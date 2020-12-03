@@ -1,6 +1,7 @@
 // ==UserScript==
 // @name            Thunder Offline Download Context Menu
 // @description     在Firefox页面中添加迅雷离线下载的链接，可通过URL链接直接通过右键离线下载，也可通过复制BT任务/eMule链接/磁力链通过右键离线下载。默认进入迅雷离线网页版。
+// @updateURL       https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Thunder%20Offline%20Download%20Context%20Menu.user.js
 // @version         1.0.1
 // @author          F9y4ng
 // @include         *

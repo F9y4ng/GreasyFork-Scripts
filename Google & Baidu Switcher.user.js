@@ -9,7 +9,7 @@
 // @description:zh-TW  最新版本的集合谷歌、百度、必應的搜索引擎跳轉工具，必應跳轉可在菜單進行自定義設置。此版本無外部腳本調用，更快速和準確的進行按鈕定位，顯示速度大大提升。如有異常請清空瀏覽器緩存，再次載入使用，感謝使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it. again. Thank you!
 // @namespace       https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/Google_baidu_Switcher_(ALL_in_One)
-// @feedback-url    https://greasyfork.org/zh-CN/scripts/12909-google-baidu-switcher-all-in-one/feedback
+// @updateURL       https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js
 // @icon            https://www.google.com/favicon.ico
 // @include         *://encrypted.google.*/search*
 // @include         *://*.google*/search*
