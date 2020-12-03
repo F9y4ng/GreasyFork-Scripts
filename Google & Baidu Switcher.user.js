@@ -16,10 +16,10 @@
 // @include         *://*.google*/webhp*
 // @include         *://*.baidu.com/*
 // @include         *://*.bing.com/*
-// @compatible      Chrome
-// @compatible      Firefox
-// @compatible      Opera
-// @compatible      Safari
+// @compatible      Chrome 兼容TamperMonkey, ViolentMonkey
+// @compatible      Firefox 兼容Greasemonkey, TamperMonkey, ViolentMonkey
+// @compatible      Opera 兼容TamperMonkey, ViolentMonkey
+// @compatible      Safari 兼容Tampermonkey • Safari
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM_unregisterMenuCommand
