@@ -4,7 +4,6 @@
 // @author         F9y4ng
 // @namespace     https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/True_href_download_for_ThunderFlashgetqqdlfs2you
 // @description    迅雷、快车、QQ旋风等专有链解密，根据网上常用的解析代码改编，增加了容错机制以及触发机制，减少页面加载执行时间。（进入页面后按ctrl+Q执行）（新增：复制网页中的加密链接文字后按Ctrl+Z执行解密。）
-// @updateURL       https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/True%20href%20download.user.js
 // @version        1.1.1.0
 // @create         2015-10-05
 // @include        http://*

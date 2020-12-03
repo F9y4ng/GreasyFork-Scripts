@@ -4,7 +4,6 @@
 // @version         2020.12.01.2
 // @icon            https://github.githubassets.com/favicons/favicon.svg
 // @description     让每个页面的字体变得有质感，默认使用苹方字体加阴影，自用脚本不处理外部需求。
-// @updateURL       https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
 // @author          F9y4ng
 // @include         *
 // @grant           none
