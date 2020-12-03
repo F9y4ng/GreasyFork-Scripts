@@ -6,8 +6,9 @@
 // @include         *
 // @exclude         file:///*
 // @exclude         /^http(s?)://lixian.vip.xunlei.com/.*/
-// @license        MPL-2.0
-// @namespace https://greasyfork.org/users/17249
+// @license         MPL-2.0
+// @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
+// @namespace       https://greasyfork.org/users/17249
 // ==/UserScript==
 
 let SelectTxt = '';
