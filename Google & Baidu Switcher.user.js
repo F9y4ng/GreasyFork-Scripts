@@ -34,7 +34,6 @@
 // ==/UserScript==
 
 !(function () {
-
   let isdebug = false;
   let debug = isdebug ? console.log.bind(console) : function () {};
 
@@ -156,17 +155,24 @@
     lastRuntime: new Date().toLocaleString('chinese', { hour12: false }),
   };
 
-  console.log('%c[GB-Init]%c\nVersion: ' + defaultConfig.Version + '\nlastRuntime: ' + defaultConfig.lastRuntime, 'font-weight:bold;color:dodgerblue', 'color:0');
+  console.log(
+    '%c[GB-Init]%c\nVersion: ' + defaultConfig.Version + '\nlastRuntime: ' + defaultConfig.lastRuntime,
+    'font-weight:bold;color:dodgerblue',
+    'color:0'
+  );
 
   !(function () {
-
     let CONST = {
       isSecurityPolicy: false,
       isUseBing: (function () {
         let temp = parseInt(GMgetValue('_if_Use_Bing_'));
         if (isNaN(temp)) {
           GMsetValue('_if_Use_Bing_', 0);
-          console.log('%c[GB-Warning]%c\nThis is your first visit, the Bing search button will not be inserted by default.', 'font-weight:bold;color:salmon', 'color:1');
+          console.log(
+            '%c[GB-Warning]%c\nThis is your first visit, the Bing search button will not be inserted by default.',
+            'font-weight:bold;color:salmon',
+            'color:1'
+          );
           return false;
         } else {
           return Boolean(temp);
@@ -191,17 +197,20 @@
         SiteName: 'Baidu',
         SplitName: 'tn',
         MainType: '.s_btn_wr',
-        HtmlCode: CONST.isUseBing ? `
+        HtmlCode: CONST.isUseBing
+          ? `
             <span id="ggyx">
                 <input type="button" title="Google一下" value="Google"/>
             </span>
             <span id="bbyx">
                 <input type="button" title="Bing一下" value="Bing ®"/>
-            </span>` : `
+            </span>`
+          : `
             <span id="ggyx">
                 <input type="button" title="Google一下" value="Google一下"/>
             </span>`,
-        StyleCode: CONST.isUseBing ? `
+        StyleCode: CONST.isUseBing
+          ? `
             #form {
                 white-space: nowrap;
             }
@@ -241,7 +250,8 @@
             #ggyx input:hover, #bbyx input:hover {
                 background: #4662D9;
                 border: 1px solid #3476d2;
-            }` : `
+            }`
+          : `
             #form {
                 white-space: nowrap;
             }
@@ -272,17 +282,20 @@
         SiteName: 'Google',
         SplitName: 'tbm',
         MainType: "form button[type='submit']",
-        HtmlCode: CONST.isUseBing ? `
+        HtmlCode: CONST.isUseBing
+          ? `
             <span id="bdyx">
                 <input type="button" title="百度一下" value="百度一下"/>
             </span>
             <span id="bbyx">
                 <input type="button" title="Bing一下" value="Bing一下"/>
-            </span>` : `
+            </span>`
+          : `
             <span id="bdyx">
                 <input type="button" title="百度一下" value="百度一下"/>
             </span>`,
-        StyleCode: CONST.isUseBing ? `
+        StyleCode: CONST.isUseBing
+          ? `
             #for_Google {
                 margin: 3px 4px 0 -5px;
             }
@@ -332,7 +345,8 @@
             }
             #bdyx input:hover, #bbyx input:hover {
                 background: #2b7de9;
-            }` : `
+            }`
+          : `
             #for_Google {
                 margin: 3px 4px 0 -5px;
             }
@@ -404,14 +418,14 @@
                 color:#00809d;
             }`,
       },
-      other: { SiteTypeID: 0 }
+      other: { SiteTypeID: 0 },
     };
 
     let newSiteType = {
       BAIDU: listSite.baidu.SiteTypeID,
       GOOGLE: listSite.google.SiteTypeID,
       BING: listSite.bing.SiteTypeID,
-      OTHERS: 0
+      OTHERS: 0,
     };
 
     debug('//-> The program begins to execution phase.');
@@ -425,15 +439,17 @@
     } else {
       curretSite = listSite.other;
     }
-    if ((curretSite.SiteTypeID === newSiteType.GOOGLE && location.href.replace(/tbm=(isch|lcl|flm)/, '') !== location.href) ||
-			(curretSite.SiteTypeID === newSiteType.BING && location.href.replace(/maps\?/, '') !== location.href) ||
-			(curretSite.SiteTypeID === newSiteType.BAIDU && ((/(b2b|map|wenku|tieba)/).test(location.hostname) ||
-				(location.href.replace(/tn=(baiduimage|news|ikaslist|vsearch)/, '') !== location.href)))) {
+    if (
+      (curretSite.SiteTypeID === newSiteType.GOOGLE && location.href.replace(/tbm=(isch|lcl|flm)/, '') !== location.href) ||
+      (curretSite.SiteTypeID === newSiteType.BING && location.href.replace(/maps\?/, '') !== location.href) ||
+      (curretSite.SiteTypeID === newSiteType.BAIDU &&
+        (/(b2b|map|wenku|tieba)/.test(location.hostname) ||
+          location.href.replace(/tn=(baiduimage|news|ikaslist|vsearch)/, '') !== location.href))
+    ) {
       CONST.isSecurityPolicy = true;
     }
 
     let menuManager = {
-
       menuDisplay: function () {
         let _Use_Bing_ = CONST.isUseBing;
         let _use_Bing_ID, in_Use_feedBack_ID;
@@ -452,20 +468,25 @@
           } else {
             _Use_Bing__ = '×';
           }
-          _use_Bing_ID = GMregisterMenuCommand(` [${_Use_Bing__}] \u6dfb\u52a0 Bing \u641c\u7d22\u8df3\u8f6c`,
-            function () {
-              inUse_switch(_Use_Bing_, '_if_Use_Bing_', 'Bing\u6309\u94ae');
+          _use_Bing_ID = GMregisterMenuCommand(` [${_Use_Bing__}] \u6dfb\u52a0 Bing \u641c\u7d22\u8df3\u8f6c`, function () {
+            inUse_switch(_Use_Bing_, '_if_Use_Bing_', 'Bing\u6309\u94ae');
+          });
+          in_Use_feedBack_ID = GMregisterMenuCommand('\u4f7f\u7528\u53cd\u9988', function () {
+            GMopenInTab('https://greasyfork.org/zh-CN/scripts/12909-google-baidu-switcher-all-in-one/feedback', {
+              active: true,
+              insert: true,
+              setParent: true,
             });
-          in_Use_feedBack_ID = GMregisterMenuCommand('\u4f7f\u7528\u53cd\u9988',
-            function () {
-              GMopenInTab('https://greasyfork.org/zh-CN/scripts/12909-google-baidu-switcher-all-in-one/feedback', {
-                active: true,
-                insert: true,
-                setParent: true
-              });
-            });
+          });
 
-          console.log('%c[GB-Status]%c\nInsert the Bing Search Button: %c%s%c', 'font-weight:bold;color:darkorange', 'color:0', 'font-weight:bold;color:red', _Use_Bing_.toString().toUpperCase(), 'font-weight:normal;color:0');
+          console.log(
+            '%c[GB-Status]%c\nInsert the Bing Search Button: %c%s%c',
+            'font-weight:bold;color:darkorange',
+            'color:0',
+            'font-weight:bold;color:red',
+            _Use_Bing_.toString().toUpperCase(),
+            'font-weight:normal;color:0'
+          );
         }
 
         function inUse_switch(_status, Name, Tips) {
@@ -481,35 +502,51 @@
           window.setTimeout(function () {
             let loc = location.href.replace(/&timestamp=(\d+)/, '');
             location.replace(loc + `&timestamp=` + new Date().getTime());
-          },
-          3000);
+          }, 3000);
         }
       },
       init: function () {
         this.menuDisplay();
-      }
+      },
     };
 
     let searchManager = {
-
       doSwitch: function () {
         try {
           const idName = '#for_' + curretSite.SiteName;
           if (curretSite.SiteTypeID !== newSiteType.OTHERS) {
             if (CONST.isSecurityPolicy) {
-              console.log('%c[GB-Prohibit]%c\nBlocked By: %c%s Security Policy%c.', 'font-weight:bold;color:indigo', 'color:0', 'color:darkred', curretSite.SiteName, 'color:0');
+              console.log(
+                '%c[GB-Prohibit]%c\nBlocked By: %c%s Security Policy%c.',
+                'font-weight:bold;color:indigo',
+                'color:0',
+                'color:darkred',
+                curretSite.SiteName,
+                'color:0'
+              );
               return;
             } else {
               if (curretSite.SiteTypeID === newSiteType.BAIDU) {
                 document.addEventListener('DOMNodeInserted', Callback, false);
               }
-              RAFInterval(function () {
-                if (document.querySelector(idName) === null) {
-                  return insertSearchButton() && scrollDetect();
-                }
-              }, 500, true);
+              RAFInterval(
+                function () {
+                  if (document.querySelector(idName) === null) {
+                    return insertSearchButton() && scrollDetect();
+                  }
+                },
+                500,
+                true
+              );
 
-              console.log('%c[GB-Switch]%c\nWe Are Using The %c%s%c Search Engine.', 'font-weight:bold;color:Green', 'color:0', 'font-weight:bold;color:darkcyan', curretSite.SiteName, 'font-weight:normal;color:0');
+              console.log(
+                '%c[GB-Switch]%c\nWe Are Using The %c%s%c Search Engine.',
+                'font-weight:bold;color:Green',
+                'color:0',
+                'font-weight:bold;color:darkcyan',
+                curretSite.SiteName,
+                'font-weight:normal;color:0'
+              );
             }
           }
         } catch (e) {
@@ -541,7 +578,7 @@
             addStyle(doStyle, doStyName, 'head', true);
 
             if (document.querySelector(SpanID) === null && getSearchValue().length > 0) {
-              if ((/^(nws|vid|fin|bks)$/).test(vim.trim())) {
+              if (/^(nws|vid|fin|bks)$/.test(vim.trim())) {
                 Target = Target.parentNode.parentNode.firstChild;
                 Target.insertBefore(userSpan, Target.firstChild);
                 document.querySelector(SpanID).setAttribute('style', 'float:right');
@@ -569,7 +606,7 @@
                   GMopenInTab(decodeURI(gotoUrl + getSearchValue()), {
                     active: true,
                     insert: true,
-                    setParent: true
+                    setParent: true,
                   });
                 });
               });
@@ -625,33 +662,40 @@
         }
 
         function addStyle(css, className, addToTarget, isReload, initType) {
-          RAFInterval(function () {
-            let addTo = document.querySelector(addToTarget);
-            if (typeof addToTarget === 'undefined') {
-              addTo = document.head || document.body || document.documentElement || document;
-            }
-            isReload = isReload || false;
-            initType = initType || 'text/css';
-            if (typeof addToTarget === 'undefined' || (typeof addToTarget !== 'undefined' && document.querySelector(addToTarget) !== null)) {
-              if (isReload === true) {
-                safeRemove('.' + className);
-              } else if (isReload === false && document.querySelector('.' + className) !== null) {
+          RAFInterval(
+            function () {
+              let addTo = document.querySelector(addToTarget);
+              if (typeof addToTarget === 'undefined') {
+                addTo = document.head || document.body || document.documentElement || document;
+              }
+              isReload = isReload || false;
+              initType = initType || 'text/css';
+              if (
+                typeof addToTarget === 'undefined' ||
+                (typeof addToTarget !== 'undefined' && document.querySelector(addToTarget) !== null)
+              ) {
+                if (isReload === true) {
+                  safeRemove('.' + className);
+                } else if (isReload === false && document.querySelector('.' + className) !== null) {
+                  return true;
+                }
+                let cssNode = document.createElement('style');
+                if (className !== null) {
+                  cssNode.className = className;
+                }
+                cssNode.setAttribute('type', initType);
+                cssNode.innerHTML = css;
+                try {
+                  addTo.appendChild(cssNode);
+                } catch (e) {
+                  debug('//-> ' + e.name);
+                }
                 return true;
               }
-              let cssNode = document.createElement('style');
-              if (className !== null) {
-                cssNode.className = className;
-              }
-              cssNode.setAttribute('type', initType);
-              cssNode.innerHTML = css;
-              try {
-                addTo.appendChild(cssNode);
-              } catch (e) {
-                debug('//-> ' + e.name);
-              }
-              return true;
-            }
-          }, 20, true);
+            },
+            20,
+            true
+          );
         }
 
         function safeRemove(Css) {
@@ -692,7 +736,7 @@
         }
 
         function RAFInterval(callback, period, runNow) {
-          const needCount = period / 1000 * 60;
+          const needCount = (period / 1000) * 60;
           let times = 0;
           if (runNow === true) {
             const shouldFinish = callback();
@@ -757,17 +801,22 @@
         menuManager.init();
         debug('//-> Execute insert jump button.');
         this.doSwitch();
-      }
+      },
     };
 
     (function () {
       try {
         searchManager.init();
       } catch (e) {
-        console.error('%c[GB-Error]%c\nConsole: %c%s%c.', 'font-weight:bold;color:red', 'color:0', 'font-weight:bold;color:darkred', e, 'color:0');
+        console.error(
+          '%c[GB-Error]%c\nConsole: %c%s%c.',
+          'font-weight:bold;color:red',
+          'color:0',
+          'font-weight:bold;color:darkred',
+          e,
+          'color:0'
+        );
       }
-    }());
-
-  }());
-
-}());
+    })();
+  })();
+})();
