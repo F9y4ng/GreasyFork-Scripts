@@ -14,6 +14,8 @@
 // @run-at          document-start
 // ==/UserScript==
 
+'use strict';
+
 (function () {
   /* 你可以自定义以下内容 */
 

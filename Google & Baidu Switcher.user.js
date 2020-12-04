@@ -33,6 +33,8 @@
 // @run-at          document-start
 // ==/UserScript==
 
+'use strict';
+
 !(function () {
   let isdebug = false;
   let debug = isdebug ? console.log.bind(console) : function () {};

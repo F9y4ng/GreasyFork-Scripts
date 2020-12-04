@@ -14,6 +14,8 @@
 // @grant          none
 // ==/UserScript==
 
+'use strict';
+
 let rs = 0;
 let rs2 = 0;
 let link = '';

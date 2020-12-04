@@ -11,6 +11,8 @@
 // @namespace       https://greasyfork.org/users/17249
 // ==/UserScript==
 
+'use strict';
+
 let SelectTxt = '';
 let objReg = /^(magnet:\?xt=).*|^(ed2k:\/\/).*|(.*)\.torrent$/;
 
