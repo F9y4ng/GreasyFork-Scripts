@@ -57,7 +57,10 @@
         }
         isReload = isReload || false;
         initType = initType || 'text/css';
-        if (typeof addToTarget === 'undefined' || (typeof addToTarget !== 'undefined' && document.querySelector(addToTarget) !== null)) {
+        if (
+          typeof addToTarget === 'undefined' ||
+          (typeof addToTarget !== 'undefined' && document.querySelector(addToTarget) !== null)
+        ) {
           if (isReload === true) {
             safeRemove('.' + className);
           } else if (isReload === false && document.querySelector('.' + className) !== null) {

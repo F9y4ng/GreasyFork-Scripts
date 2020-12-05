@@ -375,7 +375,7 @@
                 height: 38px;
                 font-size: 14px;
                 font-weight: 600;
-                color: #ffffff;
+                color: #fff;
             }
             #bdyx input:hover {
                 background: #2b7de9;
@@ -412,7 +412,7 @@
                 font-size: 16px;
             }
             #bdyx input:hover, #ggyx input:hover {
-                background-color: #ffffff;
+                background-color: #fff;
                 transition:border linear .1s,box-shadow linear .3s;
                 box-shadow: 1px 1px 8px #5f5f5f;
                 border: 2px solid #00809d;
