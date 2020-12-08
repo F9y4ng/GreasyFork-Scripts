@@ -4,7 +4,6 @@
 // @version         1.0.1
 // @author          F9y4ng
 // @include         *
-// @exclude         file:///*
 // @exclude         /^http(s?)://lixian.vip.xunlei.com/.*/
 // @license         MPL-2.0
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
