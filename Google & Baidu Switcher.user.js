@@ -3,7 +3,7 @@
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-CN      谷歌搜索、百度搜索、必应搜索的聚合跳转集合工具
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.0.20201201.1
+// @version         2.0.20201209.1
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:zh-TW  最新版本的集合谷歌、百度、必應的搜索引擎跳轉工具，必應跳轉可在菜單進行自定義設置。此版本無外部腳本調用，更快速和準確的進行按鈕定位，顯示速度大大提升。如有異常請清空瀏覽器緩存，再次載入使用，感謝使用！
@@ -445,8 +445,7 @@
       (curretSite.SiteTypeID === newSiteType.GOOGLE && location.href.replace(/tbm=(isch|lcl|flm)/, '') !== location.href) ||
       (curretSite.SiteTypeID === newSiteType.BING && location.href.replace(/maps\?/, '') !== location.href) ||
       (curretSite.SiteTypeID === newSiteType.BAIDU &&
-        (/(b2b|map|wenku|tieba)/.test(location.hostname) ||
-          location.href.replace(/tn=(baiduimage|news|ikaslist|vsearch)/, '') !== location.href))
+        (/(b2b|map|wenku|tieba)/.test(location.hostname) || location.href.replace(/tn=(baiduimage|news|ikaslist|vsearch)/, '') !== location.href))
     ) {
       CONST.isSecurityPolicy = true;
     }
@@ -501,7 +500,7 @@
             GMnotification(`${Tips}\u5df2\u5f00\u542f\uff0c\u4e09\u79d2\u540e\u5c06\u5237\u65b0\uff01`, title);
           }
           registerMenuCommand();
-          window.setTimeout(function () {
+          setTimeout(function () {
             let loc = location.href.replace(/&timestamp=(\d+)/, '');
             location.replace(loc + `&timestamp=` + new Date().getTime());
           }, 3000);
@@ -672,10 +671,7 @@
               }
               isReload = isReload || false;
               initType = initType || 'text/css';
-              if (
-                typeof addToTarget === 'undefined' ||
-                (typeof addToTarget !== 'undefined' && document.querySelector(addToTarget) !== null)
-              ) {
+              if (typeof addToTarget === 'undefined' || (typeof addToTarget !== 'undefined' && document.querySelector(addToTarget) !== null)) {
                 if (isReload === true) {
                   safeRemove('.' + className);
                 } else if (isReload === false && document.querySelector('.' + className) !== null) {
@@ -810,14 +806,7 @@
       try {
         searchManager.init();
       } catch (e) {
-        console.error(
-          '%c[GB-Error]%c\nConsole: %c%s%c.',
-          'font-weight:bold;color:red',
-          'color:0',
-          'font-weight:bold;color:darkred',
-          e,
-          'color:0'
-        );
+        console.error('%c[GB-Error]%c\nConsole: %c%s%c.', 'font-weight:bold;color:red', 'color:0', 'font-weight:bold;color:darkred', e, 'color:0');
       }
     })();
   })();
