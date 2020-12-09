@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            字体渲染（自用脚本）
 // @namespace       https://openuserjs.org/users/t3xtf0rm4tgmail.com
-// @version         2020.12.01.2
+// @version         2020.12.09.1
 // @icon            https://github.githubassets.com/favicons/favicon.svg
 // @description     让每个页面的字体变得有质感，默认使用苹方字体加阴影，自用脚本不处理外部需求。
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
@@ -36,16 +36,22 @@
   addStyle(tshadow, 'Font_Rendering', 'head');
 
   if (location.host.includes('.baidu.com')) {
-    document.addEventListener('DOMNodeInserted', Callback, false);
-  }
-
-  function Callback(e) {
-    if (e.target !== null && typeof e.target.className === 'string' && e.target.className.indexOf('Font_Rendering') === 0) {
-      return;
-    }
-    setTimeout(function () {
-      addStyle(tshadow, 'Font_Rendering', 'head');
-    }, 200);
+    let callback = function (records) {
+      if (document.head !== null && typeof document.head.className === 'string' && document.head.className.indexOf('InsertTo') === 0) {
+        return;
+      } else {
+        addStyle(tshadow, 'Font_Rendering', 'head');
+      }
+      records.map(function (record) {
+        debug('//-> Mutation type: ' + record.type);
+      });
+    };
+    let observer = new MutationObserver(callback);
+    let option = {
+      childList: true,
+      subtree: true,
+    };
+    observer.observe(document.body, option);
   }
 
   function addStyle(css, className, addToTarget, isReload, initType) {
@@ -57,10 +63,7 @@
         }
         isReload = isReload || false;
         initType = initType || 'text/css';
-        if (
-          typeof addToTarget === 'undefined' ||
-          (typeof addToTarget !== 'undefined' && document.querySelector(addToTarget) !== null)
-        ) {
+        if (typeof addToTarget === 'undefined' || (typeof addToTarget !== 'undefined' && document.querySelector(addToTarget) !== null)) {
           if (isReload === true) {
             safeRemove('.' + className);
           } else if (isReload === false && document.querySelector('.' + className) !== null) {
