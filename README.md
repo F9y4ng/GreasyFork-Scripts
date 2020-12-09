@@ -1,6 +1,6 @@
 # GreasyFork Scripts
 
-- ## **Font Rendering.user.js** (`version 2020.12.01.2`)
+- ## **Font Rendering.user.js** (`version 2020.12.09.1`)
 
   > 让每个页面的字体变得有质感，默认使用苹方字体加阴影，自用脚本不处理外部需求。
 
