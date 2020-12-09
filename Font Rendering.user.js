@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            字体渲染（自用脚本）
 // @namespace       https://openuserjs.org/users/t3xtf0rm4tgmail.com
-// @version         2020.12.09.1
+// @version         2020.12.09.2
 // @icon            https://github.githubassets.com/favicons/favicon.svg
 // @description     让每个页面的字体变得有质感，默认使用苹方字体加阴影，自用脚本不处理外部需求。
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
@@ -51,7 +51,9 @@
       childList: true,
       subtree: true,
     };
-    observer.observe(document.body, option);
+    if (document.body) {
+      observer.observe(document.body, option);
+    }
   }
 
   function addStyle(css, className, addToTarget, isReload, initType) {
