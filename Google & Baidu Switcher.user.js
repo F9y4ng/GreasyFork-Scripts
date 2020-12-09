@@ -527,6 +527,16 @@
               );
               return;
             } else {
+              RAFInterval(
+                function () {
+                  if (document.querySelector(idName) === null) {
+                    return insertSearchButton() && scrollDetect();
+                  }
+                },
+                500,
+                true
+              );
+
               if (curretSite.SiteTypeID === newSiteType.BAIDU) {
                 let callback = function (records) {
                   if (document.head !== null && typeof document.head.className === 'string' && document.head.className.indexOf('InsertTo') === 0) {
@@ -547,15 +557,6 @@
                   observer.observe(document.body, option);
                 }
               }
-              RAFInterval(
-                function () {
-                  if (document.querySelector(idName) === null) {
-                    return insertSearchButton() && scrollDetect();
-                  }
-                },
-                500,
-                true
-              );
 
               console.log(
                 '%c[GB-Switch]%c\nWe Are Using The %c%s%c Search Engine.',
