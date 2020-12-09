@@ -37,7 +37,7 @@
 
   if (location.host.includes('.baidu.com')) {
     let callback = function (records) {
-      if (document.head !== null && typeof document.head.className === 'string' && document.head.className.indexOf('InsertTo') === 0) {
+      if (document.head !== null && typeof document.head.className === 'string' && document.head.className.indexOf('Font_Rendering') === 0) {
         return;
       } else {
         addStyle(tshadow, 'Font_Rendering', 'head');
