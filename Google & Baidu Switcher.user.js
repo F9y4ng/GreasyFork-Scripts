@@ -12,8 +12,8 @@
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @icon            https://www.google.com/favicon.ico
 // @include         *://encrypted.google.*/search*
-// @include         *://*.google*/search*
-// @include         *://*.google*/webhp*
+// @include         *://*.google.*/search*
+// @include         *://*.google.*/webhp*
 // @include         *://*.baidu.com/*
 // @include         *://*.bing.com/*
 // @compatible      Chrome 兼容TamperMonkey, ViolentMonkey
@@ -434,9 +434,9 @@
 
     if (location.host.includes('.baidu.com')) {
       curretSite = listSite.baidu;
-    } else if (location.host.includes('google')) {
+    } else if (location.host.includes('.google.')) {
       curretSite = listSite.google;
-    } else if (location.host.includes('bing')) {
+    } else if (location.host.includes('.bing.com')) {
       curretSite = listSite.bing;
     } else {
       curretSite = listSite.other;
