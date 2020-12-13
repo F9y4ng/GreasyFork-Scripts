@@ -3,7 +3,7 @@
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-CN      谷歌搜索、百度搜索、必应搜索的聚合跳转集合工具
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.0.20201213.2
+// @version         2.0.20201213.3
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:zh-TW  最新版本的集合谷歌、百度、必應的搜索引擎跳轉工具，必應跳轉可在菜單進行自定義設置。此版本無外部腳本調用，更快速和準確的進行按鈕定位，顯示速度大大提升。如有異常請清空瀏覽器緩存，再次載入使用，感謝使用！
@@ -537,18 +537,17 @@
                 true
               );
               if (curretSite.SiteTypeID === newSiteType.BAIDU) {
-                document.addEventListener(
-                  'DOMNodeInserted',
-                  function (e) {
-                    if (e.target !== null && typeof e.target.className === 'string' && e.target.className.indexOf('InsertTo') === 0) {
-                      return;
-                    }
+                const callback = function () {
+                  if (document.querySelector('.InsertTo' + curretSite.SiteName)) {
+                    debug('//-> found with selector ["InsertTo' + curretSite.SiteName + '"]');
+                  } else {
                     setTimeout(function () {
                       insertSearchButton();
                     }, 100);
-                  },
-                  false
-                );
+                  }
+                };
+                const opts = { childList: true, subtree: true };
+                new MutationObserver(callback).observe(document, opts);
               }
               console.log(
                 '%c[GB-Switch]%c\nWe Are Using The %c%s%c Search Engine.',
