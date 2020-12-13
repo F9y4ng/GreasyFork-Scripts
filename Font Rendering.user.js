@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name            字体渲染（自用脚本）
 // @namespace       https://openuserjs.org/users/t3xtf0rm4tgmail.com
-// @version         2020.12.13.1
+// @version         2020.12.13.2
 // @icon            https://github.githubassets.com/favicons/favicon.svg
 // @description     让每个页面的字体变得有质感，默认使用苹方字体加阴影，自用脚本不处理外部需求。
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @author          F9y4ng
 // @include         *
-// @grant           GM_info
+// @grant           none
 // @license         GPL-3.0-only
 // @create          2020-11-24
 // @copyright       2020, F9y4ng
@@ -28,7 +28,6 @@
   let isdebug = false;
   let shadow = '';
   let debug = isdebug ? console.log.bind(console) : function () {};
-  const isGM = Boolean(GM_info.scriptHandler.toLowerCase() === 'greasemonkey');
   if (shadow_r !== 0) {
     shadow = `text-shadow: 1px 1px ` + shadow_r + `px ` + shadow_c + `!important;`;
   }
@@ -37,39 +36,18 @@
   addStyle(tshadow, 'Font_Rendering', 'head');
 
   if (location.host.includes('.baidu.com')) {
-    if (isGM) {
-      document.addEventListener(
-        'DOMNodeInserted',
-        function (e) {
-          if (e.target !== null && typeof e.target.className === 'string' && e.target.className.indexOf('InsertTo') === 0) {
-            return;
-          }
-          setTimeout(function () {
-            addStyle(tshadow, 'Font_Rendering', 'head');
-          }, 100);
-        },
-        false
-      );
-    } else {
-      let callback = function (records) {
-        if (document.head !== null && typeof document.head.className === 'string' && document.head.className.indexOf('Font_Rendering') === 0) {
+    document.addEventListener(
+      'DOMNodeInserted',
+      function (e) {
+        if (e.target !== null && typeof e.target.className === 'string' && e.target.className.indexOf('Font_Rendering') === 0) {
           return;
-        } else {
-          addStyle(tshadow, 'Font_Rendering', 'head');
         }
-        records.map(function (record) {
-          debug('//-> Mutation type: ' + record.type);
-        });
-      };
-      let observer = new MutationObserver(callback);
-      let option = {
-        childList: true,
-        subtree: true,
-      };
-      if (document.body) {
-        observer.observe(document.body, option);
-      }
-    }
+        setTimeout(function () {
+          addStyle(tshadow, 'Font_Rendering', 'head');
+        }, 100);
+      },
+      false
+    );
   }
 
   function addStyle(css, className, addToTarget, isReload, initType) {
