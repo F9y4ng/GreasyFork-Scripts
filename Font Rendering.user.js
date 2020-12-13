@@ -40,9 +40,7 @@
       if (document.querySelector('.Font_Rendering')) {
         debug('//-> found with selector ["Font_Rendering"]');
       } else {
-        setTimeout(function () {
-          addStyle(tshadow, 'Font_Rendering', 'head');
-        }, 100);
+        addStyle(tshadow, 'Font_Rendering', 'head');
       }
     };
     const opts = { childList: true, subtree: true };

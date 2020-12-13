@@ -541,9 +541,7 @@
                   if (document.querySelector('.InsertTo' + curretSite.SiteName)) {
                     debug('//-> found with selector ["InsertTo' + curretSite.SiteName + '"]');
                   } else {
-                    setTimeout(function () {
-                      insertSearchButton();
-                    }, 100);
+                    insertSearchButton();
                   }
                 };
                 const opts = { childList: true, subtree: true };
