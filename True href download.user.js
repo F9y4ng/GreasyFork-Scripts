@@ -32,7 +32,7 @@ function ChkDownloadUrl(stat, urls) {
       link = document.getElementsByTagName('a');
     }
 
-    let Decryption = function (url) {
+    let Decryption = url => {
       if (url !== '') {
         let str = url.href;
         let Sr = url;
@@ -81,7 +81,7 @@ function ChkDownloadUrl(stat, urls) {
         let Lik = link[i];
         link[i].addEventListener(
           'mouseover',
-          function () {
+          () => {
             Decryption(Lik);
           },
           false
@@ -187,7 +187,7 @@ function ChkDownloadUrl(stat, urls) {
 try {
   document.addEventListener(
     'keydown',
-    function (e) {
+    e => {
       if (e.keyCode === 81 && (navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)) {
         e.preventDefault();
         let t = '';

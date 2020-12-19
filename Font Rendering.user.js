@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name            字体渲染（自用脚本）
 // @namespace       https://openuserjs.org/users/t3xtf0rm4tgmail.com
-// @version         2020.12.13.3
+// @version         2020.12.19.1
 // @icon            https://github.githubassets.com/favicons/favicon.svg
 // @description     让每个页面的字体变得有质感，默认使用苹方字体加阴影，自用脚本不处理外部需求。
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
@@ -27,7 +27,7 @@
 
   let isdebug = false;
   let shadow = '';
-  let debug = isdebug ? console.log.bind(console) : function () {};
+  let debug = isdebug ? console.log.bind(console) : () => {};
   if (shadow_r !== 0) {
     shadow = `text-shadow: 1px 1px ` + shadow_r + `px ` + shadow_c + `!important;`;
   }
@@ -36,7 +36,7 @@
   addStyle(tshadow, 'Font_Rendering', 'head');
 
   if (location.host.includes('.baidu.com')) {
-    const callback = function () {
+    const callback = () => {
       if (document.querySelector('.Font_Rendering')) {
         debug('//-> found with selector ["Font_Rendering"]');
       } else {
@@ -49,7 +49,7 @@
 
   function addStyle(css, className, addToTarget, isReload, initType) {
     RAFInterval(
-      function () {
+      () => {
         let addTo = document.querySelector(addToTarget);
         if (typeof addToTarget === 'undefined') {
           addTo = document.head || document.body || document.documentElement || document;

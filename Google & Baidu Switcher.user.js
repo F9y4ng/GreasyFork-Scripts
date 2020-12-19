@@ -3,7 +3,7 @@
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-CN      谷歌搜索、百度搜索、必应搜索的聚合跳转集合工具
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.0.20201214.1
+// @version         2.0.20201219.1
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:zh-TW  最新版本的集合谷歌、百度、必應的搜索引擎跳轉工具，必應跳轉可在菜單進行自定義設置。此版本無外部腳本調用，更快速和準確的進行按鈕定位，顯示速度大大提升。如有異常請清空瀏覽器緩存，再次載入使用，感謝使用！
@@ -37,7 +37,7 @@
 
 !(function () {
   let isdebug = false;
-  let debug = isdebug ? console.log.bind(console) : function () {};
+  let debug = isdebug ? console.log.bind(console) : () => {};
 
   /* Perfectly Compatible For Greasemonkey, TamperMonkey, ViolentMonkey * F9y4ng * 20201127 */
 
@@ -51,17 +51,17 @@
   if (isGM) {
     let Storage = window.localStorage;
     if (Storage) {
-      GMsetValue = function (key, value) {
+      GMsetValue = (key, value) => {
         Storage.setItem(key, value);
       };
-      GMgetValue = function (key) {
+      GMgetValue = key => {
         return Storage.getItem(key);
       };
     }
-    GMregisterMenuCommand = function (caption, commandFunc, accessKey) {
+    GMregisterMenuCommand = (caption, commandFunc, accessKey) => {
       if (!document.body) {
         if (document.readyState === 'loading' && document.documentElement && document.documentElement.localName === 'html') {
-          new MutationObserver(function (mutations, observer) {
+          new MutationObserver((mutations, observer) => {
             if (document.body) {
               observer.disconnect();
               GMregisterMenuCommand(caption, commandFunc, accessKey);
@@ -88,14 +88,14 @@
       menuItem.addEventListener('click', commandFunc, true);
       menu.appendChild(menuItem);
     };
-    GMunregisterMenuCommand = function () {
+    GMunregisterMenuCommand = () => {
       let contextMenu = document.body.getAttribute('contextmenu');
       let menu = contextMenu ? document.querySelector('menu#' + contextMenu) : null;
       if (menu) {
         document.body.removeChild(menu);
       }
     };
-    GMnotification = function (options) {
+    GMnotification = options => {
       const opts = {};
       if (typeof options === 'string') {
         opts.text = options;
@@ -103,7 +103,7 @@
         opts.image = arguments[2];
         opts.onclick = arguments[3];
       } else {
-        Object.keys(options).forEach(function (key) {
+        Object.keys(options).forEach(key => {
           opts[key] = options[key];
         });
       }
@@ -117,7 +117,7 @@
           debug('//-> User has denied notifications for this page/site!');
           return;
         } else {
-          Notification.requestPermission(function (permission) {
+          Notification.requestPermission(permission => {
             debug('//-> New permission: ' + permission);
             checkPermission();
           });
@@ -134,13 +134,13 @@
           ntfctn.onclick = ntcOptions.onclick;
         }
         if (ntcOptions.timeout) {
-          setTimeout(function () {
+          setTimeout(() => {
             ntfctn.close();
           }, ntcOptions.timeout);
         }
       }
     };
-    GMopenInTab = function (a, b) {
+    GMopenInTab = (a, b) => {
       window.open(a, Math.random().toString(36).slice(-6), '', b instanceof String);
     };
   } else {
@@ -166,7 +166,7 @@
   !(function () {
     let CONST = {
       isSecurityPolicy: false,
-      isUseBing: (function () {
+      isUseBing: (() => {
         let temp = parseInt(GMgetValue('_if_Use_Bing_'));
         if (isNaN(temp)) {
           GMsetValue('_if_Use_Bing_', 0);
@@ -469,10 +469,10 @@
           } else {
             _Use_Bing__ = '×';
           }
-          _use_Bing_ID = GMregisterMenuCommand(` [${_Use_Bing__}] \u6dfb\u52a0 Bing \u641c\u7d22\u8df3\u8f6c`, function () {
+          _use_Bing_ID = GMregisterMenuCommand(` [${_Use_Bing__}] \u6dfb\u52a0 Bing \u641c\u7d22\u8df3\u8f6c`, () => {
             inUse_switch(_Use_Bing_, '_if_Use_Bing_', 'Bing\u6309\u94ae');
           });
-          in_Use_feedBack_ID = GMregisterMenuCommand('\u4f7f\u7528\u53cd\u9988', function () {
+          in_Use_feedBack_ID = GMregisterMenuCommand('\u4f7f\u7528\u53cd\u9988', () => {
             GMopenInTab('https://greasyfork.org/zh-CN/scripts/12909-google-baidu-switcher-all-in-one/feedback', {
               active: true,
               insert: true,
@@ -500,7 +500,7 @@
             GMnotification(`${Tips}\u5df2\u5f00\u542f\uff0c\u4e09\u79d2\u540e\u5c06\u5237\u65b0\uff01`, title);
           }
           registerMenuCommand();
-          setTimeout(function () {
+          setTimeout(() => {
             let loc = location.href.replace(/&timestamp=(\d+)/, '');
             location.replace(loc + `&timestamp=` + new Date().getTime());
           }, 3000);
@@ -528,7 +528,7 @@
               return;
             } else {
               RAFInterval(
-                function () {
+                () => {
                   if (document.querySelector(idName) === null) {
                     return insertSearchButton() && scrollDetect();
                   }
@@ -537,7 +537,7 @@
                 true
               );
               if (curretSite.SiteTypeID === newSiteType.BAIDU) {
-                const callback = function () {
+                const callback = () => {
                   if (document.querySelector('.InsertTo' + curretSite.SiteName)) {
                     debug('//-> found with selector ["InsertTo' + curretSite.SiteName + '"]');
                   } else {
@@ -585,8 +585,8 @@
               } else {
                 insterAfter(userSpan, Target);
               }
-              document.querySelectorAll('#ggyx, #bbyx, #bdyx').forEach(function (per) {
-                per.addEventListener('click', function () {
+              document.querySelectorAll('#ggyx, #bbyx, #bdyx').forEach(per => {
+                per.addEventListener('click', () => {
                   let gotoUrl = 'about:blank';
                   switch (per.id) {
                     case 'ggyx':
@@ -644,7 +644,7 @@
               H += Y.offsetTop;
               Y = Y.offsetParent;
             }
-            document.addEventListener('scroll', function () {
+            document.addEventListener('scroll', () => {
               let s = document.body.scrollTop || document.documentElement.scrollTop;
               debug('//-> H-' + H);
               debug('//-> S-' + s);
@@ -659,7 +659,7 @@
 
         function addStyle(css, className, addToTarget, isReload, initType) {
           RAFInterval(
-            function () {
+            () => {
               let addTo = document.querySelector(addToTarget);
               if (typeof addToTarget === 'undefined') {
                 addTo = document.head || document.body || document.documentElement || document;
@@ -710,7 +710,7 @@
 
         function getSearchValue() {
           let val = '';
-          document.querySelectorAll('input[name="wd"], input[name="q"]').forEach(function (things) {
+          document.querySelectorAll('input[name="wd"], input[name="q"]').forEach(things => {
             val = things.getAttribute('value');
             debug('//-> INPUT:' + val);
           });
