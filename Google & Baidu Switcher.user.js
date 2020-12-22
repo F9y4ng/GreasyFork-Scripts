@@ -3,7 +3,7 @@
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-CN      谷歌搜索、百度搜索、必应搜索的聚合跳转集合工具
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.0.20201219.1
+// @version         2.0.20201221.1
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:zh-TW  最新版本的集合谷歌、百度、必應的搜索引擎跳轉工具，必應跳轉可在菜單進行自定義設置。此版本無外部腳本調用，更快速和準確的進行按鈕定位，顯示速度大大提升。如有異常請清空瀏覽器緩存，再次載入使用，感謝使用！
@@ -95,7 +95,7 @@
         document.body.removeChild(menu);
       }
     };
-    GMnotification = options => {
+    GMnotification = function (options) {
       const opts = {};
       if (typeof options === 'string') {
         opts.text = options;
