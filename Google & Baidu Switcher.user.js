@@ -445,7 +445,8 @@
       (curretSite.SiteTypeID === newSiteType.GOOGLE && location.href.replace(/tbm=(isch|lcl|flm)/, '') !== location.href) ||
       (curretSite.SiteTypeID === newSiteType.BING && location.href.replace(/maps\?/, '') !== location.href) ||
       (curretSite.SiteTypeID === newSiteType.BAIDU &&
-        (/(b2b|map|wenku|tieba)/.test(location.hostname) || location.href.replace(/tn=(baiduimage|news|ikaslist|vsearch)/, '') !== location.href))
+        (/(b2b|map|wenku|tieba|hanyu)/.test(location.hostname) ||
+          location.href.replace(/tn=(baiduimage|news|ikaslist|vsearch)/, '') !== location.href))
     ) {
       CONST.isSecurityPolicy = true;
     }
