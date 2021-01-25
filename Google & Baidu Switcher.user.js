@@ -3,7 +3,7 @@
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-CN      谷歌搜索、百度搜索、必应搜索的聚合跳转集合工具
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.0.20201221.1
+// @version         2.0.20210125.1
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:zh-TW  最新版本的集合谷歌、百度、必應的搜索引擎跳轉工具，必應跳轉可在菜單進行自定義設置。此版本無外部腳本調用，更快速和準確的進行按鈕定位，顯示速度大大提升。如有異常請清空瀏覽器緩存，再次載入使用，感謝使用！
@@ -46,7 +46,7 @@
   let handlerInfo = GMinfo.scriptHandler;
   const isGM = Boolean(handlerInfo.toLowerCase() === 'greasemonkey');
 
-  debug('//-> CheckGM: ' + isGM + ' >> ' + handlerInfo);
+  debug(`//-> CheckGM: ${isGM} >> ${handlerInfo}`);
 
   if (isGM) {
     let Storage = window.localStorage;
@@ -65,7 +65,7 @@
             if (document.body) {
               observer.disconnect();
               GMregisterMenuCommand(caption, commandFunc, accessKey);
-              debug('//-> Mutation: ' + mutations);
+              debug(`//-> Mutation: ${mutations}`);
             }
           }).observe(document.documentElement, { childList: true });
         } else {
@@ -74,7 +74,7 @@
         return;
       }
       let contextMenu = document.body.getAttribute('contextmenu');
-      let menu = contextMenu ? document.querySelector('menu#' + contextMenu) : null;
+      let menu = contextMenu ? document.querySelector(`menu#${contextMenu}`) : null;
       if (!menu) {
         menu = document.createElement('menu');
         menu.setAttribute('id', 'gm-registered-menu');
@@ -90,7 +90,7 @@
     };
     GMunregisterMenuCommand = () => {
       let contextMenu = document.body.getAttribute('contextmenu');
-      let menu = contextMenu ? document.querySelector('menu#' + contextMenu) : null;
+      let menu = contextMenu ? document.querySelector(`menu#${contextMenu}`) : null;
       if (menu) {
         document.body.removeChild(menu);
       }
@@ -118,7 +118,7 @@
           return;
         } else {
           Notification.requestPermission(permission => {
-            debug('//-> New permission: ' + permission);
+            debug(`//-> New permission: ${permission}`);
             checkPermission();
           });
         }
@@ -158,7 +158,7 @@
   };
 
   console.log(
-    '%c[GB-Init]%c\nVersion: ' + defaultConfig.Version + '\nlastRuntime: ' + defaultConfig.lastRuntime,
+    `%c[GB-Init]%c\nVersion: ${defaultConfig.Version}\nlastRuntime: ${defaultConfig.lastRuntime}`,
     'font-weight:bold;color:dodgerblue',
     'color:0'
   );
@@ -182,7 +182,7 @@
       })(),
     };
 
-    debug('//-> ' + CONST.isUseBing);
+    debug(`//-> ${CONST.isUseBing}`);
 
     let curretSite = {
       SiteTypeID: 1,
@@ -457,7 +457,7 @@
         let _use_Bing_ID, in_Use_feedBack_ID;
 
         registerMenuCommand();
-        debug('//-> ' + _Use_Bing_);
+        debug(`//-> ${_Use_Bing_}`);
 
         function registerMenuCommand() {
           let _Use_Bing__;
@@ -515,7 +515,7 @@
     let searchManager = {
       doSwitch: function () {
         try {
-          const idName = '#for_' + curretSite.SiteName;
+          const idName = `#for_${curretSite.SiteName}`;
           if (curretSite.SiteTypeID !== newSiteType.OTHERS) {
             if (CONST.isSecurityPolicy) {
               console.log(
@@ -539,8 +539,8 @@
               );
               if (curretSite.SiteTypeID === newSiteType.BAIDU) {
                 const callback = () => {
-                  if (document.querySelector('.InsertTo' + curretSite.SiteName)) {
-                    debug('//-> found with selector ["InsertTo' + curretSite.SiteName + '"]');
+                  if (document.querySelector(`.InsertTo${curretSite.SiteName}`)) {
+                    debug(`//-> found with selector ["InsertTo${curretSite.SiteName}"]`);
                   } else {
                     insertSearchButton();
                   }
@@ -559,21 +559,21 @@
             }
           }
         } catch (e) {
-          debug('//-> ' + e.name);
+          debug(`//-> ${e.name}`);
         }
 
         function insertSearchButton() {
           try {
             const getTarget = curretSite.MainType;
             const doHtml = curretSite.HtmlCode;
-            const doStyName = 'InsertTo' + curretSite.SiteName;
+            const doStyName = `InsertTo${curretSite.SiteName}`;
             const doStyle = curretSite.StyleCode;
             const vim = GetUrlParam(curretSite.SplitName);
             const userSpan = document.createElement('span');
             let Target = document.querySelector(getTarget);
-            userSpan.id = 'for_' + curretSite.SiteName;
+            userSpan.id = `for_${curretSite.SiteName}`;
             userSpan.innerHTML = doHtml;
-            const SpanID = '#' + userSpan.id;
+            const SpanID = `#${userSpan.id}`;
 
             addStyle(doStyle, doStyName, 'head', true);
 
@@ -582,7 +582,7 @@
                 Target = Target.parentNode.parentNode.firstChild;
                 Target.insertBefore(userSpan, Target.firstChild);
                 document.querySelector(SpanID).setAttribute('style', 'float:right');
-                debug('//-> ' + Target);
+                debug(`//-> ${Target}`);
               } else {
                 insterAfter(userSpan, Target);
               }
@@ -602,7 +602,7 @@
                     default:
                       break;
                   }
-                  debug('//-> ' + per.id);
+                  debug(`//-> ${per.id}`);
                   GMopenInTab(decodeURI(gotoUrl + getSearchValue()), {
                     active: true,
                     insert: true,
@@ -613,7 +613,7 @@
             }
             return true;
           } catch (e) {
-            debug('//-> ' + e.name);
+            debug(`//-> ${e.name}`);
             return false;
           }
         }
@@ -621,17 +621,17 @@
         function scrollDetect() {
           try {
             if (curretSite.SiteTypeID === newSiteType.GOOGLE) {
-              const nodeName = '#for_' + curretSite.SiteName;
+              const nodeName = `#for_${curretSite.SiteName}`;
               debug('//-> Turn on google scrolling detecting.');
-              scrollButton(nodeName + ' #bdyx', 'scrollspan');
-              scrollButton(nodeName + ' #bdyx input', 'scrollbars');
+              scrollButton(`${nodeName} #bdyx`, 'scrollspan');
+              scrollButton(`${nodeName} #bdyx input`, 'scrollbars');
               if (CONST.isUseBing) {
-                scrollButton(nodeName + ' #bbyx input', 'scrollbars');
+                scrollButton(`${nodeName} #bbyx input`, 'scrollbars');
               }
             }
             return true;
           } catch (e) {
-            debug('//-> ' + e.name);
+            debug(`//-> ${e.name}`);
             return false;
           }
         }
@@ -647,8 +647,8 @@
             }
             document.addEventListener('scroll', () => {
               let s = document.body.scrollTop || document.documentElement.scrollTop;
-              debug('//-> H-' + H);
-              debug('//-> S-' + s);
+              debug(`//-> H-${H}`);
+              debug(`//-> S-${s}`);
               if (s > H + 35) {
                 oDiv.setAttribute('class', classNameIn);
               } else {
@@ -669,8 +669,8 @@
               initType = initType || 'text/css';
               if (typeof addToTarget === 'undefined' || (typeof addToTarget !== 'undefined' && document.querySelector(addToTarget) !== null)) {
                 if (isReload === true) {
-                  safeRemove('.' + className);
-                } else if (isReload === false && document.querySelector('.' + className) !== null) {
+                  safeRemove(`.${className}`);
+                } else if (isReload === false && document.querySelector(`.${className}`) !== null) {
                   return true;
                 }
                 let cssNode = document.createElement('style');
@@ -682,7 +682,7 @@
                 try {
                   addTo.appendChild(cssNode);
                 } catch (e) {
-                  debug('//-> ' + e.name);
+                  debug(`//-> ${e.name}`);
                 }
                 return true;
               }
@@ -705,7 +705,7 @@
           try {
             func();
           } catch (e) {
-            debug('//-> ' + e.name);
+            debug(`//-> ${e.name}`);
           }
         }
 
@@ -713,7 +713,7 @@
           let val = '';
           document.querySelectorAll('input[name="wd"], input[name="q"]').forEach(things => {
             val = things.getAttribute('value');
-            debug('//-> INPUT:' + val);
+            debug(`//-> INPUT:${val}`);
           });
           if (val === null || val === '' || typeof val === 'undefined') {
             let kvl = location.search.substr(1).split('&');
@@ -724,7 +724,7 @@
               }
             }
             val = val.replace('+', ' ');
-            debug('//-> QUERY:' + val);
+            debug(`//-> QUERY:${val}`);
           }
           return encodeURIComponent(val);
         }
