@@ -1,3 +1,4 @@
+/* jshint esversion: 6 */
 // ==UserScript==
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
