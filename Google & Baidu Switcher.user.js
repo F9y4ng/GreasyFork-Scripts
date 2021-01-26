@@ -501,7 +501,6 @@
             GMsetValue(`${Name}`, 1);
             GMnotification(`${Tips}\u5df2\u5f00\u542f\uff0c\u4e09\u79d2\u540e\u5c06\u5237\u65b0\uff01`, title);
           }
-          registerMenuCommand();
           setTimeout(() => {
             let loc = location.href.replace(/&timestamp=(\d+)/, '');
             location.replace(loc + `&timestamp=` + new Date().getTime());
