@@ -1,7 +1,8 @@
+/* jshint esversion: 6 */
 // ==UserScript==
 // @name            字体渲染（自用脚本）
 // @namespace       https://openuserjs.org/users/t3xtf0rm4tgmail.com
-// @version         2020.12.19.1
+// @version         2021.01.26.1
 // @icon            https://github.githubassets.com/favicons/favicon.svg
 // @description     让每个页面的字体变得有质感，默认使用苹方字体加阴影，自用脚本不处理外部需求。
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
@@ -29,9 +30,9 @@
   let shadow = '';
   let debug = isdebug ? console.log.bind(console) : () => {};
   if (shadow_r !== 0) {
-    shadow = `text-shadow: 1px 1px ` + shadow_r + `px ` + shadow_c + `!important;`;
+    shadow = `text-shadow: 1px 1px ${shadow_r}px ${shadow_c}!important;`;
   }
-  let tshadow = cssfun + `{` + shadow + `font-family: 'PingFang SC','Microsoft YaHei',sans-serif!important;}`;
+  let tshadow = `${cssfun}{${shadow}font-family: "PingFang SC","Microsoft YaHei",sans-serif!important;}`;
 
   addStyle(tshadow, 'Font_Rendering', 'head');
 
@@ -58,8 +59,8 @@
         initType = initType || 'text/css';
         if (typeof addToTarget === 'undefined' || (typeof addToTarget !== 'undefined' && document.querySelector(addToTarget) !== null)) {
           if (isReload === true) {
-            safeRemove('.' + className);
-          } else if (isReload === false && document.querySelector('.' + className) !== null) {
+            safeRemove(`.${className}`);
+          } else if (isReload === false && document.querySelector(`.${className}`) !== null) {
             return true;
           }
           let cssNode = document.createElement('style');
@@ -71,7 +72,7 @@
           try {
             addTo.appendChild(cssNode);
           } catch (e) {
-            debug('//-> ' + e.name);
+            debug(`//-> ${e.name}`);
           }
           return true;
         }
@@ -94,7 +95,7 @@
     try {
       func();
     } catch (e) {
-      debug('//-> ' + e.name);
+      debug(`//-> ${e.name}`);
     }
   }
 
