@@ -3,11 +3,11 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.0.20210125.1
+// @version         2.0.20210202.1
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
-// @description:zh-TW  最新版本的集合谷歌、百度、必應的搜索引擎跳轉工具，必應跳轉可在菜單進行自定義設置。此版本無外部腳本調用，更快速和準確的進行按鈕定位，顯示速度大大提升。如有異常請清空瀏覽器緩存，再次載入使用，感謝使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it. again. Thank you!
+// @description:zh-TW  最新版本的集合谷歌、百度、必應的搜索引擎跳轉工具，必應跳轉可在菜單進行自定義設置。此版本無外部腳本調用，更快速和準確的進行按鈕定位，顯示速度大大提升。如有異常請清空瀏覽器緩存，再次載入使用，感謝使用！
 // @namespace       https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/Google_baidu_Switcher_(ALL_in_One)
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @icon            https://www.google.com/favicon.ico
@@ -36,20 +36,20 @@
 'use strict';
 
 !(function () {
-  let isdebug = false;
-  let debug = isdebug ? console.log.bind(console) : () => {};
+  const isdebug = false;
+  const debug = isdebug ? console.log.bind(console) : () => {};
 
   /* Perfectly Compatible For Greasemonkey, TamperMonkey, ViolentMonkey * F9y4ng * 20201127 */
 
   let GMsetValue, GMgetValue, GMregisterMenuCommand, GMunregisterMenuCommand, GMnotification, GMopenInTab;
   const GMinfo = GM_info;
-  let handlerInfo = GMinfo.scriptHandler;
+  const handlerInfo = GMinfo.scriptHandler;
   const isGM = Boolean(handlerInfo.toLowerCase() === 'greasemonkey');
 
   debug(`//-> CheckGM: ${isGM} >> ${handlerInfo}`);
 
   if (isGM) {
-    let Storage = window.localStorage;
+    const Storage = window.localStorage;
     if (Storage) {
       GMsetValue = (key, value) => {
         Storage.setItem(key, value);
@@ -73,7 +73,7 @@
         }
         return;
       }
-      let contextMenu = document.body.getAttribute('contextmenu');
+      const contextMenu = document.body.getAttribute('contextmenu');
       let menu = contextMenu ? document.querySelector(`menu#${contextMenu}`) : null;
       if (!menu) {
         menu = document.createElement('menu');
@@ -82,14 +82,14 @@
         document.body.appendChild(menu);
         document.body.setAttribute('contextmenu', 'gm-registered-menu');
       }
-      let menuItem = document.createElement('menuitem');
+      const menuItem = document.createElement('menuitem');
       menuItem.setAttribute('icon', 'https://wiki.greasespot.net/favicon.ico');
       menuItem.textContent = caption;
       menuItem.addEventListener('click', commandFunc, true);
       menu.appendChild(menuItem);
     };
     GMunregisterMenuCommand = () => {
-      let contextMenu = document.body.getAttribute('contextmenu');
+      const contextMenu = document.body.getAttribute('contextmenu');
       let menu = contextMenu ? document.querySelector(`menu#${contextMenu}`) : null;
       if (menu) {
         document.body.removeChild(menu);
@@ -164,10 +164,10 @@
   );
 
   !(function () {
-    let CONST = {
+    const CONST = {
       isSecurityPolicy: false,
       isUseBing: (() => {
-        let temp = parseInt(GMgetValue('_if_Use_Bing_'));
+        const temp = parseInt(GMgetValue('_if_Use_Bing_'));
         if (isNaN(temp)) {
           GMsetValue('_if_Use_Bing_', 0);
           console.log(
@@ -423,7 +423,7 @@
       other: { SiteTypeID: 0 },
     };
 
-    let newSiteType = {
+    const newSiteType = {
       BAIDU: listSite.baidu.SiteTypeID,
       GOOGLE: listSite.google.SiteTypeID,
       BING: listSite.bing.SiteTypeID,
@@ -453,10 +453,18 @@
 
     let menuManager = {
       menuDisplay: function () {
-        let _Use_Bing_ = CONST.isUseBing;
+        const _Use_Bing_ = CONST.isUseBing;
         let _use_Bing_ID, in_Use_feedBack_ID;
 
         registerMenuCommand();
+        console.log(
+          '%c[GB-Status]%c\nInsert the Bing Search Button: %c%s%c',
+          'font-weight:bold;color:darkorange',
+          'color:0',
+          'font-weight:bold;color:red',
+          _Use_Bing_.toString().toUpperCase(),
+          'font-weight:normal;color:0'
+        );
         debug(`//-> ${_Use_Bing_}`);
 
         function registerMenuCommand() {
@@ -480,15 +488,6 @@
               setParent: true,
             });
           });
-
-          console.log(
-            '%c[GB-Status]%c\nInsert the Bing Search Button: %c%s%c',
-            'font-weight:bold;color:darkorange',
-            'color:0',
-            'font-weight:bold;color:red',
-            _Use_Bing_.toString().toUpperCase(),
-            'font-weight:normal;color:0'
-          );
         }
 
         function inUse_switch(_status, Name, Tips) {
@@ -636,7 +635,7 @@
         }
 
         function scrollButton(paraName, classNameIn) {
-          let oDiv = document.querySelector(paraName);
+          const oDiv = document.querySelector(paraName);
           let H = 0;
           let Y = oDiv;
           if (Y !== null) {
@@ -645,7 +644,7 @@
               Y = Y.offsetParent;
             }
             document.addEventListener('scroll', () => {
-              let s = document.body.scrollTop || document.documentElement.scrollTop;
+              const s = document.body.scrollTop || document.documentElement.scrollTop;
               debug(`//-> H-${H}`);
               debug(`//-> S-${s}`);
               if (s > H + 35) {
@@ -672,7 +671,7 @@
                 } else if (isReload === false && document.querySelector(`.${className}`) !== null) {
                   return true;
                 }
-                let cssNode = document.createElement('style');
+                const cssNode = document.createElement('style');
                 if (className !== null) {
                   cssNode.className = className;
                 }
@@ -693,7 +692,7 @@
 
         function safeRemove(Css) {
           safeFunction(() => {
-            let removeNodes = document.querySelectorAll(Css);
+            const removeNodes = document.querySelectorAll(Css);
             for (let i = 0; i < removeNodes.length; i++) {
               removeNodes[i].remove();
             }
@@ -715,7 +714,7 @@
             debug(`//-> INPUT:${val}`);
           });
           if (val === null || val === '' || typeof val === 'undefined') {
-            let kvl = location.search.substr(1).split('&');
+            const kvl = location.search.substr(1).split('&');
             for (let i = 0; i < kvl.length; i++) {
               let value = kvl[i].replace(/^(wd|word|kw|query|q)=/, '');
               if (value !== kvl[i]) {
@@ -756,7 +755,7 @@
         }
 
         function insterAfter(newElement, targetElement) {
-          let parent = targetElement.parentNode;
+          const parent = targetElement.parentNode;
           if (parent.lastChild === targetElement) {
             parent.appendChild(newElement);
           } else {
@@ -767,13 +766,13 @@
         function GetUrlParam(paraName) {
           if (paraName === 'undefined') {
             const parameter = document.location.pathname.toString();
-            let arr = parameter.split('/');
+            const arr = parameter.split('/');
             return arr[1];
           } else {
             const url = document.location.toString();
-            let arrObj = url.split('?');
+            const arrObj = url.split('?');
             if (arrObj.length > 1) {
-              let arrPara = arrObj[1].split('&');
+              const arrPara = arrObj[1].split('&');
               let arr;
               for (let i = 0; i < arrPara.length; i++) {
                 arr = arrPara[i].split('=');

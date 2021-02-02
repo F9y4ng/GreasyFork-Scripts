@@ -1,10 +1,10 @@
 # `GreasyFork Scripts`
 
-- ## **Font Rendering.user.js** (`version 2021.01.26.1`)
+- ## **Font Rendering.user.js** (`version 2021.02.02.1`)
 
   > 让每个页面的字体变得有质感，默认使用苹方字体加阴影，自用脚本不处理外部需求。
 
-- ## **Google & Baidu Switcher.user.js** (`version 2.0.20210125.1`)
+- ## **Google & Baidu Switcher.user.js** (`version 2.0.20210202.1`)
 
   > 最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位
   > ，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
