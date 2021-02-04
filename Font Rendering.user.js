@@ -4,7 +4,7 @@
 // @namespace       https://openuserjs.org/users/t3xtf0rm4tgmail.com
 // @version         2021.02.04.2
 // @icon            https://github.githubassets.com/favicons/favicon.svg
-// @description     让每个页面的字体变得有质感，默认使用苹方字体加阴影，自用脚本不处理外部需求。
+// @description     让每个页面的字体变得有质感，默认使用苹方字体，附加字体描边、字体阴影、字体平滑等效果，自用脚本不处理外部需求。
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @author          F9y4ng
 // @include         *
