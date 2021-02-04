@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name            字体渲染（自用脚本）
 // @namespace       https://openuserjs.org/users/t3xtf0rm4tgmail.com
-// @version         2021.02.02.1
+// @version         2021.02.04.2
 // @icon            https://github.githubassets.com/favicons/favicon.svg
 // @description     让每个页面的字体变得有质感，默认使用苹方字体加阴影，自用脚本不处理外部需求。
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
@@ -15,7 +15,7 @@
 // @compatible      Safari 兼容Tampermonkey • Safari
 // @license         GPL-3.0-only
 // @create          2020-11-24
-// @copyright       2020, F9y4ng
+// @copyright       2020-2021, F9y4ng
 // @run-at          document-start
 // ==/UserScript==
 
@@ -24,8 +24,9 @@
 (function () {
   /* 你可以自定义以下内容 */
 
-  const shadow_r = 4; // 建议控制在4~8之间，关闭阴影为0
-  const shadow_c = `#888`; // 建议#777,#888,#999，或 rgba(136,136,136,0.8) 或依喜好修改，currentcolor为原字体颜色（慎用）
+  const stroke_r = 0.1; // 字体描边：建议控制在0~1.0之间，关闭描边为0，默认0.1
+  const shadow_r = 4; // 字体阴影：建议控制在4~8之间，关闭阴影为0，默认4
+  const shadow_c = `#888`; // 阴影颜色：建议#777,#888,#999，或 rgba(136,136,136,0.8) 或依喜好修改，currentcolor为原字体颜色（慎用）
   const cssfun = `body:not(input):not(textarea):not(i):not(em):not(pre):not(code):not([class*="icon"]):not([class*="fa"]):not([class*="logo"]):not([class*="mi"]):not([class*="code"])`; // 可以继续添加需要屏蔽的标签或classname或ID
 
   /* 请勿修改以下代码 */
@@ -36,10 +37,18 @@
   if (!isNaN(shadow_r) && shadow_r !== 0) {
     shadow = `text-shadow: 1px 1px ${shadow_r}px ${shadow_c}!important;`;
   }
+  let stroke = '';
+  if (!isNaN(stroke_r) && stroke_r > 0 && stroke_r <= 1.0) {
+    stroke = `
+    text-stroke: ${stroke_r}px !important;
+    -webkit-text-stroke: ${stroke_r}px !important;
+    `;
+  }
   const tshadow = `
   ${cssfun} {
       ${shadow}
       font-family: "PingFang SC","Microsoft YaHei",sans-serif!important;
+      ${stroke}
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
   }`;
