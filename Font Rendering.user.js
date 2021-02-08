@@ -19,9 +19,9 @@
 // @run-at          document-start
 // ==/UserScript==
 
-'use strict';
-
 (function () {
+  'use strict';
+
   /* 你可以自定义以下内容 */
 
   let stroke_r = 0.1; // 字体描边：建议控制在0~1.0之间，关闭描边为0，默认0.1
