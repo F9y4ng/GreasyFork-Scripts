@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.0.20210204.1
+// @version         2.1.20210208.2
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it. again. Thank you!
@@ -22,6 +22,7 @@
 // @compatible      Safari 兼容Tampermonkey • Safari
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
+// @grant           GM.registerMenuCommand
 // @grant           GM_unregisterMenuCommand
 // @grant           GM_openInTab
 // @grant           GM_getValue
@@ -33,13 +34,12 @@
 // @run-at          document-start
 // ==/UserScript==
 
-'use strict';
-
 !(function () {
+  'use strict';
   const isdebug = false;
   const debug = isdebug ? console.log.bind(console) : () => {};
 
-  /* Perfectly Compatible For Greasemonkey, TamperMonkey, ViolentMonkey * F9y4ng * 20201127 */
+  /* Perfectly Compatible For Greasemonkey, TamperMonkey, ViolentMonkey * F9y4ng * 20210208 */
 
   let GMsetValue, GMgetValue, GMregisterMenuCommand, GMunregisterMenuCommand, GMnotification, GMopenInTab;
   const GMinfo = GM_info;
@@ -58,43 +58,8 @@
         return Storage.getItem(key);
       };
     }
-    GMregisterMenuCommand = (caption, commandFunc, accessKey) => {
-      if (!document.body) {
-        if (document.readyState === 'loading' && document.documentElement && document.documentElement.localName === 'html') {
-          new MutationObserver((mutations, observer) => {
-            if (document.body) {
-              observer.disconnect();
-              GMregisterMenuCommand(caption, commandFunc, accessKey);
-              debug(`//-> Mutation: ${mutations}`);
-            }
-          }).observe(document.documentElement, { childList: true });
-        } else {
-          debug('GMregisterMenuCommand got no body.');
-        }
-        return;
-      }
-      const contextMenu = document.body.getAttribute('contextmenu');
-      let menu = contextMenu ? document.querySelector(`menu#${contextMenu}`) : null;
-      if (!menu) {
-        menu = document.createElement('menu');
-        menu.setAttribute('id', 'gm-registered-menu');
-        menu.setAttribute('type', 'context');
-        document.body.appendChild(menu);
-        document.body.setAttribute('contextmenu', 'gm-registered-menu');
-      }
-      const menuItem = document.createElement('menuitem');
-      menuItem.setAttribute('icon', 'https://wiki.greasespot.net/favicon.ico');
-      menuItem.textContent = caption;
-      menuItem.addEventListener('click', commandFunc, true);
-      menu.appendChild(menuItem);
-    };
-    GMunregisterMenuCommand = () => {
-      const contextMenu = document.body.getAttribute('contextmenu');
-      let menu = contextMenu ? document.querySelector(`menu#${contextMenu}`) : null;
-      if (menu) {
-        document.body.removeChild(menu);
-      }
-    };
+    GMregisterMenuCommand = GM.registerMenuCommand;
+    GMunregisterMenuCommand = () => {};
     GMnotification = function (options) {
       const opts = {};
       if (typeof options === 'string') {
@@ -158,7 +123,8 @@
   };
 
   console.log(
-    `%c[GB-Init]%c\nVersion: ${defaultConfig.Version}\nlastRuntime: ${defaultConfig.lastRuntime}`,
+    `%c[GB-Init]%c\nVersion: ${defaultConfig.Version}\nlastRuntime: ${defaultConfig.lastRuntime}
+    \n\u795d\u798f2021\uff1a\u65b0\u6625\u5feb\u4e50\uff0c\u4e07\u4e8b\u5982\u610f\uff01`,
     'font-weight:bold;color:dodgerblue',
     'color:0'
   );
@@ -469,7 +435,7 @@
 
         function registerMenuCommand() {
           let _Use_Bing__;
-          if (in_Use_feedBack_ID) {
+          if (in_Use_feedBack_ID && !isGM) {
             GMunregisterMenuCommand(_use_Bing_ID);
             GMunregisterMenuCommand(in_Use_feedBack_ID);
           }
