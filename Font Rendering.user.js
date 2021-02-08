@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name            字体渲染（自用脚本）
 // @namespace       https://openuserjs.org/users/t3xtf0rm4tgmail.com
-// @version         2021.02.05.1
+// @version         2021.02.08.1
 // @icon            https://github.githubassets.com/favicons/favicon.svg
 // @description     让每个页面的字体变得有质感，默认使用苹方字体，附加字体描边、字体阴影、字体平滑等效果，自用脚本不处理外部需求。
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
@@ -45,6 +45,8 @@
     stroke = `
     text-stroke: ${stroke_r}px !important;
     -webkit-text-stroke: ${stroke_r}px !important;
+    text-fill-color:currentcolor;
+    -webkit-text-fill-color:currentcolor;
     `;
   }
   let smoothing = '';
