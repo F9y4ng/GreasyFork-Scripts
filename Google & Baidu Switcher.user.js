@@ -132,7 +132,7 @@
       isUseBing: (() => {
         if (isNaN(temp)) {
           GMsetValue('_if_Use_Bing_', 0);
-          console.log(
+          console.warn(
             '%c[GB-Warning]%c\nThis is your first visit, the Bing search button will not be inserted by default.',
             'font-weight:bold;color:salmon',
             'color:1'
