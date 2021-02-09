@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.1.20210209.2
+// @version         2.1.20210209.3
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it. again. Thank you!
@@ -17,7 +17,7 @@
 // @include         *://*.baidu.com/*
 // @include         *://*.bing.com/*
 // @compatible      Chrome 兼容TamperMonkey, ViolentMonkey
-// @compatible      Firefox 兼容Greasemonkey, TamperMonkey, ViolentMonkey
+// @compatible      Firefox 兼容Greasemonkey4, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
 // @grant           GM_info
@@ -26,10 +26,11 @@
 // @grant           GM_unregisterMenuCommand
 // @grant           GM_openInTab
 // @grant           GM_getValue
-// @grant           GM_setValue
 // @grant           GM.getValue
+// @grant           GM_setValue
 // @grant           GM.setValue
 // @grant           GM_notification
+// @grant           GM.notification
 // @license         GPL-3.0-only
 // @create          2015-10-07
 // @copyright       2015-2021, F9y4ng
@@ -41,7 +42,7 @@
   const isdebug = false;
   const debug = isdebug ? console.log.bind(console) : () => {};
 
-  /* Perfectly Compatible For Greasemonkey, TamperMonkey, ViolentMonkey * F9y4ng * 20210209 */
+  /* Perfectly Compatible For Greasemonkey4.0, TamperMonkey, ViolentMonkey * F9y4ng * 20210209 */
 
   let GMsetValue, GMgetValue, GMregisterMenuCommand, GMunregisterMenuCommand, GMnotification, GMopenInTab;
   const GMinfo = GM_info;
@@ -55,51 +56,7 @@
     GMgetValue = GM.getValue;
     GMregisterMenuCommand = GM.registerMenuCommand;
     GMunregisterMenuCommand = () => {};
-    GMnotification = function (options) {
-      const opts = {};
-      if (typeof options === 'string') {
-        opts.text = options;
-        opts.title = arguments[1];
-        opts.image = arguments[2];
-        opts.onclick = arguments[3];
-      } else {
-        Object.keys(options).forEach(key => {
-          opts[key] = options[key];
-        });
-      }
-
-      checkPermission();
-
-      function checkPermission() {
-        if (Notification.permission === 'granted') {
-          fireNotice(opts);
-        } else if (Notification.permission === 'denied') {
-          debug('//-> User has denied notifications for this page/site!');
-          return;
-        } else {
-          Notification.requestPermission(permission => {
-            debug(`//-> New permission: ${permission}`);
-            checkPermission();
-          });
-        }
-      }
-
-      function fireNotice(ntcOptions) {
-        if (ntcOptions.text && !ntcOptions.body) {
-          ntcOptions.body = ntcOptions.text;
-        }
-        let ntfctn = new Notification(ntcOptions.title, ntcOptions);
-
-        if (ntcOptions.onclick) {
-          ntfctn.onclick = ntcOptions.onclick;
-        }
-        if (ntcOptions.timeout) {
-          setTimeout(() => {
-            ntfctn.close();
-          }, ntcOptions.timeout);
-        }
-      }
-    };
+    GMnotification = GM.notification;
     GMopenInTab = (a, b) => {
       window.open(a, Math.random().toString(36).slice(-6), '', b instanceof String);
     };
