@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.1.20210208.2
+// @version         2.1.20210209.2
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it. again. Thank you!
@@ -27,6 +27,8 @@
 // @grant           GM_openInTab
 // @grant           GM_getValue
 // @grant           GM_setValue
+// @grant           GM.getValue
+// @grant           GM.setValue
 // @grant           GM_notification
 // @license         GPL-3.0-only
 // @create          2015-10-07
@@ -39,7 +41,7 @@
   const isdebug = false;
   const debug = isdebug ? console.log.bind(console) : () => {};
 
-  /* Perfectly Compatible For Greasemonkey, TamperMonkey, ViolentMonkey * F9y4ng * 20210208 */
+  /* Perfectly Compatible For Greasemonkey, TamperMonkey, ViolentMonkey * F9y4ng * 20210209 */
 
   let GMsetValue, GMgetValue, GMregisterMenuCommand, GMunregisterMenuCommand, GMnotification, GMopenInTab;
   const GMinfo = GM_info;
@@ -49,15 +51,8 @@
   debug(`//-> CheckGM: ${isGM} >> ${handlerInfo}`);
 
   if (isGM) {
-    const Storage = window.localStorage;
-    if (Storage) {
-      GMsetValue = (key, value) => {
-        Storage.setItem(key, value);
-      };
-      GMgetValue = key => {
-        return Storage.getItem(key);
-      };
-    }
+    GMsetValue = GM.setValue;
+    GMgetValue = GM.getValue;
     GMregisterMenuCommand = GM.registerMenuCommand;
     GMunregisterMenuCommand = () => {};
     GMnotification = function (options) {
@@ -129,11 +124,11 @@
     'color:0'
   );
 
-  !(function () {
+  !(async function () {
+    const temp = parseInt(await GMgetValue('_if_Use_Bing_'));
     const CONST = {
       isSecurityPolicy: false,
       isUseBing: (() => {
-        const temp = parseInt(GMgetValue('_if_Use_Bing_'));
         if (isNaN(temp)) {
           GMsetValue('_if_Use_Bing_', 0);
           console.log(
