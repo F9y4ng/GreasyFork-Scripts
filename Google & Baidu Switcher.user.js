@@ -74,7 +74,7 @@
     lastRuntime: new Date().toLocaleString('chinese', { hour12: false }),
   };
 
-  console.log(
+  console.info(
     `%c[GB-Init]%c\nVersion: ${defaultConfig.Version}\nlastRuntime: ${defaultConfig.lastRuntime}
     \n%c\u795d\u798f2021\uff1a\u65b0\u6625\u5feb\u4e50\uff0c\u4e07\u4e8b\u5982\u610f\uff01\n`,
     'font-weight:bold;color:dodgerblue',
