@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.1.20210319.1
+// @version         2.2.20210327.2
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it. again. Thank you!
@@ -359,11 +359,10 @@
       curretSite = listSite.other;
     }
     if (
-      (curretSite.SiteTypeID === newSiteType.GOOGLE && location.href.replace(/tbm=(isch|lcl|flm)/, '') !== location.href) ||
+      (curretSite.SiteTypeID === newSiteType.GOOGLE && location.href.replace(/tbm=(lcl|flm)/, '') !== location.href) ||
       (curretSite.SiteTypeID === newSiteType.BING && location.href.replace(/maps\?/, '') !== location.href) ||
       (curretSite.SiteTypeID === newSiteType.BAIDU &&
-        (/(b2b|map|wenku|tieba|hanyu)/.test(location.hostname) ||
-          location.href.replace(/tn=(baiduimage|news|ikaslist|vsearch)/, '') !== location.href))
+        (/(b2b|map|wenku|tieba|hanyu)/.test(location.hostname) || location.href.replace(/tn=(news|ikaslist|vsearch)/, '') !== location.href))
     ) {
       CONST.isSecurityPolicy = true;
     }
@@ -497,22 +496,39 @@
                 Target = Target.parentNode.parentNode.firstChild;
                 Target.insertBefore(userSpan, Target.firstChild);
                 document.querySelector(SpanID).setAttribute('style', 'float:right');
-                debug(`//-> ${Target}`);
+              } else if (/^baiduimage$/.test(vim.trim())) {
+                insterAfter(userSpan, Target);
+                document.querySelector(SpanID).setAttribute('style', 'margin-left:12px');
               } else {
                 insterAfter(userSpan, Target);
               }
+
+              debug(`//-> ${Target}`);
+
               document.querySelectorAll('#ggyx, #bbyx, #bdyx').forEach(per => {
                 per.addEventListener('click', () => {
                   let gotoUrl = 'about:blank';
                   switch (per.id) {
                     case 'ggyx':
-                      gotoUrl = 'https://www.google.com/search?newwindow=1&hl=zh-CN&source=hp&q=';
+                      if (/^(baiduimage|images)$/.test(vim.trim())) {
+                        gotoUrl = 'https://www.google.com/search?newwindow=1&hl=zh-CN&source=lnms&tbm=isch&sa=X&q=';
+                      } else {
+                        gotoUrl = 'https://www.google.com/search?newwindow=1&hl=zh-CN&source=hp&q=';
+                      }
                       break;
                     case 'bbyx':
-                      gotoUrl = 'https://cn.bing.com/search?q=';
+                      if (/^(isch|baiduimage)$/.test(vim.trim())) {
+                        gotoUrl = 'https://cn.bing.com/images/search?q=';
+                      } else {
+                        gotoUrl = 'https://cn.bing.com/search?q=';
+                      }
                       break;
                     case 'bdyx':
-                      gotoUrl = 'https://www.baidu.com/s?ie=utf-8&rqlang=cn&wd=';
+                      if (/^(images|isch)$/.test(vim.trim())) {
+                        gotoUrl = 'https://image.baidu.com/search/index?tn=baiduimage&ps=1&ie=utf-8&word=';
+                      } else {
+                        gotoUrl = 'https://www.baidu.com/s?ie=utf-8&rqlang=cn&wd=';
+                      }
                       break;
                     default:
                       break;
