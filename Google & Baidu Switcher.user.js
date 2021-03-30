@@ -511,7 +511,7 @@
                   switch (per.id) {
                     case 'ggyx':
                       if (/^(baiduimage|images)$/.test(vim.trim())) {
-                        gotoUrl = 'https://www.google.com/search?newwindow=1&hl=zh-CN&source=lnms&tbm=isch&sa=X&q=';
+                        gotoUrl = 'https://www.google.com/search?newwindow=1&hl=zh-CN&source=hp&tbm=isch&q=';
                       } else {
                         gotoUrl = 'https://www.google.com/search?newwindow=1&hl=zh-CN&source=hp&q=';
                       }
