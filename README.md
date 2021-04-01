@@ -1,8 +1,10 @@
 # `GreasyFork Scripts`
 
-- ## **Font Rendering.user.js** (`version 2021.02.09.1`)
+- ## **Font Rendering.user.js** (`version 2021.04.01.3`)
 
   简介：让每个页面的字体变得有质感，默认使用苹方字体，附加字体描边、字体阴影、字体平滑等效果，自用脚本不处理外部需求。
+
+  > `version 2021.04.01.3` 优化阴影及描边效果。
 
 - ## **Google & Baidu Switcher.user.js** (`version 2.2.20210327.3`)
 
