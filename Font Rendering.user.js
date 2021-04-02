@@ -27,7 +27,7 @@
   let stroke_r = 0.04; // 字体描边：建议控制在0~1.0之间，关闭描边为0，默认0.04
   let shadow_r = 2; // 字体阴影：建议控制在1~8之间，关闭阴影为0，默认2
   const smooth_i = 1; // 字体平滑，默认开启，关闭为0
-  const shadow_c = `rgba(136,136,136,0.4)`; // 阴影颜色：建议#888，或 rgba(136,136,136,0.8) 或依喜好修改，currentcolor为原字体颜色（慎用）
+  const shadow_c = `rgba(136,136,136,0.3)`; // 阴影颜色：建议#888，或 rgba(136,136,136,0.8) 或依喜好修改，currentcolor为原字体颜色（慎用）
   const cssfun = `:not(input):not(textarea):not(i):not(em):not(pre):not(code):not([class*="icon"]):not(.fa):not([class*="logo"]):not(.mi):not([class*="code"]):not(.fb-close)`; // 可以继续添加需要屏蔽的标签或classname
 
   /* 请勿修改以下代码 */
