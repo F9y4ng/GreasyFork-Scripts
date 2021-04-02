@@ -1,9 +1,9 @@
-/* jshint esversion: 6 */
+/* jshint esversion: 8 */
 // ==UserScript==
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.2.20210327.3
+// @version         2.3.20210403.21
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it. again. Thank you!
@@ -14,10 +14,12 @@
 // @include         *://encrypted.google.*/search*
 // @include         *://*.google.*/search*
 // @include         *://*.google.*/webhp*
-// @include         *://*.baidu.com/*
+// @include         *://www.baidu.com/*
+// @include         *://image.baidu.com/*
 // @include         *://*.bing.com/*
+// @exclude         *://*.google.*/sorry/*
 // @compatible      Chrome 兼容TamperMonkey, ViolentMonkey
-// @compatible      Firefox 兼容Greasemonkey4, TamperMonkey, ViolentMonkey
+// @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
 // @grant           GM_info
@@ -42,7 +44,7 @@
   const isdebug = false;
   const debug = isdebug ? console.log.bind(console) : () => {};
 
-  /* Perfectly Compatible For Greasemonkey4.0, TamperMonkey, ViolentMonkey * F9y4ng * 20210209 */
+  /* Perfectly Compatible For Greasemonkey4.0+, TamperMonkey, ViolentMonkey * F9y4ng * 20210209 */
 
   let GMsetValue, GMgetValue, GMregisterMenuCommand, GMunregisterMenuCommand, GMnotification, GMopenInTab;
   const GMinfo = GM_info;
@@ -188,7 +190,7 @@
                 color: #fff;
                 width: 112px;
                 border: 1px solid #3476d2;
-                text-shadow: 0 0 2px #ffffff!important;
+                text-shadow: 0 0 2px #ffffff !important;
                 font-size: 16px
             }
             #ggyx input:hover {
@@ -232,7 +234,7 @@
                 height: 26px!important;
                 font-size: 13px!important;
                 font-weight: normal!important;
-                text-shadow: 0 0 1px #ffffff!important;
+                text-shadow: 0 0 1px #ffffff !important;
             }
             #bdyx input {
                 cursor: pointer;
@@ -280,7 +282,7 @@
                 height: 26px!important;
                 font-size: 13px!important;
                 font-weight: normal!important;
-                text-shadow: 0 0 1px #ffffff!important;
+                text-shadow: 0 0 1px #ffffff !important;
             }
             #bdyx input {
                 cursor: pointer;
@@ -321,20 +323,26 @@
                 width: auto 60px;
                 height: 36px;
                 background-color: #f7faff;
-                border: 1px solid #b4ddea;
-                color: #2996b0;
+                border: 1px solid #0095B7;
+                color: #0095B7;
                 margin-left: -2px;
                 font-family: 'Microsoft YaHei'!important;
-                text-shadow: 1px 1px 2px #999!important;
                 font-size: 16px;
+                font-weight: 700;
+            }
+            .scrollspan {
+                height: 32px!important;
+            }
+            .scrollbars {
+                height: 30px!important;
             }
             #bdyx input:hover, #ggyx input:hover {
                 background-color: #fff;
                 transition:border linear .1s,box-shadow linear .3s;
-                box-shadow: 1px 1px 8px #5f5f5f;
-                border: 2px solid #00809d;
-                text-shadow: 0 0 1px #00809d!important;
-                color:#00809d;
+                box-shadow: 1px 1px 8px #08748D;
+                border: 2px solid #0095B7;
+                text-shadow: 0 0 1px #0095B7 !important;
+                color:#0095B7;
             }`,
       },
       other: { SiteTypeID: 0 },
@@ -347,7 +355,7 @@
       OTHERS: 0,
     };
 
-    debug('//-> The program begins to execution phase.');
+    debug('//-> Initialization complete, start running...');
 
     if (location.host.includes('.baidu.com')) {
       curretSite = listSite.baidu;
@@ -359,10 +367,9 @@
       curretSite = listSite.other;
     }
     if (
-      (curretSite.SiteTypeID === newSiteType.GOOGLE && location.href.replace(/tbm=(lcl|flm)/, '') !== location.href) ||
+      (curretSite.SiteTypeID === newSiteType.GOOGLE && location.href.replace(/tbm=(lcl|flm|fin)/, '') !== location.href) ||
       (curretSite.SiteTypeID === newSiteType.BING && location.href.replace(/maps\?/, '') !== location.href) ||
-      (curretSite.SiteTypeID === newSiteType.BAIDU &&
-        (/(b2b|map|wenku|tieba|hanyu)/.test(location.hostname) || location.href.replace(/tn=(news|ikaslist|vsearch)/, '') !== location.href))
+      (curretSite.SiteTypeID === newSiteType.BAIDU && location.href.replace(/tn=(news|ikaslist|vsearch)|detail\?/, '') !== location.href)
     ) {
       CONST.isSecurityPolicy = true;
     }
@@ -381,7 +388,7 @@
           _Use_Bing_.toString().toUpperCase(),
           'font-weight:normal;color:0'
         );
-        debug(`//-> ${_Use_Bing_}`);
+        debug(`//-> CONST.isUseBing: ${_Use_Bing_}`);
 
         function registerMenuCommand() {
           let _Use_Bing__;
@@ -492,14 +499,19 @@
             addStyle(doStyle, doStyName, 'head', true);
 
             if (document.querySelector(SpanID) === null && getSearchValue().length > 0) {
-              if (/^(nws|vid|fin|bks)$/.test(vim.trim())) {
+              if (/^(nws|vid|bks)$/.test(vim.trim())) {
                 Target = Target.parentNode.parentNode.firstChild;
                 Target.insertBefore(userSpan, Target.firstChild);
                 document.querySelector(SpanID).setAttribute('style', 'float:right');
               } else {
                 insterAfter(userSpan, Target);
+                // Baidu图片特殊检查 F9y4ng 20210402
                 if (/^baiduimage$/.test(vim.trim())) {
                   document.querySelector(SpanID).setAttribute('style', 'margin-left:12px');
+                }
+                // Bing图片特殊检查 F9y4ng 20210403
+                if (/^images$/.test(vim.trim()) && location.href.replace(/view=detailV2/, '') !== location.href) {
+                  document.querySelector('.b_searchboxForm').setAttribute('style', 'width:630px');
                 }
               }
 
@@ -551,14 +563,26 @@
 
         function scrollDetect() {
           try {
-            if (curretSite.SiteTypeID === newSiteType.GOOGLE) {
-              const nodeName = `#for_${curretSite.SiteName}`;
-              debug('//-> Turn on google scrolling detecting.');
-              scrollButton(`${nodeName} #bdyx`, 'scrollspan');
-              scrollButton(`${nodeName} #bdyx input`, 'scrollbars');
-              if (CONST.isUseBing) {
-                scrollButton(`${nodeName} #bbyx input`, 'scrollbars');
-              }
+            const nodeName = `#for_${curretSite.SiteName}`;
+            const vim = GetUrlParam(curretSite.SplitName);
+            switch (curretSite.SiteTypeID) {
+              case newSiteType.GOOGLE:
+                scrollButton(`${nodeName} #bdyx`, 'scrollspan', 35);
+                scrollButton(`${nodeName} #bdyx input`, 'scrollbars', 35);
+                if (CONST.isUseBing) {
+                  scrollButton(`${nodeName} #bbyx input`, 'scrollbars', 35);
+                }
+                break;
+              case newSiteType.BING:
+                if (/^images$/.test(vim.trim())) {
+                  scrollButton(`${nodeName}`, 'scrollspan', 50);
+                  scrollButton(`${nodeName} #bdyx input`, 'scrollbars', 50);
+                  scrollButton(`${nodeName} #ggyx input`, 'scrollbars', 50);
+                }
+                break;
+              default:
+                debug(`//-> No scrolling detecting.`);
+                break;
             }
             return true;
           } catch (e) {
@@ -567,7 +591,8 @@
           }
         }
 
-        function scrollButton(paraName, classNameIn) {
+        function scrollButton(paraName, classNameIn, scrollSize) {
+          debug(`//-> ${curretSite.SiteName} Scrolling Detecting: ${paraName}`);
           const oDiv = document.querySelector(paraName);
           let H = 0;
           let Y = oDiv;
@@ -578,9 +603,8 @@
             }
             document.addEventListener('scroll', () => {
               const s = document.body.scrollTop || document.documentElement.scrollTop;
-              debug(`//-> H-${H}`);
-              debug(`//-> S-${s}`);
-              if (s > H + 35) {
+              debug(`//-> H=${H} S=${s} H-S=(${H - s})`);
+              if (s > H + scrollSize) {
                 oDiv.setAttribute('class', classNameIn);
               } else {
                 oDiv.removeAttribute('class');
@@ -722,9 +746,9 @@
       },
 
       init: function () {
-        debug('//-> Call the load menu option.');
+        debug('//-> Loading menu...');
         menuManager.init();
-        debug('//-> Execute insert jump button.');
+        debug('//-> Insert button...');
         this.doSwitch();
       },
     };
