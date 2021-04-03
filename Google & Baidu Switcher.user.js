@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.3.20210403.22
+// @version         2.3.20210404.5
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it. again. Thank you!
@@ -321,7 +321,7 @@
             #bdyx input, #ggyx input {
                 cursor: pointer;
                 width: auto 60px;
-                height: 36px;
+                height: 40px;
                 background-color: #f7faff;
                 border: 1px solid #0095B7;
                 color: #0095B7;
@@ -450,6 +450,29 @@
               );
               return;
             } else {
+              if (curretSite.SiteTypeID !== newSiteType.OTHERS) {
+                const callback = mutations => {
+                  mutations.forEach(mutation => {
+                    if (document.querySelector(`.InsertTo${curretSite.SiteName}`) && document.querySelector(idName)) {
+                      debug(`// -> Already Insert Button & CSS.`);
+                    } else {
+                      debug(
+                        `%c[GB-MutationObserver]\n%c(%c%s%c has changed: %c%s%c).`,
+                        'font-weight:bold;color:olive',
+                        'color:0',
+                        'color:olive',
+                        mutation.type,
+                        'color:0',
+                        'font-weight:bold;color:red',
+                        (insertSearchButton() && scrollDetect()).toString().toUpperCase(),
+                        'color:0'
+                      );
+                    }
+                  });
+                };
+                const opts = { childList: true, subtree: true };
+                new MutationObserver(callback).observe(document, opts);
+              }
               RAFInterval(
                 () => {
                   if (document.querySelector(idName) === null) {
@@ -459,17 +482,6 @@
                 500,
                 true
               );
-              if (curretSite.SiteTypeID === newSiteType.BAIDU) {
-                const callback = () => {
-                  if (document.querySelector(`.InsertTo${curretSite.SiteName}`)) {
-                    debug(`//-> found with selector ["InsertTo${curretSite.SiteName}"]`);
-                  } else {
-                    insertSearchButton();
-                  }
-                };
-                const opts = { childList: true, subtree: true };
-                new MutationObserver(callback).observe(document, opts);
-              }
               console.log(
                 '%c[GB-Switch]%c\nWe Are Using The %c%s%c Search Engine.',
                 'font-weight:bold;color:Green',
@@ -497,7 +509,7 @@
             userSpan.innerHTML = doHtml;
             const SpanID = `#${userSpan.id}`;
 
-            addStyle(doStyle, doStyName, 'head', true);
+            addStyle(doStyle, doStyName, 'head');
 
             if (document.querySelector(SpanID) === null && getSearchValue().length > 0) {
               if (/^(nws|vid|bks)$/.test(vim.trim())) {

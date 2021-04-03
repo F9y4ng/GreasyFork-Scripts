@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name            字体渲染（自用脚本）
 // @namespace       https://openuserjs.org/users/t3xtf0rm4tgmail.com
-// @version         2021.04.01.3
+// @version         2021.04.04.2
 // @icon            https://github.githubassets.com/favicons/favicon.svg
 // @description     让每个页面的字体变得有质感，默认使用苹方字体，附加字体描边、字体阴影、字体平滑等效果，自用脚本不处理外部需求。
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
@@ -25,7 +25,7 @@
   /* 你可以自定义以下内容 */
 
   let stroke_r = 0.04; // 字体描边：建议控制在0~1.0之间，关闭描边为0，默认0.04
-  let shadow_r = 2; // 字体阴影：建议控制在1~8之间，关闭阴影为0，默认2
+  let shadow_r = 1.5; // 字体阴影：建议控制在1~8之间，关闭阴影为0，默认1.5
   const smooth_i = 1; // 字体平滑，默认开启，关闭为0
   const shadow_c = `rgba(136,136,136,0.3)`; // 阴影颜色：建议#888，或 rgba(136,136,136,0.8) 或依喜好修改，currentcolor为原字体颜色（慎用）
   const cssfun = `:not(input):not(textarea):not(i):not(em):not(pre):not(code):not([class*="icon"]):not(.fa):not([class*="logo"]):not(.mi):not([class*="code"]):not(.fb-close)`; // 可以继续添加需要屏蔽的标签或classname
@@ -69,19 +69,17 @@
       ${smoothing}
   }`;
 
-  addStyle(tshadow, 'Font_Rendering', 'head');
+  addStyle(tshadow, 'FontRendering', 'head');
 
-  if (location.host.includes('.baidu.com')) {
-    const callback = () => {
-      if (document.querySelector('.Font_Rendering')) {
-        debug('//-> found with selector ["Font_Rendering"]');
-      } else {
-        addStyle(tshadow, 'Font_Rendering', 'head');
-      }
-    };
-    const opts = { childList: true, subtree: true };
-    new MutationObserver(callback).observe(document, opts);
-  }
+  const callback = () => {
+    if (document.querySelector('.FontRendering')) {
+      debug('//-> Already Insert CSS.');
+    } else {
+      addStyle(tshadow, 'FontRendering', 'head');
+    }
+  };
+  const opts = { childList: true, subtree: true };
+  new MutationObserver(callback).observe(document, opts);
 
   function addStyle(css, className, addToTarget, isReload, initType) {
     RAFInterval(

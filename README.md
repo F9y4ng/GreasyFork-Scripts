@@ -1,18 +1,17 @@
 # `GreasyFork Scripts`
 
-- ## **Font Rendering.user.js** (`version 2021.04.01.3`)
+- ## **Font Rendering.user.js** (`version 2021.04.04.2`)
 
   简介：让每个页面的字体变得有质感，默认使用苹方字体，附加字体描边、字体阴影、字体平滑等效果，自用脚本不处理外部需求。
 
-  > `version 2021.04.01.3` 优化阴影及描边效果。
+  > `version 2021.04.04.2` 1、MutationObserver callback()函数优化，对所有站点启用。2、默认值的重新设定。
 
-- ## **Google & Baidu Switcher.user.js** (`version 2.3.20210403.22`)
+- ## **Google & Baidu Switcher.user.js** (`version 2.3.20210404.5`)
 
   简介：最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位
    ，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 
-  > `version 2.3.20210403.22` 1、新增对Bing图片站的屏幕滚动时按钮判断。2、优化屏幕滚动的判断函数。3、优化Bing按钮样式。
-  4、修正对Bing图片预览、Baidu图片站的格式错误。5、修正脚本匹配网站的规则。6、修正各种小Bug无数。7、改动较多，如有出现异常，请及时反馈。
+  > `version 2.3.20210404.5` 1、新增对Bing图片站的MutationObserver检查。2、优化MutationObserver callback()函数，修正检测逻辑。3、优化BING图片按钮样式（针对Microsoft Edge Chromium）。
 
 - ## **PowerlinePro.psm1** (`version 1.0.0`)
 
