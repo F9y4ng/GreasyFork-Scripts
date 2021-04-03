@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.3.20210403.21
+// @version         2.3.20210403.22
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it. again. Thank you!
@@ -329,6 +329,7 @@
                 font-family: 'Microsoft YaHei'!important;
                 font-size: 16px;
                 font-weight: 700;
+                border-radius: 4px;
             }
             .scrollspan {
                 height: 32px!important;
