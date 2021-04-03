@@ -524,7 +524,7 @@
                 }
                 // Bing图片特殊检查 F9y4ng 20210403
                 if (/^images$/.test(vim.trim()) && location.href.replace(/view=detailV2/, '') !== location.href) {
-                  document.querySelector('.b_searchboxForm').setAttribute('style', 'width:630px');
+                  document.querySelector('.b_searchboxForm').setAttribute('style', 'width:635px');
                 }
               }
 
