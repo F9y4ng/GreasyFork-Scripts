@@ -6,12 +6,12 @@
 
   > `version 2021.04.04.2` 1、MutationObserver callback()函数优化，对所有站点启用。2、默认值的重新设定。
 
-- ## **Google & Baidu Switcher.user.js** (`version 2.3.20210404.8`)
+- ## **Google & Baidu Switcher.user.js** (`version 2.3.20210404.9`)
 
   简介：最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位
    ，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 
-  > `version 2.3.20210404.8` 1、新增对Bing图片站的MutationObserver检查。2、优化MutationObserver callback()函数，修正检测逻辑。3、优化BING图片按钮样式（针对Microsoft Edge Chromium）4、修正Bugs。
+  > `version 2.3.20210404.9` 1、新增对Bing图片站的MutationObserver检查。2、优化MutationObserver callback()函数，修正检测逻辑。3、优化BING图片按钮样式（针对Microsoft Edge Chromium）4、修正Bugs。
 
 - ## **PowerlinePro.psm1** (`version 1.0.0`)
 

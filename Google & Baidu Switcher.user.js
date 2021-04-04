@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.3.20210404.8
+// @version         2.3.20210404.9
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it. again. Thank you!
@@ -450,29 +450,27 @@
               );
               return;
             } else {
-              if (curretSite.SiteTypeID !== newSiteType.OTHERS) {
-                const callback = mutations => {
-                  mutations.forEach(mutation => {
-                    if (document.querySelector(`.InsertTo${curretSite.SiteName}`) && document.querySelector(idName)) {
-                      debug(`// -> Already Insert Button & CSS.`);
-                    } else {
-                      debug(
-                        `%c[GB-MutationObserver]\n%c(%c%s%c has changed: %c%s%c).`,
-                        'font-weight:bold;color:olive',
-                        'color:0',
-                        'color:olive',
-                        mutation.type,
-                        'color:0',
-                        'font-weight:bold;color:red',
-                        (insertSearchButton() && scrollDetect()).toString().toUpperCase(),
-                        'color:0'
-                      );
-                    }
-                  });
-                };
-                const opts = { childList: true, subtree: true };
-                new MutationObserver(callback).observe(document, opts);
-              }
+              const callback = mutations => {
+                mutations.forEach(mutation => {
+                  if (document.querySelector(`.InsertTo${curretSite.SiteName}`) && document.querySelector(idName)) {
+                    debug(`//-> Already Insert Button & CSS.`);
+                  } else {
+                    debug(
+                      `%c[GB-MutationObserver]\n%c(%c%s%c has changed: %c%s%c).`,
+                      'font-weight:bold;color:olive',
+                      'color:0',
+                      'color:olive',
+                      mutation.type,
+                      'color:0',
+                      'font-weight:bold;color:red',
+                      (insertSearchButton() && scrollDetect()).toString().toUpperCase(),
+                      'color:0'
+                    );
+                  }
+                });
+              };
+              const opts = { childList: true, subtree: true };
+              new MutationObserver(callback).observe(document, opts);
               RAFInterval(
                 () => {
                   if (document.querySelector(idName) === null) {
@@ -511,7 +509,7 @@
 
             addStyle(doStyle, doStyName, 'head');
 
-            if (document.querySelector(SpanID) === null && getSearchValue().length > 0) {
+            if (document.querySelector(SpanID) === null && getSearchValue().length > 0 && Target !== null) {
               if (/^(nws|vid|bks)$/.test(vim.trim())) {
                 Target = Target.parentNode.parentNode.firstChild;
                 Target.insertBefore(userSpan, Target.firstChild);
