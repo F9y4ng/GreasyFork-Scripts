@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.3.20210404.5
+// @version         2.3.20210404.8
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it. again. Thank you!
@@ -325,7 +325,7 @@
                 background-color: #f7faff;
                 border: 1px solid #0095B7;
                 color: #0095B7;
-                margin-left: -2px;
+                margin-left: -1px;
                 font-family: 'Microsoft YaHei'!important;
                 font-size: 16px;
                 font-weight: 700;
@@ -493,7 +493,7 @@
             }
           }
         } catch (e) {
-          debug(`//-> ${e.name}`);
+          debug(`//-> %c${e.name}`, 'color:darkred');
         }
 
         function insertSearchButton() {
@@ -515,20 +515,26 @@
               if (/^(nws|vid|bks)$/.test(vim.trim())) {
                 Target = Target.parentNode.parentNode.firstChild;
                 Target.insertBefore(userSpan, Target.firstChild);
-                document.querySelector(SpanID).setAttribute('style', 'float:right');
+                if (document.querySelector(SpanID)) {
+                  document.querySelector(SpanID).setAttribute('style', 'float:right');
+                }
               } else {
                 insterAfter(userSpan, Target);
                 // Baidu图片特殊检查 F9y4ng 20210402
-                if (/^baiduimage$/.test(vim.trim())) {
+                if (document.querySelector(SpanID) && /^baiduimage$/.test(vim.trim())) {
                   document.querySelector(SpanID).setAttribute('style', 'margin-left:12px');
                 }
                 // Bing图片特殊检查 F9y4ng 20210403
-                if (/^images$/.test(vim.trim()) && location.href.replace(/view=detailV2/, '') !== location.href) {
-                  document.querySelector('.b_searchboxForm').setAttribute('style', 'width:635px');
+                if (
+                  document.querySelector('.b_searchboxForm') &&
+                  /^images$/.test(vim.trim()) &&
+                  location.href.replace(/view=detailV2/, '') !== location.href
+                ) {
+                  document.querySelector('.b_searchboxForm').setAttribute('style', 'width:640px');
                 }
               }
 
-              debug(`//-> ${Target}`);
+              debug(`//-> Target: ${Target}`);
 
               document.querySelectorAll('#ggyx, #bbyx, #bdyx').forEach(per => {
                 per.addEventListener('click', () => {
@@ -569,7 +575,7 @@
             }
             return true;
           } catch (e) {
-            debug(`//-> ${e.name}`);
+            debug(`//-> %c${e}`, 'color:darkred');
             return false;
           }
         }
@@ -599,7 +605,7 @@
             }
             return true;
           } catch (e) {
-            debug(`//-> ${e.name}`);
+            debug(`//-> %c${e.name}`, 'color:darkred');
             return false;
           }
         }
@@ -650,7 +656,7 @@
                 try {
                   addTo.appendChild(cssNode);
                 } catch (e) {
-                  debug(`//-> ${e.name}`);
+                  debug(`//-> %c${e.name}`, 'color:darkred');
                 }
                 return true;
               }
@@ -673,7 +679,7 @@
           try {
             func();
           } catch (e) {
-            debug(`//-> ${e.name}`);
+            debug(`//-> %c${e.name}`, 'color:darkred');
           }
         }
 
@@ -681,7 +687,7 @@
           let val = '';
           document.querySelectorAll('input[name="wd"], input[name="q"]').forEach(things => {
             val = things.getAttribute('value');
-            debug(`//-> INPUT:${val}`);
+            debug(`//-> INPUT: ${val}`);
           });
           if (val === null || val === '' || typeof val === 'undefined') {
             const kvl = location.search.substr(1).split('&');
@@ -691,8 +697,8 @@
                 val = value;
               }
             }
+            debug(`//-> QUERY: ${val}`);
             val = val.replace('+', ' ');
-            debug(`//-> QUERY:${val}`);
           }
           return encodeURIComponent(val);
         }
@@ -725,11 +731,13 @@
         }
 
         function insterAfter(newElement, targetElement) {
-          const parent = targetElement.parentNode;
-          if (parent.lastChild === targetElement) {
-            parent.appendChild(newElement);
-          } else {
-            parent.insertBefore(newElement, targetElement.nextSibling);
+          if (targetElement !== null) {
+            const parent = targetElement.parentNode;
+            if (parent.lastChild === targetElement) {
+              parent.appendChild(newElement);
+            } else {
+              parent.insertBefore(newElement, targetElement.nextSibling);
+            }
           }
         }
 
