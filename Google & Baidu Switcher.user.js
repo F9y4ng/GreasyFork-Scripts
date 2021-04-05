@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.3.20210404.9
+// @version         2.3.20210405.1
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it. again. Thank you!
@@ -540,14 +540,14 @@
                   switch (per.id) {
                     case 'ggyx':
                       if (/^(baiduimage|images)$/.test(vim.trim())) {
-                        gotoUrl = 'https://www.google.com/search?newwindow=1&hl=zh-CN&source=hp&tbm=isch&q=';
+                        gotoUrl = 'https://www.google.com/search?hl=zh-CN&source=lnms&tbm=isch&sa=X&q=';
                       } else {
-                        gotoUrl = 'https://www.google.com/search?newwindow=1&hl=zh-CN&source=hp&q=';
+                        gotoUrl = 'https://www.google.com/search?hl=zh-CN&source=hp&newwindow=1&q=';
                       }
                       break;
                     case 'bbyx':
                       if (/^(isch|baiduimage)$/.test(vim.trim())) {
-                        gotoUrl = 'https://cn.bing.com/images/search?q=';
+                        gotoUrl = 'https://cn.bing.com/images/search?first=1&tsc=ImageBasicHover&q=';
                       } else {
                         gotoUrl = 'https://cn.bing.com/search?q=';
                       }
@@ -695,8 +695,8 @@
                 val = value;
               }
             }
+            val = val.replace(/\+/g, ' ');
             debug(`//-> QUERY: ${val}`);
-            val = val.replace('+', ' ');
           }
           return encodeURIComponent(val);
         }
