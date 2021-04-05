@@ -11,7 +11,6 @@
 // @namespace       https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/Google_baidu_Switcher_(ALL_in_One)
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @icon            https://www.google.com/favicon.ico
-// @include         *://encrypted.google.*/search*
 // @include         *://*.google.*/search*
 // @include         *://*.google.*/webhp*
 // @include         *://www.baidu.com/*
