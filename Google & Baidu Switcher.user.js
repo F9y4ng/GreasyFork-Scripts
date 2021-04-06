@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.3.20210405.1
+// @version         2.3.20210406.2
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it. again. Thank you!
@@ -437,6 +437,7 @@
       doSwitch: function () {
         try {
           const idName = `#for_${curretSite.SiteName}`;
+          const className = `.InsertTo${curretSite.SiteName}`;
           if (curretSite.SiteTypeID !== newSiteType.OTHERS) {
             if (CONST.isSecurityPolicy) {
               console.log(
@@ -451,7 +452,7 @@
             } else {
               const callback = mutations => {
                 mutations.forEach(mutation => {
-                  if (document.querySelector(`.InsertTo${curretSite.SiteName}`) && document.querySelector(idName)) {
+                  if (document.querySelector(className) && document.querySelector(idName)) {
                     debug(`//-> Already Insert Button & CSS.`);
                   } else {
                     debug(
@@ -472,7 +473,7 @@
               new MutationObserver(callback).observe(document, opts);
               RAFInterval(
                 () => {
-                  if (document.querySelector(idName) === null) {
+                  if (!document.querySelector(idName) || !document.querySelector(className)) {
                     return insertSearchButton() && scrollDetect();
                   }
                 },
@@ -508,7 +509,7 @@
 
             addStyle(doStyle, doStyName, 'head');
 
-            if (document.querySelector(SpanID) === null && getSearchValue().length > 0 && Target !== null) {
+            if (!document.querySelector(SpanID) && getSearchValue().length > 0 && Target) {
               if (/^(nws|vid|bks)$/.test(vim.trim())) {
                 Target = Target.parentNode.parentNode.firstChild;
                 Target.insertBefore(userSpan, Target.firstChild);
@@ -638,10 +639,10 @@
               }
               isReload = isReload || false;
               initType = initType || 'text/css';
-              if (typeof addToTarget === 'undefined' || (typeof addToTarget !== 'undefined' && document.querySelector(addToTarget) !== null)) {
+              if (typeof addToTarget === 'undefined' || (typeof addToTarget !== 'undefined' && document.querySelector(addToTarget))) {
                 if (isReload === true) {
                   safeRemove(`.${className}`);
-                } else if (isReload === false && document.querySelector(`.${className}`) !== null) {
+                } else if (isReload === false && document.querySelector(`.${className}`)) {
                   return true;
                 }
                 const cssNode = document.createElement('style');
@@ -682,9 +683,11 @@
 
         function getSearchValue() {
           let val = '';
-          document.querySelectorAll('input[name="wd"], input[name="q"]').forEach(things => {
-            val = things.getAttribute('value');
-            debug(`//-> INPUT: ${val}`);
+          document.querySelectorAll('input[name="wd"], input[name="q"], input[name="word"]').forEach(things => {
+            val = things.value; // DHTML InsteadOf getAttribute
+            if (val) {
+              debug(`//-> INPUT: ${val}`);
+            }
           });
           if (val === null || val === '' || typeof val === 'undefined') {
             const kvl = location.search.substr(1).split('&');
@@ -695,7 +698,9 @@
               }
             }
             val = val.replace(/\+/g, ' ');
-            debug(`//-> QUERY: ${val}`);
+            if (val) {
+              debug(`//-> QUERY: ${val}`);
+            }
           }
           return encodeURIComponent(val);
         }
