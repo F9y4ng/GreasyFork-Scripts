@@ -72,7 +72,16 @@
 
   const defaultConfig = {
     Version: GMinfo.script.version,
-    lastRuntime: new Date().toLocaleString('chinese', { hour12: false }),
+    lastRuntime: new Date().toLocaleString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZoneName: 'short',
+      hour12: false,
+    }),
   };
 
   console.info(
