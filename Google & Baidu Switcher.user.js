@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.3.20210424.1
+// @version         2.3.20210424.2
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it. again. Thank you!
@@ -50,7 +50,16 @@
   const handlerInfo = GMinfo.scriptHandler;
   const isGM = Boolean(handlerInfo.toLowerCase() === 'greasemonkey');
 
-  debug(`//-> CheckGM: ${isGM} >> ${handlerInfo}`);
+  function titleCase(str) {
+    return str
+      .toString()
+      .toLowerCase()
+      .replace(/( |^)[a-z]/g, L => {
+        return L.toUpperCase();
+      });
+  }
+
+  debug(`//-> CheckGM: ${titleCase(isGM)} >> ${handlerInfo}`);
 
   if (isGM) {
     GMsetValue = GM.setValue;
@@ -388,7 +397,7 @@
           'font-weight:bold;color:darkorange',
           'color:0',
           'font-weight:bold;color:red',
-          _Use_Bing_.toString().toUpperCase(),
+          titleCase(_Use_Bing_),
           'font-weight:normal;color:0'
         );
         debug(`//-> CONST.isUseBing: ${_Use_Bing_}`);
@@ -466,7 +475,7 @@
                       mutation.type,
                       'color:0',
                       'font-weight:bold;color:red',
-                      (insertSearchButton() && scrollDetect()).toString().toUpperCase(),
+                      titleCase(insertSearchButton() && scrollDetect()),
                       'color:0'
                     );
                   }
