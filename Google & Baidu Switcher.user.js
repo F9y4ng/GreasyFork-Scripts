@@ -3,10 +3,10 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.3.20210424.2
+// @version         2.3.20210517.1
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
-// @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it. again. Thank you!
+// @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it again. Thank you!
 // @description:zh-TW  最新版本的集合谷歌、百度、必應的搜索引擎跳轉工具，必應跳轉可在菜單進行自定義設置。此版本無外部腳本調用，更快速和準確的進行按鈕定位，顯示速度大大提升。如有異常請清空瀏覽器緩存，再次載入使用，感謝使用！
 // @namespace       https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/Google_baidu_Switcher_(ALL_in_One)
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
@@ -43,21 +43,22 @@
   const isdebug = false;
   const debug = isdebug ? console.log.bind(console) : () => {};
 
+  function titleCase(str, bool) {
+    const RegExp = bool ? /( |^)[a-z]/g : /(^)[a-z]/g;
+    return str
+      .toString()
+      .toLowerCase()
+      .replace(RegExp, L => {
+        return L.toUpperCase();
+      });
+  }
+
   /* Perfectly Compatible For Greasemonkey4.0+, TamperMonkey, ViolentMonkey * F9y4ng * 20210209 */
 
   let GMsetValue, GMgetValue, GMregisterMenuCommand, GMunregisterMenuCommand, GMnotification, GMopenInTab;
   const GMinfo = GM_info;
   const handlerInfo = GMinfo.scriptHandler;
   const isGM = Boolean(handlerInfo.toLowerCase() === 'greasemonkey');
-
-  function titleCase(str) {
-    return str
-      .toString()
-      .toLowerCase()
-      .replace(/( |^)[a-z]/g, L => {
-        return L.toUpperCase();
-      });
-  }
 
   debug(`//-> CheckGM: ${titleCase(isGM)} >> ${handlerInfo}`);
 
@@ -468,7 +469,7 @@
                     debug(`//-> Already Insert Button & CSS.`);
                   } else {
                     debug(
-                      `%c[GB-MutationObserver]\n%c(%c%s%c has changed: %c%s%c).`,
+                      '%c[GB-MutationObserver]\n%c(%c%s%c has changed: %c%s%c).',
                       'font-weight:bold;color:olive',
                       'color:0',
                       'color:olive',
@@ -695,10 +696,10 @@
 
         function getSearchValue() {
           let val = '';
-          document.querySelectorAll('input[name="wd"], input[name="q"], input[name="word"]').forEach(things => {
-            val = things.value; // DHTML InsteadOf getAttribute
+          document.querySelectorAll('input[name="wd"], input[name="q"], input[name="word"]').forEach((item, index, arr) => {
+            val = arr[0].value;
             if (val) {
-              debug(`//-> INPUT: ${val}`);
+              debug(`//-> INPUT: ${val} - INDEX: ${index} - OLD: ${item.value}`);
             }
           });
           if (val === null || val === '' || typeof val === 'undefined') {
