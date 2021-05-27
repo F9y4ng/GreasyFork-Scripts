@@ -87,7 +87,7 @@
     isNoticed: false,
     isNeedUpdate: false,
     isAutoUpdate: GMinfo.scriptWillUpdate ? GMinfo.scriptWillUpdate : true, // TODO :-)
-    lastestScriptUrl: 'https://greasyfork.org/scripts/12909/code/12909',
+    lastestScriptUrl: 'https://greasyfork.org/scripts/12909/code/',
     lastestVersion: '',
     lastRuntime: new Date().toLocaleString('en-US', {
       timeZoneName: 'short',
