@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.3.20210517.1
+// @version         2.4.20210527.12
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it again. Thank you!
@@ -40,6 +40,7 @@
 
 !(function () {
   'use strict';
+  const isVersionDetection = true; // Version Detection is ON by default.
   const isdebug = false;
   const debug = isdebug ? console.log.bind(console) : () => {};
 
@@ -81,7 +82,13 @@
   }
 
   const defaultConfig = {
-    Version: GMinfo.script.version,
+    name: GMinfo.script.name,
+    curVersion: GMinfo.script.version,
+    isNoticed: false,
+    isNeedUpdate: false,
+    isAutoUpdate: GMinfo.scriptWillUpdate ? GMinfo.scriptWillUpdate : true, // TODO :-)
+    lastestScriptUrl: 'https://greasyfork.org/scripts/12909/code/12909',
+    lastestVersion: '',
     lastRuntime: new Date().toLocaleString('en-US', {
       timeZoneName: 'short',
       hour12: false,
@@ -89,10 +96,134 @@
   };
 
   console.info(
-    `%c[GB-Init]%c\nVersion: ${defaultConfig.Version}\nlastRuntime: ${defaultConfig.lastRuntime}`,
+    `%c[GB-Init]%c\nVersion: ${defaultConfig.curVersion}\nlastRuntime: ${defaultConfig.lastRuntime} %c[%s]`,
     'font-weight:bold;color:dodgerblue',
-    'color:0'
+    'color:0',
+    'color:snow',
+    (() => {
+      try {
+        Update_checkVersion();
+        return true;
+      } catch (e) {
+        return e.name;
+      }
+    })()
   );
+
+  function checkUpdate_GreasyFork() {
+    return new Promise((e, t) => {
+      fetch(`${defaultConfig.lastestScriptUrl}.meta.js`, {
+        method: 'GET',
+        mode: 'cors',
+        cache: 'no-store',
+        credentials: 'omit',
+      })
+        .then(e => {
+          return e.text();
+        })
+        .then(t => {
+          let n = defaultConfig.curVersion;
+          t.split(/[\r\n]+/).forEach(function (item) {
+            let key = item.match(/^(\/\/\s+@version\s+)(\S+)$/);
+            if (key) {
+              n = key[2];
+            }
+          });
+          if (n !== undefined) {
+            const fetchWord = parseInt(n.replace(/\./g, ''));
+            const defaultWord = parseInt(defaultConfig.curVersion.replace(/\./g, ''));
+            if (fetchWord > defaultWord) {
+              e([2, n]);
+            } else if (fetchWord < defaultWord) {
+              e([1, n]);
+            } else {
+              e([0, n]);
+            }
+          }
+        })
+        .catch(e => {
+          debug('//-> Request Failure', e);
+          t(isVersionDetection);
+        });
+    });
+  }
+
+  async function Update_checkVersion(s = isVersionDetection) {
+    let t = [];
+    t = await checkUpdate_GreasyFork().catch(() => {
+      t = [0, defaultConfig.curVersion];
+    });
+    defaultConfig.isNeedUpdate = t[0];
+    defaultConfig.lastestVersion = t[1];
+
+    debug(`//-> Script Auto Update: ${defaultConfig.isAutoUpdate}`);
+
+    if (s && defaultConfig.isAutoUpdate) {
+      switch (defaultConfig.isNeedUpdate) {
+        case 2:
+          console.info(
+            `%c[GB-Update]%c\nWe found a new version: %c${defaultConfig.lastestVersion}%c.\nPlease upgrade from your update source to the latest version.`,
+            'font-weight:bold;color:crimson',
+            'color:0',
+            'color:crimson',
+            'color:0'
+          );
+          if (!defaultConfig.isNoticed) {
+            GMnotification({
+              title: `${defaultConfig.name} `,
+              text: `\u53d1\u73b0\u6700\u65b0\u7248\u672c\uff1a${defaultConfig.lastestVersion}\uff0c\u70b9\u51fb\u8fd9\u91cc\u8fdb\u884c\u76f4\u94fe\u66f4\u65b0\u3002\u005b\u0047\u0072\u0065\u0061\u0073\u0079\u0046\u006f\u0072\u006b\u6e90\u005d`,
+              timeout: 5000,
+              highlight: true,
+              ondone: () => {
+                defaultConfig.isNoticed = true;
+              },
+              onclick: () => {
+                let w = window.open(`${defaultConfig.lastestScriptUrl}.user.js`, 'GreasyFork.Scripts.Update.' + new Date().getTime(), '', false);
+                setTimeout(() => {
+                  w.close();
+                }, 500);
+              },
+            });
+          }
+          break;
+        case 1:
+          console.warn(
+            `%c[GB-Update]%c\nWe found a new version, but the latest version (%c${defaultConfig.lastestVersion}%c) is lower than your local script version (%c${defaultConfig.curVersion}%c).\n\nPlease confirm whether you need to upgrade your local script, and then you need to update it manually.\n\nIf you no longer need the update prompt, please set "isVersionDetection" to "false" in your local code!`,
+            'font-weight:bold;color:crimson',
+            'color:0',
+            'font-weight:bold;color:tomato',
+            'color:0',
+            'font-weight:bold;color:darkred',
+            'color:0'
+          );
+          if (!defaultConfig.isNoticed) {
+            GMnotification({
+              title: `${defaultConfig.name}`,
+              text: `\u53d1\u73b0\u5f02\u5e38\u7248\u672c\uff1a${defaultConfig.lastestVersion}\uff0c\u56e0\u6700\u65b0\u7248\u672c\u4f4e\u4e8e\u60a8\u7684\u672c\u5730\u7248\u672c(${defaultConfig.curVersion})\uff0c\u8bf7\u70b9\u51fb\u8fd9\u91cc\u786e\u8ba4\u662f\u5426\u9700\u8981\u5347\u7ea7\uff1f\u3010\u624b\u52a8\u5347\u7ea7\u6a21\u5f0f\u3011`,
+              timeout: 5000,
+              highlight: true,
+              ondone: () => {
+                defaultConfig.isNoticed = true;
+              },
+              onclick: () => {
+                window.open(`${defaultConfig.lastestScriptUrl.substr(0, 36)}`, 'GreasyFork.Scripts.Update.Manual', '', true);
+              },
+            });
+          }
+          break;
+        default:
+          debug(
+            `%c[GB-Update]%c\nCurretVersion: %cV${defaultConfig.curVersion}%c is up to date!`,
+            'font-weight:bold;color:darkcyan',
+            'color:0',
+            'color:red',
+            'color:0'
+          );
+          break;
+      }
+    }
+    return s;
+  }
 
   !(async function () {
     const temp = parseInt(await GMgetValue('_if_Use_Bing_'));
@@ -418,7 +549,7 @@
             inUse_switch(_Use_Bing_, '_if_Use_Bing_', 'Bing\u6309\u94ae');
           });
           in_Use_feedBack_ID = GMregisterMenuCommand('\u4f7f\u7528\u53cd\u9988', () => {
-            GMopenInTab('https://greasyfork.org/zh-CN/scripts/12909-google-baidu-switcher-all-in-one/feedback', {
+            GMopenInTab('https://greasyfork.org/zh-CN/scripts/12909/feedback', {
               active: true,
               insert: true,
               setParent: true,
