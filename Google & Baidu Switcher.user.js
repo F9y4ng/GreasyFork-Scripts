@@ -169,7 +169,7 @@
             GMnotification({
               title: `${defaultConfig.name} `,
               text: `\u53d1\u73b0\u6700\u65b0\u7248\u672c\uff1a${defaultConfig.lastestVersion}\uff0c\u70b9\u51fb\u8fd9\u91cc\u8fdb\u884c\u76f4\u94fe\u66f4\u65b0\u3002\u005b\u0047\u0072\u0065\u0061\u0073\u0079\u0046\u006f\u0072\u006b\u6e90\u005d`,
-              timeout: 5000,
+              timeout: 20e3,
               highlight: true,
               onclick: () => {
                 let w = window.open(
@@ -201,7 +201,7 @@
             GMnotification({
               title: `${defaultConfig.name}`,
               text: `\u53d1\u73b0\u5f02\u5e38\u7248\u672c\uff1a${defaultConfig.lastestVersion}\uff0c\u56e0\u6700\u65b0\u7248\u672c\u4f4e\u4e8e\u60a8\u7684\u672c\u5730\u7248\u672c(${defaultConfig.curVersion})\uff0c\u8bf7\u70b9\u51fb\u8fd9\u91cc\u786e\u8ba4\u662f\u5426\u9700\u8981\u5347\u7ea7\uff1f\u3010\u624b\u52a8\u5347\u7ea7\u6a21\u5f0f\u3011`,
-              timeout: 5000,
+              timeout: 25e3,
               highlight: true,
               onclick: () => {
                 window.open(`${defaultConfig.lastestScriptUrl.substr(0, 36)}`, 'GreasyFork.Scripts.Update.Manual', '', true);
