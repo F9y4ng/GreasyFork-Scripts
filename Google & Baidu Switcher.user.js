@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.4.20210527.14
+// @version         2.4.20210527.15
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it again. Thank you!
@@ -84,7 +84,7 @@
   const defaultConfig = {
     name: GMinfo.script.name,
     curVersion: GMinfo.script.version,
-    isNoticed: false,
+    isNoticed: sessionStorage.getItem('nkey') || 0,
     isNeedUpdate: false,
     isAutoUpdate: GMinfo.scriptWillUpdate ? GMinfo.scriptWillUpdate : true, // TODO :-)
     lastestScriptUrl: 'https://greasyfork.org/scripts/12909/code/',
@@ -129,7 +129,7 @@
               n = key[2];
             }
           });
-          if (n !== undefined) {
+          if (n !== undefined && n !== null) {
             const fetchWord = parseInt(n.replace(/\./g, ''));
             const defaultWord = parseInt(defaultConfig.curVersion.replace(/\./g, ''));
             if (fetchWord > defaultWord) {
@@ -143,22 +143,19 @@
         })
         .catch(e => {
           debug('//-> Request Failure', e);
-          t(isVersionDetection);
+          return t;
         });
     });
   }
 
   async function Update_checkVersion(s = isVersionDetection) {
     let t = [];
-    t = await checkUpdate_GreasyFork().catch(() => {
-      t = [0, defaultConfig.curVersion];
-    });
-    defaultConfig.isNeedUpdate = t[0];
-    defaultConfig.lastestVersion = t[1];
-
-    debug(`//-> Script Auto Update: ${defaultConfig.isAutoUpdate}`);
-
     if (s && defaultConfig.isAutoUpdate) {
+      t = await checkUpdate_GreasyFork().catch(() => {
+        t = [0, defaultConfig.curVersion];
+      });
+      defaultConfig.isNeedUpdate = t[0];
+      defaultConfig.lastestVersion = t[1];
       switch (defaultConfig.isNeedUpdate) {
         case 2:
           console.info(
@@ -174,9 +171,6 @@
               text: `\u53d1\u73b0\u6700\u65b0\u7248\u672c\uff1a${defaultConfig.lastestVersion}\uff0c\u70b9\u51fb\u8fd9\u91cc\u8fdb\u884c\u76f4\u94fe\u66f4\u65b0\u3002\u005b\u0047\u0072\u0065\u0061\u0073\u0079\u0046\u006f\u0072\u006b\u6e90\u005d`,
               timeout: 5000,
               highlight: true,
-              ondone: () => {
-                defaultConfig.isNoticed = true;
-              },
               onclick: () => {
                 let w = window.open(
                   `${defaultConfig.lastestScriptUrl + new Date().getTime()}.user.js`,
@@ -186,9 +180,11 @@
                 );
                 setTimeout(() => {
                   w.close();
+                  sessionStorage.clear();
                 }, 500);
               },
             });
+            sessionStorage.setItem('nkey', 2);
           }
           break;
         case 1:
@@ -207,13 +203,12 @@
               text: `\u53d1\u73b0\u5f02\u5e38\u7248\u672c\uff1a${defaultConfig.lastestVersion}\uff0c\u56e0\u6700\u65b0\u7248\u672c\u4f4e\u4e8e\u60a8\u7684\u672c\u5730\u7248\u672c(${defaultConfig.curVersion})\uff0c\u8bf7\u70b9\u51fb\u8fd9\u91cc\u786e\u8ba4\u662f\u5426\u9700\u8981\u5347\u7ea7\uff1f\u3010\u624b\u52a8\u5347\u7ea7\u6a21\u5f0f\u3011`,
               timeout: 5000,
               highlight: true,
-              ondone: () => {
-                defaultConfig.isNoticed = true;
-              },
               onclick: () => {
                 window.open(`${defaultConfig.lastestScriptUrl.substr(0, 36)}`, 'GreasyFork.Scripts.Update.Manual', '', true);
+                sessionStorage.clear();
               },
             });
+            sessionStorage.setItem('nkey', 1);
           }
           break;
         default:
