@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name            Google & baidu Switcher (ALL in One)
-// @version         2.4.20210527.15
-// @author          F9y4ng
-// @license         GPL-3.0-only
-// @copyright       2015-2021, F9y4ng
+// @version    2.4.20210527.15
+// @name    Google & baidu Switcher (ALL in One)
+// @name:en    Google & baidu & Bing Switcher (ALL in One)
+// @name:zh-TW    谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
+// @namespace    https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/Google_baidu_Switcher_(ALL_in_One)
 // ==/UserScript==
