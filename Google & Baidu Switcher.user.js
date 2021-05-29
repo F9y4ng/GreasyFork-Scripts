@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.4.20210527.15
+// @version         2.4.20210529.5
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it again. Thank you!
@@ -39,8 +39,8 @@
 // ==/UserScript==
 
 !(function () {
-  'use strict';
-  const isVersionDetection = true; // Version Detection is ON by default.
+  ('use strict');
+  const isVersionDetection = true; // Set "false" to turn off the Version Detection.
   const isdebug = false;
   const debug = isdebug ? console.log.bind(console) : () => {};
 
@@ -70,7 +70,7 @@
     GMunregisterMenuCommand = () => {};
     GMnotification = GM.notification;
     GMopenInTab = (a, b) => {
-      window.open(a, Math.random().toString(36).slice(-6), '', b instanceof String);
+      window.open(a, Math.random().toString(b.length).slice(-6), '');
     };
   } else {
     GMsetValue = GM_setValue;
@@ -81,14 +81,13 @@
     GMopenInTab = GM_openInTab;
   }
 
-  const defaultConfig = {
-    name: GMinfo.script.name,
+  const defCon = {
+    scriptName: GMinfo.script.name,
     curVersion: GMinfo.script.version,
     isNoticed: sessionStorage.getItem('nkey') || 0,
-    isNeedUpdate: false,
+    isNeedUpdate: 0,
+    fetchResult: true,
     isAutoUpdate: GMinfo.scriptWillUpdate ? GMinfo.scriptWillUpdate : true, // TODO :-)
-    lastestScriptUrl: 'https://greasyfork.org/scripts/12909/code/',
-    lastestVersion: '',
     lastRuntime: new Date().toLocaleString('en-US', {
       timeZoneName: 'short',
       hour12: false,
@@ -96,133 +95,175 @@
   };
 
   console.info(
-    `%c[GB-Init]%c\nVersion: ${defaultConfig.curVersion}\nlastRuntime: ${defaultConfig.lastRuntime} %c[%s]`,
+    `%c[GB-Init]%c\nVersion: ${defCon.curVersion} %c[%s]%c\nlastRuntime: ${defCon.lastRuntime}`,
     'font-weight:bold;color:dodgerblue',
     'color:0',
     'color:snow',
-    (() => {
-      try {
-        Update_checkVersion();
-        return true;
-      } catch (e) {
-        return e.name;
-      }
-    })()
+    Update_checkVersion() instanceof Object,
+    'color:0'
   );
 
-  function checkUpdate_GreasyFork() {
+  function fetchVersion(u) {
     return new Promise((e, t) => {
-      fetch(`${defaultConfig.lastestScriptUrl + new Date().getTime()}.meta.js`, {
+      fetch(u, {
         method: 'GET',
         mode: 'cors',
         cache: 'no-store',
         credentials: 'omit',
       })
         .then(e => {
+          if (!e.ok) {
+            throw Error(e.statusText);
+          }
           return e.text();
         })
         .then(t => {
-          let n = defaultConfig.curVersion;
+          let n = defCon.curVersion;
           t.split(/[\r\n]+/).forEach(function (item) {
             let key = item.match(/^(\/\/\s+@version\s+)(\S+)$/);
             if (key) {
               n = key[2];
             }
           });
-          if (n !== undefined && n !== null) {
-            const fetchWord = parseInt(n.replace(/\./g, ''));
-            const defaultWord = parseInt(defaultConfig.curVersion.replace(/\./g, ''));
+          if (n !== undefined) {
+            const fetchWord = isNaNAndAssign(parseFloat(n.substr(0, 6).replace(/\./g, '') + n.substr(6)));
+            const defaultWord = isNaNAndAssign(parseFloat(defCon.curVersion.substr(0, 6).replace(/\./g, '') + defCon.curVersion.substr(6)));
             if (fetchWord > defaultWord) {
-              e([2, n]);
+              e([2, n, u]);
             } else if (fetchWord < defaultWord) {
-              e([1, n]);
+              e([1, n, u]);
             } else {
-              e([0, n]);
+              e([0, n, u]);
             }
           }
         })
         .catch(e => {
-          debug('//-> Request Failure', e);
-          return t;
+          debug('%c[GB-Update]%c\nRequest Failure: %c(%s)', 'font-weight:bold;color:red', 'color:0', 'font-weight:bold;color:darkred', e);
+          t();
         });
     });
   }
 
+  function isNaNAndAssign(n) {
+    return isNaN(n) ? 9e12 : n;
+  }
+
   async function Update_checkVersion(s = isVersionDetection) {
     let t = [];
-    if (s && defaultConfig.isAutoUpdate) {
-      t = await checkUpdate_GreasyFork().catch(() => {
-        t = [0, defaultConfig.curVersion];
+    if (s && defCon.isAutoUpdate) {
+      t = await fetchVersion(
+        String(
+          `https://greasyfork.org/scripts/12909-google-baidu-switcher-all-in-one/code/` +
+            `Google%20%20baidu%20Switcher%20(ALL%20in%20One).meta.js?${new Date().getTime()}`
+        )
+      ).catch(async () => {
+        defCon.fetchResult = false;
       });
-      defaultConfig.isNeedUpdate = t[0];
-      defaultConfig.lastestVersion = t[1];
-      switch (defaultConfig.isNeedUpdate) {
-        case 2:
-          console.info(
-            `%c[GB-Update]%c\nWe found a new version: %c${defaultConfig.lastestVersion}%c.\nPlease upgrade from your update source to the latest version.`,
-            'font-weight:bold;color:crimson',
-            'color:0',
-            'color:crimson',
-            'color:0'
-          );
-          if (!defaultConfig.isNoticed) {
-            GMnotification({
-              title: `${defaultConfig.name} `,
-              text: `\u53d1\u73b0\u6700\u65b0\u7248\u672c\uff1a${defaultConfig.lastestVersion}\uff0c\u70b9\u51fb\u8fd9\u91cc\u8fdb\u884c\u76f4\u94fe\u66f4\u65b0\u3002\u005b\u0047\u0072\u0065\u0061\u0073\u0079\u0046\u006f\u0072\u006b\u6e90\u005d`,
-              timeout: 20e3,
-              highlight: true,
-              onclick: () => {
-                let w = window.open(
-                  `${defaultConfig.lastestScriptUrl + new Date().getTime()}.user.js`,
-                  'GreasyFork.Scripts.Update.' + Math.random(),
-                  '',
-                  false
-                );
-                setTimeout(() => {
-                  w.close();
+      if (!defCon.fetchResult) {
+        t = await fetchVersion(
+          `https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js?${new Date().getTime()}`
+        ).catch(async () => {
+          t = [0, defCon.curVersion, ''];
+        });
+      }
+      if (typeof t !== 'undefined') {
+        defCon.isNeedUpdate = t[0];
+        const lastestVersion = t[1];
+        const updateUrl = t[2].replace('meta', 'user');
+        const recheckURLs = updateUrl
+          .replace('raw.githubusercontent', 'github')
+          .replace('master', 'blob/master')
+          .replace(/code\/[^/]+\.js/, '');
+        switch (defCon.isNeedUpdate) {
+          case 2:
+            console.info(
+              String(
+                `%c[GB-Update]%c\nWe found a new version: %c${lastestVersion}%c.\n` +
+                  `Please upgrade from your update source to the latest version.\n` +
+                  `[${recheckURLs.split('/')[2]}]`
+              ),
+              'font-weight:bold;color:crimson',
+              'color:0',
+              'color:crimson',
+              'color:0'
+            );
+            if (!defCon.isNoticed) {
+              GMnotification({
+                title: `${defCon.scriptName}`,
+                text: String(
+                  `\u53d1\u73b0\u6700\u65b0\u7248\u672c\uff1a${lastestVersion}` +
+                    `\uff0c\u70b9\u51fb\u8fd9\u91cc\u8fdb\u884c\u76f4\u94fe\u66f4\u65b0` +
+                    `\u3002\u005b\u0047\u0072\u0065\u0061\u0073\u0079\u0046\u006f\u0072` +
+                    `\u006b\u6e90\u005d`
+                ),
+                timeout: 20e3,
+                highlight: true,
+                onclick: () => {
+                  let w = window.open(`${updateUrl}`, `Update.Auto.${Math.random()}`, '');
+                  setTimeout(() => {
+                    w ? w.close() : () => {};
+                    sessionStorage.clear();
+                  }, 850);
+                },
+              });
+              sessionStorage.setItem('nkey', 2);
+            }
+            break;
+          case 1:
+            console.warn(
+              String(
+                `%c[GB-Update]%c\nWe found a new version, But %cthe latest version ` +
+                  `(%c${lastestVersion}%c) is lower than your local version (%c${defCon.curVersion}%c).\n\n` +
+                  `Please confirm whether you need to upgrade your local script, and then you need to update it manually.\n\n` +
+                  `If you no longer need the update prompt, please set "isVersionDetection" to "false" in your local code!\n\n` +
+                  `[${recheckURLs.split('/')[2]}]`
+              ),
+              'font-weight:bold;color:crimson',
+              'font-weight:bold;color:0',
+              'color:0',
+              'font-weight:900;color:tomato',
+              'color:0',
+              'font-weight:900;color:darkred',
+              'color:0'
+            );
+            if (!defCon.isNoticed) {
+              GMnotification({
+                title: `${defCon.scriptName}`,
+                text: String(
+                  `\u53d1\u73b0\u5f02\u5e38\u7248\u672c\uff1a${lastestVersion}` +
+                    `\uff0c\u56e0\u6700\u65b0\u7248\u672c\u4f4e\u4e8e\u60a8\u7684\u672c` +
+                    `\u5730\u7248\u672c(${defCon.curVersion})\uff0c\u8bf7\u70b9\u51fb\u8fd9` +
+                    `\u91cc\u786e\u8ba4\u662f\u5426\u9700\u8981\u5347\u7ea7\uff1f\u3010` +
+                    `\u624b\u52a8\u5347\u7ea7\u6a21\u5f0f\u3011`
+                ),
+                timeout: 25e3,
+                highlight: true,
+                onclick: () => {
+                  window.open(`${recheckURLs}`, `Update.Manual.${Math.random()}`, '');
                   sessionStorage.clear();
-                }, 500);
-              },
-            });
-            sessionStorage.setItem('nkey', 2);
-          }
-          break;
-        case 1:
-          console.warn(
-            `%c[GB-Update]%c\nWe found a new version, but the latest version (%c${defaultConfig.lastestVersion}%c) is lower than your local script version (%c${defaultConfig.curVersion}%c).\n\nPlease confirm whether you need to upgrade your local script, and then you need to update it manually.\n\nIf you no longer need the update prompt, please set "isVersionDetection" to "false" in your local code!`,
-            'font-weight:bold;color:crimson',
-            'color:0',
-            'font-weight:bold;color:tomato',
-            'color:0',
-            'font-weight:bold;color:darkred',
-            'color:0'
-          );
-          if (!defaultConfig.isNoticed) {
-            GMnotification({
-              title: `${defaultConfig.name}`,
-              text: `\u53d1\u73b0\u5f02\u5e38\u7248\u672c\uff1a${defaultConfig.lastestVersion}\uff0c\u56e0\u6700\u65b0\u7248\u672c\u4f4e\u4e8e\u60a8\u7684\u672c\u5730\u7248\u672c(${defaultConfig.curVersion})\uff0c\u8bf7\u70b9\u51fb\u8fd9\u91cc\u786e\u8ba4\u662f\u5426\u9700\u8981\u5347\u7ea7\uff1f\u3010\u624b\u52a8\u5347\u7ea7\u6a21\u5f0f\u3011`,
-              timeout: 25e3,
-              highlight: true,
-              onclick: () => {
-                window.open(`${defaultConfig.lastestScriptUrl.substr(0, 36)}`, 'GreasyFork.Scripts.Update.Manual', '', true);
-                sessionStorage.clear();
-              },
-            });
-            sessionStorage.setItem('nkey', 1);
-          }
-          break;
-        default:
-          debug(
-            `%c[GB-Update]%c\nCurretVersion: %cV${defaultConfig.curVersion}%c is up to date!`,
-            'font-weight:bold;color:darkcyan',
-            'color:0',
-            'color:red',
-            'color:0'
-          );
-          break;
+                },
+              });
+              sessionStorage.setItem('nkey', 1);
+            }
+            break;
+          default:
+            debug(
+              `%c[GB-Update]%c\nCurretVersion: %cV${defCon.curVersion}%c is up to date!`,
+              'font-weight:bold;color:darkcyan',
+              'color:0',
+              'color:red',
+              'color:0'
+            );
+            break;
+        }
+      } else {
+        console.error(
+          '%c[GB-Update]\n%cSome Unexpected Errors Caused Version Detection Failure.\nProbably Caused By NetworkError.',
+          'font-weight:bold;color:red',
+          'font-weight:bold;color:darkred'
+        );
       }
     }
-    return s;
   }
 
   !(async function () {
