@@ -220,9 +220,9 @@
                 onclick: () => {
                   let w;
                   if (isGM) {
-                    window.open(`${recheckURLs}`, `Update.Manual.${Math.random()}`, '');
+                    window.open(`${recheckURLs}`, `Update.Manual`, '');
                   } else {
-                    w = window.open(`${updateUrl}`, `Update.Auto.${Math.random()}`, '');
+                    w = window.open(`${updateUrl}`, `Update.Auto`, '');
                   }
                   setTimeout(() => {
                     w ? w.close() : () => {};
@@ -263,7 +263,7 @@
                 timeout: 25e3,
                 highlight: true,
                 onclick: () => {
-                  window.open(`${recheckURLs}`, `Update.Manual.${Math.random()}`, '');
+                  window.open(`${recheckURLs}`, `Update.Manual`, '');
                   sessionStorage.clear();
                 },
               });
