@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.4.20210529.6
+// @version         2.4.20210529.7
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it again. Thank you!
@@ -213,8 +213,7 @@
                 text: String(
                   `\u53d1\u73b0\u6700\u65b0\u7248\u672c\uff1a${lastestVersion}` +
                     `\uff0c\u70b9\u51fb\u8fd9\u91cc\u8fdb\u884c\u76f4\u94fe\u66f4\u65b0` +
-                    `\u3002\u005b\u0047\u0072\u0065\u0061\u0073\u0079\u0046\u006f\u0072` +
-                    `\u006b\u6e90\u005d`
+                    `\u3002\n\u005b${recheckURLs.split('/')[2]}\u6e90\u005d`
                 ),
                 timeout: 20e3,
                 highlight: true,
@@ -223,7 +222,7 @@
                   setTimeout(() => {
                     w ? w.close() : () => {};
                     sessionStorage.clear();
-                  }, 850);
+                  }, 1000);
                 },
               });
               sessionStorage.setItem('nkey', 2);
@@ -253,8 +252,8 @@
                   `\u53d1\u73b0\u5f02\u5e38\u7248\u672c\uff1a${lastestVersion}` +
                     `\uff0c\u56e0\u6700\u65b0\u7248\u672c\u4f4e\u4e8e\u60a8\u7684\u672c` +
                     `\u5730\u7248\u672c(${defCon.curVersion})\uff0c\u8bf7\u70b9\u51fb\u8fd9` +
-                    `\u91cc\u786e\u8ba4\u662f\u5426\u9700\u8981\u5347\u7ea7\uff1f\u3010` +
-                    `\u624b\u52a8\u5347\u7ea7\u6a21\u5f0f\u3011`
+                    `\u91cc\u786e\u8ba4\u662f\u5426\u9700\u8981\u5347\u7ea7\uff1f` +
+                    `\u005b${recheckURLs.split('/')[2]}\u6e90\u005d`
                 ),
                 timeout: 25e3,
                 highlight: true,
