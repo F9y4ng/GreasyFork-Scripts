@@ -11,17 +11,14 @@
   @ 默认值的重新设定。
   ```
 
-- ## **Google & Baidu Switcher.user.js** (`version 2.4.20210529.8`)
+- ## **Google & Baidu Switcher.user.js** (`version 2.4.20210529.9`)
 
   简介：最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 
-  > `version 2.4.20210529.8`
+  > `version 2.4.20210529.9`
 
   ```text
-  + 新增版本检测容错机制：增加github.com源作为备份。
-  + 增加更新源的判断与跳转。
-  @ 修正版本检测bug.
-  @ 优化代码，修正代码bugs.
+  @ 修正Firefox访问greasyfork.org的缓存问题。
   ```
 
 - ## **PowerlinePro.psm1** (`version 1.0.0`)

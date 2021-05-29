@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.4.20210529.8
+// @version         2.4.20210529.9
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it again. Thank you!
@@ -171,9 +171,7 @@
   async function Update_checkVersion(s = isVersionDetection) {
     let t = [];
     if (s && defCon.isAutoUpdate) {
-      t = await fetchVersion(
-        String(`https://greasyfork.org/scripts/12909-google-baidu-switcher-all-in-one/code/Google%20%20baidu%20Switcher%20(ALL%20in%20One).meta.js`)
-      ).catch(async () => {
+      t = await fetchVersion(`https://greasyfork.org/scripts/12909/code/${new Date().getTime()}.meta.js`).catch(async () => {
         defCon.fetchResult = false;
       });
       if (!defCon.fetchResult) {
