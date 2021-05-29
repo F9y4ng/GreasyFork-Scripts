@@ -215,9 +215,10 @@
                 onclick: () => {
                   let w = window.open(`${updateUrl}`, `Update.Auto`, '');
                   setTimeout(() => {
+                    window.opener = null;
                     w ? w.close() : () => {};
                     sessionStorage.clear();
-                  }, 1000);
+                  }, 2e3);
                 },
               });
               sessionStorage.setItem('nkey', 2);
