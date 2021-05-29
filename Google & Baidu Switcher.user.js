@@ -218,7 +218,12 @@
                 timeout: 20e3,
                 highlight: true,
                 onclick: () => {
-                  let w = window.open(`${updateUrl}`, `Update.Auto.${Math.random()}`, '');
+                  let w;
+                  if (isGM) {
+                    window.open(`${recheckURLs}`, `Update.Manual.${Math.random()}`, '');
+                  } else {
+                    w = window.open(`${updateUrl}`, `Update.Auto.${Math.random()}`, '');
+                  }
                   setTimeout(() => {
                     w ? w.close() : () => {};
                     sessionStorage.clear();
