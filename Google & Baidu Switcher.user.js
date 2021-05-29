@@ -172,19 +172,16 @@
     let t = [];
     if (s && defCon.isAutoUpdate) {
       t = await fetchVersion(
-        String(
-          `https://greasyfork.org/scripts/12909-google-baidu-switcher-all-in-one/code/` +
-            `Google%20%20baidu%20Switcher%20(ALL%20in%20One).meta.js?${new Date().getTime()}`
-        )
+        String(`https://greasyfork.org/scripts/12909-google-baidu-switcher-all-in-one/code/Google%20%20baidu%20Switcher%20(ALL%20in%20One).meta.js`)
       ).catch(async () => {
         defCon.fetchResult = false;
       });
       if (!defCon.fetchResult) {
-        t = await fetchVersion(
-          `https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js?${new Date().getTime()}`
-        ).catch(async () => {
-          t = [0, defCon.curVersion, ''];
-        });
+        t = await fetchVersion(`https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`).catch(
+          async () => {
+            t = [0, defCon.curVersion, ''];
+          }
+        );
       }
       if (typeof t !== 'undefined') {
         defCon.isNeedUpdate = t[0];
@@ -218,12 +215,7 @@
                 timeout: 20e3,
                 highlight: true,
                 onclick: () => {
-                  let w;
-                  if (isGM) {
-                    window.open(`${recheckURLs}`, `Update.Manual`, '');
-                  } else {
-                    w = window.open(`${updateUrl}`, `Update.Auto`, '');
-                  }
+                  let w = window.open(`${updateUrl}`, `Update.Auto`, '');
                   setTimeout(() => {
                     w ? w.close() : () => {};
                     sessionStorage.clear();
