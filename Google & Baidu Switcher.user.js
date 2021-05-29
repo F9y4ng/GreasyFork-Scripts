@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.4.20210529.5
+// @version         2.4.20210529.6
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it again. Thank you!
@@ -126,14 +126,16 @@
             }
           });
           if (n !== undefined) {
-            const fetchWord = isNaNAndAssign(parseFloat(n.substr(0, 6).replace(/\./g, '') + n.substr(6)));
-            const defaultWord = isNaNAndAssign(parseFloat(defCon.curVersion.substr(0, 6).replace(/\./g, '') + defCon.curVersion.substr(6)));
-            if (fetchWord > defaultWord) {
-              e([2, n, u]);
-            } else if (fetchWord < defaultWord) {
-              e([1, n, u]);
-            } else {
-              e([0, n, u]);
+            switch (isUpgrade(defCon.curVersion, n)) {
+              case 2:
+                e([2, n, u]);
+                break;
+              case 1:
+                e([1, n, u]);
+                break;
+              default:
+                e([0, n, u]);
+                break;
             }
           }
         })
@@ -144,8 +146,26 @@
     });
   }
 
-  function isNaNAndAssign(n) {
-    return isNaN(n) ? 9e12 : n;
+  function isUpgrade(current_version, compare_version) {
+    let compare_version_array = compare_version.split('.');
+    let current_version_array = current_version.split('.');
+    let is_upgrade = 0;
+    if (compare_version_array.length === 4 && current_version_array.length === 4) {
+      for (let i = 0; i < compare_version_array.length; i++) {
+        if (parseInt(compare_version_array[i]) < parseInt(current_version_array[i])) {
+          is_upgrade = 2;
+          break;
+        } else {
+          if (parseInt(compare_version_array[i]) === parseInt(current_version_array[i])) {
+            continue;
+          } else {
+            is_upgrade = 1;
+            break;
+          }
+        }
+      }
+    }
+    return is_upgrade;
   }
 
   async function Update_checkVersion(s = isVersionDetection) {
