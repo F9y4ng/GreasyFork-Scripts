@@ -126,7 +126,7 @@
             }
           });
           if (n !== undefined) {
-            switch (isUpgrade(defCon.curVersion, n)) {
+            switch (isUpgrade(n, defCon.curVersion)) {
               case 2:
                 e([2, n, u]);
                 break;
