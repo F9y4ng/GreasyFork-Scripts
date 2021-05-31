@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.4.20210529.9
+// @version         2.5.20210601.2
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it again. Thank you!
@@ -21,6 +21,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
+// @require         https://cdn.jsdelivr.net/gh/alihesari/notice.js@master/dist/notice.js
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -30,19 +31,25 @@
 // @grant           GM.getValue
 // @grant           GM_setValue
 // @grant           GM.setValue
-// @grant           GM_notification
-// @grant           GM.notification
 // @license         GPL-3.0-only
 // @create          2015-10-07
 // @copyright       2015-2021, F9y4ng
 // @run-at          document-start
 // ==/UserScript==
 
+('use strict');
+
 !(function () {
-  ('use strict');
   const isVersionDetection = true; // Set "false" to turn off the Version Detection.
   const isdebug = false;
   const debug = isdebug ? console.log.bind(console) : () => {};
+
+  /* Perfectly Compatible For Greasemonkey4.0+, TamperMonkey, ViolentMonkey * F9y4ng * 20210601 */
+
+  let GMsetValue, GMgetValue, GMregisterMenuCommand, GMunregisterMenuCommand, GMnotification, GMopenInTab;
+  const GMinfo = GM_info;
+  const handlerInfo = GMinfo.scriptHandler;
+  const isGM = Boolean(handlerInfo.toLowerCase() === 'greasemonkey');
 
   function titleCase(str, bool) {
     const RegExp = bool ? /( |^)[a-z]/g : /(^)[a-z]/g;
@@ -53,14 +60,6 @@
         return L.toUpperCase();
       });
   }
-
-  /* Perfectly Compatible For Greasemonkey4.0+, TamperMonkey, ViolentMonkey * F9y4ng * 20210209 */
-
-  let GMsetValue, GMgetValue, GMregisterMenuCommand, GMunregisterMenuCommand, GMnotification, GMopenInTab;
-  const GMinfo = GM_info;
-  const handlerInfo = GMinfo.scriptHandler;
-  const isGM = Boolean(handlerInfo.toLowerCase() === 'greasemonkey');
-
   debug(`//-> CheckGM: ${titleCase(isGM)} >> ${handlerInfo}`);
 
   if (isGM) {
@@ -68,26 +67,59 @@
     GMgetValue = GM.getValue;
     GMregisterMenuCommand = GM.registerMenuCommand;
     GMunregisterMenuCommand = () => {};
-    GMnotification = GM.notification;
     GMopenInTab = (a, b) => {
-      window.open(a, Math.random().toString(b.length).slice(-6), '');
+      window.open(a, randString(b.length).slice(-6), '');
     };
   } else {
     GMsetValue = GM_setValue;
     GMgetValue = GM_getValue;
     GMregisterMenuCommand = GM_registerMenuCommand;
     GMunregisterMenuCommand = GM_unregisterMenuCommand;
-    GMnotification = GM_notification;
     GMopenInTab = GM_openInTab;
   }
+
+  GMnotification = (e, t, i, a, o, u) => {
+    new NoticeJs({
+      text: e,
+      type: t,
+      timeout: i ? i : 30,
+      width: 400,
+      position: 'bottomRight',
+      callbacks: {
+        onShow: [
+          () => {
+            if (u) {
+              const m = setInterval(() => {
+                u ? --u : clearInterval(m);
+                document.querySelector('#update dl dd b').innerHTML = u;
+              }, 1e3);
+            }
+          },
+        ],
+        onClick: [
+          () => {
+            if (a) {
+              const w = window.open(a, 'Update.Scripts', '');
+              setTimeout(() => {
+                if (o) {
+                  window.opener = null;
+                  w ? w.close() : () => {};
+                }
+                sessionStorage.clear();
+              }, 2e3);
+            }
+          },
+        ],
+      },
+    }).show();
+  };
 
   const defCon = {
     scriptName: GMinfo.script.name,
     curVersion: GMinfo.script.version,
-    isNoticed: sessionStorage.getItem('nkey') || 0,
+    isNoticed: sessionStorage.getItem('nCount') | 0,
     isNeedUpdate: 0,
     fetchResult: true,
-    isAutoUpdate: GMinfo.scriptWillUpdate ? GMinfo.scriptWillUpdate : true, // TODO :-)
     lastRuntime: new Date().toLocaleString('en-US', {
       timeZoneName: 'short',
       hour12: false,
@@ -126,7 +158,7 @@
             }
           });
           if (n !== undefined) {
-            switch (isUpgrade(n, defCon.curVersion)) {
+            switch (isUpgrade(defCon.curVersion, n)) {
               case 2:
                 e([2, n, u]);
                 break;
@@ -146,11 +178,21 @@
     });
   }
 
+  function randString(n) {
+    let seed = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    seed += seed.toLowerCase();
+    let r = '';
+    for (let i = n; i > 0; --i) {
+      r += seed[Math.floor(Math.random() * seed.length)];
+    }
+    return r;
+  }
+
   function isUpgrade(current_version, compare_version) {
     let compare_version_array = compare_version.split('.');
     let current_version_array = current_version.split('.');
     let is_upgrade = 0;
-    if (compare_version_array.length === 4 && current_version_array.length === 4) {
+    if (compare_version_array.length === current_version_array.length) {
       for (let i = 0; i < compare_version_array.length; i++) {
         if (parseInt(compare_version_array[i]) < parseInt(current_version_array[i])) {
           is_upgrade = 2;
@@ -164,14 +206,16 @@
           }
         }
       }
+    } else {
+      is_upgrade = 2;
     }
     return is_upgrade;
   }
 
-  async function Update_checkVersion(s = isVersionDetection) {
+  async function Update_checkVersion(s = false) {
     let t = [];
-    if (s && defCon.isAutoUpdate) {
-      t = await fetchVersion(`https://greasyfork.org/scripts/12909/code/${new Date().getTime()}.meta.js`).catch(async () => {
+    if (isVersionDetection) {
+      t = await fetchVersion(`https://greasyfork.org/scripts/12909/code/${randString(32)}.meta.js`).catch(async () => {
         defCon.fetchResult = false;
       });
       if (!defCon.fetchResult) {
@@ -189,49 +233,16 @@
           .replace('raw.githubusercontent', 'github')
           .replace('master', 'blob/master')
           .replace(/code\/[^/]+\.js/, '');
+        const sourceSite = titleCase(recheckURLs.split('/')[2].split('.')[0]);
         switch (defCon.isNeedUpdate) {
           case 2:
-            console.info(
-              String(
-                `%c[GB-Update]%c\nWe found a new version: %c${lastestVersion}%c.\n` +
-                  `Please upgrade from your update source to the latest version.\n` +
-                  `[${recheckURLs.split('/')[2]}]`
-              ),
-              'font-weight:bold;color:crimson',
-              'color:0',
-              'color:crimson',
-              'color:0'
-            );
-            if (!defCon.isNoticed) {
-              GMnotification({
-                title: `${defCon.scriptName}`,
-                text: String(
-                  `\u53d1\u73b0\u6700\u65b0\u7248\u672c\uff1a${lastestVersion}` +
-                    `\uff0c\u70b9\u51fb\u8fd9\u91cc\u8fdb\u884c\u76f4\u94fe\u66f4\u65b0` +
-                    `\u3002\n\u005b${recheckURLs.split('/')[2]}\u6e90\u005d`
-                ),
-                timeout: 20e3,
-                highlight: true,
-                onclick: () => {
-                  let w = window.open(`${updateUrl}`, `Update.Auto`, '');
-                  setTimeout(() => {
-                    window.opener = null;
-                    w ? w.close() : () => {};
-                    sessionStorage.clear();
-                  }, 2e3);
-                },
-              });
-              sessionStorage.setItem('nkey', 2);
-            }
-            break;
-          case 1:
             console.warn(
               String(
                 `%c[GB-Update]%c\nWe found a new version, But %cthe latest version ` +
-                  `(%c${lastestVersion}%c) is lower than your local version (%c${defCon.curVersion}%c).\n\n` +
+                  `%c${lastestVersion}%c is lower than your local version %c${defCon.curVersion}.%c\n\n` +
                   `Please confirm whether you need to upgrade your local script, and then you need to update it manually.\n\n` +
                   `If you no longer need the update prompt, please set "isVersionDetection" to "false" in your local code!\n\n` +
-                  `[${recheckURLs.split('/')[2]}]`
+                  `[${sourceSite}]`
               ),
               'font-weight:bold;color:crimson',
               'font-weight:bold;color:0',
@@ -241,29 +252,76 @@
               'font-weight:900;color:darkred',
               'color:0'
             );
-            if (!defCon.isNoticed) {
-              GMnotification({
-                title: `${defCon.scriptName}`,
-                text: String(
-                  `\u53d1\u73b0\u5f02\u5e38\u7248\u672c\uff1a${lastestVersion}` +
-                    `\uff0c\u56e0\u6700\u65b0\u7248\u672c\u4f4e\u4e8e\u60a8\u7684\u672c` +
-                    `\u5730\u7248\u672c(${defCon.curVersion})\uff0c\u8bf7\u70b9\u51fb\u8fd9` +
-                    `\u91cc\u786e\u8ba4\u662f\u5426\u9700\u8981\u5347\u7ea7\uff1f` +
-                    `\u005b${recheckURLs.split('/')[2]}\u6e90\u005d`
+            if (defCon.isNoticed < 2 || s) {
+              GMnotification(
+                String(
+                  `<div id="update">
+                    <dl>
+                      <dt>${defCon.scriptName}</dt>
+                      <dd><span>发现版本异常</span>检测到远程版本 <i>${lastestVersion}</i>\
+                      低于您的本地版本 <i>${defCon.curVersion}</i>，\
+                      由于您可能自行修改过本地脚本，如需覆盖安装，\
+                      请点击这里手动确认升级？</dd>
+                      <dd>[ ${sourceSite} ]</dd>
+                    <dl>
+                  </div>`
                 ),
-                timeout: 25e3,
-                highlight: true,
-                onclick: () => {
-                  window.open(`${recheckURLs}`, `Update.Manual`, '');
-                  sessionStorage.clear();
-                },
-              });
-              sessionStorage.setItem('nkey', 1);
+                'error',
+                80,
+                `${recheckURLs}`
+              );
+              sessionStorage.setItem('nCount', ++defCon.isNoticed);
+            }
+            break;
+          case 1:
+            console.info(
+              String(
+                `%c[GB-Update]%c\nWe found a new version: %c${lastestVersion}%c.\n` +
+                  `Please upgrade from your update source to the latest version.\n` +
+                  `[${sourceSite}]`
+              ),
+              'font-weight:bold;color:crimson',
+              'color:0',
+              'color:crimson',
+              'color:0'
+            );
+            if (defCon.isNoticed < 2 || s) {
+              GMnotification(
+                String(
+                  `<div id="update">
+                    <dl>
+                      <dt>${defCon.scriptName}</dt>
+                      <dd><span>发现版本更新</span>最新版本 <i>${lastestVersion}</i>，\
+                      请点击这里进行直链安装升级。</dd>
+                      <dd>[ ${sourceSite} ]</dd>
+                    <dl>
+                  </div>`
+                ),
+                'warning',
+                50,
+                `${updateUrl}`,
+                true
+              );
+              sessionStorage.setItem('nCount', ++defCon.isNoticed);
             }
             break;
           default:
+            if (s) {
+              GMnotification(
+                String(
+                  `<div id='update'>
+                    <dl>
+                      <dt>${defCon.scriptName}</dt>
+                      <dd><span>更新成功</span>当前版本 <i>${defCon.curVersion}</i> 已为最新!</dd>
+                      <dd>[ ${sourceSite} ]</dd>
+                    </dl>
+                  </div>`
+                ),
+                'success'
+              );
+            }
             debug(
-              `%c[GB-Update]%c\nCurretVersion: %cV${defCon.curVersion}%c is up to date!`,
+              `%c[GB-Update]%c\nCurretVersion: %c${defCon.curVersion}%c is up-to-date!`,
               'font-weight:bold;color:darkcyan',
               'color:0',
               'color:red',
@@ -284,6 +342,305 @@
   !(async function () {
     const temp = parseInt(await GMgetValue('_if_Use_Bing_'));
     const CONST = {
+      noticeCss: `\n
+            .noticejs-top {
+              top: 0;
+              width: 100%;
+            }
+            .noticejs-top .item {
+              border-radius: 0 !important;
+              margin: 0 !important;
+            }
+            .noticejs-topRight {
+              top: 10px;
+              right: 10px;
+            }
+            .noticejs-topLeft {
+              top: 10px;
+              left: 10px;
+            }
+            .noticejs-topCenter {
+              top: 10px;
+              left: 50%;
+              transform: translate(-50%);
+            }
+            .noticejs-middleLeft,
+            .noticejs-middleRight {
+              right: 10px;
+              top: 50%;
+              transform: translateY(-50%);
+            }
+            .noticejs-middleLeft {
+              left: 10px;
+            }
+            .noticejs-middleCenter {
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+            }
+            .noticejs-bottom {
+              bottom: 0;
+              width: 100%;
+            }
+            .noticejs-bottom .item {
+              border-radius: 0 !important;
+              margin: 0 !important;
+            }
+            .noticejs-bottomRight {
+              bottom: 10px;
+              right: 10px;
+            }
+            .noticejs-bottomLeft {
+              bottom: 10px;
+              left: 10px;
+            }
+            .noticejs-bottomCenter {
+              bottom: 10px;
+              left: 50%;
+              transform: translate(-50%);
+            }
+            .noticejs {
+              font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+            }
+            .noticejs .item {
+              margin: 0 0 10px;
+              border-radius: 3px;
+              overflow: hidden;
+            }
+            .noticejs .item .close {
+              float: right;
+              font-size: 18px;
+              font-weight: 700;
+              line-height: 1;
+              color: #fff;
+              text-shadow: 0 1px 0 #fff;
+              opacity: 1;
+              margin-right: 7px;
+            }
+            .noticejs .item .close:hover {
+              opacity: 0.5;
+              color: #000;
+            }
+            .noticejs .item a {
+              color: #fff;
+              border-bottom: 1px dashed #fff;
+            }
+            .noticejs .item a,
+            .noticejs .item a:hover {
+              text-decoration: none;
+            }
+            .noticejs .success {
+              background-color: #64ce83;
+            }
+            .noticejs .success .noticejs-heading {
+              background-color: #3da95c;
+              color: #fff;
+              padding: 10px;
+            }
+            .noticejs .success .noticejs-body {
+              color: #fff;
+              padding: 10px;
+            }
+            .noticejs .success .noticejs-body:hover {
+              visibility: visible !important;
+            }
+            .noticejs .success .noticejs-content {
+              visibility: visible;
+            }
+            .noticejs .info {
+              background-color: #3ea2ff;
+            }
+            .noticejs .info .noticejs-heading {
+              background-color: #067cea;
+              color: #fff;
+              padding: 10px;
+            }
+            .noticejs .info .noticejs-body {
+              color: #fff;
+              padding: 10px;
+            }
+            .noticejs .info .noticejs-body:hover {
+              visibility: visible !important;
+            }
+            .noticejs .info .noticejs-content {
+              visibility: visible;
+            }
+            .noticejs .warning {
+              background-color: #ff7f48;
+            }
+            .noticejs .warning .noticejs-heading {
+              background-color: #f44e06;
+              color: #fff;
+              padding: 10px;
+            }
+            .noticejs .warning .noticejs-body {
+              color: #fff;
+              padding: 10px;
+            }
+            .noticejs .warning .noticejs-body:hover {
+              visibility: visible !important;
+            }
+            .noticejs .warning .noticejs-content {
+              visibility: visible;
+            }
+            .noticejs .error {
+              background-color: #e74c3c;
+            }
+            .noticejs .error .noticejs-heading {
+              background-color: #ba2c1d;
+              color: #fff;
+              padding: 10px;
+            }
+            .noticejs .error .noticejs-body {
+              color: #fff;
+              padding: 10px;
+            }
+            .noticejs .error .noticejs-body:hover {
+              visibility: visible !important;
+            }
+            .noticejs .error .noticejs-content {
+              visibility: visible;
+            }
+            .noticejs .progressbar {
+              width: 100%;
+            }
+            .noticejs .progressbar .bar {
+              width: 1%;
+              height: 30px;
+              background-color: #4caf50;
+            }
+            .noticejs .success .noticejs-progressbar {
+              width: 100%;
+              background-color: #64ce83;
+              margin-top: -1px;
+            }
+            .noticejs .success .noticejs-progressbar .noticejs-bar {
+              width: 100%;
+              height: 5px;
+              background: #3da95c;
+            }
+            .noticejs .info .noticejs-progressbar {
+              width: 100%;
+              background-color: #3ea2ff;
+              margin-top: -1px;
+            }
+            .noticejs .info .noticejs-progressbar .noticejs-bar {
+              width: 100%;
+              height: 5px;
+              background: #067cea;
+            }
+            .noticejs .warning .noticejs-progressbar {
+              width: 100%;
+              background-color: #ff7f48;
+              margin-top: -1px;
+            }
+            .noticejs .warning .noticejs-progressbar .noticejs-bar {
+              width: 100%;
+              height: 5px;
+              background: #f44e06;
+            }
+            .noticejs .error .noticejs-progressbar {
+              width: 100%;
+              background-color: #e74c3c;
+              margin-top: -1px;
+            }
+            .noticejs .error .noticejs-progressbar .noticejs-bar {
+              width: 100%;
+              height: 5px;
+              background: #ba2c1d;
+            }
+            @keyframes noticejs-fadeOut {
+              0% {
+                opacity: 1;
+              }
+              to {
+                opacity: 0;
+              }
+            }
+            .noticejs-fadeOut {
+              animation-name: noticejs-fadeOut;
+            }
+            @keyframes noticejs-modal-in {
+              to {
+                opacity: 0.3;
+              }
+            }
+            @keyframes noticejs-modal-out {
+              to {
+                opacity: 0;
+              }
+            }
+            .noticejs {
+              position: fixed;
+              z-index: 10050;
+              width: 400px;
+            }
+            .noticejs ::-webkit-scrollbar {
+              width: 8px;
+            }
+            .noticejs ::-webkit-scrollbar-button {
+              width: 8px;
+              height: 5px;
+            }
+            .noticejs ::-webkit-scrollbar-track {
+              border-radius: 10px;
+            }
+            .noticejs ::-webkit-scrollbar-thumb {
+              background: hsla(0, 0%, 100%, 0.5);
+              border-radius: 10px;
+            }
+            .noticejs ::-webkit-scrollbar-thumb:hover {
+              background: #fff;
+            }
+            .noticejs-modal {
+              position: fixed;
+              width: 100%;
+              height: 100%;
+              background-color: #000;
+              z-index: 10000;
+              opacity: 0.3;
+              left: 0;
+              top: 0;
+            }
+            .noticejs-modal-open {
+              opacity: 0;
+              animation: noticejs-modal-in 0.3s ease-out;
+            }
+            .noticejs-modal-close {
+              animation: noticejs-modal-out 0.3s ease-out;
+              animation-fill-mode: forwards;
+            }
+            #update, #update dl {
+              cursor: pointer!important;
+              margin: 0!important;
+              padding: 0!important;
+            }
+            #update dl dt {
+              margin: 5px 0 8px 0!important;
+              font-size: 16px!important;
+              font-weight: 900!important;
+            }
+            #update dl dd {
+              margin: 5px 0 4px 0!important;
+              font-size: 14px!important;
+              line-height: 180%!important;
+              margin-inline-start: 20px!important;
+            }
+            #update dl dd b {
+              font-family: Candara, sans-serif!important;
+              font-size: 24px!important;
+              padding: 0 5px;
+            }
+            #update dl dd span {
+              font-weight: 700;
+              font-size: 15px!important;
+              margin-right: 8px;
+            }
+            #update dl dd i {
+              font-family: Candara, sans-serif!important;
+              font-size: 20px!important;
+            }
+        \n`,
       isSecurityPolicy: false,
       isUseBing: (() => {
         if (isNaN(temp)) {
@@ -577,8 +934,7 @@
     let menuManager = {
       menuDisplay: function () {
         const _Use_Bing_ = CONST.isUseBing;
-        let _use_Bing_ID, in_Use_feedBack_ID;
-
+        let _use_Bing_ID, in_Use_feedBack_ID, in_UpdateCheck_ID;
         registerMenuCommand();
         console.log(
           '%c[GB-Status]%c\nInsert the Bing Search Button: %c%s%c',
@@ -588,39 +944,73 @@
           titleCase(_Use_Bing_),
           'font-weight:normal;color:0'
         );
+
         debug(`//-> CONST.isUseBing: ${_Use_Bing_}`);
 
         function registerMenuCommand() {
           let _Use_Bing__;
-          if (in_Use_feedBack_ID && !isGM) {
-            GMunregisterMenuCommand(_use_Bing_ID);
-            GMunregisterMenuCommand(in_Use_feedBack_ID);
+          if (!isGM) {
+            _use_Bing_ID ? GMunregisterMenuCommand(_use_Bing_ID) : () => {};
+            in_Use_feedBack_ID ? GMunregisterMenuCommand(in_Use_feedBack_ID) : () => {};
+            in_UpdateCheck_ID ? GMunregisterMenuCommand(in_UpdateCheck_ID) : () => {};
           }
           if (_Use_Bing_) {
-            _Use_Bing__ = '√';
+            _Use_Bing__ = '\u2705';
           } else {
-            _Use_Bing__ = '×';
+            _Use_Bing__ = '\u274c';
           }
-          _use_Bing_ID = GMregisterMenuCommand(` [${_Use_Bing__}] \u6dfb\u52a0 Bing \u641c\u7d22\u8df3\u8f6c`, () => {
-            inUse_switch(_Use_Bing_, '_if_Use_Bing_', 'Bing\u6309\u94ae');
+          _use_Bing_ID = GMregisterMenuCommand(`${_Use_Bing__} Bing 搜索跳转`, () => {
+            inUse_switch(_Use_Bing_, '_if_Use_Bing_', 'Bing 按钮');
           });
-          in_Use_feedBack_ID = GMregisterMenuCommand('\u4f7f\u7528\u53cd\u9988', () => {
-            GMopenInTab('https://greasyfork.org/zh-CN/scripts/12909/feedback', {
+          in_Use_feedBack_ID = GMregisterMenuCommand('\ud83d\udcc3 使用反馈', () => {
+            GMopenInTab('https://greasyfork.org/scripts/12909/feedback', {
               active: true,
               insert: true,
               setParent: true,
             });
           });
+          if (isVersionDetection) {
+            in_UpdateCheck_ID = GMregisterMenuCommand('\ud83d\udd0e 检查更新', () => {
+              Update_checkVersion(true);
+            });
+          }
         }
 
         function inUse_switch(_status, Name, Tips) {
-          const title = `\u6e29\u99a8\u63d0\u793a\uff1a`;
           if (_status) {
             GMsetValue(`${Name}`, 0);
-            GMnotification(`${Tips}\u5df2\u5173\u95ed\uff0c\u4e09\u79d2\u540e\u5c06\u5237\u65b0\uff01`, title);
+            GMnotification(
+              String(
+                `<div id='update'>
+                  <dl>
+                    <dt>温馨提示：</dt>
+                    <dd>${Tips}已清除完成，网页将在<b>3</b>秒后自动刷新！</dd>
+                  </dl>
+                </div>`
+              ),
+              'info',
+              null,
+              null,
+              null,
+              3
+            );
           } else {
             GMsetValue(`${Name}`, 1);
-            GMnotification(`${Tips}\u5df2\u5f00\u542f\uff0c\u4e09\u79d2\u540e\u5c06\u5237\u65b0\uff01`, title);
+            GMnotification(
+              String(
+                `<div id='update'>
+                  <dl>
+                    <dt>温馨提示：</dt>
+                    <dd>${Tips}已添加完成，网页将在<b>3</b>秒后自动刷新！</dd>
+                  </dl>
+                </div>`
+              ),
+              'info',
+              null,
+              null,
+              null,
+              3
+            );
           }
           setTimeout(() => {
             let loc = location.href.replace(/&timestamp=(\d+)/, '');
@@ -699,7 +1089,7 @@
             const getTarget = curretSite.MainType;
             const doHtml = curretSite.HtmlCode;
             const doStyName = `InsertTo${curretSite.SiteName}`;
-            const doStyle = curretSite.StyleCode;
+            const doStyle = curretSite.StyleCode + CONST.noticeCss;
             const vim = GetUrlParam(curretSite.SplitName);
             const userSpan = document.createElement('span');
             let Target = document.querySelector(getTarget);
