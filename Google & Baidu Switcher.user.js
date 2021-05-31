@@ -21,7 +21,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @require         https://cdn.jsdelivr.net/gh/alihesari/notice.js@master/dist/notice.js
+// @require         https://cdn.jsdelivr.net/npm/notice.js@0.4.0/dist/notice.js
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
