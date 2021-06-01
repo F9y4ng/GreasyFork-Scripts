@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @version         2.5.20210601.2
+// @version         2.5.20210601.3
 // @author          F9y4ng
 // @description     最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 // @description:en  The latest version of Google, Baidu, Bing`s search engine, Bing option can be switched in the menu settings. If any exception or error, please clear the browser cache and reload it again. Thank you!
@@ -85,6 +85,7 @@
       timeout: i ? i : 30,
       width: 400,
       position: 'bottomRight',
+      closeWith: ['click'],
       callbacks: {
         onShow: [
           () => {
@@ -105,7 +106,6 @@
                   window.opener = null;
                   w ? w.close() : () => {};
                 }
-                sessionStorage.clear();
               }, 2e3);
             }
           },
@@ -610,21 +610,19 @@
               animation: noticejs-modal-out 0.3s ease-out;
               animation-fill-mode: forwards;
             }
-            #update, #update dl {
-              cursor: pointer!important;
-              margin: 0!important;
-              padding: 0!important;
+            #update {
+              padding: 4px 4px 0 4px!important;
             }
             #update dl dt {
-              margin: 5px 0 8px 0!important;
+              margin: 2px 0 8px 0!important;
               font-size: 16px!important;
               font-weight: 900!important;
             }
             #update dl dd {
-              margin: 5px 0 4px 0!important;
+              margin: 3px 6px 0 0!important;
               font-size: 14px!important;
               line-height: 180%!important;
-              margin-inline-start: 20px!important;
+              margin-inline-start: 10px!important;
             }
             #update dl dd b {
               font-family: Candara, sans-serif!important;
