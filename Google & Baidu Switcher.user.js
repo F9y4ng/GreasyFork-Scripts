@@ -691,21 +691,20 @@
 
         function scrollDetect() {
           try {
-            const nodeName = `#${CONST.rndidName}`;
             const vim = GetUrlParam(curretSite.SplitName);
             switch (curretSite.SiteTypeID) {
               case newSiteType.GOOGLE:
-                scrollButton(`${nodeName} #${CONST.bdyx}`, 'scrollspan', 35);
-                scrollButton(`${nodeName} #${CONST.bdyx} input`, 'scrollbars', 35);
+                scrollButton(`#${CONST.rndidName}`, 'scrollspan', 35);
+                scrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, 'scrollbars', 35);
                 if (CONST.isUseBing) {
-                  scrollButton(`${nodeName} #${CONST.bbyx} input`, 'scrollbars', 35);
+                  scrollButton(`#${CONST.rndidName} #${CONST.bbyx} input`, 'scrollbars', 35);
                 }
                 break;
               case newSiteType.BING:
                 if (/^(images|videos)$/.test(vim.trim())) {
-                  scrollButton(`${nodeName}`, 'scrollspan', 50);
-                  scrollButton(`${nodeName} #${CONST.bdyx} input`, 'scrollbars', 50);
-                  scrollButton(`${nodeName} #${CONST.ggyx} input`, 'scrollbars', 50);
+                  scrollButton(`#${CONST.rndidName}`, 'scrollspan', 50);
+                  scrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, 'scrollbars', 50);
+                  scrollButton(`#${CONST.rndidName} #${CONST.ggyx} input`, 'scrollbars', 50);
                 }
                 break;
               default:
