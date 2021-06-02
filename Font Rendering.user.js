@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name            字体渲染（自用脚本）
 // @namespace       https://openuserjs.org/users/t3xtf0rm4tgmail.com
-// @version         2021.04.04.2
+// @version         2021.06.02.1
 // @icon            https://github.githubassets.com/favicons/favicon.svg
 // @description     让每个页面的字体变得有质感，默认使用苹方字体，附加字体描边、字体阴影、字体平滑等效果，自用脚本不处理外部需求。
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
@@ -19,9 +19,9 @@
 // @run-at          document-start
 // ==/UserScript==
 
-(function () {
-  'use strict';
+'use strict';
 
+(function () {
   /* 你可以自定义以下内容 */
 
   let stroke_r = 0.04; // 字体描边：建议控制在0~1.0之间，关闭描边为0，默认0.04
@@ -34,52 +34,47 @@
 
   const isdebug = false;
   const debug = isdebug ? console.log.bind(console) : () => {};
+  const rndClass = randString(10, true);
   let shadow = '';
   shadow_r = parseFloat(shadow_r);
   if (!isNaN(shadow_r) && shadow_r !== 0) {
-    shadow = `text-shadow:
-    -1px 1px ${shadow_r}px ${shadow_c},
-    1px 1px ${shadow_r}px ${shadow_c},
-    1px -1px ${shadow_r}px ${shadow_c},
-    -1px -1px ${shadow_r}px ${shadow_c} !important;`;
+    shadow = `text-shadow: -1px 1px ${shadow_r}px ${shadow_c}, 1px 1px ${shadow_r}px ${shadow_c}, 1px -1px ${shadow_r}px ${shadow_c}, -1px -1px ${shadow_r}px ${shadow_c} !important;`;
   }
   let stroke = '';
   stroke_r = parseFloat(stroke_r);
   if (!isNaN(stroke_r) && stroke_r > 0 && stroke_r <= 1.0) {
-    stroke = `
-    text-stroke: ${stroke_r}px !important;
-    -webkit-text-stroke: ${stroke_r}px !important;
-    -webkit-text-stroke: initial;
-    text-fill-color: currentcolor;
-    -webkit-text-fill-color: currentcolor;
-    `;
+    stroke = `text-stroke: ${stroke_r}px !important;-webkit-text-stroke: ${stroke_r}px !important;-webkit-text-stroke: initial;text-fill-color: currentcolor;-webkit-text-fill-color: currentcolor;`;
   }
   let smoothing = '';
   if (smooth_i) {
-    smoothing = `
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    `;
+    smoothing = `-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;`;
   }
-  const tshadow = `
-  ${cssfun} {
-      ${shadow}
-      font-family: "PingFang SC","Microsoft YaHei",sans-serif!important;
-      ${stroke}
-      ${smoothing}
-  }`;
+  const tshadow = `${cssfun} {${shadow}font-family: "PingFang SC","Microsoft YaHei",sans-serif!important;${stroke}${smoothing}}`;
 
-  addStyle(tshadow, 'FontRendering', 'head');
+  addStyle(tshadow, `${rndClass}`, 'head');
 
   const callback = () => {
-    if (document.querySelector('.FontRendering')) {
+    if (document.querySelector(`.${rndClass}`)) {
       debug('//-> Already Insert CSS.');
     } else {
-      addStyle(tshadow, 'FontRendering', 'head');
+      addStyle(tshadow, `${rndClass}`, 'head');
     }
   };
   const opts = { childList: true, subtree: true };
   new MutationObserver(callback).observe(document, opts);
+
+  function randString(n, v, r) {
+    let s = '';
+    let a = '0123456789';
+    let b = 'abcdefghijklmnopqrstuvwxyz';
+    let c = b.toUpperCase();
+    n = Number.isFinite(n) ? n : 10;
+    v ? (r = b + c) : (r = a + b + a + c);
+    for (; n > 0; --n) {
+      s += r[Math.floor(Math.random() * r.length)];
+    }
+    return s;
+  }
 
   function addStyle(css, className, addToTarget, isReload, initType) {
     RAFInterval(
