@@ -265,18 +265,16 @@
             }
             if (defCon.isNoticed < 2 || s) {
               GMnotification(
-                String(
-                  `<div class="${defCon.rName}">
+                String(`
+                  <div class="${defCon.rName}">
                     <dl>
                       <dt>${defCon.scriptName}</dt>
-                      <dd><span>发现版本异常</span>检测到远程版本 <i>${lastestVersion}</i>\
-                      低于您的本地版本 <i>${defCon.curVersion}</i>\
+                      <dd><span>发现版本异常</span>检测到远程版本 <i>${lastestVersion}</i> 低于您的本地版本 <i>${defCon.curVersion}，</i>\
                       由于您可能自行修改过本地脚本，如需覆盖安装，请点击这里手动确认升级？</dd>
                       <dd> ( isVersionDetection 设为 false，可永久关闭提示 ) </dd>
                       <dd>[ ${sourceSite} ]</dd>
                     <dl>
-                  </div>`
-                ),
+                  </div>`),
                 'error',
                 0,
                 80,
@@ -301,16 +299,15 @@
             }
             if (defCon.isNoticed < 2 || s) {
               GMnotification(
-                String(
-                  `<div class="${defCon.rName}">
+                String(`
+                  <div class="${defCon.rName}">
                     <dl>
                       <dt>${defCon.scriptName}</dt>
                       <dd><span>发现版本更新</span>最新版本 <i>${lastestVersion}</i>，\
                       请点击这里进行直链安装升级。</dd>
                       <dd>[ ${sourceSite} ]</dd>
                     <dl>
-                  </div>`
-                ),
+                  </div>`),
                 'warning',
                 0,
                 50,
@@ -321,20 +318,6 @@
             }
             break;
           default:
-            if (s) {
-              GMnotification(
-                String(
-                  `<div class='${defCon.rName}'>
-                    <dl>
-                      <dt>${defCon.scriptName}</dt>
-                      <dd><span>更新成功</span>当前版本 <i>${defCon.curVersion}</i> 已为最新!</dd>
-                      <dd>[ ${sourceSite} ]</dd>
-                    </dl>
-                  </div>`
-                ),
-                'success'
-              );
-            }
             debug(
               `%c[GB-Update]%c\nCurretVersion: %c${defCon.curVersion}%c is up-to-date!`,
               'font-weight:bold;color:darkcyan',
@@ -342,6 +325,19 @@
               'color:red',
               'color:0'
             );
+            if (s) {
+              GMnotification(
+                String(`
+                <div class='${defCon.rName}'>
+                    <dl>
+                      <dt>${defCon.scriptName}</dt>
+                      <dd><span>更新成功</span>当前版本 <i>${defCon.curVersion}</i> 已为最新!</dd>
+                      <dd>[ ${sourceSite} ]</dd>
+                    </dl>
+                  </div>`),
+                'success'
+              );
+            }
             break;
         }
       } else {
@@ -395,17 +391,17 @@
         SplitName: 'tn',
         MainType: '.s_btn_wr',
         HtmlCode: CONST.isUseBing
-          ? `
+          ? String(`
             <span id="${CONST.ggyx}">
                 <input type="button" title="Google一下" value="Google"/>
             </span>
             <span id="${CONST.bbyx}">
                 <input type="button" title="Bing一下" value="Bing ®"/>
-            </span>`
-          : `
+            </span>`)
+          : String(`
             <span id="${CONST.ggyx}">
                 <input type="button" title="Google一下" value="Google一下"/>
-            </span>`,
+            </span>`),
         StyleCode: CONST.isUseBing
           ? `#form{white-space: nowrap;} #u{z-index: 1!important;} #${CONST.rndidName} #${CONST.bbyx}{margin-left: -1.5px;} #${CONST.rndidName} #${CONST.ggyx}{margin-left: 2px;} #${CONST.bbyx} input{background: #4e6ef2; border-top-right-radius: 10px; border-bottom-right-radius: 10px; cursor: pointer; height: 40px; color: #fff; width: 80px; border: 1px solid #3476d2; font-size: 16px; font-weight:bold;} #${CONST.ggyx} input{background: #4e6ef2; border-top-left-radius: 10px; border-bottom-left-radius: 10px; cursor: pointer; height: 40px; color: #fff; width: 80px; border: 1px solid #3476d2; font-size: 16px; font-weight:bold;} #${CONST.ggyx} input:hover, #${CONST.bbyx} input:hover{background: #4662D9; border: 1px solid #3476d2;}`
           : `#form{white-space: nowrap;} #u{z-index: 1!important;} #${CONST.rndidName}{margin-left: 6px} #${CONST.ggyx} input{background: #4e6ef2; border-radius: 10px; cursor: pointer; height: 40px; color: #fff; width: 112px; border: 1px solid #3476d2; text-shadow: 0 0 2px #ffffff !important; font-size: 16px} #${CONST.ggyx} input:hover{background: #4662D9; border: 1px solid #3476d2;}`,
@@ -416,17 +412,17 @@
         SplitName: 'tbm',
         MainType: "form button[type='submit']",
         HtmlCode: CONST.isUseBing
-          ? `
+          ? String(`
             <span id="${CONST.bdyx}">
                 <input type="button" title="百度一下" value="百度一下"/>
             </span>
             <span id="${CONST.bbyx}">
                 <input type="button" title="Bing一下" value="Bing一下"/>
-            </span>`
-          : `
+            </span>`)
+          : String(`
             <span id="${CONST.bdyx}">
                 <input type="button" title="百度一下" value="百度一下"/>
-            </span>`,
+            </span>`),
         StyleCode: CONST.isUseBing
           ? `#${CONST.rndidName}{margin: 3px 4px 0 -5px;} #${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px; border-left:1px solid #ddd;} #${CONST.rndidName} #${CONST.bbyx}{margin-left:-2px} .scrollspan{padding:1px 0 0 18px!important} .scrollbars{height: 26px!important; font-size: 13px!important; font-weight: normal!important; text-shadow: 0 0 1px #ffffff !important;} #${CONST.bdyx} input{cursor: pointer; padding: 1px 1px 1px 6px!important; border: 1px solid transparent; background: #1a73e8; box-shadow: none; border-top-left-radius: 24px; border-bottom-left-radius: 24px; width: 90px; height: 38px; font-size: 15px; font-weight: 600; color: #fff} #${CONST.bbyx} input{cursor: pointer; padding: 1px 6px 1px 1px!important; border: 1px solid transparent; background: #1a73e8; box-shadow: none; border-top-right-radius: 24px; border-bottom-right-radius: 24px; width: 90px; height: 38px; font-size: 15px; font-weight: 600; color: #fff} #${CONST.bdyx} input:hover, #${CONST.bbyx} input:hover{background: #2b7de9;}`
           : `#${CONST.rndidName}{margin: 3px 4px 0 -5px;} #${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px; border-left:1px solid #ddd;} .scrollspan{padding:1px 0 0 18px!important} .scrollbars{height: 26px!important; font-size: 13px!important; font-weight: normal!important; text-shadow: 0 0 1px #ffffff !important;} #${CONST.bdyx} input{cursor: pointer; border: 1px solid transparent; background: #1a73e8; box-shadow: none; border-radius: 24px; width: 90px; height: 38px; font-size: 14px; font-weight: 600; color: #fff;} #${CONST.bdyx} input:hover{background: #2b7de9;}`,
@@ -436,13 +432,13 @@
         SiteName: 'Bing',
         SplitName: 'undefined',
         MainType: '#sb_go_par',
-        HtmlCode: `
-            <span id="${CONST.bdyx}">
-                <input type="button" title="百度一下" value="百度"/>
-            </span>
-            <span id="${CONST.ggyx}">
-                <input type="button" title="Google一下" value="Google"/>
-            </span>`,
+        HtmlCode: String(`
+          <span id="${CONST.bdyx}">
+              <input type="button" title="百度一下" value="百度"/>
+          </span>
+          <span id="${CONST.ggyx}">
+              <input type="button" title="Google一下" value="Google"/>
+          </span>`),
         StyleCode: `#${CONST.rndidName}{height: 44px; width: 120px; margin: 2px 10px 2px 0;} #${CONST.bdyx} input, #${CONST.ggyx} input{cursor: pointer; width: auto 60px; height: 40px; background-color: #f7faff; border: 1px solid #0095B7; color: #0095B7; margin-left: -1px; font-family: 'Microsoft YaHei'!important; font-size: 16px; font-weight: 700; border-radius: 4px;} .scrollspan{height: 32px!important;} .scrollbars{height: 30px!important;} #${CONST.bdyx} input:hover, #${CONST.ggyx} input:hover{background-color: #fff; transition:border linear .1s,box-shadow linear .3s; box-shadow: 1px 1px 8px #08748D; border: 2px solid #0095B7; text-shadow: 0 0 1px #0095B7 !important; color:#0095B7;}`,
       },
       other: { SiteTypeID: 0 },
@@ -523,21 +519,20 @@
 
         function inUse_switch(_status, Name, Tips) {
           const inf = x => {
-            return String(
-              `<div class='${defCon.rName}'>
+            return String(`
+              <div class='${defCon.rName}'>
                   <dl>
                     <dt>温馨提示：</dt>
                     <dd>${Tips}已${x}完成，网页将在<b>3</b>秒后自动刷新！</dd>
                   </dl>
-                </div>`
-            );
+              </div>`);
           };
           if (_status) {
             GMsetValue(`${Name}`, 0);
-            GMnotification(inf('清除'), 'info', 3);
+            GMnotification(inf('\u6e05\u9664'), 'info', 3);
           } else {
             GMsetValue(`${Name}`, 1);
-            GMnotification(inf('添加'), 'info', 3);
+            GMnotification(inf('\u6dfb\u52a0'), 'info', 3);
           }
           setTimeout(() => {
             let loc = location.href.replace(/&timestamp=(\d+)/, '');
