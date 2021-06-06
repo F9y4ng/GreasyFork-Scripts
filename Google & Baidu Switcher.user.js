@@ -147,7 +147,9 @@
                 const w = window.open(url, "Update.Scripts");
                 if (autoclose) {
                   setTimeout(() => {
-                    window.opener = null;
+                    if (isGM) {
+                      window.opener = null;
+                    }
                     w ? w.close() : error("//-> window not exsits.");
                     GMnotification(
                       defCon.noticeHTML(
