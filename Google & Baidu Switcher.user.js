@@ -14,6 +14,8 @@
 // @include         *://*.google.*/search*
 // @include         *://*.google.*/webhp*
 // @include         *://www.baidu.com/*
+// @include         *://ipv6.baidu.com/*
+// @include         *://www1.baidu.com/*
 // @include         *://image.baidu.com/*
 // @include         *://*.bing.com/*
 // @exclude         *://*.google.*/sorry/*
