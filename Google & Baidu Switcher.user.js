@@ -260,7 +260,6 @@
     if (isVersionDetection) {
       result = m === undefined ? isVersionDetection : Boolean(m);
     } else {
-      GMsetValue('_is_Ver_Det_', false);
       result = false;
     }
     if (result) {
