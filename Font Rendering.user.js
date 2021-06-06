@@ -19,7 +19,7 @@
 // @run-at          document-start
 // ==/UserScript==
 
-'use strict';
+"use strict";
 
 (function () {
   /* 你可以自定义以下内容 */
@@ -35,38 +35,38 @@
   const isdebug = false;
   const debug = isdebug ? console.log.bind(console) : () => {};
   const rndClass = randString(10, true);
-  let shadow = '';
+  let shadow = "";
   shadow_r = parseFloat(shadow_r);
   if (!isNaN(shadow_r) && shadow_r !== 0) {
     shadow = `text-shadow: -1px 1px ${shadow_r}px ${shadow_c}, 1px 1px ${shadow_r}px ${shadow_c}, 1px -1px ${shadow_r}px ${shadow_c}, -1px -1px ${shadow_r}px ${shadow_c} !important;`;
   }
-  let stroke = '';
+  let stroke = "";
   stroke_r = parseFloat(stroke_r);
   if (!isNaN(stroke_r) && stroke_r > 0 && stroke_r <= 1.0) {
     stroke = `text-stroke: ${stroke_r}px !important;-webkit-text-stroke: ${stroke_r}px !important;-webkit-text-stroke: initial;text-fill-color: currentcolor;-webkit-text-fill-color: currentcolor;`;
   }
-  let smoothing = '';
+  let smoothing = "";
   if (smooth_i) {
     smoothing = `-webkit-font-smoothing: antialiased;-moz-osx-font-smoothing: grayscale;`;
   }
   const tshadow = `${cssfun} {${shadow}font-family: "PingFang SC","Microsoft YaHei",sans-serif!important;${stroke}${smoothing}}`;
 
-  addStyle(tshadow, `${rndClass}`, 'head');
+  addStyle(tshadow, `${rndClass}`, "head");
 
   const callback = () => {
     if (document.querySelector(`.${rndClass}`)) {
-      debug('//-> Already Insert CSS.');
+      debug("//-> Already Insert CSS.");
     } else {
-      addStyle(tshadow, `${rndClass}`, 'head');
+      addStyle(tshadow, `${rndClass}`, "head");
     }
   };
   const opts = { childList: true, subtree: true };
   new MutationObserver(callback).observe(document, opts);
 
   function randString(n, v, r) {
-    let s = '';
-    let a = '0123456789';
-    let b = 'abcdefghijklmnopqrstuvwxyz';
+    let s = "";
+    let a = "0123456789";
+    let b = "abcdefghijklmnopqrstuvwxyz";
     let c = b.toUpperCase();
     n = Number.isFinite(n) ? n : 10;
     v ? (r = b + c) : (r = a + b + a + c);
@@ -80,22 +80,22 @@
     RAFInterval(
       () => {
         let addTo = document.querySelector(addToTarget);
-        if (typeof addToTarget === 'undefined') {
+        if (typeof addToTarget === "undefined") {
           addTo = document.head || document.body || document.documentElement || document;
         }
         isReload = isReload || false;
-        initType = initType || 'text/css';
-        if (typeof addToTarget === 'undefined' || (typeof addToTarget !== 'undefined' && document.querySelector(addToTarget) !== null)) {
+        initType = initType || "text/css";
+        if (typeof addToTarget === "undefined" || (typeof addToTarget !== "undefined" && document.querySelector(addToTarget) !== null)) {
           if (isReload === true) {
             safeRemove(`.${className}`);
           } else if (isReload === false && document.querySelector(`.${className}`) !== null) {
             return true;
           }
-          const cssNode = document.createElement('style');
+          const cssNode = document.createElement("style");
           if (className !== null) {
             cssNode.className = className;
           }
-          cssNode.setAttribute('type', initType);
+          cssNode.setAttribute("type", initType);
           cssNode.innerHTML = css;
           try {
             addTo.appendChild(cssNode);
