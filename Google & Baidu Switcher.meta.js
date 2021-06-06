@@ -1,7 +1,8 @@
 // ==UserScript==
-// @version    3.0.20210606.1
-// @name    Google & baidu Switcher (ALL in One)
-// @name:en    Google & baidu & Bing Switcher (ALL in One)
-// @name:zh-TW    谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
-// @namespace    https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/Google_baidu_Switcher_(ALL_in_One)
+// @version     3.0.20210606.1
+// @name        Google & baidu Switcher (ALL in One)
+// @name:en     Google & baidu & Bing Switcher (ALL in One)
+// @name:zh-TW  谷歌搜索、百度搜索、必應搜索的聚合跳轉集合工具
+// @namespace   https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/Google_baidu_Switcher_(ALL_in_One)
+// @note        1、新增animate.css，压缩CSS.\n2、新增更新内容提示。\n3、修正bugs.
 // ==/UserScript==
