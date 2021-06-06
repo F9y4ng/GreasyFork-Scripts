@@ -39,9 +39,9 @@
 // @run-at          document-start
 // ==/UserScript==
 
-"use strict";
-
 !(function () {
+  "use strict";
+
   /* customize */
 
   const isVersionDetection = true; // Set "false" to turn off the Version Detection forever.
