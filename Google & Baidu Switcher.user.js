@@ -39,7 +39,7 @@
 // @run-at          document-start
 // ==/UserScript==
 
-'use strict';
+"use strict";
 
 !(function () {
   /* customize */
@@ -52,7 +52,7 @@
   let GMsetValue, GMgetValue, GMregisterMenuCommand, GMunregisterMenuCommand, GMnotification, GMopenInTab;
   const GMinfo = GM_info;
   const handlerInfo = GMinfo.scriptHandler;
-  const isGM = Boolean(handlerInfo.toLowerCase() === 'greasemonkey');
+  const isGM = Boolean(handlerInfo.toLowerCase() === "greasemonkey");
   const debug = isdebug ? console.log.bind(console) : () => {};
   const error = isdebug ? console.error.bind(console) : () => {};
   const defCon = {
@@ -60,11 +60,11 @@
     scriptName: GMinfo.script.name,
     curVersion: GMinfo.script.version,
     support: GMinfo.script.supportURL,
-    isNoticed: sessionStorage.getItem('nCount') | 0,
+    isNoticed: sessionStorage.getItem("nCount") | 0,
     isNeedUpdate: 0,
     fetchResult: true,
-    lastRuntime: new Date().toLocaleString('en-US', {
-      timeZoneName: 'short',
+    lastRuntime: new Date().toLocaleString("en-US", {
+      timeZoneName: "short",
       hour12: false,
     }),
     titleCase: (str, bool) => {
@@ -79,9 +79,9 @@
     },
     randString: (n, v, r) => {
       // v: true for only letters.
-      let s = '';
-      let a = '0123456789';
-      let b = 'abcdefghijklmnopqrstuvwxyz';
+      let s = "";
+      let a = "0123456789";
+      let b = "abcdefghijklmnopqrstuvwxyz";
       let c = b.toUpperCase();
       n = Number.isFinite(n) ? n : 10;
       v ? (r = b + c) : (r = a + b + a + c);
@@ -112,15 +112,15 @@
     GMopenInTab = GM_openInTab;
   }
 
-  GMnotification = (text = '', type = 'info', closeWith = true, Interval = 0, timeout = 30, url = '', autoclose = false, closeToreload = false) => {
+  GMnotification = (text = "", type = "info", closeWith = true, Interval = 0, timeout = 30, url = "", autoclose = false, closeToreload = false) => {
     try {
       new NoticeJs({
         text: text,
         type: type,
-        closeWith: closeWith ? ['button'] : ['click'],
+        closeWith: closeWith ? ["button"] : ["click"],
         timeout: timeout ? timeout : 30,
         width: 400,
-        position: 'bottomRight',
+        position: "bottomRight",
         callbacks: {
           onShow: [
             function () {
@@ -138,18 +138,18 @@
           onClick: [
             function () {
               if (url) {
-                const w = window.open(url, 'Update.Scripts');
+                const w = window.open(url, "Update.Scripts");
                 if (autoclose) {
                   setTimeout(() => {
                     window.opener = null;
-                    w ? w.close() : error('//-> window not exsits.');
+                    w ? w.close() : error("//-> window not exsits.");
                     GMnotification(
                       defCon.noticeHTML(
                         `<dd>如果您已更新了脚本，请点击<a href="javascript:void(0)" \
                         onclick="location.reload()" class="im"\
                         >这里</a>刷新使其生效。</a></dd>`
                       ),
-                      'info',
+                      "info",
                       true,
                       0,
                       200
@@ -169,7 +169,7 @@
         },
       }).show();
     } catch (e) {
-      error('//-> GMnotification error:\n', e);
+      error("//-> GMnotification error:\n", e);
     }
   };
 
@@ -177,11 +177,11 @@
 
   console.info(
     `%c[GB-Init]%c\nVersion: ${defCon.curVersion} %c[%s]%c\nExtension: %s\nlastRuntime: ${defCon.lastRuntime}`,
-    'font-weight:bold;color:dodgerblue',
-    'color:0',
-    'color:snow',
+    "font-weight:bold;color:dodgerblue",
+    "color:0",
+    "color:snow",
     checkVersion() instanceof Object === isVersionDetection,
-    'color:0',
+    "color:0",
     defCon.titleCase(handlerInfo)
   );
 
@@ -190,10 +190,10 @@
   function fetchVersion(u) {
     return new Promise((e, t) => {
       fetch(u, {
-        method: 'GET',
-        mode: 'cors',
-        cache: 'no-store',
-        credentials: 'omit',
+        method: "GET",
+        mode: "cors",
+        cache: "no-store",
+        credentials: "omit",
       })
         .then(e => {
           if (!e.ok) {
@@ -224,15 +224,15 @@
           }
         })
         .catch(e => {
-          error('//-> fetchVersion() error:\n', e);
+          error("//-> fetchVersion() error:\n", e);
           t();
         });
     });
   }
 
   function compareVersion(current, compare) {
-    let compare_array = compare.split('.');
-    let current_array = current.split('.');
+    let compare_array = compare.split(".");
+    let current_array = current.split(".");
     let upgradeID = 0;
     if (compare_array.length === current_array.length) {
       for (let i = 0; i < compare_array.length; i++) {
@@ -256,12 +256,8 @@
 
   async function checkVersion(s = false) {
     let t, result;
-    const m = await GMgetValue('_is_Ver_Det_');
-    if (isVersionDetection) {
-      result = m === undefined ? isVersionDetection : Boolean(m);
-    } else {
-      result = false;
-    }
+    const m = await GMgetValue("_is_Ver_Det_");
+    isVersionDetection ? (result = m === undefined ? isVersionDetection : Boolean(m)) : (result = false);
     if (result) {
       t = await fetchVersion(`https://greasyfork.org/scripts/12909/code/${defCon.randString(32)}.meta.js`).catch(async () => {
         defCon.fetchResult = false;
@@ -269,21 +265,21 @@
       if (!defCon.fetchResult) {
         t = await fetchVersion(`https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`).catch(
           async () => {
-            t = [0, defCon.curVersion, ''];
+            t = [0, defCon.curVersion, ""];
           }
         );
       }
-      if (typeof t !== 'undefined') {
+      if (typeof t !== "undefined") {
         defCon.isNeedUpdate = t[0];
         const lastestVersion = t[1];
-        const updateUrl = t[2].replace('meta', 'user');
+        const updateUrl = t[2].replace("meta", "user");
         const recheckURLs = new URL(
           updateUrl
-            .replace('raw.githubusercontent', 'github')
-            .replace('master', 'blob/master')
-            .replace(/code\/[^/]+\.js/, '')
+            .replace("raw.githubusercontent", "github")
+            .replace("master", "blob/master")
+            .replace(/code\/[^/]+\.js/, "")
         );
-        const sourceSite = defCon.titleCase(recheckURLs.hostname).split('.')[0];
+        const sourceSite = defCon.titleCase(recheckURLs.hostname).split(".")[0];
         switch (defCon.isNeedUpdate) {
           case 2:
             if (!s) {
@@ -295,13 +291,13 @@
                     `If you no longer need the update prompt, please set "isVersionDetection" to "false" in your local code!\n\n` +
                     `[${sourceSite}]`
                 ),
-                'font-weight:bold;color:crimson',
-                'font-weight:bold;color:0',
-                'color:0',
-                'font-weight:bold;color:tomato',
-                'color:0',
-                'font-weight:bold;color:darkred',
-                'color:0'
+                "font-weight:bold;color:crimson",
+                "font-weight:bold;color:0",
+                "color:0",
+                "font-weight:bold;color:tomato",
+                "color:0",
+                "font-weight:bold;color:darkred",
+                "color:0"
               );
             }
             if (defCon.isNoticed < 2 || s) {
@@ -316,7 +312,7 @@
                       您需要在“脚本更新源”覆盖安装新版本后，从脚本菜单重新启用自动检测。</dd>\
                       <dd style="text-align: center"><img src="https://z3.ax1x.com/2021/06/03/28UFHJ.jpg" alt="开启自动检测"></dd>`
                 ),
-                'error',
+                "error",
                 true,
                 0,
                 350,
@@ -324,8 +320,8 @@
                 false,
                 true
               );
-              GMsetValue('_is_Ver_Det_', false);
-              sessionStorage.setItem('nCount', ++defCon.isNoticed);
+              GMsetValue("_is_Ver_Det_", false);
+              sessionStorage.setItem("nCount", ++defCon.isNoticed);
             }
             break;
           case 1:
@@ -336,10 +332,10 @@
                     `Please upgrade from your update source to the latest version.\n` +
                     `[${sourceSite}]`
                 ),
-                'font-weight:bold;color:crimson',
-                'color:0',
-                'color:crimson',
-                'color:0'
+                "font-weight:bold;color:crimson",
+                "color:0",
+                "color:crimson",
+                "color:0"
               );
             }
             if (defCon.isNoticed < 2 || s) {
@@ -350,23 +346,23 @@
                       请点击这里进行直链安装升级。</dd>\
                       <dd>[ ${sourceSite} ]</dd>`
                 ),
-                'warning',
+                "warning",
                 false,
                 0,
                 50,
                 `${updateUrl}`,
                 true
               );
-              sessionStorage.setItem('nCount', ++defCon.isNoticed);
+              sessionStorage.setItem("nCount", ++defCon.isNoticed);
             }
             break;
           default:
             debug(
               `%c[GB-Update]%c\nCurretVersion: %c${defCon.curVersion}%c is up-to-date!`,
-              'font-weight:bold;color:darkcyan',
-              'color:0',
-              'color:red',
-              'color:0'
+              "font-weight:bold;color:darkcyan",
+              "color:0",
+              "color:red",
+              "color:0"
             );
             if (s) {
               GMnotification(
@@ -375,25 +371,25 @@
                       <dd><span>更新成功</span>当前版本 <i>${defCon.curVersion}</i> 已为最新!</dd>\
                       <dd>[ ${sourceSite} ]</dd>`
                 ),
-                'success'
+                "success"
               );
             }
             break;
         }
       } else {
         console.error(
-          '%c[GB-Update]\n%cSome Unexpected Errors Caused Version Detection Failure.\nProbably Caused By NetworkError.',
-          'font-weight:bold;color:red',
-          'font-weight:bold;color:darkred'
+          "%c[GB-Update]\n%cSome Unexpected Errors Caused Version Detection Failure.\nProbably Caused By NetworkError.",
+          "font-weight:bold;color:red",
+          "font-weight:bold;color:darkred"
         );
       }
     } else {
       console.warn(
         `%c[GB-Update]%c\nVersion detection has been turned off forever. %cBye%c!`,
-        'font-weight:bold;color:red',
-        'color:0',
-        'color:darkred',
-        'color:0'
+        "font-weight:bold;color:red",
+        "color:0",
+        "color:darkred",
+        "color:0"
       );
     }
   }
@@ -403,8 +399,8 @@
   !(async function () {
     /* Get Promise Value */
 
-    const is_Use_Bing = parseInt(await GMgetValue('_if_Use_Bing_'));
-    const is_Ver_Det = await GMgetValue('_is_Ver_Det_');
+    const is_Use_Bing = parseInt(await GMgetValue("_if_Use_Bing_"));
+    const is_Ver_Det = await GMgetValue("_is_Ver_Det_");
 
     /* Set Default Value */
 
@@ -418,11 +414,11 @@
       isVDResult: isVersionDetection ? (is_Ver_Det === undefined ? isVersionDetection : Boolean(is_Ver_Det)) : false,
       isUseBing: (() => {
         if (isNaN(is_Use_Bing)) {
-          GMsetValue('_if_Use_Bing_', 0);
+          GMsetValue("_if_Use_Bing_", 0);
           console.warn(
-            '%c[GB-Warning]%c\nThis is your first visit, the Bing search button will not be inserted by default.',
-            'font-weight:bold;color:salmon',
-            'color:1'
+            "%c[GB-Warning]%c\nThis is your first visit, the Bing search button will not be inserted by default.",
+            "font-weight:bold;color:salmon",
+            "color:1"
           );
           return false;
         } else {
@@ -434,19 +430,19 @@
 
     let curretSite = {
       SiteTypeID: 0,
-      SiteName: '',
-      SplitName: '',
-      MainType: '',
-      HtmlCode: '',
-      StyleType: '',
+      SiteName: "",
+      SplitName: "",
+      MainType: "",
+      HtmlCode: "",
+      StyleType: "",
     };
 
     const listSite = {
       baidu: {
         SiteTypeID: 1,
-        SiteName: 'Baidu',
-        SplitName: 'tn',
-        MainType: '.s_btn_wr',
+        SiteName: "Baidu",
+        SplitName: "tn",
+        MainType: ".s_btn_wr",
         HtmlCode: CONST.isUseBing
           ? String(`
             <span id="${CONST.ggyx}">
@@ -465,8 +461,8 @@
       },
       google: {
         SiteTypeID: 2,
-        SiteName: 'Google',
-        SplitName: 'tbm',
+        SiteName: "Google",
+        SplitName: "tbm",
         MainType: "form button[type='submit']",
         HtmlCode: CONST.isUseBing
           ? String(`
@@ -486,9 +482,9 @@
       },
       bing: {
         SiteTypeID: 3,
-        SiteName: 'Bing',
-        SplitName: 'undefined',
-        MainType: '#sb_go_par',
+        SiteName: "Bing",
+        SplitName: "undefined",
+        MainType: "#sb_go_par",
         HtmlCode: String(`
           <span id="${CONST.bdyx}">
               <input type="button" title="百度一下" value="百度"/>
@@ -508,12 +504,12 @@
       OTHERS: 0,
     };
 
-    debug('//-> Initialization complete, start running...');
+    debug("//-> Initialization complete, start running...");
 
-    if (location.host.includes('.baidu.com')) {
+    if (location.host.includes(".baidu.com")) {
       // Include baidu
       curretSite = listSite.baidu;
-    } else if (location.host.includes('.bing.com')) {
+    } else if (location.host.includes(".bing.com")) {
       // Include bing
       curretSite = listSite.bing;
     } else if (/^([0-9a-z-]+\.)?google(\.[a-z]{2,4}){1,3}$/.test(location.host)) {
@@ -542,10 +538,10 @@
         };
         if (_status) {
           GMsetValue(`${Name}`, 0);
-          GMnotification(info('\u6e05\u9664'), 'info', true, 3);
+          GMnotification(info("\u6e05\u9664"), "info", true, 3);
         } else {
           GMsetValue(`${Name}`, 1);
-          GMnotification(info('\u6dfb\u52a0'), 'success', true, 3);
+          GMnotification(info("\u6dfb\u52a0"), "success", true, 3);
         }
         setTimeout(() => {
           location.reload();
@@ -553,7 +549,7 @@
       },
 
       menuRemove: x => {
-        x ? GMunregisterMenuCommand(x) : error('//-> menuRemove() not found item: %s.', typeof x);
+        x ? GMunregisterMenuCommand(x) : error("//-> menuRemove() not found item: %s.", typeof x);
       },
 
       registerMenuCommand: function (e) {
@@ -565,11 +561,11 @@
         this.menuRemove(in_Use_feedBack_ID);
         this.menuRemove(in_UpdateCheck_ID);
 
-        e ? (_Use_Bing__ = '\ufff0\u2705 【已开启】') : (_Use_Bing__ = '\ufff0\u274c 【已关闭】');
+        e ? (_Use_Bing__ = "\ufff0\u2705 【已开启】") : (_Use_Bing__ = "\ufff0\u274c 【已关闭】");
 
         _use_Bing_ID = GMregisterMenuCommand(`${_Use_Bing__}Bing 搜索跳转`, () => {
           if (!Already) {
-            this.inUse_switch(e, '_if_Use_Bing_', 'Bing 按钮');
+            this.inUse_switch(e, "_if_Use_Bing_", "Bing 按钮");
             Already = true;
           }
         });
@@ -577,13 +573,13 @@
         if (isVersionDetection) {
           // check VDR value to insert menu.
           if (CONST.isVDResult) {
-            in_UpdateCheck_ID = GMregisterMenuCommand('\ufff5\ud83d\udd0e 【检查】版本更新', () => {
+            in_UpdateCheck_ID = GMregisterMenuCommand("\ufff5\ud83d\udd0e 【检查】版本更新", () => {
               checkVersion(true);
             });
           } else {
-            in_UpdateCheck_ID = GMregisterMenuCommand('\ufff5\ud83d\udcdb 【已关闭】版本更新 \u267b 重新开启', () => {
-              GMsetValue('_is_Ver_Det_', true);
-              GMnotification(defCon.noticeHTML(`<dd>更新检测正在重新打开，网页将在<em>3</em>秒后自动刷新！</dd>`), 'info', true, 3);
+            in_UpdateCheck_ID = GMregisterMenuCommand("\ufff5\ud83d\udcdb 【已关闭】版本更新 \u267b 重新开启", () => {
+              GMsetValue("_is_Ver_Det_", true);
+              GMnotification(defCon.noticeHTML(`<dd>更新检测正在重新打开，网页将在<em>3</em>秒后自动刷新！</dd>`), "info", true, 3);
               setTimeout(() => {
                 sessionStorage.clear();
                 location.reload();
@@ -591,8 +587,8 @@
             });
           }
         }
-        in_Use_feedBack_ID = GMregisterMenuCommand('\ufff9\ud83e\udde1 【提建议】说出您的意见！', () => {
-          GMopenInTab(`${defCon.support ? defCon.support : 'https://greasyfork.org/scripts/12909/feedback'}`, {
+        in_Use_feedBack_ID = GMregisterMenuCommand("\ufff9\ud83e\udde1 【提建议】说出您的意见！", () => {
+          GMopenInTab(`${defCon.support ? defCon.support : "https://greasyfork.org/scripts/12909/feedback"}`, {
             active: true,
             insert: true,
             setParent: true,
@@ -609,10 +605,10 @@
         }
 
         console.log(
-          '%c[GB-Status]%c\nInsert the Bing Search Button: %c%s',
-          'font-weight:bold;color:darkorange',
-          'color:0',
-          'font-weight:bold;color:red',
+          "%c[GB-Status]%c\nInsert the Bing Search Button: %c%s",
+          "font-weight:bold;color:darkorange",
+          "color:0",
+          "font-weight:bold;color:red",
           defCon.titleCase(CONST.isUseBing && !CONST.isSecurityPolicy)
         );
       },
@@ -631,31 +627,31 @@
           const doHtml = curretSite.HtmlCode;
           const doStyName = `${CONST.rndclassName}`;
           const doStyle = curretSite.StyleCode + CONST.noticeCss;
-          const userSpan = document.createElement('span');
+          const userSpan = document.createElement("span");
           userSpan.id = `${CONST.rndidName}`;
           userSpan.innerHTML = doHtml;
           const SpanID = `#${userSpan.id}`;
           let Target = document.querySelector(getTarget);
 
-          addStyle(doStyle, doStyName, 'head');
+          addStyle(doStyle, doStyName, "head");
 
           if (!document.querySelector(SpanID) && getSearchValue().length > 0 && Target) {
             if (/^(nws|vid|bks)$/.test(CONST.vim.trim())) {
               Target = Target.parentNode.parentNode.firstChild;
               Target.insertBefore(userSpan, Target.firstChild);
               if (document.querySelector(SpanID)) {
-                document.querySelector(SpanID).setAttribute('style', 'float:right');
+                document.querySelector(SpanID).setAttribute("style", "float:right");
               }
             } else {
               insterAfter(userSpan, Target);
               // Baidu image fixed
               if (document.querySelector(SpanID) && /^baiduimage$/.test(CONST.vim.trim())) {
-                document.querySelector(SpanID).setAttribute('style', 'margin-left:12px');
+                document.querySelector(SpanID).setAttribute("style", "margin-left:12px");
               }
               // Bing image fixed
-              if (document.querySelector('.b_searchboxForm') && /^images$/.test(CONST.vim.trim())) {
-                if (location.href.replace(/view=detailV2/, '') !== location.href) {
-                  document.querySelector('.b_searchboxForm').setAttribute('style', 'width:640px');
+              if (document.querySelector(".b_searchboxForm") && /^images$/.test(CONST.vim.trim())) {
+                if (location.href.replace(/view=detailV2/, "") !== location.href) {
+                  document.querySelector(".b_searchboxForm").setAttribute("style", "width:640px");
                 }
               }
             }
@@ -663,28 +659,28 @@
             debug(`//-> searchManager $(Target): ${Target}`);
 
             document.querySelectorAll(`#${CONST.ggyx}, #${CONST.bbyx}, #${CONST.bdyx}`).forEach(per => {
-              per.addEventListener('click', () => {
-                let gotoUrl = 'about:blank';
+              per.addEventListener("click", () => {
+                let gotoUrl = "about:blank";
                 switch (per.id) {
                   case `${CONST.ggyx}`:
                     if (/^(baiduimage|images)$/.test(CONST.vim.trim())) {
-                      gotoUrl = 'https://www.google.com/search?hl=zh-CN&source=lnms&tbm=isch&sa=X&q=';
+                      gotoUrl = "https://www.google.com/search?hl=zh-CN&source=lnms&tbm=isch&sa=X&q=";
                     } else {
-                      gotoUrl = 'https://www.google.com/search?hl=zh-CN&source=hp&newwindow=1&q=';
+                      gotoUrl = "https://www.google.com/search?hl=zh-CN&source=hp&newwindow=1&q=";
                     }
                     break;
                   case `${CONST.bbyx}`:
                     if (/^(isch|baiduimage)$/.test(CONST.vim.trim())) {
-                      gotoUrl = 'https://cn.bing.com/images/search?first=1&tsc=ImageBasicHover&q=';
+                      gotoUrl = "https://cn.bing.com/images/search?first=1&tsc=ImageBasicHover&q=";
                     } else {
-                      gotoUrl = 'https://cn.bing.com/search?q=';
+                      gotoUrl = "https://cn.bing.com/search?q=";
                     }
                     break;
                   case `${CONST.bdyx}`:
                     if (/^(images|isch)$/.test(CONST.vim.trim())) {
-                      gotoUrl = 'https://image.baidu.com/search/index?tn=baiduimage&ps=1&ie=utf-8&word=';
+                      gotoUrl = "https://image.baidu.com/search/index?tn=baiduimage&ps=1&ie=utf-8&word=";
                     } else {
-                      gotoUrl = 'https://www.baidu.com/s?ie=utf-8&rqlang=cn&wd=';
+                      gotoUrl = "https://www.baidu.com/s?ie=utf-8&rqlang=cn&wd=";
                     }
                     break;
                   default:
@@ -700,7 +696,7 @@
           }
           return true;
         } catch (e) {
-          error('//-> searchManager.insertSearchButton() error:\n', e);
+          error("//-> searchManager.insertSearchButton() error:\n", e);
           return false;
         }
       },
@@ -708,17 +704,17 @@
       scrollDetect: function () {
         switch (curretSite.SiteTypeID) {
           case newSiteType.GOOGLE:
-            scrollButton(`#${CONST.rndidName}`, 'scrollspan', 35);
-            scrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, 'scrollbars', 35);
+            scrollButton(`#${CONST.rndidName}`, "scrollspan", 35);
+            scrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, "scrollbars", 35);
             if (CONST.isUseBing) {
-              scrollButton(`#${CONST.rndidName} #${CONST.bbyx} input`, 'scrollbars', 35);
+              scrollButton(`#${CONST.rndidName} #${CONST.bbyx} input`, "scrollbars", 35);
             }
             break;
           case newSiteType.BING:
             if (/^(images|videos)$/.test(CONST.vim.trim())) {
-              scrollButton(`#${CONST.rndidName}`, 'scrollspan', 50);
-              scrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, 'scrollbars', 50);
-              scrollButton(`#${CONST.rndidName} #${CONST.ggyx} input`, 'scrollbars', 50);
+              scrollButton(`#${CONST.rndidName}`, "scrollspan", 50);
+              scrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, "scrollbars", 50);
+              scrollButton(`#${CONST.rndidName} #${CONST.ggyx} input`, "scrollbars", 50);
             }
             break;
           default:
@@ -733,10 +729,10 @@
           if (curretSite.SiteTypeID !== newSiteType.OTHERS) {
             if (CONST.isSecurityPolicy) {
               console.log(
-                '%c[GB-Prohibit]%c\nBlocked By: %c%s Security Policy',
-                'font-weight:bold;color:indigo',
-                'color:0',
-                'font-weight:bold;color:darkred',
+                "%c[GB-Prohibit]%c\nBlocked By: %c%s Security Policy",
+                "font-weight:bold;color:indigo",
+                "color:0",
+                "font-weight:bold;color:darkred",
                 curretSite.SiteName
               );
               return;
@@ -747,15 +743,15 @@
                     debug(`//-> Already Insert Button & CSS.`);
                   } else {
                     debug(
-                      '%c[GB-MutationObserver]\n%c(%c%s%c has changed: %c%s%c)',
-                      'font-weight:bold;color:olive',
-                      'color:0',
-                      'color:olive',
+                      "%c[GB-MutationObserver]\n%c(%c%s%c has changed: %c%s%c)",
+                      "font-weight:bold;color:olive",
+                      "color:0",
+                      "color:olive",
                       mutation.type,
-                      'color:0',
-                      'font-weight:bold;color:red',
+                      "color:0",
+                      "font-weight:bold;color:red",
                       defCon.titleCase(this.insertSearchButton() && this.scrollDetect()),
-                      'color:0'
+                      "color:0"
                     );
                   }
                 });
@@ -773,17 +769,17 @@
                 true
               );
               console.log(
-                '%c[GB-Switch]%c\nWe are using The %c%s%c Search Engine.',
-                'font-weight:bold;color:Green',
-                'color:0',
-                'font-weight:bold;color:darkcyan',
+                "%c[GB-Switch]%c\nWe are using The %c%s%c Search Engine.",
+                "font-weight:bold;color:Green",
+                "color:0",
+                "font-weight:bold;color:darkcyan",
                 curretSite.SiteName,
-                'font-weight:normal;color:0'
+                "font-weight:normal;color:0"
               );
             }
           }
         } catch (e) {
-          error('//-> searchManager.doSwitch() error:\n', e);
+          error("//-> searchManager.doSwitch() error:\n", e);
         }
       },
 
@@ -804,13 +800,13 @@
           H += Y.offsetTop;
           Y = Y.offsetParent;
         }
-        document.addEventListener('scroll', () => {
+        document.addEventListener("scroll", () => {
           const s = document.body.scrollTop || document.documentElement.scrollTop;
           debug(`//-> H=${H} S=${s} H-S=(${H - s})`);
           if (s > H + scrollSize) {
-            oDiv.setAttribute('class', classNameIn);
+            oDiv.setAttribute("class", classNameIn);
           } else {
-            oDiv.removeAttribute('class');
+            oDiv.removeAttribute("class");
           }
         });
       }
@@ -821,22 +817,22 @@
         () => {
           try {
             let addTo = document.querySelector(addToTarget);
-            if (typeof addToTarget === 'undefined') {
+            if (typeof addToTarget === "undefined") {
               addTo = document.head || document.body || document.documentElement || document;
             }
             isReload = isReload || false;
-            initType = initType || 'text/css';
-            if (typeof addToTarget === 'undefined' || (typeof addToTarget !== 'undefined' && document.querySelector(addToTarget))) {
+            initType = initType || "text/css";
+            if (typeof addToTarget === "undefined" || (typeof addToTarget !== "undefined" && document.querySelector(addToTarget))) {
               if (isReload === true) {
                 safeRemove(`.${className}`);
               } else if (isReload === false && document.querySelector(`.${className}`)) {
                 return true;
               }
-              const cssNode = document.createElement('style');
+              const cssNode = document.createElement("style");
               if (className !== null) {
                 cssNode.className = className;
               }
-              cssNode.setAttribute('type', initType);
+              cssNode.setAttribute("type", initType);
               cssNode.innerHTML = css;
               addTo.appendChild(cssNode);
             }
@@ -864,27 +860,27 @@
       try {
         func();
       } catch (e) {
-        error('//-> Function error:\n', e);
+        error("//-> Function error:\n", e);
       }
     }
 
     function getSearchValue() {
-      let val = '';
+      let val = "";
       document.querySelectorAll('input[name="wd"], input[name="q"], input[name="word"]').forEach((item, index, arr) => {
         val = arr[0].value;
         if (val) {
           debug(`//-> INPUT: ${val} - INDEX: ${index} - OLD: ${item.value}`);
         }
       });
-      if (val === null || val === '' || typeof val === 'undefined') {
-        const kvl = location.search.substr(1).split('&');
+      if (val === null || val === "" || typeof val === "undefined") {
+        const kvl = location.search.substr(1).split("&");
         for (let i = 0; i < kvl.length; i++) {
-          let value = kvl[i].replace(/^(wd|word|kw|query|q)=/, '');
+          let value = kvl[i].replace(/^(wd|word|kw|query|q)=/, "");
           if (value !== kvl[i]) {
             val = value;
           }
         }
-        val = val.replace(/\+/g, ' ');
+        val = val.replace(/\+/g, " ");
         if (val) {
           debug(`//-> QUERY: ${val}`);
         }
@@ -893,25 +889,25 @@
     }
 
     function GetUrlParam(paraName) {
-      if (paraName === 'undefined') {
+      if (paraName === "undefined") {
         const parameter = document.location.pathname.toString();
-        const arr = parameter.split('/');
+        const arr = parameter.split("/");
         return arr[1];
       } else {
         const url = document.location.toString();
-        const arrObj = url.split('?');
+        const arrObj = url.split("?");
         if (arrObj.length > 1) {
-          const arrPara = arrObj[1].split('&');
+          const arrPara = arrObj[1].split("&");
           let arr;
           for (let i = 0; i < arrPara.length; i++) {
-            arr = arrPara[i].split('=');
+            arr = arrPara[i].split("=");
             if (arr !== null && arr[0] === paraName) {
               return arr[1];
             }
           }
-          return '';
+          return "";
         } else {
-          return '';
+          return "";
         }
       }
     }
@@ -958,13 +954,13 @@
 
     !(function () {
       try {
-        debug('//-> Insert Ext Menu.');
+        debug("//-> Insert Ext Menu.");
         menuManager.init();
-        debug('//-> Insert Search Button.');
+        debug("//-> Insert Search Button.");
         searchManager.init();
         window.onload = () => {
           if (isVersionDetection && !CONST.isVDResult) {
-            debug('//-> Ready to Insert Random Tips.');
+            debug("//-> Ready to Insert Random Tips.");
             if (Math.ceil(Math.random() * 20) > 18) {
               GMnotification(
                 defCon.noticeHTML(
@@ -972,7 +968,7 @@
                   才能恢复自动更新。</dd><dd style="text-align: center" title="随机提示"><img\
                   src="https://z3.ax1x.com/2021/06/03/28UFHJ.jpg" alt="开启自动检测"></dd>`
                 ),
-                'info',
+                "info",
                 true,
                 0,
                 80
@@ -981,7 +977,7 @@
           }
         };
       } catch (e) {
-        console.error('%c[GB-Error]%c\n%s', 'font-weight:bold;color:red', 'font-weight:bold;color:darkred', e);
+        console.error("%c[GB-Error]%c\n%s", "font-weight:bold;color:red", "font-weight:bold;color:darkred", e);
       }
     })();
   })();
