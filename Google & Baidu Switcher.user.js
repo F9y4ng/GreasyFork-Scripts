@@ -504,14 +504,18 @@
         SiteName: "Bing",
         SplitName: "undefined",
         MainType: "#sb_go_par",
-        HtmlCode: String(`
+        HtmlCode: CONST.isUseBing
+          ? String(`
           <span id="${CONST.bdyx}">
               <input type="button" title="百度一下" value="百度"/>
           </span>
           <span id="${CONST.ggyx}">
               <input type="button" title="Google一下" value="Google"/>
-          </span>`),
-        StyleCode: `#${CONST.rndidName}{height:44px;width:120px;margin: 2px 10px 2px 0}#${CONST.bdyx} input,#${CONST.ggyx} input{cursor:pointer;width:auto 60px;height:40px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;margin-left:-1px;font-family:'Microsoft YaHei'!important;font-size:16px;font-weight:700;border-radius:4px}.scrollspan{height:32px!important}.scrollbars{height:30px!important}#${CONST.bdyx} input:hover,#${CONST.ggyx} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border: 2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7}`,
+          </span>`)
+          : ``,
+        StyleCode: CONST.isUseBing
+          ? `#${CONST.rndidName}{height:44px;width:120px;margin: 2px 10px 2px 0}#${CONST.bdyx} input,#${CONST.ggyx} input{cursor:pointer;width:auto 60px;height:40px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;margin-left:-1px;font-family:'Microsoft YaHei'!important;font-size:16px;font-weight:700;border-radius:4px}.scrollspan{height:32px!important}.scrollbars{height:30px!important}#${CONST.bdyx} input:hover,#${CONST.ggyx} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border: 2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7}`
+          : ``,
       },
       other: { SiteTypeID: 0 },
     };
@@ -669,7 +673,7 @@
               }
               // Bing image fixed
               if (document.querySelector(".b_searchboxForm") && /^images$/.test(CONST.vim.trim())) {
-                if (location.href.replace(/view=detailV2/, "") !== location.href) {
+                if (location.href.replace(/view=detailV2/, "") !== location.href && CONST.isUseBing) {
                   document.querySelector(".b_searchboxForm").setAttribute("style", "width:640px");
                 }
               }
@@ -730,7 +734,7 @@
             }
             break;
           case newSiteType.BING:
-            if (/^(images|videos)$/.test(CONST.vim.trim())) {
+            if (/^(images|videos)$/.test(CONST.vim.trim()) && CONST.isUseBing) {
               scrollButton(`#${CONST.rndidName}`, "scrollspan", 50);
               scrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, "scrollbars", 50);
               scrollButton(`#${CONST.rndidName} #${CONST.ggyx} input`, "scrollbars", 50);
