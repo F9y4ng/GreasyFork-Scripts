@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.0.20210606.2
+// @version         3.1.20210607.1
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en  Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
@@ -25,8 +25,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @require         https://cdn.jsdelivr.net/npm/notice.js@0.4.0/dist/notice.js
-// @note            新增animate动画效果，压缩代码中的CSS.\n新增更新内容提示。\n修正一些bugs.
+// @note            调整代码几处逻辑bugs.\n调整Noticejs的Css样式。\n取消引用外链js, 重构代码且修正NoticeJs引发TypeError错误。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -65,7 +64,7 @@
     support: GMinfo.script.supportURL,
     isNoticed: sessionStorage.getItem("nCount") | 0,
     isNeedUpdate: 0,
-    updateNote: null,
+    updateNote: "",
     fetchResult: true,
     lastRuntime: new Date().toLocaleString("en-US", {
       timeZoneName: "short",
@@ -116,7 +115,7 @@
     GMopenInTab = GM_openInTab;
   }
 
-  GMnotification = (text = "", type = "info", closeWith = true, Interval = 0, timeout = 30, url = "", autoclose = false, closeToreload = false) => {
+  GMnotification = (text = "", type = "info", closeWith = true, Interval = 0, timeout = 30, url = "", autoclose = false, xToreload = false) => {
     try {
       new NoticeJs({
         text: text,
@@ -171,7 +170,7 @@
           ],
           onClose: [
             function () {
-              if (closeToreload) {
+              if (xToreload) {
                 location.reload();
               }
             },
@@ -280,7 +279,11 @@
       if (!defCon.fetchResult) {
         t = await fetchVersion(`https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`).catch(
           async () => {
-            t = [0, defCon.curVersion, ""];
+            console.error(
+              "%c[GB-Update]\n%cSome Unexpected Errors Caused Version Detection Failure.\nProbably Caused By NetworkError.",
+              "font-weight:bold;color:red",
+              "font-weight:bold;color:darkred"
+            );
           }
         );
       }
@@ -398,12 +401,6 @@
             }
             break;
         }
-      } else {
-        console.error(
-          "%c[GB-Update]\n%cSome Unexpected Errors Caused Version Detection Failure.\nProbably Caused By NetworkError.",
-          "font-weight:bold;color:red",
-          "font-weight:bold;color:darkred"
-        );
       }
     } else {
       console.warn(
@@ -447,7 +444,7 @@
           return Boolean(is_Use_Bing);
         }
       })(),
-      noticeCss: `@charset "UTF-8";.animated{animation-duration:1s;animation-fill-mode:both}.animated.infinite{animation-iteration-count:infinite}.animated.hinge{animation-duration:2s}.animated.bounceIn,.animated.bounceOut,.animated.flipOutX,.animated.flipOutY{animation-duration:.75s}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.fadeOut{animation-name:fadeOut}.noticejs-top{top:0;width:100%}.noticejs-top .item{border-radius:0!important;margin:0!important}.noticejs-topRight{top:10px;right:10px}.noticejs-topLeft{top:10px;left:10px}.noticejs-topCenter{top:10px;left:50%;transform:translate(-50%)}.noticejs-middleLeft,.noticejs-middleRight{right:10px;top:50%;transform:translateY(-50%)}.noticejs-middleLeft{left:10px}.noticejs-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.noticejs-bottom{bottom:0;width:100%}.noticejs-bottom .item{border-radius:0!important;margin:0!important}.noticejs-bottomRight{bottom:10px;right:10px}.noticejs-bottomLeft{bottom:10px;left:10px}.noticejs-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.noticejs{z-index:99999!important;font-family:Helvetica Neue,Helvetica,Arial,sans-serif}.noticejs .item{margin:0 0 10px;border-radius:3px;overflow:hidden}.noticejs .item .close{float:right;font-size:18px;font-weight:700;line-height:1;color:#fff;text-shadow:0 1px 0 #fff;opacity:1;margin-right:7px}.noticejs .item .close:hover{opacity:.5;color:#000}.noticejs .item a{color:#fff;border-bottom:1px dashed #fff}.noticejs .item a,.noticejs .item a:hover{text-decoration:none}.noticejs .success{background-color:#64ce83}.noticejs .success .noticejs-heading{background-color:#3da95c;color:#fff;padding:10px}.noticejs .success .noticejs-body{color:#fff;padding:10px!important}.noticejs .success .noticejs-body:hover{visibility:visible!important}.noticejs .success .noticejs-content{visibility:visible}.noticejs .info{background-color:#3ea2ff}.noticejs .info .noticejs-heading{background-color:#067cea;color:#fff;padding:10px}.noticejs .info .noticejs-body{color:#fff;padding:10px!important}.noticejs .info .noticejs-body:hover{visibility:visible!important}.noticejs .info .noticejs-content{visibility:visible}.noticejs .warning{background-color:#ff7f48}.noticejs .warning .noticejs-heading{background-color:#f44e06;color:#fff;padding:10px!important}.noticejs .warning .noticejs-body{color:#fff;padding:10px}.noticejs .warning .noticejs-body:hover{visibility:visible!important}.noticejs .warning .noticejs-content{visibility:visible}.noticejs .error{background-color:#e74c3c}.noticejs .error .noticejs-heading{background-color:#ba2c1d;color:#fff;padding:10px!important}.noticejs .error .noticejs-body{color:#fff;padding:10px}.noticejs .error .noticejs-body:hover{visibility:visible!important}.noticejs .error .noticejs-content{visibility:visible}.noticejs .progressbar{width:100%}.noticejs .progressbar .bar{width:1%;height:30px;background-color:#4caf50}.noticejs .success .noticejs-progressbar{width:100%;background-color:#64ce83;margin-top:-1px}.noticejs .success .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#3da95c}.noticejs .info .noticejs-progressbar{width:100%;background-color:#3ea2ff;margin-top:-1px}.noticejs .info .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#067cea}.noticejs .warning .noticejs-progressbar{width:100%;background-color:#ff7f48;margin-top:-1px}.noticejs .warning .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#f44e06}.noticejs .error .noticejs-progressbar{width:100%;background-color:#e74c3c;margin-top:-1px}.noticejs .error .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#ba2c1d}@keyframes noticejs-fadeOut{0%{opacity:1}to{opacity:0}}.noticejs-fadeOut{animation-name:noticejs-fadeOut}@keyframes noticejs-modal-in{to{opacity:.3}}@keyframes noticejs-modal-out{to{opacity:0}}.noticejs{position:fixed;z-index:10050;width:400px}.noticejs ::-webkit-scrollbar{width:8px}.noticejs ::-webkit-scrollbar-button{width:8px;height:5px}.noticejs ::-webkit-scrollbar-track{border-radius:10px}.noticejs ::-webkit-scrollbar-thumb{background:hsla(0,0%,100%,.5);border-radius:10px}.noticejs ::-webkit-scrollbar-thumb:hover{background:#fff}.noticejs-modal{position:fixed;width:100%;height:100%;background-color:#000;z-index:10000;opacity:.3;left:0;top:0}.noticejs-modal-open{opacity:0;animation:noticejs-modal-in .3s ease-out}.noticejs-modal-close{animation:noticejs-modal-out .3s ease-out;animation-fill-mode:forwards}.${defCon.rName}{padding:4px 4px 0 4px!important}.${defCon.rName} dl dt{margin:2px 0 8px 0!important;font-size:16px!important;font-weight:900!important}.${defCon.rName} dl dd{margin:3px 6px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${defCon.rName} dl dd em{color:#fff;font-family:Candara,sans-serif!important;font-size:24px!important;padding:0 5px}.${defCon.rName} dl dd span{font-weight:700;font-size:15px!important;margin-right:8px}.${defCon.rName} dl dd u{color:#ff8c00;font-weight:600;font-size:16px;text-decoration:none;padding:0 3px}.${defCon.rName} dl dd i{font-family:Candara,sans-serif!important;font-size:20px!important}.${defCon.rName} dl dd .im{color:gold;font-size:16px;font-weight:900;padding:0 3px}.${defCon.rName} ul{width:90%;display:inline-block;text-align:left;vertical-align:top;color:rgba(255, 255, 255, 0.5);padding:0.2em;margin:0;counter-reset:xxx 0}.${defCon.rName} li{list-style:none;font-style:italic!important;position:relative;padding:0 0 0 0.1em;margin:0 0 0 2px;-webkit-transition:.12s;transition:.12s}.${defCon.rName} li::before{content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-family:'Roboto Condensed';font-size:1em;-webkit-transition:.5s;transition:.5s}.${defCon.rName} .disappear{display:none}`,
+      noticeCss: `@charset "UTF-8";.animated{animation-duration:1s;animation-fill-mode:both}.animated.infinite{animation-iteration-count:infinite}.animated.hinge{animation-duration:2s}.animated.bounceIn,.animated.bounceOut,.animated.flipOutX,.animated.flipOutY{animation-duration:.75s}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.fadeOut{animation-name:fadeOut}.noticejs-top{top:0;width:100%}.noticejs-top .item{border-radius:0!important;margin:0!important}.noticejs-topRight{top:10px;right:10px}.noticejs-topLeft{top:10px;left:10px}.noticejs-topCenter{top:10px;left:50%;transform:translate(-50%)}.noticejs-middleLeft,.noticejs-middleRight{right:10px;top:50%;transform:translateY(-50%)}.noticejs-middleLeft{left:10px}.noticejs-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.noticejs-bottom{bottom:0;width:100%}.noticejs-bottom .item{border-radius:0!important;margin:0!important}.noticejs-bottomRight{bottom:10px;right:10px}.noticejs-bottomLeft{bottom:10px;left:10px}.noticejs-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.noticejs{z-index:99999!important;font-family:Helvetica Neue,Helvetica,Arial,sans-serif}.noticejs .item{margin:0 0 10px;border-radius:3px;overflow:hidden}.noticejs .item .close{float:right;font-size:18px;font-weight:700;line-height:1;color:#fff;text-shadow:0 1px 0 #fff;opacity:1;margin-right:7px}.noticejs .item .close:hover{opacity:.5;color:#000}.noticejs .item a{color:#fff;border-bottom:1px dashed #fff}.noticejs .item a,.noticejs .item a:hover{text-decoration:none}.noticejs .success{background-color:#64ce83}.noticejs .success .noticejs-heading{background-color:#3da95c;color:#fff;padding:10px}.noticejs .success .noticejs-body{color:#fff;padding:10px!important}.noticejs .success .noticejs-body:hover{visibility:visible!important}.noticejs .success .noticejs-content{visibility:visible}.noticejs .info{background-color:#3ea2ff}.noticejs .info .noticejs-heading{background-color:#067cea;color:#fff;padding:10px}.noticejs .info .noticejs-body{color:#fff;padding:10px!important}.noticejs .info .noticejs-body:hover{visibility:visible!important}.noticejs .info .noticejs-content{visibility:visible}.noticejs .warning{background-color:#ff7f48}.noticejs .warning .noticejs-heading{background-color:#f44e06;color:#fff;padding:10px!important}.noticejs .warning .noticejs-body{color:#fff;padding:10px}.noticejs .warning .noticejs-body:hover{visibility:visible!important}.noticejs .warning .noticejs-content{visibility:visible}.noticejs .error{background-color:#e74c3c}.noticejs .error .noticejs-heading{background-color:#ba2c1d;color:#fff;padding:10px!important}.noticejs .error .noticejs-body{color:#fff;padding:10px}.noticejs .error .noticejs-body:hover{visibility:visible!important}.noticejs .error .noticejs-content{visibility:visible}.noticejs .progressbar{width:100%}.noticejs .progressbar .bar{width:1%;height:30px;background-color:#4caf50}.noticejs .success .noticejs-progressbar{width:100%;background-color:#64ce83;margin-top:-1px}.noticejs .success .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#3da95c}.noticejs .info .noticejs-progressbar{width:100%;background-color:#3ea2ff;margin-top:-1px}.noticejs .info .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#067cea}.noticejs .warning .noticejs-progressbar{width:100%;background-color:#ff7f48;margin-top:-1px}.noticejs .warning .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#f44e06}.noticejs .error .noticejs-progressbar{width:100%;background-color:#e74c3c;margin-top:-1px}.noticejs .error .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#ba2c1d}@keyframes noticejs-fadeOut{0%{opacity:1}to{opacity:0}}.noticejs-fadeOut{animation-name:noticejs-fadeOut}@keyframes noticejs-modal-in{to{opacity:.3}}@keyframes noticejs-modal-out{to{opacity:0}}.noticejs{position:fixed;z-index:10050;width:400px}.noticejs ::-webkit-scrollbar{width:8px}.noticejs ::-webkit-scrollbar-button{width:8px;height:5px}.noticejs ::-webkit-scrollbar-track{border-radius:10px}.noticejs ::-webkit-scrollbar-thumb{background:hsla(0,0%,100%,.5);border-radius:10px}.noticejs ::-webkit-scrollbar-thumb:hover{background:#fff}.noticejs-modal{position:fixed;width:100%;height:100%;background-color:#000;z-index:10000;opacity:.3;left:0;top:0}.noticejs-modal-open{opacity:0;animation:noticejs-modal-in .3s ease-out}.noticejs-modal-close{animation:noticejs-modal-out .3s ease-out;animation-fill-mode:forwards}.${defCon.rName}{padding:4px 4px 0 4px!important}.${defCon.rName} dl{margin:0!important;padding:0!important}.${defCon.rName} dl dt{margin:2px 0 8px 0!important;font-size:16px!important;font-weight:900!important}.${defCon.rName} dl dd{margin:3px 6px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${defCon.rName} dl dd em{color:#fff;font-family:Candara,sans-serif!important;font-size:24px!important;padding:0 5px}.${defCon.rName} dl dd span{font-weight:700;font-size:15px!important;margin-right:8px}.${defCon.rName} dl dd u{color:#ff8c00;font-weight:600;font-size:16px;text-decoration:none;padding:0 3px}.${defCon.rName} dl dd i{font-family:Candara,sans-serif!important;font-size:20px!important}.${defCon.rName} dl dd .im{color:gold;font-size:16px;font-weight:900;padding:0 3px}.${defCon.rName} ul{width:90%;display:inline-block;text-align:left;vertical-align:top;color:rgba(255, 255, 255, 0.5);padding:0.2em;margin:0;counter-reset:xxx 0}.${defCon.rName} li{list-style:none;font-style:italic!important;position:relative;padding:0 0 0 0.1em;margin:0 0 0 2px;-webkit-transition:.12s;transition:.12s}.${defCon.rName} li::before{content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-family:'Roboto Condensed';font-size:1em;-webkit-transition:.5s;transition:.5s}.${defCon.rName} .disappear{display:none}`,
     };
 
     let curretSite = {
@@ -787,7 +784,7 @@
                     return this.insertSearchButton() && this.scrollDetect();
                   }
                 },
-                500,
+                200,
                 true
               );
               console.log(
@@ -831,6 +828,17 @@
             oDiv.removeAttribute("class");
           }
         });
+      }
+    }
+
+    function insterAfter(newElement, targetElement) {
+      if (targetElement !== null) {
+        const parent = targetElement.parentNode;
+        if (parent.lastChild === targetElement) {
+          parent.appendChild(newElement);
+        } else {
+          parent.insertBefore(newElement, targetElement.nextSibling);
+        }
       }
     }
 
@@ -961,16 +969,391 @@
       requestAnimationFrame(step);
     }
 
-    function insterAfter(newElement, targetElement) {
-      if (targetElement !== null) {
-        const parent = targetElement.parentNode;
-        if (parent.lastChild === targetElement) {
-          parent.appendChild(newElement);
-        } else {
-          parent.insertBefore(newElement, targetElement.nextSibling);
+    /* Refactoring NoticeJs Functions */
+
+    (function (q, c) {
+      typeof exports === "object" && typeof module === "object"
+        ? (module.exports = c())
+        : typeof define === "function" && define.amd
+        ? define("NoticeJs", [], c)
+        : typeof exports === "object"
+        ? (exports.NoticeJs = c())
+        : (q.NoticeJs = c());
+    })("undefined" !== typeof self ? self : this, function () {
+      return (function (q) {
+        let m = {};
+        function c(f) {
+          if (m[f]) {
+            return m[f].exports;
+          }
+          let h = (m[f] = {
+            i: f,
+            l: !1,
+            exports: {},
+          });
+          q[f].call(h.exports, h, h.exports, c);
+          h.l = !0;
+          return h.exports;
         }
-      }
-    }
+        c.m = q;
+        c.c = m;
+        c.d = function (f, h, g) {
+          c.o(f, h) ||
+            Object.defineProperty(f, h, {
+              configurable: !1,
+              enumerable: !0,
+              get: g,
+            });
+        };
+        c.n = function (f) {
+          let h =
+            f && f.__esModule
+              ? function () {
+                  return f.default;
+                }
+              : function () {
+                  return f;
+                };
+          c.d(h, "a", h);
+          return h;
+        };
+        c.o = function (f, h) {
+          return Object.prototype.hasOwnProperty.call(f, h);
+        };
+        c.p = "dist/";
+        return c((c.s = 2));
+      })([
+        function (q, c, m) {
+          Object.defineProperty(c, "__esModule", { value: !0 });
+          c.noticeJsModalClassName = "noticejs-modal";
+          c.closeAnimation = "noticejs-fadeOut";
+          c.Defaults = {
+            title: "",
+            text: "",
+            type: "success",
+            position: "topRight",
+            timeout: 30,
+            progressBar: !0,
+            closeWith: ["button"],
+            animation: null,
+            modal: !1,
+            scroll: {
+              maxHeight: 300,
+              showOnHover: !0,
+            },
+            rtl: !1,
+            callbacks: {
+              beforeShow: [],
+              onShow: [],
+              afterShow: [],
+              onClose: [],
+              afterClose: [],
+              onClick: [],
+              onHover: [],
+              onTemplate: [],
+            },
+          };
+        },
+        function (q, c, m) {
+          function f(a, b) {
+            a.callbacks.hasOwnProperty(b) &&
+              a.callbacks[b].forEach(function (d) {
+                typeof d === "function" && d.apply(a);
+              });
+          }
+          Object.defineProperty(c, "__esModule", { value: !0 });
+          c.appendNoticeJs = c.addListener = c.CloseItem = c.AddModal = void 0;
+          c.getCallback = f;
+          let h = (function (a) {
+            if (a && a.__esModule) {
+              return a;
+            }
+            let b = {};
+            if (null !== a) {
+              for (let d in a) {
+                Object.prototype.hasOwnProperty.call(a, d) && (b[d] = a[d]);
+              }
+            }
+            b.default = a;
+            return b;
+          })(m(0));
+          let g = h.Defaults;
+          let k = (c.AddModal = function () {
+            if (0 >= document.getElementsByClassName(h.noticeJsModalClassName).length) {
+              let a = document.createElement("div");
+              a.classList.add(h.noticeJsModalClassName);
+              a.classList.add("noticejs-modal-open");
+              document.body.appendChild(a);
+              setTimeout(function () {
+                a.className = h.noticeJsModalClassName;
+              }, 200);
+            }
+          });
+          let n = (c.CloseItem = function (a) {
+            f(g, "onClose");
+            null !== g.animation && null !== g.animation.close && (a.className += " " + g.animation.close);
+            setTimeout(function () {
+              a.remove();
+            }, 200);
+            !0 === g.modal &&
+              1 <= document.querySelectorAll("[noticejs-modal='true']").length &&
+              ((document.querySelector(".noticejs-modal").className += " noticejs-modal-close"),
+              setTimeout(function () {
+                document.querySelector(".noticejs-modal").remove();
+              }, 500));
+            let x = a.closest(".noticejs");
+            let b = x ? "." + x.className.replace("noticejs", "").trim() : ".null";
+            setTimeout(function () {
+              if (document.querySelector(b)) {
+                0 >= document.querySelectorAll(b + " .item").length && document.querySelector(b).remove();
+              }
+            }, 500);
+          });
+          let e = (c.addListener = function (a) {
+            g.closeWith.includes("button") &&
+              a.querySelector(".close").addEventListener("click", function () {
+                n(a);
+              });
+            g.closeWith.includes("click")
+              ? ((a.style.cursor = "pointer"),
+                a.addEventListener("click", function (b) {
+                  "close" !== b.target.className && (f(g, "onClick"), n(a));
+                }))
+              : a.addEventListener("click", function (b) {
+                  "close" !== b.target.className && f(g, "onClick");
+                });
+            a.addEventListener("mouseover", function () {
+              f(g, "onHover");
+            });
+          });
+          c.appendNoticeJs = function (a, b, d) {
+            let p = ".noticejs-" + g.position;
+            let l = document.createElement("div");
+            l.classList.add("item");
+            l.classList.add(g.type);
+            !0 === g.rtl && l.classList.add("noticejs-rtl");
+            a && "" !== a && l.appendChild(a);
+            l.appendChild(b);
+            d && "" !== d && l.appendChild(d);
+            ["top", "bottom"].includes(g.position) && (document.querySelector(p).innerHTML = "");
+            null !== g.animation && null !== g.animation.open && (l.className += " " + g.animation.open);
+            !0 === g.modal && (l.setAttribute("noticejs-modal", "true"), k());
+            e(l, g.closeWith);
+            f(g, "beforeShow");
+            f(g, "onShow");
+            document.querySelector(p).appendChild(l);
+            f(g, "afterShow");
+            return l;
+          };
+        },
+        function (q, c, m) {
+          function f(a) {
+            if (a && a.__esModule) {
+              return a;
+            }
+            let b = {};
+            if (null !== a) {
+              for (let d in a) {
+                Object.prototype.hasOwnProperty.call(a, d) && (b[d] = a[d]);
+              }
+            }
+            b.default = a;
+            return b;
+          }
+          Object.defineProperty(c, "__esModule", { value: !0 });
+          let h = (function () {
+            function a(b, d) {
+              for (let p = 0; p < d.length; p++) {
+                let l = d[p];
+                l.enumerable = l.enumerable || !1;
+                l.configurable = !0;
+                "value" in l && (l.writable = !0);
+                Object.defineProperty(b, l.key, l);
+              }
+            }
+            return function (b, d, p) {
+              d && a(b.prototype, d);
+              p && a(b, p);
+              return b;
+            };
+          })();
+          m(3);
+          let g = m(0);
+          let k = f(g);
+          let n = m(4);
+          m = m(1);
+          let e = f(m);
+          m = (function () {
+            function a() {
+              let b = 0 < arguments.length && void 0 !== arguments[0] ? arguments[0] : {};
+              if (!(this instanceof a)) {
+                throw new TypeError("Cannot call a class as a function");
+              }
+              this.options = Object.assign(k.Defaults, b);
+              this.component = new n.Components();
+              this.on("beforeShow", this.options.callbacks.beforeShow);
+              this.on("onShow", this.options.callbacks.onShow);
+              this.on("afterShow", this.options.callbacks.afterShow);
+              this.on("onClose", this.options.callbacks.onClose);
+              this.on("afterClose", this.options.callbacks.afterClose);
+              this.on("onClick", this.options.callbacks.onClick);
+              this.on("onHover", this.options.callbacks.onHover);
+              return this;
+            }
+            h(a, [
+              {
+                key: "show",
+                value: function () {
+                  let b = this.component.createContainer();
+                  document.querySelector(".noticejs-" + this.options.position) === null && document.body.appendChild(b);
+                  let d = void 0;
+                  b = this.component.createHeader(this.options.title, this.options.closeWith);
+                  let p = this.component.createBody(this.options.text);
+                  !0 === this.options.progressBar && (d = this.component.createProgressBar());
+                  return e.appendNoticeJs(b, p, d);
+                },
+              },
+              {
+                key: "on",
+                value: function (b) {
+                  let d = 1 < arguments.length && void 0 !== arguments[1] ? arguments[1] : function () {};
+                  typeof d === "function" && this.options.callbacks.hasOwnProperty(b) && this.options.callbacks[b].push(d);
+                  return this;
+                },
+              },
+            ]);
+            return a;
+          })();
+          c.default = m;
+          q.exports = c.default;
+        },
+        function (q, c) {},
+        function (q, c, m) {
+          function f(n) {
+            if (n && n.__esModule) {
+              return n;
+            }
+            let e = {};
+            if (null !== n) {
+              for (let a in n) {
+                Object.prototype.hasOwnProperty.call(n, a) && (e[a] = n[a]);
+              }
+            }
+            e.default = n;
+            return e;
+          }
+          Object.defineProperty(c, "__esModule", { value: !0 });
+          c.Components = void 0;
+          let h = (function () {
+            function n(e, a) {
+              for (let b = 0; b < a.length; b++) {
+                let d = a[b];
+                d.enumerable = d.enumerable || !1;
+                d.configurable = !0;
+                "value" in d && (d.writable = !0);
+                Object.defineProperty(e, d.key, d);
+              }
+            }
+            return function (e, a, b) {
+              a && n(e.prototype, a);
+              b && n(e, b);
+              return e;
+            };
+          })();
+          q = m(0);
+          q = f(q);
+          m = m(1);
+          let g = f(m);
+          let k = q.Defaults;
+          c.Components = (function () {
+            function n() {
+              if (!(this instanceof n)) {
+                throw new TypeError("Cannot call a class as a function");
+              }
+            }
+            h(n, [
+              {
+                key: "createContainer",
+                value: function () {
+                  let e = "noticejs-" + k.position;
+                  let a = document.createElement("div");
+                  a.classList.add("noticejs");
+                  a.classList.add(e);
+                  return a;
+                },
+              },
+              {
+                key: "createHeader",
+                value: function () {
+                  let e = void 0;
+                  k.title &&
+                    "" !== k.title &&
+                    ((e = document.createElement("div")), e.setAttribute("class", "noticejs-heading"), (e.textContent = k.title));
+                  if (k.closeWith.includes("button")) {
+                    let a = document.createElement("div");
+                    a.setAttribute("class", "close");
+                    a.innerHTML = "&times;";
+                    e ? e.appendChild(a) : (e = a);
+                  }
+                  return e;
+                },
+              },
+              {
+                key: "createBody",
+                value: function () {
+                  let e = document.createElement("div");
+                  e.setAttribute("class", "noticejs-body");
+                  let a = document.createElement("div");
+                  a.setAttribute("class", "noticejs-content");
+                  a.innerHTML = k.text;
+                  e.appendChild(a);
+                  null !== k.scroll &&
+                    "" !== k.scroll.maxHeight &&
+                    ((e.style.overflowY = "auto"),
+                    (e.style.maxHeight = k.scroll.maxHeight + "px"),
+                    !0 === k.scroll.showOnHover && (e.style.visibility = "hidden"));
+                  return e;
+                },
+              },
+              {
+                key: "createProgressBar",
+                value: function () {
+                  let e = document.createElement("div");
+                  e.setAttribute("class", "noticejs-progressbar");
+                  let a = document.createElement("div");
+                  a.setAttribute("class", "noticejs-bar");
+                  e.appendChild(a);
+                  if (!0 === k.progressBar && "boolean" !== typeof k.timeout && !1 !== k.timeout) {
+                    let b = 100;
+                    let d = setInterval(function () {
+                      if (0 >= b) {
+                        clearInterval(d);
+                        let p = e.closest("div.item");
+                        if (null !== k.animation && null !== k.animation.close) {
+                          p.className = p.className.replace(new RegExp("(?:^|\\s)" + k.animation.open + "(?:\\s|$)"), " ");
+                          p.className += " " + k.animation.close;
+                          let l = parseInt(k.timeout) + 500;
+                          setTimeout(function () {
+                            g.CloseItem(p);
+                          }, l);
+                        } else {
+                          g.CloseItem(p);
+                        }
+                      } else {
+                        b--;
+                        a.style.width = b + "%";
+                      }
+                    }, k.timeout);
+                  }
+                  return e;
+                },
+              },
+            ]);
+            return n;
+          })();
+        },
+      ]);
+    });
 
     /* Let`s enjoy it! */
 
