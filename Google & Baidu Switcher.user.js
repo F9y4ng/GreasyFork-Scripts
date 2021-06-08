@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.1.20210607.1
+// @version         3.2.20210609.2
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en  Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
@@ -25,7 +25,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            调整代码几处逻辑bugs.\n调整Noticejs的Css样式。\n取消引用外链js, 重构代码且修正NoticeJs引发TypeError错误。
+// @note            修正若干小bugs.\n调整 MutationObserver callback().\n增加升级查询缓存，缓存时效为2小时，以减轻更新源服务器压力。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -35,6 +35,8 @@
 // @grant           GM.getValue
 // @grant           GM_setValue
 // @grant           GM.setValue
+// @grant           GM_deleteValue
+// @grant           GM.deleteValue
 // @license         GPL-3.0-only
 // @create          2015-10-07
 // @copyright       2015-2021, F9y4ng
@@ -51,25 +53,23 @@
 
   /* Perfectly Compatible For Greasemonkey4.0+, TamperMonkey, ViolentMonkey * F9y4ng * 20210605 */
 
-  let GMsetValue, GMgetValue, GMregisterMenuCommand, GMunregisterMenuCommand, GMnotification, GMopenInTab;
+  let GMsetValue, GMgetValue, GMdeleteValue, GMregisterMenuCommand, GMunregisterMenuCommand, GMnotification, GMopenInTab;
   const GMinfo = GM_info;
   const handlerInfo = GMinfo.scriptHandler;
   const isGM = Boolean(handlerInfo.toLowerCase() === "greasemonkey");
   const debug = isdebug ? console.log.bind(console) : () => {};
   const error = isdebug ? console.error.bind(console) : () => {};
   const defCon = {
-    // Global default value
     scriptName: GMinfo.script.name,
     curVersion: GMinfo.script.version,
     support: GMinfo.script.supportURL,
-    isNoticed: sessionStorage.getItem("nCount") | 0,
-    isNeedUpdate: 0,
-    updateNote: "",
+    encrypt: n => {
+      return window.btoa(encodeURIComponent(n));
+    },
+    decrypt: n => {
+      return decodeURIComponent(window.atob(n));
+    },
     fetchResult: true,
-    lastRuntime: new Date().toLocaleString("en-US", {
-      timeZoneName: "short",
-      hour12: false,
-    }),
     titleCase: (str, bool) => {
       // bool: true for Whole sentence.
       const RegExp = bool ? /( |^)[a-z]/g : /(^)[a-z]/g;
@@ -80,9 +80,11 @@
           return L.toUpperCase();
         });
     },
-    randString: (n, v, r) => {
+    isNoticed: sessionStorage.getItem("nCount") || 0,
+    isNeedUpdate: 0,
+    updateNote: "",
+    randString: (n, v, r = "", s = "") => {
       // v: true for only letters.
-      let s = "";
       let a = "0123456789";
       let b = "abcdefghijklmnopqrstuvwxyz";
       let c = b.toUpperCase();
@@ -93,7 +95,12 @@
       }
       return s;
     },
+    lastRuntime: new Date().toLocaleString("en-US", {
+      timeZoneName: "short",
+      hour12: false,
+    }),
   };
+
   defCon.rName = defCon.randString(7, true);
   defCon.noticeHTML = str => {
     return String(`<div class="${defCon.rName}"><dl>${str}<dl></div>`);
@@ -102,6 +109,7 @@
   if (isGM) {
     GMsetValue = GM.setValue;
     GMgetValue = GM.getValue;
+    GMdeleteValue = GM.deleteValue;
     GMregisterMenuCommand = GM.registerMenuCommand;
     GMunregisterMenuCommand = () => {};
     GMopenInTab = (a, b) => {
@@ -110,9 +118,46 @@
   } else {
     GMsetValue = GM_setValue;
     GMgetValue = GM_getValue;
+    GMdeleteValue = GM_deleteValue;
     GMregisterMenuCommand = GM_registerMenuCommand;
     GMunregisterMenuCommand = GM_unregisterMenuCommand;
     GMopenInTab = GM_openInTab;
+  }
+
+  /* refactoring functions of GMsetValue/GMgetValue/GMdeleteValue with Expire */
+
+  function _eval(fn) {
+    let Fn = Function;
+    return new Fn("return " + fn)();
+  }
+
+  function GMsetExpire(key, value, expire) {
+    let obj = {
+      data: value,
+      time: Date.now(),
+      expire: expire,
+    };
+    GMsetValue(key, JSON.stringify(obj));
+  }
+
+  function GMgetExpire(key, val, expire = 0) {
+    if (!val) {
+      return val;
+    }
+    val = JSON.parse(val);
+    if (val.expire) {
+      expire = val.expire
+        .replace("w", "*7*24*3600*1000")
+        .replace("d", "*24*3600*1000")
+        .replace("h", "*3600*1000")
+        .replace("m", "*60*1000")
+        .replace("s", "*1000");
+    }
+    if (Date.now() - val.time > _eval(expire)) {
+      GMdeleteValue(key);
+      return null;
+    }
+    return val.data;
   }
 
   GMnotification = (text = "", type = "info", closeWith = true, Interval = 0, timeout = 30, url = "", autoclose = false, xToreload = false) => {
@@ -152,6 +197,8 @@
                       window.opener = null;
                     }
                     w ? w.close() : error("//-> window not exsits.");
+                    // Destroy cache when upgraded.
+                    GMdeleteValue("_Check_Version_Expire_");
                     GMnotification(
                       defCon.noticeHTML(
                         `<dd>如果您已更新了脚本，请点击<a href="javascript:void(0)" \
@@ -226,13 +273,13 @@
           if (n !== undefined) {
             switch (compareVersion(defCon.curVersion, n)) {
               case 2:
-                e([2, n, m, u]);
+                e([2, defCon.encrypt(n), defCon.encrypt(m), defCon.encrypt(u)]);
                 break;
               case 1:
-                e([1, n, m, u]);
+                e([1, defCon.encrypt(n), defCon.encrypt(m), defCon.encrypt(u)]);
                 break;
               default:
-                e([0, n, m, u]);
+                e([0, defCon.encrypt(n), defCon.encrypt(m), defCon.encrypt(u)]);
                 break;
             }
           }
@@ -273,30 +320,44 @@
     const m = await GMgetValue("_is_Ver_Det_");
     isVersionDetection ? (result = m === undefined ? isVersionDetection : Boolean(m)) : (result = false);
     if (result) {
-      t = await fetchVersion(`https://greasyfork.org/scripts/12909/code/${defCon.randString(32)}.meta.js`).catch(async () => {
-        defCon.fetchResult = false;
-      });
-      if (!defCon.fetchResult) {
-        t = await fetchVersion(`https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`).catch(
-          async () => {
-            console.error(
-              "%c[GB-Update]\n%cSome Unexpected Errors Caused Version Detection Failure.\nProbably Caused By NetworkError.",
-              "font-weight:bold;color:red",
-              "font-weight:bold;color:darkred"
-            );
-          }
-        );
+      const exp = await GMgetValue("_Check_Version_Expire_");
+      const cache = GMgetExpire("_Check_Version_Expire_", exp);
+      // Checking the local cache to reduce server requests
+      if (!cache) {
+        t = await fetchVersion(`https://greasyfork.org/scripts/12909/code/${defCon.randString(32)}.meta.js`).catch(async () => {
+          defCon.fetchResult = false;
+        });
+        if (!defCon.fetchResult) {
+          t = await fetchVersion(`https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`).catch(
+            async () => {
+              console.error(
+                "%c[GB-Update]\n%cSome Unexpected Errors Caused Version Detection Failure.\nProbably Caused By NetworkError.",
+                "font-weight:bold;color:red",
+                "font-weight:bold;color:darkred"
+              );
+            }
+          );
+        }
+        t ? GMsetExpire("_Check_Version_Expire_", t, "2h") : () => {};
+        debug("//--> checkVersion: Loading Data from Server.");
+      } else {
+        t = cache;
+        debug("//--> checkVersion: Loading Data from Cache, Expire: 2 hours.");
       }
+
       if (typeof t !== "undefined") {
         defCon.isNeedUpdate = t[0];
-        const lastestVersion = t[1];
+        const lastestVersion = defCon.decrypt(t[1]);
         const updateNote = ((w = "") => {
-          t[2].split(/\\n/).forEach(function (item) {
-            w += `<li>${item}</li>`;
-          });
+          defCon
+            .decrypt(t[2])
+            .split(/\\n/)
+            .forEach(function (item) {
+              w += `<li>${item}</li>`;
+            });
           return w ? `<dd class="disappear"><ul>${w}</ul></dd>` : "";
         })();
-        const updateUrl = t[3].replace("meta", "user");
+        const updateUrl = defCon.decrypt(t[3]).replace("meta", "user");
         const recheckURLs = new URL(
           updateUrl
             .replace("raw.githubusercontent", "github")
@@ -326,9 +387,10 @@
               );
             }
             if (defCon.isNoticed < 2 || s) {
-              GMnotification(
-                defCon.noticeHTML(
-                  `<dt>${defCon.scriptName}</dt>
+              setTimeout(function () {
+                GMnotification(
+                  defCon.noticeHTML(
+                    `<dt>${defCon.scriptName}</dt>
                       <dd><span>发现版本异常</span>检测到新版本 <i>${lastestVersion}</i> 低于您的本地版本\
                       <i>${defCon.curVersion}</i>，由于您曾编辑过本地脚本，脚本将被设置为默认禁止自动更新。</dd>\
                       <dd>如需覆盖安装，请点击<a href="${recheckURLs}" target="_blank" class="im">这里</a>手动升级。</dd>\
@@ -336,15 +398,16 @@
                       font-style:italic">注：若要重新启用自动更新功能，您需要在“脚本更新源”覆盖安装新版本后，\
                       从脚本菜单重新启用自动检测。</dd><dd style="text-align: center">\
                       <img src="https://z3.ax1x.com/2021/06/03/28UFHJ.jpg" alt="开启自动检测"></dd>`
-                ),
-                "error",
-                true,
-                0,
-                350,
-                null,
-                false,
-                true
-              );
+                  ),
+                  "error",
+                  true,
+                  0,
+                  350,
+                  null,
+                  false,
+                  true
+                );
+              }, 100);
               GMsetValue("_is_Ver_Det_", false);
               sessionStorage.setItem("nCount", ++defCon.isNoticed);
             }
@@ -364,20 +427,22 @@
               );
             }
             if (defCon.isNoticed < 2 || s) {
-              GMnotification(
-                defCon.noticeHTML(
-                  `<dt>${defCon.scriptName}</dt>\
+              setTimeout(function () {
+                GMnotification(
+                  defCon.noticeHTML(
+                    `<dt>${defCon.scriptName}</dt>\
                       <dd><span>发现版本更新</span>最新版本 <i>${lastestVersion}</i>，如果您现在需要更新，请点击这里完成自动升级安装。</dd>\
                       ${updateNote}<dd>[ ${sourceSite} ]</dd><dd onmouseover="this.parentNode.children[2].style.display='block';\
                       this.style.display='none'" style="text-align:center">&gt;&gt; 查看更新内容 &lt;&lt;</dd>`
-                ),
-                "warning",
-                false,
-                0,
-                80,
-                `${updateUrl}`,
-                true
-              );
+                  ),
+                  "warning",
+                  false,
+                  0,
+                  80,
+                  `${updateUrl}`,
+                  true
+                );
+              }, 100);
               sessionStorage.setItem("nCount", ++defCon.isNoticed);
             }
             break;
@@ -404,11 +469,10 @@
       }
     } else {
       console.warn(
-        `%c[GB-Update]%c\nVersion detection has been turned off forever. %cBye%c!`,
+        `%c[GB-Update]%c\nVersion detection has been turned off forever, %cBye!`,
         "font-weight:bold;color:red",
         "color:0",
-        "color:darkred",
-        "color:0"
+        "color:darkred"
       );
     }
   }
@@ -430,7 +494,6 @@
       bdyx: defCon.randString(5, true),
       ggyx: defCon.randString(5, true),
       bbyx: defCon.randString(5, true),
-      isVDResult: isVersionDetection ? (is_Ver_Det === undefined ? isVersionDetection : Boolean(is_Ver_Det)) : false,
       isUseBing: (() => {
         if (isNaN(is_Use_Bing)) {
           GMsetValue("_if_Use_Bing_", 0);
@@ -444,7 +507,8 @@
           return Boolean(is_Use_Bing);
         }
       })(),
-      noticeCss: `@charset "UTF-8";.animated{animation-duration:1s;animation-fill-mode:both}.animated.infinite{animation-iteration-count:infinite}.animated.hinge{animation-duration:2s}.animated.bounceIn,.animated.bounceOut,.animated.flipOutX,.animated.flipOutY{animation-duration:.75s}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.fadeOut{animation-name:fadeOut}.noticejs-top{top:0;width:100%}.noticejs-top .item{border-radius:0!important;margin:0!important}.noticejs-topRight{top:10px;right:10px}.noticejs-topLeft{top:10px;left:10px}.noticejs-topCenter{top:10px;left:50%;transform:translate(-50%)}.noticejs-middleLeft,.noticejs-middleRight{right:10px;top:50%;transform:translateY(-50%)}.noticejs-middleLeft{left:10px}.noticejs-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.noticejs-bottom{bottom:0;width:100%}.noticejs-bottom .item{border-radius:0!important;margin:0!important}.noticejs-bottomRight{bottom:10px;right:10px}.noticejs-bottomLeft{bottom:10px;left:10px}.noticejs-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.noticejs{z-index:99999!important;font-family:Helvetica Neue,Helvetica,Arial,sans-serif}.noticejs .item{margin:0 0 10px;border-radius:3px;overflow:hidden}.noticejs .item .close{float:right;font-size:18px;font-weight:700;line-height:1;color:#fff;text-shadow:0 1px 0 #fff;opacity:1;margin-right:7px}.noticejs .item .close:hover{opacity:.5;color:#000}.noticejs .item a{color:#fff;border-bottom:1px dashed #fff}.noticejs .item a,.noticejs .item a:hover{text-decoration:none}.noticejs .success{background-color:#64ce83}.noticejs .success .noticejs-heading{background-color:#3da95c;color:#fff;padding:10px}.noticejs .success .noticejs-body{color:#fff;padding:10px!important}.noticejs .success .noticejs-body:hover{visibility:visible!important}.noticejs .success .noticejs-content{visibility:visible}.noticejs .info{background-color:#3ea2ff}.noticejs .info .noticejs-heading{background-color:#067cea;color:#fff;padding:10px}.noticejs .info .noticejs-body{color:#fff;padding:10px!important}.noticejs .info .noticejs-body:hover{visibility:visible!important}.noticejs .info .noticejs-content{visibility:visible}.noticejs .warning{background-color:#ff7f48}.noticejs .warning .noticejs-heading{background-color:#f44e06;color:#fff;padding:10px!important}.noticejs .warning .noticejs-body{color:#fff;padding:10px}.noticejs .warning .noticejs-body:hover{visibility:visible!important}.noticejs .warning .noticejs-content{visibility:visible}.noticejs .error{background-color:#e74c3c}.noticejs .error .noticejs-heading{background-color:#ba2c1d;color:#fff;padding:10px!important}.noticejs .error .noticejs-body{color:#fff;padding:10px}.noticejs .error .noticejs-body:hover{visibility:visible!important}.noticejs .error .noticejs-content{visibility:visible}.noticejs .progressbar{width:100%}.noticejs .progressbar .bar{width:1%;height:30px;background-color:#4caf50}.noticejs .success .noticejs-progressbar{width:100%;background-color:#64ce83;margin-top:-1px}.noticejs .success .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#3da95c}.noticejs .info .noticejs-progressbar{width:100%;background-color:#3ea2ff;margin-top:-1px}.noticejs .info .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#067cea}.noticejs .warning .noticejs-progressbar{width:100%;background-color:#ff7f48;margin-top:-1px}.noticejs .warning .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#f44e06}.noticejs .error .noticejs-progressbar{width:100%;background-color:#e74c3c;margin-top:-1px}.noticejs .error .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#ba2c1d}@keyframes noticejs-fadeOut{0%{opacity:1}to{opacity:0}}.noticejs-fadeOut{animation-name:noticejs-fadeOut}@keyframes noticejs-modal-in{to{opacity:.3}}@keyframes noticejs-modal-out{to{opacity:0}}.noticejs{position:fixed;z-index:10050;width:400px}.noticejs ::-webkit-scrollbar{width:8px}.noticejs ::-webkit-scrollbar-button{width:8px;height:5px}.noticejs ::-webkit-scrollbar-track{border-radius:10px}.noticejs ::-webkit-scrollbar-thumb{background:hsla(0,0%,100%,.5);border-radius:10px}.noticejs ::-webkit-scrollbar-thumb:hover{background:#fff}.noticejs-modal{position:fixed;width:100%;height:100%;background-color:#000;z-index:10000;opacity:.3;left:0;top:0}.noticejs-modal-open{opacity:0;animation:noticejs-modal-in .3s ease-out}.noticejs-modal-close{animation:noticejs-modal-out .3s ease-out;animation-fill-mode:forwards}.${defCon.rName}{padding:4px 4px 0 4px!important}.${defCon.rName} dl{margin:0!important;padding:0!important}.${defCon.rName} dl dt{margin:2px 0 8px 0!important;font-size:16px!important;font-weight:900!important}.${defCon.rName} dl dd{margin:3px 6px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${defCon.rName} dl dd em{color:#fff;font-family:Candara,sans-serif!important;font-size:24px!important;padding:0 5px}.${defCon.rName} dl dd span{font-weight:700;font-size:15px!important;margin-right:8px}.${defCon.rName} dl dd u{color:#ff8c00;font-weight:600;font-size:16px;text-decoration:none;padding:0 3px}.${defCon.rName} dl dd i{font-family:Candara,sans-serif!important;font-size:20px!important}.${defCon.rName} dl dd .im{color:gold;font-size:16px;font-weight:900;padding:0 3px}.${defCon.rName} ul{width:90%;display:inline-block;text-align:left;vertical-align:top;color:rgba(255, 255, 255, 0.5);padding:0.2em;margin:0;counter-reset:xxx 0}.${defCon.rName} li{list-style:none;font-style:italic!important;position:relative;padding:0 0 0 0.1em;margin:0 0 0 2px;-webkit-transition:.12s;transition:.12s}.${defCon.rName} li::before{content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-family:'Roboto Condensed';font-size:1em;-webkit-transition:.5s;transition:.5s}.${defCon.rName} .disappear{display:none}`,
+      isVDResult: isVersionDetection ? (is_Ver_Det === undefined ? isVersionDetection : Boolean(is_Ver_Det)) : false,
+      noticeCss: `@charset "UTF-8";.animated{animation-duration:1s;animation-fill-mode:both}.animated.infinite{animation-iteration-count:infinite}.animated.hinge{animation-duration:2s}.animated.bounceIn,.animated.bounceOut,.animated.flipOutX,.animated.flipOutY{animation-duration:.75s}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.fadeOut{animation-name:fadeOut}.noticejs-top{top:0;width:100%}.noticejs-top .item{border-radius:0!important;margin:0!important}.noticejs-topRight{top:10px;right:10px}.noticejs-topLeft{top:10px;left:10px}.noticejs-topCenter{top:10px;left:50%;transform:translate(-50%)}.noticejs-middleLeft,.noticejs-middleRight{right:10px;top:50%;transform:translateY(-50%)}.noticejs-middleLeft{left:10px}.noticejs-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.noticejs-bottom{bottom:0;width:100%}.noticejs-bottom .item{border-radius:0!important;margin:0!important}.noticejs-bottomRight{bottom:10px;right:10px}.noticejs-bottomLeft{bottom:10px;left:10px}.noticejs-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.noticejs{z-index:99999!important;font-family:Helvetica Neue,Helvetica,Arial,sans-serif}.noticejs .item{margin:0 0 10px;border-radius:3px;overflow:hidden}.noticejs .item .close{float:right;font-size:18px;font-weight:700;line-height:1;color:#fff;text-shadow:0 1px 0 #fff;opacity:1;margin-right:7px}.noticejs .item .close:hover{opacity:.5;color:#000}.noticejs .item a{color:#fff;border-bottom:1px dashed #fff}.noticejs .item a,.noticejs .item a:hover{text-decoration:none}.noticejs .success{background-color:#64ce83}.noticejs .success .noticejs-heading{background-color:#3da95c;color:#fff;padding:10px}.noticejs .success .noticejs-body{color:#fff;padding:10px!important}.noticejs .success .noticejs-body:hover{visibility:visible!important}.noticejs .success .noticejs-content{visibility:visible}.noticejs .info{background-color:#3ea2ff}.noticejs .info .noticejs-heading{background-color:#067cea;color:#fff;padding:10px}.noticejs .info .noticejs-body{color:#fff;padding:10px!important}.noticejs .info .noticejs-body:hover{visibility:visible!important}.noticejs .info .noticejs-content{visibility:visible}.noticejs .warning{background-color:#ff7f48}.noticejs .warning .noticejs-heading{background-color:#f44e06;color:#fff;padding:10px!important}.noticejs .warning .noticejs-body{color:#fff;padding:10px}.noticejs .warning .noticejs-body:hover{visibility:visible!important}.noticejs .warning .noticejs-content{visibility:visible}.noticejs .error{background-color:#e74c3c}.noticejs .error .noticejs-heading{background-color:#ba2c1d;color:#fff;padding:10px!important}.noticejs .error .noticejs-body{color:#fff;padding:10px}.noticejs .error .noticejs-body:hover{visibility:visible!important}.noticejs .error .noticejs-content{visibility:visible}.noticejs .progressbar{width:100%}.noticejs .progressbar .bar{width:1%;height:30px;background-color:#4caf50}.noticejs .success .noticejs-progressbar{width:100%;background-color:#64ce83;margin-top:-1px}.noticejs .success .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#3da95c}.noticejs .info .noticejs-progressbar{width:100%;background-color:#3ea2ff;margin-top:-1px}.noticejs .info .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#067cea}.noticejs .warning .noticejs-progressbar{width:100%;background-color:#ff7f48;margin-top:-1px}.noticejs .warning .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#f44e06}.noticejs .error .noticejs-progressbar{width:100%;background-color:#e74c3c;margin-top:-1px}.noticejs .error .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#ba2c1d}@keyframes noticejs-fadeOut{0%{opacity:1}to{opacity:0}}.noticejs-fadeOut{animation-name:noticejs-fadeOut}@keyframes noticejs-modal-in{to{opacity:.3}}@keyframes noticejs-modal-out{to{opacity:0}}.noticejs{position:fixed;z-index:10050;width:400px}.noticejs ::-webkit-scrollbar{width:8px}.noticejs ::-webkit-scrollbar-button{width:8px;height:5px}.noticejs ::-webkit-scrollbar-track{border-radius:10px}.noticejs ::-webkit-scrollbar-thumb{background:hsla(0,0%,100%,.5);border-radius:10px}.noticejs ::-webkit-scrollbar-thumb:hover{background:#fff}.noticejs-modal{position:fixed;width:100%;height:100%;background-color:#000;z-index:10000;opacity:.3;left:0;top:0}.noticejs-modal-open{opacity:0;animation:noticejs-modal-in .3s ease-out}.noticejs-modal-close{animation:noticejs-modal-out .3s ease-out;animation-fill-mode:forwards}.${defCon.rName}{padding:4px 4px 0 4px!important}.${defCon.rName} dl{margin:0!important;padding:2px!important}.${defCon.rName} dl dt{margin:2px 0 8px 0!important;font-size:16px!important;font-weight:900!important}.${defCon.rName} dl dd{margin:3px 6px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${defCon.rName} dl dd em{color:#fff;font-family:Candara,sans-serif!important;font-size:24px!important;padding:0 5px}.${defCon.rName} dl dd span{font-weight:700;font-size:15px!important;margin-right:8px}.${defCon.rName} dl dd i{font-family:Candara,sans-serif!important;font-size:20px!important}.${defCon.rName} dl dd .im{color:gold;font-size:16px;font-weight:900;padding:0 3px}.${defCon.rName} ul{width:90%;display:inline-block;text-align:left;vertical-align:top;color:rgba(255, 255, 255, 0.5);padding:0.2em;margin:0;counter-reset:xxx 0}.${defCon.rName} li{list-style:none;font-style:italic!important;position:relative;padding:0 0 0 0.1em;margin:0 0 0 2px;-webkit-transition:.12s;transition:.12s}.${defCon.rName} li::before{content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-family:'Roboto Condensed';font-size:1em;-webkit-transition:.5s;transition:.5s}.${defCon.rName} .disappear{display:none}`,
     };
 
     let curretSite = {
@@ -557,14 +621,14 @@
     let menuManager = {
       inUse_switch: (_status, Name, Tips) => {
         const info = x => {
-          return defCon.noticeHTML(`<dd>${Tips}已成功<u>${x}</u>，网页将在<em>3</em>秒后自动刷新！</dd>`);
+          return defCon.noticeHTML(`<dd>${Tips}已<a class="im">${x}</a>，网页将在<em>3</em>秒后自动刷新！</dd>`);
         };
         if (_status) {
           GMsetValue(`${Name}`, 0);
           GMnotification(info("\u6e05\u9664"), "info", true, 3);
         } else {
           GMsetValue(`${Name}`, 1);
-          GMnotification(info("\u6dfb\u52a0"), "success", true, 3);
+          GMnotification(info("\u6dfb\u52a0"), "info", true, 3);
         }
         setTimeout(() => {
           location.reload();
@@ -602,9 +666,11 @@
           } else {
             in_UpdateCheck_ID = GMregisterMenuCommand("\ufff5\ud83d\udcdb 【已关闭】版本更新 \u267b 重新开启", () => {
               GMsetValue("_is_Ver_Det_", true);
-              GMnotification(defCon.noticeHTML(`<dd>更新检测正在重新打开，网页将在<em>3</em>秒后自动刷新！</dd>`), "info", true, 3);
+              GMnotification(defCon.noticeHTML(`<dd>更新检测已开启，网页将在<em>3</em>秒后自动刷新！</dd>`), "info", true, 3);
+              // Destroy cache & session when restart detection.
+              GMdeleteValue("_Check_Version_Expire_");
+              sessionStorage.removeItem("nCount");
               setTimeout(() => {
-                sessionStorage.clear();
                 location.reload();
               }, 3e3);
             });
@@ -673,7 +739,7 @@
               }
               // Bing image fixed
               if (document.querySelector(".b_searchboxForm") && /^images$/.test(CONST.vim.trim())) {
-                if (location.href.replace(/view=detailV2/, "") !== location.href && CONST.isUseBing) {
+                if (location.href.includes("view=detailV2") && CONST.isUseBing) {
                   document.querySelector(".b_searchboxForm").setAttribute("style", "width:640px");
                 }
               }
@@ -738,6 +804,8 @@
               scrollButton(`#${CONST.rndidName}`, "scrollspan", 50);
               scrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, "scrollbars", 50);
               scrollButton(`#${CONST.rndidName} #${CONST.ggyx} input`, "scrollbars", 50);
+            } else {
+              debug(`//-> No scrolling detecting.`);
             }
             break;
           default:
@@ -745,6 +813,18 @@
             break;
         }
         return true;
+      },
+
+      RAF: function () {
+        RAFInterval(
+          () => {
+            if (!document.querySelector(`#${CONST.rndidName}`) || !document.querySelector(`.${CONST.rndclassName}`)) {
+              return this.insertSearchButton() && this.scrollDetect();
+            }
+          },
+          200,
+          true
+        );
       },
 
       doSwitch: function () {
@@ -773,7 +853,7 @@
                       mutation.type,
                       "color:0",
                       "font-weight:bold;color:red",
-                      defCon.titleCase(this.insertSearchButton() && this.scrollDetect()),
+                      defCon.titleCase(!(this.RAF() instanceof Object)),
                       "color:0"
                     );
                   }
@@ -782,15 +862,6 @@
               const opts = { childList: true, subtree: true };
               let observer = new MutationObserver(callback);
               observer.observe(document, opts);
-              RAFInterval(
-                () => {
-                  if (!document.querySelector(`#${CONST.rndidName}`) || !document.querySelector(`.${CONST.rndclassName}`)) {
-                    return this.insertSearchButton() && this.scrollDetect();
-                  }
-                },
-                200,
-                true
-              );
               console.log(
                 "%c[GB-Switch]%c\nWe are using The %c%s%c Search Engine.",
                 "font-weight:bold;color:Green",
@@ -1367,10 +1438,13 @@
         menuManager.init();
         debug("//-> Insert Search Button.");
         searchManager.init();
-        window.onload = () => {
-          if (isVersionDetection && !CONST.isVDResult) {
-            debug("//-> Ready to Insert Random Tips.");
-            if (Math.ceil(Math.random() * 20) > 18) {
+      } catch (e) {
+        console.error("%c[GB-Error]%c\n%s", "font-weight:bold;color:red", "font-weight:bold;color:darkred", e);
+      } finally {
+        if (isVersionDetection && !CONST.isVDResult) {
+          debug("//-> Ready to Insert Random Tips.");
+          if (Math.ceil(Math.random() * 20) > 16) {
+            setTimeout(function () {
               GMnotification(
                 defCon.noticeHTML(
                   `<dd title="随机提示">如果您修改过代码，在覆盖安装新代码后，您仍要从菜单中再开启检测功能，\
@@ -1382,11 +1456,9 @@
                 0,
                 80
               );
-            }
+            }, Math.random() * 4e3);
           }
-        };
-      } catch (e) {
-        console.error("%c[GB-Error]%c\n%s", "font-weight:bold;color:red", "font-weight:bold;color:darkred", e);
+        }
       }
     })();
   })();
