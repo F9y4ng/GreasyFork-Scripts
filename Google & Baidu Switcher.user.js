@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.2.20210609.2
+// @version         3.2.20210609.4
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en  Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
@@ -25,7 +25,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            修正若干小bugs.\n调整 MutationObserver callback().\n增加升级查询缓存，缓存时效为2小时，以减轻更新源服务器压力。
+// @note            优化代码逻辑。\n修正NoticeJs的Css样式问题。\n修正若干bugs，更新检测功能完结撒花。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -51,7 +51,7 @@
   const isVersionDetection = true; // Set "false" to turn off the Version Detection forever.
   const isdebug = false; // set "true" to debug scripts, May cause script response slower.
 
-  /* Perfectly Compatible For Greasemonkey4.0+, TamperMonkey, ViolentMonkey * F9y4ng * 20210605 */
+  /* Perfectly Compatible For Greasemonkey4.0+, TamperMonkey, ViolentMonkey * F9y4ng * 20210609 */
 
   let GMsetValue, GMgetValue, GMdeleteValue, GMregisterMenuCommand, GMunregisterMenuCommand, GMnotification, GMopenInTab;
   const GMinfo = GM_info;
@@ -83,7 +83,7 @@
     isNoticed: sessionStorage.getItem("nCount") || 0,
     isNeedUpdate: 0,
     updateNote: "",
-    randString: (n, v, r = "", s = "") => {
+    randString: (n, v, r, s = "") => {
       // v: true for only letters.
       let a = "0123456789";
       let b = "abcdefghijklmnopqrstuvwxyz";
@@ -95,6 +95,7 @@
       }
       return s;
     },
+    isUpgrade: Boolean(GetUrlParam("Zn")),
     lastRuntime: new Date().toLocaleString("en-US", {
       timeZoneName: "short",
       hour12: false,
@@ -124,7 +125,7 @@
     GMopenInTab = GM_openInTab;
   }
 
-  /* refactoring functions of GMsetValue/GMgetValue/GMdeleteValue with Expire */
+  /* Refactoring functions of GMsetValue/GMgetValue/GMdeleteValue with Expire */
 
   function _eval(fn) {
     let Fn = Function;
@@ -199,11 +200,12 @@
                     w ? w.close() : error("//-> window not exsits.");
                     // Destroy cache when upgraded.
                     GMdeleteValue("_Check_Version_Expire_");
+                    debug("//-> Destroy cache when upgraded.");
                     GMnotification(
                       defCon.noticeHTML(
-                        `<dd>如果您已更新了脚本，请点击<a href="javascript:void(0)" \
-                        onclick="location.reload()" class="im"\
-                        >这里</a>刷新使其生效。</a></dd>`
+                        `<dd>如果您已更新了脚本，请点击<a href="javascript:void(0)"\
+                        onclick="location.replace(location.href.replace(/&zn=[^&]*/i,'')+'&Zn=1')"\
+                        class="im">这里</a>刷新使其生效。</a></dd>`
                       ),
                       "info",
                       true,
@@ -229,6 +231,40 @@
     }
   };
 
+  /* Common functions */
+
+  function GetUrlParam(paraName) {
+    if (!paraName) {
+      const parameter = document.location.pathname.toString();
+      const arr = parameter.split("/");
+      return arr[1];
+    } else {
+      const url = document.location.toString();
+      const arrObj = url.split("?");
+      if (arrObj.length > 1) {
+        const arrPara = arrObj[1].split("&");
+        let arr;
+        for (let i = 0; i < arrPara.length; i++) {
+          arr = arrPara[i].split("=");
+          if (arr !== null && arr[0] === paraName) {
+            return arr[1];
+          }
+        }
+        return "";
+      } else {
+        return "";
+      }
+    }
+  }
+
+  function safeFunction(func) {
+    try {
+      func();
+    } catch (e) {
+      error("//-> Function error:\n", e);
+    }
+  }
+
   /* SYSTEM INFO */
 
   console.info(
@@ -236,7 +272,7 @@
     "font-weight:bold;color:dodgerblue",
     "color:0",
     "color:snow",
-    checkVersion() instanceof Object === isVersionDetection,
+    checkVersion(defCon.isUpgrade) instanceof Object === isVersionDetection,
     "color:0",
     defCon.titleCase(handlerInfo)
   );
@@ -271,17 +307,7 @@
             }
           });
           if (n !== undefined) {
-            switch (compareVersion(defCon.curVersion, n)) {
-              case 2:
-                e([2, defCon.encrypt(n), defCon.encrypt(m), defCon.encrypt(u)]);
-                break;
-              case 1:
-                e([1, defCon.encrypt(n), defCon.encrypt(m), defCon.encrypt(u)]);
-                break;
-              default:
-                e([0, defCon.encrypt(n), defCon.encrypt(m), defCon.encrypt(u)]);
-                break;
-            }
+            e([compareVersion(defCon.curVersion, n), defCon.encrypt(n), defCon.encrypt(m), defCon.encrypt(u)]);
           }
         })
         .catch(e => {
@@ -346,8 +372,8 @@
       }
 
       if (typeof t !== "undefined") {
-        defCon.isNeedUpdate = t[0];
         const lastestVersion = defCon.decrypt(t[1]);
+        defCon.isNeedUpdate = cache ? compareVersion(defCon.curVersion, lastestVersion) : t[0];
         const updateNote = ((w = "") => {
           defCon
             .decrypt(t[2])
@@ -508,7 +534,7 @@
         }
       })(),
       isVDResult: isVersionDetection ? (is_Ver_Det === undefined ? isVersionDetection : Boolean(is_Ver_Det)) : false,
-      noticeCss: `@charset "UTF-8";.animated{animation-duration:1s;animation-fill-mode:both}.animated.infinite{animation-iteration-count:infinite}.animated.hinge{animation-duration:2s}.animated.bounceIn,.animated.bounceOut,.animated.flipOutX,.animated.flipOutY{animation-duration:.75s}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.fadeOut{animation-name:fadeOut}.noticejs-top{top:0;width:100%}.noticejs-top .item{border-radius:0!important;margin:0!important}.noticejs-topRight{top:10px;right:10px}.noticejs-topLeft{top:10px;left:10px}.noticejs-topCenter{top:10px;left:50%;transform:translate(-50%)}.noticejs-middleLeft,.noticejs-middleRight{right:10px;top:50%;transform:translateY(-50%)}.noticejs-middleLeft{left:10px}.noticejs-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.noticejs-bottom{bottom:0;width:100%}.noticejs-bottom .item{border-radius:0!important;margin:0!important}.noticejs-bottomRight{bottom:10px;right:10px}.noticejs-bottomLeft{bottom:10px;left:10px}.noticejs-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.noticejs{z-index:99999!important;font-family:Helvetica Neue,Helvetica,Arial,sans-serif}.noticejs .item{margin:0 0 10px;border-radius:3px;overflow:hidden}.noticejs .item .close{float:right;font-size:18px;font-weight:700;line-height:1;color:#fff;text-shadow:0 1px 0 #fff;opacity:1;margin-right:7px}.noticejs .item .close:hover{opacity:.5;color:#000}.noticejs .item a{color:#fff;border-bottom:1px dashed #fff}.noticejs .item a,.noticejs .item a:hover{text-decoration:none}.noticejs .success{background-color:#64ce83}.noticejs .success .noticejs-heading{background-color:#3da95c;color:#fff;padding:10px}.noticejs .success .noticejs-body{color:#fff;padding:10px!important}.noticejs .success .noticejs-body:hover{visibility:visible!important}.noticejs .success .noticejs-content{visibility:visible}.noticejs .info{background-color:#3ea2ff}.noticejs .info .noticejs-heading{background-color:#067cea;color:#fff;padding:10px}.noticejs .info .noticejs-body{color:#fff;padding:10px!important}.noticejs .info .noticejs-body:hover{visibility:visible!important}.noticejs .info .noticejs-content{visibility:visible}.noticejs .warning{background-color:#ff7f48}.noticejs .warning .noticejs-heading{background-color:#f44e06;color:#fff;padding:10px!important}.noticejs .warning .noticejs-body{color:#fff;padding:10px}.noticejs .warning .noticejs-body:hover{visibility:visible!important}.noticejs .warning .noticejs-content{visibility:visible}.noticejs .error{background-color:#e74c3c}.noticejs .error .noticejs-heading{background-color:#ba2c1d;color:#fff;padding:10px!important}.noticejs .error .noticejs-body{color:#fff;padding:10px}.noticejs .error .noticejs-body:hover{visibility:visible!important}.noticejs .error .noticejs-content{visibility:visible}.noticejs .progressbar{width:100%}.noticejs .progressbar .bar{width:1%;height:30px;background-color:#4caf50}.noticejs .success .noticejs-progressbar{width:100%;background-color:#64ce83;margin-top:-1px}.noticejs .success .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#3da95c}.noticejs .info .noticejs-progressbar{width:100%;background-color:#3ea2ff;margin-top:-1px}.noticejs .info .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#067cea}.noticejs .warning .noticejs-progressbar{width:100%;background-color:#ff7f48;margin-top:-1px}.noticejs .warning .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#f44e06}.noticejs .error .noticejs-progressbar{width:100%;background-color:#e74c3c;margin-top:-1px}.noticejs .error .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#ba2c1d}@keyframes noticejs-fadeOut{0%{opacity:1}to{opacity:0}}.noticejs-fadeOut{animation-name:noticejs-fadeOut}@keyframes noticejs-modal-in{to{opacity:.3}}@keyframes noticejs-modal-out{to{opacity:0}}.noticejs{position:fixed;z-index:10050;width:400px}.noticejs ::-webkit-scrollbar{width:8px}.noticejs ::-webkit-scrollbar-button{width:8px;height:5px}.noticejs ::-webkit-scrollbar-track{border-radius:10px}.noticejs ::-webkit-scrollbar-thumb{background:hsla(0,0%,100%,.5);border-radius:10px}.noticejs ::-webkit-scrollbar-thumb:hover{background:#fff}.noticejs-modal{position:fixed;width:100%;height:100%;background-color:#000;z-index:10000;opacity:.3;left:0;top:0}.noticejs-modal-open{opacity:0;animation:noticejs-modal-in .3s ease-out}.noticejs-modal-close{animation:noticejs-modal-out .3s ease-out;animation-fill-mode:forwards}.${defCon.rName}{padding:4px 4px 0 4px!important}.${defCon.rName} dl{margin:0!important;padding:2px!important}.${defCon.rName} dl dt{margin:2px 0 8px 0!important;font-size:16px!important;font-weight:900!important}.${defCon.rName} dl dd{margin:3px 6px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${defCon.rName} dl dd em{color:#fff;font-family:Candara,sans-serif!important;font-size:24px!important;padding:0 5px}.${defCon.rName} dl dd span{font-weight:700;font-size:15px!important;margin-right:8px}.${defCon.rName} dl dd i{font-family:Candara,sans-serif!important;font-size:20px!important}.${defCon.rName} dl dd .im{color:gold;font-size:16px;font-weight:900;padding:0 3px}.${defCon.rName} ul{width:90%;display:inline-block;text-align:left;vertical-align:top;color:rgba(255, 255, 255, 0.5);padding:0.2em;margin:0;counter-reset:xxx 0}.${defCon.rName} li{list-style:none;font-style:italic!important;position:relative;padding:0 0 0 0.1em;margin:0 0 0 2px;-webkit-transition:.12s;transition:.12s}.${defCon.rName} li::before{content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-family:'Roboto Condensed';font-size:1em;-webkit-transition:.5s;transition:.5s}.${defCon.rName} .disappear{display:none}`,
+      noticeCss: `@charset "UTF-8";.animated{animation-duration:1s;animation-fill-mode:both}.animated.infinite{animation-iteration-count:infinite}.animated.hinge{animation-duration:2s}.animated.bounceIn,.animated.bounceOut,.animated.flipOutX,.animated.flipOutY{animation-duration:.75s}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.fadeOut{animation-name:fadeOut}.noticejs-top{top:0;width:100%}.noticejs-top .item{border-radius:0!important;margin:0!important}.noticejs-topRight{top:10px;right:10px}.noticejs-topLeft{top:10px;left:10px}.noticejs-topCenter{top:10px;left:50%;transform:translate(-50%)}.noticejs-middleLeft,.noticejs-middleRight{right:10px;top:50%;transform:translateY(-50%)}.noticejs-middleLeft{left:10px}.noticejs-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.noticejs-bottom{bottom:0;width:100%}.noticejs-bottom .item{border-radius:0!important;margin:0!important}.noticejs-bottomRight{bottom:10px;right:10px}.noticejs-bottomLeft{bottom:10px;left:10px}.noticejs-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.noticejs{z-index:99999!important;font-family:Helvetica Neue,Helvetica,Arial,sans-serif}.noticejs .item{margin:0 0 10px;border-radius:3px;overflow:hidden}.noticejs .item .close{float:right;font-size:18px;font-weight:700;line-height:1;color:#fff;text-shadow:0 1px 0 #fff;opacity:1;margin-right:7px}.noticejs .item .close:hover{opacity:.5;color:#000}.noticejs .item a{color:#fff;border-bottom:1px dashed #fff}.noticejs .item a,.noticejs .item a:hover{text-decoration:none}.noticejs .success{background-color:#64ce83}.noticejs .success .noticejs-heading{background-color:#3da95c;color:#fff;padding:10px}.noticejs .success .noticejs-body{color:#fff;padding:10px!important}.noticejs .success .noticejs-body:hover{visibility:visible!important}.noticejs .success .noticejs-content{visibility:visible}.noticejs .info{background-color:#3ea2ff}.noticejs .info .noticejs-heading{background-color:#067cea;color:#fff;padding:10px}.noticejs .info .noticejs-body{color:#fff;padding:10px!important}.noticejs .info .noticejs-body:hover{visibility:visible!important}.noticejs .info .noticejs-content{visibility:visible}.noticejs .warning{background-color:#ff7f48}.noticejs .warning .noticejs-heading{background-color:#f44e06;color:#fff;padding:10px!important}.noticejs .warning .noticejs-body{color:#fff;padding:10px}.noticejs .warning .noticejs-body:hover{visibility:visible!important}.noticejs .warning .noticejs-content{visibility:visible}.noticejs .error{background-color:#e74c3c}.noticejs .error .noticejs-heading{background-color:#ba2c1d;color:#fff;padding:10px!important}.noticejs .error .noticejs-body{color:#fff;padding:10px}.noticejs .error .noticejs-body:hover{visibility:visible!important}.noticejs .error .noticejs-content{visibility:visible}.noticejs .progressbar{width:100%}.noticejs .progressbar .bar{width:1%;height:30px;background-color:#4caf50}.noticejs .success .noticejs-progressbar{width:100%;background-color:#64ce83;margin-top:-1px}.noticejs .success .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#3da95c}.noticejs .info .noticejs-progressbar{width:100%;background-color:#3ea2ff;margin-top:-1px}.noticejs .info .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#067cea}.noticejs .warning .noticejs-progressbar{width:100%;background-color:#ff7f48;margin-top:-1px}.noticejs .warning .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#f44e06}.noticejs .error .noticejs-progressbar{width:100%;background-color:#e74c3c;margin-top:-1px}.noticejs .error .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#ba2c1d}@keyframes noticejs-fadeOut{0%{opacity:1}to{opacity:0}}.noticejs-fadeOut{animation-name:noticejs-fadeOut}@keyframes noticejs-modal-in{to{opacity:.3}}@keyframes noticejs-modal-out{to{opacity:0}}.noticejs{position:fixed;z-index:10050;width:400px}.noticejs ::-webkit-scrollbar{width:8px}.noticejs ::-webkit-scrollbar-button{width:8px;height:5px}.noticejs ::-webkit-scrollbar-track{border-radius:10px}.noticejs ::-webkit-scrollbar-thumb{background:hsla(0,0%,100%,.5);border-radius:10px}.noticejs ::-webkit-scrollbar-thumb:hover{background:#fff}.noticejs-modal{position:fixed;width:100%;height:100%;background-color:#000;z-index:10000;opacity:.3;left:0;top:0}.noticejs-modal-open{opacity:0;animation:noticejs-modal-in .3s ease-out}.noticejs-modal-close{animation:noticejs-modal-out .3s ease-out;animation-fill-mode:forwards}.${defCon.rName}{padding:4px 4px 0 4px!important}.${defCon.rName} dl{margin:0!important;padding:2px!important}.${defCon.rName} dl dt{margin:2px 0 8px 0!important;font-size:16px!important;font-weight:900!important}.${defCon.rName} dl dd{margin:3px 6px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${defCon.rName} dl dd em{color:#fff;font-family:Candara,sans-serif!important;font-size:24px!important;padding:0 5px}.${defCon.rName} dl dd span{font-weight:700;font-size:15px!important;margin-right:8px}.${defCon.rName} dl dd i{font-family:Candara,sans-serif!important;font-size:20px!important}.${defCon.rName} dl dd .im{color:gold;font-size:16px;font-weight:900;padding:0 3px}.${defCon.rName} ul{width:90%;display:inline-block;text-align:left;vertical-align:top;color:rgba(255, 255, 255, 0.5);padding:0.2em;margin:0 0 0 1em;counter-reset:xxx 0}.${defCon.rName} li{list-style:none;font-style:italic!important;position:relative;padding:0 0 0 0.1em;margin:0 0 0 2px;-webkit-transition:.12s;transition:.12s}.${defCon.rName} li::before{content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-family:'Roboto Condensed';font-size:1em;display:inline-block;width:1.5em;margin-left:-1.5em;-webkit-transition:.5s;transition:.5s}.${defCon.rName} .disappear{display:none}`,
     };
 
     let curretSite = {
@@ -566,7 +592,7 @@
       bing: {
         SiteTypeID: 3,
         SiteName: "Bing",
-        SplitName: "undefined",
+        SplitName: "",
         MainType: "#sb_go_par",
         HtmlCode: CONST.isUseBing
           ? String(`
@@ -640,7 +666,7 @@
       },
 
       registerMenuCommand: function (e) {
-        let Already, _Use_Bing__;
+        let yet, _Use_Bing__;
         let _use_Bing_ID, in_Use_feedBack_ID, in_UpdateCheck_ID;
 
         // Remove menus if the menus exists.
@@ -651,9 +677,9 @@
         e ? (_Use_Bing__ = "\ufff0\u2705 【已开启】") : (_Use_Bing__ = "\ufff0\u274c 【已关闭】");
 
         _use_Bing_ID = GMregisterMenuCommand(`${_Use_Bing__}Bing 搜索跳转`, () => {
-          if (!Already) {
+          if (!yet) {
             this.inUse_switch(e, "_if_Use_Bing_", "Bing 按钮");
-            Already = true;
+            yet = true;
           }
         });
         // "false" is disabled forever.
@@ -670,6 +696,7 @@
               // Destroy cache & session when restart detection.
               GMdeleteValue("_Check_Version_Expire_");
               sessionStorage.removeItem("nCount");
+              debug("//-> Destroy cache & session when restart detection.");
               setTimeout(() => {
                 location.reload();
               }, 3e3);
@@ -961,16 +988,7 @@
       });
     }
 
-    function safeFunction(func) {
-      try {
-        func();
-      } catch (e) {
-        error("//-> Function error:\n", e);
-      }
-    }
-
-    function getSearchValue() {
-      let val = "";
+    function getSearchValue(val) {
       document.querySelectorAll('input[name="wd"], input[name="q"], input[name="word"]').forEach((item, index, arr) => {
         val = arr[0].value;
         if (val) {
@@ -991,30 +1009,6 @@
         }
       }
       return encodeURIComponent(val);
-    }
-
-    function GetUrlParam(paraName) {
-      if (paraName === "undefined") {
-        const parameter = document.location.pathname.toString();
-        const arr = parameter.split("/");
-        return arr[1];
-      } else {
-        const url = document.location.toString();
-        const arrObj = url.split("?");
-        if (arrObj.length > 1) {
-          const arrPara = arrObj[1].split("&");
-          let arr;
-          for (let i = 0; i < arrPara.length; i++) {
-            arr = arrPara[i].split("=");
-            if (arr !== null && arr[0] === paraName) {
-              return arr[1];
-            }
-          }
-          return "";
-        } else {
-          return "";
-        }
-      }
     }
 
     function RAFInterval(callback, period, runNow) {
@@ -1456,7 +1450,7 @@
                 0,
                 80
               );
-            }, Math.random() * 4e3);
+            }, Math.random() * 10e3);
           }
         }
       }
