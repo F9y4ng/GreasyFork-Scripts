@@ -25,7 +25,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            优化代码逻辑。\n修正NoticeJs的Css样式问题。\n修正若干bugs，更新检测功能完结撒花。
+// @note            优化代码逻辑。\n修正NoticeJs的Css样式问题。\n修正缓存时间有效性规则及若干bugs，更新检测功能完结撒花。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -50,6 +50,12 @@
 
   const isVersionDetection = true; // Set "false" to turn off the Version Detection forever.
   const isdebug = false; // set "true" to debug scripts, May cause script response slower.
+
+  /* Define Version Detection expiration time.
+   * In order to reduce the pressure of the script source server,
+   * do not modify the expiration time too short. 4h by default.
+   * (s = second, m = minute, h = hour, d = day, w = week) */
+  const expireTime = "4h"; //
 
   /* Perfectly Compatible For Greasemonkey4.0+, TamperMonkey, ViolentMonkey * F9y4ng * 20210609 */
 
@@ -83,6 +89,14 @@
     isNoticed: sessionStorage.getItem("nCount") || 0,
     isNeedUpdate: 0,
     updateNote: "",
+    restTime: 0,
+    durationTime: (t, hoursRound, minutesRound) => {
+      const hours = Math.floor(t / 1000 / 60 / 60);
+      const minutes = Math.floor(t / 1000 / 60 - 60 * hours);
+      hours > 0 ? (hoursRound = `${hours}h`) : (hoursRound = ``);
+      minutes > 0 ? (minutesRound = `${minutes}m`) : (minutesRound = ``);
+      return `${hoursRound} ${minutesRound}`;
+    },
     randString: (n, v, r, s = "") => {
       // v: true for only letters.
       let a = "0123456789";
@@ -136,7 +150,7 @@
     let obj = {
       data: value,
       time: Date.now(),
-      expire: expire,
+      expire: /(?!^0)^[0-9]+[smhdw]$/i.test(expire) ? expire : "4h",
     };
     GMsetValue(key, JSON.stringify(obj));
   }
@@ -147,14 +161,16 @@
     }
     val = JSON.parse(val);
     if (val.expire) {
+      /(?!^0)^[0-9]+[smhdw]$/i.test(val.expire) ? (val.expire = val.expire) : (val.expire = "4h");
       expire = val.expire
-        .replace("w", "*7*24*3600*1000")
-        .replace("d", "*24*3600*1000")
-        .replace("h", "*3600*1000")
-        .replace("m", "*60*1000")
-        .replace("s", "*1000");
+        .replace(/w/i, "*7*24*3600*1000")
+        .replace(/d/i, "*24*3600*1000")
+        .replace(/h/i, "*3600*1000")
+        .replace(/m/i, "*60*1000")
+        .replace(/s/i, "*1000");
     }
-    if (Date.now() - val.time > _eval(expire)) {
+    defCon.restTime = _eval(expire) + val.time - Date.now();
+    if (defCon.restTime <= 0) {
       GMdeleteValue(key);
       return null;
     }
@@ -364,11 +380,11 @@
             }
           );
         }
-        t ? GMsetExpire("_Check_Version_Expire_", t, "2h") : () => {};
+        t ? GMsetExpire("_Check_Version_Expire_", t, expireTime) : () => {};
         debug("//--> checkVersion: Loading Data from Server.");
       } else {
         t = cache;
-        debug("//--> checkVersion: Loading Data from Cache, Expire: 2 hours.");
+        debug(`//--> checkVersion: Loading Data from Cache, Cache expire: ${defCon.durationTime(defCon.restTime)}.`);
       }
 
       if (typeof t !== "undefined") {
@@ -401,6 +417,7 @@
                     `%c${lastestVersion}%c is lower than your local version %c${defCon.curVersion}.%c\n\n` +
                     `Please confirm whether you need to upgrade your local script, and then you need to update it manually.\n\n` +
                     `If you no longer need the update prompt, please set "isVersionDetection" to "false" in your local code!\n\n` +
+                    `${cache ? "Cache expire: " + defCon.durationTime(defCon.restTime) + ".\n\n" : ""}` +
                     `[${sourceSite}]`
                 ),
                 "font-weight:bold;color:crimson",
@@ -444,6 +461,7 @@
                 String(
                   `%c[GB-Update]%c\nWe found a new version: %c${lastestVersion}%c.\n` +
                     `Please upgrade from your update source to the latest version.\n` +
+                    `${cache ? "Cache expire: " + defCon.durationTime(defCon.restTime) + ".\n" : ""}` +
                     `[${sourceSite}]`
                 ),
                 "font-weight:bold;color:crimson",

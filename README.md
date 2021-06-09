@@ -19,7 +19,7 @@
   ```text
   @ 优化代码逻辑。
   @ 修正NoticeJs的Css样式问题。
-  @ 修正若干bugs，更新检测功能完结撒花。
+  @ 修正缓存时间有效性规则及若干bugs，更新检测功能完结撒花。
   ```
 
 - ## **PowerlinePro.psm1** (`version 1.0.0`)
