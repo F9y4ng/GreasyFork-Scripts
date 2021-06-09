@@ -55,7 +55,8 @@
    * In order to reduce the pressure of the script source server,
    * do not modify the expiration time too short. 4h by default.
    * (s = second, m = minute, h = hour, d = day, w = week) */
-  const expireTime = "4h"; //
+
+  const expireTime = "4h";
 
   /* Perfectly Compatible For Greasemonkey4.0+, TamperMonkey, ViolentMonkey * F9y4ng * 20210609 */
 
@@ -93,9 +94,9 @@
     durationTime: (t, hoursRound, minutesRound) => {
       const hours = Math.floor(t / 1000 / 60 / 60);
       const minutes = Math.floor(t / 1000 / 60 - 60 * hours);
-      hours > 0 ? (hoursRound = `${hours}h`) : (hoursRound = ``);
+      hours > 0 ? (hoursRound = `${hours}h `) : (hoursRound = ``);
       minutes > 0 ? (minutesRound = `${minutes}m`) : (minutesRound = ``);
-      return `${hoursRound} ${minutesRound}`;
+      return `${hoursRound}${minutesRound}`;
     },
     randString: (n, v, r, s = "") => {
       // v: true for only letters.
