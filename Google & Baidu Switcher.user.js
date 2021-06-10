@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.2.20210609.4
+// @version         3.2.20210610.3
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en  Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
@@ -25,7 +25,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            优化代码逻辑。\n修正NoticeJs的Css样式问题。\n修正缓存时间有效性规则及若干bugs，更新检测功能完结撒花。
+// @note            修正Google以及Bing下跳转按钮的Css样式异常。\n解决unsafe-eval的问题。\n优化其他函数，细节决定成败。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -51,9 +51,10 @@
   const isVersionDetection = true; // Set "false" to turn off the Version Detection forever.
   const isdebug = false; // set "true" to debug scripts, May cause script response slower.
 
-  /* Define Version Detection expiration time.
-   * In order to reduce the pressure of the script source server,
-   * do not modify the expiration time too short. 4h by default.
+  /* The following variable is used to define the expiration time of version detection.
+   * In order to reduce the query pressure on the script source server as much as possible,
+   * Please don`t set the Query-cache expiration time too short. So we set 4 hours by default,
+   * Then to reduce update-tips frequency, you can extend the expireTime to a few days, or even weeks.
    * (s = second, m = minute, h = hour, d = day, w = week) */
 
   const expireTime = "4h";
@@ -91,12 +92,23 @@
     isNeedUpdate: 0,
     updateNote: "",
     restTime: 0,
-    durationTime: (t, hoursRound, minutesRound) => {
-      const hours = Math.floor(t / 1000 / 60 / 60);
-      const minutes = Math.floor(t / 1000 / 60 - 60 * hours);
-      hours > 0 ? (hoursRound = `${hours}h `) : (hoursRound = ``);
-      minutes > 0 ? (minutesRound = `${minutes}m`) : (minutesRound = ``);
-      return `${hoursRound}${minutesRound}`;
+    durationTime: t => {
+      let weeksRound, daysRound, hoursRound, minutesRound, secondsRound;
+      const weeks = Math.floor(t / 1000 / 60 / 60 / 24 / 7);
+      const days = Math.floor(t / 1000 / 60 / 60 / 24 - weeks * 7);
+      const hours = Math.floor(t / 1000 / 60 / 60 - weeks * 7 * 24 - days * 24);
+      const minutes = Math.floor(t / 1000 / 60 - weeks * 7 * 24 * 60 - days * 24 * 60 - hours * 60);
+      const seconds = Math.floor(t / 1000 - weeks * 7 * 24 * 60 * 60 - days * 24 * 60 * 60 - hours * 60 * 60 - minutes * 60);
+      weeks > 0 ? (weeksRound = ` ${weeks}wk`) : (weeksRound = "");
+      days > 0 ? (daysRound = ` ${days}d`) : (daysRound = "");
+      hours > 0 ? (hoursRound = ` ${hours}h`) : (hoursRound = "");
+      minutes > 0 ? (minutesRound = ` ${minutes}min`) : (minutesRound = "");
+      weeks > 0 || days > 0 || hours > 0 || minutes > 0
+        ? (secondsRound = "")
+        : seconds > 0
+        ? (secondsRound = ` ${seconds}s`)
+        : (secondsRound = " Cache is cleaning...");
+      return `${weeksRound}${daysRound}${hoursRound}${minutesRound}${secondsRound}`;
     },
     randString: (n, v, r, s = "") => {
       // v: true for only letters.
@@ -129,7 +141,7 @@
     GMregisterMenuCommand = GM.registerMenuCommand;
     GMunregisterMenuCommand = () => {};
     GMopenInTab = (a, b) => {
-      window.open(a, defCon.randString(b.length, true).slice(-6));
+      window.open(a, defCon.randString(b ? b.length : 10).slice(-6));
     };
   } else {
     GMsetValue = GM_setValue;
@@ -142,11 +154,6 @@
 
   /* Refactoring functions of GMsetValue/GMgetValue/GMdeleteValue with Expire */
 
-  function _eval(fn) {
-    let Fn = Function;
-    return new Fn("return " + fn)();
-  }
-
   function GMsetExpire(key, value, expire) {
     let obj = {
       data: value,
@@ -156,21 +163,26 @@
     GMsetValue(key, JSON.stringify(obj));
   }
 
-  function GMgetExpire(key, val, expire = 0) {
+  function GMgetExpire(key, val) {
+    let expire, expires, expireTime;
     if (!val) {
       return val;
     }
     val = JSON.parse(val);
     if (val.expire) {
-      /(?!^0)^[0-9]+[smhdw]$/i.test(val.expire) ? (val.expire = val.expire) : (val.expire = "4h");
-      expire = val.expire
+      /(?!^0)^[0-9]+[smhdw]$/i.test(val.expire) ? (expire = val.expire) : (expire = "4h");
+      expire = expire
         .replace(/w/i, "*7*24*3600*1000")
         .replace(/d/i, "*24*3600*1000")
         .replace(/h/i, "*3600*1000")
         .replace(/m/i, "*60*1000")
         .replace(/s/i, "*1000");
+      expires = expire.split("*");
+      expireTime = expires.reduce(function (a, b) {
+        return a * b;
+      }, 1);
     }
-    defCon.restTime = _eval(expire) + val.time - Date.now();
+    defCon.restTime = val.time + expireTime - Date.now();
     if (defCon.restTime <= 0) {
       GMdeleteValue(key);
       return null;
@@ -178,7 +190,9 @@
     return val.data;
   }
 
-  GMnotification = (text = "", type = "info", closeWith = true, Interval = 0, timeout = 30, url = "", autoclose = false, xToreload = false) => {
+  /* Refactoring GMnotification Function */
+
+  GMnotification = (text = "", type = "info", closeWith = true, Interval = 0, timeout = 30, url = "", autoclose = false, closeToreload = false) => {
     try {
       new NoticeJs({
         text: text,
@@ -187,6 +201,10 @@
         timeout: timeout ? timeout : 30,
         width: 400,
         position: "bottomRight",
+        scroll: {
+          maxHeight: 400,
+          showOnHover: !0,
+        },
         animation: {
           open: "animated fadeIn",
           close: "animated fadeOut",
@@ -236,7 +254,7 @@
           ],
           onClose: [
             function () {
-              if (xToreload) {
+              if (closeToreload) {
                 location.reload();
               }
             },
@@ -294,7 +312,7 @@
     defCon.titleCase(handlerInfo)
   );
 
-  /* Version Detection Start */
+  /* Version Detection with Cache * F9y4ng * 20210609 */
 
   function fetchVersion(u) {
     return new Promise((e, t) => {
@@ -323,9 +341,7 @@
               m = note[2];
             }
           });
-          if (n !== undefined) {
-            e([compareVersion(defCon.curVersion, n), defCon.encrypt(n), defCon.encrypt(m), defCon.encrypt(u)]);
-          }
+          e([compareVersion(defCon.curVersion, n), defCon.encrypt(n), defCon.encrypt(m), defCon.encrypt(u)]);
         })
         .catch(e => {
           error("//-> fetchVersion() error:\n", e);
@@ -381,23 +397,25 @@
             }
           );
         }
-        t ? GMsetExpire("_Check_Version_Expire_", t, expireTime) : () => {};
+        t ? GMsetExpire("_Check_Version_Expire_", t, expireTime) : error("t ==> undefined");
         debug("//--> checkVersion: Loading Data from Server.");
       } else {
         t = cache;
-        debug(`//--> checkVersion: Loading Data from Cache, Cache expire: ${defCon.durationTime(defCon.restTime)}.`);
+        debug(`//--> checkVersion: Loading Data from Cache, Cache expire:${defCon.durationTime(defCon.restTime)}`);
       }
 
       if (typeof t !== "undefined") {
         const lastestVersion = defCon.decrypt(t[1]);
         defCon.isNeedUpdate = cache ? compareVersion(defCon.curVersion, lastestVersion) : t[0];
         const updateNote = ((w = "") => {
-          defCon
-            .decrypt(t[2])
-            .split(/\\n/)
-            .forEach(function (item) {
-              w += `<li>${item}</li>`;
-            });
+          if (defCon.decrypt(t[2])) {
+            defCon
+              .decrypt(t[2])
+              .split(/\\n/)
+              .forEach(function (item) {
+                w += `<li>${item}</li>`;
+              });
+          }
           return w ? `<dd class="disappear"><ul>${w}</ul></dd>` : "";
         })();
         const updateUrl = defCon.decrypt(t[3]).replace("meta", "user");
@@ -407,7 +425,9 @@
             .replace("master", "blob/master")
             .replace(/code\/[^/]+\.js/, "")
         );
-        const sourceSite = defCon.titleCase(recheckURLs.hostname).split(".")[0];
+        let sourceSite = defCon.titleCase(recheckURLs.hostname).split(".")[0];
+        sourceSite = cache ? `${sourceSite} on Cache` : sourceSite;
+        const repo = cache ? "\nCache expire:" + defCon.durationTime(defCon.restTime) + "\n" : "\n";
 
         switch (defCon.isNeedUpdate) {
           case 2:
@@ -417,9 +437,8 @@
                   `%c[GB-Update]%c\nWe found a new version, But %cthe latest version ` +
                     `%c${lastestVersion}%c is lower than your local version %c${defCon.curVersion}.%c\n\n` +
                     `Please confirm whether you need to upgrade your local script, and then you need to update it manually.\n\n` +
-                    `If you no longer need the update prompt, please set "isVersionDetection" to "false" in your local code!\n\n` +
-                    `${cache ? "Cache expire: " + defCon.durationTime(defCon.restTime) + ".\n\n" : ""}` +
-                    `[${sourceSite}]`
+                    `If you no longer need the update prompt, please set "isVersionDetection" to "false" in your local code!\n` +
+                    `${repo}[${sourceSite}]`
                 ),
                 "font-weight:bold;color:crimson",
                 "font-weight:bold;color:0",
@@ -435,18 +454,17 @@
                 GMnotification(
                   defCon.noticeHTML(
                     `<dt>${defCon.scriptName}</dt>
-                      <dd><span>发现版本异常</span>检测到新版本 <i>${lastestVersion}</i> 低于您的本地版本\
-                      <i>${defCon.curVersion}</i>，由于您曾编辑过本地脚本，脚本将被设置为默认禁止自动更新。</dd>\
-                      <dd>如需覆盖安装，请点击<a href="${recheckURLs}" target="_blank" class="im">这里</a>手动升级。</dd>\
-                      <dd>[ ${sourceSite} ]</dd><dd style="font-size:11px!important;color:lemonchiffon;\
-                      font-style:italic">注：若要重新启用自动更新功能，您需要在“脚本更新源”覆盖安装新版本后，\
-                      从脚本菜单重新启用自动检测。</dd><dd style="text-align: center">\
-                      <img src="https://z3.ax1x.com/2021/06/03/28UFHJ.jpg" alt="开启自动检测"></dd>`
+                      <dd><span>发现版本异常</span>检测到新版本 <i>${lastestVersion}</i> 低于您的本地版本 <i>${defCon.curVersion}</i>。</dd>\
+                      <dd>由于您编辑过本地脚本，或是手动在脚本网站上升级过新版本，从而造成缓存错误。为避免未知错误的出现，脚本将自动设置为禁止检测更新，\
+                      直至您手动从脚本菜单中再次开启它。</dd><dd>[ ${sourceSite} ]</dd><dd style="font-size:12px!important;\
+                      color:lemonchiffon;font-style:italic">注：若要重新启用自动更新，您需要在<a href="${recheckURLs}"\
+                      target="_blank" class="im">脚本网站</a>覆盖安装新版本后，从脚本菜单重新开启检测功能。</dd>\
+                      <dd style="text-align: center"><img src="https://z3.ax1x.com/2021/06/03/28UFHJ.jpg" alt="开启自动检测"></dd>`
                   ),
                   "error",
                   true,
                   0,
-                  350,
+                  600,
                   null,
                   false,
                   true
@@ -461,9 +479,8 @@
               console.info(
                 String(
                   `%c[GB-Update]%c\nWe found a new version: %c${lastestVersion}%c.\n` +
-                    `Please upgrade from your update source to the latest version.\n` +
-                    `${cache ? "Cache expire: " + defCon.durationTime(defCon.restTime) + ".\n" : ""}` +
-                    `[${sourceSite}]`
+                    `Please upgrade from your update source to the latest version.` +
+                    `${repo}[${sourceSite}]`
                 ),
                 "font-weight:bold;color:crimson",
                 "color:0",
@@ -472,13 +489,17 @@
               );
             }
             if (defCon.isNoticed < 2 || s) {
+              let showdDetail = "";
+              if (updateNote) {
+                showdDetail = `<dd onmouseover="this.parentNode.children[2].style.display='block';\
+                      this.style.display='none'" style="text-align:center">&gt;&gt; 查看更新内容 &lt;&lt;</dd>`;
+              }
               setTimeout(function () {
                 GMnotification(
                   defCon.noticeHTML(
                     `<dt>${defCon.scriptName}</dt>\
                       <dd><span>发现版本更新</span>最新版本 <i>${lastestVersion}</i>，如果您现在需要更新，请点击这里完成自动升级安装。</dd>\
-                      ${updateNote}<dd>[ ${sourceSite} ]</dd><dd onmouseover="this.parentNode.children[2].style.display='block';\
-                      this.style.display='none'" style="text-align:center">&gt;&gt; 查看更新内容 &lt;&lt;</dd>`
+                      ${updateNote}<dd>[ ${sourceSite} ]</dd>${showdDetail}`
                   ),
                   "warning",
                   false,
@@ -493,7 +514,7 @@
             break;
           default:
             debug(
-              `%c[GB-Update]%c\nCurretVersion: %c${defCon.curVersion}%c is up-to-date!`,
+              `%c[GB-Update]%c\nCurretVersion: %c${defCon.curVersion}%c is up-to-date!${repo}[${sourceSite}]`,
               "font-weight:bold;color:darkcyan",
               "color:0",
               "color:red",
@@ -584,8 +605,8 @@
                 <input type="button" title="Google一下" value="Google一下"/>
             </span>`),
         StyleCode: CONST.isUseBing
-          ? `#form{white-space:nowrap} #u{z-index:1!important} #${CONST.rndidName} #${CONST.bbyx}{margin-left:-1.5px} #${CONST.rndidName} #${CONST.ggyx}{margin-left:2px}#${CONST.bbyx} input{background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor: pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px;font-weight:bold}#${CONST.ggyx} input{background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px;font-weight:bold}#${CONST.ggyx} input:hover,#${CONST.bbyx} input:hover{background: #4662D9;border:1px solid #3476d2}`
-          : `#form{white-space:nowrap}#u{z-index: 1!important}#${CONST.rndidName}{margin-left:6px}#${CONST.ggyx} input{background: #4e6ef2;border-radius:10px;cursor:pointer;height:40px;color:#fff;width:112px;border:1px solid #3476d2;text-shadow: 0 0 2px #ffffff!important;font-size:16px}#${CONST.ggyx} input:hover{background:#4662D9;border: 1px solid #3476d2}`,
+          ? `#form{white-space:nowrap} #u{z-index:1!important} #${CONST.rndidName} #${CONST.bbyx}{margin-left:-1.5px} #${CONST.rndidName} #${CONST.ggyx}{margin-left:2px}#${CONST.bbyx} input{background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px;font-weight:bold}#${CONST.ggyx} input{background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px;font-weight:bold}#${CONST.ggyx} input:hover,#${CONST.bbyx} input:hover{background: #4662D9;border:1px solid #3476d2}`
+          : `#form{white-space:nowrap}#u{z-index:1!important}#${CONST.rndidName}{margin-left:6px}#${CONST.ggyx} input{background:#4e6ef2;border-radius:10px;cursor:pointer;height:40px;color:#fff;width:112px;border:1px solid #3476d2;text-shadow:0 0 2px #ffffff!important;font-size:16px}#${CONST.ggyx} input:hover{background:#4662D9;border:1px solid #3476d2;}`,
       },
       google: {
         SiteTypeID: 2,
@@ -605,8 +626,8 @@
                 <input type="button" title="百度一下" value="百度一下"/>
             </span>`),
         StyleCode: CONST.isUseBing
-          ? `#${CONST.rndidName}{margin:3px 4px 0 -5px}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-2px}.scrollspan{padding:1px 0 0 18px!important}.scrollbars{height:26px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}#${CONST.bdyx} input{cursor:pointer;padding:1px 1px 1px 6px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff}#${CONST.bbyx} input{cursor:pointer;padding:1px 6px 1px 1px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff}#${CONST.bdyx} input:hover,#${CONST.bbyx} input:hover{background: #2b7de9}`
-          : `#${CONST.rndidName}{margin: 3px 4px 0 -5px} #${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px; border-left:1px solid #ddd} .scrollspan{padding:1px 0 0 18px!important} .scrollbars{height: 26px!important; font-size: 13px!important; font-weight: normal!important; text-shadow: 0 0 1px #ffffff !important} #${CONST.bdyx} input{cursor: pointer; border: 1px solid transparent; background: #1a73e8; box-shadow: none; border-radius: 24px; width: 90px; height: 38px; font-size: 14px; font-weight: 600; color: #fff} #${CONST.bdyx} input:hover{background: #2b7de9}`,
+          ? `#${CONST.rndidName}{margin:3px 4px 0 -5px}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd;}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-2px}.scrollspan{display:block;margin: 3px 3px 0 0}.scrollbars{height:26px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}.scrollbars2{display:inline-block;margin-top:-3px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}#${CONST.bdyx} input{cursor:pointer;padding:1px 1px 1px 6px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bbyx} input{cursor:pointer;padding:1px 6px 1px 1px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover,#${CONST.bbyx} input:hover{background: #2b7de9;}`
+          : `#${CONST.rndidName}{margin:3px 4px 0 -5px}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd}.scrollspan{display:block;margin:3px 3px 0 0}.scrollbars{height:26px!important;font-size:13px!important;font-weight:normal!important; text-shadow:0 0 1px #ffffff!important}.scrollbars2{display:inline-block;margin-top:-3px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}#${CONST.bdyx} input{cursor:pointer;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-radius:24px;width:90px;height:38px;font-size:14px;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover{background:#2b7de9;}`,
       },
       bing: {
         SiteTypeID: 3,
@@ -623,7 +644,7 @@
           </span>`)
           : ``,
         StyleCode: CONST.isUseBing
-          ? `#${CONST.rndidName}{height:44px;width:120px;margin: 2px 10px 2px 0}#${CONST.bdyx} input,#${CONST.ggyx} input{cursor:pointer;width:auto 60px;height:40px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;margin-left:-1px;font-family:'Microsoft YaHei'!important;font-size:16px;font-weight:700;border-radius:4px}.scrollspan{height:32px!important}.scrollbars{height:30px!important}#${CONST.bdyx} input:hover,#${CONST.ggyx} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border: 2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7}`
+          ? `#${CONST.rndidName}{height:44px;width:120px;margin:2px 5px 2px 0}#${CONST.bdyx} input,#${CONST.ggyx} input{cursor:pointer;width:auto 60px;height:40px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;margin-left:-1px;font-family:'Microsoft YaHei'!important;font-size:16px;font-weight:700;border-radius:4px}.scrollspan{height:32px!important}.scrollbars{height:30px!important;padding:4px}#${CONST.bdyx} input:hover,#${CONST.ggyx} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border:2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7;}`
           : ``,
       },
       other: { SiteTypeID: 0 },
@@ -639,10 +660,10 @@
     debug("//-> Initialization complete, start running...");
 
     if (location.host.includes(".baidu.com")) {
-      // Include baidu
+      // Includes baidu
       curretSite = listSite.baidu;
     } else if (location.host.includes(".bing.com")) {
-      // Include bing
+      // Includes bing
       curretSite = listSite.bing;
     } else if (/^([0-9a-z-]+\.)?google(\.[a-z]{2,3}){1,3}$/.test(location.host)) {
       // Regular google
@@ -786,7 +807,10 @@
               // Bing image fixed
               if (document.querySelector(".b_searchboxForm") && /^images$/.test(CONST.vim.trim())) {
                 if (location.href.includes("view=detailV2") && CONST.isUseBing) {
-                  document.querySelector(".b_searchboxForm").setAttribute("style", "width:640px");
+                  document.querySelector(".b_searchboxForm").setAttribute("style", "width:122.5%!important");
+                  document.querySelectorAll(`#${CONST.rndidName} input`).forEach(item => {
+                    item.style = "height:35px!important";
+                  });
                 }
               }
             }
@@ -837,12 +861,17 @@
       },
 
       scrollDetect: function () {
+        let scrollbars, height;
+        const e = /^isch$/.test(CONST.vim.trim());
         switch (curretSite.SiteTypeID) {
           case newSiteType.GOOGLE:
-            scrollButton(`#${CONST.rndidName}`, "scrollspan", 35);
-            scrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, "scrollbars", 35);
+            // Google image fixed
+            e ? (scrollbars = "scrollbars2") : (scrollbars = "scrollbars");
+            e ? (height = -14) : (height = 35);
+            scrollButton(`#${CONST.rndidName}`, "scrollspan", height);
+            scrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, scrollbars, height);
             if (CONST.isUseBing) {
-              scrollButton(`#${CONST.rndidName} #${CONST.bbyx} input`, "scrollbars", 35);
+              scrollButton(`#${CONST.rndidName} #${CONST.bbyx} input`, scrollbars, height);
             }
             break;
           case newSiteType.BING:
