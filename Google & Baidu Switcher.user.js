@@ -1496,9 +1496,9 @@
             setTimeout(function () {
               GMnotification(
                 defCon.noticeHTML(
-                  `<dd title="随机提示">如果您修改过代码，在覆盖安装新代码后，您仍要从菜单中再开启检测功能，\
-                  才能恢复自动更新。</dd><dd style="text-align: center" title="随机提示"><img\
-                  src="https://z3.ax1x.com/2021/06/03/28UFHJ.jpg" alt="开启自动检测"></dd>`
+                  `<dd title="随机提示">若要恢复自动更新功能，请在覆盖安装新代码后,\
+                  从脚本菜单中重新开启"版本更新"功能。</dd><dd style="text-align: center" title="随机提示">\
+                  <img src="https://z3.ax1x.com/2021/06/03/28UFHJ.jpg" alt="开启自动检测"></dd>`
                 ),
                 "info",
                 true,
