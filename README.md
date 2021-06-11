@@ -10,16 +10,14 @@
   @ 代码优化，修正bugs.
   ```
 
-- ## **Google & Baidu Switcher.user.js** (`version 3.2.20210610.3`)
+- ## **Google & Baidu Switcher.user.js** (`version 3.2.20210611.1`)
 
   简介：最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 
-  > `version 3.2.20210610.3`
+  > `version 3.2.20210611.1`
 
   ```text
-  @ 修正Google以及Bing下跳转按钮的Css样式异常。
-  @ 解决unsafe-eval的问题。
-  @ 优化其他函数，细节决定成败。
+  @ 修正百度和Bing首页的按钮插入bug.
   ```
 
 - ## **PowerlinePro.psm1** (`version 1.0.0`)

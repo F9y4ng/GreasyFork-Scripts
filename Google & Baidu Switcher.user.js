@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.2.20210610.3
+// @version         3.2.20210611.1
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en  Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
@@ -25,7 +25,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            修正Google以及Bing下跳转按钮的Css样式异常。\n解决unsafe-eval的问题。\n优化其他函数，细节决定成败。
+// @note            修正百度和Bing首页的按钮插入bug.
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -401,7 +401,7 @@
         debug("//--> checkVersion: Loading Data from Server.");
       } else {
         t = cache;
-        debug(`//--> checkVersion: Loading Data from Cache, Cache expire:${defCon.durationTime(defCon.restTime)}`);
+        debug("//--> checkVersion: Loading Data from Cache.");
       }
 
       if (typeof t !== "undefined") {
@@ -546,12 +546,11 @@
   /* Menus & Button insert  */
 
   !(async function () {
-    /* Get Promise Value */
-
+    // Get Promise Value
     const is_Use_Bing = parseInt(await GMgetValue("_if_Use_Bing_"));
     const is_Ver_Det = await GMgetValue("_is_Ver_Det_");
 
-    /* Set Default Value */
+    /* Set Default Value & initialize */
 
     const CONST = {
       isSecurityPolicy: false,
@@ -657,7 +656,7 @@
       OTHERS: 0,
     };
 
-    debug("//-> Initialization complete, start running...");
+    debug("//-> initialized complete, start running...");
 
     if (location.host.includes(".baidu.com")) {
       // Includes baidu
@@ -732,11 +731,11 @@
           } else {
             in_UpdateCheck_ID = GMregisterMenuCommand("\ufff5\ud83d\udcdb 【已关闭】版本更新 \u267b 重新开启", () => {
               GMsetValue("_is_Ver_Det_", true);
-              GMnotification(defCon.noticeHTML(`<dd>更新检测已开启，网页将在<em>3</em>秒后自动刷新！</dd>`), "info", true, 3);
               // Destroy cache & session when restart detection.
               GMdeleteValue("_Check_Version_Expire_");
               sessionStorage.removeItem("nCount");
               debug("//-> Destroy cache & session when restart detection.");
+              GMnotification(defCon.noticeHTML(`<dd>更新检测已开启，网页将在<em>3</em>秒后自动刷新！</dd>`), "info", true, 3);
               setTimeout(() => {
                 location.reload();
               }, 3e3);
@@ -783,6 +782,7 @@
           const doHtml = curretSite.HtmlCode;
           const doStyName = `${CONST.rndclassName}`;
           const doStyle = CONST.noticeCss + curretSite.StyleCode;
+          const indexPage = location.pathname !== "/";
           const userSpan = document.createElement("span");
           userSpan.id = `${CONST.rndidName}`;
           userSpan.innerHTML = doHtml;
@@ -791,7 +791,7 @@
 
           addStyle(doStyle, doStyName, "head");
 
-          if (!document.querySelector(SpanID) && getSearchValue().length > 0 && Target) {
+          if (!document.querySelector(SpanID) && getSearchValue() && indexPage && Target) {
             if (/^(nws|vid|bks)$/.test(CONST.vim.trim())) {
               Target = Target.parentNode.parentNode.firstChild;
               Target.insertBefore(userSpan, Target.firstChild);
@@ -861,11 +861,11 @@
       },
 
       scrollDetect: function () {
-        let scrollbars, height;
-        const e = /^isch$/.test(CONST.vim.trim());
+        let scrollbars, height, e;
         switch (curretSite.SiteTypeID) {
           case newSiteType.GOOGLE:
             // Google image fixed
+            e = /^isch$/.test(CONST.vim.trim());
             e ? (scrollbars = "scrollbars2") : (scrollbars = "scrollbars");
             e ? (height = -14) : (height = 35);
             scrollButton(`#${CONST.rndidName}`, "scrollspan", height);
@@ -1045,15 +1045,22 @@
       });
       if (val === null || val === "" || typeof val === "undefined") {
         const kvl = location.search.substr(1).split("&");
-        for (let i = 0; i < kvl.length; i++) {
-          let value = kvl[i].replace(/^(wd|word|kw|query|q)=/, "");
-          if (value !== kvl[i]) {
-            val = value;
+        if (kvl) {
+          for (let i = 0; i < kvl.length; i++) {
+            let value = kvl[i].replace(/^(wd|word|kw|query|q)=/, "");
+            if (value !== kvl[i]) {
+              val = value;
+            }
           }
-        }
-        val = val.replace(/\+/g, " ");
-        if (val) {
-          debug(`//-> QUERY: ${val}`);
+          if (val) {
+            val = val.replace(/\+/g, " ");
+            debug(`//-> QUERY: ${val}`);
+          } else {
+            val = "";
+            error(`//-> QUERY is null`);
+          }
+        } else {
+          return "";
         }
       }
       return encodeURIComponent(val);
