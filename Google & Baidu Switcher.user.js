@@ -1492,7 +1492,7 @@
       } finally {
         if (isVersionDetection && !CONST.isVDResult) {
           debug("//-> Ready to Insert Random Tips.");
-          if (Math.ceil(Math.random() * 20) > 16) {
+          if (Math.ceil(Math.random() * 20) > 18) {
             setTimeout(function () {
               GMnotification(
                 defCon.noticeHTML(
