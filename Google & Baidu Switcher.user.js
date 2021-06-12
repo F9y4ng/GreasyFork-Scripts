@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.2.20210611.1
+// @version         3.2.20210613.2
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en  Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
@@ -25,7 +25,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            修正百度和Bing首页的按钮插入bug.
+// @note            修正URL参数获取函数的bug.\n新增国内镜像更新检测源：JSDELIVR.\n修正部分函数逻辑。\n修正CSS并重新压缩。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -77,7 +77,7 @@
     decrypt: n => {
       return decodeURIComponent(window.atob(n));
     },
-    fetchResult: true,
+    fetchResult: "success",
     titleCase: (str, bool) => {
       // bool: true for Whole sentence.
       const RegExp = bool ? /( |^)[a-z]/g : /(^)[a-z]/g;
@@ -262,7 +262,7 @@
         },
       }).show();
     } catch (e) {
-      error("//-> GMnotification error:\n", e);
+      error("//-> %cGMnotification:\n%c%s", "font-weight:bold", "font-weight:normal", e);
     }
   };
 
@@ -272,7 +272,7 @@
     if (!paraName) {
       const parameter = document.location.pathname.toString();
       const arr = parameter.split("/");
-      return arr[1];
+      return arr[1] === undefined ? "" : arr[1];
     } else {
       const url = document.location.toString();
       const arrObj = url.split("?");
@@ -296,7 +296,7 @@
     try {
       func();
     } catch (e) {
-      error("//-> Function error:\n", e);
+      error("//-> %cFunctions:\n%c%s", "font-weight:bold", "font-weight:normal", e);
     }
   }
 
@@ -344,7 +344,7 @@
           e([compareVersion(defCon.curVersion, n), defCon.encrypt(n), defCon.encrypt(m), defCon.encrypt(u)]);
         })
         .catch(e => {
-          error("//-> fetchVersion() error:\n", e);
+          error("//-> %cfetchVersion:\n%c%s", "font-weight:bold", "font-weight:normal", e);
           t();
         });
     });
@@ -375,35 +375,54 @@
   }
 
   async function checkVersion(s = false) {
-    let t, result;
+    let t, setResult;
     const m = await GMgetValue("_is_Ver_Det_");
-    isVersionDetection ? (result = m === undefined ? isVersionDetection : Boolean(m)) : (result = false);
-    if (result) {
+    isVersionDetection ? (setResult = m === undefined ? isVersionDetection : Boolean(m)) : (setResult = false);
+    if (setResult) {
+      // load cache
       const exp = await GMgetValue("_Check_Version_Expire_");
       const cache = GMgetExpire("_Check_Version_Expire_", exp);
       // Checking the local cache to reduce server requests
       if (!cache) {
+        // first: greasyfork
         t = await fetchVersion(`https://greasyfork.org/scripts/12909/code/${defCon.randString(32)}.meta.js`).catch(async () => {
-          defCon.fetchResult = false;
+          defCon.fetchResult = "GreasyFork - Failed to fetch";
+          error(defCon.fetchResult);
         });
-        if (!defCon.fetchResult) {
+        // second: github
+        if (defCon.fetchResult.includes("GreasyFork")) {
           t = await fetchVersion(`https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`).catch(
             async () => {
-              console.error(
-                "%c[GB-Update]\n%cSome Unexpected Errors Caused Version Detection Failure.\nProbably Caused By NetworkError.",
-                "font-weight:bold;color:red",
-                "font-weight:bold;color:darkred"
-              );
+              defCon.fetchResult = "Github - Failed to fetch";
+              error(defCon.fetchResult);
             }
           );
         }
-        t ? GMsetExpire("_Check_Version_Expire_", t, expireTime) : error("t ==> undefined");
-        debug("//--> checkVersion: Loading Data from Server.");
+        // final: Jsdelivr points to gitee
+        if (defCon.fetchResult.includes("Github")) {
+          t = await fetchVersion(`https://cdn.jsdelivr.net/gh/F9y4ng/GreasyFork-Scripts@master/Google%20&%20Baidu%20Switcher.meta.js`).catch(
+            async () => {
+              defCon.fetchResult = "All Sources - Failed to fetch";
+              error(defCon.fetchResult);
+            }
+          );
+        }
+        // Set value with expire
+        if (t !== undefined) {
+          GMsetExpire("_Check_Version_Expire_", t, expireTime);
+          debug("//--> checkVersion: Loading Data from Server.");
+        } else {
+          console.error(
+            "%c[GB-Update]\n%cSome unknown exceptions cause version detection failure, most likely by a network error.",
+            "font-weight:bold;color:red",
+            "font-weight:bold;color:darkred"
+          );
+        }
       } else {
         t = cache;
         debug("//--> checkVersion: Loading Data from Cache.");
       }
-
+      // Resolution return data
       if (typeof t !== "undefined") {
         const lastestVersion = defCon.decrypt(t[1]);
         defCon.isNeedUpdate = cache ? compareVersion(defCon.curVersion, lastestVersion) : t[0];
@@ -422,12 +441,14 @@
         const recheckURLs = new URL(
           updateUrl
             .replace("raw.githubusercontent", "github")
+            .replace("cdn.jsdelivr.net/gh", "gitee.com")
+            .replace("@", "/")
             .replace("master", "blob/master")
             .replace(/code\/[^/]+\.js/, "")
         );
         let sourceSite = defCon.titleCase(recheckURLs.hostname).split(".")[0];
         sourceSite = cache ? `${sourceSite} on Cache` : sourceSite;
-        const repo = cache ? "\nCache expire:" + defCon.durationTime(defCon.restTime) + "\n" : "\n";
+        const repo = cache ? `\nCache expire:${defCon.durationTime(defCon.restTime)}\n` : `\n`;
 
         switch (defCon.isNeedUpdate) {
           case 2:
@@ -459,7 +480,7 @@
                       直至您手动从脚本菜单中再次开启它。</dd><dd>[ ${sourceSite} ]</dd><dd style="font-size:12px!important;\
                       color:lemonchiffon;font-style:italic">注：若要重新启用自动更新，您需要在<a href="${recheckURLs}"\
                       target="_blank" class="im">脚本网站</a>覆盖安装新版本后，从脚本菜单重新开启检测功能。</dd>\
-                      <dd style="text-align: center"><img src="https://z3.ax1x.com/2021/06/03/28UFHJ.jpg" alt="开启自动检测"></dd>`
+                      <dd style="text-align: center"><img src="https://i.niupic.com/images/2021/06/13/9kVe.png" alt="开启自动检测"></dd>`
                   ),
                   "error",
                   true,
@@ -513,7 +534,9 @@
             }
             break;
           default:
-            debug(
+            let info;
+            s ? (info = console.log.bind(console)) : (info = debug.bind(console));
+            info(
               `%c[GB-Update]%c\nCurretVersion: %c${defCon.curVersion}%c is up-to-date!${repo}[${sourceSite}]`,
               "font-weight:bold;color:darkcyan",
               "color:0",
@@ -604,7 +627,7 @@
                 <input type="button" title="Google一下" value="Google一下"/>
             </span>`),
         StyleCode: CONST.isUseBing
-          ? `#form{white-space:nowrap} #u{z-index:1!important} #${CONST.rndidName} #${CONST.bbyx}{margin-left:-1.5px} #${CONST.rndidName} #${CONST.ggyx}{margin-left:2px}#${CONST.bbyx} input{background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px;font-weight:bold}#${CONST.ggyx} input{background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px;font-weight:bold}#${CONST.ggyx} input:hover,#${CONST.bbyx} input:hover{background: #4662D9;border:1px solid #3476d2}`
+          ? `#form{white-space:nowrap}#u{z-index:1!important}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-1.5px}#${CONST.rndidName} #${CONST.ggyx}{margin-left:2px}#${CONST.bbyx} input{background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px;font-weight:bold}#${CONST.ggyx} input{background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px;font-weight:bold}#${CONST.ggyx} input:hover,#${CONST.bbyx} input:hover{background: #4662D9;border:1px solid #3476d2}`
           : `#form{white-space:nowrap}#u{z-index:1!important}#${CONST.rndidName}{margin-left:6px}#${CONST.ggyx} input{background:#4e6ef2;border-radius:10px;cursor:pointer;height:40px;color:#fff;width:112px;border:1px solid #3476d2;text-shadow:0 0 2px #ffffff!important;font-size:16px}#${CONST.ggyx} input:hover{background:#4662D9;border:1px solid #3476d2;}`,
       },
       google: {
@@ -625,8 +648,8 @@
                 <input type="button" title="百度一下" value="百度一下"/>
             </span>`),
         StyleCode: CONST.isUseBing
-          ? `#${CONST.rndidName}{margin:3px 4px 0 -5px}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd;}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-2px}.scrollspan{display:block;margin: 3px 3px 0 0}.scrollbars{height:26px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}.scrollbars2{display:inline-block;margin-top:-3px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}#${CONST.bdyx} input{cursor:pointer;padding:1px 1px 1px 6px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bbyx} input{cursor:pointer;padding:1px 6px 1px 1px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover,#${CONST.bbyx} input:hover{background: #2b7de9;}`
-          : `#${CONST.rndidName}{margin:3px 4px 0 -5px}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd}.scrollspan{display:block;margin:3px 3px 0 0}.scrollbars{height:26px!important;font-size:13px!important;font-weight:normal!important; text-shadow:0 0 1px #ffffff!important}.scrollbars2{display:inline-block;margin-top:-3px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}#${CONST.bdyx} input{cursor:pointer;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-radius:24px;width:90px;height:38px;font-size:14px;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover{background:#2b7de9;}`,
+          ? `#${CONST.rndidName}{margin:3px 4px 0 -5px}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd;}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-2px}.scrollspan{display:block;margin: 3px 3px 0 0}.scrollbars{height:26px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}.scrollbars2{display:inline-block;margin-top:-3px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}#${CONST.bdyx} input{cursor:pointer;padding:1px 1px 1px 6px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bbyx} input{cursor:pointer;padding:1px 6px 1px 1px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover,#${CONST.bbyx} input:hover{background:#2b7de9;}`
+          : `#${CONST.rndidName}{margin:3px 4px 0 -5px}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd}.scrollspan{display:block;margin:3px 3px 0 0}.scrollbars{height:26px!important;font-size:13px!important;font-weight:normal!important; text-shadow:0 0 1px #fff!important}.scrollbars2{display:inline-block;margin-top:-3px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #fff!important}#${CONST.bdyx} input{cursor:pointer;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-radius:24px;width:90px;height:38px;font-size:14px;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover{background:#2b7de9;}`,
       },
       bing: {
         SiteTypeID: 3,
@@ -643,7 +666,7 @@
           </span>`)
           : ``,
         StyleCode: CONST.isUseBing
-          ? `#${CONST.rndidName}{height:44px;width:120px;margin:2px 5px 2px 0}#${CONST.bdyx} input,#${CONST.ggyx} input{cursor:pointer;width:auto 60px;height:40px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;margin-left:-1px;font-family:'Microsoft YaHei'!important;font-size:16px;font-weight:700;border-radius:4px}.scrollspan{height:32px!important}.scrollbars{height:30px!important;padding:4px}#${CONST.bdyx} input:hover,#${CONST.ggyx} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border:2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7;}`
+          ? `#${CONST.rndidName}{height:44px;width:120px;margin:2px 5px 2px 0}#${CONST.bdyx} input,#${CONST.ggyx} input{cursor:pointer;width:auto 60px;height:40px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;margin-left:-1px;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px;font-weight:700;border-radius:4px}.scrollspan{height:32px!important}.scrollbars{height:30px!important;padding:4px}#${CONST.bdyx} input:hover,#${CONST.ggyx} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border:2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7;}`
           : ``,
       },
       other: { SiteTypeID: 0 },
@@ -700,8 +723,8 @@
         }, 3e3);
       },
 
-      menuRemove: x => {
-        x ? GMunregisterMenuCommand(x) : error("//-> menuRemove() not found item: %s.", typeof x);
+      menuRemove: t => {
+        t ? GMunregisterMenuCommand(t) : debug("//-> menuRemove() not found item: %s.", typeof t);
       },
 
       registerMenuCommand: function (e) {
@@ -725,11 +748,13 @@
         if (isVersionDetection) {
           // check VDR value to insert menu.
           if (CONST.isVDResult) {
-            in_UpdateCheck_ID = GMregisterMenuCommand("\ufff5\ud83d\udd0e 【检查】版本更新", () => {
+            in_UpdateCheck_ID = GMregisterMenuCommand("\ufff5\ud83d\udd0e 【版本更新】手动实时检查", () => {
+              // Destroy cache before manual check.
+              GMdeleteValue("_Check_Version_Expire_");
               checkVersion(true);
             });
           } else {
-            in_UpdateCheck_ID = GMregisterMenuCommand("\ufff5\ud83d\udcdb 【已关闭】版本更新 \u267b 重新开启", () => {
+            in_UpdateCheck_ID = GMregisterMenuCommand("\ufff5\ud83d\udcdb 【版本更新】已关闭 \u267b 重新开启", () => {
               GMsetValue("_is_Ver_Det_", true);
               // Destroy cache & session when restart detection.
               GMdeleteValue("_Check_Version_Expire_");
@@ -742,7 +767,7 @@
             });
           }
         }
-        in_Use_feedBack_ID = GMregisterMenuCommand("\ufff9\ud83e\udde1 【提建议】说出您的意见！", () => {
+        in_Use_feedBack_ID = GMregisterMenuCommand("\ufff9\ud83e\udde1 【建议反馈】说出您的意见！", () => {
           GMopenInTab(`${defCon.support ? defCon.support : "https://greasyfork.org/scripts/12909/feedback"}`, {
             active: true,
             insert: true,
@@ -758,7 +783,6 @@
             this.registerMenuCommand(CONST.isUseBing);
           });
         }
-
         console.log(
           "%c[GB-Status]%c\nInsert the Bing Search Button: %c%s",
           "font-weight:bold;color:darkorange",
@@ -782,7 +806,7 @@
           const doHtml = curretSite.HtmlCode;
           const doStyName = `${CONST.rndclassName}`;
           const doStyle = CONST.noticeCss + curretSite.StyleCode;
-          const indexPage = location.pathname !== "/";
+          const indexPage = location.pathname === "/";
           const userSpan = document.createElement("span");
           userSpan.id = `${CONST.rndidName}`;
           userSpan.innerHTML = doHtml;
@@ -791,7 +815,7 @@
 
           addStyle(doStyle, doStyName, "head");
 
-          if (!document.querySelector(SpanID) && getSearchValue() && indexPage && Target) {
+          if (!document.querySelector(SpanID) && getSearchValue() && !indexPage && Target) {
             if (/^(nws|vid|bks)$/.test(CONST.vim.trim())) {
               Target = Target.parentNode.parentNode.firstChild;
               Target.insertBefore(userSpan, Target.firstChild);
@@ -855,7 +879,7 @@
           }
           return true;
         } catch (e) {
-          error("//-> searchManager.insertSearchButton() error:\n", e);
+          error("//-> %csearchManager.insertSearchButton:\n%c%s", "font-weight:bold", "font-weight:normal", e);
           return false;
         }
       },
@@ -948,7 +972,7 @@
             }
           }
         } catch (e) {
-          error("//-> searchManager.doSwitch() error:\n", e);
+          error("//-> %csearchManager.doSwitch:\n%c%s", "font-weight:bold", "font-weight:normal", e);
         }
       },
 
@@ -971,7 +995,7 @@
         }
         document.addEventListener("scroll", () => {
           const s = document.body.scrollTop || document.documentElement.scrollTop;
-          debug(`//-> H=${H} S=${s} H-S=(${H - s})`);
+          debug(`//-> H=${H} S=${s} (${s - H})`);
           if (s > H + scrollSize) {
             oDiv.setAttribute("class", classNameIn);
           } else {
@@ -1018,7 +1042,7 @@
             }
             return true;
           } catch (e) {
-            error(`//-> addStyle() error:\n`, e);
+            error("//-> %caddStyle:\n%c%s", "font-weight:bold", "font-weight:normal", e);
             return false;
           }
         },
@@ -1498,7 +1522,7 @@
                 defCon.noticeHTML(
                   `<dd title="随机提示">若要恢复自动更新功能，请在覆盖安装新代码后,\
                   从脚本菜单中重新开启"版本更新"功能。</dd><dd style="text-align: center" title="随机提示">\
-                  <img src="https://z3.ax1x.com/2021/06/03/28UFHJ.jpg" alt="开启自动检测"></dd>`
+                  <img src="https://i.niupic.com/images/2021/06/13/9kVe.png" alt="开启自动检测"></dd>`
                 ),
                 "info",
                 true,
