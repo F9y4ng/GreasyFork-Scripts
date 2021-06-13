@@ -17,10 +17,9 @@
   > `version 3.2.20210613.2`
 
   ```text
-  + 新增国内镜像更新检测源：JSDELIVR.
-  @ 修正URL参数获取函数的bug.
-  @ 修正部分函数逻辑。
-  @ 修正CSS并重新压缩。
+  @ 重构Fetch with request timeout.（防止更新检测因网络延时而等待过长时间。）
+  @ 重构GM.notification Function.
+  @ 重构NoticeJs.js及Css，修正错误。
   ```
 
 - ## **PowerlinePro.psm1** (`version 1.0.0`)

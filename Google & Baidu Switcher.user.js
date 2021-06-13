@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.2.20210613.2
+// @version         3.2.20210614.1
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en  Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
@@ -18,14 +18,14 @@
 // @include         *://www1.baidu.com/*
 // @include         *://image.baidu.com/*
 // @include         *://*.bing.com/*
-// @exclude         *://*.google.*/sorry/*
+// @exclude         *://*.google.*/sorry*
 // @exclude         *://*.google.*/url*
 // @exclude         *://www.baidu.com/link*
 // @compatible      Chrome 兼容TamperMonkey, ViolentMonkey
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            修正URL参数获取函数的bug.\n新增国内镜像更新检测源：JSDELIVR.\n修正部分函数逻辑。\n修正CSS并重新压缩。
+// @note            重构Fetch with request timeout.\n重构GM.notification Function.\n重构NoticeJs.js及Css，修正错误。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -54,7 +54,7 @@
   /* The following variable is used to define the expiration time of version detection.
    * In order to reduce the query pressure on the script source server as much as possible,
    * Please don`t set the Query-cache expiration time too short. So we set 4 hours by default,
-   * Then to reduce update-tips frequency, you can extend the expireTime to a few days, or even weeks.
+   * And to reduce update-tips frequency, you can extend the expireTime to a few days, or even weeks.
    * (s = second, m = minute, h = hour, d = day, w = week) */
 
   const expireTime = "4h";
@@ -93,22 +93,18 @@
     updateNote: "",
     restTime: 0,
     durationTime: t => {
-      let weeksRound, daysRound, hoursRound, minutesRound, secondsRound;
-      const weeks = Math.floor(t / 1000 / 60 / 60 / 24 / 7);
-      const days = Math.floor(t / 1000 / 60 / 60 / 24 - weeks * 7);
-      const hours = Math.floor(t / 1000 / 60 / 60 - weeks * 7 * 24 - days * 24);
-      const minutes = Math.floor(t / 1000 / 60 - weeks * 7 * 24 * 60 - days * 24 * 60 - hours * 60);
-      const seconds = Math.floor(t / 1000 - weeks * 7 * 24 * 60 * 60 - days * 24 * 60 * 60 - hours * 60 * 60 - minutes * 60);
-      weeks > 0 ? (weeksRound = ` ${weeks}wk`) : (weeksRound = "");
-      days > 0 ? (daysRound = ` ${days}d`) : (daysRound = "");
-      hours > 0 ? (hoursRound = ` ${hours}h`) : (hoursRound = "");
-      minutes > 0 ? (minutesRound = ` ${minutes}min`) : (minutesRound = "");
-      weeks > 0 || days > 0 || hours > 0 || minutes > 0
-        ? (secondsRound = "")
-        : seconds > 0
-        ? (secondsRound = ` ${seconds}s`)
-        : (secondsRound = " Cache is cleaning...");
-      return `${weeksRound}${daysRound}${hoursRound}${minutesRound}${secondsRound}`;
+      let w, d, h, m, s;
+      const wks = Math.floor(t / 1000 / 60 / 60 / 24 / 7);
+      const ds = Math.floor(t / 1000 / 60 / 60 / 24 - wks * 7);
+      const hs = Math.floor(t / 1000 / 60 / 60 - wks * 7 * 24 - ds * 24);
+      const ms = Math.floor(t / 1000 / 60 - wks * 7 * 24 * 60 - ds * 24 * 60 - hs * 60);
+      const ss = Math.floor(t / 1000 - wks * 7 * 24 * 60 * 60 - ds * 24 * 60 * 60 - hs * 60 * 60 - ms * 60);
+      wks > 0 ? (w = ` ${wks}wk`) : (w = "");
+      ds > 0 ? (d = ` ${ds}d`) : (d = "");
+      hs > 0 ? (h = ` ${hs}h`) : (h = "");
+      ms > 0 ? (m = ` ${ms}min`) : (m = "");
+      wks > 0 || ds > 0 || hs > 0 || ms > 0 ? (s = "") : ss > 0 ? (s = ` ${ss}s`) : (s = " Destroying cache.");
+      return `${w}${d}${h}${m}${s}`;
     },
     randString: (n, v, r, s = "") => {
       // v: true for only letters.
@@ -192,78 +188,32 @@
 
   /* Refactoring GMnotification Function */
 
-  GMnotification = (text = "", type = "info", closeWith = true, Interval = 0, timeout = 30, url = "", autoclose = false, closeToreload = false) => {
+  GMnotification = (text = "", type = "info", closeWith = true, timeout = 30, { ...options } = {}) => {
     try {
       new NoticeJs({
         text: text,
         type: type,
         closeWith: closeWith ? ["button"] : ["click"],
-        timeout: timeout ? timeout : 30,
-        width: 400,
-        position: "bottomRight",
-        scroll: {
-          maxHeight: 400,
-          showOnHover: !0,
-        },
-        animation: {
-          open: "animated fadeIn",
-          close: "animated fadeOut",
-        },
-        callbacks: {
-          onShow: [
-            function () {
-              if (Interval) {
-                const m = setInterval(() => {
-                  Interval ? --Interval : clearInterval(m);
-                  const y = document.querySelector(`.${defCon.rName} dl dd em`);
-                  if (y) {
-                    y.innerHTML = Interval;
-                  }
-                }, 1e3);
-              }
-            },
-          ],
-          onClick: [
-            function () {
-              if (url) {
-                const w = window.open(url, "Update.Scripts");
-                if (autoclose) {
-                  setTimeout(() => {
-                    if (isGM) {
-                      window.opener = null;
-                    }
-                    w ? w.close() : error("//-> window not exsits.");
-                    // Destroy cache when upgraded.
-                    GMdeleteValue("_Check_Version_Expire_");
-                    debug("//-> Destroy cache when upgraded.");
-                    GMnotification(
-                      defCon.noticeHTML(
-                        `<dd>如果您已更新了脚本，请点击<a href="javascript:void(0)"\
-                        onclick="location.replace(location.href.replace(/&zn=[^&]*/i,'')+'&Zn=1')"\
-                        class="im">这里</a>刷新使其生效。</a></dd>`
-                      ),
-                      "info",
-                      true,
-                      0,
-                      200
-                    );
-                  }, 2e3);
-                }
-              }
-            },
-          ],
-          onClose: [
-            function () {
-              if (closeToreload) {
-                location.reload();
-              }
-            },
-          ],
-        },
+        timeout: timeout,
+        callbacks: { ...options },
       }).show();
     } catch (e) {
       error("//-> %cGMnotification:\n%c%s", "font-weight:bold", "font-weight:normal", e);
     }
+  };
+
+  const callback_Countdown = {
+    onShow: [
+      function (Interval = 3) {
+        const m = setInterval(() => {
+          Interval ? --Interval : clearInterval(m);
+          const emText = document.querySelector(`.${defCon.rName} dl dd em`);
+          if (emText) {
+            emText.innerHTML = Interval;
+          }
+        }, 1e3);
+      },
+    ],
   };
 
   /* Common functions */
@@ -312,19 +262,41 @@
     defCon.titleCase(handlerInfo)
   );
 
-  /* Version Detection with Cache * F9y4ng * 20210609 */
+  /* Version Detection with Cache and timeout * F9y4ng * 20210614 */
+
+  function fetchTimeout(url, time, { ...options } = {}) {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    return new Promise((resolve, reject) => {
+      let t = setTimeout(() => {
+        controller.abort();
+        resolve(new Response("timeout", { status: 504, statusText: `Request timeout. (User-Defined: ${time}ms)` }));
+      }, time);
+      fetch(url, { signal: signal, ...options }).then(
+        res => {
+          clearTimeout(t);
+          resolve(res);
+        },
+        err => {
+          clearTimeout(t);
+          reject(err);
+        }
+      );
+    });
+  }
 
   function fetchVersion(u) {
     return new Promise((e, t) => {
-      fetch(u, {
+      fetchTimeout(u, 2000, {
         method: "GET",
         mode: "cors",
         cache: "no-store",
         credentials: "omit",
       })
         .then(e => {
+          debug("//-> %c%s %s", "color:green", e.ok, e.status);
           if (!e.ok) {
-            throw Error(e.statusText);
+            throw Error(`${e.status} ${e.statusText}`);
           }
           return e.text();
         })
@@ -375,7 +347,7 @@
   }
 
   async function checkVersion(s = false) {
-    let t, setResult;
+    let t, setResult, info;
     const m = await GMgetValue("_is_Ver_Det_");
     isVersionDetection ? (setResult = m === undefined ? isVersionDetection : Boolean(m)) : (setResult = false);
     if (setResult) {
@@ -402,7 +374,7 @@
         if (defCon.fetchResult.includes("Github")) {
           t = await fetchVersion(`https://cdn.jsdelivr.net/gh/F9y4ng/GreasyFork-Scripts@master/Google%20&%20Baidu%20Switcher.meta.js`).catch(
             async () => {
-              defCon.fetchResult = "All Sources - Failed to fetch";
+              defCon.fetchResult = "Jsdelivr - Failed to fetch";
               error(defCon.fetchResult);
             }
           );
@@ -410,17 +382,17 @@
         // Set value with expire
         if (t !== undefined) {
           GMsetExpire("_Check_Version_Expire_", t, expireTime);
-          debug("//--> checkVersion: Loading Data from Server.");
+          debug("//-> checkVersion: Loading Data from Server.");
         } else {
           console.error(
-            "%c[GB-Update]\n%cSome unknown exceptions cause version detection failure, most likely by a network error.",
+            "%c[GB-Update]\n%cSome unknown exceptions cause version detection failure, most likely by a network error. Please try again.",
             "font-weight:bold;color:red",
             "font-weight:bold;color:darkred"
           );
         }
       } else {
         t = cache;
-        debug("//--> checkVersion: Loading Data from Cache.");
+        debug("//-> checkVersion: Loading Data from Cache.");
       }
       // Resolution return data
       if (typeof t !== "undefined") {
@@ -452,24 +424,22 @@
 
         switch (defCon.isNeedUpdate) {
           case 2:
-            if (!s) {
-              console.warn(
-                String(
-                  `%c[GB-Update]%c\nWe found a new version, But %cthe latest version ` +
-                    `%c${lastestVersion}%c is lower than your local version %c${defCon.curVersion}.%c\n\n` +
-                    `Please confirm whether you need to upgrade your local script, and then you need to update it manually.\n\n` +
-                    `If you no longer need the update prompt, please set "isVersionDetection" to "false" in your local code!\n` +
-                    `${repo}[${sourceSite}]`
-                ),
-                "font-weight:bold;color:crimson",
-                "font-weight:bold;color:0",
-                "color:0",
-                "font-weight:bold;color:tomato",
-                "color:0",
-                "font-weight:bold;color:darkred",
-                "color:0"
-              );
-            }
+            console.warn(
+              String(
+                `%c[GB-Update]%c\nWe found a new version, But %cthe latest version ` +
+                  `%c${lastestVersion}%c is lower than your local version %c${defCon.curVersion}.%c\n\n` +
+                  `Please confirm whether you need to upgrade your local script, and then you need to update it manually.\n\n` +
+                  `If you no longer need the update prompt, please set "isVersionDetection" to "false" in your local code!\n` +
+                  `${repo}(${sourceSite})`
+              ),
+              "font-weight:bold;color:crimson",
+              "font-weight:bold;color:0",
+              "color:0",
+              "font-weight:bold;color:tomato",
+              "color:0",
+              "font-weight:bold;color:darkred",
+              "color:0"
+            );
             if (defCon.isNoticed < 2 || s) {
               setTimeout(function () {
                 GMnotification(
@@ -479,16 +449,19 @@
                       <dd>由于您编辑过本地脚本，或是手动在脚本网站上升级过新版本，从而造成缓存错误。为避免未知错误的出现，脚本将自动设置为禁止检测更新，\
                       直至您手动从脚本菜单中再次开启它。</dd><dd>[ ${sourceSite} ]</dd><dd style="font-size:12px!important;\
                       color:lemonchiffon;font-style:italic">注：若要重新启用自动更新，您需要在<a href="${recheckURLs}"\
-                      target="_blank" class="im">脚本网站</a>覆盖安装新版本后，从脚本菜单重新开启检测功能。</dd>\
+                      target="_blank" style="padding:0 2px;font-size:14px;color:gold">脚本源网站</a>覆盖安装新版本后，从脚本菜单重新开启检测功能。</dd>\
                       <dd style="text-align: center"><img src="https://i.niupic.com/images/2021/06/13/9kVe.png" alt="开启自动检测"></dd>`
                   ),
                   "error",
                   true,
-                  0,
-                  600,
-                  null,
-                  false,
-                  true
+                  300,
+                  {
+                    onClose: [
+                      function () {
+                        location.reload();
+                      },
+                    ],
+                  }
                 );
               }, 100);
               GMsetValue("_is_Ver_Det_", false);
@@ -496,19 +469,17 @@
             }
             break;
           case 1:
-            if (!s) {
-              console.info(
-                String(
-                  `%c[GB-Update]%c\nWe found a new version: %c${lastestVersion}%c.\n` +
-                    `Please upgrade from your update source to the latest version.` +
-                    `${repo}[${sourceSite}]`
-                ),
-                "font-weight:bold;color:crimson",
-                "color:0",
-                "color:crimson",
-                "color:0"
-              );
-            }
+            console.info(
+              String(
+                `%c[GB-Update]%c\nWe found a new version: %c${lastestVersion}%c.\n` +
+                  `Please upgrade from your update source to the latest version.` +
+                  `${repo}(${sourceSite})`
+              ),
+              "font-weight:bold;color:crimson",
+              "color:0",
+              "color:crimson",
+              "color:0"
+            );
             if (defCon.isNoticed < 2 || s) {
               let showdDetail = "";
               if (updateNote) {
@@ -524,20 +495,40 @@
                   ),
                   "warning",
                   false,
-                  0,
                   80,
-                  `${updateUrl}`,
-                  true
+                  {
+                    onClick: [
+                      function () {
+                        const w = window.open(updateUrl, "Update.Scripts");
+                        setTimeout(() => {
+                          isGM ? (window.opener = null) : debug("Not Greasemonkey");
+                          w ? w.close() : debug("window not exsits.");
+                          // Destroy cache when upgraded.
+                          GMdeleteValue("_Check_Version_Expire_");
+                          debug("//-> Destroy cache when upgraded.");
+                          GMnotification(
+                            defCon.noticeHTML(
+                              `<dd>如果您已更新了脚本，请点击<a href="javascript:void(0)"\
+                                  onclick="location.replace(location.href.replace(/&zn=[^&]*/i,'')+'&Zn=1')"\
+                                  class="im">这里</a>刷新使其生效。</a></dd>`
+                            ),
+                            "info",
+                            true,
+                            200
+                          );
+                        }, 2e3);
+                      },
+                    ],
+                  }
                 );
               }, 100);
               sessionStorage.setItem("nCount", ++defCon.isNoticed);
             }
             break;
           default:
-            let info;
-            s ? (info = console.log.bind(console)) : (info = debug.bind(console));
+            s ? (info = console.info.bind(console)) : (info = debug.bind(console));
             info(
-              `%c[GB-Update]%c\nCurretVersion: %c${defCon.curVersion}%c is up-to-date!${repo}[${sourceSite}]`,
+              `%c[GB-Update]%c\nCurretVersion: %c${defCon.curVersion}%c is up-to-date!${repo}(${sourceSite})`,
               "font-weight:bold;color:darkcyan",
               "color:0",
               "color:red",
@@ -596,7 +587,7 @@
         }
       })(),
       isVDResult: isVersionDetection ? (is_Ver_Det === undefined ? isVersionDetection : Boolean(is_Ver_Det)) : false,
-      noticeCss: `@charset "UTF-8";.animated{animation-duration:1s;animation-fill-mode:both}.animated.infinite{animation-iteration-count:infinite}.animated.hinge{animation-duration:2s}.animated.bounceIn,.animated.bounceOut,.animated.flipOutX,.animated.flipOutY{animation-duration:.75s}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.fadeOut{animation-name:fadeOut}.noticejs-top{top:0;width:100%}.noticejs-top .item{border-radius:0!important;margin:0!important}.noticejs-topRight{top:10px;right:10px}.noticejs-topLeft{top:10px;left:10px}.noticejs-topCenter{top:10px;left:50%;transform:translate(-50%)}.noticejs-middleLeft,.noticejs-middleRight{right:10px;top:50%;transform:translateY(-50%)}.noticejs-middleLeft{left:10px}.noticejs-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.noticejs-bottom{bottom:0;width:100%}.noticejs-bottom .item{border-radius:0!important;margin:0!important}.noticejs-bottomRight{bottom:10px;right:10px}.noticejs-bottomLeft{bottom:10px;left:10px}.noticejs-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.noticejs{z-index:99999!important;font-family:Helvetica Neue,Helvetica,Arial,sans-serif}.noticejs .item{margin:0 0 10px;border-radius:3px;overflow:hidden}.noticejs .item .close{float:right;font-size:18px;font-weight:700;line-height:1;color:#fff;text-shadow:0 1px 0 #fff;opacity:1;margin-right:7px}.noticejs .item .close:hover{opacity:.5;color:#000}.noticejs .item a{color:#fff;border-bottom:1px dashed #fff}.noticejs .item a,.noticejs .item a:hover{text-decoration:none}.noticejs .success{background-color:#64ce83}.noticejs .success .noticejs-heading{background-color:#3da95c;color:#fff;padding:10px}.noticejs .success .noticejs-body{color:#fff;padding:10px!important}.noticejs .success .noticejs-body:hover{visibility:visible!important}.noticejs .success .noticejs-content{visibility:visible}.noticejs .info{background-color:#3ea2ff}.noticejs .info .noticejs-heading{background-color:#067cea;color:#fff;padding:10px}.noticejs .info .noticejs-body{color:#fff;padding:10px!important}.noticejs .info .noticejs-body:hover{visibility:visible!important}.noticejs .info .noticejs-content{visibility:visible}.noticejs .warning{background-color:#ff7f48}.noticejs .warning .noticejs-heading{background-color:#f44e06;color:#fff;padding:10px!important}.noticejs .warning .noticejs-body{color:#fff;padding:10px}.noticejs .warning .noticejs-body:hover{visibility:visible!important}.noticejs .warning .noticejs-content{visibility:visible}.noticejs .error{background-color:#e74c3c}.noticejs .error .noticejs-heading{background-color:#ba2c1d;color:#fff;padding:10px!important}.noticejs .error .noticejs-body{color:#fff;padding:10px}.noticejs .error .noticejs-body:hover{visibility:visible!important}.noticejs .error .noticejs-content{visibility:visible}.noticejs .progressbar{width:100%}.noticejs .progressbar .bar{width:1%;height:30px;background-color:#4caf50}.noticejs .success .noticejs-progressbar{width:100%;background-color:#64ce83;margin-top:-1px}.noticejs .success .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#3da95c}.noticejs .info .noticejs-progressbar{width:100%;background-color:#3ea2ff;margin-top:-1px}.noticejs .info .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#067cea}.noticejs .warning .noticejs-progressbar{width:100%;background-color:#ff7f48;margin-top:-1px}.noticejs .warning .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#f44e06}.noticejs .error .noticejs-progressbar{width:100%;background-color:#e74c3c;margin-top:-1px}.noticejs .error .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#ba2c1d}@keyframes noticejs-fadeOut{0%{opacity:1}to{opacity:0}}.noticejs-fadeOut{animation-name:noticejs-fadeOut}@keyframes noticejs-modal-in{to{opacity:.3}}@keyframes noticejs-modal-out{to{opacity:0}}.noticejs{position:fixed;z-index:10050;width:400px}.noticejs ::-webkit-scrollbar{width:8px}.noticejs ::-webkit-scrollbar-button{width:8px;height:5px}.noticejs ::-webkit-scrollbar-track{border-radius:10px}.noticejs ::-webkit-scrollbar-thumb{background:hsla(0,0%,100%,.5);border-radius:10px}.noticejs ::-webkit-scrollbar-thumb:hover{background:#fff}.noticejs-modal{position:fixed;width:100%;height:100%;background-color:#000;z-index:10000;opacity:.3;left:0;top:0}.noticejs-modal-open{opacity:0;animation:noticejs-modal-in .3s ease-out}.noticejs-modal-close{animation:noticejs-modal-out .3s ease-out;animation-fill-mode:forwards}.${defCon.rName}{padding:4px 4px 0 4px!important}.${defCon.rName} dl{margin:0!important;padding:2px!important}.${defCon.rName} dl dt{margin:2px 0 8px 0!important;font-size:16px!important;font-weight:900!important}.${defCon.rName} dl dd{margin:3px 6px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${defCon.rName} dl dd em{color:#fff;font-family:Candara,sans-serif!important;font-size:24px!important;padding:0 5px}.${defCon.rName} dl dd span{font-weight:700;font-size:15px!important;margin-right:8px}.${defCon.rName} dl dd i{font-family:Candara,sans-serif!important;font-size:20px!important}.${defCon.rName} dl dd .im{color:gold;font-size:16px;font-weight:900;padding:0 3px}.${defCon.rName} ul{width:90%;display:inline-block;text-align:left;vertical-align:top;color:rgba(255, 255, 255, 0.5);padding:0.2em;margin:0 0 0 1em;counter-reset:xxx 0}.${defCon.rName} li{list-style:none;font-style:italic!important;position:relative;padding:0 0 0 0.1em;margin:0 0 0 2px;-webkit-transition:.12s;transition:.12s}.${defCon.rName} li::before{content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-family:'Roboto Condensed';font-size:1em;display:inline-block;width:1.5em;margin-left:-1.5em;-webkit-transition:.5s;transition:.5s}.${defCon.rName} .disappear{display:none}`,
+      noticeCss: `@charset "UTF-8";.animated{animation-duration:1s;animation-fill-mode:both}.animated.infinite{animation-iteration-count:infinite}.animated.hinge{animation-duration:2s}.animated.bounceIn,.animated.bounceOut,.animated.flipOutX,.animated.flipOutY{animation-duration:.75s}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.fadeOut{animation-name:fadeOut}.noticejs-top{top:0;width:100%}.noticejs-top .item{border-radius:0!important;margin:0!important}.noticejs-topRight{top:10px;right:10px}.noticejs-topLeft{top:10px;left:10px}.noticejs-topCenter{top:10px;left:50%;transform:translate(-50%)}.noticejs-middleLeft,.noticejs-middleRight{right:10px;top:50%;transform:translateY(-50%)}.noticejs-middleLeft{left:10px}.noticejs-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.noticejs-bottom{bottom:0;width:100%}.noticejs-bottom .item{border-radius:0!important;margin:0!important}.noticejs-bottomRight{bottom:10px;right:10px}.noticejs-bottomLeft{bottom:10px;left:10px}.noticejs-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.noticejs{z-index:99999!important;font-family:Helvetica Neue,Helvetica,Arial,sans-serif}.noticejs .item{margin:0 0 10px;border-radius:3px;overflow:hidden}.noticejs .item .close{float:right;font-size:18px;font-weight:700;line-height:1;color:#fff;text-shadow:0 1px 0 #fff;opacity:1;margin-right:7px}.noticejs .item .close:hover{opacity:.5;color:#000;cursor:pointer}.noticejs .item a{color:#fff;border-bottom:1px dashed #fff}.noticejs .item a,.noticejs .item a:hover{text-decoration:none}.noticejs .success{background-color:#64ce83}.noticejs .success .noticejs-heading{background-color:#3da95c;color:#fff;padding:10px}.noticejs .success .noticejs-body{color:#fff;padding:10px!important}.noticejs .success .noticejs-body:hover{visibility:visible!important}.noticejs .success .noticejs-content{visibility:visible}.noticejs .info{background-color:#3ea2ff}.noticejs .info .noticejs-heading{background-color:#067cea;color:#fff;padding:10px}.noticejs .info .noticejs-body{color:#fff;padding:10px!important}.noticejs .info .noticejs-body:hover{visibility:visible!important}.noticejs .info .noticejs-content{visibility:visible}.noticejs .warning{background-color:#ff7f48}.noticejs .warning .noticejs-heading{background-color:#f44e06;color:#fff;padding:10px!important}.noticejs .warning .noticejs-body{color:#fff;padding:10px}.noticejs .warning .noticejs-body:hover{visibility:visible!important}.noticejs .warning .noticejs-content{visibility:visible}.noticejs .error{background-color:#e74c3c}.noticejs .error .noticejs-heading{background-color:#ba2c1d;color:#fff;padding:10px!important}.noticejs .error .noticejs-body{color:#fff;padding:10px}.noticejs .error .noticejs-body:hover{visibility:visible!important}.noticejs .error .noticejs-content{visibility:visible}.noticejs .progressbar{width:100%}.noticejs .progressbar .bar{width:1%;height:30px;background-color:#4caf50}.noticejs .success .noticejs-progressbar{width:100%;background-color:#64ce83;margin-top:-1px}.noticejs .success .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#3da95c}.noticejs .info .noticejs-progressbar{width:100%;background-color:#3ea2ff;margin-top:-1px}.noticejs .info .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#067cea}.noticejs .warning .noticejs-progressbar{width:100%;background-color:#ff7f48;margin-top:-1px}.noticejs .warning .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#f44e06}.noticejs .error .noticejs-progressbar{width:100%;background-color:#e74c3c;margin-top:-1px}.noticejs .error .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#ba2c1d}@keyframes noticejs-fadeOut{0%{opacity:1}to{opacity:0}}.noticejs-fadeOut{animation-name:noticejs-fadeOut}@keyframes noticejs-modal-in{to{opacity:.3}}@keyframes noticejs-modal-out{to{opacity:0}}.noticejs{position:fixed;z-index:10050}.noticejs ::-webkit-scrollbar{width:8px}.noticejs ::-webkit-scrollbar-button{width:8px;height:5px}.noticejs ::-webkit-scrollbar-track{border-radius:10px}.noticejs ::-webkit-scrollbar-thumb{background:hsla(0,0%,100%,.5);border-radius:10px}.noticejs ::-webkit-scrollbar-thumb:hover{background:#fff}.noticejs-modal{position:fixed;width:100%;height:100%;background-color:#000;z-index:10000;opacity:.3;left:0;top:0}.noticejs-modal-open{opacity:0;animation:noticejs-modal-in .3s ease-out}.noticejs-modal-close{animation:noticejs-modal-out .3s ease-out;animation-fill-mode:forwards}.${defCon.rName}{padding:4px 4px 0 4px!important}.${defCon.rName} dl{margin:0!important;padding:2px!important}.${defCon.rName} dl dt{margin:2px 0 8px 0!important;font-size:16px!important;font-weight:900!important}.${defCon.rName} dl dd{margin:3px 6px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${defCon.rName} dl dd em{color:#fff;font-family:Candara,sans-serif!important;font-size:24px!important;padding:0 5px}.${defCon.rName} dl dd span{font-weight:700;font-size:15px!important;margin-right:8px}.${defCon.rName} dl dd i{font-family:Candara,sans-serif!important;font-size:20px!important}.${defCon.rName} dl dd .im{color:gold;font-size:16px;font-weight:900;padding:0 3px}.${defCon.rName} ul{width:90%;display:inline-block;text-align:left;vertical-align:top;color:rgba(255, 255, 255, 0.5);padding:0.2em;margin:0 0 0 1em;counter-reset:xxx 0}.${defCon.rName} li{list-style:none;font-style:italic!important;position:relative;padding:0 0 0 0.1em;margin:0 0 0 2px;-webkit-transition:.12s;transition:.12s}.${defCon.rName} li::before{content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-family:'Roboto Condensed';font-size:1em;display:inline-block;width:1.5em;margin-left:-1.5em;-webkit-transition:.5s;transition:.5s}.${defCon.rName} .disappear{display:none}`,
     };
 
     let curretSite = {
@@ -713,10 +704,10 @@
         };
         if (_status) {
           GMsetValue(`${Name}`, 0);
-          GMnotification(info("\u6e05\u9664"), "info", true, 3);
+          GMnotification(info("\u6e05\u9664"), "info", true, 30, callback_Countdown);
         } else {
           GMsetValue(`${Name}`, 1);
-          GMnotification(info("\u6dfb\u52a0"), "info", true, 3);
+          GMnotification(info("\u6dfb\u52a0"), "info", true, 30, callback_Countdown);
         }
         setTimeout(() => {
           location.reload();
@@ -760,7 +751,7 @@
               GMdeleteValue("_Check_Version_Expire_");
               sessionStorage.removeItem("nCount");
               debug("//-> Destroy cache & session when restart detection.");
-              GMnotification(defCon.noticeHTML(`<dd>更新检测已开启，网页将在<em>3</em>秒后自动刷新！</dd>`), "info", true, 3);
+              GMnotification(defCon.noticeHTML(`<dd>更新检测已开启，网页将在<em>3</em>秒后自动刷新！</dd>`), "info", true, 30, callback_Countdown);
               setTimeout(() => {
                 location.reload();
               }, 3e3);
@@ -1119,74 +1110,80 @@
 
     /* Refactoring NoticeJs Functions */
 
-    (function (q, c) {
+    (function (q, d) {
       typeof exports === "object" && typeof module === "object"
-        ? (module.exports = c())
-        : typeof define === "function" && define.amd
-        ? define("NoticeJs", [], c)
+        ? (window.module.exports = d())
+        : typeof define === "function" && window.define.amd
+        ? window.define("NoticeJs", [], d)
         : typeof exports === "object"
-        ? (exports.NoticeJs = c())
-        : (q.NoticeJs = c());
+        ? (window.exports.NoticeJs = d())
+        : (q.NoticeJs = d());
     })("undefined" !== typeof self ? self : this, function () {
       return (function (q) {
         let m = {};
-        function c(f) {
-          if (m[f]) {
-            return m[f].exports;
+        function d(g) {
+          if (m[g]) {
+            return m[g].exports;
           }
-          let h = (m[f] = {
-            i: f,
+          let l = (m[g] = {
+            i: g,
             l: !1,
             exports: {},
           });
-          q[f].call(h.exports, h, h.exports, c);
-          h.l = !0;
-          return h.exports;
+          q[g].call(l.exports, l, l.exports, d);
+          l.l = !0;
+          return l.exports;
         }
-        c.m = q;
-        c.c = m;
-        c.d = function (f, h, g) {
-          c.o(f, h) ||
-            Object.defineProperty(f, h, {
+        d.m = q;
+        d.c = m;
+        d.d = function (g, l, f) {
+          d.o(g, l) ||
+            Object.defineProperty(g, l, {
               configurable: !1,
               enumerable: !0,
-              get: g,
+              get: f,
             });
         };
-        c.n = function (f) {
-          let h =
-            f && f.__esModule
+        d.n = function (g) {
+          let l =
+            g && g.__esModule
               ? function () {
-                  return f.default;
+                  return g.default;
                 }
               : function () {
-                  return f;
+                  return g;
                 };
-          c.d(h, "a", h);
-          return h;
+          d.d(l, "a", l);
+          return l;
         };
-        c.o = function (f, h) {
-          return Object.prototype.hasOwnProperty.call(f, h);
+        d.o = function (g, l) {
+          return Object.prototype.hasOwnProperty.call(g, l);
         };
-        c.p = "dist/";
-        return c((c.s = 2));
+        d.p = "dist/";
+        return d((d.s = 2));
       })([
-        function (q, c, m) {
-          Object.defineProperty(c, "__esModule", { value: !0 });
-          c.noticeJsModalClassName = "noticejs-modal";
-          c.closeAnimation = "noticejs-fadeOut";
-          c.Defaults = {
+        function (q, d, m) {
+          Object.defineProperty(d, "__esModule", { value: !0 });
+          d.noticeJsModalClassName = "noticejs-modal";
+          d.closeAnimation = "noticejs-fadeOut";
+          d.Defaults = {
             title: "",
             text: "",
             type: "success",
-            position: "topRight",
+            position: "bottomRight",
+            newestOnTop: !1,
             timeout: 30,
             progressBar: !0,
+            indeterminate: !1,
             closeWith: ["button"],
-            animation: null,
+            animation: {
+              open: "animated fadeIn",
+              close: "animated fadeOut",
+            },
             modal: !1,
+            width: 400,
             scroll: {
-              maxHeight: 300,
+              maxHeightContent: 400,
               showOnHover: !0,
             },
             rtl: !1,
@@ -1202,187 +1199,208 @@
             },
           };
         },
-        function (q, c, m) {
-          function f(a, b) {
+        function (q, d, m) {
+          function g(a, b) {
             a.callbacks.hasOwnProperty(b) &&
-              a.callbacks[b].forEach(function (d) {
-                typeof d === "function" && d.apply(a);
+              a.callbacks[b].forEach(function (c) {
+                typeof c === "function" && c.apply(a);
               });
           }
-          Object.defineProperty(c, "__esModule", { value: !0 });
-          c.appendNoticeJs = c.addListener = c.CloseItem = c.AddModal = void 0;
-          c.getCallback = f;
-          let h = (function (a) {
+          Object.defineProperty(d, "__esModule", { value: !0 });
+          d.appendNoticeJs = d.addListener = d.CloseItem = d.AddModal = void 0;
+          d.getCallback = g;
+          let l = (function (a) {
             if (a && a.__esModule) {
               return a;
             }
             let b = {};
             if (null !== a) {
-              for (let d in a) {
-                Object.prototype.hasOwnProperty.call(a, d) && (b[d] = a[d]);
+              for (let c in a) {
+                Object.prototype.hasOwnProperty.call(a, c) && (b[c] = a[c]);
               }
             }
             b.default = a;
             return b;
           })(m(0));
-          let g = h.Defaults;
-          let k = (c.AddModal = function () {
-            if (0 >= document.getElementsByClassName(h.noticeJsModalClassName).length) {
+          let f = l.Defaults;
+          let h = (d.AddModal = function () {
+            if (0 >= document.getElementsByClassName(l.noticeJsModalClassName).length) {
               let a = document.createElement("div");
-              a.classList.add(h.noticeJsModalClassName);
+              a.classList.add(l.noticeJsModalClassName);
               a.classList.add("noticejs-modal-open");
               document.body.appendChild(a);
               setTimeout(function () {
-                a.className = h.noticeJsModalClassName;
+                a.className = l.noticeJsModalClassName;
               }, 200);
             }
           });
-          let n = (c.CloseItem = function (a) {
-            f(g, "onClose");
-            null !== g.animation && null !== g.animation.close && (a.className += " " + g.animation.close);
+          let n = (d.CloseItem = function (a) {
+            g(f, "onClose");
+            null !== f.animation && null !== f.animation.close && (a.className += " " + f.animation.close);
             setTimeout(function () {
               a.remove();
             }, 200);
-            !0 === g.modal &&
+            !0 === f.modal &&
               1 <= document.querySelectorAll("[noticejs-modal='true']").length &&
               ((document.querySelector(".noticejs-modal").className += " noticejs-modal-close"),
               setTimeout(function () {
                 document.querySelector(".noticejs-modal").remove();
               }, 500));
-            let x = a.closest(".noticejs");
-            let b = x ? "." + x.className.replace("noticejs", "").trim() : ".null";
+            let b = a.closest(".noticejs");
+            let c = b ? "." + b.className.replace("noticejs", "").trim() : ".null";
             setTimeout(function () {
-              if (document.querySelector(b)) {
-                0 >= document.querySelectorAll(b + " .item").length && document.querySelector(b).remove();
-              }
+              0 >= document.querySelectorAll(c + " .item").length && document.querySelector(c) && document.querySelector(c).remove();
             }, 500);
           });
-          let e = (c.addListener = function (a) {
-            g.closeWith.includes("button") &&
+          let e = (d.addListener = function (a) {
+            f.closeWith.includes("button") &&
               a.querySelector(".close").addEventListener("click", function () {
                 n(a);
               });
-            g.closeWith.includes("click")
+            f.closeWith.includes("click")
               ? ((a.style.cursor = "pointer"),
                 a.addEventListener("click", function (b) {
-                  "close" !== b.target.className && (f(g, "onClick"), n(a));
+                  "close" !== b.target.className && (g(f, "onClick"), n(a));
                 }))
               : a.addEventListener("click", function (b) {
-                  "close" !== b.target.className && f(g, "onClick");
+                  "close" !== b.target.className && g(f, "onClick");
                 });
             a.addEventListener("mouseover", function () {
-              f(g, "onHover");
+              g(f, "onHover");
             });
           });
-          c.appendNoticeJs = function (a, b, d) {
-            let p = ".noticejs-" + g.position;
-            let l = document.createElement("div");
-            l.classList.add("item");
-            l.classList.add(g.type);
-            !0 === g.rtl && l.classList.add("noticejs-rtl");
-            a && "" !== a && l.appendChild(a);
-            l.appendChild(b);
-            d && "" !== d && l.appendChild(d);
-            ["top", "bottom"].includes(g.position) && (document.querySelector(p).innerHTML = "");
-            null !== g.animation && null !== g.animation.open && (l.className += " " + g.animation.open);
-            !0 === g.modal && (l.setAttribute("noticejs-modal", "true"), k());
-            e(l, g.closeWith);
-            f(g, "beforeShow");
-            f(g, "onShow");
-            document.querySelector(p).appendChild(l);
-            f(g, "afterShow");
-            return l;
+          d.appendNoticeJs = function (a, b, c) {
+            let p = ".noticejs-" + f.position;
+            let k = document.createElement("div");
+            k.classList.add("item");
+            k.classList.add(f.type);
+            !0 === f.rtl && k.classList.add("noticejs-rtl");
+            "" !== f.width && Number.isInteger(f.width) && (k.style.width = f.width + "px");
+            a && "" !== a && k.appendChild(a);
+            k.appendChild(b);
+            c && "" !== c && k.appendChild(c);
+            ["top", "bottom"].includes(f.position) && (document.querySelector(p).innerHTML = "");
+            null !== f.animation && null !== f.animation.open && (k.className += " " + f.animation.open);
+            !0 === f.modal && (k.setAttribute("noticejs-modal", "true"), h());
+            e(k, f.closeWith);
+            g(f, "beforeShow");
+            g(f, "onShow");
+            !0 === f.newestOnTop ? document.querySelector(p).insertAdjacentElement("afterbegin", k) : document.querySelector(p).appendChild(k);
+            g(f, "afterShow");
+            return k;
           };
         },
-        function (q, c, m) {
-          function f(a) {
+        function (q, d, m) {
+          function g(a) {
             if (a && a.__esModule) {
               return a;
             }
             let b = {};
             if (null !== a) {
-              for (let d in a) {
-                Object.prototype.hasOwnProperty.call(a, d) && (b[d] = a[d]);
+              for (let c in a) {
+                Object.prototype.hasOwnProperty.call(a, c) && (b[c] = a[c]);
               }
             }
             b.default = a;
             return b;
           }
-          Object.defineProperty(c, "__esModule", { value: !0 });
-          let h = (function () {
-            function a(b, d) {
-              for (let p = 0; p < d.length; p++) {
-                let l = d[p];
-                l.enumerable = l.enumerable || !1;
-                l.configurable = !0;
-                "value" in l && (l.writable = !0);
-                Object.defineProperty(b, l.key, l);
+          Object.defineProperty(d, "__esModule", { value: !0 });
+          let l = (function () {
+            function a(b, c) {
+              for (let p = 0; p < c.length; p++) {
+                let k = c[p];
+                k.enumerable = k.enumerable || !1;
+                k.configurable = !0;
+                "value" in k && (k.writable = !0);
+                Object.defineProperty(b, k.key, k);
               }
             }
-            return function (b, d, p) {
-              d && a(b.prototype, d);
+            return function (b, c, p) {
+              c && a(b.prototype, c);
               p && a(b, p);
               return b;
             };
           })();
           m(3);
-          let g = m(0);
-          let k = f(g);
+          let f = m(0);
+          let h = g(f);
           let n = m(4);
           m = m(1);
-          let e = f(m);
+          let e = g(m);
           m = (function () {
-            function a() {
-              let b = 0 < arguments.length && void 0 !== arguments[0] ? arguments[0] : {};
-              if (!(this instanceof a)) {
-                throw new TypeError("Cannot call a class as a function");
+            class a {
+              constructor() {
+                let b = 0 < arguments.length && void 0 !== arguments[0] ? arguments[0] : {};
+                if (!(this instanceof a)) {
+                  throw new TypeError("Cannot call a class as a function");
+                }
+                this.options = Object.assign(h.Defaults, b);
+                this.component = new n.Components();
+                this.id = "noticejs-" + Math.random();
+                this.on("beforeShow", this.options.callbacks.beforeShow);
+                this.on("onShow", this.options.callbacks.onShow);
+                this.on("afterShow", this.options.callbacks.afterShow);
+                this.on("onClose", this.options.callbacks.onClose);
+                this.on("afterClose", this.options.callbacks.afterClose);
+                this.on("onClick", this.options.callbacks.onClick);
+                this.on("onHover", this.options.callbacks.onHover);
               }
-              this.options = Object.assign(k.Defaults, b);
-              this.component = new n.Components();
-              this.on("beforeShow", this.options.callbacks.beforeShow);
-              this.on("onShow", this.options.callbacks.onShow);
-              this.on("afterShow", this.options.callbacks.afterShow);
-              this.on("onClose", this.options.callbacks.onClose);
-              this.on("afterClose", this.options.callbacks.afterClose);
-              this.on("onClick", this.options.callbacks.onClick);
-              this.on("onHover", this.options.callbacks.onHover);
-              return this;
             }
-            h(a, [
-              {
-                key: "show",
-                value: function () {
-                  let b = this.component.createContainer();
-                  document.querySelector(".noticejs-" + this.options.position) === null && document.body.appendChild(b);
-                  let d = void 0;
-                  b = this.component.createHeader(this.options.title, this.options.closeWith);
-                  let p = this.component.createBody(this.options.text);
-                  !0 === this.options.progressBar && (d = this.component.createProgressBar());
-                  return e.appendNoticeJs(b, p, d);
+            l(
+              a,
+              [
+                {
+                  key: "show",
+                  value: function () {
+                    let b = this.component.createContainer();
+                    document.querySelector(".noticejs-" + this.options.position) === null && document.body.appendChild(b);
+                    let c = void 0;
+                    b = this.component.createHeader(this.options.title, this.options.closeWith);
+                    let p = this.component.createBody(this.options.text);
+                    !0 === this.options.progressBar && (c = this.component.createProgressBar());
+                    b = e.appendNoticeJs(b, p, c);
+                    b.setAttribute("id", this.id);
+                    return (this.dom = b);
+                  },
                 },
-              },
-              {
-                key: "on",
-                value: function (b) {
-                  let d = 1 < arguments.length && void 0 !== arguments[1] ? arguments[1] : function () {};
-                  typeof d === "function" && this.options.callbacks.hasOwnProperty(b) && this.options.callbacks[b].push(d);
-                  return this;
+                {
+                  key: "on",
+                  value: function (b) {
+                    let c = 1 < arguments.length && void 0 !== arguments[1] ? arguments[1] : function () {};
+                    typeof c === "function" && this.options.callbacks.hasOwnProperty(b) && this.options.callbacks[b].push(c);
+                    return this;
+                  },
                 },
-              },
-            ]);
+                {
+                  key: "close",
+                  value: function () {
+                    e.CloseItem(this.dom);
+                  },
+                },
+              ],
+              [
+                {
+                  key: "overrideDefaults",
+                  value: function (b) {
+                    this.options = Object.assign(h.Defaults, b);
+                    return this;
+                  },
+                },
+              ]
+            );
             return a;
           })();
-          c.default = m;
-          q.exports = c.default;
+          d.default = m;
+          q.exports = d.default;
         },
-        function (q, c) {},
-        function (q, c, m) {
-          function f(n) {
+        function (q, d) {},
+        function (q, d, m) {
+          function g(n) {
             if (n && n.__esModule) {
               return n;
             }
             let e = {};
-            if (null !== n) {
+            if (n === null) {
               for (let a in n) {
                 Object.prototype.hasOwnProperty.call(n, a) && (e[a] = n[a]);
               }
@@ -1390,16 +1408,16 @@
             e.default = n;
             return e;
           }
-          Object.defineProperty(c, "__esModule", { value: !0 });
-          c.Components = void 0;
-          let h = (function () {
+          Object.defineProperty(d, "__esModule", { value: !0 });
+          d.Components = void 0;
+          let l = (function () {
             function n(e, a) {
               for (let b = 0; b < a.length; b++) {
-                let d = a[b];
-                d.enumerable = d.enumerable || !1;
-                d.configurable = !0;
-                "value" in d && (d.writable = !0);
-                Object.defineProperty(e, d.key, d);
+                let c = a[b];
+                c.enumerable = c.enumerable || !1;
+                c.configurable = !0;
+                "value" in c && (c.writable = !0);
+                Object.defineProperty(e, c.key, c);
               }
             }
             return function (e, a, b) {
@@ -1409,21 +1427,21 @@
             };
           })();
           q = m(0);
-          q = f(q);
+          q = g(q);
           m = m(1);
-          let g = f(m);
-          let k = q.Defaults;
-          c.Components = (function () {
+          let f = g(m);
+          let h = q.Defaults;
+          d.Components = (function () {
             function n() {
               if (!(this instanceof n)) {
                 throw new TypeError("Cannot call a class as a function");
               }
             }
-            h(n, [
+            l(n, [
               {
                 key: "createContainer",
                 value: function () {
-                  let e = "noticejs-" + k.position;
+                  let e = "noticejs-" + h.position;
                   let a = document.createElement("div");
                   a.classList.add("noticejs");
                   a.classList.add(e);
@@ -1434,10 +1452,10 @@
                 key: "createHeader",
                 value: function () {
                   let e = void 0;
-                  k.title &&
-                    "" !== k.title &&
-                    ((e = document.createElement("div")), e.setAttribute("class", "noticejs-heading"), (e.textContent = k.title));
-                  if (k.closeWith.includes("button")) {
+                  h.title &&
+                    "" !== h.title &&
+                    ((e = document.createElement("div")), e.setAttribute("class", "noticejs-heading"), (e.textContent = h.title));
+                  if (h.closeWith.includes("button")) {
                     let a = document.createElement("div");
                     a.setAttribute("class", "close");
                     a.innerHTML = "&times;";
@@ -1453,13 +1471,13 @@
                   e.setAttribute("class", "noticejs-body");
                   let a = document.createElement("div");
                   a.setAttribute("class", "noticejs-content");
-                  a.innerHTML = k.text;
+                  a.innerHTML = h.text;
                   e.appendChild(a);
-                  null !== k.scroll &&
-                    "" !== k.scroll.maxHeight &&
+                  null !== h.scroll &&
+                    "" !== h.scroll.maxHeight &&
                     ((e.style.overflowY = "auto"),
-                    (e.style.maxHeight = k.scroll.maxHeight + "px"),
-                    !0 === k.scroll.showOnHover && (e.style.visibility = "hidden"));
+                    (e.style.maxHeight = h.scroll.maxHeight + "px"),
+                    !0 === h.scroll.showOnHover && (e.style.visibility = "hidden"));
                   return e;
                 },
               },
@@ -1471,27 +1489,37 @@
                   let a = document.createElement("div");
                   a.setAttribute("class", "noticejs-bar");
                   e.appendChild(a);
-                  if (!0 === k.progressBar && "boolean" !== typeof k.timeout && !1 !== k.timeout) {
-                    let b = 100;
-                    let d = setInterval(function () {
+                  let b = 100;
+                  let c = 0;
+                  let p = 0;
+                  let k = "";
+                  if (!0 === h.progressBar && "boolean" !== typeof h.timeout && !1 !== h.timeout) {
+                    let u = function () {
                       if (0 >= b) {
-                        clearInterval(d);
-                        let p = e.closest("div.item");
-                        if (null !== k.animation && null !== k.animation.close) {
-                          p.className = p.className.replace(new RegExp("(?:^|\\s)" + k.animation.open + "(?:\\s|$)"), " ");
-                          p.className += " " + k.animation.close;
-                          let l = parseInt(k.timeout) + 500;
+                        clearInterval(p);
+                        let r = e.closest("div.item");
+                        if (null !== h.animation && null !== h.animation.close) {
+                          r.className = r.className.replace(new RegExp("(?:^|\\s)" + h.animation.open + "(?:\\s|$)"), " ");
+                          r.className += " " + h.animation.close;
+                          let t = parseInt(h.timeout) + 500;
                           setTimeout(function () {
-                            g.CloseItem(p);
-                          }, l);
+                            f.CloseItem(r);
+                          }, t);
                         } else {
-                          g.CloseItem(p);
+                          f.CloseItem(r);
                         }
                       } else {
                         b--;
                         a.style.width = b + "%";
                       }
-                    }, k.timeout);
+                    };
+                    let v = function () {
+                      c === 0 ? (b--, b === 0 && (c = 1)) : (b++, b === 100 && (c = 0));
+                      document.getElementById(k) === null ? clearInterval(p) : (a.style.width = b + "%");
+                    };
+                    !0 === h.indeterminate
+                      ? ((p = setInterval(v, h.timeout)), (k = "noticejs-progressbar-" + p), e.setAttribute("id", k))
+                      : (p = setInterval(u, h.timeout));
                   }
                   return e;
                 },
@@ -1526,7 +1554,6 @@
                 ),
                 "info",
                 true,
-                0,
                 80
               );
             }, Math.random() * 10e3);
