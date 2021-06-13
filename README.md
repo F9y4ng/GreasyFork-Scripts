@@ -10,11 +10,11 @@
   @ 代码优化，修正bugs.
   ```
 
-- ## **Google & Baidu Switcher.user.js** (`version 3.2.20210613.2`)
+- ## **Google & Baidu Switcher.user.js** (`version 3.2.20210614.1`)
 
   简介：最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 
-  > `version 3.2.20210613.2`
+  > `version 3.2.20210614.1`
 
   ```text
   @ 重构Fetch with request timeout.（防止更新检测因网络延时而等待过长时间。）
