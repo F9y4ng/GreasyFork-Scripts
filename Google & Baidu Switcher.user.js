@@ -434,7 +434,7 @@
         );
         let sourceSite = defCon.titleCase(recheckURLs.hostname).split(".")[0];
         sourceSite = cache ? `${sourceSite} on Cache` : sourceSite;
-        const repo = cache ? `\nCache expire:${defCon.durationTime(defCon.restTime)}\n` : `\n`;
+        const repo = cache ? `\nCache expire:${defCon.durationTime(defCon.restTime)}\n` : `\nExpiration time: ${defCon._expireTime}\n`;
 
         switch (defCon.isNeedUpdate) {
           case 2:
@@ -505,7 +505,8 @@
                   defCon.noticeHTML(
                     `<dt>${defCon.scriptName}</dt>\
                       <dd><span>发现版本更新</span>最新版本 <i>${lastestVersion}</i>，如果您现在需要更新，请点击这里完成自动升级安装。</dd>\
-                      ${updateNote}<dd>[ ${sourceSite} ]</dd>${showdDetail}`
+                      ${updateNote}<dd>[ ${sourceSite} ]<kbd style="float:right;font-size:11px;">\
+                      ( 缓存时间：${defCon.showDate(defCon._expireTime)} )</kbd></dd>${showdDetail}`
                   ),
                   "warning",
                   false,
@@ -549,14 +550,17 @@
               "color:0"
             );
             if (s) {
-              GMnotification(
-                defCon.noticeHTML(
-                  `<dt>${defCon.scriptName}</dt>\
-                      <dd><span>更新成功</span>当前版本 <i>${defCon.curVersion}</i> 已为最新!</dd>\
-                      <dd>[ ${sourceSite} ]</dd>`
-                ),
-                "success"
-              );
+              setTimeout(() => {
+                GMnotification(
+                  defCon.noticeHTML(
+                    `<dt>${defCon.scriptName}</dt>\
+                      <dd><span>更新成功</span>当前版本 <i>${defCon.curVersion}</i> 已为最新！</dd>\
+                      <dd>[ ${sourceSite} ]<kbd style="float:right;font-size:11px;">\
+                      ( 缓存时间：${defCon.showDate(defCon._expireTime)} )</kbd></dd>`
+                  ),
+                  "success"
+                );
+              }, 100);
             }
             break;
         }
