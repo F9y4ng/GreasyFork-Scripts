@@ -360,6 +360,8 @@
     } else {
       if (_expireTime !== "4h") {
         GMsetValue("_expire_time_", _expireTime);
+        // Destroy cache if expireTime changed.
+        GMdeleteValue("_Check_Version_Expire_");
         console.warn(`%c[GB-Update]%c\nThe expireTime is set to ${_expireTime}.`, "font-weight:bold;color:crimson", "color:0");
       }
       defCon._expireTime = _expireTime;
