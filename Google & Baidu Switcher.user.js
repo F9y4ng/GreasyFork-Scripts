@@ -3,7 +3,7 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.2.20210614.1
+// @version         3.2.20210614.2
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en  Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
@@ -25,7 +25,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            重构Fetch with request timeout.\n重构GM.notification Function.\n重构NoticeJs.js及Css，修正错误。
+// @note            紧急更新：修正更新检查缓存时间的永久化问题，此版本可永久固化过期时间不会因脚本升级而失效，脚本菜单中设有对应操作选项。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -106,6 +106,9 @@
       wks > 0 || ds > 0 || hs > 0 || ms > 0 ? (s = "") : ss > 0 ? (s = ` ${ss}s`) : (s = " Destroying cache.");
       return `${w}${d}${h}${m}${s}`;
     },
+    showDate: s => {
+      return s.replace(/w/i, " 周 ").replace(/d/i, " 天 ").replace(/h/i, " 小时 ").replace(/m/i, " 分钟 ").replace(/s/i, " 秒 ");
+    },
     randString: (n, v, r, s = "") => {
       // v: true for only letters.
       let a = "0123456789";
@@ -124,7 +127,7 @@
       hour12: false,
     }),
   };
-
+  const _expireTime = /(?!^0)^[0-9]+[smhdw]$/i.test(expireTime) ? expireTime : "4h";
   defCon.rName = defCon.randString(7, true);
   defCon.noticeHTML = str => {
     return String(`<div class="${defCon.rName}"><dl>${str}<dl></div>`);
@@ -350,6 +353,17 @@
     let t, setResult, info;
     const m = await GMgetValue("_is_Ver_Det_");
     isVersionDetection ? (setResult = m === undefined ? isVersionDetection : Boolean(m)) : (setResult = false);
+    const _expire_time_ = await GMgetValue("_expire_time_");
+    if (_expire_time_) {
+      defCon._expireTime = _expire_time_;
+      debug("//-> Load expireTime from cache.");
+    } else {
+      if (_expireTime !== "4h") {
+        GMsetValue("_expire_time_", _expireTime);
+        console.warn(`%c[GB-Update]%c\nThe expireTime is set to ${_expireTime}.`, "font-weight:bold;color:crimson", "color:0");
+      }
+      defCon._expireTime = _expireTime;
+    }
     if (setResult) {
       // load cache
       const exp = await GMgetValue("_Check_Version_Expire_");
@@ -381,7 +395,7 @@
         }
         // Set value with expire
         if (t !== undefined) {
-          GMsetExpire("_Check_Version_Expire_", t, expireTime);
+          GMsetExpire("_Check_Version_Expire_", t, defCon._expireTime);
           debug("//-> checkVersion: Loading Data from Server.");
         } else {
           console.error(
@@ -739,11 +753,47 @@
         if (isVersionDetection) {
           // check VDR value to insert menu.
           if (CONST.isVDResult) {
-            in_UpdateCheck_ID = GMregisterMenuCommand("\ufff5\ud83d\udd0e 【版本更新】手动实时检查", () => {
-              // Destroy cache before manual check.
-              GMdeleteValue("_Check_Version_Expire_");
-              checkVersion(true);
-            });
+            if (defCon._expireTime === _expireTime) {
+              in_UpdateCheck_ID = GMregisterMenuCommand(`\ufff5\ud83d\udd0e 【版本更新】手动实时检查`, () => {
+                // Destroy cache before manual check.
+                GMdeleteValue("_Check_Version_Expire_");
+                checkVersion(true);
+              });
+            } else {
+              if (_expireTime !== "4h") {
+                in_UpdateCheck_ID = GMregisterMenuCommand(
+                  `\ufff5\ud83d\udd0e 【变更缓存时间】${defCon.showDate(defCon._expireTime)} \u21D2 ${defCon.showDate(_expireTime)}`,
+                  () => {
+                    // Destroy cache before change expireTime.
+                    GMdeleteValue("_Check_Version_Expire_");
+                    GMdeleteValue("_expire_time_");
+                    GMnotification(
+                      defCon.noticeHTML(`<dd>缓存时间已重新设定，网页将在<em>3</em>秒后自动刷新！</dd>`),
+                      "info",
+                      true,
+                      30,
+                      callback_Countdown
+                    );
+                    setTimeout(() => {
+                      location.reload();
+                    }, 3e3);
+                  }
+                );
+              } else {
+                in_UpdateCheck_ID = GMregisterMenuCommand(
+                  `\ufff5\ud83d\udd0e 【重置缓存】检查更新 ( 重置为 ${defCon.showDate(_expireTime)} )`,
+                  () => {
+                    // Destroy cache before change expireTime.
+                    GMdeleteValue("_Check_Version_Expire_");
+                    GMdeleteValue("_expire_time_");
+                    checkVersion(true);
+                    setTimeout(() => {
+                      location.reload();
+                    }, 4e3);
+                  }
+                );
+              }
+            }
           } else {
             in_UpdateCheck_ID = GMregisterMenuCommand("\ufff5\ud83d\udcdb 【版本更新】已关闭 \u267b 重新开启", () => {
               GMsetValue("_is_Ver_Det_", true);
