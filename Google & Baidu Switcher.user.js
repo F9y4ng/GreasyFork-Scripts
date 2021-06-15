@@ -88,7 +88,6 @@
           return L.toUpperCase();
         });
     },
-    isNoticed: sessionStorage.getItem("nCount") || 0,
     isNeedUpdate: 0,
     updateNote: "",
     restTime: 0,
@@ -414,6 +413,7 @@
       // Resolution return data
       if (typeof t !== "undefined") {
         const lastestVersion = defCon.decrypt(t[1]);
+        defCon.isNoticed = sessionStorage.getItem("nCount") || 0;
         defCon.isNeedUpdate = cache ? compareVersion(defCon.curVersion, lastestVersion) : t[0];
         const updateNote = ((w = "") => {
           if (defCon.decrypt(t[2])) {
@@ -786,7 +786,7 @@
                   // Destroy cache & session before change expireTime.
                   GMdeleteValue("_Check_Version_Expire_");
                   GMdeleteValue("_expire_time_");
-                  sessionStorage.setItem("nCount", 0);
+                  sessionStorage.removeItem("nCount");
                   checkVersion(false);
                   if (!defCon.isNeedUpdate) {
                     GMnotification(
