@@ -3,14 +3,14 @@
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.2.20210614.2
+// @version         3.2.20210614.3
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en  Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
 // @description:zh-TW  谷歌、百度、必應的搜索引擎跳轉工具，腳本默認自動更新檢測，可在菜單自定義設置必應按鈕，搜索引擎跳轉的最佳體驗。
 // @namespace       https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/Google_baidu_Switcher_(ALL_in_One)
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
-// @icon            https://www.google.com/favicon.ico
+// @icon            https://img.icons8.com/fluent/48/000000/google-logo.png
 // @include         *://*.google.*/search*
 // @include         *://*.google.*/webhp*
 // @include         *://www.baidu.com/*
@@ -25,7 +25,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            紧急更新：修正更新检查缓存时间的永久化问题，此版本可永久固化过期时间不会因脚本升级而失效，脚本菜单中设有对应操作选项。
+// @note            修正@icon数据因不可访问等网络问题造成Greasemonkey插件不能保存脚本的Bug.
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
