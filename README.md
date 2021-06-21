@@ -1,14 +1,18 @@
 # `GreasyFork Scripts`
 
-- ## **Font Rendering.user.js** (`version 2021.06.20.6`)
+- ## **Font Rendering.user.js** (`version 2021.06.21.3`)
 
   简介：让每个页面的字体变得有质感，默认使用苹方字体，附加字体描边、字体阴影、字体平滑等效果，自用脚本不处理外部需求。
 
-  > `version 2021.06.20.6`
+  > `version 2021.06.21.3`
 
   重大版本更新，请使用前仔细查看 [**脚本使用说明**](https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89)。
 
   ```text
+  + 新增跨页面数据同步。
+  @ 修正新旧数据转换错误问题，下个版本更新中将去除。
+  @ 修正字体检测的兼容性.
+
   + 增加脚本设置UI，从脚本菜单触发。
   + 增加排除域名功能，从脚本菜单触发。
   + 增加字体全局重写功能。

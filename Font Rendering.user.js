@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name            字体渲染（自用脚本）
 // @namespace       https://openuserjs.org/users/t3xtf0rm4tgmail.com
-// @version         2021.06.20.6
+// @version         2021.06.21.3
 // @icon            https://img.icons8.com/ios-filled/50/26e07f/font-style-formatting.png
 // @description     让每个页面的字体变得有质感，默认使用苹方字体，附加字体描边、字体阴影、字体平滑等效果，自用脚本不处理外部需求。
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
@@ -32,6 +32,7 @@
   /* customize */
 
   const isdebug = false; // set "true" to debug scripts, May cause script response slower.
+  const refreshTime = 1000; // Define data synchronous refresh time, unit is millisecond.
 
   /* Perfectly Compatible For Greasemonkey4.0+, TamperMonkey, ViolentMonkey * F9y4ng * 20210609 */
 
@@ -1031,36 +1032,39 @@
     ].sort()
   );
 
-  let isSupportFontFamily = function (f) {
-    if (typeof f !== "string") {
-      return false;
+  class isSupportFontFamily {
+    constructor() {
+      let baseFonts = ["monospace", "sans-serif", "serif"];
+      let testString = "mmmmmmmnnoowwllii测试";
+      let testSize = "72px";
+      let h = document.getElementsByTagName("body")[0];
+      let s = document.createElement("span");
+      s.style.fontSize = testSize;
+      s.innerHTML = testString;
+      let defaultWidth = {};
+      let defaultHeight = {};
+      for (let index in baseFonts) {
+        s.style.fontFamily = baseFonts[index];
+        h.appendChild(s);
+        defaultWidth[baseFonts[index]] = s.offsetWidth;
+        defaultHeight[baseFonts[index]] = s.offsetHeight;
+        h.removeChild(s);
+      }
+
+      function detect(font) {
+        let detected = false;
+        for (let index in baseFonts) {
+          s.style.fontFamily = font + "," + baseFonts[index];
+          h.appendChild(s);
+          let matched = s.offsetWidth !== defaultWidth[baseFonts[index]] || s.offsetHeight !== defaultHeight[baseFonts[index]];
+          h.removeChild(s);
+          detected = detected || matched;
+        }
+        return detected;
+      }
+      this.detect = detect;
     }
-    let h = "Arial";
-    if (f.toLowerCase() === h.toLowerCase()) {
-      return true;
-    }
-    let e = "a";
-    let d = 100;
-    let a = 100;
-    let i = 100;
-    let c = document.createElement("canvas");
-    let b = c.getContext("2d");
-    c.width = a;
-    c.height = i;
-    b.textAlign = "center";
-    b.fillStyle = "black";
-    b.textBaseline = "middle";
-    let g = function (j) {
-      b.clearRect(0, 0, a, i);
-      b.font = d + "px " + j + ", " + h;
-      b.fillText(e, a / 2, i / 2);
-      let k = b.getImageData(0, 0, a, i).data;
-      return [].slice.call(k).filter(function (l) {
-        return l !== 0;
-      });
-    };
-    return g(h).join("") !== g(f).join("");
-  };
+  }
 
   /* define default value */
 
@@ -1081,12 +1085,35 @@
 
   !(async function () {
     // Get Promise Value
-    const temp = await GMgetValue("_fonts_set_");
+    let temp = await GMgetValue("_fonts_set_");
     let exSite = await GMgetValue("_Exclude_site_");
+    let obj = ["workstation-xi"].sort();
+
+    /* Fixed data error, next versions will remove it. START */
+    /* Temporary */ function isJSON(str) {
+      /* Temporary */ try {
+        /* Temporary */ let obj = JSON.parse(str);
+        /* Temporary */ if (typeof obj === "object" && obj) {
+          /* Temporary */ return true;
+        } /* Temporary */ else {
+          /* Temporary */ return false;
+        } /* Temporary */
+      } /* Temporary */ catch (e) {
+        /* Temporary */ return false;
+      } /* Temporary */
+    } /* Temporary */
+    /* Temporary */ if (isJSON(exSite)) {
+      /* Temporary */ GMsetValue("_Exclude_site_", obj);
+    } /* Temporary */
+    /* Fixed data error, next versions will remove it. END */
 
     if (!temp && !exSite) {
       sessionStorage.setItem("_temp_", 1);
       sessionStorage.setItem("_exSite_", 1);
+    } else {
+      setInterval(async () => {
+        exSite = await GMgetValue("_Exclude_site_");
+      }, refreshTime);
     }
 
     if (Number(sessionStorage.getItem("_temp_")) && Number(sessionStorage.getItem("_exSite_"))) {
@@ -1110,13 +1137,11 @@
 
     /* Exclude site */
 
-    let obj = ["workstation-xi"].sort();
     let siteIndex;
     if (!exSite) {
-      GMsetValue("_Exclude_site_", JSON.stringify(obj));
+      GMsetValue("_Exclude_site_", obj);
       exSite = obj;
     } else {
-      exSite = JSON.parse(exSite);
       for (let i = 0; i < exSite.length; i++) {
         if (exSite[i] === location.hostname) {
           siteIndex = i;
@@ -1140,7 +1165,7 @@
           });
           Exclude_site = GMregisterMenuCommand(`\ufff1\ud83d\udeab 排除渲染 ${location.hostname}`, async () => {
             exSite.push(location.hostname);
-            GMsetValue("_Exclude_site_", JSON.stringify(exSite));
+            GMsetValue("_Exclude_site_", exSite);
             let dialog = new DialogBox({
               trueButtonText: "确 定",
               messageText: "<p>" + location.hostname + " 已<b style='color:red'>禁止</b>字体渲染！</p><p>确定后页面将自动刷新！</p>",
@@ -1154,7 +1179,7 @@
         } else {
           Exclude_site = GMregisterMenuCommand(`\ufff1\ud83c\udf40 重新渲染 ${location.hostname}`, async () => {
             exSite.splice(siteIndex, 1);
-            GMsetValue("_Exclude_site_", JSON.stringify(exSite));
+            GMsetValue("_Exclude_site_", exSite);
             let dialog = new DialogBox({
               trueButtonText: "确 定",
               messageText: "<p>" + location.hostname + " 重新<b style='color:green'>开启</b>字体渲染！</p><p>确定后页面将自动刷新！</p>",
@@ -1171,8 +1196,8 @@
           window.open(feedback, "feedback");
         });
       }
-    } catch (error) {
-      error("%c[Error]%c\n%s", "font-weight:bold;color:red", "font-weight:bold;color:darkred", error);
+    } catch (e) {
+      error("%c[Error]%c\n%s", "font-weight:bold;color:red", "font-weight:bold;color:darkred", e);
     }
 
     /* Set Default Value & initialize */
@@ -1251,7 +1276,7 @@
       <fieldset id="fr-autopager-field" style="display:block">
         <legend class="setting-title">
           <span style="display:inline-block">${defCon.scriptName}</span>
-          <span style="display:inline-block;position:fixed;" onclick="window.open('https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89','Guide')">
+          <span style="display:inline-block;position:fixed;cursor:pointer" onclick="window.open('https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89','Guide')">
             <img class="Rotation" title="帮助文件" height="24" width="24" src="https://img.icons8.com/fluent/100/000000/help.png"/>
           <span>
         </legend>
@@ -1359,10 +1384,11 @@
       /* Fonts selection */
 
       const fontReady = await document.fonts.ready;
+      const checkFont = new isSupportFontFamily();
       const fontAvailable = new Set();
       if (fontReady) {
         for (const font of fontCheck.values()) {
-          if (isSupportFontFamily(font.en) || isSupportFontFamily(font.ch)) {
+          if (checkFont.detect(font.en) || checkFont.detect(font.ch)) {
             fontAvailable.add(font);
           }
         }
@@ -1556,13 +1582,14 @@
       let reFontFace = "";
       fontCheck.forEach(item => {
         if (item.en.toLowerCase() === refont.toLowerCase()) {
-          reFontFace = item.en + "「" + item.ch + "」";
+          reFontFace = item.ch + " " + item.en;
         }
       });
       console.info(
-        `%c${defCon.scriptName}\n%c渲染字体：%s\n▞ 字体平滑：%s　▚ 字体重写：%s\n▞ 字体描边：%s　▚ 字体阴影：%s`,
+        `%c${defCon.scriptName}\n%c▞ 跨页面数据同步时长：%sms\n▞ 渲染字体：%s\n▞ 字体平滑：%s　▚ 字体重写：%s\n▞ 字体描边：%s　▚ 字体阴影：%s`,
         "line-height:160%;font-weight:bold;font-size:14px;color:red",
         "line-height:180%;font-size:12px;color:teal",
+        refreshTime,
         reFontFace,
         CONST.fontSmooth ? "ON " : "OFF",
         CONST.fontFace ? "ON " : "OFF",
