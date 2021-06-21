@@ -4,7 +4,7 @@
 // @namespace       https://openuserjs.org/users/t3xtf0rm4tgmail.com
 // @version         2021.06.21.3
 // @icon            https://img.icons8.com/ios-filled/50/26e07f/font-style-formatting.png
-// @description     让每个页面的字体变得有质感，默认使用苹方字体，附加字体描边、字体阴影、字体平滑等效果，自用脚本不处理外部需求。
+// @description     让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @author          F9y4ng
 // @include         *
