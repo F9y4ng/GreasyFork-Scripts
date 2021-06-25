@@ -256,15 +256,17 @@
 
   /* SYSTEM INFO */
 
-  console.info(
-    `%c[GB-Init]%c\nVersion: ${defCon.curVersion} %c[%s]%c\nExtension: %s\nlastRuntime: ${defCon.lastRuntime}`,
-    "font-weight:bold;color:dodgerblue",
-    "color:0",
-    "color:snow",
-    checkVersion(defCon.isUpgrade) instanceof Object === isVersionDetection,
-    "color:0",
-    defCon.titleCase(handlerInfo)
-  );
+  if (window.self === window.top) {
+    console.info(
+      `%c[GB-Init]%c\nVersion: ${defCon.curVersion} %c[%s]%c\nExtension: %s\nlastRuntime: ${defCon.lastRuntime}`,
+      "font-weight:bold;color:dodgerblue",
+      "color:0",
+      "color:snow",
+      checkVersion(defCon.isUpgrade) instanceof Object === isVersionDetection,
+      "color:0",
+      defCon.titleCase(handlerInfo)
+    );
+  }
 
   /* Version Detection with Cache and timeout * F9y4ng * 20210614 */
 
@@ -440,22 +442,24 @@
 
         switch (defCon.isNeedUpdate) {
           case 2:
-            console.warn(
-              String(
-                `%c[GB-Update]%c\nWe found a new version, But %cthe latest version ` +
-                  `%c${lastestVersion}%c is lower than your local version %c${defCon.curVersion}.%c\n\n` +
-                  `Please confirm whether you need to upgrade your local script, and then you need to update it manually.\n\n` +
-                  `If you no longer need the update prompt, please set "isVersionDetection" to "false" in your local code!\n` +
-                  `${repo}(${sourceSite})`
-              ),
-              "font-weight:bold;color:crimson",
-              "font-weight:bold;color:0",
-              "color:0",
-              "font-weight:bold;color:tomato",
-              "color:0",
-              "font-weight:bold;color:darkred",
-              "color:0"
-            );
+            if (window.self === window.top) {
+              console.warn(
+                String(
+                  `%c[GB-Update]%c\nWe found a new version, But %cthe latest version ` +
+                    `%c${lastestVersion}%c is lower than your local version %c${defCon.curVersion}.%c\n\n` +
+                    `Please confirm whether you need to upgrade your local script, and then you need to update it manually.\n\n` +
+                    `If you no longer need the update prompt, please set "isVersionDetection" to "false" in your local code!\n` +
+                    `${repo}(${sourceSite})`
+                ),
+                "font-weight:bold;color:crimson",
+                "font-weight:bold;color:0",
+                "color:0",
+                "font-weight:bold;color:tomato",
+                "color:0",
+                "font-weight:bold;color:darkred",
+                "color:0"
+              );
+            }
             if (defCon.isNoticed < 2 || s) {
               setTimeout(function () {
                 GMnotification(
@@ -485,17 +489,19 @@
             }
             break;
           case 1:
-            console.info(
-              String(
-                `%c[GB-Update]%c\nWe found a new version: %c${lastestVersion}%c.\n` +
-                  `Please upgrade from your update source to the latest version.` +
-                  `${repo}(${sourceSite})`
-              ),
-              "font-weight:bold;color:crimson",
-              "color:0",
-              "color:crimson",
-              "color:0"
-            );
+            if (window.self === window.top) {
+              console.info(
+                String(
+                  `%c[GB-Update]%c\nWe found a new version: %c${lastestVersion}%c.\n` +
+                    `Please upgrade from your update source to the latest version.` +
+                    `${repo}(${sourceSite})`
+                ),
+                "font-weight:bold;color:crimson",
+                "color:0",
+                "color:crimson",
+                "color:0"
+              );
+            }
             if (defCon.isNoticed < 2 || s) {
               let showdDetail = "";
               if (updateNote) {
@@ -542,14 +548,16 @@
             }
             break;
           default:
-            s ? (info = console.info.bind(console)) : (info = debug.bind(console));
-            info(
-              `%c[GB-Update]%c\nCurretVersion: %c${defCon.curVersion}%c is up-to-date!${repo}(${sourceSite})`,
-              "font-weight:bold;color:darkcyan",
-              "color:0",
-              "color:red",
-              "color:0"
-            );
+            if (window.self === window.top) {
+              s ? (info = console.info.bind(console)) : (info = debug.bind(console));
+              info(
+                `%c[GB-Update]%c\nCurretVersion: %c${defCon.curVersion}%c is up-to-date!${repo}(${sourceSite})`,
+                "font-weight:bold;color:darkcyan",
+                "color:0",
+                "color:red",
+                "color:0"
+              );
+            }
             if (s) {
               setTimeout(function () {
                 GMnotification(
@@ -567,11 +575,13 @@
         }
       }
     } else {
-      console.warn(
-        `%c[GB-Update]%c\nVersion detection turned off ${!isVersionDetection ? "Manually" : "Automatically"}.`,
-        "font-weight:bold;color:red",
-        "color:0"
-      );
+      if (window.self === window.top) {
+        console.warn(
+          `%c[GB-Update]%c\nVersion detection turned off ${!isVersionDetection ? "Manually" : "Automatically"}.`,
+          "font-weight:bold;color:red",
+          "color:0"
+        );
+      }
     }
   }
 
@@ -836,13 +846,15 @@
             this.registerMenuCommand(CONST.isUseBing);
           });
         }
-        console.log(
-          "%c[GB-Status]%c\nInsert the Bing Search Button: %c%s",
-          "font-weight:bold;color:darkorange",
-          "color:0",
-          "font-weight:bold;color:red",
-          defCon.titleCase(CONST.isUseBing && !CONST.isSecurityPolicy)
-        );
+        if (window.self === window.top) {
+          console.log(
+            "%c[GB-Status]%c\nInsert the Bing Search Button: %c%s",
+            "font-weight:bold;color:darkorange",
+            "color:0",
+            "font-weight:bold;color:red",
+            defCon.titleCase(CONST.isUseBing && !CONST.isSecurityPolicy)
+          );
+        }
       },
 
       init: function () {
@@ -983,13 +995,15 @@
         try {
           if (curretSite.SiteTypeID !== newSiteType.OTHERS) {
             if (CONST.isSecurityPolicy) {
-              console.log(
-                "%c[GB-Prohibit]%c\nBlocked By: %c%s Security Policy",
-                "font-weight:bold;color:indigo",
-                "color:0",
-                "font-weight:bold;color:darkred",
-                curretSite.SiteName
-              );
+              if (window.self === window.top) {
+                console.log(
+                  "%c[GB-Prohibit]%c\nBlocked By: %c%s Security Policy",
+                  "font-weight:bold;color:indigo",
+                  "color:0",
+                  "font-weight:bold;color:darkred",
+                  curretSite.SiteName
+                );
+              }
               return;
             } else {
               const callback = mutations => {
@@ -1014,14 +1028,16 @@
               const opts = { childList: true, subtree: true };
               let observer = new MutationObserver(callback);
               observer.observe(document, opts);
-              console.log(
-                "%c[GB-Switch]%c\nWe are using The %c%s%c Search Engine.",
-                "font-weight:bold;color:Green",
-                "color:0",
-                "font-weight:bold;color:darkcyan",
-                curretSite.SiteName,
-                "font-weight:normal;color:0"
-              );
+              if (window.self === window.top) {
+                console.log(
+                  "%c[GB-Switch]%c\nWe are using The %c%s%c Search Engine.",
+                  "font-weight:bold;color:Green",
+                  "color:0",
+                  "font-weight:bold;color:darkcyan",
+                  curretSite.SiteName,
+                  "font-weight:normal;color:0"
+                );
+              }
             }
           }
         } catch (e) {

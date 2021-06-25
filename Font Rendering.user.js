@@ -1691,30 +1691,32 @@
 
     /* SYSTEM INFO */
 
-    if (siteIndex === undefined) {
-      let reFontFace = "SYSTEM-UI";
-      fontCheck.forEach(item => {
-        if (item.en.toLowerCase() === refont.toLowerCase()) {
-          reFontFace = item.ch + " " + item.en;
-        }
-      });
-      console.info(
-        `%c${defCon.scriptName}\n%c▞ 跨页面数据实时同步时长：%sms\n▞ 渲染字体：%s\n▞ 字体平滑：%s　▚ 字体重写：%s\n▞ 字体描边：%s　▚ 字体阴影：%s`,
-        "line-height:160%;font-weight:bold;font-size:14px;color:red",
-        "line-height:180%;font-size:12px;color:teal",
-        refreshTime,
-        reFontFace,
-        CONST.fontSmooth ? "ON " : "OFF",
-        CONST.fontFace ? "ON " : "OFF",
-        Number(CONST.fontStroke) ? "ON " : "OFF",
-        Number(CONST.fontShadow) ? "ON " : "OFF"
-      );
-    } else {
-      console.info(
-        `%c${defCon.scriptName}\n%c${location.hostname.toUpperCase()} 已在排除渲染列表内，若要重新渲染，请在脚本菜单中打开重新渲染。`,
-        "line-height:160%;font-weight:bold;font-size:14px;color:red",
-        "line-height:180%;font-size:12px;color:darkred"
-      );
+    if (window.self === window.top) {
+      if (siteIndex === undefined) {
+        let reFontFace = "SYSTEM-UI";
+        fontCheck.forEach(item => {
+          if (item.en.toLowerCase() === refont.toLowerCase()) {
+            reFontFace = item.ch + " " + item.en;
+          }
+        });
+        console.info(
+          `%c${defCon.scriptName}\n%c▞ 跨页面数据实时同步时长：%sms\n▞ 渲染字体：%s\n▞ 字体平滑：%s　▚ 字体重写：%s\n▞ 字体描边：%s　▚ 字体阴影：%s`,
+          "line-height:160%;font-weight:bold;font-size:14px;color:red",
+          "line-height:180%;font-size:12px;color:teal",
+          refreshTime,
+          reFontFace,
+          CONST.fontSmooth ? "ON " : "OFF",
+          CONST.fontFace ? "ON " : "OFF",
+          Number(CONST.fontStroke) ? "ON " : "OFF",
+          Number(CONST.fontShadow) ? "ON " : "OFF"
+        );
+      } else {
+        console.info(
+          `%c${defCon.scriptName}\n%c${location.hostname.toUpperCase()} 已在排除渲染列表内，若要重新渲染，请在脚本菜单中打开重新渲染。`,
+          "line-height:160%;font-weight:bold;font-size:14px;color:red",
+          "line-height:180%;font-size:12px;color:darkred"
+        );
+      }
     }
 
     /* important Functions */
