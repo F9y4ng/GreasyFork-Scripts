@@ -2,7 +2,7 @@
 // ==UserScript==
 // @name            字体渲染（自用脚本）
 // @namespace       https://openuserjs.org/users/t3xtf0rm4tgmail.com
-// @version         2021.06.21.3
+// @version         2021.06.26.2
 // @icon            https://img.icons8.com/ios-filled/50/26e07f/font-style-formatting.png
 // @description     让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
@@ -16,6 +16,8 @@
 // @grant           GM.getValue
 // @grant           GM_setValue
 // @grant           GM.setValue
+// @grant           GM_deleteValue
+// @grant           GM.deleteValue
 // @compatible      Chrome 兼容TamperMonkey, ViolentMonkey
 // @compatible      Firefox 兼容Greasemonkey, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
@@ -32,11 +34,11 @@
   /* customize */
 
   const isdebug = false; // set "true" to debug scripts, May cause script response slower.
-  const refreshTime = 1000; // Define data synchronous refresh time, unit is millisecond.
+  const refreshTime = 1e3; // Define data synchronous refresh time, unit is millisecond.
 
   /* Perfectly Compatible For Greasemonkey4.0+, TamperMonkey, ViolentMonkey * F9y4ng * 20210609 */
 
-  let GMsetValue, GMgetValue, GMregisterMenuCommand, GMunregisterMenuCommand;
+  let GMsetValue, GMgetValue, GMdeleteValue, GMregisterMenuCommand, GMunregisterMenuCommand;
   const GMinfo = GM_info;
   const handlerInfo = GMinfo.scriptHandler;
   const isGM = Boolean(handlerInfo.toLowerCase() === "greasemonkey");
@@ -44,7 +46,9 @@
   const error = isdebug ? console.error.bind(console) : () => {};
   const defCon = {
     scriptName: GMinfo.script.name,
+    curVersion: GMinfo.script.version,
     supportURL: GMinfo.script.supportURL,
+    guideUrl: "https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89",
     randString: (n, v, r, s = "") => {
       // v: true for only letters.
       let a = "0123456789";
@@ -61,396 +65,484 @@
   defCon.rndClass = defCon.randString(10, true);
   defCon.rndId = defCon.randString(12, true);
 
+  /* GM selector */
+
   if (isGM) {
     GMsetValue = GM.setValue;
     GMgetValue = GM.getValue;
+    GMdeleteValue = GM.deleteValue;
     GMregisterMenuCommand = GM.registerMenuCommand;
     GMunregisterMenuCommand = () => {};
   } else {
     GMsetValue = GM_setValue;
     GMgetValue = GM_getValue;
+    GMdeleteValue = GM_deleteValue;
     GMregisterMenuCommand = GM_registerMenuCommand;
     GMunregisterMenuCommand = GM_unregisterMenuCommand;
   }
 
+  /* Passive event listeners */
+
+  let supportsPassive = false;
+  try {
+    let opts = Object.defineProperty({}, "passive", {
+      get: function () {
+        return (supportsPassive = true);
+      },
+    });
+    window.addEventListener("testPassive", null, opts);
+    window.removeEventListener("testPassive", null, opts);
+  } catch (e) {
+    error("//-> ", e);
+  }
+
+  /* Get browser core & system parameters */
+
+  const browser = {
+    versions: (function () {
+      let u = navigator.userAgent;
+      return {
+        edg: u.indexOf("edg") > -1 /* edge */,
+        presto: u.indexOf("Presto") > -1 /* opera */,
+        webKit: u.indexOf("AppleWebKit") > -1 /* chromium */,
+        gecko: u.indexOf("Gecko") > -1 && u.indexOf("KHTML") === -1 /* firefox */,
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/) || !!u.match(/AppleWebKit/) /* mobile */,
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/) /* ios */,
+        android: u.indexOf("Android") > -1 || u.indexOf("Linux") > -1 /* android */,
+        iPhone: u.indexOf("iPhone") > -1 || u.indexOf("Mac") > -1 /* iPhone */,
+        iPad: u.indexOf("iPad") > -1 /* ipad */,
+        webApp: u.indexOf("Safari") === -1 /* webApp */,
+      };
+    })(),
+    language: (navigator.browserLanguage || navigator.language).toLowerCase() /* language */,
+    platform: navigator.platform /* platform */,
+    cookies: navigator.cookieEnabled /* cookies */,
+  };
+
   /* Color Picker init */
 
-  ~(function (window, document) {
-    let type = window.SVGAngle || document.implementation.hasFeature("http://www.w3.org/TR/SVG11/feature#BasicStructure", "1.1") ? "SVG" : "VML";
-    let picker;
-    let slide;
-    let hueOffset = 15;
-    let svgNS = "http://www.w3.org/2000/svg";
-
-    let colorpickerHTMLSnippet = [
-      '<div class="picker-wrapper">',
-      '<div class="picker"></div>',
-      '<div class="picker-indicator"></div>',
-      "</div>",
-      '<div class="slide-wrapper">',
-      '<div class="slide"></div>',
-      '<div class="slide-indicator"></div>',
-      "</div>",
-    ].join("");
-
-    function mousePosition(evt) {
-      if (window.event && window.event.contentOverflow !== undefined) {
-        return { x: window.event.offsetX, y: window.event.offsetY };
-      }
-      if (evt.offsetX !== undefined && evt.offsetY !== undefined) {
-        return { x: evt.offsetX, y: evt.offsetY };
-      }
-      let wrapper = evt.target.parentNode.parentNode;
-      return { x: evt.layerX - wrapper.offsetLeft, y: evt.layerY - wrapper.offsetTop };
+  const addClassName = (node, str) => {
+    if (
+      node.className.split(" ").filter(s => {
+        return s === str;
+      }).length === 0
+    ) {
+      node.className += ` ${str}`;
     }
+  };
 
-    function $(el, attrs, children) {
-      el = document.createElementNS(svgNS, el);
-      for (let key in attrs) {
-        el.setAttribute(key, attrs[key]);
-      }
-      if (Object.prototype.toString.call(children) !== "[object Array]") {
-        children = [children];
-      }
-      let i = 0;
-      let len = (children[0] && children.length) || 0;
-      for (; i < len; i++) {
-        el.appendChild(children[i]);
-      }
-      return el;
+  const removeClassName = (node, str) => {
+    node.className = node.className
+      .split(" ")
+      .filter(s => {
+        return s !== str;
+      })
+      .join(" ");
+  };
+
+  const numberBorder = (num, max, min) => {
+    return Math.max(Math.min(num, max), min);
+  };
+
+  const rgbToHsb = hex => {
+    const hsb = { h: 0, s: 0, b: 0 };
+    if (hex.indexOf("#") === 0) {
+      hex = hex.substring(1);
     }
+    if (hex.length === 3) {
+      hex = hex
+        .split("")
+        .map(s => {
+          return s + s;
+        })
+        .join("");
+    }
+    if (hex.length !== 6) {
+      return false;
+    }
+    hex = [hex.substr(0, 2), hex.substr(2, 2), hex.substr(4, 2)].map(s => {
+      return parseInt(s, 16);
+    });
+    const rgb = {
+      r: hex[0],
+      g: hex[1],
+      b: hex[2],
+    };
+    const MAX = Math.max(...hex);
+    const MIN = Math.min(...hex);
+    // H start
+    if (MAX === MIN) {
+      hsb.h = 0;
+    } else if (MAX === rgb.r && rgb.g >= rgb.b) {
+      hsb.h = (60 * (rgb.g - rgb.b)) / (MAX - MIN) + 0;
+    } else if (MAX === rgb.r && rgb.g < rgb.b) {
+      hsb.h = (60 * (rgb.g - rgb.b)) / (MAX - MIN) + 360;
+    } else if (MAX === rgb.g) {
+      hsb.h = (60 * (rgb.b - rgb.r)) / (MAX - MIN) + 120;
+    } else if (MAX === rgb.b) {
+      hsb.h = (60 * (rgb.r - rgb.g)) / (MAX - MIN) + 240;
+    }
+    // H end
+    if (MAX === 0) {
+      hsb.s = 0;
+    } else {
+      hsb.s = 1 - MIN / MAX;
+    }
+    hsb.b = MAX / 255;
+    return hsb;
+  };
 
-    if (type === "SVG") {
-      slide = $("svg", { xmlns: "http://www.w3.org/2000/svg", version: "1.1", width: "100%", height: "100%" }, [
-        $(
-          "defs",
-          {},
-          $(
-            "linearGradient",
-            {
-              id: "gradient-hsv",
-              x1: "0%",
-              y1: "100%",
-              x2: "0%",
-              y2: "0%",
-            },
-            [
-              $("stop", { offset: "0%", "stop-color": "#FF0000", "stop-opacity": "1" }),
-              $("stop", { offset: "13%", "stop-color": "#FF00FF", "stop-opacity": "1" }),
-              $("stop", { offset: "25%", "stop-color": "#8000FF", "stop-opacity": "1" }),
-              $("stop", { offset: "38%", "stop-color": "#0040FF", "stop-opacity": "1" }),
-              $("stop", { offset: "50%", "stop-color": "#00FFFF", "stop-opacity": "1" }),
-              $("stop", { offset: "63%", "stop-color": "#00FF40", "stop-opacity": "1" }),
-              $("stop", { offset: "75%", "stop-color": "#0BED00", "stop-opacity": "1" }),
-              $("stop", { offset: "88%", "stop-color": "#FFFF00", "stop-opacity": "1" }),
-              $("stop", { offset: "100%", "stop-color": "#FF0000", "stop-opacity": "1" }),
-            ]
-          )
+  const heightToRgb = heightPercent => {
+    heightPercent = 1 - heightPercent;
+    let rgb = { r: undefined, g: undefined, b: undefined };
+    const percentInEach = heightPercent * 6;
+    return Object.entries(rgb).reduce((lastObj, nowArr, index) => {
+      return Object.assign(lastObj, {
+        [nowArr[0]]: Math.floor(
+          (function () {
+            const left = ((index + 1) % 3) * 2;
+            const right = left + 2;
+            const differenceL = percentInEach - left;
+            const differenceR = right - percentInEach;
+            if (differenceL >= 0 && differenceR >= 0) {
+              return 0;
+            }
+            const distance = Math.min(Math.abs(differenceL), Math.abs(differenceR), Math.abs(6 - differenceL), Math.abs(6 - differenceR));
+            return Math.min(255, 255 * distance);
+          })()
         ),
-        $("rect", {
-          x: "0",
-          y: "0",
-          width: "100%",
-          height: "100%",
-          fill: "url(#gradient-hsv)",
-        }),
-      ]);
+      });
+    }, {});
+  };
 
-      picker = $("svg", { xmlns: "http://www.w3.org/2000/svg", version: "1.1", width: "100%", height: "100%" }, [
-        $("defs", {}, [
-          $(
-            "linearGradient",
-            {
-              id: "gradient-black",
-              x1: "0%",
-              y1: "100%",
-              x2: "0%",
-              y2: "0%",
-            },
-            [
-              $("stop", { offset: "0%", "stop-color": "#000000", "stop-opacity": "1" }),
-              $("stop", { offset: "100%", "stop-color": "#CC9A81", "stop-opacity": "0" }),
-            ]
-          ),
-          $(
-            "linearGradient",
-            {
-              id: "gradient-white",
-              x1: "0%",
-              y1: "100%",
-              x2: "100%",
-              y2: "100%",
-            },
-            [
-              $("stop", { offset: "0%", "stop-color": "#FFFFFF", "stop-opacity": "1" }),
-              $("stop", { offset: "100%", "stop-color": "#CC9A81", "stop-opacity": "0" }),
-            ]
-          ),
-        ]),
-        $("rect", {
-          x: "0",
-          y: "0",
-          width: "100%",
-          height: "100%",
-          fill: "url(#gradient-white)",
-        }),
-        $("rect", {
-          x: "0",
-          y: "0",
-          width: "100%",
-          height: "100%",
-          fill: "url(#gradient-black)",
-        }),
-      ]);
-    } else if (type === "VML") {
-      slide = [
-        '<DIV style="position: relative; width: 100%; height: 100%">',
-        '<v:rect style="position: absolute; top: 0; left: 0; width: 100%; height: 100%" stroked="f" filled="t">',
-        '<v:fill type="gradient" method="none" angle="0" color="red" color2="red" colors="8519f fuchsia;.25 #8000ff;24903f #0040ff;.5 aqua;41287f #00ff40;.75 #0bed00;57671f yellow"></v:fill>',
-        "</v:rect>",
-        "</DIV>",
-      ].join("");
+  const heightAddLAndT_ToRGB = (height, left, top) => {
+    const rgb = heightToRgb(height);
+    for (const key in rgb) {
+      rgb[key] = (255 - rgb[key]) * (1 - left) + rgb[key];
+      rgb[key] = rgb[key] * (1 - top);
+    }
+    return rgb;
+  };
 
-      picker = [
-        '<DIV style="position: relative; width: 100%; height: 100%">',
-        '<v:rect style="position: absolute; left: -1px; top: -1px; width: 101%; height: 101%" stroked="f" filled="t">',
-        '<v:fill type="gradient" method="none" angle="270" color="#FFFFFF" opacity="100%" color2="#CC9A81" o:opacity2="0%"></v:fill>',
-        "</v:rect>",
-        '<v:rect style="position: absolute; left: 0px; top: 0px; width: 100%; height: 101%" stroked="f" filled="t">',
-        '<v:fill type="gradient" method="none" angle="0" color="#000000" opacity="100%" color2="#CC9A81" o:opacity2="0%"></v:fill>',
-        "</v:rect>",
-        "</DIV>",
-      ].join("");
-
-      if (!document.namespaces.v) {
-        document.namespaces.add("v", "urn:schemas-microsoft-com:vml", "#default#VML");
+  const rgbAToHex = (rgba, err) => {
+    rgba = rgba.replace(/\s+/g, "");
+    let pattern = /^rgba?\((\d+),(\d+),(\d+),?(\d*(\.\d+)?)?\)$/;
+    let result = pattern.exec(rgba);
+    if (!result) {
+      return err;
+    }
+    let colors = [];
+    let alpha, r, g, b;
+    if (/^rgba/.test(result[0])) {
+      alpha = result[4];
+      r = Math.floor(alpha * parseInt(result[1]) + (1 - alpha) * 255);
+      g = Math.floor(alpha * parseInt(result[2]) + (1 - alpha) * 255);
+      b = Math.floor(alpha * parseInt(result[3]) + (1 - alpha) * 255);
+      return String(("0" + r.toString(16)).slice(-2) + ("0" + g.toString(16)).slice(-2) + ("0" + b.toString(16)).slice(-2));
+    } else {
+      for (let i = 1, len = 3; i <= len; ++i) {
+        let str = Number(result[i]).toString(16);
+        if (str.length === 1) {
+          str = 0 + str;
+        }
+        colors.push(str);
       }
+      rgba = colors.join("");
+      return rgba;
     }
+  };
 
-    function hsv2rgb(hsv) {
-      let R, G, B, X, C;
-      let h = (hsv.h % 360) / 60;
+  const rgbToHex = rgb => {
+    const { r, g, b } = rgb;
+    return Math.floor(r).toString(16).padStart(2, "0") + Math.floor(g).toString(16).padStart(2, "0") + Math.floor(b).toString(16).padStart(2, "0");
+  };
 
-      C = hsv.v * hsv.s;
-      X = C * (1 - Math.abs((h % 2) - 1));
-      R = G = B = hsv.v - C;
+  const hexToRgb = hex => {
+    return {
+      r: parseInt(hex.substr(0, 2), 16),
+      g: parseInt(hex.substr(2, 2), 16),
+      b: parseInt(hex.substr(4, 2), 16),
+    };
+  };
 
-      h = ~~h;
-      R += [C, X, 0, 0, X, C][h];
-      G += [X, C, C, X, 0, 0][h];
-      B += [0, 0, X, C, C, X][h];
+  const cE = str => {
+    return document.createElement(str);
+  };
 
-      let r = Math.floor(R * 255);
-      let g = Math.floor(G * 255);
-      let b = Math.floor(B * 255);
-      return { r: r, g: g, b: b, hex: "#" + (16777216 | b | (g << 8) | (r << 16)).toString(16).slice(1) };
-    }
+  class ColorPicker {
+    constructor({ dom = cE("div"), value = "FFF", def = "FFF" } = {}) {
+      this.dom = dom;
+      this.def = def;
+      const thisClass = this;
+      Array.prototype.forEach.call(this.getDOM().children, node => {
+        node.remove();
+      });
+      addClassName(dom, "fr-color-picker");
 
-    function rgb2hsv(rgb) {
-      let r = rgb.r;
-      let g = rgb.g;
-      let b = rgb.b;
+      const rightBar = cE("div");
+      rightBar.className = "fr-color-picker-right-bar";
+      const rightBarPicker = cE("div");
+      rightBarPicker.className = "fr-color-picker-right-bar-picker";
 
-      if (rgb.r > 1 || rgb.g > 1 || rgb.b > 1) {
-        r /= 255;
-        g /= 255;
-        b /= 255;
-      }
+      rightBar.appendChild(rightBarPicker);
 
-      let H, S, V, C;
-      V = Math.max(r, g, b);
-      C = V - Math.min(r, g, b);
-      H = C === 0 ? null : V === r ? (g - b) / C + (g < b ? 6 : 0) : V === g ? (b - r) / C + 2 : (r - g) / C + 4;
-      H = (H % 6) * 60;
-      S = C === 0 ? 0 : C / V;
-      return { h: H, s: S, v: V };
-    }
+      const gradientColor = cE("div");
+      gradientColor.className = "fr-color-picker-gradients fr-color-picker-gradient-color";
+      const gradientBlack = cE("div");
+      gradientBlack.className = "fr-color-picker-gradients fr-color-picker-gradient-black";
+      gradientColor.style.background = "linear-gradient(to right,#FFFFFF,#FF0000)";
+      const gradientCircle = cE("div");
+      gradientCircle.className = "fr-color-picker-circle";
 
-    function slideListener(ctx, slideElement, pickerElement) {
-      return function (evt) {
-        evt = evt || window.event;
-        evt.stopPropagation();
-        let mouse = mousePosition(evt);
-        ctx.h = (mouse.y / slideElement.offsetHeight) * 360 + hueOffset;
-        ctx.s = ctx.v = 1;
-        let c = hsv2rgb({ h: ctx.h, s: 1, v: 1 });
-        pickerElement.style.backgroundColor = c.hex;
-        ctx.callback && ctx.callback(c.hex, { h: ctx.h - hueOffset, s: ctx.s, v: ctx.v }, { r: c.r, g: c.g, b: c.b }, undefined, mouse);
+      gradientBlack.appendChild(gradientCircle);
+      this.getDOM().appendChild(rightBar);
+      this.getDOM().appendChild(gradientColor);
+      this.getDOM().appendChild(gradientBlack);
+
+      document.querySelector(".cpicker-2 #color").addEventListener("change", () => {
+        let color = document.querySelector(".cpicker-2 #color").value;
+        this.setValue(color, true);
+        this.onchange();
+        this.updatePicker();
+      });
+
+      this.textInput = document.querySelector(".cpicker-2 #color");
+      this._gradientBlack = gradientBlack;
+      this._gradientColor = gradientColor;
+      this._rightBar = rightBar;
+      this._rightBarPicker = rightBarPicker;
+      this._colorBlock = document.querySelector("#fr-color-picker-show");
+
+      this._gradientCircle = gradientCircle;
+
+      this._height = 0;
+      this._mouseX = 0;
+      this._mouseY = 0;
+
+      this.setValue(value, true);
+      this._lastValue = this.value;
+      this._def = this.def.substring(1);
+      this.updatePicker();
+
+      const mouseMoveFun = e => {
+        window.addEventListener("mouseup", function mouseUpFun() {
+          thisClass.getDOM().style.userSelect = "text";
+          window.removeEventListener("mousemove", mouseMoveFun);
+          window.removeEventListener("mouseup", mouseUpFun);
+        });
+        const bbox = thisClass._gradientBlack.getBoundingClientRect();
+        this._mouseX = e.clientX - bbox.left; // * (p.width / bbox.width)
+        this._mouseY = e.clientY - bbox.top; // * (p.height / bbox.height)
+        this.mouseBorder();
+        this.setValue(heightAddLAndT_ToRGB(this.height, this.position.x, this.position.y));
+        this.updatePicker();
       };
-    }
-
-    function pickerListener(ctx, pickerElement) {
-      return function (evt) {
-        evt = evt || window.event;
-        let mouse = mousePosition(evt);
-        let width = pickerElement.offsetWidth;
-        let height = pickerElement.offsetHeight;
-
-        ctx.s = mouse.x / width;
-        ctx.v = (height - mouse.y) / height;
-        let c = hsv2rgb(ctx);
-        ctx.callback && ctx.callback(c.hex, { h: ctx.h - hueOffset, s: ctx.s, v: ctx.v }, { r: c.r, g: c.g, b: c.b }, mouse);
+      const mouseMoveFunBar = e => {
+        window.addEventListener("mouseup", function mouseUpFunBar() {
+          thisClass.getDOM().style.userSelect = "text";
+          window.removeEventListener("mousemove", mouseMoveFunBar);
+          window.removeEventListener("mouseup", mouseUpFunBar);
+        });
+        const bbox = thisClass._rightBar.getBoundingClientRect();
+        this._height = e.clientY - bbox.top; // * (p.height / bbox.height)
+        this.mouseBorderBar();
+        this.setValue(heightAddLAndT_ToRGB(this.height, this.position.x, this.position.y));
+        this.updatePicker();
       };
-    }
-
-    let uniqID = 0;
-
-    class ColorPicker {
-      constructor(slideElement, pickerElement, callback) {
-        // new ColorPicker(slideElement, pickerElement, callback)
-        this.h = 0;
-        this.s = 1;
-        this.v = 1;
-
-        if (!callback) {
-          let element = slideElement;
-          element.innerHTML = colorpickerHTMLSnippet;
-
-          this.slideElement = element.getElementsByClassName("slide")[0];
-          this.pickerElement = element.getElementsByClassName("picker")[0];
-          let slideIndicator = element.getElementsByClassName("slide-indicator")[0];
-          let pickerIndicator = element.getElementsByClassName("picker-indicator")[0];
-
-          ColorPicker.fixIndicators(slideIndicator, pickerIndicator);
-
-          this.callback = function (hex, hsv, rgb, pickerCoordinate, slideCoordinate) {
-            ColorPicker.positionIndicators(slideIndicator, pickerIndicator, slideCoordinate, pickerCoordinate);
-
-            pickerElement(hex, hsv, rgb);
-          };
-        } else {
-          this.callback = callback;
-          this.pickerElement = pickerElement;
-          this.slideElement = slideElement;
-        }
-
-        if (type === "SVG") {
-          let hsvGradient = slide.getElementsByTagName("linearGradient")[0];
-          let hsvRect = slide.getElementsByTagName("rect")[0];
-
-          hsvGradient.id = "gradient-hsv-" + uniqID;
-          hsvRect.setAttribute("fill", "url(#" + hsvGradient.id + ")");
-
-          let blackAndWhiteGradients = picker.getElementsByTagName("linearGradient");
-          let whiteAndBlackRects = picker.getElementsByTagName("rect");
-
-          blackAndWhiteGradients[0].id = "gradient-black-" + uniqID;
-          blackAndWhiteGradients[1].id = "gradient-white-" + uniqID;
-
-          whiteAndBlackRects[0].setAttribute("fill", "url(#" + blackAndWhiteGradients[1].id + ")");
-          whiteAndBlackRects[1].setAttribute("fill", "url(#" + blackAndWhiteGradients[0].id + ")");
-
-          this.slideElement.appendChild(slide.cloneNode(true));
-          this.pickerElement.appendChild(picker.cloneNode(true));
-
-          uniqID++;
-        } else {
-          this.slideElement.innerHTML = slide;
-          this.pickerElement.innerHTML = picker;
-        }
-
-        addEventListener(this.slideElement, "click", slideListener(this, this.slideElement, this.pickerElement));
-        addEventListener(this.pickerElement, "click", pickerListener(this, this.pickerElement));
-
-        enableDragging(this, this.slideElement, slideListener(this, this.slideElement, this.pickerElement));
-        enableDragging(this, this.pickerElement, pickerListener(this, this.pickerElement));
-      }
-      setHsv(hsv) {
-        return setColor(this, hsv);
-      }
-      setRgb(rgb) {
-        return setColor(this, rgb2hsv(rgb), rgb);
-      }
-      setHex(hex) {
-        return setColor(this, ColorPicker.hex2hsv(hex), undefined, hex);
-      }
-      static hsv2rgb(hsv) {
-        let rgbHex = hsv2rgb(hsv);
-        delete rgbHex.hex;
-        return rgbHex;
-      }
-      static hsv2hex(hsv) {
-        return hsv2rgb(hsv).hex;
-      }
-      static rgb2hex(rgb) {
-        return hsv2rgb(rgb2hsv(rgb)).hex;
-      }
-      static hex2hsv(hex) {
-        return rgb2hsv(ColorPicker.hex2rgb(hex));
-      }
-      static hex2rgb(hex) {
-        return { r: parseInt(hex.substr(1, 2), 16), g: parseInt(hex.substr(3, 2), 16), b: parseInt(hex.substr(5, 2), 16) };
-      }
-      static positionIndicators(slideIndicator, pickerIndicator, mouseSlide, mousePicker) {
-        if (mouseSlide) {
-          pickerIndicator.style.left = "auto";
-          pickerIndicator.style.right = "0px";
-          pickerIndicator.style.top = "0px";
-          slideIndicator.style.top = mouseSlide.y - slideIndicator.offsetHeight / 2 + "px";
-        }
-        if (mousePicker) {
-          pickerIndicator.style.top = mousePicker.y - pickerIndicator.offsetHeight / 2 + "px";
-          pickerIndicator.style.left = mousePicker.x - pickerIndicator.offsetWidth / 2 + "px";
-        }
-      }
-      static fixIndicators(slideIndicator, pickerIndicator) {
-        pickerIndicator.style.pointerEvents = "none";
-        slideIndicator.style.pointerEvents = "none";
-      }
-    }
-
-    function addEventListener(element, event, listener) {
-      if (element.attachEvent) {
-        element.attachEvent("on" + event, listener);
-      } else if (element.addEventListener) {
-        element.addEventListener(event, listener, false);
-      }
-    }
-
-    function enableDragging(ctx, element, listener) {
-      let mousedown = false;
-      addEventListener(element, "mousedown", function (evt) {
-        mousedown = true;
+      this._gradientBlack.addEventListener("mousedown", e => {
+        this.getDOM().style.userSelect = "none";
+        mouseMoveFun(e);
+        window.addEventListener("mousemove", mouseMoveFun);
       });
-      addEventListener(element, "mouseup", function (evt) {
-        mousedown = false;
+      this._rightBar.addEventListener("mousedown", e => {
+        this.getDOM().style.userSelect = "none";
+        mouseMoveFunBar(e);
+        window.addEventListener("mousemove", mouseMoveFunBar);
       });
-      addEventListener(element, "mouseout", function (evt) {
-        mousedown = false;
-      });
-      addEventListener(element, "mousemove", function (evt) {
-        if (mousedown) {
-          listener(evt);
-        }
+
+      if ("ontouchstart" in window) {
+        const touchFun = e => {
+          e.preventDefault();
+          e = e.touches[0];
+          const bbox = thisClass._gradientBlack.getBoundingClientRect();
+          this._mouseX = e.clientX - bbox.left; // * (p.width / bbox.width)
+          this._mouseY = e.clientY - bbox.top; // * (p.height / bbox.height)
+          this.mouseBorder();
+          this.setValue(heightAddLAndT_ToRGB(this.height, this.position.x, this.position.y));
+          this.updatePicker();
+        };
+        const touchFunBar = e => {
+          e.preventDefault();
+          e = e.touches[0];
+          const bbox = this._rightBar.getBoundingClientRect();
+          this._height = e.clientY - bbox.top; // * (p.height / bbox.height)
+          this.mouseBorderBar();
+          this.setValue(heightAddLAndT_ToRGB(this.height, this.position.x, this.position.y));
+          this.updatePicker();
+        };
+        this._gradientBlack.addEventListener("touchmove", touchFun, supportsPassive ? { passive: true } : false);
+        this._gradientBlack.addEventListener("touchstart", touchFun, supportsPassive ? { passive: true } : false);
+        this._rightBar.addEventListener("touchmove", touchFunBar, supportsPassive ? { passive: true } : false);
+        this._rightBar.addEventListener("touchstart", touchFunBar, supportsPassive ? { passive: true } : false);
+      }
+
+      this._changeFunctions = [];
+    }
+    onchange() {
+      this._changeFunctions.forEach(fun => {
+        return fun({
+          target: this,
+          type: "change",
+          timeStamp: performance.now(),
+        });
       });
     }
 
-    ColorPicker.rgb2hsv = rgb2hsv;
-    function setColor(ctx, hsv, rgb, hex) {
-      ctx.h = hsv.h % 360;
-      ctx.s = hsv.s;
-      ctx.v = hsv.v;
-      let c = hsv2rgb(ctx);
-      let mouseSlide = {
-        y: (ctx.h * ctx.slideElement.offsetHeight) / 360,
-        x: 0,
-      };
-
-      let pickerHeight = ctx.pickerElement.offsetHeight;
-      let mousePicker = {
-        x: ctx.s * ctx.pickerElement.offsetWidth,
-        y: pickerHeight - ctx.v * pickerHeight,
-      };
-      ctx.pickerElement.style.backgroundColor = hsv2rgb({ h: ctx.h, s: 1, v: 1 }).hex;
-      ctx.callback && ctx.callback(hex || c.hex, { h: ctx.h, s: ctx.s, v: ctx.v }, rgb || { r: c.r, g: c.g, b: c.b }, mousePicker, mouseSlide);
-      return ctx;
+    addEventListener(type, fun) {
+      if (typeof fun !== "function") {
+        return;
+      }
+      switch (type) {
+        case "change": {
+          this._changeFunctions.push(fun);
+          break;
+        }
+      }
     }
-    window.ColorPicker = ColorPicker;
-  })(window, window.document);
 
-  /* new DialogBox */
+    getValue(mode = "value") {
+      switch (mode) {
+        case "hex": {
+          return this._value;
+        }
+        case "rgb": {
+          return hexToRgb(this.getValue("hex"));
+        }
+        case "hsb": {
+          return rgbToHsb(this.getValue("hex"));
+        }
+        case "value":
+        default: {
+          return "#" + this._value;
+        }
+      }
+    }
+    getBrightness() {
+      const { r, g, b } = this.getValue("rgb");
+      return 0.299 * r + 0.587 * g + 0.114 * b;
+    }
+    setValue(value, resetPosition = false) {
+      let hex = "";
+      const Hex6Reg = /^#([A-F0-9]{6}|[a-f0-9]{6})$/;
+      const Hex3Reg = /^#([A-F0-9]{3}|[a-f0-9]{3})$/;
+      const rgbaReg =
+        /^rgba\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*((?!1.[1-9])[0-1]?(\.[0-9]{1,3})?)\)$/;
+      const rgbReg =
+        /^rgb\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))\)$/;
+      switch (typeof value) {
+        case "string": {
+          if (Hex6Reg.test(value)) {
+            value = value.substring(1);
+          } else if (Hex3Reg.test(value)) {
+            value = value
+              .substring(1)
+              .split("")
+              .map(s => {
+                return s + s;
+              })
+              .join("");
+          } else if (rgbaReg.test(value)) {
+            value = rgbAToHex(value, this._def);
+          } else if (rgbReg.test(value)) {
+            value = rgbAToHex(value, this._def);
+          } else if (value === "currentcolor") {
+            value = "FFFFFF";
+          } else {
+            value = this._def;
+          }
+          hex = value;
+          break;
+        }
+        case "object": {
+          hex = rgbToHex(value);
+        }
+      }
+      let rgb;
+      try {
+        rgb = hexToRgb(hex);
+      } catch (error) {
+        rgb = {
+          r: 255,
+          g: 255,
+          b: 255,
+        };
+      }
+      const { r, g, b } = rgb;
+      this._value = rgbToHex({ r, g, b }).toUpperCase();
+      this.textInput.value = this._value === "FFFFFF" ? "currentcolor" : "#" + this._value;
+      this._colorBlock.style.backgroundColor = this.getValue();
+      if (resetPosition) {
+        const { h, s, b } = rgbToHsb(hex);
+        this._height = 1 - h / 360;
+        if (h === 0) {
+          this._height = 0;
+        }
+        this._mouseX = s;
+        this._mouseY = 1 - b;
+      } else {
+        if (this._lastValue !== this.value) {
+          this.onchange();
+        }
+      }
+      this._lastValue = this.value;
+    }
 
-  class DialogBox {
+    getDOM() {
+      return this.dom;
+    }
+    mouseBorder() {
+      this._mouseX = numberBorder(this._mouseX / (this._gradientBlack.getBoundingClientRect().width - 2), 1, 0);
+      this._mouseY = numberBorder(this._mouseY / (this._gradientBlack.getBoundingClientRect().height - 2), 1, 0);
+    }
+    mouseBorderBar() {
+      this._height = numberBorder(this._height / (this._rightBar.getBoundingClientRect().height - 2), 1, 0);
+    }
+    updatePicker() {
+      const position = this.position;
+      const target = this._gradientCircle;
+      target.style.left = `${position.x * 100}%`;
+      target.style.top = `${position.y * 100}%`;
+      this._rightBarPicker.style.top = `${this.height * 100}%`;
+      this._gradientColor.style.background = `linear-gradient(to right,#FFFFFF,#${rgbToHex(heightToRgb(this.height))})`;
+      if (this.getBrightness() > 152) {
+        addClassName(target, "fr-color-picker-circle-black");
+        removeClassName(target, "fr-color-picker-circle-white");
+      } else {
+        removeClassName(target, "fr-color-picker-circle-black");
+        addClassName(target, "fr-color-picker-circle-white");
+      }
+    }
+    get position() {
+      return {
+        x: this._mouseX,
+        y: this._mouseY,
+      };
+    }
+    get height() {
+      return this._height;
+    }
+    get value() {
+      return this.getValue();
+    }
+    set value(value) {
+      this.setValue(value, true);
+      this.updatePicker();
+    }
+  }
+
+  /* new frDialogBox */
+
+  class frDialogBox {
     constructor({
       titleText = "Error",
       messageText = "Something unexpected has gone wrong. If the problem persists, contact your administrator",
@@ -467,39 +559,39 @@
       this.hasFalse = falseButtonText !== null;
       this.hasNeutral = neutralButtonText !== null;
 
-      this.dialog = undefined;
+      this.frDialog = undefined;
       this.trueButton = undefined;
       this.falseButton = undefined;
       this.neutralButton = undefined;
 
       this.parent = document.body;
 
-      this._createDialog(this);
-      this._appendDialog();
+      this._createfrDialog(this);
+      this._appendfrDialog();
     }
 
-    _createDialog(context) {
-      this.dialog = document.createElement("div");
-      this.dialog.classList.add("dialog-box");
+    _createfrDialog(context) {
+      this.frDialog = document.createElement("div");
+      this.frDialog.classList.add("frDialog-box");
 
-      this.dialog.style.opacity = 0;
+      this.frDialog.style.opacity = 0;
 
       const title = document.createElement("div");
       title.textContent = this.titleText;
-      title.classList.add("dialog-box-title");
-      this.dialog.appendChild(title);
+      title.classList.add("frDialog-box-title");
+      this.frDialog.appendChild(title);
 
       const question = document.createElement("div");
       question.innerHTML = this.messageText;
-      question.classList.add("dialog-box-message");
-      this.dialog.appendChild(question);
+      question.classList.add("frDialog-box-message");
+      this.frDialog.appendChild(question);
 
       const buttonContainer = document.createElement("div");
-      buttonContainer.classList.add("dialog-box-button-container");
-      this.dialog.appendChild(buttonContainer);
+      buttonContainer.classList.add("frDialog-box-button-container");
+      this.frDialog.appendChild(buttonContainer);
 
       this.trueButton = document.createElement("a");
-      this.trueButton.classList.add("dialog-box-button", "dialog-box-button--true");
+      this.trueButton.classList.add("frDialog-box-button", "frDialog-box-button--true");
       this.trueButton.textContent = this.trueButtonText;
       this.trueButton.addEventListener("click", function () {
         context._destroy();
@@ -508,7 +600,7 @@
 
       if (this.hasFalse) {
         this.falseButton = document.createElement("a");
-        this.falseButton.classList.add("dialog-box-button", "dialog-box-button--false");
+        this.falseButton.classList.add("frDialog-box-button", "frDialog-box-button--false");
         this.falseButton.textContent = this.falseButtonText;
         this.falseButton.addEventListener("click", function () {
           context._destroy();
@@ -518,7 +610,7 @@
 
       if (this.hasNeutral) {
         this.neutralButton = document.createElement("a");
-        this.neutralButton.classList.add("dialog-box-button", "dialog-box-button--neutral");
+        this.neutralButton.classList.add("frDialog-box-button", "frDialog-box-button--neutral");
         this.neutralButton.textContent = this.neutralButtonText;
         this.neutralButton.addEventListener("click", function () {
           context._destroy();
@@ -527,9 +619,9 @@
       }
     }
 
-    _appendDialog() {
-      const diag = this.dialog;
-      if (this.dialog) {
+    _appendfrDialog() {
+      const diag = this.frDialog;
+      if (this.frDialog) {
         this.parent.appendChild(diag);
         setTimeout(function () {
           diag.style.opacity = 1;
@@ -538,15 +630,15 @@
     }
 
     _destroy() {
-      if (this.dialog) {
-        this.parent.removeChild(this.dialog);
+      if (this.frDialog) {
+        this.parent.removeChild(this.frDialog);
         delete this;
       }
     }
 
     respond() {
       return new Promise((resolve, reject) => {
-        const somethingWentWrongUponCreation = !this.dialog || !this.trueButton;
+        const somethingWentWrongUponCreation = !this.frDialog || !this.trueButton;
 
         if (somethingWentWrongUponCreation) {
           reject(new Error("Something went wrong upon modal creation"));
@@ -567,243 +659,246 @@
 
   /* Slider Movements init */
 
-  let Slider = {};
-  Slider.scope = {};
-  Slider.createTemplateTagFirstArg = function (e) {
-    return (e.raw = e);
-  };
-  Slider.createTemplateTagFirstArgWithRaw = function (e, f) {
-    e.raw = f;
-    return e;
-  };
-
-  !(function (e) {
-    class f {
-      constructor(a, c) {
-        let b = void 0 === c ? {} : c;
-        c = void 0 === b.size ? 10 : b.size;
-        let d = void 0 === b.val ? 0 : b.val;
-        let g = void 0 === b.precision ? 0 : b.precision;
-        let h = void 0 === b.range ? 1 : b.range;
-        let k = void 0 === b.getVal ? function () {} : b.getVal;
-        let l = void 0 === b.drag ? !0 : b.drag;
-        let m = void 0 === b.direction ? "horizontal" : b.direction;
-        b = void 0 === b.tip ? !1 : b.tip;
-        if (!a) {
-          error("//-> \u5fc5\u987b\u6307\u5b9a\u5b9e\u4f8b\u5bf9\u8c61\u7684\u5bb9\u5668\uff01");
-        }
-        this.container = document.querySelector(a);
-        this.size = c;
-        this.val = d;
-        this.precision = g;
-        this.range = h;
-        this.getVal = k;
-        this.drag = l;
-        this.direction = m;
-        if (typeof b === "object") {
-          this.tip = b || {
-            trigger: "show",
-            align: "top",
-          };
-        } else if ("boolean" !== typeof b) {
-          error("//-> tip\u914d\u7f6e\u9519\u8bef");
-        }
-        this.initialize();
+  class frProgress {
+    constructor(a, c) {
+      let b = void 0 === c ? {} : c;
+      c = void 0 === b.size ? 10 : b.size;
+      let d = void 0 === b.val ? 0 : b.val;
+      let g = void 0 === b.precision ? 0 : b.precision;
+      let h = void 0 === b.range ? 1 : b.range;
+      let k = void 0 === b.getVal ? function () {} : b.getVal;
+      let l = void 0 === b.drag ? !0 : b.drag;
+      let m = void 0 === b.direction ? "horizontal" : b.direction;
+      b = void 0 === b.tip ? !1 : b.tip;
+      if (!a) {
+        error("//-> \u5fc5\u987b\u6307\u5b9a\u5b9e\u4f8b\u5bf9\u8c61\u7684\u5bb9\u5668\uff01");
       }
-      initialize() {
-        if (
-          0 > this.size ||
-          0 > this.val ||
-          100 < this.val ||
-          0 > this.precision ||
-          4 < this.precision ||
-          ("horizontal" !== this.direction && "vertical" !== this.direction) ||
-          !this.container ||
-          ("boolean" !== typeof this.drag && "object" !== typeof this.drag)
-        ) {
-          return error("//-> \u53c2\u6570\u914d\u7f6e\u9519\u8bef\uff01");
-        }
-        this.rander();
-        this.renderLine();
-      }
-      rander() {
-        this.bgBar = document.createElement("div");
-        this.bgLine = document.createElement("div");
-        this.btnTip = document.createElement("div");
-        let a = this.bgBar;
-        let c = this.container;
-        let b = this.bgLine;
-        let d = this.btnTip;
-        switch (this.direction) {
-          case "horizontal":
-            a.classList.add("ProgressBar");
-            a.style.height = this.size + "px";
-            a.style.width = "100%";
-            a.style.borderRadius = this.size / 2 + "px";
-            b.appendChild(d);
-            break;
-          case "vertical":
-            a.classList.add("ProgressBar");
-            a.style.width = this.size + "px";
-            a.style.height = "100%";
-            a.style.borderRadius = this.size / 2 + "px";
-            d.classList.add("vertical");
-            b.appendChild(d);
-        }
-        d.classList.add("btnl");
-        d.style.width = this.size + "px";
-        d.style.height = this.size + "px";
-        b.classList.add("ProgressLine");
-        b.style.borderRadius = this.size / 2 + "px";
-        a.appendChild(b);
-        c.appendChild(a);
-        this.drag ? this.Dragdrop() : this.btnTip.classList.add("disable");
-        (this.tip || typeof this.tip === "object") && this.openTip();
-        this.onLoading();
-      }
-      Dragdrop() {
-        let a = this;
-        let c = this.bgBar;
-        let b = function (d) {
-          a.getPos(d);
+      this.container = document.querySelector(a);
+      this.size = c;
+      this.val = d;
+      this.precision = g;
+      this.range = h;
+      this.getVal = k;
+      this.drag = l;
+      this.direction = m;
+      if (typeof b === "object") {
+        this.tip = b || {
+          trigger: "show",
+          align: "top",
         };
-        c.addEventListener("mousedown", function (d) {
-          document.addEventListener("mousemove", b);
-          a.getPos(d);
-        });
-        document.addEventListener("mouseup", function (d) {
-          document.removeEventListener("mousemove", b);
-        });
-        c.addEventListener("touchstart", function (d) {
+      } else if ("boolean" !== typeof b) {
+        error("//-> tip\u914d\u7f6e\u9519\u8bef");
+      }
+      this.initialize();
+    }
+    initialize() {
+      if (
+        0 > this.size ||
+        0 > this.val ||
+        100 < this.val ||
+        0 > this.precision ||
+        4 < this.precision ||
+        ("horizontal" !== this.direction && "vertical" !== this.direction) ||
+        !this.container ||
+        ("boolean" !== typeof this.drag && "object" !== typeof this.drag)
+      ) {
+        return error("//-> \u53c2\u6570\u914d\u7f6e\u9519\u8bef\uff01");
+      }
+      this.rander();
+      this.renderLine();
+    }
+    rander() {
+      this.bgBar = document.createElement("div");
+      this.bgLine = document.createElement("div");
+      this.btnTip = document.createElement("div");
+      let a = this.bgBar;
+      let c = this.container;
+      let b = this.bgLine;
+      let d = this.btnTip;
+      switch (this.direction) {
+        case "horizontal":
+          a.classList.add("frProgressBar");
+          a.style.height = this.size + "px";
+          a.style.width = "100%";
+          a.style.borderRadius = this.size / 2 + "px";
+          b.appendChild(d);
+          break;
+        case "vertical":
+          a.classList.add("frProgressBar");
+          a.style.width = this.size + "px";
+          a.style.height = "100%";
+          a.style.borderRadius = this.size / 2 + "px";
+          d.classList.add("vertical");
+          b.appendChild(d);
+      }
+      d.classList.add("btnll");
+      d.style.width = this.size + "px";
+      d.style.height = this.size + "px";
+      b.classList.add("frProgressLine");
+      b.style.borderRadius = this.size / 2 + "px";
+      a.appendChild(b);
+      c.appendChild(a);
+      this.drag ? this.Dragdrop() : this.btnTip.classList.add("disable");
+      (this.tip || typeof this.tip === "object") && this.openTip();
+      this.onLoading();
+    }
+    Dragdrop() {
+      let a = this;
+      let c = this.bgBar;
+      let b = function (d) {
+        a.getPos(d);
+      };
+      c.addEventListener("mousedown", function (d) {
+        document.addEventListener("mousemove", b);
+        a.getPos(d);
+      });
+      document.addEventListener("mouseup", function (d) {
+        document.removeEventListener("mousemove", b);
+      });
+      c.addEventListener(
+        "touchstart",
+        function (d) {
           document.addEventListener("touchmove", b);
           a.getPos(d);
-        });
-        document.addEventListener("touchend", function (d) {
+        },
+        supportsPassive ? { passive: true } : false
+      );
+      document.addEventListener(
+        "touchend",
+        function (d) {
           document.removeEventListener("touchmove", b);
-        });
+        },
+        supportsPassive ? { passive: true } : false
+      );
+    }
+    getPos(a) {
+      typeof a.touches === "undefined" && (a.preventDefault(), a.stopPropagation());
+      a.touches && (a = a.touches[0]);
+      this.oldVal = this.val;
+      let b, c;
+      switch (this.direction) {
+        case "horizontal":
+          a = a.clientX + this.size / 2;
+          c = this.bgBar.clientWidth;
+          b = this.getElementLeft(this.bgBar);
+          this.val = ((a - b - this.size) / (c - this.size)) * 100;
+          break;
+        case "vertical":
+          a = a.clientY + this.size / 2;
+          c = this.bgBar.clientHeight;
+          b = this.getElementTop(this.bgBar);
+          this.val = 100 - ((a - b - this.size) / (c - this.size)) * 100;
       }
-      getPos(a) {
-        typeof a.touches === "undefined" && (a.preventDefault(), a.stopPropagation());
-        a.touches && (a = a.touches[0]);
-        this.oldVal = this.val;
-        let b, c;
-        switch (this.direction) {
-          case "horizontal":
-            a = a.clientX + this.size / 2;
-            c = this.bgBar.clientWidth;
-            b = this.getElementLeft(this.bgBar);
-            this.val = ((a - b - this.size) / (c - this.size)) * 100;
-            break;
-          case "vertical":
-            a = a.clientY + this.size / 2;
-            c = this.bgBar.clientHeight;
-            b = this.getElementTop(this.bgBar);
-            this.val = 100 - ((a - b - this.size) / (c - this.size)) * 100;
-        }
-        this.val = Math.max(0, this.val);
-        this.val = Math.min(100, this.val);
-        this.renderLine();
-        this.eventVal();
+      this.val = Math.max(0, this.val);
+      this.val = Math.min(100, this.val);
+      this.renderLine();
+      this.eventVal();
+    }
+    getElementLeft(a) {
+      let c = a.offsetLeft;
+      for (a = a.offsetParent; null !== a; a) {
+        c += a.offsetLeft;
+        a = a.offsetParent;
       }
-      getElementLeft(a) {
-        let c = a.offsetLeft;
-        for (a = a.offsetParent; null !== a; a) {
-          c += a.offsetLeft;
-          a = a.offsetParent;
-        }
-        return c;
+      return c;
+    }
+    getElementTop(a) {
+      let c = a.offsetTop;
+      for (a = a.offsetParent; null !== a; a) {
+        c += a.offsetTop;
+        a = a.offsetParent;
       }
-      getElementTop(a) {
-        let c = a.offsetTop;
-        for (a = a.offsetParent; null !== a; a) {
-          c += a.offsetTop;
-          a = a.offsetParent;
-        }
-        return c;
-      }
-      renderLine() {
-        switch (this.direction) {
-          case "horizontal":
-            this.bgLine.style.width = ((this.bgBar.clientWidth - this.size) * this.val) / 100 + this.size + "px";
-            break;
-          case "vertical":
-            this.bgLine.style.height = ((this.bgBar.clientHeight - this.size) * this.val) / 100 + this.size + "px";
-        }
-      }
-      eventVal() {
-        this.val = Number(this.val.toFixed(this.precision));
-        this.oldVal !== this.val &&
-          (this.getVal && this.getVal(this), this.tip || typeof this.tip === "object") &&
-          (this.tipBox.innerText = String(((this.val / 100) * this.range).toFixed(this.precision + 2)));
-      }
-      updateVal(a) {
-        0 > a ||
-          100 < a ||
-          ((this.val = Number(a)), this.renderLine(), (this.val = Number(a.toFixed(this.precision))), !this.tip && "object" !== typeof this.tip) ||
-          (this.tipBox.innerText = String(((this.val / 100) * this.range).toFixed(this.precision + 2)));
-      }
-      openTip() {
-        let a = this.btnTip;
-        this.tipBox = document.createElement("span");
-        this.tipBox.classList.add("progressVal");
-        this.tipBox.innerText = String(((this.val / 100) * this.range).toFixed(this.precision + 2));
-        a.appendChild(this.tipBox);
-        this.tip.trigger && this.tipConfig();
-      }
-      tipConfig() {
-        let a = this;
-        switch (this.tip.trigger) {
-          case "hover":
-            this.tipBox.style.opacity = 0;
-            this.bgBar.addEventListener("mouseenter", function () {
-              return (a.tipBox.style.opacity = 1);
-            });
-            this.bgBar.addEventListener("mouseleave", function () {
-              return (a.tipBox.style.opacity = 0);
-            });
-            this.bgBar.addEventListener("touchstart", function () {
-              return (a.tipBox.style.opacity = 1);
-            });
-            this.bgBar.addEventListener("touchend", function () {
-              return (a.tipBox.style.opacity = 0);
-            });
-            break;
-          case "show":
-            this.tipBox.style.opacity = 1;
-        }
-        switch (this.tip.align) {
-          case "bottom":
-            this.tipBox.classList.add("bottom");
-            break;
-          case "left":
-            this.tipBox.classList.add("left");
-            break;
-          case "right":
-            this.tipBox.classList.add("right");
-        }
-      }
-      onLoading() {
-        let a = (this.btnLoading = document.createElement("span"));
-        let c = this.btnTip;
-        a.classList.add("loading");
-        c.appendChild(a);
-        a.style.width = c.offsetWidth + "px";
-        a.style.height = c.offsetHeight + "px";
-      }
-      onLoad(a, c) {
-        c = void 0 === c ? function () {} : c;
-        if ("boolean" !== typeof a) {
-          error("//-> onload\u914d\u7f6e\u9519\u8bef");
-        }
-        a && (this.btnLoading.style.display = "block");
-        c(this);
+      return c;
+    }
+    renderLine() {
+      switch (this.direction) {
+        case "horizontal":
+          this.bgLine.style.width = ((this.bgBar.clientWidth - this.size) * this.val) / 100 + this.size + "px";
+          break;
+        case "vertical":
+          this.bgLine.style.height = ((this.bgBar.clientHeight - this.size) * this.val) / 100 + this.size + "px";
       }
     }
-    e.Progress = f;
-  })(window);
+    eventVal() {
+      this.val = Number(this.val.toFixed(this.precision));
+      this.oldVal !== this.val &&
+        (this.getVal && this.getVal(this), this.tip || typeof this.tip === "object") &&
+        (this.tipBox.innerText = String(((this.val / 100) * this.range).toFixed(this.precision + 2)));
+    }
+    updateVal(a) {
+      0 > a ||
+        100 < a ||
+        ((this.val = Number(a)), this.renderLine(), (this.val = Number(a.toFixed(this.precision))), !this.tip && "object" !== typeof this.tip) ||
+        (this.tipBox.innerText = String(((this.val / 100) * this.range).toFixed(this.precision + 2)));
+    }
+    openTip() {
+      let a = this.btnTip;
+      this.tipBox = document.createElement("span");
+      this.tipBox.classList.add("frProgressVal");
+      this.tipBox.innerText = String(((this.val / 100) * this.range).toFixed(this.precision + 2));
+      a.appendChild(this.tipBox);
+      this.tip.trigger && this.tipConfig();
+    }
+    tipConfig() {
+      let a = this;
+      switch (this.tip.trigger) {
+        case "hover":
+          this.tipBox.style.opacity = 0;
+          this.bgBar.addEventListener("mouseenter", function () {
+            return (a.tipBox.style.opacity = 1);
+          });
+          this.bgBar.addEventListener("mouseleave", function () {
+            return (a.tipBox.style.opacity = 0);
+          });
+          this.bgBar.addEventListener(
+            "touchstart",
+            function () {
+              return (a.tipBox.style.opacity = 1);
+            },
+            supportsPassive ? { passive: true } : false
+          );
+          this.bgBar.addEventListener(
+            "touchend",
+            function () {
+              return (a.tipBox.style.opacity = 0);
+            },
+            supportsPassive ? { passive: true } : false
+          );
+          break;
+        case "show":
+          this.tipBox.style.opacity = 1;
+      }
+      switch (this.tip.align) {
+        case "bottom":
+          this.tipBox.classList.add("bottom");
+          break;
+        case "left":
+          this.tipBox.classList.add("left");
+          break;
+        case "right":
+          this.tipBox.classList.add("right");
+      }
+    }
+    onLoading() {
+      let a = (this.btnLoading = document.createElement("span"));
+      let c = this.btnTip;
+      a.classList.add("loading");
+      c.appendChild(a);
+      a.style.width = c.offsetWidth + "px";
+      a.style.height = c.offsetHeight + "px";
+    }
+    onLoad(a, c) {
+      c = void 0 === c ? function () {} : c;
+      if ("boolean" !== typeof a) {
+        error("//-> onload\u914d\u7f6e\u9519\u8bef");
+      }
+      a && (this.btnLoading.style.display = "block");
+      c(this);
+    }
+  }
 
   function checkdraw(b, a, c) {
-    b.value = ((a.val / 100) * a.range).toFixed(a.precision + 2);
+    b.value = Number((a.val / 100) * a.range) ? ((a.val / 100) * a.range).toFixed(a.precision + 2) : "OFF";
     b.addEventListener("blur", function () {
       this.value <= a.range
         ? ((this.value = Number(this.value.match(c)).toFixed(a.precision + 2)), a.updateVal((100 * this.value) / a.range))
@@ -853,13 +948,14 @@
           return selector;
         })();
 
-        let close = fontSet("#fontSelect .close");
+        let close = fontSet("#fontSelect .frclose");
         close.that.forEach(function (item) {
           ddRemove(item.parentNode);
           let value = item.parentNode.children[1].value;
           let text = item.parentNode.children[0].innerHTML;
           fontData.push(new selector(text, value));
-          if (fontSet("#fontSelect .close").that.length === 0) {
+          fontData.sort();
+          if (fontSet("#fontSelect .frclose").that.length === 0) {
             fontSet("#fontSelect .selector").that[0].parentNode.style.cssText += "display:none;";
           }
         });
@@ -873,24 +969,27 @@
         });
         return arr;
       },
-      fsearch: function (name, fontData) {
+      fsearch: function (fontData) {
         let domId = fontSet(s).that[0];
         let html = String(
-          `<div id="selector"><label>已选择:</label><div class="selector"></div></div><div class="selectId"><label>设置字体，请选择：</label><input type="text" placeholder="留空则初始化为微软雅黑" autocomplete="off"><dl style="display: none;"></dl><span class="fr_tooltip ps1">\ud83d\udd14<span class="fr_tooltiptext ps2"><strong>温馨提示：</strong><p>脚本预载了多种常用的、好看的中文字体，下拉菜单中所罗列的字体是您系统中已安装过的字体，没有安装过则不会显示。</p><p>在选择字体时，尽量减少字体种类。<b style="color:darkred">（请您注意）</b>字体是按您选择的先后顺序进行优先渲染的，所以多选不如之选一个您最想要的。</p></span></span></div>`
+          `<div id="selector"><label>已选择：<span id="stcleaner">[清空]</span></label><div class="selector"></div></div><div class="selectFontId"><label>设置字体，请选择：</label><input type="text" placeholder="输入关键字可检索字体" autocomplete="off"><dl style="display: none;"></dl><span class="fr_tooltip ps1">\ud83d\udd14<span class="fr_tooltiptext ps2"><strong>温馨提示：</strong><p>脚本预载了多种常用的、好看的中文字体，下拉菜单中所罗列的字体是您系统中已安装过的字体，没有安装过则不会显示。</p><p><em style="color:darkred">（注一）</em>如果没有重新选择字体，则使用上一次保存的字体。首次使用默认为微软雅黑字体。</p><p><em style="color:darkred">（注二）</em>输入框可输入关键字进行搜索，支持中文和英文字体名。</p><p><em style="color:darkred">（注三）</em>字体是按您选择的先后顺序进行优先渲染的，所以多选不如之选一个您最想要的。</p></span></span></div>`
         );
         domId.innerHTML = html;
 
         fontSet("#fontSelect .selector").that[0].parentNode.style.cssText += "display:none;";
 
         function clickEvent() {
-          fontSet("#fontSelect .selectId dl dd").that.forEach(function (item) {
+          fontSet("#fontSelect .selectFontId dl dd").that.forEach(function (item) {
             item.onclick = function (e) {
               let value = this.attributes.value.value.toString();
               if (value) {
                 fontSet("#fontSelect .selector").that[0].innerHTML += String(
-                  `<a href="javascript:void(0)" class="label"><span style="color:#fff;font-size:16px;font-family:${value}!important">${this.innerHTML}</span><input type="hidden" name="font-name" value="${value}"/><span class="close">×</span></a>`
+                  `<a href="javascript:void(0)" class="label"><span style="font-family:${value}!important">${this.innerHTML}</span><input type="hidden" name="font-name" value="${value}"/><span class="frclose" style="font-family:${value}!important">×</span></a>`
                 );
                 fontSet(".selector").that[0].parentNode.style.cssText += "display:block;";
+                document.querySelector("#stcleaner").addEventListener("click", () => {
+                  fontSet().fdeleteList(fontData);
+                });
                 for (let i = 0; i < fontData.length; i++) {
                   if (fontData[i].en === value) {
                     fontData.splice(i, 1);
@@ -899,8 +998,8 @@
                 }
                 removeFontSelector();
               }
-              fontSet(".selectId dl").hide();
-              fontSet("#fontSelect .selectId input").that[0].value = "";
+              fontSet(".selectFontId dl").hide();
+              fontSet("#fontSelect .selectFontId input").that[0].value = "";
               e.stopPropagation();
             };
           });
@@ -913,49 +1012,49 @@
           }
         };
 
-        fontSet("#fontSelect .selectId input").that[0].oninput = function () {
+        fontSet("#fontSelect .selectFontId input").that[0].oninput = function () {
           let val = this.value;
-          let dd = fontSet("#fontSelect .selectId dl dd").that[0];
+          let dd = fontSet("#fontSelect .selectFontId dl dd").that[0];
           if (dd === "DD") {
             ddRemove(dd);
           }
-          fontSet("#fontSelect .selectId dl").hide();
+          fontSet("#fontSelect .selectFontId dl").hide();
           if (fontData.length > 0) {
-            fontSet("#fontSelect .selectId dl").show();
-            let sear_1 = new RegExp(val);
+            fontSet("#fontSelect .selectFontId dl").show();
+            let sear_1 = new RegExp(val, "i");
             let judge_1 = false;
-            fontSet("#fontSelect .selectId dl").that[0].innerHTML = "";
+            fontSet("#fontSelect .selectFontId dl").that[0].innerHTML = "";
             fontData.forEach(function (item) {
-              if (sear_1.test(item.name)) {
+              if (sear_1.test(item.ch) || sear_1.test(item.en)) {
                 judge_1 = true;
-                fontSet("#fontSelect .selectId dl").that[0].innerHTML += String(
+                fontSet("#fontSelect .selectFontId dl").that[0].innerHTML += String(
                   `<dd style="font-family:${item.en}!important" value="${item.en}">${item.ch}</dd>`
                 );
               }
             });
             if (!judge_1) {
-              fontSet("#fontSelect .selectId dl").that[0].innerHTML = "<dd>\u6682\u65E0\u6570\u636E</dd>";
+              fontSet("#fontSelect .selectFontId dl").that[0].innerHTML = "<dd>\u6682\u65e0\u60a8\u9700\u8981\u7684\u5b57\u4f53</dd>";
             }
             clickEvent();
           }
         };
 
-        fontSet("#fontSelect .selectId input").that[0].onclick = function (e) {
-          let dd = fontSet("#fontSelect .selectId dl dd").that[0];
+        fontSet("#fontSelect .selectFontId input").that[0].onclick = function (e) {
+          let dd = fontSet("#fontSelect .selectFontId dl dd").that[0];
           if (dd === "DD") {
             ddRemove(dd);
           }
           if (fontData.length === 0) {
-            this.innerHTML = "暂无数据";
+            this.innerHTML = "\u6682\u65e0\u6570\u636e";
           } else {
-            fontSet("#fontSelect .selectId dl").show();
+            fontSet("#fontSelect .selectFontId dl").show();
           }
-          fontSet("#fontSelect .selectId dl").that[0].innerHTML = "";
+          fontSet("#fontSelect .selectFontId dl").that[0].innerHTML = "";
           fontData.sort(function (a, b) {
             return a.en - b.en;
           });
           fontData.forEach(function (item) {
-            fontSet("#fontSelect .selectId dl").that[0].innerHTML += String(
+            fontSet("#fontSelect .selectFontId dl").that[0].innerHTML += String(
               `<dd style="font-family:${item.en}!important" value="${item.en}">${item.ch}</dd>`
             );
           });
@@ -973,13 +1072,13 @@
         })();
 
         function removeFontSelector() {
-          fontSet("#fontSelect .close").that.forEach(function (item) {
+          fontSet("#fontSelect .frclose").that.forEach(function (item) {
             item.onclick = function () {
               ddRemove(this.parentNode);
               let value = this.parentNode.children[1].value;
               let text = this.parentNode.children[0].innerHTML;
               fontData.push(new selector(text, value));
-              if (fontSet("#fontSelect .close").that.length === 0) {
+              if (fontSet("#fontSelect .frclose").that.length === 0) {
                 fontSet("#fontSelect .selector").that[0].parentNode.style.cssText += "display:none;";
               }
             };
@@ -987,8 +1086,8 @@
         }
 
         document.onclick = function (e) {
-          fontSet("#fontSelect .selectId dl").hide();
-          fontSet("#fontSelect .selectId input").that[0].value = "";
+          fontSet("#fontSelect .selectFontId dl").hide();
+          fontSet("#fontSelect .selectFontId input").that[0].value = "";
         };
       },
     };
@@ -999,9 +1098,10 @@
       { ch: "微软雅黑", en: "Microsoft YaHei" },
       { ch: "微软正黑体", en: "Microsoft JhengHei" },
       { ch: "苹方-简", en: "PingFang SC" },
+      { ch: "更纱黑体 SC", en: "Sarasa Gothic SC" },
       { ch: "冬青黑体简", en: "Hiragino Sans GB" },
       { ch: "兰亭黑-简", en: "Lantinghei SC" },
-      { ch: "儷黑 Pro", en: "LiHei Pro Medium" },
+      { ch: "丽黑 Pro", en: "LiHei Pro Medium" },
       { ch: "翩翩体-简", en: "Hanzipen SC" },
       { ch: "手札体-简", en: "Hannotate SC" },
       { ch: "娃娃体-简", en: "Wawati SC" },
@@ -1009,7 +1109,16 @@
       { ch: "行楷-简", en: "Xingkai SC" },
       { ch: "雅痞-简", en: "Yapi SC" },
       { ch: "圆体-简", en: "Yuanti SC" },
+      { ch: "方正兰亭黑", en: "lanLantinghei SC" },
+      { ch: "方正兰亭刊宋", en: "FZLanTingKanSongS" },
+      { ch: "思源黑体", en: "Source Han Sans SC" },
+      { ch: "思源宋体", en: "Source Han Serif SC" },
+      { ch: "文泉驿微米黑", en: "WenQuanYi Micro Hei" },
+      { ch: "文泉驿正黑", en: "WenQuanYi Zen Hei" },
+      { ch: "汉仪旗黑55S", en: "HYQihei 55S" },
+      { ch: "新细明体", en: "PMingLiU" },
       { ch: "华文黑体", en: "STHeiti" },
+      { ch: "华文仿宋", en: "STFangsong" },
       { ch: "华文楷体", en: "STKaiti" },
       { ch: "华文细黑", en: "STXihei" },
       { ch: "华文彩云", en: "STCaiyun" },
@@ -1019,23 +1128,14 @@
       { ch: "华文行楷", en: "STXingkai" },
       { ch: "方正舒体", en: "FZShuTi" },
       { ch: "方正姚体", en: "FZYaoti" },
-      { ch: "思源黑体", en: "Source Han Sans CN" },
-      { ch: "思源宋体", en: "Source Han Serif SC" },
-      { ch: "文泉驿微米黑", en: "WenQuanYi Micro Hei" },
-      { ch: "汉仪旗黑 40S", en: "HYQihei 40S" },
-      { ch: "汉仪旗黑 50S", en: "HYQihei 50S" },
-      { ch: "汉仪旗黑 60S", en: "HYQihei 60S" },
       { ch: "幼圆", en: "YouYuan" },
-      { ch: "楷体", en: "KaiTi" },
-      { ch: "仿宋", en: "FangSong" },
-      { ch: "隶书", en: "LiSu" },
     ].sort()
   );
 
   class isSupportFontFamily {
     constructor() {
       let baseFonts = ["monospace", "sans-serif", "serif"];
-      let testString = "mmmmmmmnnoowwllii测试";
+      let testString = "mmmmmmmmmmmmmlli.这是测试,這是測試";
       let testSize = "72px";
       let h = document.getElementsByTagName("body")[0];
       let s = document.createElement("span");
@@ -1054,7 +1154,7 @@
       function detect(font) {
         let detected = false;
         for (let index in baseFonts) {
-          s.style.fontFamily = font + "," + baseFonts[index];
+          s.style.fontFamily = "'" + font + "'," + baseFonts[index];
           h.appendChild(s);
           let matched = s.offsetWidth !== defaultWidth[baseFonts[index]] || s.offsetHeight !== defaultHeight[baseFonts[index]];
           h.removeChild(s);
@@ -1069,43 +1169,44 @@
   /* define default value */
 
   const defValue = {
-    fontSelect: `"Microsoft YaHei",Arial,Helvetica,sans-serif`,
+    fontSelect: `"Microsoft YaHei",Arial,sans-serif,iconfont,icomoon,FontAwesome,"Material Icons","Material Icons Extended"`,
     fontFace: true,
-    fontStroke: 0.04,
-    fontShadow: 1.0,
-    shadowColor: "#d4d4d4",
+    fontStroke: browser.versions.gecko ? 0.04 : 0.015,
+    fontShadow: browser.versions.webKit ? 2.0 : 1.5,
+    shadowColor: "#7B7B7B",
     fontSmooth: true,
-    fontCSS: `:not(.fa,.mi):not([class*="nav"]):not([class*="icon"]):not([class*="logo"]):not([class*="code"])`,
-    fontEx: `pre *, code *,* input,* textarea,* kbd,* i,* em`,
+    fontCSS: `:not(i):not(em):not([class*="fa"]):not([class*="icon"]):not([class*="logo"]):not([class*="code"])`,
+    fontEx: `* pre,* pre *,* code,* code *,* input,* button,* textarea,* kbd,* i,* em`,
   };
   const feedback = defCon.supportURL ? defCon.supportURL : "https://greasyfork.org/scripts/416688/feedback";
   const CONST = {};
 
+  /* Determine whether the DOM is loaded */
+
+  function addLoadEvent(fn) {
+    document.addEventListener("readystatechange", event => {
+      if (event.target.readyState === "interactive") {
+        fn();
+      } else if (event.target.readyState === "complete") {
+        let sw = document.querySelector("#frsiteWelcome");
+        sw.classList.remove("isactived");
+        debug("//-> DOMs loaded complete!");
+      }
+    });
+  }
+
   /* Start specific operation */
 
   !(async function () {
+    // Rebuild data for update
+    const rebuild = (await GMgetValue("_rebuild_")) || 0;
+    !Number(rebuild) ? (GMdeleteValue("_fonts_set_"), GMdeleteValue("_Exclude_site_"), GMsetValue("_rebuild_", 1)) : debug("Data is rebuild!");
+
     // Get Promise Value
     let temp = await GMgetValue("_fonts_set_");
     let exSite = await GMgetValue("_Exclude_site_");
-    let obj = ["workstation-xi"].sort();
 
-    /* Fixed data error, next versions will remove it. START */
-    /* Temporary */ function isJSON(str) {
-      /* Temporary */ try {
-        /* Temporary */ let obj = JSON.parse(str);
-        /* Temporary */ if (typeof obj === "object" && obj) {
-          /* Temporary */ return true;
-        } /* Temporary */ else {
-          /* Temporary */ return false;
-        } /* Temporary */
-      } /* Temporary */ catch (e) {
-        /* Temporary */ return false;
-      } /* Temporary */
-    } /* Temporary */
-    /* Temporary */ if (isJSON(exSite)) {
-      /* Temporary */ GMsetValue("_Exclude_site_", obj);
-    } /* Temporary */
-    /* Fixed data error, next versions will remove it. END */
+    /* Real-time update data */
 
     if (!temp && !exSite) {
       sessionStorage.setItem("_temp_", 1);
@@ -1116,28 +1217,28 @@
       }, refreshTime);
     }
 
-    if (Number(sessionStorage.getItem("_temp_")) && Number(sessionStorage.getItem("_exSite_"))) {
-      setTimeout(async () => {
-        let dialog = new DialogBox({
+    /* DialogBox for the first visit after upgrading */
+
+    addLoadEvent(async () => {
+      if (Number(sessionStorage.getItem("_temp_")) && Number(sessionStorage.getItem("_exSite_"))) {
+        let frDialog = new frDialogBox({
           trueButtonText: "好，去看看",
           falseButtonText: "不，算了吧",
-          messageText: `<p><span style="font-size:32px;font-weight:900;color:red">您好</span>，这是您首次使用新版的字体渲染脚本，新版脚本可通过脚本菜单进行全局设置，可排除不需要渲染的域名等高级功能，告别旧版需要修改代码的大难题，具体功能敬请试用。</p><p>稍后，将为您打开新版脚本的介绍页面，您需要去看一下吗？</p>`,
+          messageText: `<p><span style="font-size:28px;font-weight:900;color:red">您好</span>，这是您首次使用${defCon.scriptName}的新版本 <span style="font-family:Candara;color:darkorange;font-size:24px;font-weight:900;font-style:italic">V${defCon.curVersion}</span>，新版脚本新增了字体搜索功能、修正了字体阴影渲染造成的模糊问题、重建新的拾色器、优化自由度更高的排除规则等等，具体功能敬请试用。</p><p>稍后，将为您打开新版脚本的新功能帮助文件页面，您需要去看一下吗？</p>`,
           titleText: "温馨提示",
         });
         sessionStorage.clear();
-        if (await dialog.respond()) {
-          window.open(
-            `https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89`,
-            "Guide"
-          );
+        if (await frDialog.respond()) {
+          window.open(`${defCon.guideUrl}`, "Guide");
         }
-        dialog = null;
-      }, 100);
-    }
+        frDialog = null;
+      }
+    });
 
     /* Exclude site */
 
     let siteIndex;
+    let obj = ["workstation-xi"].sort();
     if (!exSite) {
       GMsetValue("_Exclude_site_", obj);
       exSite = obj;
@@ -1148,56 +1249,6 @@
           break;
         }
       }
-    }
-
-    /* Menus Insert */
-
-    try {
-      let Font_Set, Exclude_site, Feed_Back;
-      Font_Set ? GMunregisterMenuCommand(Font_Set) : debug("No Font_Set");
-      Exclude_site ? GMunregisterMenuCommand(Exclude_site) : debug("No Exclude_site");
-      Feed_Back ? GMunregisterMenuCommand(Feed_Back) : debug("No Feed_Back");
-
-      if (window.self === window.top) {
-        if (siteIndex === undefined) {
-          Font_Set = GMregisterMenuCommand("\ufff0\ud83c\udf13 字体渲染设置", () => {
-            document.querySelector(`#${defCon.rndId}`).style = "visibility: visible;";
-          });
-          Exclude_site = GMregisterMenuCommand(`\ufff1\ud83d\udeab 排除渲染 ${location.hostname}`, async () => {
-            exSite.push(location.hostname);
-            GMsetValue("_Exclude_site_", exSite);
-            let dialog = new DialogBox({
-              trueButtonText: "确 定",
-              messageText: "<p>" + location.hostname + " 已<b style='color:red'>禁止</b>字体渲染！</p><p>确定后页面将自动刷新！</p>",
-              titleText: "禁止字体渲染",
-            });
-            if (await dialog.respond()) {
-              dialog = null;
-              location.reload();
-            }
-          });
-        } else {
-          Exclude_site = GMregisterMenuCommand(`\ufff1\ud83c\udf40 重新渲染 ${location.hostname}`, async () => {
-            exSite.splice(siteIndex, 1);
-            GMsetValue("_Exclude_site_", exSite);
-            let dialog = new DialogBox({
-              trueButtonText: "确 定",
-              messageText: "<p>" + location.hostname + " 重新<b style='color:green'>开启</b>字体渲染！</p><p>确定后页面将自动刷新！</p>",
-              titleText: "恢复字体渲染",
-            });
-            if (await dialog.respond()) {
-              dialog = null;
-              location.reload();
-            }
-          });
-        }
-
-        Feed_Back = GMregisterMenuCommand("\ufff9\ud83e\udde1 建议反馈", () => {
-          window.open(feedback, "feedback");
-        });
-      }
-    } catch (e) {
-      error("%c[Error]%c\n%s", "font-weight:bold;color:red", "font-weight:bold;color:darkred", e);
     }
 
     /* Set Default Value & initialize */
@@ -1239,12 +1290,12 @@
     const shadow_r = parseFloat(CONST.fontShadow);
     const shadow_c = CONST.shadowColor;
     if (!isNaN(shadow_r) && shadow_r > 0 && shadow_r <= 8) {
-      shadow = `text-shadow:-1px 1px ${shadow_r}px ${shadow_c},1px 1px ${shadow_r}px ${shadow_c},1px -1px ${shadow_r}px ${shadow_c},-1px -1px ${shadow_r}px ${shadow_c};`;
+      shadow = `text-shadow:0 0 ${shadow_r}px ${shadow_c};`;
     }
     let stroke = "";
     const stroke_r = parseFloat(CONST.fontStroke);
     if (!isNaN(stroke_r) && stroke_r > 0 && stroke_r <= 1.0) {
-      stroke = `-webkit-text-stroke:${stroke_r}px;text-stroke:${stroke_r}px;-webkit-text-fill-color:currentcolor;text-fill-color:currentcolor;`;
+      stroke = `text-stroke:${stroke_r}px currentcolor;-webkit-text-stroke:${stroke_r}px currentcolor;`;
     }
     let smoothing = "";
     const smooth_i = Boolean(CONST.fontSmooth);
@@ -1259,75 +1310,111 @@
     let fontface = "";
     if (CONST.fontFace) {
       fontface = refont
-        ? `@font-face{font-family:"宋体";src:local("${refont}")}@font-face{font-family:"新宋体";src:local("${refont}")}@font-face{font-family:"黑体";src:local("${refont}")}@font-face{font-family:"Microsoft YaHei UI";src:local("${refont}")}@font-face{font-family:"Segoe UI";src:local("${refont}")}@font-face{font-family:"Microsoft YaHei";src:local("${refont}")}@font-face{font-family:"微软雅黑";src:local("${refont}")}@font-face{font-family:"PingFang SC";src:local("${refont}")}@font-face{font-family:Tahoma;src:local("${refont}")}@font-face{font-family:Arial;src:local("${refont}")}@font-face{font-family:Helvetica;src:local("${refont}")}`
+        ? `@font-face{font-family:"宋体";src:local("${refont}")}@font-face{font-family:"黑体";src:local("${refont}")}@font-face{font-family:SimHei;src:local("${refont}")}@font-face{font-family:SimSun;src:local("${refont}")}@font-face{font-family:"serif";src:local("${refont}")}@font-face{font-family:"Microsoft YaHei UI";src:local("${refont}")}@font-face{font-family:"Segoe UI";src:local("${refont}")}@font-face{font-family:"sans-serif";src:local("${refont}")}@font-face{font-family:Tahoma;src:local("${refont}")}@font-face{font-family:Arial;src:local("${refont}")}@font-face{font-family:Helvetica;src:local("${refont}")}`
         : ``;
     }
+    let exclude = "";
     const cssexlude = CONST.fontEx;
-    const exclude = `${cssexlude}{text-stroke:0!important;-webkit-text-stroke:0!important;text-shadow:0 0 0 #fff!important}`;
+    if (cssexlude) {
+      exclude = `${cssexlude}{font-family:iconfont,icomoon,FontAwesome,"Material Icons","Material Icons Extended",arial,sans-serif;text-stroke:initial!important;-webkit-text-stroke:initial!important;text-shadow:initial!important}`;
+    }
 
     const cssfun = CONST.fontCSS;
     let tshadow = "";
     if (siteIndex === undefined) {
-      tshadow = `${exclude}${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontface}`;
+      tshadow = `${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontface}${exclude}`;
     }
-    const fontStyle = `.dialog-box{max-width:400px;color:#444;z-index:9999999;border:2px solid #efefef;-moz-border-radius:24px;border-radius:24px}.dialog-box *,.dialog-box *:hover{text-stroke:0!important;-webkit-text-stroke:0!important;text-shadow:0 0 0 #fff!important}.dialog-box-button--false{background:#d93223;color:#fff;border:1px solid #d93223;-moz-border-radius:6px;border-radius:6px;font-size:14px!important}.dialog-box-button--true{background:#038c5a;color:#fff;border:1px solid #038c5a;-moz-border-radius:6px;border-radius:6px;font-size:14px!important}.dialog-box-button--neutral{background:#777;color:#fff;border:1px solid #777;-moz-border-radius:6px;border-radius:6px;font-size:14px!important}.dialog-box{width:100%;display:block;position:fixed;right:-180px;top:500px;transform:translate(-50%,-50%);background:#fff;-webkit-box-shadow:0 0 10px 0 rgba(0,0,0,.3);-moz-box-shadow:0 0 10px 0 rgba(0,0,0,.3);box-shadow:0 0 10px 0 rgba(0,0,0,.3);border-radius:3px;-moz-border-radius:3px;-webkit-border-radius:3px;overflow:hidden;transition:opacity .3s}.dialog-box-message{color:#444;padding:10px;margin:10px;font-size:16px;font-weight:300}.dialog-box-message p{line-height:160%;margin:5px 0}.dialog-box-title{background:#efefef;margin-top:0;padding:12px;font-size:20px;font-weight:700;width:100%}.dialog-box-button{min-width:20%;letter-spacing:0;text-align:center;cursor:pointer;padding:10px;display:inline-block;border-radius:2px;-moz-border-radius:2px;-webkit-border-radius:2px;margin:0 1%;font-size:12px;font-weight:300;transition:opacity .5s}.dialog-box-button:hover{color:#fff;opacity:.8}.dialog-box-button-container{text-align:right;padding:2.5%;background:#efefef;color:#ffffff;}#color-picker{display:none;min-height:205px;min-width:250px;z-index:999999;margin-top:40px;position:fixed}.picker-wrapper,.slide-wrapper{position:relative;float:left}.picker-indicator,.slide-indicator{position:absolute;left:0;top:0;pointer-events:none}.picker,.slide{cursor:crosshair;float:left}.cp-default{background-color:#d1f2fb;padding:10px;box-shadow:0 0 10px #000;border-radius:6px;float:left}.cp-default .picker{width:200px;height:200px;border:2px solid #222}.cp-default .slide{width:30px;height:200px}.cp-default .slide-wrapper{margin-left:10px}.cp-default .picker-indicator{width:5px;height:5px;border:2px solid #00008b;-moz-border-radius:4px;-o-border-radius:4px;-webkit-border-radius:4px;border-radius:4px;opacity:.5;background-color:#fff}.cp-default .slide-indicator{width:100%;height:10px;left:-4px;opacity:.6;border:4px solid #add8e6;-moz-border-radius:4px;-o-border-radius:4px;-webkit-border-radius:4px;border-radius:4px;background-color:#fff}body #fr-container{background:#f0f6ff;border-radius:6px;-moz-border-radius:6px;position:fixed;top:10px;right:20px}#fr-container *{text-stroke:0!important;-webkit-text-stroke:0!important;text-shadow:0 0 0 #fff!important}#fr-container{width:340px;z-index:9999999;padding:3px 8px;text-align:left;background-color:#fff;color:#333;font-size:16px;font-weight:900;-webkit-transition:all .1s ease-in;transition:all .1s ease-in;}#fr-container strong{display:block;margin-bottom:10px}#fr-container p{display:block;margin:0 0 10px 0;line-height:140%}#fr-container ul li{list-style:none;margin:3px 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:none;float:none;cursor:default}#fr-container fieldset{border:2px groove #67a5df;-moz-border-radius:10px;border-radius:10px;padding:4px 9px 6px 9px;margin:2px;display:block;width:auto;height:auto;min-height:500px}#fr-container legend{line-height:20px;padding:0 8px;margin-bottom:0;font-size:16px;font-weight:700;font-family:"Microsoft YaHei",sans-serif;-webkit-box-sizing:content-box;box-sizing:content-box;width:auto!important;min-width:185px!important}#fr-container fieldset>ul{padding:0;margin:0}#fr-container .setting-title{color:#8b0000}@-webkit-keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.setting-title .Rotation{bottom:auto;top:auto;left:auto;right:auto;-webkit-transform:rotate(360deg);animation:rotation 5s linear infinite;-moz-animation:rotation 5s linear infinite;-webkit-animation:rotation 5s linear infinite;-o-animation:rotation 5s linear infinite}#fontSelect{padding:2px 10px;min-height:80px}#fontFace,#fontSmooth{padding:2px 10px;height:40px;width:calc(100% -10px);min-width:calc(100% -10px)}#shadowColor{padding:2px 10px;min-height:45px;margin:4px width: calc(100% - 10px)}#fontShadow{padding:2px 10px;height:70px}#fontStroke{padding:2px 10px;height:70px}#submitData{padding:2px 10px;height:40px}#submitData button{background-color:#67a5df;color:#fff;padding:5px;font-size:14px;font-weight:400;border:2px solid #6ba7e0;-moz-border-radius:6px;border-radius:6px;width:50px}#submitData .cancel,#submitData .reset{float:left;margin-right:10px}#submitData .fr-submit{float:right}#fontCSS,#fontEx{padding:2px 10px;min-height:110px}#fontCSS textarea,#fontEx textarea{width:100%;max-width:calc(100% - 15px)!important;height:60px;resize:none;border:2px solid #67a5df;-moz-border-radius:6px;border-radius:6px;-webkit-box-sizing:content-box;box-sizing:content-box;padding:5px;font-family:"Fira Code",Monaco,consolas,sans-serif;font-size:14px;font-weight:500;color:#0b5b9c;scrollbar-color:rgba(0,0,0,.6) rgba(0,0,0,.25);scrollbar-width:thin;scrollbar-arrow-color:#fff;scrollbar-face-color:#4c4c4c;scrollbar-highlight-color:#4c4c4c;scrollbar-shadow-color:#4c4c4c;scrollbar-track-color:#bfbfbf;scrollbar-3dlight-color:#4c4c4c;scrollbar-darkshadow-color:#4c4c4c;scrollbar-base-color:#4c4c4c}#fontCSS textarea::-webkit-scrollbar,#fontEx textarea::-webkit-scrollbar{width:5px;height:5px}#fontCSS textarea::-webkit-scrollbar-track，#fontEx textarea::-webkit-scrollbar-track{border-radius:5px;background-color:rgba(0,0,0,.25)}#fontCSS textarea::-webkit-scrollbar-thumb,#fontEx textarea::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(0,0,0,.6)}.fr_tooltip{position:relative}.fr_tooltip .fr_tooltiptext{visibility:hidden;z-index:9999;width:220px;max-width:220px;background-color:#54a2ec;border:2px solid #b8c4ce;font-weight:400;color:#fff;border-radius:6px;-moz-border-radius:6px;padding:10px;position:absolute;font-size:14px;opacity:.9;-moz-opacity:.9;display:none;-webkit-box-sizing:content-box;box-sizing:content-box}.fr_tooltip:hover .fr_tooltiptext{visibility:visible;display:block}.ps1{top:-32px;left:250px}.ps2{top:-20px;left:-250px}.ps4{top:25px}#fontSelect .selector a{font-weight:400;color:#111;text-decoration:none}#fontSelect .label{padding:2px 0;background:#67a5df;border-radius:2px;-moz-border-radius:2px;color:#fff;display:block;line-height:20px;height:24px;margin:2px 5px 2px 0;float:left;-webkit-box-sizing:content-box;box-sizing:content-box;font-weight:400}#fontSelect .label span{padding:5px}#fontSelect .close{padding:1px 2px 5px 2px!important;color:#fff;-webkit-box-sizing:content-box;box-sizing:content-box}#fontSelect .close:hover{background-color:#366694;border-radius:2px;-moz-border-radius:2px;color:tomato}#fontSelect .selectId{width:calc(100% - 42px)}#fontSelect .selectId label{display:block;margin:5px 0}#fontSelect .selectId input{height:36px!important;padding:1px 25px!important;text-indent:0;font-size:16px;width:100%;max-width:calc(100% - 10px);outline-color:#67a5df;border:2px solid #67a5df;border-radius:6px;-moz-border-radius:6px;-webkit-box-sizing:content-box;box-sizing:content-box}#fontSelect .selectId dl{position:fixed;z-index:1000;width:100%;max-width:180px;-webkit-box-sizing:content-box;box-sizing:content-box;background-color:#fff;border:2px solid #67a5df;border-radius:4px;-moz-border-radius:4px;margin:8px 0 0 0;padding:4px 25px;max-height:200px;font-size:18px;overflow-x:hidden;white-space:nowrap}#fontSelect .selectId dl dd{margin:0;padding:5px;font-weight:400}#fontSelect .selectId dl dd:hover{background-color:#67a5df;color:#fff}#selector{width:100%;max-width:100%}#fontSelect .selector{width:100%;max-width:calc(100% - 15px);overflow-y:auto;max-height:60px;border:2px solid #67a5df;border-radius:6px;-moz-border-radius:6px;padding:6px;-webkit-box-sizing:content-box;box-sizing:content-box}.checkbox{display:none!important}.checkbox+label{background-color:#fff;padding:11px 9px;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:58px;height:10px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);-webkit-box-sizing:content-box;box-sizing:content-box;word-wrap:normal!important}.checkbox+label:before{content:' ';position:absolute;background:#fff;top:0;z-index:999;left:0;width:24px;color:#fff;height:32px;border-radius:7px;-moz-border-radius:7px;box-shadow:0 0 1px rgba(0,0,0,.6);}.checkbox+label:after{content:'OFF';position:absolute;top:0;left:28px;font-size:1em;color:#fff;font-weight:700;padding:5px;border-radius:100px;-moz-border-radius:100px;-webkit-box-sizing:content-box;box-sizing:content-box}.checkbox:checked+label{-webkit-box-sizing:content-box;box-sizing:content-box;background:#67a5df;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.checkbox:checked+label:after{content:'ON';left:10px;-webkit-box-sizing:content-box;box-sizing:content-box}.checkbox:checked+label:before{content:' ';position:absolute;z-index:999;left:52px;-webkit-box-sizing:content-box;box-sizing:content-box}#f-face label,#f-face+label:after,#f-face+label:before,#smooth label,#smooth+label:after,#smooth+label:before{-webkit-transition:all .1s ease-in;transition:all .1s ease-in;-webkit-box-sizing:content-box;box-sizing:content-box}#color-picker-show{float:left;display:block;margin-top:-6px}.cpicker{width:32px;height:32px;cursor:pointer;position:relative;border:2px solid #181a25;-moz-border-radius:4px;border-radius:4px;float:left;display:inline-block}.cpicker #color{width:125px;height:32px;text-indent:0;font-size:18px;-webkit-box-sizing:content-box;box-sizing:content-box;font-family:Impact,'Courier New',sans-serif!important;font-weight:400;border:#67a5df 2px solid;-moz-border-radius:4px;border-radius:4px;display:inline-block;padding:0 5px;margin-top:-2px;text-align:center}#fontShadow #shadowSize,#fontStroke #strokeSize{color:#111;width:56px;text-indent:0;margin-bottom:2px;float:right;height:32px;font-size:17px;font-family:Impact,'Courier New',sans-serif!important;border:#67a5df 2px solid;-moz-border-radius:4px;border-radius:4px;margin-right:2px;text-align:center;-webkit-box-sizing:content-box;box-sizing:content-box;padding:0}.progress{margin:2px;width:calc(100% - 10px)}.ProgressBar{background:#f0f0f0;margin:2px;width:250px;box-sizing:border-box;display:flex;align-items:flex-end;box-shadow:0 0 1px 1px rgba(0,0,0,.1) inset}.ProgressLine{width:100%;height:100%;position:relative;border-radius:15px;background:#67a5df}.ProgressLine .btnl{position:absolute;height:100%;right:0;border-radius:50%;font-size:8px;background:#67a5df;border:6px solid #fff;top:50%;transform:translate(6px,-50%);box-sizing:content-box!important;box-shadow:0 0 0 1px rgba(0,0,0,.2);display:flex;justify-content:center;align-items:center}.ProgressLine .btnl .disable{background:#ddd;border-color:#fafafa}.ProgressLine .btnl .loading{display:none;position:absolute;content:'';top:50%;left:50%;border-radius:50%;overflow:hidden;transform:translate(-50%,-50%);background:url(../images/loading1.gif);background-position:center center;background-size:130%;opacity:.5}@keyframes rate{0%{transform:translate(-50%,-50%) rotate(0)}100%{transform:translate(-50%,-50%) rotate(360deg)}}.vertical{top:0!important;left:50%!important;transform:translate(-50%,-6px)!important}.ProgressBar .progressVal{position:absolute;right:0;background:rgba(0,0,0,.4);text-align:center;width:45px;box-sizing:border-box;padding:0 4px;font-size:10px;color:#fff;height:20px;line-height:20px;border-radius:4px;top:-35px;left:50%;transform:translateX(-50%);transition:.5s linear}.ProgressBar .progressVal.bottom{top:auto;bottom:-35px}.ProgressBar .progressVal::after{position:absolute;content:'';border-width:5px 5px 0;border-style:solid;border-color:rgba(0,0,0,.4) transparent transparent;bottom:-5px;left:50%;transform:translateX(-50%)}.ProgressBar .progressVal.bottom::after{bottom:auto;top:-5px;border-width:0 5px 5px;border-style:solid;border-color:transparent transparent rgba(0,0,0,.4)}.ProgressBar .progressVal.left{top:auto;left:-40px}.ProgressBar .progressVal.left::after{top:50%;transform:translateY(-50%);left:auto;right:-5px;bottom:auto;border-width:5px 0 5px 5px;border-style:solid;border-color:transparent transparent transparent rgba(0,0,0,.4)}.ProgressBar .progressVal.right{top:auto;right:-85px;left:auto}.ProgressBar .progressVal.right::after{top:50%;transform:translateY(-50%);right:auto;left:-5px;bottom:auto;border-width:5px 5px 5px 0;border-style:solid;border-color:transparent rgba(0,0,0,.4) transparent transparent}`;
+    const fontStyle = `.frDialog-box{max-width:400px;color:#444;z-index:9999999;border:2px solid #efefef;-moz-border-radius:24px;border-radius:24px}.frDialog-box .frDialog-box-title,.frDialog-box-button,.frDialog-box-button:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important;text-stroke:initial!important}.frDialog-box-button--false,.frDialog-box-button--false:hover{background:#d93223;color:#fff;border:1px solid #d93223;-moz-border-radius:6px;border-radius:6px;font-size:14px!important}.frDialog-box-button--true,.frDialog-box-button--true:hover{background:#038c5a;color:#fff;border:1px solid #038c5a;-moz-border-radius:6px;border-radius:6px;font-size:14px!important}.frDialog-box-button--neutral,.frDialog-box-button--neutral:hover{background:#777;color:#fff;border:1px solid #777;-moz-border-radius:6px;border-radius:6px;font-size:14px!important}.frDialog-box{display:block;overflow:hidden;position:fixed;top:500px;right:-180px;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;width:100%;background:#fff;-webkit-box-shadow:0 0 10px 0 rgba(0,0,0,.3);-moz-box-shadow:0 0 10px 0 rgba(0,0,0,.3);box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .3s;transform:translate(-50%,-50%)}.frDialog-box-message{color:#444;padding:10px;margin:10px;font-size:16px;font-weight:300;text-align:left}.frDialog-box-message p{line-height:160%;margin:5px 0}.frDialog-box-title{background:#efefef;margin-top:0;padding:12px;font-size:20px;font-weight:700;text-align:left;width:100%}.frDialog-box-button{display:inline-block;margin:0 1%;-moz-border-radius:2px;-webkit-border-radius:2px;border-radius:2px;padding:10px;min-width:20%;font-weight:400;text-align:center;letter-spacing:0;transition:opacity .5s;cursor:pointer}.frDialog-box-button:hover{color:#fff;opacity:.8;text-decoration:underline!important}.frDialog-box-button-container{text-align:right;padding:2.5%;background:#efefef;color:#fff}body #fr-container{position:fixed;top:10px;right:20px;-moz-border-radius:6px;border-radius:6px;background:#f0f6ff;-webkit-box-sizing:content-box;box-sizing:content-box}#fr-container *{font-size:16px;font-weight:700;font-family:"Microsoft YaHei",sans-serif;text-shadow:initial!important;-webkit-text-stroke:initial!important;text-stroke:initial!important}#fr-container{width:340px;min-height:70%;z-index:999999;padding:3px 8px;text-align:left;background-color:#fff;color:#333;font-size:16px;font-weight:900;-webkit-transition:all .1s ease-in;transition:all .1s ease-in}#fr-container strong{display:block;margin-bottom:10px}#fr-container ul li{list-style:none;margin:3px 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:none;float:none;cursor:default}#fr-container fieldset{border:2px groove #67a5df;-moz-border-radius:10px;border-radius:10px;padding:4px 9px 6px;margin:2px;display:block;width:auto;height:auto;min-height:500px}#fr-container legend{line-height:20px;padding:0 8px;margin-bottom:0;font-size:16px;font-weight:700;font-family:"Microsoft YaHei",sans-serif;-webkit-box-sizing:content-box;box-sizing:content-box;width:auto!important;min-width:185px!important}#fr-container fieldset>ul{padding:0;margin:0}#fr-container .setting-title{color:#8b0000}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.setting-title .Rotation{width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;-webkit-transform:rotate(360deg);-moz-animation:rotation 5s linear infinite;-webkit-animation:rotation 5s linear infinite;-o-animation:rotation 5s linear infinite;animation:rotation 5s linear infinite}#fontSelect{padding:2px 10px;min-height:80px}#fontFace,#fontSmooth{padding:2px 10px;height:40px;width:calc(100% - 22px);min-width:calc(100% - 22px)}#shadowColor{padding:2px 10px;min-height:45px;margin:4px;width:calc(100% - 10px)}#shadowColor *{-webkit-box-sizing:content-box;box-sizing:content-box}#fr-color-picker-show{float:left;display:block;margin:0}#shadowColor .cpicker{width:32px;height:30px;cursor:pointer;position:relative;border:2px solid #181a25;-moz-border-radius:4px;border-radius:4px;float:left;display:inline-block}#shadowColor .cpicker-2{display:inline-block;width:135px;margin:0 0 0 10px}#shadowColor .cpicker-2 #color{width:135px;height:32px;text-indent:0;font-size:18px;font-weight:400;background:#fafafa;-webkit-box-sizing:content-box;box-sizing:content-box;font-family:Impact,"Courier New",sans-serif!important;font-weight:400;color:#333;border:#67a5df 2px solid;-moz-border-radius:4px;border-radius:4px;display:inline-block;padding:0;margin:0;text-align:center}#fr-color-picker-main{width:220px;height:200px;z-index:999;position:fixed;display:none;margin:10px 0 0 20px;-webkit-box-sizing:content-box;box-sizing:content-box;background-color:#d1f2fb;padding:10px;box-shadow:0 0 10px #000;border-radius:6px}.fr-color-picker,.fr-color-picker *,.fr-color-picker ::after,.fr-color-picker ::before{border:0;margin:0;padding:0;display:block;box-sizing:border-box}.fr-color-picker{background-color:#fff;display:block;min-width:128px;min-height:128px;position:relative}.fr-color-picker>.fr-color-picker-right-bar{border:solid #000 1px;background:linear-gradient(red,#f0f,#00f,#0ff,#0f0,#ff0,red);width:16px;height:calc(100% - 26px);position:absolute;right:12px;top:12px}.fr-color-picker .fr-color-picker-right-bar-picker{position:absolute;width:100%;height:1px}.fr-color-picker .fr-color-picker-right-bar-picker::after,.fr-color-picker .fr-color-picker-right-bar-picker::before{content:"";width:10px;height:7px;position:absolute;background:0 0;border:solid transparent 5px;border-width:3.5px 5px;top:-3px}.fr-color-picker .fr-color-picker-right-bar-picker::before{border-left:solid #404040 5px;left:-6px}.fr-color-picker .fr-color-picker-right-bar-picker::after{border-right:solid #404040 5px;right:-6px}.fr-color-picker>.fr-color-picker-gradients{position:absolute;width:calc(100% - 50px);height:calc(100% - 26px);border:solid #000 1px;left:12px;top:12px}.fr-color-picker>.fr-color-picker-gradients,.fr-color-picker>.fr-color-picker-gradients *{cursor:url(color-picker.cur),crosshair;-webkit-box-sizing:content-box;box-sizing:content-box}.fr-color-picker>.fr-color-picker-gradient-black{background:linear-gradient(rgba(0,0,0,0),#000)}.fr-color-picker>.fr-color-picker-color-block{position:absolute;border:solid #000 1px;background:#fff;width:calc(100% - 104px);max-width:72px;height:18px;left:12px;bottom:8px}.fr-color-picker .fr-color-picker-circle{background-color:transparent;position:absolute}.fr-color-picker .fr-color-picker-circle::before{border-radius:50%;width:11px;height:11px;border:solid #000 1px;background-color:transparent;position:relative;left:-6px;top:-6px;display:block;content:""}.fr-color-picker .fr-color-picker-circle.fr-color-picker-circle-black::before{border-color:#000}.fr-color-picker .fr-color-picker-circle.fr-color-picker-circle-white::before{border-color:#fff}#fontShadow{padding:2px 10px;height:70px}#fontStroke{padding:2px 10px;height:70px}#submitData{padding:2px 10px;height:40px}#submitData button{background-image:initial;background-color:#67a5df;color:#fff;padding:5px;font-size:14px;font-weight:400;border:2px solid #6ba7e0;-moz-border-radius:6px;border-radius:6px;width:50px}#submitData .fr-cancel,#submitData .fr-reset{float:left;margin-right:10px}#submitData .fr-submit{float:right}#fontCSS,#fontEx{padding:2px 10px;min-height:110px}#fontEx textarea{background:#fafafa}#fontCSS textarea,#fontEx textarea{width:100%;max-width:calc(100% - 15px)!important;height:60px;line-height:140%;resize:none;border:2px solid #67a5df;-moz-border-radius:6px;border-radius:6px;-webkit-box-sizing:content-box;box-sizing:content-box;padding:5px;font-family:"Fira Code",Monaco,consolas,sans-serif;font-size:14px;font-weight:500;color:#0b5b9c;scrollbar-color:rgba(0,0,0,.6) rgba(0,0,0,.25);scrollbar-width:thin;scrollbar-arrow-color:#fff;scrollbar-face-color:#4c4c4c;scrollbar-highlight-color:#4c4c4c;scrollbar-shadow-color:#4c4c4c;scrollbar-track-color:#bfbfbf;scrollbar-3dlight-color:#4c4c4c;scrollbar-darkshadow-color:#4c4c4c;scrollbar-base-color:#4c4c4c}#fontCSS textarea::-webkit-scrollbar,#fontEx textarea::-webkit-scrollbar{width:5px;height:5px}#fontCSS textarea::-webkit-scrollbar-track，#fontEx textarea::-webkit-scrollbar-track{border-radius:5px;background-color:rgba(0,0,0,.25)}#fontCSS textarea::-webkit-scrollbar-thumb,#fontEx textarea::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(0,0,0,.6)}.fr_tooltip{position:relative;cursor:help}.fr_tooltip .fr_tooltiptext{display:none;visibility:hidden;position:absolute;z-index:999999;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #b8c4ce;-moz-border-radius:6px;border-radius:6px;padding:10px;width:220px;max-width:220px;font-weight:400;color:#fff;background-color:#54a2ec;-moz-opacity:.9;opacity:.9}.fr_tooltip .fr_tooltiptext p{display:block;margin:0 0 10px;line-height:140%}.fr_tooltip .fr_tooltiptext *{font-size:14px!important}.fr_tooltip:hover .fr_tooltiptext{visibility:visible;display:block}.ps1{top:-32px;left:250px}.ps2{top:5px;left:-250px}.ps4{top:25px}#fontSelect .selector a{font-weight:400;color:#111;text-decoration:none}#fontSelect .label{display:block;float:left;margin:2px 5px 2px 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:initial;-moz-border-radius:2px;border-radius:2px;padding:2px 0;height:24px;font-weight:400;line-height:20px;color:#fff;background:#67a5df}#fontSelect .label span{color:#fff;font-size:16px;font-weight:normal;padding:5px;background:#67a5df}#fontSelect .frclose{padding:5px!important;color:#fff;background:#67a5df;-webkit-box-sizing:content-box;box-sizing:content-box}#fontSelect .frclose:hover{-moz-border-radius:2px;border-radius:2px;color:tomato;background-color:#366694}#fontSelect .selectFontId{width:calc(100% - 42px)}#fontSelect .selectFontId label{display:block;margin:5px 0;color:#333;cursor:initial}#fontSelect .selectFontId input{-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df;-moz-border-radius:6px;border-radius:6px;padding:1px 23px!important;width:100%;max-width:calc(100% - 10px);height:36px!important;font-size:16px;font-weight:700;text-indent:0;background:#fafafa;outline-color:#67a5df}#fontSelect .selectFontId dl{overflow-x:hidden;position:fixed;z-index:1000;margin:8px 0 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df;-moz-border-radius:4px;border-radius:4px;padding:4px 25px;width:100%;max-width:180px;max-height:200px;font-size:18px;white-space:nowrap;background-color:#fff}#fontSelect .selectFontId dl dd{margin:0;padding:5px;font-weight:400;font-size:21px}#fontSelect .selectFontId dl dd:hover{background-color:#67a5df;color:#fff}#selector{width:100%;max-width:100%}#selector label{display:block;cursor:initial;margin:0 0 4px}#selector #stcleaner{margin-left:5px;cursor:pointer}#selector #stcleaner:hover{color:red}#fontSelect .selector{overflow-y:auto;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df;-moz-border-radius:6px;border-radius:6px;padding:6px;width:100%;max-width:calc(100% - 15px);max-height:60px}.checkbox{display:none!important}.checkbox+label{padding:11px 9px;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:58px;height:10px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);-webkit-box-sizing:content-box;box-sizing:content-box;word-wrap:normal!important}.checkbox+label::before{position:absolute;top:0;left:0;z-index:99;-moz-border-radius:7px;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.checkbox+label::after{position:absolute;top:0;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;-moz-border-radius:100px;border-radius:100px;padding:5px;font-size:1em;font-weight:700;color:#fff;content:"OFF"}.checkbox:checked+label{-webkit-box-sizing:content-box;box-sizing:content-box;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.checkbox:checked+label::after{content:"ON";left:10px;-webkit-box-sizing:content-box;box-sizing:content-box}.checkbox:checked+label::before{content:" ";position:absolute;z-index:99;left:52px;-webkit-box-sizing:content-box;box-sizing:content-box}#f-face label,#f-face+label::after,#f-face+label::before,#smooth label,#smooth+label::after,#smooth+label::before{-webkit-transition:all .1s ease-in;transition:all .1s ease-in;-webkit-box-sizing:content-box;box-sizing:content-box}#fontShadow #shadowSize,#fontStroke #strokeSize{color:#111;width:56px;text-indent:0;margin-bottom:2px;float:right;height:32px;font-size:17px;font-weight:400;font-family:Impact,"Courier New",sans-serif!important;border:#67a5df 2px solid;-moz-border-radius:4px;border-radius:4px;margin-right:2px;text-align:center;-webkit-box-sizing:content-box;box-sizing:content-box;padding:0;background:#fafafa}.frProgress{margin:2px;width:calc(100% - 10px)}.frProgressBar{background:#f0f0f0;margin:2px;width:250px;box-sizing:border-box;display:flex;align-items:flex-end;box-shadow:0 0 1px 1px rgba(0,0,0,.1) inset}.frProgressLine{width:100%;height:100%;position:relative;border-radius:15px;background:#67a5df}.frProgressLine .btnll{position:absolute;height:100%;right:0;border-radius:50%;font-size:8px;background:#67a5df;border:6px solid #fff;top:50%;transform:translate(6px,-50%);box-sizing:content-box!important;box-shadow:0 0 0 1px rgba(0,0,0,.2);display:flex;justify-content:center;align-items:center}.frProgressLine .btnll .disable{background:#ddd;border-color:#fafafa}.frProgressLine .btnll .loading{display:none;position:absolute;content:"";top:50%;left:50%;border-radius:50%;overflow:hidden;transform:translate(-50%,-50%);background:url(loading1.gif);background-position:center center;background-size:130%;opacity:.5}@keyframes rate{0%{transform:translate(-50%,-50%) rotate(0)}100%{transform:translate(-50%,-50%) rotate(360deg)}}.vertical{top:0!important;left:50%!important;transform:translate(-50%,-6px)!important}.frProgressBar .frProgressVal{position:absolute;right:0;background:rgba(0,0,0,.4);text-align:center;width:54px;box-sizing:border-box;padding:0 4px;font-size:10px;color:#fff;height:24px;line-height:24px;border-radius:4px;top:-35px;left:50%;transform:translateX(-50%);transition:.5s linear}.frProgressBar .frProgressVal.bottom{top:auto;bottom:-35px}.frProgressBar .frProgressVal::after{position:absolute;content:"";border-width:5px 5px 0;border-style:solid;border-color:rgba(0,0,0,.4) transparent transparent;bottom:-5px;left:50%;transform:translateX(-50%)}.frProgressBar .frProgressVal.bottom::after{bottom:auto;top:-5px;border-width:0 5px 5px;border-style:solid;border-color:transparent transparent rgba(0,0,0,.4)}.frProgressBar .frProgressVal.left{top:auto;left:-40px}.frProgressBar .frProgressVal.left::after{top:50%;transform:translateY(-50%);left:auto;right:-5px;bottom:auto;border-width:5px 0 5px 5px;border-style:solid;border-color:transparent transparent transparent rgba(0,0,0,.4)}.frProgressBar .frProgressVal.right{top:auto;right:-94px;left:auto}.frProgressBar .frProgressVal.right::after{top:50%;transform:translateY(-50%);right:auto;left:-5px;bottom:auto;border-width:5px 5px 5px 0;border-style:solid;border-color:transparent rgba(0,0,0,.4) transparent transparent}.cssreadonly{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent);background-size:50px 50px;background-color:#fff7f7}.cssnotreadonly{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent);background-size:50px 50px;background-color:#f7fff7}.loadings{width:160px;height:160px;position:relative}.loadings::after,.loadings::before{content:"";position:absolute;width:0;height:0;background:#000;border-radius:50%;top:0;left:0;right:0;bottom:0;margin:auto;animation:toBig 1s linear infinite}.loadings::after{animation-delay:.5s}@keyframes toBig{0%{width:0;height:0;opacity:1}100%{width:150px;height:150px;opacity:0}}.frsite-welcome{display:none;justify-content:center;align-items:center;position:fixed;top:10px;right:20px;width:inherit;height:inherit;min-height:75%;padding:3px 8px;border-radius:4px;-webkit-box-sizing:content-box;box-sizing:content-box;z-index:1000;opacity:.65}.frsite-welcome.isactived{display:flex;background:linear-gradient(45deg,#ccc 0,#ccc 25%,transparent 25%,transparent 50%,#ccc 50%,#ccc 75%,transparent 75%,transparent);background-size:50px 50px;background-color:#eee}`;
     const tHTML = String(`
     <div id="fr-container">
+      <div class="frsite-welcome isactived" id="frsiteWelcome">
+        <div class="loadings">\u9875\u9762\u7b49\u5f85\u6570\u636e\u52a0\u8f7d\u4e2d\u2026</div>
+      </div>
       <fieldset id="fr-autopager-field" style="display:block">
         <legend class="setting-title">
           <span style="display:inline-block">${defCon.scriptName}</span>
-          <span style="display:inline-block;position:fixed;cursor:pointer" onclick="window.open('https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89','Guide')">
-            <img class="Rotation" title="帮助文件" height="24" width="24" src="https://img.icons8.com/fluent/100/000000/help.png"/>
+          <span style="display:inline-block;position:fixed;cursor:pointer" onclick="window.open('${defCon.guideUrl}','Guide')">
+            <div class="Rotation" title="帮助文件" height="24" width="24"/>
+              <svg class="icon" style="width:24px;height:24px;vertical-align:middle;fill:currentColor;overflow:hidden;" viewBox="0 0 1053 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M526.628571 1024C245.76 1024 14.628571 795.794286 14.628571 512S242.834286 0 526.628571 0c280.868571 0 512 228.205714 512 512S807.497143 1024 526.628571 1024z m-40.96-266.24c11.702857 8.777143 23.405714 14.628571 35.108572 14.628571 14.628571 0 26.331429-5.851429 35.108571-14.628571 11.702857-8.777143 14.628571-20.48 14.628572-38.034286 0-14.628571-5.851429-26.331429-14.628572-35.108571-8.777143-8.777143-20.48-14.628571-35.108571-14.628572s-26.331429 5.851429-38.034286 14.628572-14.628571 20.48-14.628571 35.108571c2.925714 17.554286 8.777143 29.257143 17.554285 38.034286zM675.84 321.828571c-14.628571-20.48-32.182857-38.034286-58.514286-49.737142-26.331429-11.702857-55.588571-17.554286-87.771428-17.554286-35.108571 0-67.291429 5.851429-93.622857 20.48-26.331429 14.628571-46.811429 32.182857-61.44 55.588571-14.628571 23.405714-20.48 43.885714-20.48 64.365715 0 11.702857 2.925714 20.48 11.702857 29.257142 8.777143 8.777143 20.48 14.628571 32.182857 14.628572 20.48 0 35.108571-11.702857 43.885714-38.034286 8.777143-23.405714 17.554286-43.885714 29.257143-55.588571 11.702857-11.702857 29.257143-17.554286 55.588571-17.554286 20.48 0 38.034286 5.851429 52.662858 17.554286 14.628571 11.702857 20.48 29.257143 20.48 46.811428 0 8.777143-2.925714 17.554286-5.851429 26.331429-5.851429 8.777143-8.777143 14.628571-17.554286 20.48-5.851429 5.851429-17.554286 17.554286-32.182857 29.257143-17.554286 14.628571-29.257143 26.331429-40.96 38.034285-8.777143 11.702857-17.554286 23.405714-23.405714 38.034286-5.851429 14.628571-8.777143 29.257143-8.777143 49.737143 0 14.628571 2.925714 26.331429 11.702857 35.108571 8.777143 8.777143 17.554286 11.702857 29.257143 11.702858 23.405714 0 35.108571-11.702857 40.96-35.108572 2.925714-11.702857 2.925714-17.554286 5.851429-23.405714 0-5.851429 2.925714-8.777143 5.851428-14.628572s5.851429-8.777143 11.702857-14.628571l17.554286-17.554286c29.257143-26.331429 46.811429-43.885714 58.514286-52.662857 11.702857-11.702857 20.48-23.405714 29.257143-38.034286 8.777143-14.628571 11.702857-32.182857 11.702857-49.737142 2.925714-29.257143-2.925714-52.662857-17.554286-73.142858z" fill="#67a5df"></path></svg>
+            </div>
           <span>
         </legend>
         <ul class="setting-main">
           <li id="fontSelect">
             <div class="font-list"></div>
           </li>
-          <li id="fontSmooth">
-            <div style="float:left">字体平滑（默认：开）</div>
-            <div style="float:right;margin:-5px 1px 0 0"><input type="checkbox" id="smooth" class="checkbox" ${CONST.fontSmooth ? "checked" : ""} />
-            <label for="smooth"></label>
-            </div>
-          </li>
           <li id="fontFace">
             <div style="float:left">字体重写（默认：开）</div>
-            <div style="float:right;margin:-5px 1px 0 0"><input type="checkbox" id="f-face" class="checkbox" ${CONST.fontFace ? "checked" : ""} />
-            <label for="f-face"></label>
+            <div style="float:right;margin:-5px 1px 0 0">
+              <input type="checkbox" id="f-face" class="checkbox" ${CONST.fontFace ? "checked" : ""} />
+              <label for="f-face"></label>
+            </div>
+          </li>
+          <li id="fontSmooth">
+            <div style="float:left">字体平滑（默认：开）</div>
+            <div style="float:right;margin:-5px 1px 0 0">
+              <input type="checkbox" id="smooth" class="checkbox" ${CONST.fontSmooth ? "checked" : ""} />
+              <label for="smooth"></label>
             </div>
           </li>
           <li id="fontStroke">
-            <div style="margin-bottom:2px;min-width:calc(100% - 10px);float:left">字体描边尺寸<input id="strokeSize" /></div>
-            <div id="stroke" class="progress"></div>
+            <div style="margin-bottom:2px;min-width:calc(100% - 10px);float:left">
+              字体描边尺寸<input id="strokeSize" />
+            </div>
+            <div id="stroke" class="frProgress"></div>
           </li>
           <li id="fontShadow">
-            <div style="margin-bottom:2px;min-width:calc(100% - 10px);float:left">字体阴影尺寸<input id="shadowSize" /></div>
-            <div id="shadow" class="progress"></div>
+            <div style="margin-bottom:2px;min-width:calc(100% - 10px);float:left">
+              字体阴影尺寸<input id="shadowSize" />
+            </div>
+            <div id="shadow" class="frProgress"></div>
           </li>
           <li id="shadowColor">
-            <div style="float:left;margin-right:10px">阴影颜色<span class="fr_tooltip">\ud83d\udd14<span class="fr_tooltiptext ps4"><p>阴影颜色可通过点击色块激活拾色器进行选择，也可自定义进行填写，填写格式如下：</p><p>HEX: #dbdbdb</p><p>RGB: rgb(133,133,133)</p><p>RGBA: rbga(236,236,236,0.8)</p><p>自身颜色: currentcolor</p><p><b style="color:darkred">注意：</b>格式错误，输入框变红</p></span></span></div>
-            <div class="cpicker" id="color-picker-show"><input id="color" style="margin-left:40px"/></div>
-            <div id="color-picker" class="cp-default">
-                <div class="picker-wrapper">
-                    <div id="picker" class="picker"></div>
-                    <div id="picker-indicator" class="picker-indicator"></div>
-                </div>
-                <div class="slide-wrapper">
-                    <div id="slide" class="slide"></div>
-                    <div id="slide-indicator" class="slide-indicator"></div>
-                </div>
+            <div style="float:left;margin:6px 10px 0 0">阴影颜色
+              <span class="fr_tooltip">\ud83d\udd14
+                <span class="fr_tooltiptext ps4">
+                  <p>阴影颜色可通过点击色块激活拾色器进行选择，也可自定义进行填写，填写格式如下：</p>
+                  <p>HEX: #CECECE 或 #3f7<br/>
+                  RGB: rgb(133,133,133)<br/>
+                  RGBA: rbga(236,236,236,0.8)<br/>
+                  自身颜色: currentcolor 或 表示纯白色的代码:
+                  <em style="color:#CECECE">rgb(255,255,255), rgba(200,54,54,0), #FFFFFF </em></p>
+                  <p><em style="color:darkred">注意：</em>输入数值会自动转化为HEX格式，但颜色值保持一致性，错误格式会被替换为上次保存的数据。</p>
+                </span>
+              </span>
             </div>
+            <div class="cpicker" id="fr-color-picker-show"></div>
+            <div class="cpicker-2"><input id="color"/></div>
+            <div id="fr-color-picker-main"></div>
           </li>
           <li id="fontCSS">
-            <div style="margin-bottom: 6px">需要渲染的元素：<span class="fr_tooltip">\ud83d\udd14<span class="fr_tooltiptext ps4">请将要渲染的元素用逗号分隔，默认为渲染全部元素，排除指定样式。（该选项需要CSS知识，请谨慎填写，样式若失效请重置）</span></span></div>
-            <textarea id="cssfun">${CONST.fontCSS ? CONST.fontCSS : ""}</textarea>
+            <div style="margin-bottom: 6px">排除渲染的CSS样式：
+              <span class="fr_tooltip">\ud83d\udd14
+                <span class="fr_tooltiptext ps4">
+                  <p>默认为排除大多数网站常用的特殊CSS样式，填写格式如下所示：<br/><em style="color:#CECECE"> :not(.fa) </em>或<em style="color:#CECECE"> :not([class*="fa"])</em></p>
+                  <p><em style="color:darkred">该选项为重要参数，默认只读，双击解锁。请尽量不要修改，避免造成样式失效。若失效请重置。</em></p>
+                </span>
+              </span>
+            </div>
+            <textarea id="cssfun" class="cssreadonly" title="重要参数，默认只读，双击解锁。"\
+            ondblclick="this.setAttribute('class','cssnotreadonly');this.title='请谨慎修改该参数！';this.readOnly=false"\
+            readonly>${CONST.fontCSS ? CONST.fontCSS : ""}</textarea>
           </li>
           <li id="fontEx">
-            <div style="margin-bottom: 6px">排除渲染的元素：<span class="fr_tooltip">\ud83d\udd14<span class="fr_tooltiptext ps4">请将排除渲染的元素用逗号分隔，默认为元素标签。（该选项需要CSS知识，请谨慎填写，样式若失效请重置）</span></span></div>
+            <div style="margin-bottom: 6px">排除渲染的HTML标签：
+              <span class="fr_tooltip">\ud83d\udd14
+                <span class="fr_tooltiptext ps4">
+                  <p>请将排除渲染的HTML标签用逗号分隔，默认为元素标签。具体规则请点击顶部旋转的帮助文件图标。</p>
+                  <p><em style="color:darkred">编辑该选项需要CSS知识，如需要排除复杂的样式或标签可通过这里进行添加，样式若混乱请重置。</em></p>
+                </span>
+              </span>
+            </div>
             <textarea id="exclude">${CONST.fontEx ? CONST.fontEx : ""}</textarea>
           </li>
           <li id="submitData">
-            <button class="reset">重置</button><button class="cancel">关闭</button><button class="fr-submit">保存</button>
+            <button class="fr-reset">重置</button>
+            <button class="fr-cancel">关闭</button>
+            <button class="fr-submit">保存</button>
           </li>
         </ul>
       </fieldset>
@@ -1346,7 +1433,7 @@
           document.getElementsByTagName("body")[0].appendChild(div);
           return true;
         } catch (e) {
-          console.log(e);
+          error(`//-> ${e.name}`);
           return false;
         }
       }
@@ -1381,6 +1468,52 @@
       let observer = new MutationObserver(callback);
       observer.observe(document, opts);
 
+      /* Menus Insert */
+
+      let Font_Set, Exclude_site, Feed_Back;
+
+      Font_Set ? GMunregisterMenuCommand(Font_Set) : debug("No Font_Set");
+      Exclude_site ? GMunregisterMenuCommand(Exclude_site) : debug("No Exclude_site");
+      Feed_Back ? GMunregisterMenuCommand(Feed_Back) : debug("No Feed_Back");
+
+      if (window.self === window.top) {
+        if (siteIndex === undefined) {
+          Font_Set = GMregisterMenuCommand("\ufff0\ud83c\udf13 字体渲染设置", () => {
+            document.querySelector(`#${defCon.rndId}`).style = "visibility: visible;";
+          });
+          Exclude_site = GMregisterMenuCommand(`\ufff1\ud83d\udeab 排除渲染 ${location.hostname}`, async () => {
+            exSite.push(location.hostname);
+            GMsetValue("_Exclude_site_", exSite);
+            let frDialog = new frDialogBox({
+              trueButtonText: "确 定",
+              messageText: "<p>" + location.hostname + " 已<b style='color:red'>禁止</b>字体渲染！</p><p>确定后页面将自动刷新！</p>",
+              titleText: "禁止字体渲染",
+            });
+            if (await frDialog.respond()) {
+              frDialog = null;
+              location.reload();
+            }
+          });
+        } else {
+          Exclude_site = GMregisterMenuCommand(`\ufff1\ud83c\udf40 重新渲染 ${location.hostname}`, async () => {
+            exSite.splice(siteIndex, 1);
+            GMsetValue("_Exclude_site_", exSite);
+            let frDialog = new frDialogBox({
+              trueButtonText: "确 定",
+              messageText: "<p>" + location.hostname + " 重新<b style='color:green'>开启</b>字体渲染！</p><p>确定后页面将自动刷新！</p>",
+              titleText: "恢复字体渲染",
+            });
+            if (await frDialog.respond()) {
+              frDialog = null;
+              location.reload();
+            }
+          });
+        }
+        Feed_Back = GMregisterMenuCommand("\ufff9\ud83e\udde1 建议反馈", () => {
+          window.open(feedback, "feedback");
+        });
+      }
+
       /* Fonts selection */
 
       const fontReady = await document.fonts.ready;
@@ -1395,13 +1528,13 @@
       }
       const fontData = [...fontAvailable.values()];
       if (document.querySelector(`#${defCon.rndId}`)) {
-        fontSet("#fontSelect .font-list").fsearch("fontSelect", fontData);
+        fontSet("#fontSelect .font-list").fsearch(fontData);
       }
 
       /* Fonts stroke */
 
       const strock = document.getElementById("strokeSize");
-      const drawStrock = new Progress("#stroke", {
+      const drawStrock = new frProgress("#stroke", {
         val: CONST.fontStroke * 100,
         size: 10,
         precision: 1,
@@ -1413,15 +1546,15 @@
           align: "right",
         },
         getVal: function (e) {
-          strock.value = ((e.val / 100) * e.range).toFixed(e.precision + 2);
+          strock.value = Number((e.val / 100) * e.range) ? ((e.val / 100) * e.range).toFixed(e.precision + 2) : "OFF";
         },
       });
-      drawStrock.onLoad(true, checkdraw(strock, drawStrock, /\d+(?:\.\d{1,3})?/));
+      drawStrock.onLoad(true, checkdraw(strock, drawStrock, /OFF|\d+(?:\.\d{1,3})?/));
 
       /* Fonts shadow */
 
       const shadows = document.getElementById("shadowSize");
-      let drawShadow = new Progress("#shadow", {
+      let drawShadow = new frProgress("#shadow", {
         val: (CONST.fontShadow * 100) / 8,
         size: 10,
         precision: 0,
@@ -1433,50 +1566,24 @@
           align: "right",
         },
         getVal: function (s) {
-          shadows.value = ((s.val / 100) * s.range).toFixed(s.precision + 2);
+          shadows.value = Number((s.val / 100) * s.range) ? ((s.val / 100) * s.range).toFixed(s.precision + 2) : "OFF";
         },
       });
-      drawShadow.onLoad(false, checkdraw(shadows, drawShadow, /\d+(?:\.\d{1,2})?/));
+      drawShadow.onLoad(false, checkdraw(shadows, drawShadow, /OFF|\d+(?:\.\d{1,2})?/));
 
       /* Fonts shadow color selection */
 
-      const cpshow = document.querySelector("#color-picker-show");
-      const cp = document.querySelector("#color-picker");
+      const cpshow = document.querySelector("#fr-color-picker-show");
+      const cp = document.querySelector("#fr-color-picker-main");
       const body = document.querySelector("body");
       const colorshow = document.querySelector("#color");
-      let cpr = new ColorPicker(document.getElementById("slide"), document.getElementById("picker"), function (
-        hex,
-        hsv,
-        rgb,
-        mousePicker,
-        mouseSlide,
-        currentColor
-      ) {
-        currentColor = hex;
-        ColorPicker.positionIndicators(
-          document.getElementById("slide-indicator"),
-          document.getElementById("picker-indicator"),
-          mouseSlide,
-          mousePicker
-        );
-        cpshow.style.backgroundColor = hex;
-        colorshow.value = hex;
-        colorshow.style.border = "2px solid #67a5df";
-        colorshow.style.color = "black";
-      });
-      cpr.setHex(CONST.shadowColor);
-
       const colorReg =
-        /^currentcolor$|^#([A-F0-9]{6}|[a-f0-9]{6}|[A-F0-9]{3}|[a-f0-9]{3})$|^rgba\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*((?!1.[1-9])[0-1](\.[0-9])?)\)$|^rgb\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))\)$/;
-      colorshow.addEventListener("change", function () {
-        if (colorReg.test(this.value.trim())) {
-          cpr.setHex(this.value);
-          colorshow.style.border = "2px solid #67a5df";
-          colorshow.style.color = "black";
-        } else {
-          colorshow.style.border = "2px solid red";
-          colorshow.style.color = "red";
-        }
+        /^currentcolor$|^#([A-F0-9]{6}|[a-f0-9]{6}|[A-F0-9]{3}|[a-f0-9]{3})$|^rgba\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*((?!1.[1-9])[0-1]?(\.[0-9]{1,3})?)\)$|^rgb\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))\)$/;
+
+      const picker = new ColorPicker({
+        dom: cp,
+        value: CONST.shadowColor,
+        def: CONST.shadowColor,
       });
 
       cpshow.addEventListener("click", function (e) {
@@ -1496,42 +1603,49 @@
 
       /* Buttons control */
 
-      document.querySelector("#submitData .reset").addEventListener("click", async () => {
-        let dialog = new DialogBox({
+      document.querySelector("#submitData .fr-reset").addEventListener("click", async () => {
+        let frDialog = new frDialogBox({
           trueButtonText: "确 定",
           falseButtonText: "取 消",
           messageText: `<p>『重置』将初始化您所有的操作，脚本的所有参数将被还原为初始状态，一般是在您配置错误造成页面混乱后才会进行重置。</p><p style="color:red">注意，重置后记得保存数据！</p><p>请确认您是否要进行重置操作？</p>`,
           titleText: "参数重置确认",
         });
 
-        if (await dialog.respond()) {
+        if (await frDialog.respond()) {
           fontSet().fdeleteList(fontData);
-          strock.value = defValue.fontStroke.toFixed(3);
+          strock.value = Number(defValue.fontStroke) ? defValue.fontStroke.toFixed(3) : "OFF";
           drawStrock.updateVal((Number(defValue.fontStroke) * 100) / drawStrock.range);
-          shadows.value = defValue.fontShadow.toFixed(2);
-          drawShadow.updateVal((Number(defValue.fontShadow) * 100) / drawShadow.range);
-          cpr.setHex(defValue.shadowColor);
+          shadows.value = Number(defValue.fontShadow) ? defValue.fontShadow.toFixed(2) : "OFF";
+          drawShadow.updateVal((Number(defValue.fontShadow) * 1e5) / drawShadow.range / 1e3);
+          picker.value = defValue.shadowColor;
           document.querySelector("#smooth").checked = defValue.fontSmooth;
           document.querySelector("#f-face").checked = defValue.fontFace;
           document.querySelector("#cssfun").value = defValue.fontCSS;
           document.querySelector("#exclude").value = defValue.fontEx;
         }
-        dialog = null;
+        frDialog = null;
       });
 
       document.querySelector("#submitData .fr-submit").addEventListener("click", async () => {
-        const fstrock = /[0-9]+(?:\.[0-9]{1,3})?/.test(strock.value) ? strock.value : defValue.fontStroke;
-        const fshadow = /[0-9]+(?:\.[0-9]{1,3})?/.test(shadows.value) ? shadows.value : defValue.fontShadow;
+        const fstrock = /[0-9]+(?:\.[0-9]{1,3})?/.test(strock.value) ? strock.value : strock.value === "OFF" ? "0.000" : defValue.fontStroke;
+        const fshadow = /[0-9]+(?:\.[0-9]{1,3})?/.test(shadows.value) ? shadows.value : shadows.value === "OFF" ? "0.00" : defValue.fontShadow;
         const pickedcolor = colorshow.value;
         const fscolor = colorReg.test(pickedcolor) ? pickedcolor : defValue.shadowColor;
         const fontlists = fontSet().fsearchList("font-name");
-        const fontselect = fontlists.length > 0 ? String(fontlists.toString() + "," + defValue.fontSelect) : defValue.fontSelect;
+        const fontselect =
+          fontlists.length > 0
+            ? fontlists.indexOf("Microsoft YaHei") === 0
+              ? defValue.fontSelect
+              : String(QuotedStr(fontlists.toString()) + defValue.fontSelect)
+            : CONST.fontSelect.indexOf("Microsoft YaHei") === 0
+            ? defValue.fontSelect
+            : CONST.fontSelect.split(",")[0] + "," + defValue.fontSelect;
         const smooth = document.querySelector("#smooth").checked;
         const fontface = document.querySelector("#f-face").checked;
         const fcss = document.querySelector("#cssfun").value;
         const cssfun = fcss ? fcss.toString() : defValue.fontCSS;
         const fex = document.querySelector("#exclude").value;
-        const fontex = fex ? fex.toString() : defValue.fontEx;
+        const fontex = fex.toString();
         if (
           saveDate("_fonts_set_", {
             fontSelect: fontselect,
@@ -1544,32 +1658,31 @@
             fontEx: fontex,
           })
         ) {
-          let dialog = new DialogBox({
+          let frDialog = new frDialogBox({
             trueButtonText: "感谢使用",
             messageText: "<p>您的设置参数已保存！页面将会自动刷新！</p>",
             titleText: "操作完毕",
           });
-
-          if (await dialog.respond()) {
+          if (await frDialog.respond()) {
             document.querySelector(`#${defCon.rndId}`).style = "visibility:hidden;";
-            dialog = null;
+            frDialog = null;
             location.reload();
           }
         } else {
-          let dialog = new DialogBox({
+          let frDialog = new frDialogBox({
             trueButtonText: "反馈问题",
             messageText: "<p>保存过程中发生了错误！</p><p>请收集浏览器信息、脚本插件信息、以及脚本版本后，与作者联系反馈！</p>",
             titleText: "错误报告",
           });
-          if (await dialog.respond()) {
+          if (await frDialog.respond()) {
             document.querySelector(`#${defCon.rndId}`).style = "visibility:hidden;";
             window.open(feedback, "feedback");
           }
-          dialog = null;
+          frDialog = null;
         }
       });
 
-      document.querySelector("#submitData .cancel").addEventListener("click", () => {
+      document.querySelector("#submitData .fr-cancel").addEventListener("click", () => {
         document.querySelector(`#${defCon.rndId}`).style = "display:none";
       });
     } catch (e) {
@@ -1579,14 +1692,14 @@
     /* SYSTEM INFO */
 
     if (siteIndex === undefined) {
-      let reFontFace = "";
+      let reFontFace = "SYSTEM-UI";
       fontCheck.forEach(item => {
         if (item.en.toLowerCase() === refont.toLowerCase()) {
           reFontFace = item.ch + " " + item.en;
         }
       });
       console.info(
-        `%c${defCon.scriptName}\n%c▞ 跨页面数据同步时长：%sms\n▞ 渲染字体：%s\n▞ 字体平滑：%s　▚ 字体重写：%s\n▞ 字体描边：%s　▚ 字体阴影：%s`,
+        `%c${defCon.scriptName}\n%c▞ 跨页面数据实时同步时长：%sms\n▞ 渲染字体：%s\n▞ 字体平滑：%s　▚ 字体重写：%s\n▞ 字体描边：%s　▚ 字体阴影：%s`,
         "line-height:160%;font-weight:bold;font-size:14px;color:red",
         "line-height:180%;font-size:12px;color:teal",
         refreshTime,
@@ -1685,6 +1798,17 @@
         }
       }
       requestAnimationFrame(step);
+    }
+
+    function QuotedStr(str) {
+      let returnStr = "";
+      let strs = str.split(",");
+      for (let s in strs) {
+        if (strs[s] !== "Microsoft YaHei") {
+          returnStr += `"${strs[s]}",`;
+        }
+      }
+      return returnStr;
     }
 
     function saveDate(key, { ...Options }) {
