@@ -1,12 +1,12 @@
 /* jshint esversion: 8 */
 // ==UserScript==
 // @name            字体渲染（自用脚本）
-// @namespace       https://openuserjs.org/users/t3xtf0rm4tgmail.com
-// @version         2021.06.26.2
-// @icon            https://img.icons8.com/ios-filled/50/26e07f/font-style-formatting.png
-// @description     让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
-// @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
+// @version         2021.06.26.3
 // @author          F9y4ng
+// @description     让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
+// @namespace       https://openuserjs.org/scripts/f9y4ng/Font_Rendering_(Customized)
+// @icon            https://img.icons8.com/ios-filled/50/26e07f/font-style-formatting.png
+// @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @include         *
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
@@ -48,7 +48,7 @@
     scriptName: GMinfo.script.name,
     curVersion: GMinfo.script.version,
     supportURL: GMinfo.script.supportURL,
-    guideUrl: "https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89",
+    guideUrl: GMinfo.script.namespace,
     randString: (n, v, r, s = "") => {
       // v: true for only letters.
       let a = "0123456789";
@@ -62,8 +62,92 @@
       return s;
     },
   };
-  defCon.rndClass = defCon.randString(10, true);
-  defCon.rndId = defCon.randString(12, true);
+
+  /* Define random aliases */
+
+  defCon.id = {
+    rndId: defCon.randString(12, true),
+    container: defCon.randString(10, true),
+    field: defCon.randString(9, true),
+    welcome: defCon.randString(8, true),
+    fontList: defCon.randString(8, true),
+    fontFace: defCon.randString(8, true),
+    fontSmooth: defCon.randString(8, true),
+    fontStroke: defCon.randString(8, true),
+    fontShadow: defCon.randString(8, true),
+    shadowColor: defCon.randString(8, true),
+    fontCSS: defCon.randString(8, true),
+    fontEx: defCon.randString(8, true),
+    submit: defCon.randString(8, true),
+    fface: defCon.randString(6, true),
+    smooth: defCon.randString(6, true),
+    strokeSize: defCon.randString(6, true),
+    stroke: defCon.randString(7, true),
+    shadowSize: defCon.randString(6, true),
+    shadow: defCon.randString(7, true),
+    cps: defCon.randString(9, true),
+    cpm: defCon.randString(9, true),
+    color: defCon.randString(7, true),
+    cssfun: defCon.randString(7, true),
+    exclude: defCon.randString(7, true),
+    selector: defCon.randString(9, true),
+    cleaner: defCon.randString(7, true),
+    fontName: defCon.randString(6, true),
+  };
+  defCon.class = {
+    rndClass: defCon.randString(10, true),
+    welcome: defCon.randString(8, true),
+    active: defCon.randString(6, true),
+    loading: defCon.randString(6, true),
+    title: defCon.randString(7, true),
+    rotation: defCon.randString(6, true),
+    main: defCon.randString(7, true),
+    fontList: defCon.randString(7, true),
+    checkbox: defCon.randString(7, true),
+    Progress: defCon.randString(8, true),
+    tooltip: defCon.randString(8, true),
+    tooltiptext: defCon.randString(9, true),
+    ps1: defCon.randString(4, true),
+    ps2: defCon.randString(4, true),
+    ps4: defCon.randString(4, true),
+    colorPicker: defCon.randString(8, true),
+    colorPicker2: defCon.randString(8, true),
+    readonly: defCon.randString(7, true),
+    notreadonly: defCon.randString(7, true),
+    reset: defCon.randString(6, true),
+    cancel: defCon.randString(6, true),
+    submit: defCon.randString(6, true),
+    selector: defCon.randString(9, true),
+    selectFontId: defCon.randString(8, true),
+    close: defCon.randString(6, true),
+    ProgressVal: defCon.randString(7, true),
+    ProgressBar: defCon.randString(7, true),
+    ProgressLine: defCon.randString(7, true),
+    btnl: defCon.randString(5, true),
+    cp: defCon.randString(10, true),
+    cpcb: defCon.randString(6, true),
+    cpcw: defCon.randString(6, true),
+    cprbp: defCon.randString(7, true),
+    cpg: defCon.randString(7, true),
+    cpgc: defCon.randString(6, true),
+    cpgb: defCon.randString(6, true),
+    cpc: defCon.randString(7, true),
+    cprb: defCon.randString(7, true),
+    onload: defCon.randString(6, true),
+    vertical: defCon.randString(7, true),
+    tbbottom: defCon.randString(5, true),
+    tbleft: defCon.randString(5, true),
+    tbright: defCon.randString(5, true),
+    tbdisable: defCon.randString(5, true),
+    db: defCon.randString(9, true),
+    dbbc: defCon.randString(8, true),
+    dbb: defCon.randString(7, true),
+    dbm: defCon.randString(7, true),
+    dbt: defCon.randString(7, true),
+    dbbt: defCon.randString(6, true),
+    dbbf: defCon.randString(6, true),
+    dbbn: defCon.randString(6, true),
+  };
 
   /* GM selector */
 
@@ -277,41 +361,41 @@
       Array.prototype.forEach.call(this.getDOM().children, node => {
         node.remove();
       });
-      addClassName(dom, "fr-color-picker");
+      addClassName(dom, `${defCon.class.cp}`);
 
       const rightBar = cE("div");
-      rightBar.className = "fr-color-picker-right-bar";
+      rightBar.className = `${defCon.class.cprb}`;
       const rightBarPicker = cE("div");
-      rightBarPicker.className = "fr-color-picker-right-bar-picker";
+      rightBarPicker.className = `${defCon.class.cprbp}`;
 
       rightBar.appendChild(rightBarPicker);
 
       const gradientColor = cE("div");
-      gradientColor.className = "fr-color-picker-gradients fr-color-picker-gradient-color";
+      gradientColor.className = `${defCon.class.cpg} ${defCon.class.cpgc}`;
       const gradientBlack = cE("div");
-      gradientBlack.className = "fr-color-picker-gradients fr-color-picker-gradient-black";
+      gradientBlack.className = `${defCon.class.cpg} ${defCon.class.cpgb}`;
       gradientColor.style.background = "linear-gradient(to right,#FFFFFF,#FF0000)";
       const gradientCircle = cE("div");
-      gradientCircle.className = "fr-color-picker-circle";
+      gradientCircle.className = `${defCon.class.cpc}`;
 
       gradientBlack.appendChild(gradientCircle);
       this.getDOM().appendChild(rightBar);
       this.getDOM().appendChild(gradientColor);
       this.getDOM().appendChild(gradientBlack);
 
-      document.querySelector(".cpicker-2 #color").addEventListener("change", () => {
-        let color = document.querySelector(".cpicker-2 #color").value;
+      document.querySelector(`.${defCon.class.colorPicker2} #${defCon.id.color}`).addEventListener("change", () => {
+        let color = document.querySelector(`.${defCon.class.colorPicker2} #${defCon.id.color}`).value;
         this.setValue(color, true);
         this.onchange();
         this.updatePicker();
       });
 
-      this.textInput = document.querySelector(".cpicker-2 #color");
+      this.textInput = document.querySelector(`.${defCon.class.colorPicker2} #${defCon.id.color}`);
       this._gradientBlack = gradientBlack;
       this._gradientColor = gradientColor;
       this._rightBar = rightBar;
       this._rightBarPicker = rightBarPicker;
-      this._colorBlock = document.querySelector("#fr-color-picker-show");
+      this._colorBlock = document.querySelector(`#${defCon.id.cps}`);
 
       this._gradientCircle = gradientCircle;
 
@@ -515,11 +599,11 @@
       this._rightBarPicker.style.top = `${this.height * 100}%`;
       this._gradientColor.style.background = `linear-gradient(to right,#FFFFFF,#${rgbToHex(heightToRgb(this.height))})`;
       if (this.getBrightness() > 152) {
-        addClassName(target, "fr-color-picker-circle-black");
-        removeClassName(target, "fr-color-picker-circle-white");
+        addClassName(target, `${defCon.class.cpcb}`);
+        removeClassName(target, `${defCon.class.cpcw}`);
       } else {
-        removeClassName(target, "fr-color-picker-circle-black");
-        addClassName(target, "fr-color-picker-circle-white");
+        removeClassName(target, `${defCon.class.cpcb}`);
+        addClassName(target, `${defCon.class.cpcw}`);
       }
     }
     get position() {
@@ -572,26 +656,26 @@
 
     _createfrDialog(context) {
       this.frDialog = document.createElement("div");
-      this.frDialog.classList.add("frDialog-box");
+      this.frDialog.classList.add(`${defCon.class.db}`);
 
       this.frDialog.style.opacity = 0;
 
       const title = document.createElement("div");
       title.textContent = this.titleText;
-      title.classList.add("frDialog-box-title");
+      title.classList.add(`${defCon.class.dbt}`);
       this.frDialog.appendChild(title);
 
       const question = document.createElement("div");
       question.innerHTML = this.messageText;
-      question.classList.add("frDialog-box-message");
+      question.classList.add(`${defCon.class.dbm}`);
       this.frDialog.appendChild(question);
 
       const buttonContainer = document.createElement("div");
-      buttonContainer.classList.add("frDialog-box-button-container");
+      buttonContainer.classList.add(`${defCon.class.dbbc}`);
       this.frDialog.appendChild(buttonContainer);
 
       this.trueButton = document.createElement("a");
-      this.trueButton.classList.add("frDialog-box-button", "frDialog-box-button--true");
+      this.trueButton.classList.add(`${defCon.class.dbb}`, `${defCon.class.dbbt}`);
       this.trueButton.textContent = this.trueButtonText;
       this.trueButton.addEventListener("click", function () {
         context._destroy();
@@ -600,7 +684,7 @@
 
       if (this.hasFalse) {
         this.falseButton = document.createElement("a");
-        this.falseButton.classList.add("frDialog-box-button", "frDialog-box-button--false");
+        this.falseButton.classList.add(`${defCon.class.dbb}`, `${defCon.class.dbbf}`);
         this.falseButton.textContent = this.falseButtonText;
         this.falseButton.addEventListener("click", function () {
           context._destroy();
@@ -610,7 +694,7 @@
 
       if (this.hasNeutral) {
         this.neutralButton = document.createElement("a");
-        this.neutralButton.classList.add("frDialog-box-button", "frDialog-box-button--neutral");
+        this.neutralButton.classList.add(`${defCon.class.dbb}`, `${defCon.class.dbbn}`);
         this.neutralButton.textContent = this.neutralButtonText;
         this.neutralButton.addEventListener("click", function () {
           context._destroy();
@@ -717,28 +801,28 @@
       let d = this.btnTip;
       switch (this.direction) {
         case "horizontal":
-          a.classList.add("frProgressBar");
+          a.classList.add(`${defCon.class.ProgressBar}`);
           a.style.height = this.size + "px";
           a.style.width = "100%";
           a.style.borderRadius = this.size / 2 + "px";
           b.appendChild(d);
           break;
         case "vertical":
-          a.classList.add("frProgressBar");
+          a.classList.add(`${defCon.class.ProgressBar}`);
           a.style.width = this.size + "px";
           a.style.height = "100%";
           a.style.borderRadius = this.size / 2 + "px";
-          d.classList.add("vertical");
+          d.classList.add(`${defCon.class.vertical}`);
           b.appendChild(d);
       }
-      d.classList.add("btnll");
+      d.classList.add(`${defCon.class.btnl}`);
       d.style.width = this.size + "px";
       d.style.height = this.size + "px";
-      b.classList.add("frProgressLine");
+      b.classList.add(`${defCon.class.ProgressLine}`);
       b.style.borderRadius = this.size / 2 + "px";
       a.appendChild(b);
       c.appendChild(a);
-      this.drag ? this.Dragdrop() : this.btnTip.classList.add("disable");
+      this.drag ? this.Dragdrop() : this.btnTip.classList.add(`${defCon.class.tbdisable}`);
       (this.tip || typeof this.tip === "object") && this.openTip();
       this.onLoading();
     }
@@ -834,7 +918,7 @@
     openTip() {
       let a = this.btnTip;
       this.tipBox = document.createElement("span");
-      this.tipBox.classList.add("frProgressVal");
+      this.tipBox.classList.add(`${defCon.class.ProgressVal}`);
       this.tipBox.innerText = String(((this.val / 100) * this.range).toFixed(this.precision + 2));
       a.appendChild(this.tipBox);
       this.tip.trigger && this.tipConfig();
@@ -870,19 +954,19 @@
       }
       switch (this.tip.align) {
         case "bottom":
-          this.tipBox.classList.add("bottom");
+          this.tipBox.classList.add(`${defCon.class.tbbottom}`);
           break;
         case "left":
-          this.tipBox.classList.add("left");
+          this.tipBox.classList.add(`${defCon.class.tbleft}`);
           break;
         case "right":
-          this.tipBox.classList.add("right");
+          this.tipBox.classList.add(`${defCon.class.tbright}`);
       }
     }
     onLoading() {
       let a = (this.btnLoading = document.createElement("span"));
       let c = this.btnTip;
-      a.classList.add("loading");
+      a.classList.add(`${defCon.class.onload}`);
       c.appendChild(a);
       a.style.width = c.offsetWidth + "px";
       a.style.height = c.offsetHeight + "px";
@@ -948,15 +1032,15 @@
           return selector;
         })();
 
-        let close = fontSet("#fontSelect .frclose");
+        let close = fontSet(`#${defCon.id.fontList} .${defCon.class.close}`);
         close.that.forEach(function (item) {
           ddRemove(item.parentNode);
           let value = item.parentNode.children[1].value;
           let text = item.parentNode.children[0].innerHTML;
           fontData.push(new selector(text, value));
           fontData.sort();
-          if (fontSet("#fontSelect .frclose").that.length === 0) {
-            fontSet("#fontSelect .selector").that[0].parentNode.style.cssText += "display:none;";
+          if (fontSet(`#${defCon.id.fontList} .${defCon.class.close}`).that.length === 0) {
+            fontSet(`#${defCon.id.fontList} .${defCon.class.selector}`).that[0].parentNode.style.cssText += "display:none;";
           }
         });
 
@@ -972,22 +1056,22 @@
       fsearch: function (fontData) {
         let domId = fontSet(s).that[0];
         let html = String(
-          `<div id="selector"><label>已选择：<span id="stcleaner">[清空]</span></label><div class="selector"></div></div><div class="selectFontId"><label>设置字体，请选择：</label><input type="text" placeholder="输入关键字可检索字体" autocomplete="off"><dl style="display: none;"></dl><span class="fr_tooltip ps1">\ud83d\udd14<span class="fr_tooltiptext ps2"><strong>温馨提示：</strong><p>脚本预载了多种常用的、好看的中文字体，下拉菜单中所罗列的字体是您系统中已安装过的字体，没有安装过则不会显示。</p><p><em style="color:darkred">（注一）</em>如果没有重新选择字体，则使用上一次保存的字体。首次使用默认为微软雅黑字体。</p><p><em style="color:darkred">（注二）</em>输入框可输入关键字进行搜索，支持中文和英文字体名。</p><p><em style="color:darkred">（注三）</em>字体是按您选择的先后顺序进行优先渲染的，所以多选不如之选一个您最想要的。</p></span></span></div>`
+          `<div id="${defCon.id.selector}"><label>已选择：<span id="${defCon.id.cleaner}">[清空]</span></label><div class="${defCon.class.selector}"></div></div><div class="${defCon.class.selectFontId}"><label>设置字体，请选择：</label><input type="text" placeholder="输入关键字可检索字体" autocomplete="off"><dl style="display: none;"></dl><span class="${defCon.class.tooltip} ${defCon.class.ps1}">\ud83d\udd14<span class="${defCon.class.tooltip} ${defCon.class.ps2}"><strong>温馨提示：</strong><p>脚本预载了多种常用的、好看的中文字体，下拉菜单中所罗列的字体是您系统中已安装过的字体，没有安装过则不会显示。</p><p><em style="color:darkred">（注一）</em>如果没有重新选择字体，则使用上一次保存的字体。首次使用默认为微软雅黑字体。</p><p><em style="color:darkred">（注二）</em>输入框可输入关键字进行搜索，支持中文和英文字体名。</p><p><em style="color:darkred">（注三）</em>字体是按您选择的先后顺序进行优先渲染的，所以多选不如之选一个您最想要的。</p></span></span></div>`
         );
         domId.innerHTML = html;
 
-        fontSet("#fontSelect .selector").that[0].parentNode.style.cssText += "display:none;";
+        fontSet(`#${defCon.id.fontList} .${defCon.class.selector}`).that[0].parentNode.style.cssText += "display:none;";
 
         function clickEvent() {
-          fontSet("#fontSelect .selectFontId dl dd").that.forEach(function (item) {
+          fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd`).that.forEach(function (item) {
             item.onclick = function (e) {
               let value = this.attributes.value.value.toString();
               if (value) {
-                fontSet("#fontSelect .selector").that[0].innerHTML += String(
-                  `<a href="javascript:void(0)" class="label"><span style="font-family:${value}!important">${this.innerHTML}</span><input type="hidden" name="font-name" value="${value}"/><span class="frclose" style="font-family:${value}!important">×</span></a>`
+                fontSet(`#${defCon.id.fontList} .${defCon.class.selector}`).that[0].innerHTML += String(
+                  `<a href="javascript:void(0)" class="label"><span style="font-family:${value}!important">${this.innerHTML}</span><input type="hidden" name="${defCon.id.fontName}" value="${value}"/><span class="${defCon.class.close}" style="font-family:${value}!important">×</span></a>`
                 );
-                fontSet(".selector").that[0].parentNode.style.cssText += "display:block;";
-                document.querySelector("#stcleaner").addEventListener("click", () => {
+                fontSet(`.${defCon.class.selector}`).that[0].parentNode.style.cssText += "display:block;";
+                document.querySelector(`#${defCon.id.cleaner}`).addEventListener("click", () => {
                   fontSet().fdeleteList(fontData);
                 });
                 for (let i = 0; i < fontData.length; i++) {
@@ -998,8 +1082,8 @@
                 }
                 removeFontSelector();
               }
-              fontSet(".selectFontId dl").hide();
-              fontSet("#fontSelect .selectFontId input").that[0].value = "";
+              fontSet(`.${defCon.class.selectFontId} dl`).hide();
+              fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`).that[0].value = "";
               e.stopPropagation();
             };
           });
@@ -1012,49 +1096,50 @@
           }
         };
 
-        fontSet("#fontSelect .selectFontId input").that[0].oninput = function () {
+        fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`).that[0].oninput = function () {
           let val = this.value;
-          let dd = fontSet("#fontSelect .selectFontId dl dd").that[0];
+          let dd = fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd`).that[0];
           if (dd === "DD") {
             ddRemove(dd);
           }
-          fontSet("#fontSelect .selectFontId dl").hide();
+          fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`).hide();
           if (fontData.length > 0) {
-            fontSet("#fontSelect .selectFontId dl").show();
+            fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`).show();
             let sear_1 = new RegExp(val, "i");
             let judge_1 = false;
-            fontSet("#fontSelect .selectFontId dl").that[0].innerHTML = "";
+            fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`).that[0].innerHTML = "";
             fontData.forEach(function (item) {
               if (sear_1.test(item.ch) || sear_1.test(item.en)) {
                 judge_1 = true;
-                fontSet("#fontSelect .selectFontId dl").that[0].innerHTML += String(
+                fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`).that[0].innerHTML += String(
                   `<dd style="font-family:${item.en}!important" value="${item.en}">${item.ch}</dd>`
                 );
               }
             });
             if (!judge_1) {
-              fontSet("#fontSelect .selectFontId dl").that[0].innerHTML = "<dd>\u6682\u65e0\u60a8\u9700\u8981\u7684\u5b57\u4f53</dd>";
+              fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`).that[0].innerHTML =
+                "<dd>\u6682\u65e0\u60a8\u9700\u8981\u7684\u5b57\u4f53</dd>";
             }
             clickEvent();
           }
         };
 
-        fontSet("#fontSelect .selectFontId input").that[0].onclick = function (e) {
-          let dd = fontSet("#fontSelect .selectFontId dl dd").that[0];
+        fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`).that[0].onclick = function (e) {
+          let dd = fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd`).that[0];
           if (dd === "DD") {
             ddRemove(dd);
           }
           if (fontData.length === 0) {
             this.innerHTML = "\u6682\u65e0\u6570\u636e";
           } else {
-            fontSet("#fontSelect .selectFontId dl").show();
+            fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`).show();
           }
-          fontSet("#fontSelect .selectFontId dl").that[0].innerHTML = "";
+          fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`).that[0].innerHTML = "";
           fontData.sort(function (a, b) {
             return a.en - b.en;
           });
           fontData.forEach(function (item) {
-            fontSet("#fontSelect .selectFontId dl").that[0].innerHTML += String(
+            fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`).that[0].innerHTML += String(
               `<dd style="font-family:${item.en}!important" value="${item.en}">${item.ch}</dd>`
             );
           });
@@ -1072,22 +1157,22 @@
         })();
 
         function removeFontSelector() {
-          fontSet("#fontSelect .frclose").that.forEach(function (item) {
+          fontSet(`#${defCon.id.fontList} .${defCon.class.close}`).that.forEach(function (item) {
             item.onclick = function () {
               ddRemove(this.parentNode);
               let value = this.parentNode.children[1].value;
               let text = this.parentNode.children[0].innerHTML;
               fontData.push(new selector(text, value));
-              if (fontSet("#fontSelect .frclose").that.length === 0) {
-                fontSet("#fontSelect .selector").that[0].parentNode.style.cssText += "display:none;";
+              if (fontSet(`#${defCon.id.fontList} .${defCon.class.close}`).that.length === 0) {
+                fontSet(`#${defCon.id.fontList} .${defCon.class.selector}`).that[0].parentNode.style.cssText += "display:none;";
               }
             };
           });
         }
 
         document.onclick = function (e) {
-          fontSet("#fontSelect .selectFontId dl").hide();
-          fontSet("#fontSelect .selectFontId input").that[0].value = "";
+          fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`).hide();
+          fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`).that[0].value = "";
         };
       },
     };
@@ -1188,8 +1273,8 @@
       if (event.target.readyState === "interactive") {
         fn();
       } else if (event.target.readyState === "complete") {
-        let sw = document.querySelector("#frsiteWelcome");
-        sw.classList.remove("isactived");
+        let sw = document.querySelector(`#${defCon.id.welcome}`);
+        sw.classList.remove(`${defCon.class.active}`);
         debug("//-> DOMs loaded complete!");
       }
     });
@@ -1324,55 +1409,55 @@
     if (siteIndex === undefined) {
       tshadow = `${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontface}${exclude}`;
     }
-    const fontStyle = `.frDialog-box{max-width:400px;color:#444;z-index:9999999;border:2px solid #efefef;-moz-border-radius:24px;border-radius:24px}.frDialog-box .frDialog-box-title,.frDialog-box-button,.frDialog-box-button:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important;text-stroke:initial!important}.frDialog-box-button--false,.frDialog-box-button--false:hover{background:#d93223;color:#fff;border:1px solid #d93223;-moz-border-radius:6px;border-radius:6px;font-size:14px!important}.frDialog-box-button--true,.frDialog-box-button--true:hover{background:#038c5a;color:#fff;border:1px solid #038c5a;-moz-border-radius:6px;border-radius:6px;font-size:14px!important}.frDialog-box-button--neutral,.frDialog-box-button--neutral:hover{background:#777;color:#fff;border:1px solid #777;-moz-border-radius:6px;border-radius:6px;font-size:14px!important}.frDialog-box{display:block;overflow:hidden;position:fixed;top:500px;right:-180px;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;width:100%;background:#fff;-webkit-box-shadow:0 0 10px 0 rgba(0,0,0,.3);-moz-box-shadow:0 0 10px 0 rgba(0,0,0,.3);box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .3s;transform:translate(-50%,-50%)}.frDialog-box-message{color:#444;padding:10px;margin:10px;font-size:16px;font-weight:300;text-align:left}.frDialog-box-message p{line-height:160%;margin:5px 0}.frDialog-box-title{background:#efefef;margin-top:0;padding:12px;font-size:20px;font-weight:700;text-align:left;width:100%}.frDialog-box-button{display:inline-block;margin:0 1%;-moz-border-radius:2px;-webkit-border-radius:2px;border-radius:2px;padding:10px;min-width:20%;font-weight:400;text-align:center;letter-spacing:0;transition:opacity .5s;cursor:pointer}.frDialog-box-button:hover{color:#fff;opacity:.8;text-decoration:underline!important}.frDialog-box-button-container{text-align:right;padding:2.5%;background:#efefef;color:#fff}body #fr-container{position:fixed;top:10px;right:20px;-moz-border-radius:6px;border-radius:6px;background:#f0f6ff;-webkit-box-sizing:content-box;box-sizing:content-box}#fr-container *{font-size:16px;font-weight:700;font-family:"Microsoft YaHei",sans-serif;text-shadow:initial!important;-webkit-text-stroke:initial!important;text-stroke:initial!important}#fr-container{width:340px;min-height:70%;z-index:999999;padding:3px 8px;text-align:left;background-color:#fff;color:#333;font-size:16px;font-weight:900;-webkit-transition:all .1s ease-in;transition:all .1s ease-in}#fr-container strong{display:block;margin-bottom:10px}#fr-container ul li{list-style:none;margin:3px 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:none;float:none;cursor:default}#fr-container fieldset{border:2px groove #67a5df;-moz-border-radius:10px;border-radius:10px;padding:4px 9px 6px;margin:2px;display:block;width:auto;height:auto;min-height:500px}#fr-container legend{line-height:20px;padding:0 8px;margin-bottom:0;font-size:16px;font-weight:700;font-family:"Microsoft YaHei",sans-serif;-webkit-box-sizing:content-box;box-sizing:content-box;width:auto!important;min-width:185px!important}#fr-container fieldset>ul{padding:0;margin:0}#fr-container .setting-title{color:#8b0000}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.setting-title .Rotation{width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;-webkit-transform:rotate(360deg);-moz-animation:rotation 5s linear infinite;-webkit-animation:rotation 5s linear infinite;-o-animation:rotation 5s linear infinite;animation:rotation 5s linear infinite}#fontSelect{padding:2px 10px;min-height:80px}#fontFace,#fontSmooth{padding:2px 10px;height:40px;width:calc(100% - 22px);min-width:calc(100% - 22px)}#shadowColor{padding:2px 10px;min-height:45px;margin:4px;width:calc(100% - 10px)}#shadowColor *{-webkit-box-sizing:content-box;box-sizing:content-box}#fr-color-picker-show{float:left;display:block;margin:0}#shadowColor .cpicker{width:32px;height:30px;cursor:pointer;position:relative;border:2px solid #181a25;-moz-border-radius:4px;border-radius:4px;float:left;display:inline-block}#shadowColor .cpicker-2{display:inline-block;width:135px;margin:0 0 0 10px}#shadowColor .cpicker-2 #color{width:135px;height:32px;text-indent:0;font-size:18px;font-weight:400;background:#fafafa;-webkit-box-sizing:content-box;box-sizing:content-box;font-family:Impact,"Courier New",sans-serif!important;font-weight:400;color:#333;border:#67a5df 2px solid;-moz-border-radius:4px;border-radius:4px;display:inline-block;padding:0;margin:0;text-align:center}#fr-color-picker-main{width:220px;height:200px;z-index:999;position:fixed;display:none;margin:10px 0 0 20px;-webkit-box-sizing:content-box;box-sizing:content-box;background-color:#d1f2fb;padding:10px;box-shadow:0 0 10px #000;border-radius:6px}.fr-color-picker,.fr-color-picker *,.fr-color-picker ::after,.fr-color-picker ::before{border:0;margin:0;padding:0;display:block;box-sizing:border-box}.fr-color-picker{background-color:#fff;display:block;min-width:128px;min-height:128px;position:relative}.fr-color-picker>.fr-color-picker-right-bar{border:solid #000 1px;background:linear-gradient(red,#f0f,#00f,#0ff,#0f0,#ff0,red);width:16px;height:calc(100% - 26px);position:absolute;right:12px;top:12px}.fr-color-picker .fr-color-picker-right-bar-picker{position:absolute;width:100%;height:1px}.fr-color-picker .fr-color-picker-right-bar-picker::after,.fr-color-picker .fr-color-picker-right-bar-picker::before{content:"";width:10px;height:7px;position:absolute;background:0 0;border:solid transparent 5px;border-width:3.5px 5px;top:-3px}.fr-color-picker .fr-color-picker-right-bar-picker::before{border-left:solid #404040 5px;left:-6px}.fr-color-picker .fr-color-picker-right-bar-picker::after{border-right:solid #404040 5px;right:-6px}.fr-color-picker>.fr-color-picker-gradients{position:absolute;width:calc(100% - 50px);height:calc(100% - 26px);border:solid #000 1px;left:12px;top:12px}.fr-color-picker>.fr-color-picker-gradients,.fr-color-picker>.fr-color-picker-gradients *{cursor:url(color-picker.cur),crosshair;-webkit-box-sizing:content-box;box-sizing:content-box}.fr-color-picker>.fr-color-picker-gradient-black{background:linear-gradient(rgba(0,0,0,0),#000)}.fr-color-picker>.fr-color-picker-color-block{position:absolute;border:solid #000 1px;background:#fff;width:calc(100% - 104px);max-width:72px;height:18px;left:12px;bottom:8px}.fr-color-picker .fr-color-picker-circle{background-color:transparent;position:absolute}.fr-color-picker .fr-color-picker-circle::before{border-radius:50%;width:11px;height:11px;border:solid #000 1px;background-color:transparent;position:relative;left:-6px;top:-6px;display:block;content:""}.fr-color-picker .fr-color-picker-circle.fr-color-picker-circle-black::before{border-color:#000}.fr-color-picker .fr-color-picker-circle.fr-color-picker-circle-white::before{border-color:#fff}#fontShadow{padding:2px 10px;height:70px}#fontStroke{padding:2px 10px;height:70px}#submitData{padding:2px 10px;height:40px}#submitData button{background-image:initial;background-color:#67a5df;color:#fff;padding:5px;font-size:14px;font-weight:400;border:2px solid #6ba7e0;-moz-border-radius:6px;border-radius:6px;width:50px}#submitData .fr-cancel,#submitData .fr-reset{float:left;margin-right:10px}#submitData .fr-submit{float:right}#fontCSS,#fontEx{padding:2px 10px;min-height:110px}#fontEx textarea{background:#fafafa}#fontCSS textarea,#fontEx textarea{width:100%;max-width:calc(100% - 15px)!important;height:60px;line-height:140%;resize:none;border:2px solid #67a5df;-moz-border-radius:6px;border-radius:6px;-webkit-box-sizing:content-box;box-sizing:content-box;padding:5px;font-family:"Fira Code",Monaco,consolas,sans-serif;font-size:14px;font-weight:500;color:#0b5b9c;scrollbar-color:rgba(0,0,0,.6) rgba(0,0,0,.25);scrollbar-width:thin;scrollbar-arrow-color:#fff;scrollbar-face-color:#4c4c4c;scrollbar-highlight-color:#4c4c4c;scrollbar-shadow-color:#4c4c4c;scrollbar-track-color:#bfbfbf;scrollbar-3dlight-color:#4c4c4c;scrollbar-darkshadow-color:#4c4c4c;scrollbar-base-color:#4c4c4c}#fontCSS textarea::-webkit-scrollbar,#fontEx textarea::-webkit-scrollbar{width:5px;height:5px}#fontCSS textarea::-webkit-scrollbar-track，#fontEx textarea::-webkit-scrollbar-track{border-radius:5px;background-color:rgba(0,0,0,.25)}#fontCSS textarea::-webkit-scrollbar-thumb,#fontEx textarea::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(0,0,0,.6)}.fr_tooltip{position:relative;cursor:help}.fr_tooltip .fr_tooltiptext{display:none;visibility:hidden;position:absolute;z-index:999999;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #b8c4ce;-moz-border-radius:6px;border-radius:6px;padding:10px;width:220px;max-width:220px;font-weight:400;color:#fff;background-color:#54a2ec;-moz-opacity:.9;opacity:.9}.fr_tooltip .fr_tooltiptext p{display:block;margin:0 0 10px;line-height:140%}.fr_tooltip .fr_tooltiptext *{font-size:14px!important}.fr_tooltip:hover .fr_tooltiptext{visibility:visible;display:block}.ps1{top:-32px;left:250px}.ps2{top:5px;left:-250px}.ps4{top:25px}#fontSelect .selector a{font-weight:400;color:#111;text-decoration:none}#fontSelect .label{display:block;float:left;margin:2px 5px 2px 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:initial;-moz-border-radius:2px;border-radius:2px;padding:2px 0;height:24px;font-weight:400;line-height:20px;color:#fff;background:#67a5df}#fontSelect .label span{color:#fff;font-size:16px;font-weight:normal;padding:5px;background:#67a5df}#fontSelect .frclose{padding:5px!important;color:#fff;background:#67a5df;-webkit-box-sizing:content-box;box-sizing:content-box}#fontSelect .frclose:hover{-moz-border-radius:2px;border-radius:2px;color:tomato;background-color:#366694}#fontSelect .selectFontId{width:calc(100% - 42px)}#fontSelect .selectFontId label{display:block;margin:5px 0;color:#333;cursor:initial}#fontSelect .selectFontId input{-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df;-moz-border-radius:6px;border-radius:6px;padding:1px 23px!important;width:100%;max-width:calc(100% - 10px);height:36px!important;font-size:16px;font-weight:700;text-indent:0;background:#fafafa;outline-color:#67a5df}#fontSelect .selectFontId dl{overflow-x:hidden;position:fixed;z-index:1000;margin:8px 0 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df;-moz-border-radius:4px;border-radius:4px;padding:4px 25px;width:100%;max-width:180px;max-height:200px;font-size:18px;white-space:nowrap;background-color:#fff}#fontSelect .selectFontId dl dd{margin:0;padding:5px;font-weight:400;font-size:21px}#fontSelect .selectFontId dl dd:hover{background-color:#67a5df;color:#fff}#selector{width:100%;max-width:100%}#selector label{display:block;cursor:initial;margin:0 0 4px}#selector #stcleaner{margin-left:5px;cursor:pointer}#selector #stcleaner:hover{color:red}#fontSelect .selector{overflow-y:auto;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df;-moz-border-radius:6px;border-radius:6px;padding:6px;width:100%;max-width:calc(100% - 15px);max-height:60px}.checkbox{display:none!important}.checkbox+label{padding:11px 9px;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:58px;height:10px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);-webkit-box-sizing:content-box;box-sizing:content-box;word-wrap:normal!important}.checkbox+label::before{position:absolute;top:0;left:0;z-index:99;-moz-border-radius:7px;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.checkbox+label::after{position:absolute;top:0;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;-moz-border-radius:100px;border-radius:100px;padding:5px;font-size:1em;font-weight:700;color:#fff;content:"OFF"}.checkbox:checked+label{-webkit-box-sizing:content-box;box-sizing:content-box;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.checkbox:checked+label::after{content:"ON";left:10px;-webkit-box-sizing:content-box;box-sizing:content-box}.checkbox:checked+label::before{content:" ";position:absolute;z-index:99;left:52px;-webkit-box-sizing:content-box;box-sizing:content-box}#f-face label,#f-face+label::after,#f-face+label::before,#smooth label,#smooth+label::after,#smooth+label::before{-webkit-transition:all .1s ease-in;transition:all .1s ease-in;-webkit-box-sizing:content-box;box-sizing:content-box}#fontShadow #shadowSize,#fontStroke #strokeSize{color:#111;width:56px;text-indent:0;margin-bottom:2px;float:right;height:32px;font-size:17px;font-weight:400;font-family:Impact,"Courier New",sans-serif!important;border:#67a5df 2px solid;-moz-border-radius:4px;border-radius:4px;margin-right:2px;text-align:center;-webkit-box-sizing:content-box;box-sizing:content-box;padding:0;background:#fafafa}.frProgress{margin:2px;width:calc(100% - 10px)}.frProgressBar{background:#f0f0f0;margin:2px;width:250px;box-sizing:border-box;display:flex;align-items:flex-end;box-shadow:0 0 1px 1px rgba(0,0,0,.1) inset}.frProgressLine{width:100%;height:100%;position:relative;border-radius:15px;background:#67a5df}.frProgressLine .btnll{position:absolute;height:100%;right:0;border-radius:50%;font-size:8px;background:#67a5df;border:6px solid #fff;top:50%;transform:translate(6px,-50%);box-sizing:content-box!important;box-shadow:0 0 0 1px rgba(0,0,0,.2);display:flex;justify-content:center;align-items:center}.frProgressLine .btnll .disable{background:#ddd;border-color:#fafafa}.frProgressLine .btnll .loading{display:none;position:absolute;content:"";top:50%;left:50%;border-radius:50%;overflow:hidden;transform:translate(-50%,-50%);background:url(loading1.gif);background-position:center center;background-size:130%;opacity:.5}@keyframes rate{0%{transform:translate(-50%,-50%) rotate(0)}100%{transform:translate(-50%,-50%) rotate(360deg)}}.vertical{top:0!important;left:50%!important;transform:translate(-50%,-6px)!important}.frProgressBar .frProgressVal{position:absolute;right:0;background:rgba(0,0,0,.4);text-align:center;width:54px;box-sizing:border-box;padding:0 4px;font-size:10px;color:#fff;height:24px;line-height:24px;border-radius:4px;top:-35px;left:50%;transform:translateX(-50%);transition:.5s linear}.frProgressBar .frProgressVal.bottom{top:auto;bottom:-35px}.frProgressBar .frProgressVal::after{position:absolute;content:"";border-width:5px 5px 0;border-style:solid;border-color:rgba(0,0,0,.4) transparent transparent;bottom:-5px;left:50%;transform:translateX(-50%)}.frProgressBar .frProgressVal.bottom::after{bottom:auto;top:-5px;border-width:0 5px 5px;border-style:solid;border-color:transparent transparent rgba(0,0,0,.4)}.frProgressBar .frProgressVal.left{top:auto;left:-40px}.frProgressBar .frProgressVal.left::after{top:50%;transform:translateY(-50%);left:auto;right:-5px;bottom:auto;border-width:5px 0 5px 5px;border-style:solid;border-color:transparent transparent transparent rgba(0,0,0,.4)}.frProgressBar .frProgressVal.right{top:auto;right:-94px;left:auto}.frProgressBar .frProgressVal.right::after{top:50%;transform:translateY(-50%);right:auto;left:-5px;bottom:auto;border-width:5px 5px 5px 0;border-style:solid;border-color:transparent rgba(0,0,0,.4) transparent transparent}.cssreadonly{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent);background-size:50px 50px;background-color:#fff7f7}.cssnotreadonly{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent);background-size:50px 50px;background-color:#f7fff7}.loadings{width:160px;height:160px;position:relative}.loadings::after,.loadings::before{content:"";position:absolute;width:0;height:0;background:#000;border-radius:50%;top:0;left:0;right:0;bottom:0;margin:auto;animation:toBig 1s linear infinite}.loadings::after{animation-delay:.5s}@keyframes toBig{0%{width:0;height:0;opacity:1}100%{width:150px;height:150px;opacity:0}}.frsite-welcome{display:none;justify-content:center;align-items:center;position:fixed;top:10px;right:20px;width:inherit;height:inherit;min-height:75%;padding:3px 8px;border-radius:4px;-webkit-box-sizing:content-box;box-sizing:content-box;z-index:1000;opacity:.65}.frsite-welcome.isactived{display:flex;background:linear-gradient(45deg,#ccc 0,#ccc 25%,transparent 25%,transparent 50%,#ccc 50%,#ccc 75%,transparent 75%,transparent);background-size:50px 50px;background-color:#eee}`;
+    const fontStyle = `.${defCon.class.db}{max-width:400px;color:#444;z-index:9999999;border:2px solid #efefef;-moz-border-radius:24px;border-radius:24px}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important;text-stroke:initial!important}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223;color:#fff;border:1px solid #d93223;-moz-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a;color:#fff;border:1px solid #038c5a;-moz-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777;color:#fff;border:1px solid #777;-moz-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:500px;right:-180px;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;width:100%;background:#fff;-webkit-box-shadow:0 0 10px 0 rgba(0,0,0,.3);-moz-box-shadow:0 0 10px 0 rgba(0,0,0,.3);box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .3s;transform:translate(-50%,-50%)}.${defCon.class.dbm}{color:#444;padding:10px;margin:10px;font-size:16px;font-weight:300;text-align:left}.${defCon.class.dbm} p{line-height:160%;margin:5px 0}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px;font-weight:700;text-align:left;width:100%}.${defCon.class.dbb}{display:inline-block;margin:0 1%;-moz-border-radius:2px;-webkit-border-radius:2px;border-radius:2px;padding:10px;min-width:20%;font-weight:400;text-align:center;letter-spacing:0;transition:opacity .5s;cursor:pointer}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;text-decoration:underline!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}body #${defCon.id.container}{position:fixed;top:10px;right:20px;-moz-border-radius:6px;border-radius:6px;background:#f0f6ff;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.container} *{font-size:16px;font-weight:700;font-family:"Microsoft YaHei",sans-serif;text-shadow:initial!important;-webkit-text-stroke:initial!important;text-stroke:initial!important}#${defCon.id.container}{width:340px;min-height:70%;z-index:999999;padding:3px 8px;text-align:left;background-color:#fff;color:#333;font-size:16px;font-weight:900;-webkit-transition:all .1s ease-in;transition:all .1s ease-in}#${defCon.id.container} strong{display:block;margin-bottom:10px}#${defCon.id.container} ul li{list-style:none;margin:3px 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:none;float:none;cursor:default}#${defCon.id.container} fieldset{border:2px groove #67a5df;-moz-border-radius:10px;border-radius:10px;padding:4px 9px 6px;margin:2px;display:block;width:auto;height:auto;min-height:500px}#${defCon.id.container} legend{line-height:20px;padding:0 8px;margin-bottom:0;font-size:16px;font-weight:700;font-family:"Microsoft YaHei",sans-serif;-webkit-box-sizing:content-box;box-sizing:content-box;width:auto!important;min-width:185px!important}#${defCon.id.container} fieldset>ul{padding:0;margin:0}#${defCon.id.container} .${defCon.class.title}{color:#8b0000}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;-webkit-transform:rotate(360deg);-moz-animation:rotation 5s linear infinite;-webkit-animation:rotation 5s linear infinite;-o-animation:rotation 5s linear infinite;animation:rotation 5s linear infinite}#${defCon.id.fontList}{padding:2px 10px;min-height:80px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 22px);min-width:calc(100% - 22px)}#${defCon.id.shadowColor}{padding:2px 10px;min-height:45px;margin:4px;width:calc(100% - 10px)}#${defCon.id.shadowColor} *{-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.cps}{float:left;display:block;margin:0}#${defCon.id.shadowColor} .${defCon.class.colorPicker}{width:32px;height:30px;cursor:pointer;position:relative;border:2px solid #181a25;-moz-border-radius:4px;border-radius:4px;float:left;display:inline-block}#${defCon.id.shadowColor} .${defCon.class.colorPicker2}{display:inline-block;width:135px;margin:0 0 0 10px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2} #${defCon.id.color}{width:135px;height:32px;text-indent:0;font-size:18px;font-weight:400;background:#fafafa;-webkit-box-sizing:content-box;box-sizing:content-box;font-family:Impact,"Courier New",sans-serif!important;font-weight:400;color:#333;border:#67a5df 2px solid;-moz-border-radius:4px;border-radius:4px;display:inline-block;padding:0;margin:0;text-align:center}#${defCon.id.cpm}{width:220px;height:200px;z-index:999;position:fixed;display:none;margin:10px 0 0 20px;-webkit-box-sizing:content-box;box-sizing:content-box;background-color:#d1f2fb;padding:10px;box-shadow:0 0 10px #000;border-radius:6px}.${defCon.class.cp},.${defCon.class.cp} *,.${defCon.class.cp} ::after,.${defCon.class.cp} ::before{border:0;margin:0;padding:0;display:block;box-sizing:border-box}.${defCon.class.cp}{background-color:#fff;display:block;min-width:128px;min-height:128px;position:relative}.${defCon.class.cp}>.${defCon.class.cprb}{border:solid #000 1px;background:linear-gradient(red,#f0f,#00f,#0ff,#0f0,#ff0,red);width:16px;height:calc(100% - 26px);position:absolute;right:12px;top:12px}.${defCon.class.cp} .${defCon.class.cprbp}{position:absolute;width:100%;height:1px}.${defCon.class.cp} .${defCon.class.cprbp}::after,.${defCon.class.cp} .${defCon.class.cprbp}::before{content:"";width:10px;height:7px;position:absolute;background:0 0;border:solid transparent 5px;border-width:3.5px 5px;top:-3px}.${defCon.class.cp} .${defCon.class.cprbp}::before{border-left:solid #404040 5px;left:-6px}.${defCon.class.cp} .${defCon.class.cprbp}::after{border-right:solid #404040 5px;right:-6px}.${defCon.class.cp}>.${defCon.class.cpg}{position:absolute;width:calc(100% - 50px);height:calc(100% - 26px);border:solid #000 1px;left:12px;top:12px}.${defCon.class.cp}>.${defCon.class.cpg},.${defCon.class.cp}>.${defCon.class.cpg} *{cursor:url(color-picker.cur),crosshair;-webkit-box-sizing:content-box;box-sizing:content-box}.${defCon.class.cp}>.${defCon.class.cpgb}{background:linear-gradient(rgba(0,0,0,0),#000)}.${defCon.class.cp}>.${defCon.class.cp}-color-block{position:absolute;border:solid #000 1px;background:#fff;width:calc(100% - 104px);max-width:72px;height:18px;left:12px;bottom:8px}.${defCon.class.cp} .${defCon.class.cpc}{background-color:transparent;position:absolute}.${defCon.class.cp} .${defCon.class.cpc}::before{border-radius:50%;width:11px;height:11px;border:solid #000 1px;background-color:transparent;position:relative;left:-6px;top:-6px;display:block;content:""}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcb}::before{border-color:#000}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcw}::before{border-color:#fff}#${defCon.id.fontShadow}{padding:2px 10px;height:70px}#${defCon.id.fontStroke}{padding:2px 10px;height:70px}#${defCon.id.submit}{padding:2px 10px;height:40px}#${defCon.id.submit} button{background-image:initial;background-color:#67a5df;color:#fff;padding:5px;font-size:14px;font-weight:400;border:2px solid #6ba7e0;-moz-border-radius:6px;border-radius:6px;width:50px}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;min-height:110px}#${defCon.id.fontEx} textarea{background:#fafafa}#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{width:100%;max-width:calc(100% - 15px)!important;height:60px;line-height:140%;resize:none;border:2px solid #67a5df;-moz-border-radius:6px;border-radius:6px;-webkit-box-sizing:content-box;box-sizing:content-box;padding:5px;font-family:"Fira Code",Monaco,consolas,sans-serif;font-size:14px;font-weight:500;color:#0b5b9c;scrollbar-color:rgba(0,0,0,.6) rgba(0,0,0,.25);scrollbar-width:thin;scrollbar-arrow-color:#fff;scrollbar-face-color:#4c4c4c;scrollbar-highlight-color:#4c4c4c;scrollbar-shadow-color:#4c4c4c;scrollbar-track-color:#bfbfbf;scrollbar-3dlight-color:#4c4c4c;scrollbar-darkshadow-color:#4c4c4c;scrollbar-base-color:#4c4c4c}#${defCon.id.fontCSS} textarea::-webkit-scrollbar,#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:5px;height:5px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track，#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{border-radius:5px;background-color:rgba(0,0,0,.25)}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb,#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(0,0,0,.6)}.${defCon.class.tooltip}{position:relative;cursor:help}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;visibility:hidden;position:absolute;z-index:999999;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #b8c4ce;-moz-border-radius:6px;border-radius:6px;padding:10px;width:220px;max-width:220px;font-weight:400;color:#fff;background-color:#54a2ec;-moz-opacity:.9;opacity:.9}.${defCon.class.tooltip} .${defCon.class.tooltip} p{display:block;margin:0 0 10px;line-height:140%}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-size:14px!important}.${defCon.class.tooltip}:hover .${defCon.class.tooltip}{visibility:visible;display:block}.${defCon.class.ps1}{top:-32px;left:250px}.${defCon.class.ps2}{top:5px;left:-250px}.${defCon.class.ps4}{top:25px}#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;color:#111;text-decoration:none}#${defCon.id.fontList} .label{display:block;float:left;margin:2px 5px 2px 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:initial;-moz-border-radius:2px;border-radius:2px;padding:2px 0;height:24px;font-weight:400;line-height:20px;color:#fff;background:#67a5df}#${defCon.id.fontList} .label span{color:#fff;font-size:16px;font-weight:normal;padding:5px;background:#67a5df}#${defCon.id.fontList} .${defCon.class.close}{padding:5px!important;color:#fff;background:#67a5df;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.fontList} .${defCon.class.close}:hover{-moz-border-radius:2px;border-radius:2px;color:tomato;background-color:#366694}#${defCon.id.fontList} .${defCon.class.selectFontId}{width:calc(100% - 42px)}#${defCon.id.fontList} .${defCon.class.selectFontId} label{display:block;margin:5px 0;color:#333;cursor:initial}#${defCon.id.fontList} .${defCon.class.selectFontId} input{-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df;-moz-border-radius:6px;border-radius:6px;padding:1px 23px!important;width:100%;max-width:calc(100% - 10px);height:36px!important;font-size:16px;font-weight:700;text-indent:0;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:8px 0 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df;-moz-border-radius:4px;border-radius:4px;padding:4px 25px;width:100%;max-width:180px;max-height:200px;font-size:18px;white-space:nowrap;background-color:#fff}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{margin:0;padding:5px;font-weight:400;font-size:21px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{background-color:#67a5df;color:#fff}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-y:auto;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df;-moz-border-radius:6px;border-radius:6px;padding:6px;width:100%;max-width:calc(100% - 15px);max-height:60px}.${defCon.class.checkbox}{display:none!important}.${defCon.class.checkbox}+label{padding:11px 9px;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:58px;height:10px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);-webkit-box-sizing:content-box;box-sizing:content-box;word-wrap:normal!important}.${defCon.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;-moz-border-radius:7px;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${defCon.class.checkbox}+label::after{position:absolute;top:0;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;-moz-border-radius:100px;border-radius:100px;padding:5px;font-size:1em;font-weight:700;color:#fff;content:"OFF"}.${defCon.class.checkbox}:checked+label{-webkit-box-sizing:content-box;box-sizing:content-box;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.${defCon.class.checkbox}:checked+label::after{content:"ON";left:10px;-webkit-box-sizing:content-box;box-sizing:content-box}.${defCon.class.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.fface} label,#${defCon.id.fface}+label::after,#${defCon.id.fface}+label::before,#${defCon.id.smooth} label,#${defCon.id.smooth}+label::after,#${defCon.id.smooth}+label::before{-webkit-transition:all .1s ease-in;transition:all .1s ease-in;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.fontShadow} #${defCon.id.shadowSize},#${defCon.id.fontStroke} #${defCon.id.strokeSize}{color:#111;width:56px;text-indent:0;margin-bottom:2px;float:right;height:32px;font-size:17px;font-weight:400;font-family:Impact,"Courier New",sans-serif!important;border:#67a5df 2px solid;-moz-border-radius:4px;border-radius:4px;margin-right:2px;text-align:center;-webkit-box-sizing:content-box;box-sizing:content-box;padding:0;background:#fafafa}.${defCon.class.Progress}{margin:2px;width:calc(100% - 10px)}.${defCon.class.ProgressBar}{background:#f0f0f0;margin:2px;width:250px;box-sizing:border-box;display:flex;align-items:flex-end;box-shadow:0 0 1px 1px rgba(0,0,0,.1) inset}.${defCon.class.ProgressLine}{width:100%;height:100%;position:relative;border-radius:15px;background:#67a5df}.${defCon.class.ProgressLine} .${defCon.class.btnl}{position:absolute;height:100%;right:0;border-radius:50%;font-size:8px;background:#67a5df;border:6px solid #fff;top:50%;transform:translate(6px,-50%);box-sizing:content-box!important;box-shadow:0 0 0 1px rgba(0,0,0,.2);display:flex;justify-content:center;align-items:center}.${defCon.class.ProgressLine} .${defCon.class.btnl} .${defCon.class.tbdisable}{background:#ddd;border-color:#fafafa}.${defCon.class.ProgressLine} .${defCon.class.btnl} .${defCon.class.onload}{display:none;position:absolute;content:"";top:50%;left:50%;border-radius:50%;overflow:hidden;transform:translate(-50%,-50%);background:url(loading1.gif);background-position:center center;background-size:130%;opacity:.5}@keyframes rate{0%{transform:translate(-50%,-50%) rotate(0)}100%{transform:translate(-50%,-50%) rotate(360deg)}}.vertical{top:0!important;left:50%!important;transform:translate(-50%,-6px)!important}.${defCon.class.ProgressBar} .${defCon.class.ProgressVal}{position:absolute;right:0;background:rgba(0,0,0,.4);text-align:center;width:54px;box-sizing:border-box;padding:0 4px;font-size:10px;color:#fff;height:24px;line-height:24px;border-radius:4px;top:-35px;left:50%;transform:translateX(-50%);transition:.5s linear}.${defCon.class.ProgressBar} .${defCon.class.ProgressVal}.${defCon.class.tbbottom}{top:auto;bottom:-35px}.${defCon.class.ProgressBar} .${defCon.class.ProgressVal}::after{position:absolute;content:"";border-width:5px 5px 0;border-style:solid;border-color:rgba(0,0,0,.4) transparent transparent;bottom:-5px;left:50%;transform:translateX(-50%)}.${defCon.class.ProgressBar} .${defCon.class.ProgressVal}.${defCon.class.tbbottom}::after{bottom:auto;top:-5px;border-width:0 5px 5px;border-style:solid;border-color:transparent transparent rgba(0,0,0,.4)}.${defCon.class.ProgressBar} .${defCon.class.ProgressVal}.${defCon.class.tbleft}{top:auto;left:-40px}.${defCon.class.ProgressBar} .${defCon.class.ProgressVal}.${defCon.class.tbleft}::after{top:50%;transform:translateY(-50%);left:auto;right:-5px;bottom:auto;border-width:5px 0 5px 5px;border-style:solid;border-color:transparent transparent transparent rgba(0,0,0,.4)}.${defCon.class.ProgressBar} .${defCon.class.ProgressVal}.${defCon.class.tbright}{top:auto;right:-94px;left:auto}.${defCon.class.ProgressBar} .${defCon.class.ProgressVal}.${defCon.class.tbright}::after{top:50%;transform:translateY(-50%);right:auto;left:-5px;bottom:auto;border-width:5px 5px 5px 0;border-style:solid;border-color:transparent rgba(0,0,0,.4) transparent transparent}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent);background-size:50px 50px;background-color:#fff7f7}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent);background-size:50px 50px;background-color:#f7fff7}.${defCon.class.loading}{width:160px;height:160px;position:relative}.${defCon.class.loading}::after,.${defCon.class.loading}::before{content:"";position:absolute;width:0;height:0;background:#000;border-radius:50%;top:0;left:0;right:0;bottom:0;margin:auto;animation:toBig 1s linear infinite}.${defCon.class.loading}::after{animation-delay:.5s}@keyframes toBig{0%{width:0;height:0;opacity:1}100%{width:150px;height:150px;opacity:0}}.${defCon.class.welcome}{display:none;justify-content:center;align-items:center;position:fixed;top:10px;right:20px;width:inherit;height:inherit;min-height:75%;padding:3px 8px;border-radius:4px;-webkit-box-sizing:content-box;box-sizing:content-box;z-index:1000;opacity:.65}.${defCon.class.welcome} .${defCon.class.active}{display:flex;background:linear-gradient(45deg,#ccc 0,#ccc 25%,transparent 25%,transparent 50%,#ccc 50%,#ccc 75%,transparent 75%,transparent);background-size:50px 50px;background-color:#eee}`;
     const tHTML = String(`
-    <div id="fr-container">
-      <div class="frsite-welcome isactived" id="frsiteWelcome">
-        <div class="loadings">\u9875\u9762\u7b49\u5f85\u6570\u636e\u52a0\u8f7d\u4e2d\u2026</div>
+    <div id="${defCon.id.container}">
+      <div class="${defCon.class.welcome} ${defCon.class.active}" id="${defCon.id.welcome}">
+        <div class="${defCon.class.loading}">\u9875\u9762\u7b49\u5f85\u6570\u636e\u52a0\u8f7d\u4e2d\u2026</div>
       </div>
-      <fieldset id="fr-autopager-field" style="display:block">
-        <legend class="setting-title">
+      <fieldset id="${defCon.id.field}" style="display:block">
+        <legend class="${defCon.class.title}">
           <span style="display:inline-block">${defCon.scriptName}</span>
           <span style="display:inline-block;position:fixed;cursor:pointer" onclick="window.open('${defCon.guideUrl}','Guide')">
-            <div class="Rotation" title="帮助文件" height="24" width="24"/>
-              <svg class="icon" style="width:24px;height:24px;vertical-align:middle;fill:currentColor;overflow:hidden;" viewBox="0 0 1053 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M526.628571 1024C245.76 1024 14.628571 795.794286 14.628571 512S242.834286 0 526.628571 0c280.868571 0 512 228.205714 512 512S807.497143 1024 526.628571 1024z m-40.96-266.24c11.702857 8.777143 23.405714 14.628571 35.108572 14.628571 14.628571 0 26.331429-5.851429 35.108571-14.628571 11.702857-8.777143 14.628571-20.48 14.628572-38.034286 0-14.628571-5.851429-26.331429-14.628572-35.108571-8.777143-8.777143-20.48-14.628571-35.108571-14.628572s-26.331429 5.851429-38.034286 14.628572-14.628571 20.48-14.628571 35.108571c2.925714 17.554286 8.777143 29.257143 17.554285 38.034286zM675.84 321.828571c-14.628571-20.48-32.182857-38.034286-58.514286-49.737142-26.331429-11.702857-55.588571-17.554286-87.771428-17.554286-35.108571 0-67.291429 5.851429-93.622857 20.48-26.331429 14.628571-46.811429 32.182857-61.44 55.588571-14.628571 23.405714-20.48 43.885714-20.48 64.365715 0 11.702857 2.925714 20.48 11.702857 29.257142 8.777143 8.777143 20.48 14.628571 32.182857 14.628572 20.48 0 35.108571-11.702857 43.885714-38.034286 8.777143-23.405714 17.554286-43.885714 29.257143-55.588571 11.702857-11.702857 29.257143-17.554286 55.588571-17.554286 20.48 0 38.034286 5.851429 52.662858 17.554286 14.628571 11.702857 20.48 29.257143 20.48 46.811428 0 8.777143-2.925714 17.554286-5.851429 26.331429-5.851429 8.777143-8.777143 14.628571-17.554286 20.48-5.851429 5.851429-17.554286 17.554286-32.182857 29.257143-17.554286 14.628571-29.257143 26.331429-40.96 38.034285-8.777143 11.702857-17.554286 23.405714-23.405714 38.034286-5.851429 14.628571-8.777143 29.257143-8.777143 49.737143 0 14.628571 2.925714 26.331429 11.702857 35.108571 8.777143 8.777143 17.554286 11.702857 29.257143 11.702858 23.405714 0 35.108571-11.702857 40.96-35.108572 2.925714-11.702857 2.925714-17.554286 5.851429-23.405714 0-5.851429 2.925714-8.777143 5.851428-14.628572s5.851429-8.777143 11.702857-14.628571l17.554286-17.554286c29.257143-26.331429 46.811429-43.885714 58.514286-52.662857 11.702857-11.702857 20.48-23.405714 29.257143-38.034286 8.777143-14.628571 11.702857-32.182857 11.702857-49.737142 2.925714-29.257143-2.925714-52.662857-17.554286-73.142858z" fill="#67a5df"></path></svg>
+            <div class="${defCon.class.rotation}" title="帮助文件" height="24" width="24"/>
+              <svg style="width:24px;height:24px;vertical-align:middle;fill:currentColor;overflow:hidden;" viewBox="0 0 1053 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M526.628571 1024C245.76 1024 14.628571 795.794286 14.628571 512S242.834286 0 526.628571 0c280.868571 0 512 228.205714 512 512S807.497143 1024 526.628571 1024z m-40.96-266.24c11.702857 8.777143 23.405714 14.628571 35.108572 14.628571 14.628571 0 26.331429-5.851429 35.108571-14.628571 11.702857-8.777143 14.628571-20.48 14.628572-38.034286 0-14.628571-5.851429-26.331429-14.628572-35.108571-8.777143-8.777143-20.48-14.628571-35.108571-14.628572s-26.331429 5.851429-38.034286 14.628572-14.628571 20.48-14.628571 35.108571c2.925714 17.554286 8.777143 29.257143 17.554285 38.034286zM675.84 321.828571c-14.628571-20.48-32.182857-38.034286-58.514286-49.737142-26.331429-11.702857-55.588571-17.554286-87.771428-17.554286-35.108571 0-67.291429 5.851429-93.622857 20.48-26.331429 14.628571-46.811429 32.182857-61.44 55.588571-14.628571 23.405714-20.48 43.885714-20.48 64.365715 0 11.702857 2.925714 20.48 11.702857 29.257142 8.777143 8.777143 20.48 14.628571 32.182857 14.628572 20.48 0 35.108571-11.702857 43.885714-38.034286 8.777143-23.405714 17.554286-43.885714 29.257143-55.588571 11.702857-11.702857 29.257143-17.554286 55.588571-17.554286 20.48 0 38.034286 5.851429 52.662858 17.554286 14.628571 11.702857 20.48 29.257143 20.48 46.811428 0 8.777143-2.925714 17.554286-5.851429 26.331429-5.851429 8.777143-8.777143 14.628571-17.554286 20.48-5.851429 5.851429-17.554286 17.554286-32.182857 29.257143-17.554286 14.628571-29.257143 26.331429-40.96 38.034285-8.777143 11.702857-17.554286 23.405714-23.405714 38.034286-5.851429 14.628571-8.777143 29.257143-8.777143 49.737143 0 14.628571 2.925714 26.331429 11.702857 35.108571 8.777143 8.777143 17.554286 11.702857 29.257143 11.702858 23.405714 0 35.108571-11.702857 40.96-35.108572 2.925714-11.702857 2.925714-17.554286 5.851429-23.405714 0-5.851429 2.925714-8.777143 5.851428-14.628572s5.851429-8.777143 11.702857-14.628571l17.554286-17.554286c29.257143-26.331429 46.811429-43.885714 58.514286-52.662857 11.702857-11.702857 20.48-23.405714 29.257143-38.034286 8.777143-14.628571 11.702857-32.182857 11.702857-49.737142 2.925714-29.257143-2.925714-52.662857-17.554286-73.142858z" fill="#67a5df"></path></svg>
             </div>
           <span>
         </legend>
-        <ul class="setting-main">
-          <li id="fontSelect">
-            <div class="font-list"></div>
+        <ul class="${defCon.class.main}">
+          <li id="${defCon.id.fontList}">
+            <div class="${defCon.class.fontList}"></div>
           </li>
-          <li id="fontFace">
+          <li id="${defCon.id.fontFace}">
             <div style="float:left">字体重写（默认：开）</div>
             <div style="float:right;margin:-5px 1px 0 0">
-              <input type="checkbox" id="f-face" class="checkbox" ${CONST.fontFace ? "checked" : ""} />
-              <label for="f-face"></label>
+              <input type="checkbox" id="${defCon.id.fface}" class="${defCon.class.checkbox}" ${CONST.fontFace ? "checked" : ""} />
+              <label for="${defCon.id.fface}"></label>
             </div>
           </li>
-          <li id="fontSmooth">
+          <li id="${defCon.id.fontSmooth}">
             <div style="float:left">字体平滑（默认：开）</div>
             <div style="float:right;margin:-5px 1px 0 0">
-              <input type="checkbox" id="smooth" class="checkbox" ${CONST.fontSmooth ? "checked" : ""} />
-              <label for="smooth"></label>
+              <input type="checkbox" id="${defCon.id.smooth}" class="${defCon.class.checkbox}" ${CONST.fontSmooth ? "checked" : ""} />
+              <label for="${defCon.id.smooth}"></label>
             </div>
           </li>
-          <li id="fontStroke">
+          <li id="${defCon.id.fontStroke}">
             <div style="margin-bottom:2px;min-width:calc(100% - 10px);float:left">
-              字体描边尺寸<input id="strokeSize" />
+              字体描边尺寸<input id="${defCon.id.strokeSize}" />
             </div>
-            <div id="stroke" class="frProgress"></div>
+            <div id="${defCon.id.stroke}" class="${defCon.class.Progress}"></div>
           </li>
-          <li id="fontShadow">
+          <li id="${defCon.id.fontShadow}">
             <div style="margin-bottom:2px;min-width:calc(100% - 10px);float:left">
-              字体阴影尺寸<input id="shadowSize" />
+              字体阴影尺寸<input id="${defCon.id.shadowSize}" />
             </div>
-            <div id="shadow" class="frProgress"></div>
+            <div id="${defCon.id.shadow}" class="${defCon.class.Progress}"></div>
           </li>
-          <li id="shadowColor">
+          <li id="${defCon.id.shadowColor}">
             <div style="float:left;margin:6px 10px 0 0">阴影颜色
-              <span class="fr_tooltip">\ud83d\udd14
-                <span class="fr_tooltiptext ps4">
+              <span class="${defCon.class.tooltip}">\ud83d\udd14
+                <span class="${defCon.class.tooltip} ${defCon.class.ps4}">
                   <p>阴影颜色可通过点击色块激活拾色器进行选择，也可自定义进行填写，填写格式如下：</p>
                   <p>HEX: #CECECE 或 #3f7<br/>
                   RGB: rgb(133,133,133)<br/>
@@ -1383,38 +1468,38 @@
                 </span>
               </span>
             </div>
-            <div class="cpicker" id="fr-color-picker-show"></div>
-            <div class="cpicker-2"><input id="color"/></div>
-            <div id="fr-color-picker-main"></div>
+            <div class="${defCon.class.colorPicker}" id="${defCon.id.cps}"></div>
+            <div class="${defCon.class.colorPicker2}"><input id="${defCon.id.color}"/></div>
+            <div id="${defCon.id.cpm}"></div>
           </li>
-          <li id="fontCSS">
+          <li id="${defCon.id.fontCSS}">
             <div style="margin-bottom: 6px">排除渲染的CSS样式：
-              <span class="fr_tooltip">\ud83d\udd14
-                <span class="fr_tooltiptext ps4">
+              <span class="${defCon.class.tooltip}">\ud83d\udd14
+                <span class="${defCon.class.tooltip} ${defCon.class.ps4}">
                   <p>默认为排除大多数网站常用的特殊CSS样式，填写格式如下所示：<br/><em style="color:#CECECE"> :not(.fa) </em>或<em style="color:#CECECE"> :not([class*="fa"])</em></p>
                   <p><em style="color:darkred">该选项为重要参数，默认只读，双击解锁。请尽量不要修改，避免造成样式失效。若失效请重置。</em></p>
                 </span>
               </span>
             </div>
-            <textarea id="cssfun" class="cssreadonly" title="重要参数，默认只读，双击解锁。"\
-            ondblclick="this.setAttribute('class','cssnotreadonly');this.title='请谨慎修改该参数！';this.readOnly=false"\
+            <textarea id="${defCon.id.cssfun}" class="${defCon.class.readonly}" title="重要参数，默认只读，双击解锁。"\
+            ondblclick="this.setAttribute('class','${defCon.class.notreadonly}');this.title='请谨慎修改该参数！';this.readOnly=false"\
             readonly>${CONST.fontCSS ? CONST.fontCSS : ""}</textarea>
           </li>
-          <li id="fontEx">
+          <li id="${defCon.id.fontEx}">
             <div style="margin-bottom: 6px">排除渲染的HTML标签：
-              <span class="fr_tooltip">\ud83d\udd14
-                <span class="fr_tooltiptext ps4">
+              <span class="${defCon.class.tooltip}">\ud83d\udd14
+                <span class="${defCon.class.tooltip} ${defCon.class.ps4}">
                   <p>请将排除渲染的HTML标签用逗号分隔，默认为元素标签。具体规则请点击顶部旋转的帮助文件图标。</p>
                   <p><em style="color:darkred">编辑该选项需要CSS知识，如需要排除复杂的样式或标签可通过这里进行添加，样式若混乱请重置。</em></p>
                 </span>
               </span>
             </div>
-            <textarea id="exclude">${CONST.fontEx ? CONST.fontEx : ""}</textarea>
+            <textarea id="${defCon.id.exclude}">${CONST.fontEx ? CONST.fontEx : ""}</textarea>
           </li>
-          <li id="submitData">
-            <button class="fr-reset">重置</button>
-            <button class="fr-cancel">关闭</button>
-            <button class="fr-submit">保存</button>
+          <li id="${defCon.id.submit}">
+            <button class="${defCon.class.reset}">重置</button>
+            <button class="${defCon.class.cancel}">关闭</button>
+            <button class="${defCon.class.submit}">保存</button>
           </li>
         </ul>
       </fieldset>
@@ -1424,9 +1509,9 @@
     /* Insert HTML and CSS */
 
     function insertHTML() {
-      if (document.body !== null && document.querySelector(`#${defCon.rndId}`) === null) {
+      if (document.body !== null && document.querySelector(`#${defCon.id.rndId}`) === null) {
         let div = document.createElement("div");
-        div.id = defCon.rndId;
+        div.id = defCon.id.rndId;
         div.style = "visibility:hidden;";
         div.innerHTML = tHTML;
         try {
@@ -1442,10 +1527,10 @@
     function RAF() {
       RAFInterval(
         () => {
-          if (!document.querySelector(`.${defCon.rndClass}`)) {
-            addStyle(tCSS, `${defCon.rndClass}`, "head");
+          if (!document.querySelector(`.${defCon.class.rndClass}`)) {
+            addStyle(tCSS, `${defCon.class.rndClass}`, "head");
           }
-          if (!document.querySelector(`#${defCon.rndId}`)) {
+          if (!document.querySelector(`#${defCon.id.rndId}`)) {
             insertHTML();
           }
         },
@@ -1457,7 +1542,7 @@
     try {
       const callback = mutations => {
         mutations.forEach(mutation => {
-          if (document.querySelector(`#${defCon.rndId}`) && document.querySelector(`.${defCon.rndClass}`)) {
+          if (document.querySelector(`#${defCon.id.rndId}`) && document.querySelector(`.${defCon.class.rndClass}`)) {
             debug(`//-> Already Insert Button & CSS.`);
           } else {
             RAF();
@@ -1479,7 +1564,7 @@
       if (window.self === window.top) {
         if (siteIndex === undefined) {
           Font_Set = GMregisterMenuCommand("\ufff0\ud83c\udf13 字体渲染设置", () => {
-            document.querySelector(`#${defCon.rndId}`).style = "visibility: visible;";
+            document.querySelector(`#${defCon.id.rndId}`).style = "visibility: visible;";
           });
           Exclude_site = GMregisterMenuCommand(`\ufff1\ud83d\udeab 排除渲染 ${location.hostname}`, async () => {
             exSite.push(location.hostname);
@@ -1527,14 +1612,14 @@
         }
       }
       const fontData = [...fontAvailable.values()];
-      if (document.querySelector(`#${defCon.rndId}`)) {
-        fontSet("#fontSelect .font-list").fsearch(fontData);
+      if (document.querySelector(`#${defCon.id.rndId}`)) {
+        fontSet(`#${defCon.id.fontList} .${defCon.class.fontList}`).fsearch(fontData);
       }
 
       /* Fonts stroke */
 
-      const strock = document.getElementById("strokeSize");
-      const drawStrock = new frProgress("#stroke", {
+      const strock = document.getElementById(`${defCon.id.strokeSize}`);
+      const drawStrock = new frProgress(`#${defCon.id.stroke}`, {
         val: CONST.fontStroke * 100,
         size: 10,
         precision: 1,
@@ -1553,8 +1638,8 @@
 
       /* Fonts shadow */
 
-      const shadows = document.getElementById("shadowSize");
-      let drawShadow = new frProgress("#shadow", {
+      const shadows = document.getElementById(`${defCon.id.shadowSize}`);
+      let drawShadow = new frProgress(`#${defCon.id.shadow}`, {
         val: (CONST.fontShadow * 100) / 8,
         size: 10,
         precision: 0,
@@ -1573,10 +1658,10 @@
 
       /* Fonts shadow color selection */
 
-      const cpshow = document.querySelector("#fr-color-picker-show");
-      const cp = document.querySelector("#fr-color-picker-main");
+      const cpshow = document.querySelector(`#${defCon.id.cps}`);
+      const cp = document.querySelector(`#${defCon.id.cpm}`);
       const body = document.querySelector("body");
-      const colorshow = document.querySelector("#color");
+      const colorshow = document.querySelector(`#${defCon.id.color}`);
       const colorReg =
         /^currentcolor$|^#([A-F0-9]{6}|[a-f0-9]{6}|[A-F0-9]{3}|[a-f0-9]{3})$|^rgba\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*((?!1.[1-9])[0-1]?(\.[0-9]{1,3})?)\)$|^rgb\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))\)$/;
 
@@ -1603,7 +1688,7 @@
 
       /* Buttons control */
 
-      document.querySelector("#submitData .fr-reset").addEventListener("click", async () => {
+      document.querySelector(`#${defCon.id.submit} .${defCon.class.reset}`).addEventListener("click", async () => {
         let frDialog = new frDialogBox({
           trueButtonText: "确 定",
           falseButtonText: "取 消",
@@ -1618,20 +1703,20 @@
           shadows.value = Number(defValue.fontShadow) ? defValue.fontShadow.toFixed(2) : "OFF";
           drawShadow.updateVal((Number(defValue.fontShadow) * 1e5) / drawShadow.range / 1e3);
           picker.value = defValue.shadowColor;
-          document.querySelector("#smooth").checked = defValue.fontSmooth;
-          document.querySelector("#f-face").checked = defValue.fontFace;
-          document.querySelector("#cssfun").value = defValue.fontCSS;
-          document.querySelector("#exclude").value = defValue.fontEx;
+          document.querySelector(`#${defCon.id.smooth}`).checked = defValue.fontSmooth;
+          document.querySelector(`#${defCon.id.fface}`).checked = defValue.fontFace;
+          document.querySelector(`#${defCon.id.cssfun}`).value = defValue.fontCSS;
+          document.querySelector(`#${defCon.id.exclude}`).value = defValue.fontEx;
         }
         frDialog = null;
       });
 
-      document.querySelector("#submitData .fr-submit").addEventListener("click", async () => {
+      document.querySelector(`#${defCon.id.submit} .${defCon.class.submit}`).addEventListener("click", async () => {
         const fstrock = /[0-9]+(?:\.[0-9]{1,3})?/.test(strock.value) ? strock.value : strock.value === "OFF" ? "0.000" : defValue.fontStroke;
         const fshadow = /[0-9]+(?:\.[0-9]{1,3})?/.test(shadows.value) ? shadows.value : shadows.value === "OFF" ? "0.00" : defValue.fontShadow;
         const pickedcolor = colorshow.value;
         const fscolor = colorReg.test(pickedcolor) ? pickedcolor : defValue.shadowColor;
-        const fontlists = fontSet().fsearchList("font-name");
+        const fontlists = fontSet().fsearchList(`${defCon.id.fontName}`);
         const fontselect =
           fontlists.length > 0
             ? fontlists.indexOf("Microsoft YaHei") === 0
@@ -1640,11 +1725,11 @@
             : CONST.fontSelect.indexOf("Microsoft YaHei") === 0
             ? defValue.fontSelect
             : CONST.fontSelect.split(",")[0] + "," + defValue.fontSelect;
-        const smooth = document.querySelector("#smooth").checked;
-        const fontface = document.querySelector("#f-face").checked;
-        const fcss = document.querySelector("#cssfun").value;
+        const smooth = document.querySelector(`#${defCon.id.smooth}`).checked;
+        const fontface = document.querySelector(`#${defCon.id.fface}`).checked;
+        const fcss = document.querySelector(`#${defCon.id.cssfun}`).value;
         const cssfun = fcss ? fcss.toString() : defValue.fontCSS;
-        const fex = document.querySelector("#exclude").value;
+        const fex = document.querySelector(`#${defCon.id.exclude}`).value;
         const fontex = fex.toString();
         if (
           saveDate("_fonts_set_", {
@@ -1664,7 +1749,7 @@
             titleText: "操作完毕",
           });
           if (await frDialog.respond()) {
-            document.querySelector(`#${defCon.rndId}`).style = "visibility:hidden;";
+            document.querySelector(`#${defCon.id.rndId}`).style = "visibility:hidden;";
             frDialog = null;
             location.reload();
           }
@@ -1675,15 +1760,15 @@
             titleText: "错误报告",
           });
           if (await frDialog.respond()) {
-            document.querySelector(`#${defCon.rndId}`).style = "visibility:hidden;";
+            document.querySelector(`#${defCon.id.rndId}`).style = "visibility:hidden;";
             window.open(feedback, "feedback");
           }
           frDialog = null;
         }
       });
 
-      document.querySelector("#submitData .fr-cancel").addEventListener("click", () => {
-        document.querySelector(`#${defCon.rndId}`).style = "display:none";
+      document.querySelector(`#${defCon.id.submit} .${defCon.class.cancel}`).addEventListener("click", () => {
+        document.querySelector(`#${defCon.id.rndId}`).style = "display:none";
       });
     } catch (e) {
       error("%c[Error]%c\n%s", "font-weight:bold;color:red", "font-weight:bold;color:darkred", e);

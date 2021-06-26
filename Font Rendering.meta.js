@@ -1,5 +1,6 @@
 // ==UserScript==
-// @version    2021.06.26.2
-// @name    字体渲染（自用脚本）
-// @namespace    https://openuserjs.org/users/t3xtf0rm4tgmail.com
+// @name          字体渲染（自用脚本）
+// @version       2021.06.26.3
+// @author        F9y4ng
+// @namespace     https://openuserjs.org/scripts/f9y4ng/Font_Rendering_(Customized)
 // ==/UserScript==
