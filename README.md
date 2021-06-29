@@ -1,17 +1,27 @@
 # `GreasyFork Scripts`
 
-- ## **Font Rendering.user.js** (`version 2021.06.28.2`)
+- ## **Font Rendering.user.js** (`version 2021.06.29.1`)
 
   简介：让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 
-  > `version 2021.06.28.2`
+  > `version 2021.06.29.1`
 
   重大版本更新，请使用前仔细查看 [**脚本使用说明**](https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89)。```New```
 
   ```text
-  @ 修正预载loading的css错误。
-  @ 修正样式重写规则，解决部分页面字体显示错误的问题。
-  @ 修正Refused to execute inline event handler的错误。
+  ! 本次更新会重置数据，请注意保存您的本地设置数据。
+
+  + 新增字体表字体。
+    思源简黑    `Noto Sans CJK SC`    (Google Version)
+    苹方-简     `PingFangSC-Regular`
+    鸿蒙黑体    `HarmonyOS Sans SC`
+    浪漫雅圆    `LMYY`
+
+    (使用浪漫雅圆，请将字体描边尺寸调整至不低于0.300，以增加字重使字体清晰。)
+
+  @ 修正脚本菜单在部分网站的CSS样式兼容问题。
+  @ 修正在部分网站保存数据时造成数据错误的问题。
+  @ 优化重置操作，彻底恢复所有数据为默认。
   ```
 
 - ## **Google & Baidu Switcher.user.js** (`version 3.2.20210626.2`)
