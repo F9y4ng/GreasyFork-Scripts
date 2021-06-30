@@ -1,7 +1,7 @@
-/* jshint esversion: 8 */
+/* jshint esversion: 9 */
 // ==UserScript==
 // @name            字体渲染（自用脚本）
-// @version         2021.06.29.2
+// @version         2021.06.30.1
 // @author          F9y4ng
 // @description     让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @namespace       https://openuserjs.org/scripts/f9y4ng/Font_Rendering_(Customized)
@@ -1192,10 +1192,11 @@
       { ch: "微软正黑体", en: "Microsoft JhengHei" },
       { ch: "苹方 简", en: "PingFang SC" },
       { ch: "苹方-简", en: "PingFangSC-Regular" },
-      { ch: "更纱黑体", en: "Sarasa Gothic SC" },
+      { ch: "更纱黑体 SC", en: "Sarasa Gothic SC" },
       { ch: "冬青黑体简", en: "Hiragino Sans GB" },
       { ch: "兰亭黑-简", en: "Lantinghei SC" },
-      { ch: "丽黑 Pro", en: "LiHei Pro Medium" },
+      { ch: "儷黑 Pro", en: "LiHei Pro Medium" },
+      { ch: "蘋果儷中黑", en: "Apple LiGothic Medium" },
       { ch: "鸿蒙黑体", en: "HarmonyOS Sans SC" },
       { ch: "浪漫雅圆", en: "LMYY" },
       { ch: "思源黑体", en: "Source Han Sans SC" },
@@ -1229,7 +1230,7 @@
   class isSupportFontFamily {
     constructor() {
       let baseFonts = ["monospace", "sans-serif", "serif"];
-      let testString = "mmmmmmmmmmmmmlli.这是测试,這是測試";
+      let testString = "wwwwwwwmmmmmmmllooii.这是测试，這是測試。";
       let testSize = "72px";
       let h = document.getElementsByTagName("body")[0];
       let s = document.createElement("span");
@@ -1533,18 +1534,26 @@
     /* Insert HTML and CSS */
 
     function insertHTML() {
-      if (document.body !== null && document.querySelector(`#${defCon.id.rndId}`) === null) {
-        let div = document.createElement("div");
-        div.id = defCon.id.rndId;
-        div.style = "visibility:hidden;";
-        div.innerHTML = tHTML;
+      if (document.body && !document.querySelector(`#${defCon.id.rndId}`)) {
         try {
+          let div = document.createElement("div");
+          div.id = defCon.id.rndId;
+          div.style = "visibility:hidden;";
+          div.innerHTML = tHTML;
           document.getElementsByTagName("body")[0].appendChild(div);
           return true;
         } catch (e) {
           error(`//-> ${e.name}`);
-          return false;
         }
+      }
+    }
+
+    function insertCSS() {
+      try {
+        addStyle(tCSS, `${defCon.class.rndClass}`, "head");
+        return true;
+      } catch (e) {
+        error(`//-> ${e.name}`);
       }
     }
 
@@ -1552,7 +1561,7 @@
       RAFInterval(
         () => {
           if (!document.querySelector(`.${defCon.class.rndClass}`)) {
-            addStyle(tCSS, `${defCon.class.rndClass}`, "head");
+            insertCSS();
           }
           if (!document.querySelector(`#${defCon.id.rndId}`)) {
             insertHTML();
@@ -1639,7 +1648,7 @@
       const fontAvailable = new Set();
       if (fontReady) {
         for (const font of fontCheck.values()) {
-          debug("//-> ", convert2Unicode(font.ch));
+          debug("//-> ", font.en, checkFont.detect(font.en), font.ch, convert2Unicode(font.ch), checkFont.detect(convert2Unicode(font.ch)));
           if (checkFont.detect(font.en) || checkFont.detect(convert2Unicode(font.ch))) {
             fontAvailable.add(font);
           }
@@ -1873,10 +1882,10 @@
           }
           isReload = isReload || false;
           initType = initType || "text/css";
-          if (typeof addToTarget === "undefined" || (typeof addToTarget !== "undefined" && document.querySelector(addToTarget) !== null)) {
+          if (typeof addToTarget === "undefined" || (typeof addToTarget !== "undefined" && document.querySelector(addToTarget))) {
             if (isReload === true) {
               safeRemove(`.${className}`);
-            } else if (isReload === false && document.querySelector(`.${className}`) !== null) {
+            } else if (isReload === false && document.querySelector(`.${className}`)) {
               return true;
             }
             const cssNode = document.createElement("style");
@@ -1885,16 +1894,10 @@
             }
             cssNode.setAttribute("type", initType);
             cssNode.innerHTML = css;
-            try {
-              addTo.appendChild(cssNode);
-            } catch (e) {
-              error(`//-> ${e.name}`);
-            }
-            return true;
+            addTo.appendChild(cssNode);
           }
-          return false;
         },
-        200,
+        20,
         true
       );
     }

@@ -1,9 +1,9 @@
-/* jshint esversion: 8 */
+/* jshint esversion: 9 */
 // ==UserScript==
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.2.20210626.2
+// @version         3.3.20210630.1
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en  Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
@@ -25,7 +25,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            变更了代码的namespace地址，需要重新安装新版本，手动删除旧版本。
+// @note            修正若干错误。\n优化代码兼容性，消除样式冲突，减少与其他脚本的冲突。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -126,10 +126,22 @@
       hour12: false,
     }),
   };
-  const _expireTime = /(?!^0)^[0-9]+[smhdw]$/i.test(expireTime) ? expireTime : "4h";
   defCon.rName = defCon.randString(7, true);
-  defCon.noticeHTML = str => {
-    return String(`<div class="${defCon.rName}"><dl>${str}<dl></div>`);
+  const _expireTime = /(?!^0)^[0-9]+[smhdw]$/i.test(expireTime) ? expireTime : "4h";
+
+  const Notice = {
+    noticejs: defCon.randString(7, true),
+    item: defCon.randString(4, true),
+    close: defCon.randString(4, true),
+    center: defCon.randString(4, true),
+    success: defCon.randString(6, true),
+    warning: defCon.randString(6, true),
+    info: defCon.randString(5, true),
+    error: defCon.randString(5, true),
+    animated: defCon.randString(7, true),
+    noticeHTML: str => {
+      return String(`<div class="${defCon.rName}"><dl>${str}<dl></div>`);
+    },
   };
 
   if (isGM) {
@@ -190,7 +202,7 @@
 
   /* Refactoring GMnotification Function */
 
-  GMnotification = (text = "", type = "info", closeWith = true, timeout = 30, { ...options } = {}) => {
+  GMnotification = (text = "", type = `${Notice.info}`, closeWith = true, timeout = 30, { ...options } = {}) => {
     /* eslint-disable no-undef */
     try {
       new NoticeJs({
@@ -463,7 +475,7 @@
             if (defCon.isNoticed < 2 || s) {
               setTimeout(function () {
                 GMnotification(
-                  defCon.noticeHTML(
+                  Notice.noticeHTML(
                     `<dt>${defCon.scriptName}</dt>
                       <dd><span>发现版本异常</span>检测到新版本 <i>${lastestVersion}</i> 低于您的本地版本 <i>${defCon.curVersion}</i>。</dd>\
                       <dd>由于您编辑过本地脚本，或是手动在脚本网站上升级过新版本，从而造成缓存错误。为避免未知错误的出现，脚本将自动设置为禁止检测更新，\
@@ -472,7 +484,7 @@
                       target="_blank" style="padding:0 2px;font-size:14px;color:gold">脚本源网站</a>覆盖安装新版本后，从脚本菜单重新开启检测功能。</dd>\
                       <dd style="text-align: center"><img src="https://i.niupic.com/images/2021/06/13/9kVe.png" alt="开启自动检测"></dd>`
                   ),
-                  "error",
+                  `${Notice.error}`,
                   true,
                   200,
                   {
@@ -510,13 +522,13 @@
               }
               setTimeout(function () {
                 GMnotification(
-                  defCon.noticeHTML(
+                  Notice.noticeHTML(
                     `<dt>${defCon.scriptName}</dt>\
                       <dd><span>发现版本更新</span>最新版本 <i>${lastestVersion}</i>，如果您现在需要更新脚本，请点击这里完成升级安装。</dd>\
                       ${updateNote}<dd>[ ${sourceSite} ]<kbd style="float:right;font-size:11px;">\
                       ( 缓存时间：${defCon.showDate(defCon._expireTime)} )</kbd></dd>${showdDetail}`
                   ),
-                  "warning",
+                  `${Notice.warning}`,
                   false,
                   60,
                   {
@@ -529,12 +541,12 @@
                           // Destroy cache when upgraded.
                           GMdeleteValue("_Check_Version_Expire_");
                           GMnotification(
-                            defCon.noticeHTML(
-                              `<dd class="center">如果您已更新了脚本，请点击<a href="javascript:void(0)"\
+                            Notice.noticeHTML(
+                              `<dd class="${Notice.center}">如果您已更新了脚本，请点击<a href="javascript:void(0)"\
                                   onclick="location.replace(location.href.replace(/&zn=[^&]*/i,'')+'&Zn=1')"\
                                   class="im">这里</a>刷新使其生效。</a></dd>`
                             ),
-                            "info",
+                            `${Notice.info}`,
                             true,
                             100
                           );
@@ -561,13 +573,13 @@
             if (s) {
               setTimeout(function () {
                 GMnotification(
-                  defCon.noticeHTML(
+                  Notice.noticeHTML(
                     `<dt>${defCon.scriptName}</dt>\
                       <dd><span>更新成功</span>当前版本 <i>${defCon.curVersion}</i> 已为最新！</dd>\
                       <dd>[ ${sourceSite} ]<kbd style="float:right;font-size:11px;">\
                       ( 缓存时间：${defCon.showDate(defCon._expireTime)} )</kbd></dd>`
                   ),
-                  "success"
+                  `${Notice.success}`
                 );
               }, 100);
             }
@@ -601,6 +613,9 @@
       bdyx: defCon.randString(5, true),
       ggyx: defCon.randString(5, true),
       bbyx: defCon.randString(5, true),
+      scrollspan: defCon.randString(8, true),
+      scrollbars: defCon.randString(8, true),
+      scrollbars2: defCon.randString(8, true),
       isUseBing: (() => {
         if (isNaN(is_Use_Bing)) {
           GMsetValue("_if_Use_Bing_", 0);
@@ -615,8 +630,8 @@
         }
       })(),
       isVDResult: isVersionDetection ? (is_Ver_Det === undefined ? isVersionDetection : Boolean(is_Ver_Det)) : false,
-      noticeCss: `@charset "UTF-8";.animated{animation-duration:1s;animation-fill-mode:both}.animated.infinite{animation-iteration-count:infinite}.animated.hinge{animation-duration:2s}.animated.bounceIn,.animated.bounceOut,.animated.flipOutX,.animated.flipOutY{animation-duration:.75s}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.fadeOut{animation-name:fadeOut}.noticejs *,.noticejs * *,.noticejs>*>*{text-stroke:initial!important;-webkit-text-stroke:initial!important;text-shadow:initial!important}.noticejs-top{top:0;width:100%}.noticejs-top .item{border-radius:0!important;margin:0!important}.noticejs-topRight{top:10px;right:10px}.noticejs-topLeft{top:10px;left:10px}.noticejs-topCenter{top:10px;left:50%;transform:translate(-50%)}.noticejs-middleLeft,.noticejs-middleRight{right:10px;top:50%;transform:translateY(-50%)}.noticejs-middleLeft{left:10px}.noticejs-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.noticejs-bottom{bottom:0;width:100%}.noticejs-bottom .item{border-radius:0!important;margin:0!important}.noticejs-bottomRight{bottom:10px;right:10px}.noticejs-bottomLeft{bottom:10px;left:10px}.noticejs-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.noticejs{z-index:99999!important;font-family:Helvetica Neue,Helvetica,Arial,sans-serif}.noticejs .item{margin:0 0 10px;border-radius:3px;overflow:hidden}.noticejs .item .close{float:right;font-size:18px;font-weight:700;line-height:1;color:#fff;text-shadow:0 1px 0 #fff;opacity:1;margin-right:7px}.noticejs .item .close:hover{opacity:.5;color:#000;cursor:pointer}.noticejs .item a{color:#fff;border-bottom:1px dashed #fff}.noticejs .item a,.noticejs .item a:hover{text-decoration:none}.noticejs .success{background-color:#64ce83}.noticejs .success .noticejs-heading{background-color:#3da95c;color:#fff;padding:10px}.noticejs .success .noticejs-body{color:#fff;padding:10px!important}.noticejs .success .noticejs-body:hover{visibility:visible!important}.noticejs .success .noticejs-content{visibility:visible}.noticejs .info{background-color:#3ea2ff}.noticejs .info .noticejs-heading{background-color:#067cea;color:#fff;padding:10px}.noticejs .info .noticejs-body{color:#fff;padding:10px!important}.noticejs .info .noticejs-body:hover{visibility:visible!important}.noticejs .info .noticejs-content{visibility:visible}.noticejs .warning{background-color:#ff7f48}.noticejs .warning .noticejs-heading{background-color:#f44e06;color:#fff;padding:10px!important}.noticejs .warning .noticejs-body{color:#fff;padding:10px}.noticejs .warning .noticejs-body:hover{visibility:visible!important}.noticejs .warning .noticejs-content{visibility:visible}.noticejs .error{background-color:#e74c3c}.noticejs .error .noticejs-heading{background-color:#ba2c1d;color:#fff;padding:10px!important}.noticejs .error .noticejs-body{color:#fff;padding:10px}.noticejs .error .noticejs-body:hover{visibility:visible!important}.noticejs .error .noticejs-content{visibility:visible}.noticejs .progressbar{width:100%}.noticejs .progressbar .bar{width:1%;height:30px;background-color:#4caf50}.noticejs .success .noticejs-progressbar{width:100%;background-color:#64ce83;margin-top:-1px}.noticejs .success .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#3da95c}.noticejs .info .noticejs-progressbar{width:100%;background-color:#3ea2ff;margin-top:-1px}.noticejs .info .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#067cea}.noticejs .warning .noticejs-progressbar{width:100%;background-color:#ff7f48;margin-top:-1px}.noticejs .warning .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#f44e06}.noticejs .error .noticejs-progressbar{width:100%;background-color:#e74c3c;margin-top:-1px}.noticejs .error .noticejs-progressbar .noticejs-bar{width:100%;height:5px;background:#ba2c1d}@keyframes noticejs-fadeOut{0%{opacity:1}to{opacity:0}}.noticejs-fadeOut{animation-name:noticejs-fadeOut}@keyframes noticejs-modal-in{to{opacity:.3}}@keyframes noticejs-modal-out{to{opacity:0}}.noticejs{position:fixed;z-index:10050}.noticejs ::-webkit-scrollbar{width:8px}.noticejs ::-webkit-scrollbar-button{width:8px;height:5px}.noticejs ::-webkit-scrollbar-track{border-radius:10px}.noticejs ::-webkit-scrollbar-thumb{background:hsla(0,0%,100%,.5);border-radius:10px}.noticejs ::-webkit-scrollbar-thumb:hover{background:#fff}.noticejs-modal{position:fixed;width:100%;height:100%;background-color:#000;z-index:10000;opacity:.3;left:0;top:0}.noticejs-modal-open{opacity:0;animation:noticejs-modal-in .3s ease-out}.noticejs-modal-close{animation:noticejs-modal-out .3s ease-out;animation-fill-mode:forwards}.${defCon.rName}{padding:2px!important}.${defCon.rName} dl{margin:0!important;padding:1px!important}.${defCon.rName} dl dt{margin:2px 0 6px 0!important;font-size:16px!important;font-weight:900!important}.${defCon.rName} dl dd{margin:2px 2px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${defCon.rName} .center{width:100%;text-align:center!important}.${defCon.rName} dl dd em{color:#fff;font-family:Candara,sans-serif!important;font-size:24px!important;padding:0 5px}.${defCon.rName} dl dd span{font-weight:700;font-size:15px!important;margin-right:8px}.${defCon.rName} dl dd i{font-family:Candara,sans-serif!important;font-size:20px!important}.${defCon.rName} dl dd .im{color:gold;font-size:16px;font-weight:900;padding:0 3px}.${defCon.rName} ul{width:90%;display:inline-block;text-align:left;vertical-align:top;color:rgba(255, 255, 255, 0.8);padding:0.2em;margin:0 0 0 1em;counter-reset:xxx 0}.${defCon.rName} li{list-style:none;font-style:italic!important;position:relative;padding:0 0 0 0.1em;margin:0 0 0 2px;-webkit-transition:.12s;transition:.12s}.${defCon.rName} li::before{content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-family:'Roboto Condensed';font-size:1em;display:inline-block;width:1.5em;margin-left:-1.5em;-webkit-transition:.5s;transition:.5s}.${defCon.rName} .disappear{display:none}`,
     };
+    CONST.noticeCss = `@charset "UTF-8";.${Notice.animated}{animation-duration:1s;animation-fill-mode:both}.${Notice.animated}.infinite{animation-iteration-count:infinite}.${Notice.animated}.hinge{animation-duration:2s}.${Notice.animated}.bounceIn,.${Notice.animated}.bounceOut,.${Notice.animated}.flipOutX,.${Notice.animated}.flipOutY{animation-duration:.75s}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.fadeOut{animation-name:fadeOut}#${CONST.rndidName} *,.${Notice.noticejs},.${Notice.noticejs} *{font-family:'Microsoft YaHei','Helvetica Neue',sans-serif!important;text-stroke:initial!important;-webkit-text-stroke:initial!important;text-shadow:initial!important}.${Notice.noticejs}-top{top:0;width:100%}.${Notice.noticejs}-top .${Notice.item}{border-radius:0!important;margin:0!important}.${Notice.noticejs}-topRight{top:10px;right:10px}.${Notice.noticejs}-topLeft{top:10px;left:10px}.${Notice.noticejs}-topCenter{top:10px;left:50%;transform:translate(-50%)}.${Notice.noticejs}-middleLeft,.${Notice.noticejs}-middleRight{right:10px;top:50%;transform:translateY(-50%)}.${Notice.noticejs}-middleLeft{left:10px}.${Notice.noticejs}-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.${Notice.noticejs}-bottom{bottom:0;width:100%}.${Notice.noticejs}-bottom .${Notice.item}{border-radius:0!important;margin:0!important}.${Notice.noticejs}-bottomRight{bottom:10px;right:10px}.${Notice.noticejs}-bottomLeft{bottom:10px;left:10px}.${Notice.noticejs}-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.${Notice.noticejs}{z-index:99999!important;font-family:Helvetica Neue,Helvetica,Arial,sans-serif}.${Notice.noticejs} .${Notice.item}{margin:0 0 10px;border-radius:3px;overflow:hidden}.${Notice.noticejs} .${Notice.item} .${Notice.close}{float:right;font-size:18px;font-weight:700;line-height:1;color:#fff;text-shadow:0 1px 0 #fff;opacity:1;margin-right:7px}.${Notice.noticejs} .${Notice.item} .${Notice.close}:hover{opacity:.5;color:#000;cursor:pointer}.${Notice.noticejs} .${Notice.item} a{color:#fff;border-bottom:1px dashed #fff}.${Notice.noticejs} .${Notice.item} a,.${Notice.noticejs} .${Notice.item} a:hover{text-decoration:none}.${Notice.noticejs} .${Notice.success}{background-color:#64ce83}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-heading{background-color:#3da95c;color:#fff;padding:10px}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-body{color:#fff;padding:10px!important}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.info}{background-color:#3ea2ff}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-heading{background-color:#067cea;color:#fff;padding:10px}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-body{color:#fff;padding:10px!important}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.warning}{background-color:#ff7f48}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-heading{background-color:#f44e06;color:#fff;padding:10px!important}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-body{color:#fff;padding:10px}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.error}{background-color:#e74c3c}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-heading{background-color:#ba2c1d;color:#fff;padding:10px!important}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-body{color:#fff;padding:10px}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-progressbar{width:100%;background-color:#64ce83;margin-top:-1px}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#3da95c}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-progressbar{width:100%;background-color:#3ea2ff;margin-top:-1px}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#067cea}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-progressbar{width:100%;background-color:#ff7f48;margin-top:-1px}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#f44e06}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-progressbar{width:100%;background-color:#e74c3c;margin-top:-1px}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#ba2c1d}@keyframes ${Notice.noticejs}-fadeOut{0%{opacity:1}to{opacity:0}}.${Notice.noticejs}-fadeOut{animation-name:${Notice.noticejs}-fadeOut}@keyframes ${Notice.noticejs}-modal-in{to{opacity:.3}}@keyframes ${Notice.noticejs}-modal-out{to{opacity:0}}.${Notice.noticejs}{position:fixed;z-index:10050}.${Notice.noticejs} ::-webkit-scrollbar{width:8px}.${Notice.noticejs} ::-webkit-scrollbar-button{width:8px;height:5px}.${Notice.noticejs} ::-webkit-scrollbar-track{border-radius:10px}.${Notice.noticejs} ::-webkit-scrollbar-thumb{background:hsla(0,0%,100%,.5);border-radius:10px}.${Notice.noticejs} ::-webkit-scrollbar-thumb:hover{background:#fff}.${Notice.noticejs}-modal{position:fixed;width:100%;height:100%;background-color:#000;z-index:10000;opacity:.3;left:0;top:0}.${Notice.noticejs}-modal-open{opacity:0;animation:${Notice.noticejs}-modal-in .3s ease-out}.${Notice.noticejs}-modal-close{animation:${Notice.noticejs}-modal-out .3s ease-out;animation-fill-mode:forwards}.${defCon.rName}{padding:2px!important}.${defCon.rName} dl{margin:0!important;padding:1px!important}.${defCon.rName} dl dt{margin:2px 0 6px 0!important;font-size:16px!important;font-weight:900!important}.${defCon.rName} dl dd{margin:2px 2px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${defCon.rName} .${Notice.center}{width:100%;text-align:center!important}.${defCon.rName} dl dd em{color:#fff;font-family:Candara,sans-serif!important;font-size:24px!important;padding:0 5px}.${defCon.rName} dl dd span{font-weight:700;font-size:15px!important;margin-right:8px}.${defCon.rName} dl dd i{font-family:Candara,sans-serif!important;font-size:20px!important}.${defCon.rName} dl dd .im{color:gold;font-size:16px;font-weight:900;padding:0 3px}.${defCon.rName} ul{width:90%;display:inline-block;text-align:left;vertical-align:top;color:rgba(255, 255, 255, 0.8);padding:0.2em;margin:0 0 0 1em;counter-reset:xxx 0}.${defCon.rName} li{list-style:none;font-style:italic!important;position:relative;padding:0 0 0 0.1em;margin:0 0 0 2px;-webkit-transition:.12s;transition:.12s}.${defCon.rName} li::before{content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-family:'Roboto Condensed';font-size:1em;display:inline-block;width:1.5em;margin-left:-1.5em;-webkit-transition:.5s;transition:.5s}.${defCon.rName} .disappear{display:none}`;
 
     let curretSite = {
       SiteTypeID: 0,
@@ -667,8 +682,8 @@
                 <input type="button" title="百度一下" value="百度一下"/>
             </span>`),
         StyleCode: CONST.isUseBing
-          ? `#${CONST.rndidName}{margin:3px 4px 0 -5px}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd;}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-2px}.scrollspan{display:block;margin: 3px 3px 0 0}.scrollbars{height:26px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}.scrollbars2{display:inline-block;margin-top:-3px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}#${CONST.bdyx} input{cursor:pointer;padding:1px 1px 1px 6px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bbyx} input{cursor:pointer;padding:1px 6px 1px 1px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover,#${CONST.bbyx} input:hover{background:#2b7de9;}`
-          : `#${CONST.rndidName}{margin:3px 4px 0 -5px}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd}.scrollspan{display:block;margin:3px 3px 0 0}.scrollbars{height:26px!important;font-size:13px!important;font-weight:normal!important; text-shadow:0 0 1px #fff!important}.scrollbars2{display:inline-block;margin-top:-3px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #fff!important}#${CONST.bdyx} input{cursor:pointer;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-radius:24px;width:90px;height:38px;font-size:14px;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover{background:#2b7de9;}`,
+          ? `#${CONST.rndidName}{margin:3px 4px 0 -5px}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd;}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-2px}.${CONST.scrollspan}{display:block;margin: 3px 3px 0 0}.${CONST.scrollspan}{height:26px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}.${CONST.scrollspan2}{display:inline-block;margin-top:-3px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}#${CONST.bdyx} input{cursor:pointer;padding:1px 1px 1px 6px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bbyx} input{cursor:pointer;padding:1px 6px 1px 1px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover,#${CONST.bbyx} input:hover{background:#2b7de9;}`
+          : `#${CONST.rndidName}{margin:3px 4px 0 -5px}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd}.${CONST.scrollspan}{display:block;margin:3px 3px 0 0}.${CONST.scrollspan}{height:26px!important;font-size:13px!important;font-weight:normal!important; text-shadow:0 0 1px #fff!important}.${CONST.scrollspan2}{display:inline-block;margin-top:-3px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #fff!important}#${CONST.bdyx} input{cursor:pointer;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-radius:24px;width:90px;height:38px;font-size:14px;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover{background:#2b7de9;}`,
       },
       bing: {
         SiteTypeID: 3,
@@ -685,7 +700,7 @@
           </span>`)
           : ``,
         StyleCode: CONST.isUseBing
-          ? `#${CONST.rndidName}{height:44px;width:120px;margin:2px 5px 2px 0}#${CONST.bdyx} input,#${CONST.ggyx} input{cursor:pointer;width:auto 60px;height:40px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;margin-left:-1px;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px;font-weight:700;border-radius:4px}.scrollspan{height:32px!important}.scrollbars{height:30px!important;padding:4px}#${CONST.bdyx} input:hover,#${CONST.ggyx} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border:2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7;}`
+          ? `#${CONST.rndidName}{height:44px;width:120px;margin:2px 5px 2px 0}#${CONST.bdyx} input,#${CONST.ggyx} input{cursor:pointer;width:auto 60px;height:40px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;margin-left:-1px;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px;font-weight:700;border-radius:4px;margin:5px 0;}.${CONST.scrollspan}{height:32px!important}.${CONST.scrollspan}{height:30px!important;padding:4px}#${CONST.bdyx} input:hover,#${CONST.ggyx} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border:2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7;}`
           : ``,
       },
       other: { SiteTypeID: 0 },
@@ -728,14 +743,14 @@
     let menuManager = {
       inUse_switch: (_status, Name, Tips) => {
         const info = x => {
-          return defCon.noticeHTML(`<dd class="center">${Tips}已<kbd class="im">${x}</kbd>，网页在<em>3</em>秒后刷新！</dd>`);
+          return Notice.noticeHTML(`<dd class="${Notice.center}">${Tips}已<kbd class="im">${x}</kbd>，网页在<em>3</em>秒后刷新！</dd>`);
         };
         if (_status) {
           GMsetValue(`${Name}`, 0);
-          GMnotification(info("\u6e05\u9664"), "info", true, 30, callback_Countdown);
+          GMnotification(info("\u6e05\u9664"), `${Notice.info}`, true, 30, callback_Countdown);
         } else {
           GMsetValue(`${Name}`, 1);
-          GMnotification(info("\u6dfb\u52a0"), "info", true, 30, callback_Countdown);
+          GMnotification(info("\u6dfb\u52a0"), `${Notice.info}`, true, 30, callback_Countdown);
         }
       },
 
@@ -779,10 +794,10 @@
                     GMdeleteValue("_Check_Version_Expire_");
                     GMsetValue("_expire_time_", _expireTime);
                     GMnotification(
-                      defCon.noticeHTML(
-                        `<dd class="center">缓存时间设定为<kbd class="im">${defCon.showDate(_expireTime)}</kbd>，网页在<em>3</em>秒后刷新！</dd>`
+                      Notice.noticeHTML(
+                        `<dd class="${Notice.center}">缓存时间设定为<kbd class="im">${defCon.showDate(_expireTime)}</kbd>，网页在<em>3</em>秒后刷新！</dd>`
                       ),
-                      "info",
+                      `${Notice.info}`,
                       true,
                       30,
                       callback_Countdown
@@ -791,7 +806,7 @@
                 );
               } else {
                 in_UpdateCheck_ID = GMregisterMenuCommand(
-                  `\ufff5\ud83e\uddf2【重置】检查更新 ( ${defCon.showDate(defCon._expireTime)}重置为 ${defCon.showDate(_expireTime)})`,
+                  `\ufff5\ud83e\uddf2【版本更新】手动检查 ( ${defCon.showDate(defCon._expireTime)}重置为 ${defCon.showDate(_expireTime)})`,
                   () => {
                     // Destroy cache & session before change expireTime.
                     GMdeleteValue("_Check_Version_Expire_");
@@ -800,10 +815,10 @@
                     checkVersion(false);
                     if (!defCon.isNeedUpdate) {
                       GMnotification(
-                        defCon.noticeHTML(
-                          `<dd class="center">缓存时间重置为<kbd class="im">${defCon.showDate(_expireTime)}</kbd>，网页在<em>3</em>秒后刷新！</dd>`
+                        Notice.noticeHTML(
+                          `<dd class="${Notice.center}">缓存时间重置为<kbd class="im">${defCon.showDate(_expireTime)}</kbd>，网页在<em>3</em>秒后刷新！</dd>`
                         ),
-                        "info",
+                        `${Notice.info}`,
                         true,
                         30,
                         callback_Countdown
@@ -821,8 +836,8 @@
               sessionStorage.removeItem("nCount");
               debug("//-> Destroy cache & session when restart detection.");
               GMnotification(
-                defCon.noticeHTML(`<dd class="center">更新检测已<kbd class="im">开启</kbd>，网页在<em>3</em>秒后刷新！</dd>`),
-                "info",
+                Notice.noticeHTML(`<dd class="${Notice.center}">更新检测已<kbd class="im">开启</kbd>，网页在<em>3</em>秒后刷新！</dd>`),
+                `${Notice.info}`,
                 true,
                 30,
                 callback_Countdown
@@ -865,20 +880,27 @@
     /* Insert search Button */
 
     let searchManager = {
+      insertCSS: function () {
+        try {
+          const doStyName = `${CONST.rndclassName}`;
+          const doStyle = CONST.noticeCss + curretSite.StyleCode;
+          addStyle(doStyle, doStyName, "head");
+          return true;
+        } catch (e) {
+          error("//-> %csearchManager.insertCSS:\n%c%s", "font-weight:bold", "font-weight:normal", e);
+        }
+      },
+
       insertSearchButton: function () {
         try {
           const getTarget = curretSite.MainType;
           const doHtml = curretSite.HtmlCode;
-          const doStyName = `${CONST.rndclassName}`;
-          const doStyle = CONST.noticeCss + curretSite.StyleCode;
           const indexPage = location.pathname === "/";
           const userSpan = document.createElement("span");
           userSpan.id = `${CONST.rndidName}`;
           userSpan.innerHTML = doHtml;
           const SpanID = `#${userSpan.id}`;
           let Target = document.querySelector(getTarget);
-
-          addStyle(doStyle, doStyName, "head");
 
           if (!document.querySelector(SpanID) && getSearchValue() && !indexPage && Target) {
             if (/^(nws|vid|bks)$/.test(CONST.vim.trim())) {
@@ -945,7 +967,6 @@
           return true;
         } catch (e) {
           error("//-> %csearchManager.insertSearchButton:\n%c%s", "font-weight:bold", "font-weight:normal", e);
-          return false;
         }
       },
 
@@ -955,9 +976,9 @@
           case newSiteType.GOOGLE:
             // Google image fixed
             e = /^isch$/.test(CONST.vim.trim());
-            e ? (scrollbars = "scrollbars2") : (scrollbars = "scrollbars");
+            e ? (scrollbars = `${CONST.scrollspan2}`) : (scrollbars = `${CONST.scrollspan}`);
             e ? (height = -14) : (height = 35);
-            scrollButton(`#${CONST.rndidName}`, "scrollspan", height);
+            scrollButton(`#${CONST.rndidName}`, `${CONST.scrollspan}`, height);
             scrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, scrollbars, height);
             if (CONST.isUseBing) {
               scrollButton(`#${CONST.rndidName} #${CONST.bbyx} input`, scrollbars, height);
@@ -965,9 +986,9 @@
             break;
           case newSiteType.BING:
             if (/^(images|videos)$/.test(CONST.vim.trim()) && CONST.isUseBing) {
-              scrollButton(`#${CONST.rndidName}`, "scrollspan", 50);
-              scrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, "scrollbars", 50);
-              scrollButton(`#${CONST.rndidName} #${CONST.ggyx} input`, "scrollbars", 50);
+              scrollButton(`#${CONST.rndidName}`, `${CONST.scrollspan}`, 50);
+              scrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, `${CONST.scrollspan}`, 50);
+              scrollButton(`#${CONST.rndidName} #${CONST.ggyx} input`, `${CONST.scrollspan}`, 50);
             } else {
               debug(`//-> No scrolling detecting.`);
             }
@@ -982,7 +1003,10 @@
       RAF: function () {
         RAFInterval(
           () => {
-            if (!document.querySelector(`#${CONST.rndidName}`) || !document.querySelector(`.${CONST.rndclassName}`)) {
+            if (!document.querySelector(`.${CONST.rndclassName}`)) {
+              return this.insertCSS();
+            }
+            if (!document.querySelector(`#${CONST.rndidName}`)) {
               return this.insertSearchButton() && this.scrollDetect();
             }
           },
@@ -1088,31 +1112,25 @@
     function addStyle(css, className, addToTarget, isReload, initType) {
       RAFInterval(
         () => {
-          try {
-            let addTo = document.querySelector(addToTarget);
-            if (typeof addToTarget === "undefined") {
-              addTo = document.head || document.body || document.documentElement || document;
+          let addTo = document.querySelector(addToTarget);
+          if (typeof addToTarget === "undefined") {
+            addTo = document.head || document.body || document.documentElement || document;
+          }
+          isReload = isReload || false;
+          initType = initType || "text/css";
+          if (typeof addToTarget === "undefined" || (typeof addToTarget !== "undefined" && document.querySelector(addToTarget))) {
+            if (isReload === true) {
+              safeRemove(`.${className}`);
+            } else if (isReload === false && document.querySelector(`.${className}`)) {
+              return true;
             }
-            isReload = isReload || false;
-            initType = initType || "text/css";
-            if (typeof addToTarget === "undefined" || (typeof addToTarget !== "undefined" && document.querySelector(addToTarget))) {
-              if (isReload === true) {
-                safeRemove(`.${className}`);
-              } else if (isReload === false && document.querySelector(`.${className}`)) {
-                return true;
-              }
-              const cssNode = document.createElement("style");
-              if (className !== null) {
-                cssNode.className = className;
-              }
-              cssNode.setAttribute("type", initType);
-              cssNode.innerHTML = css;
-              addTo.appendChild(cssNode);
+            const cssNode = document.createElement("style");
+            if (className !== null) {
+              cssNode.className = className;
             }
-            return true;
-          } catch (e) {
-            error("//-> %caddStyle:\n%c%s", "font-weight:bold", "font-weight:normal", e);
-            return false;
+            cssNode.setAttribute("type", initType);
+            cssNode.innerHTML = css;
+            addTo.appendChild(cssNode);
           }
         },
         20,
@@ -1242,12 +1260,12 @@
       })([
         function (q, d, m) {
           Object.defineProperty(d, "__esModule", { value: !0 });
-          d.noticeJsModalClassName = "noticejs-modal";
-          d.closeAnimation = "noticejs-fadeOut";
+          d.noticeJsModalClassName = `${Notice.noticejs}-modal`;
+          d.closeAnimation = `${Notice.noticejs}-fadeOut`;
           d.Defaults = {
             title: "",
             text: "",
-            type: "success",
+            type: `${Notice.success}`,
             position: "bottomRight",
             newestOnTop: !1,
             timeout: 30,
@@ -1255,8 +1273,8 @@
             indeterminate: !1,
             closeWith: ["button"],
             animation: {
-              open: "animated fadeIn",
-              close: "animated fadeOut",
+              open: `${Notice.animated} fadeIn`,
+              close: `${Notice.animated} fadeOut`,
             },
             modal: !1,
             width: 400,
@@ -1305,7 +1323,7 @@
             if (0 >= document.getElementsByClassName(l.noticeJsModalClassName).length) {
               let a = document.createElement("div");
               a.classList.add(l.noticeJsModalClassName);
-              a.classList.add("noticejs-modal-open");
+              a.classList.add(`${Notice.noticejs}-modal-open`);
               document.body.appendChild(a);
               setTimeout(function () {
                 a.className = l.noticeJsModalClassName;
@@ -1319,47 +1337,47 @@
               a.remove();
             }, 200);
             !0 === f.modal &&
-              1 <= document.querySelectorAll("[noticejs-modal='true']").length &&
-              ((document.querySelector(".noticejs-modal").className += " noticejs-modal-close"),
+              1 <= document.querySelectorAll(`[${Notice.noticejs}-modal='true']`).length &&
+              ((document.querySelector(`.${Notice.noticejs}-modal`).className += ` ${Notice.noticejs}-modal-close`),
               setTimeout(function () {
-                document.querySelector(".noticejs-modal").remove();
+                document.querySelector(`.${Notice.noticejs}-modal`).remove();
               }, 500));
-            let b = a.closest(".noticejs");
-            let c = b ? "." + b.className.replace("noticejs", "").trim() : ".null";
+            let b = a.closest(`.${Notice.noticejs}`);
+            let c = b ? "." + b.className.replace(`${Notice.noticejs}`, "").trim() : ".null";
             setTimeout(function () {
-              0 >= document.querySelectorAll(c + " .item").length && document.querySelector(c) && document.querySelector(c).remove();
+              0 >= document.querySelectorAll(c + ` .${Notice.item}`).length && document.querySelector(c) && document.querySelector(c).remove();
             }, 500);
           });
           let e = (d.addListener = function (a) {
             f.closeWith.includes("button") &&
-              a.querySelector(".close").addEventListener("click", function () {
+              a.querySelector(`.${Notice.close}`).addEventListener("click", function () {
                 n(a);
               });
             f.closeWith.includes("click")
               ? ((a.style.cursor = "pointer"),
                 a.addEventListener("click", function (b) {
-                  "close" !== b.target.className && (g(f, "onClick"), n(a));
+                  `${Notice.close}` !== b.target.className && (g(f, "onClick"), n(a));
                 }))
               : a.addEventListener("click", function (b) {
-                  "close" !== b.target.className && g(f, "onClick");
+                  `${Notice.close}` !== b.target.className && g(f, "onClick");
                 });
             a.addEventListener("mouseover", function () {
               g(f, "onHover");
             });
           });
           d.appendNoticeJs = function (a, b, c) {
-            let p = ".noticejs-" + f.position;
+            let p = `.${Notice.noticejs}-` + f.position;
             let k = document.createElement("div");
-            k.classList.add("item");
+            k.classList.add(`${Notice.item}`);
             k.classList.add(f.type);
-            !0 === f.rtl && k.classList.add("noticejs-rtl");
+            !0 === f.rtl && k.classList.add(`${Notice.noticejs}-rtl`);
             "" !== f.width && Number.isInteger(f.width) && (k.style.width = f.width + "px");
             a && "" !== a && k.appendChild(a);
             k.appendChild(b);
             c && "" !== c && k.appendChild(c);
             ["top", "bottom"].includes(f.position) && (document.querySelector(p).innerHTML = "");
             null !== f.animation && null !== f.animation.open && (k.className += " " + f.animation.open);
-            !0 === f.modal && (k.setAttribute("noticejs-modal", "true"), h());
+            !0 === f.modal && (k.setAttribute(`${Notice.noticejs}-modal`, "true"), h());
             e(k, f.closeWith);
             g(f, "beforeShow");
             g(f, "onShow");
@@ -1414,7 +1432,7 @@
                 }
                 this.options = Object.assign(h.Defaults, b);
                 this.component = new n.Components();
-                this.id = "noticejs-" + Math.random();
+                this.id = `${Notice.noticejs}-` + defCon.randString(6);
                 this.on("beforeShow", this.options.callbacks.beforeShow);
                 this.on("onShow", this.options.callbacks.onShow);
                 this.on("afterShow", this.options.callbacks.afterShow);
@@ -1431,7 +1449,7 @@
                   key: "show",
                   value: function () {
                     let b = this.component.createContainer();
-                    document.querySelector(".noticejs-" + this.options.position) === null && document.body.appendChild(b);
+                    document.querySelector(`.${Notice.noticejs}-` + this.options.position) === null && document.body.appendChild(b);
                     let c = void 0;
                     b = this.component.createHeader(this.options.title, this.options.closeWith);
                     let p = this.component.createBody(this.options.text);
@@ -1519,9 +1537,9 @@
               {
                 key: "createContainer",
                 value: function () {
-                  let e = "noticejs-" + h.position;
+                  let e = `${Notice.noticejs}-` + h.position;
                   let a = document.createElement("div");
-                  a.classList.add("noticejs");
+                  a.classList.add(`${Notice.noticejs}`);
                   a.classList.add(e);
                   return a;
                 },
@@ -1530,10 +1548,12 @@
                 key: "createHeader",
                 value: function () {
                   let e = void 0;
-                  h.title && "" !== h.title && ((e = document.createElement("div")), e.setAttribute("class", "noticejs-heading"), (e.textContent = h.title));
+                  h.title &&
+                    "" !== h.title &&
+                    ((e = document.createElement("div")), e.setAttribute("class", `${Notice.noticejs}-heading`), (e.textContent = h.title));
                   if (h.closeWith.includes("button")) {
                     let a = document.createElement("div");
-                    a.setAttribute("class", "close");
+                    a.setAttribute("class", `${Notice.close}`);
                     a.innerHTML = "&times;";
                     e ? e.appendChild(a) : (e = a);
                   }
@@ -1544,9 +1564,9 @@
                 key: "createBody",
                 value: function () {
                   let e = document.createElement("div");
-                  e.setAttribute("class", "noticejs-body");
+                  e.setAttribute("class", `${Notice.noticejs}-body`);
                   let a = document.createElement("div");
-                  a.setAttribute("class", "noticejs-content");
+                  a.setAttribute("class", `${Notice.noticejs}-content`);
                   a.innerHTML = h.text;
                   e.appendChild(a);
                   null !== h.scroll &&
@@ -1561,9 +1581,9 @@
                 key: "createProgressBar",
                 value: function () {
                   let e = document.createElement("div");
-                  e.setAttribute("class", "noticejs-progressbar");
+                  e.setAttribute("class", `${Notice.noticejs}-progressbar`);
                   let a = document.createElement("div");
-                  a.setAttribute("class", "noticejs-bar");
+                  a.setAttribute("class", `${Notice.noticejs}-bar`);
                   e.appendChild(a);
                   let b = 100;
                   let c = 0;
@@ -1573,7 +1593,7 @@
                     let u = function () {
                       if (0 >= b) {
                         clearInterval(p);
-                        let r = e.closest("div.item");
+                        let r = e.closest(`div.${Notice.item}`);
                         if (null !== h.animation && null !== h.animation.close) {
                           r.className = r.className.replace(new RegExp("(?:^|\\s)" + h.animation.open + "(?:\\s|$)"), " ");
                           r.className += " " + h.animation.close;
@@ -1594,7 +1614,7 @@
                       document.getElementById(k) === null ? clearInterval(p) : (a.style.width = b + "%");
                     };
                     !0 === h.indeterminate
-                      ? ((p = setInterval(v, h.timeout)), (k = "noticejs-progressbar-" + p), e.setAttribute("id", k))
+                      ? ((p = setInterval(v, h.timeout)), (k = `${Notice.noticejs}-progressbar-` + p), e.setAttribute("id", k))
                       : (p = setInterval(u, h.timeout));
                   }
                   return e;
@@ -1623,12 +1643,12 @@
           if (Math.floor(Math.random() * 20) > 18) {
             setTimeout(function () {
               GMnotification(
-                defCon.noticeHTML(
+                Notice.noticeHTML(
                   `<dd title="随机提示">若要恢复自动更新功能，请在覆盖安装新代码后,\
-                  从脚本菜单中重新开启"版本更新"功能。</dd><dd class="center" title="随机提示">\
+                  从脚本菜单中重新开启"版本更新"功能。</dd><dd class="${Notice.center}" title="随机提示">\
                   <img src="https://i.niupic.com/images/2021/06/13/9kVe.png" alt="开启自动检测"></dd>`
                 ),
-                "info",
+                `${Notice.info}`,
                 true,
                 80
               );
