@@ -1650,15 +1650,6 @@
         });
       }
 
-      /* Close loading */
-
-      const loadingDiv = document.querySelector(`#${defCon.id.welcome}`);
-      if (loadingDiv) {
-        loadingDiv.addEventListener("click", () => {
-          document.querySelector(`#${defCon.id.rndId}`).style = "visibility:hidden;";
-        });
-      }
-
       /* Fonts selection */
 
       const fontReady = await document.fonts.ready;
