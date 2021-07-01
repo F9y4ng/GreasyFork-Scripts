@@ -1757,6 +1757,7 @@
         if (await frDialog.respond()) {
           // Destroy all data & refresh
           GMdeleteValue("_fonts_set_");
+          document.querySelector(`#${defCon.id.rndId}`).style = "visibility:hidden;";
           location.reload();
         } else {
           fontSet().fdeleteList(fontData);
