@@ -1,7 +1,7 @@
 /* jshint esversion: 9 */
 // ==UserScript==
 // @name            字体渲染（自用脚本）
-// @version         2021.06.30.1
+// @version         2021.07.01.1
 // @author          F9y4ng
 // @description     让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @namespace       https://openuserjs.org/scripts/f9y4ng/Font_Rendering_(Customized)
@@ -1343,17 +1343,19 @@
     /* Exclude site */
 
     let siteIndex;
+    function real_Time_Update(e, t) {
+      for (let i = 0; i < e.length; i++) {
+        if (e[i] === t) {
+          return i;
+        }
+      }
+    }
     let obj = ["workstation-xi"].sort();
     if (!exSite) {
       GMsetValue("_Exclude_site_", obj);
       exSite = obj;
     } else {
-      for (let i = 0; i < exSite.length; i++) {
-        if (exSite[i] === location.hostname) {
-          siteIndex = i;
-          break;
-        }
-      }
+      siteIndex = real_Time_Update(exSite, location.hostname);
     }
 
     /* Set Default Value & initialize */
@@ -1629,6 +1631,7 @@
               titleText: "恢复字体渲染",
             });
             if (await frDialog.respond()) {
+              siteIndex = real_Time_Update(exSite, location.hostname);
               exSite.splice(siteIndex, 1);
               GMsetValue("_Exclude_site_", exSite);
               location.reload();
