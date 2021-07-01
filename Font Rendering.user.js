@@ -1,7 +1,7 @@
 /* jshint esversion: 9 */
 // ==UserScript==
 // @name            字体渲染（自用脚本）
-// @version         2021.07.01.2
+// @version         2021.07.01.3
 // @author          F9y4ng
 // @description     让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @namespace       https://openuserjs.org/scripts/f9y4ng/Font_Rendering_(Customized)
@@ -1607,6 +1607,12 @@
         if (siteIndex === undefined) {
           Font_Set = GMregisterMenuCommand("\ufff0\ud83c\udf13 字体渲染设置", () => {
             document.querySelector(`#${defCon.id.rndId}`).style = "visibility: visible;";
+            let welcome_loading = document.getElementById(`${defCon.id.welcome}`);
+            if (welcome_loading) {
+              welcome_loading.addEventListener("click", () => {
+                document.getElementById(`${defCon.id.rndId}`).style = "display:none";
+              });
+            }
           });
           Exclude_site = GMregisterMenuCommand(`\ufff1\ud83d\udeab 排除渲染 ${location.hostname}`, async () => {
             let frDialog = new frDialogBox({
@@ -1641,6 +1647,15 @@
         }
         Feed_Back = GMregisterMenuCommand("\ufff9\ud83e\udde1 建议反馈", () => {
           window.open(feedback, "feedback");
+        });
+      }
+
+      /* Close loading */
+
+      const loadingDiv = document.querySelector(`#${defCon.id.welcome}`);
+      if (loadingDiv) {
+        loadingDiv.addEventListener("click", () => {
+          document.querySelector(`#${defCon.id.rndId}`).style = "visibility:hidden;";
         });
       }
 
