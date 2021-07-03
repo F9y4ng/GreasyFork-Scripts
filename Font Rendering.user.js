@@ -1,7 +1,7 @@
 /* jshint esversion: 9 */
 // ==UserScript==
 // @name            字体渲染（自用脚本）
-// @version         2021.07.03.1
+// @version         2021.07.03.2
 // @author          F9y4ng
 // @description     让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @namespace       https://openuserjs.org/scripts/f9y4ng/Font_Rendering_(Customized)
@@ -1039,9 +1039,10 @@
         };
 
         class selector {
-          constructor(ch, en) {
+          constructor(ch, en, sort) {
             this.ch = ch;
             this.en = en;
+            this.sort = sort;
           }
         }
 
@@ -1049,9 +1050,12 @@
         close.that.forEach(function (item) {
           ddRemove(item.parentNode);
           let value = item.parentNode.children[1].value;
+          let sort = Number(item.parentNode.children[1].attributes.sort.value);
           let text = item.parentNode.children[0].innerHTML;
-          fontData.push(new selector(text, value));
-          fontData.sort();
+          fontData.push(new selector(text, value, sort));
+          fontData.sort(function (a, b) {
+            return a.sort - b.sort;
+          });
           if (fontSet(`#${defCon.id.fontList} .${defCon.class.close}`).that.length === 0) {
             fontSet(`#${defCon.id.fontList} .${defCon.class.selector}`).that[0].parentNode.style.cssText += "display:none;";
           }
@@ -1079,9 +1083,10 @@
           fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd`).that.forEach(function (item) {
             item.onclick = function (e) {
               let value = this.attributes.value.value.toString();
+              let sort = this.attributes.sort.value;
               if (value) {
                 fontSet(`#${defCon.id.fontList} .${defCon.class.selector}`).that[0].innerHTML += String(
-                  `<a href="javascript:void(0)" class="${defCon.class.label}"><span style="font-family:${value}!important">${this.innerHTML}</span><input type="hidden" name="${defCon.id.fontName}" value="${value}"/><span class="${defCon.class.close}" style="font-family:${value}!important">×</span></a>`
+                  `<a href="javascript:void(0)" class="${defCon.class.label}"><span style="font-family:${value}!important">${this.innerHTML}</span><input type="hidden" name="${defCon.id.fontName}" sort="${sort}" value="${value}"/><span class="${defCon.class.close}" style="font-family:${value}!important">×</span></a>`
                 );
                 fontSet(`.${defCon.class.selector}`).that[0].parentNode.style.cssText += "display:block;";
                 qS(`#${defCon.id.cleaner}`).addEventListener("click", () => {
@@ -1125,7 +1130,7 @@
               if (sear_1.test(item.ch) || sear_1.test(item.en)) {
                 judge_1 = true;
                 fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`).that[0].innerHTML += String(
-                  `<dd style="font-family:${item.en}!important" value="${item.en}">${item.ch}</dd>`
+                  `<dd style="font-family:${item.en}!important" sort="${item.sort}" value="${item.en}">${item.ch}</dd>`
                 );
               }
             });
@@ -1149,11 +1154,11 @@
           }
           fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`).that[0].innerHTML = "";
           fontData.sort(function (a, b) {
-            return a.en - b.en;
+            return a.sort - b.sort;
           });
           fontData.forEach(function (item) {
             fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`).that[0].innerHTML += String(
-              `<dd style="font-family:${item.en}!important" value="${item.en}">${item.ch}</dd>`
+              `<dd style="font-family:${item.en}!important" sort="${item.sort}" value="${item.en}">${item.ch}</dd>`
             );
           });
           clickEvent();
@@ -1161,9 +1166,10 @@
         };
 
         class selector {
-          constructor(ch, en) {
+          constructor(ch, en, sort) {
             this.ch = ch;
             this.en = en;
+            this.sort = sort;
           }
         }
 
@@ -1172,8 +1178,9 @@
             item.onclick = function () {
               ddRemove(this.parentNode);
               let value = this.parentNode.children[1].value;
+              let sort = Number(item.parentNode.children[1].attributes.sort.value);
               let text = this.parentNode.children[0].innerHTML;
-              fontData.push(new selector(text, value));
+              fontData.push(new selector(text, value, sort));
               if (fontSet(`#${defCon.id.fontList} .${defCon.class.close}`).that.length === 0) {
                 fontSet(`#${defCon.id.fontList} .${defCon.class.selector}`).that[0].parentNode.style.cssText += "display:none;";
               }
@@ -1668,19 +1675,25 @@
       const fontReady = await document.fonts.ready;
       const checkFont = new isSupportFontFamily();
       const fontAvailable = new Set();
+      let ii = 1;
       if (fontReady) {
         for (const font of fontCheck.values()) {
           if (checkFont.detect(font.en)) {
             if (font.en !== refont) {
+              font.sort = ii;
               fontAvailable.add(font);
             }
           } else if (checkFont.detect(convert2Unicode(font.ch)) && convert2Unicode(font.ch) !== refont) {
             font.en = convert2Unicode(font.ch);
+            font.sort = ii;
             fontAvailable.add(font);
           }
+          ii++;
         }
       }
-      const fontData = [...fontAvailable.values()];
+      const fontData = [...fontAvailable.values()].sort(function (a, b) {
+        return a.sort - b.sort;
+      });
       if (qS(`#${defCon.id.rndId}`)) {
         fontSet(`#${defCon.id.fontList} .${defCon.class.fontList}`).fsearch(fontData);
       }
