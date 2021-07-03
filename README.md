@@ -29,6 +29,8 @@
 
   > `version 3.3.20210703.1`
 
+  重大版本更新，请使用前仔细查看 [**脚本使用说明**](https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/Google_baidu_Switcher_(ALL_in_One))。```New```
+
   ```text
   @ 修正macOS下不同浏览器在Google的跳转按钮样式问题。
   ```
