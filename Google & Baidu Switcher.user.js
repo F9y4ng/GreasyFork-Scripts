@@ -369,7 +369,7 @@
   async function checkVersion(s = false) {
     let t, setResult, info;
     const m = await GMgetValue("_is_Ver_Det_");
-    isVersionDetection ? (setResult = m === undefined ? isVersionDetection : Boolean(m)) : (setResult = false);
+    isVersionDetection ? (setResult = m === undefined ? isVersionDetection : Boolean(m)) : ((setResult = false), GMsetValue("_is_Ver_Det_", false));
     const _expire_time_ = await GMgetValue("_expire_time_");
     if (_expire_time_) {
       defCon._expireTime = _expire_time_;
