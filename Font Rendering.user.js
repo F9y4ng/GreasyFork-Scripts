@@ -1,9 +1,15 @@
 /* jshint esversion: 9 */
 // ==UserScript==
-// @name            字体渲染（自用脚本）
-// @version         2021.07.04.1
-// @author          F9y4ng
-// @description     让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
+// @name              字体渲染（自用脚本）
+// @name:zh           字体渲染（自用脚本）
+// @name:zh-TW        字體渲染（自用腳本）
+// @name:en           Font Rendering (Customized)
+// @version           2021.07.04.2
+// @author            F9y4ng
+// @description       让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
+// @description:zh    让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
+// @description:zh-TW 讓每個頁面的字體變得有質感，默認使用微軟雅黑字體，亦可自定義設置多種中文字體，附加字體描邊、字體重寫、字體陰影、字體平滑、對特殊樣式元素的過濾和許可等效果，腳本菜單中可使用設置界面進行參數設置，亦可對某域名下所有頁面進行排除渲染。
+// @description:en    Make the font of each page have texture. Microsoft YaHei font is used by default. You can also customize a variety of Chinese fonts, add font stroke, font rewriting, font shadow, font smoothing, filtering and permission for special style elements, etc. in the script menu, you can use the setting interface to set parameters, and exclude rendering for all pages under a domain name.
 // @namespace       https://openuserjs.org/scripts/f9y4ng/Font_Rendering_(Customized)
 // @icon            https://img.icons8.com/ios-filled/50/26e07f/font-style-formatting.png
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
