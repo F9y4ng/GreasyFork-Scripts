@@ -2,11 +2,13 @@
 // ==UserScript==
 // @name            Google & baidu Switcher (ALL in One)
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
+// @name:zh         谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
 // @version         3.3.20210704.1
 // @author          F9y4ng
 // @description         谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en      Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
+// @description:zh      谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:zh-TW   谷歌、百度、必應的搜索引擎跳轉工具，腳本默認自動更新檢測，可在菜單自定義設置必應按鈕，搜索引擎跳轉的最佳體驗。
 // @namespace       https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
