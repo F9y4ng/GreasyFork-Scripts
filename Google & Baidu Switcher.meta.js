@@ -1,7 +1,6 @@
 // ==UserScript==
 // @name            Google & baidu Switcher (ALL in One)
 // @name:zh         谷歌、百度、必应的搜索引擎跳转工具
-// @name:zh-CN      谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
 // @version     3.3.20210704.1
 // @author      F9y4ng
