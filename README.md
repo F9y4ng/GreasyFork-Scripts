@@ -36,7 +36,7 @@
 
   > [**重要说明**](#)
   >
-  > 若要关闭更新检测功能，请更新至[Version 3.3.20210704.1](#)，然后将代码中 ```const isVersionDetection = true; // Set "false" to turn off the Version Detection forever.``` 设置为```const isVersionDetection = false;```即可永久关闭更新检测。
+  > 若要关闭更新检测功能，请将代码中 ```const isVersionDetection = true;``` 设置为```const isVersionDetection = false;```即可永久关闭更新检测。
   >
   > 若要减少更新频率，请将代码中```const expireTime = "4h"```的 4h（4小时）修改为20h（20小时）或 5d（5天）或 2w（２周）等更长的时间。修改完成保存后重新打开页面或刷新页面，打开TamperMonkey/ViolentMonkey脚本菜单，根据菜单中的提示，进行缓存时间的重置操作即可。([首次修改刷新页面后自动应用，无需任何菜单操作。](#)）
 
