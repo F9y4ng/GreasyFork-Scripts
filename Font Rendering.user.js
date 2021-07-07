@@ -4,7 +4,7 @@
 // @name:zh           字体渲染（自用脚本）
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:en           Font Rendering (Customized)
-// @version           2021.07.06.3
+// @version           2021.07.07.1
 // @author            F9y4ng
 // @description       让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @description:zh    让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
@@ -1320,15 +1320,8 @@
     // Get Promise Value
     let temp = await GMgetValue("_fonts_set_");
     let exSite = await GMgetValue("_Exclude_site_");
-
-    /* Real-time update data */
-
     if (!temp && !exSite) {
       sessionStorage.setItem("_notice_", 1);
-    } else {
-      setInterval(async () => {
-        exSite = await GMgetValue("_Exclude_site_");
-      }, refreshTime);
     }
 
     /* DialogBox for the first visit after upgrading */
@@ -1649,6 +1642,7 @@
               titleText: "禁止字体渲染",
             });
             if (await frDialog.respond()) {
+              exSite = await GMgetValue("_Exclude_site_");
               exSite.push(location.hostname);
               GMsetValue("_Exclude_site_", exSite);
               location.reload();
@@ -1664,6 +1658,7 @@
               titleText: "恢复字体渲染",
             });
             if (await frDialog.respond()) {
+              exSite = await GMgetValue("_Exclude_site_");
               siteIndex = real_Time_Update(exSite, location.hostname);
               exSite.splice(siteIndex, 1);
               GMsetValue("_Exclude_site_", exSite);
