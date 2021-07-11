@@ -39,7 +39,7 @@
 
   /* customize */
 
-  const isBackupFunction = true; // (Experimental) set "true" to use Trial of local backup function.
+  const isBackupFunction = true; // (Beta) set "true" to use Trial of local backup function.
   const isdebug = false; // set "true" to debug scripts, May cause script response slower.
 
   /* Perfectly Compatible For Greasemonkey4.0+, TamperMonkey, ViolentMonkey * F9y4ng * 20210609 */
