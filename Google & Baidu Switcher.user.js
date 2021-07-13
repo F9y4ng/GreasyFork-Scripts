@@ -4,7 +4,7 @@
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh         谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.3.20210704.1
+// @version         3.3.20210713.2
 // @author          F9y4ng
 // @description         谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en      Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
@@ -27,7 +27,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            完善不同语种的代码名称及介绍。
+// @note            新增google no country redirect的判断。\n修正google、bing下按钮的新样式。\n修正bugs，优化代码。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -616,6 +616,7 @@
       ggyx: defCon.randString(5, true),
       bbyx: defCon.randString(5, true),
       scrollspan: defCon.randString(8, true),
+      scrollspan2: defCon.randString(8, true),
       scrollbars: defCon.randString(8, true),
       scrollbars2: defCon.randString(8, true),
       isUseBing: (() => {
@@ -684,8 +685,8 @@
                 <input type="button" title="百度一下" value="百度一下"/>
             </span>`),
         StyleCode: CONST.isUseBing
-          ? `#${CONST.rndidName}{margin:3px 4px 0 -5px}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd;}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-2px}.${CONST.scrollspan}{display:inline-block;margin:0;height:26px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}.${CONST.scrollspan2}{display:inline-block;margin-top:-4px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}#${CONST.bdyx} input{cursor:pointer;padding:1px 1px 1px 6px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bbyx} input{cursor:pointer;padding:1px 6px 1px 1px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover,#${CONST.bbyx} input:hover{background:#2b7de9;}`
-          : `#${CONST.rndidName}{margin:3px 4px 0 -5px}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd}.${CONST.scrollspan}{display:inline-block;margin:0;height:26px!important;font-size:13px!important;font-weight:normal!important; text-shadow:0 0 1px #fff!important}.${CONST.scrollspan2}{display:inline-block;margin-top:-4px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #fff!important}#${CONST.bdyx} input{cursor:pointer;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-radius:24px;width:90px;height:38px;font-size:14px;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover{background:#2b7de9;}`,
+          ? `#${CONST.rndidName}{margin:3px 4px 0 -5px}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd;}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-2px}.${CONST.scrollspan}{display:inline-block;margin:0;min-height:26px}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}.${CONST.scrollbars2}{display:inline-block;margin-top:-4px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}#${CONST.bdyx} input{cursor:pointer;padding:1px 1px 1px 6px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bbyx} input{cursor:pointer;padding:1px 6px 1px 1px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover,#${CONST.bbyx} input:hover{background:#2b7de9;}`
+          : `#${CONST.rndidName}{margin:3px 4px 0 -5px}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd}.${CONST.scrollspan}{display:inline-block;margin:0;min-height:26px}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-size:13px!important;font-weight:normal!important; text-shadow:0 0 1px #fff!important}.${CONST.scrollbars2}{display:inline-block;margin-top:-4px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #fff!important}#${CONST.bdyx} input{cursor:pointer;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-radius:24px;width:90px;height:38px;font-size:14px;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover{background:#2b7de9;}`,
       },
       bing: {
         SiteTypeID: 3,
@@ -695,14 +696,14 @@
         HtmlCode: CONST.isUseBing
           ? String(`
           <span id="${CONST.bdyx}">
-              <input type="button" title="百度一下" value="百度"/>
+              <input type="button" title="百度一下" value="百度一下"/>
           </span>
           <span id="${CONST.ggyx}">
               <input type="button" title="Google一下" value="Google"/>
           </span>`)
           : ``,
         StyleCode: CONST.isUseBing
-          ? `#${CONST.rndidName}{height:44px;width:120px;margin:2px 5px 2px 0}#${CONST.bdyx} input,#${CONST.ggyx} input{cursor:pointer;width:auto 60px;height:40px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;margin-left:-1px;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px;font-weight:700;border-radius:4px;margin:5px 0;}.${CONST.scrollspan}{height:32px!important}.${CONST.scrollspan}{height:30px!important;padding:4px}#${CONST.bdyx} input:hover,#${CONST.ggyx} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border:2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7;}`
+          ? `#${CONST.rndidName}{height:44px;width:120px;margin:2px 0}#${CONST.bdyx} input{cursor:pointer;min-width:60px;height:37px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px;font-weight:900;border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px}#${CONST.ggyx} input{cursor:pointer;min-width:60px;height:37px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;font-family:"Microsoft YaHei",sans-serif!important;font-size:17px;font-weight:900;border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 -3px;padding:0 18px 0 12px}.${CONST.scrollspan}{margin-right:5px!important}.${CONST.scrollbars}{text-decoration:none!important;padding-top:2px!important;border-radius:4px!important;max-height:33px;padding:0 12px!important;margin-right:2px!important}#${CONST.bdyx} input:hover,#${CONST.ggyx} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border:2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7;}`
           : ``,
       },
       other: { SiteTypeID: 0 },
@@ -920,9 +921,9 @@
               // Bing image fixed
               if (document.querySelector(".b_searchboxForm") && /^images$/.test(CONST.vim.trim())) {
                 if (location.href.includes("view=detailV2") && CONST.isUseBing) {
-                  document.querySelector(".b_searchboxForm").setAttribute("style", "width:122.5%!important");
+                  document.querySelector(".b_searchboxForm").setAttribute("style", "width:max-content!important;padding-right:10px!important");
                   document.querySelectorAll(`#${CONST.rndidName} input`).forEach(item => {
-                    item.style = "height:35px!important";
+                    item.style = "height:35px!important;border-radius:4px!important;padding:0 12px;";
                   });
                 }
               }
@@ -976,9 +977,10 @@
         let scrollbars, height, e;
         switch (curretSite.SiteTypeID) {
           case newSiteType.GOOGLE:
+            getGlobalGoogle("www.google.com");
             // Google image fixed
             e = /^isch$/.test(CONST.vim.trim());
-            e ? (scrollbars = `${CONST.scrollspan2}`) : (scrollbars = `${CONST.scrollspan}`);
+            e ? (scrollbars = `${CONST.scrollbars2}`) : (scrollbars = `${CONST.scrollbars}`);
             e ? (height = -14) : (height = 35);
             scrollButton(`#${CONST.rndidName}`, `${CONST.scrollspan}`, height);
             scrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, scrollbars, height);
@@ -989,8 +991,8 @@
           case newSiteType.BING:
             if (/^(images|videos)$/.test(CONST.vim.trim()) && CONST.isUseBing) {
               scrollButton(`#${CONST.rndidName}`, `${CONST.scrollspan}`, 50);
-              scrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, `${CONST.scrollspan}`, 50);
-              scrollButton(`#${CONST.rndidName} #${CONST.ggyx} input`, `${CONST.scrollspan}`, 50);
+              scrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, `${CONST.scrollbars}`, 50);
+              scrollButton(`#${CONST.rndidName} #${CONST.ggyx} input`, `${CONST.scrollbars}`, 50);
             } else {
               debug(`//-> No scrolling detecting.`);
             }
@@ -1002,7 +1004,7 @@
         return true;
       },
 
-      RAF: function () {
+      startRAFInterval: function () {
         RAFInterval(
           () => {
             if (!document.querySelector(`.${CONST.rndclassName}`)) {
@@ -1015,6 +1017,7 @@
           200,
           true
         );
+        return document.querySelector(`.${CONST.rndclassName}`) && document.querySelector(`#${CONST.rndidName}`);
       },
 
       doSwitch: function () {
@@ -1032,11 +1035,10 @@
               }
               return;
             } else {
+              this.startRAFInterval();
               const callback = mutations => {
                 mutations.forEach(mutation => {
-                  if (document.querySelector(`.${CONST.rndclassName}`) && document.querySelector(`#${CONST.rndidName}`)) {
-                    debug(`//-> Already Insert Button & CSS.`);
-                  } else {
+                  if (!(document.querySelector(`.${CONST.rndclassName}`) && document.querySelector(`#${CONST.rndidName}`))) {
                     debug(
                       "%c[GB-MutationObserver]\n%c(%c%s%c has changed: %c%s%c)",
                       "font-weight:bold;color:olive",
@@ -1045,7 +1047,7 @@
                       mutation.type,
                       "color:0",
                       "font-weight:bold;color:red",
-                      defCon.titleCase(!(this.RAF() instanceof Object)),
+                      defCon.titleCase(!!this.startRAFInterval()),
                       "color:0"
                     );
                   }
@@ -1077,6 +1079,39 @@
     };
 
     /* important functions */
+
+    function getGlobalGoogle(google) {
+      if (top.location.hostname !== google) {
+        if (!document.querySelector("#_global")) {
+          const h = document.querySelector("body");
+          const s = document.createElement("iframe");
+          s.id = "_global";
+          s.width = 0;
+          s.height = 0;
+          s.src = `https://${google}/ncr`;
+          try {
+            h.appendChild(s);
+            s.onload = function () {
+              GMnotification(
+                Notice.noticeHTML(`<dd class="${Notice.center}"><span>智能跳转</span>即将跳转至Google国际站：<br/>${google}</dd>`),
+                `${Notice.info}`,
+                true,
+                30,
+                {
+                  onClose: [
+                    function () {
+                      location.href = top.location.href.replace(top.location.hostname, google);
+                    },
+                  ],
+                }
+              );
+            };
+          } catch (e) {
+            error("//->", e.name);
+          }
+        }
+      }
+    }
 
     function scrollButton(paraName, classNameIn, scrollSize) {
       debug(`//-> ${curretSite.SiteName} Scrolling Detecting: ${paraName}`);
