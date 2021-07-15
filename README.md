@@ -32,7 +32,8 @@
   重大版本更新，请使用前仔细查看 [**脚本使用说明**](https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/Google_baidu_Switcher_(ALL_in_One))。```New```
 
   ```text
-  @ 修正google no country redirect的判断的bug。\n修正bug，优化代码。
+  @ 修正google no country redirect的判断的bug。
+  @ 修正bug，优化代码。
   ```
 
   > [**重要说明**](#)
