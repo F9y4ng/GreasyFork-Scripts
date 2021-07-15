@@ -4,7 +4,7 @@
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh         谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.3.20210715.1
+// @version         3.3.20210715.2
 // @author          F9y4ng
 // @description         谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en      Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
@@ -27,12 +27,13 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            修正google no country redirect的判断的bug。\n修正bug，优化代码。
+// @note            修正google ncr的判断在firefox的兼容性，以及其他脚本插件下的兼容性。\n修正bug，优化代码。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
 // @grant           GM_unregisterMenuCommand
 // @grant           GM_openInTab
+// @grant           GM.openInTab
 // @grant           GM_getValue
 // @grant           GM.getValue
 // @grant           GM_setValue
@@ -93,6 +94,7 @@
     isNeedUpdate: 0,
     updateNote: "",
     restTime: 0,
+    _option: isGM ? false : { active: true, insert: true, setParent: true },
     durationTime: t => {
       let w, d, h, m, s;
       const wks = Math.floor(t / 1000 / 60 / 60 / 24 / 7);
@@ -152,9 +154,7 @@
     GMdeleteValue = GM.deleteValue;
     GMregisterMenuCommand = GM.registerMenuCommand;
     GMunregisterMenuCommand = () => {};
-    GMopenInTab = (a, b) => {
-      window.open(a, defCon.randString(b ? b.length : 10).slice(-6));
-    };
+    GMopenInTab = GM.openInTab;
   } else {
     GMsetValue = GM_setValue;
     GMgetValue = GM_getValue;
@@ -849,11 +849,7 @@
           }
         }
         in_Use_feedBack_ID = GMregisterMenuCommand("\ufff9\ud83e\udde1【建议反馈】说出您的意见！", () => {
-          GMopenInTab(`${defCon.support ? defCon.support : "https://greasyfork.org/scripts/12909/feedback"}`, {
-            active: true,
-            insert: true,
-            setParent: true,
-          });
+          GMopenInTab(`${defCon.support ? defCon.support : "https://greasyfork.org/scripts/12909/feedback"}`, defCon._option);
         });
       },
 
@@ -958,11 +954,7 @@
                   default:
                     break;
                 }
-                GMopenInTab(decodeURI(gotoUrl + getSearchValue()), {
-                  active: true,
-                  insert: true,
-                  setParent: true,
-                });
+                GMopenInTab(decodeURI(gotoUrl + getSearchValue()), defCon._option);
               });
             });
           }
@@ -975,8 +967,8 @@
         let scrollbars, height, e;
         switch (curretSite.SiteTypeID) {
           case newSiteType.GOOGLE:
-            getGlobalGoogle("www.google.com");
             // Google image fixed
+            getGlobalGoogle("www.google.com");
             e = /^isch$/.test(CONST.vim.trim());
             e ? (scrollbars = `${CONST.scrollbars2}`) : (scrollbars = `${CONST.scrollbars}`);
             e ? (height = -14) : (height = 35);
@@ -1080,35 +1072,29 @@
 
     function getGlobalGoogle(google) {
       if (getRealHostName() !== getRealHostName(google) && !sessionStorage.getItem("_global_google_")) {
-        if (!document.querySelector("#_global")) {
-          const h = document.querySelector("body");
-          const s = document.createElement("iframe");
-          s.id = "_global";
-          s.sandbox = "allow-same-origin allow-scripts allow-forms allow-top-navigation";
-          s.width = 0;
-          s.height = 0;
-          s.src = `https://${google}/ncr`;
-          try {
-            h.appendChild(s);
-            s.onload = function () {
-              GMnotification(
-                Notice.noticeHTML(`<dd class="${Notice.center}"><span>智能跳转</span>即将跳转至Google国际站：<br/>${google}</dd>`),
-                `${Notice.info}`,
-                true,
-                30,
-                {
-                  onClose: [
-                    function () {
-                      location.href = top.location.href.replace(top.location.hostname, google);
-                    },
-                  ],
-                }
-              );
-            };
-            sessionStorage.setItem("_global_google_", 1);
-          } catch (e) {
-            error("//->", e.name);
-          }
+        sessionStorage.setItem("_global_google_", 1);
+        try {
+          setTimeout(() => {
+            defCon.s = GMopenInTab(`https://${google}/ncr`, true);
+            GMnotification(
+              Notice.noticeHTML(`<dd class="${Notice.center}"><span>智能跳转</span>即将跳转至Google国际站：<br/>${google}</dd>`),
+              `${Notice.info}`,
+              true,
+              20,
+              {
+                onClose: [
+                  function () {
+                    if (defCon.s) {
+                      defCon.s.close();
+                    }
+                    location.href = top.location.href.replace(top.location.hostname, google);
+                  },
+                ],
+              }
+            );
+          }, 500);
+        } catch (e) {
+          console.log("//->", e);
         }
       }
     }
