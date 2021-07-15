@@ -23,18 +23,16 @@
   >
   > 新版脚本中内置了默认的字体渲染样式，该样式为我本地计算机的配置，可能并不能与你的计算机应用相同的配置参数，所以，首次使用时，如果出现渲染效果没有达到理想状态，属于正常情况。请你根据**自有显示器的配置及设置**的情况，通过[脚本配置界面](#脚本设置界面)修正相关的参数来达到最佳的显示效果。如在使用过程中遇到错误或使用问题，请到 [@Github](https://github.com/F9y4ng/GreasyFork-Scripts/issues) 或 [@Greasyfork](https://greasyfork.org/scripts/416688/feedback) 给我留言反馈。
 
-- ## **Google & Baidu Switcher.user.js** (`version 3.3.20210713.2`)
+- ## **Google & Baidu Switcher.user.js** (`version 3.3.20210715.1`)
 
   简介：最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 
-  > `version 3.3.20210713.2`
+  > `version 3.3.20210715.1`
 
   重大版本更新，请使用前仔细查看 [**脚本使用说明**](https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/Google_baidu_Switcher_(ALL_in_One))。```New```
 
   ```text
-  + 新增google no country redirect的判断。
-  @ 修正google、bing下按钮的新样式。
-  @ 修正bugs，优化代码。
+  @ 修正google no country redirect的判断的bug。\n修正bug，优化代码。
   ```
 
   > [**重要说明**](#)

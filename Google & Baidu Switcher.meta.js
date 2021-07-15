@@ -6,5 +6,5 @@
 // @version     3.3.20210713.2
 // @author      F9y4ng
 // @namespace   https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
-// @note        新增google no country redirect的判断。\n修正google、bing下按钮的新样式。\n修正bugs，优化代码。
+// @note        修正google no country redirect的判断的bug。\n修正bug，优化代码。
 // ==/UserScript==

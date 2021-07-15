@@ -4,7 +4,7 @@
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh         谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.3.20210713.2
+// @version         3.3.20210715.1
 // @author          F9y4ng
 // @description         谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en      Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
@@ -27,7 +27,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            新增google no country redirect的判断。\n修正google、bing下按钮的新样式。\n修正bugs，优化代码。
+// @note            修正google no country redirect的判断的bug。\n修正bug，优化代码。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -888,7 +888,6 @@
           const doStyName = `${CONST.rndclassName}`;
           const doStyle = CONST.noticeCss + curretSite.StyleCode;
           addStyle(doStyle, doStyName, "head");
-          return true;
         } catch (e) {
           error("//-> %csearchManager.insertCSS:\n%c%s", "font-weight:bold", "font-weight:normal", e);
         }
@@ -967,7 +966,6 @@
               });
             });
           }
-          return true;
         } catch (e) {
           error("//-> %csearchManager.insertSearchButton:\n%c%s", "font-weight:bold", "font-weight:normal", e);
         }
@@ -1001,17 +999,17 @@
             debug(`//-> No scrolling detecting.`);
             break;
         }
-        return true;
       },
 
       startRAFInterval: function () {
         RAFInterval(
           () => {
             if (!document.querySelector(`.${CONST.rndclassName}`)) {
-              return this.insertCSS();
+              this.insertCSS();
             }
             if (!document.querySelector(`#${CONST.rndidName}`)) {
-              return this.insertSearchButton() && this.scrollDetect();
+              this.insertSearchButton();
+              this.scrollDetect();
             }
           },
           200,
@@ -1040,7 +1038,7 @@
                 mutations.forEach(mutation => {
                   if (!(document.querySelector(`.${CONST.rndclassName}`) && document.querySelector(`#${CONST.rndidName}`))) {
                     debug(
-                      "%c[GB-MutationObserver]\n%c(%c%s%c has changed: %c%s%c)",
+                      "%c[GB-MutationObserver]\n%c(%c%s%c: %c%s%c)",
                       "font-weight:bold;color:olive",
                       "color:0",
                       "color:olive",
@@ -1081,11 +1079,12 @@
     /* important functions */
 
     function getGlobalGoogle(google) {
-      if (top.location.hostname !== google) {
+      if (getRealHostName() !== getRealHostName(google) && !sessionStorage.getItem("_global_google_")) {
         if (!document.querySelector("#_global")) {
           const h = document.querySelector("body");
           const s = document.createElement("iframe");
           s.id = "_global";
+          s.sandbox = "allow-same-origin allow-scripts allow-forms allow-top-navigation";
           s.width = 0;
           s.height = 0;
           s.src = `https://${google}/ncr`;
@@ -1106,11 +1105,17 @@
                 }
               );
             };
+            sessionStorage.setItem("_global_google_", 1);
           } catch (e) {
             error("//->", e.name);
           }
         }
       }
+    }
+
+    function getRealHostName(_index) {
+      _index = _index ? _index : top.location.hostname;
+      return _index.substring(_index.indexOf("google"));
     }
 
     function scrollButton(paraName, classNameIn, scrollSize) {
