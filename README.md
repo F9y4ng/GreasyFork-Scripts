@@ -33,7 +33,7 @@
 
   ```text
   @ 修正google ncr的判断在firefox下的兼容性，以及与多种脚本扩展的兼容性。
-  ! 已知bug，Firefox下使用greasemonkey插件运行脚本时，由于内置函数的缺陷，使得新开窗口不能自动关闭的bug.
+  ! 已知bug，Firefox下使用greasemonkey扩展运行脚本时，由于内置函数的缺陷，使得新开窗口不能自动关闭的bug.
   @ 修正bug，优化代码。
   ```
 
