@@ -4,7 +4,7 @@
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh         谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.3.20210715.2
+// @version         3.4.20210721.1
 // @author          F9y4ng
 // @description         谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en      Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
@@ -27,7 +27,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            修正google ncr的判断在firefox的兼容性，以及其他脚本插件下的兼容性。\n修正bug，优化代码。
+// @note            新增脚本设置页面，无需修改代码来设置参数。\n修正bugs，优化代码。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -51,16 +51,7 @@
 
   /* customize */
 
-  const isVersionDetection = true; // Set "false" to turn off the Version Detection forever.
   const isdebug = false; // set "true" to debug scripts, May cause script response slower.
-
-  /* The following variable is used to define the expiration time of version detection.
-   * In order to reduce the query pressure on the script source server as much as possible,
-   * Please don`t set the Query-cache expiration time too short. So we set 4 hours by default,
-   * And to reduce update-tips frequency, you can extend the expireTime to a few days, or even weeks.
-   * (s = second, m = minute, h = hour, d = day, w = week) */
-
-  const expireTime = "4h";
 
   /* Perfectly Compatible For Greasemonkey4.0+, TamperMonkey, ViolentMonkey * F9y4ng * 20210609 */
 
@@ -125,23 +116,36 @@
       return s;
     },
     isUpgrade: Boolean(GetUrlParam("Zn")),
-    lastRuntime: new Date().toLocaleString("en-US", {
-      timeZoneName: "short",
-      hour12: false,
-    }),
+    lastRuntime: () => {
+      return new Date().toLocaleString("en-US", {
+        timeZoneName: "short",
+        hour12: false,
+      });
+    },
   };
   defCon.rName = defCon.randString(7, true);
-  const _expireTime = /(?!^0)^[0-9]+[smhdw]$/i.test(expireTime) ? expireTime : "4h";
 
   const Notice = {
     noticejs: defCon.randString(7, true),
-    item: defCon.randString(4, true),
-    close: defCon.randString(4, true),
-    center: defCon.randString(4, true),
-    success: defCon.randString(6, true),
-    warning: defCon.randString(6, true),
-    info: defCon.randString(5, true),
-    error: defCon.randString(5, true),
+    item: defCon.randString(5, true),
+    close: defCon.randString(5, true),
+    center: defCon.randString(5, true),
+    success: defCon.randString(7, true),
+    warning: defCon.randString(7, true),
+    info: defCon.randString(7, true),
+    error: defCon.randString(7, true),
+    configuration: defCon.randString(7, true),
+    fc: defCon.randString(8, true),
+    fcSave: defCon.randString(5, true),
+    fcClose: defCon.randString(5, true),
+    fcUpdate: defCon.randString(6, true),
+    isUpdate: defCon.randString(5, true),
+    fcExpire: defCon.randString(6, true),
+    Expire: defCon.randString(6, true),
+    timeUnit: defCon.randString(6, true),
+    fcFeedback: defCon.randString(6, true),
+    fcSubmit: defCon.randString(6, true),
+    feedback: defCon.randString(5, true),
     animated: defCon.randString(7, true),
     noticeHTML: str => {
       return String(`<div class="${defCon.rName}"><dl>${str}<dl></div>`);
@@ -166,23 +170,22 @@
 
   /* Refactoring functions of GMsetValue/GMgetValue/GMdeleteValue with Expire */
 
-  function GMsetExpire(key, value, expire) {
+  function GMsetExpire(key, value) {
     let obj = {
       data: value,
       time: Date.now(),
-      expire: /(?!^0)^[0-9]+[smhdw]$/i.test(expire) ? expire : "4h",
     };
-    GMsetValue(key, JSON.stringify(obj));
+    GMsetValue(key, defCon.encrypt(JSON.stringify(obj)));
   }
 
-  function GMgetExpire(key, val) {
+  function GMgetExpire(key, val, _expire) {
     let expire, expires, expireTime;
     if (!val) {
       return val;
     }
-    val = JSON.parse(val);
-    if (val.expire) {
-      /(?!^0)^[0-9]+[smhdw]$/i.test(val.expire) ? (expire = val.expire) : (expire = "4h");
+    val = JSON.parse(defCon.decrypt(val));
+    if (_expire) {
+      /(?!^0)^[0-9]+[smhdw]$/i.test(_expire) ? (expire = _expire) : (expire = "4h");
       expire = expire
         .replace(/w/i, "*7*24*3600*1000")
         .replace(/d/i, "*24*3600*1000")
@@ -204,7 +207,7 @@
 
   /* Refactoring GMnotification Function */
 
-  GMnotification = (text = "", type = `${Notice.info}`, closeWith = true, timeout = 30, { ...options } = {}) => {
+  GMnotification = (text = "", type = `${Notice.info}`, closeWith = true, timeout = 30, { ...options } = {}, position = "bottomRight") => {
     /* eslint-disable no-undef */
     try {
       new NoticeJs({
@@ -213,6 +216,7 @@
         closeWith: closeWith ? ["button"] : ["click"],
         timeout: timeout,
         callbacks: { ...options },
+        position: position,
       }).show();
     } catch (e) {
       error("//-> %cGMnotification:\n%c%s", "font-weight:bold", "font-weight:normal", e);
@@ -272,11 +276,11 @@
 
   if (window.self === window.top) {
     console.info(
-      `%c[GB-Init]%c\nVersion: ${defCon.curVersion} %c[%s]%c\nExtension: %s\nlastRuntime: ${defCon.lastRuntime}`,
+      `%c[GB-Init]%c\nVersion: ${defCon.curVersion} %c[%s]%c\nExtension: %s\nlastRuntime: ${defCon.lastRuntime()}`,
       "font-weight:bold;color:dodgerblue",
       "color:0",
       "color:snow",
-      checkVersion(defCon.isUpgrade) instanceof Object === isVersionDetection,
+      defCon.titleCase(checkVersion(defCon.isUpgrade) instanceof Object),
       "color:0",
       defCon.titleCase(handlerInfo)
     );
@@ -368,25 +372,42 @@
 
   async function checkVersion(s = false) {
     let t, setResult, info;
-    const m = await GMgetValue("_is_Ver_Det_");
-    isVersionDetection ? (setResult = m === undefined ? isVersionDetection : Boolean(m)) : ((setResult = false), GMsetValue("_is_Ver_Det_", false));
-    const _expire_time_ = await GMgetValue("_expire_time_");
-    if (_expire_time_) {
-      defCon._expireTime = _expire_time_;
-      debug("//-> Load expireTime from cache.");
+    const n = await GMgetValue("_configuration_");
+    let useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit, _data;
+    if (!n) {
+      useBing = 0;
+      VerDetAuto = true;
+      checkUpdate = true;
+      timeNumber = 4;
+      timeUnit = "h";
+      _data = { useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit };
+      console.warn(
+        "%c[GB-Warning]%c\nThis is your first visit, the Bing search button will not be inserted by default.",
+        "font-weight:bold;color:salmon",
+        "color:1"
+      );
+      // initialization
+      GMdeleteValue("_Check_Version_Expire_");
+      GMdeleteValue("_expire_time_");
+      GMdeleteValue("_is_Ver_Det_");
+      GMdeleteValue("_if_Use_Bing_");
+      GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
     } else {
-      if (_expireTime !== "4h") {
-        GMsetValue("_expire_time_", _expireTime);
-        // Destroy cache if expireTime changed.
-        GMdeleteValue("_Check_Version_Expire_");
-        console.warn(`%c[GB-Update]%c\nThe expireTime is set to ${_expireTime}.`, "font-weight:bold;color:crimson", "color:0");
-      }
-      defCon._expireTime = _expireTime;
+      const _n = JSON.parse(defCon.decrypt(n));
+      useBing = _n.useBing;
+      VerDetAuto = _n.VerDetAuto;
+      checkUpdate = _n.checkUpdate;
+      timeNumber = _n.timeNumber;
+      timeUnit = _n.timeUnit;
+      _data = { useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit };
     }
+    setResult = checkUpdate ? Boolean(VerDetAuto) : false;
+    const _expire_time = String(timeNumber + timeUnit);
+    const _expire_time_ = /(?!^0)^[0-9]+[smhdw]$/i.test(_expire_time) ? _expire_time : "4h";
     if (setResult) {
       // load cache
       const exp = await GMgetValue("_Check_Version_Expire_");
-      const cache = GMgetExpire("_Check_Version_Expire_", exp);
+      const cache = GMgetExpire("_Check_Version_Expire_", exp, _expire_time_);
       // Checking the local cache to reduce server requests
       if (!cache) {
         // first: greasyfork
@@ -412,23 +433,23 @@
         }
         // Set value with expire
         if (t !== undefined) {
-          GMsetExpire("_Check_Version_Expire_", t, defCon._expireTime);
-          debug("//-> checkVersion: Loading Data from Server.");
+          GMsetExpire("_Check_Version_Expire_", t);
+          debug("//-> %ccheckVersion: Loading Data from Server.", "background-color:darkorange;color:snow");
         } else {
           console.error(
-            "%c[GB-Update]\n%cSome unknown exceptions cause version detection failure, most likely by a network error. Please try again.",
+            "%c[GB-Update]\n%cSome unknown exceptions cause version detection failure, most likely by a network error. Please try again later.",
             "font-weight:bold;color:red",
             "font-weight:bold;color:darkred"
           );
         }
       } else {
         t = cache;
-        debug("//-> checkVersion: Loading Data from Cache.");
+        debug("//-> %ccheckVersion: Loading Data from Cache.", "background-color:green;color:snow");
       }
       // Resolution return data
       if (typeof t !== "undefined") {
         const lastestVersion = defCon.decrypt(t[1]);
-        defCon.isNoticed = sessionStorage.getItem("nCount") || 0;
+        defCon.isNoticed = Number(sessionStorage.getItem("nCount")) || 0;
         defCon.isNeedUpdate = cache ? compareVersion(defCon.curVersion, lastestVersion) : t[0];
         const updateNote = ((w = "") => {
           if (defCon.decrypt(t[2])) {
@@ -452,7 +473,9 @@
         );
         let sourceSite = defCon.titleCase(recheckURLs.hostname).split(".")[0];
         sourceSite = cache ? `${sourceSite} on Cache` : sourceSite;
-        const repo = cache ? `\nCache expire:${defCon.durationTime(defCon.restTime)}\n` : `\nExpiration time: ${defCon._expireTime}\n`;
+        const repo = cache
+          ? `\nCache expire:${defCon.durationTime(defCon.restTime)}\nDetection: ${defCon.lastRuntime()}\n`
+          : `\nExpiration: ${_expire_time_}\nDetection: ${defCon.lastRuntime()}\n`;
 
         switch (defCon.isNeedUpdate) {
           case 2:
@@ -461,8 +484,7 @@
                 String(
                   `%c[GB-Update]%c\nWe found a new version, But %cthe latest version ` +
                     `%c${lastestVersion}%c is lower than your local version %c${defCon.curVersion}.%c\n\n` +
-                    `Please confirm whether you need to upgrade your local script, and then you need to update it manually.\n\n` +
-                    `If you no longer need the update prompt, please set "isVersionDetection" to "false" in your local code!\n` +
+                    `Please confirm whether you need to upgrade your local script, and then you need to update it manually.\n` +
                     `${repo}(${sourceSite})`
                 ),
                 "font-weight:bold;color:crimson",
@@ -488,7 +510,7 @@
                   ),
                   `${Notice.error}`,
                   true,
-                  200,
+                  300,
                   {
                     onClose: [
                       function () {
@@ -498,10 +520,11 @@
                   }
                 );
               }, 500);
-              GMsetValue("_is_Ver_Det_", false);
+              _data.VerDetAuto = false;
+              GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
               sessionStorage.setItem("nCount", ++defCon.isNoticed);
             }
-            break;
+            return false;
           case 1:
             if (window.self === window.top) {
               console.info(
@@ -528,7 +551,7 @@
                     `<dt>${defCon.scriptName}</dt>\
                       <dd><span>发现版本更新</span>最新版本 <i>${lastestVersion}</i>，如果您现在需要更新脚本，请点击这里完成升级安装。</dd>\
                       ${updateNote}<dd>[ ${sourceSite} ]<kbd style="float:right;font-size:11px;">\
-                      ( 缓存时间：${defCon.showDate(defCon._expireTime)} )</kbd></dd>${showdDetail}`
+                      ( 缓存时间：${defCon.showDate(_expire_time_)} )</kbd></dd>${showdDetail}`
                   ),
                   `${Notice.warning}`,
                   false,
@@ -552,7 +575,7 @@
                             true,
                             100
                           );
-                        }, 2e3);
+                        }, 3e3);
                       },
                     ],
                   }
@@ -560,10 +583,11 @@
               }, 500);
               sessionStorage.setItem("nCount", ++defCon.isNoticed);
             }
-            break;
+            return false;
           default:
             if (window.self === window.top) {
-              s ? (info = console.info.bind(console)) : (info = debug.bind(console));
+              info = !defCon.isNoticed || s ? console.info.bind(console) : debug.bind(console);
+              sessionStorage.setItem("nCount", 1);
               info(
                 `%c[GB-Update]%c\nCurretVersion: %c${defCon.curVersion}%c is up-to-date!${repo}(${sourceSite})`,
                 "font-weight:bold;color:darkcyan",
@@ -579,34 +603,48 @@
                     `<dt>${defCon.scriptName}</dt>\
                       <dd><span>更新成功</span>当前版本 <i>${defCon.curVersion}</i> 已为最新！</dd>\
                       <dd>[ ${sourceSite} ]<kbd style="float:right;font-size:11px;">\
-                      ( 缓存时间：${defCon.showDate(defCon._expireTime)} )</kbd></dd>`
+                      ( 缓存时间：${defCon.showDate(_expire_time_)} )</kbd></dd>`
                   ),
                   `${Notice.success}`
                 );
               }, 100);
             }
-            break;
+            return true;
         }
       }
     } else {
       if (window.self === window.top) {
-        console.warn(
-          `%c[GB-Update]%c\nVersion detection turned off ${!isVersionDetection ? "Manually" : "Automatically"}.`,
-          "font-weight:bold;color:red",
-          "color:0"
-        );
+        console.warn(`%c[GB-Update]%c\nVersion detection turned off ${!checkUpdate ? "Manually" : "Automatically"}.`, "font-weight:bold;color:red", "color:0");
       }
+      return false;
     }
   }
 
   /* Menus & Button insert  */
 
   !(async function () {
-    // Get Promise Value
-    const is_Use_Bing = parseInt(await GMgetValue("_if_Use_Bing_"));
-    const is_Ver_Det = await GMgetValue("_is_Ver_Det_");
-
     /* Set Default Value & initialize */
+
+    const _configuration = await GMgetValue("_configuration_");
+
+    let useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit, _data;
+    if (!_configuration) {
+      useBing = 0;
+      VerDetAuto = true;
+      checkUpdate = true;
+      timeNumber = 4;
+      timeUnit = "h";
+      _data = { useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit };
+      GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
+    } else {
+      const _configuration_ = JSON.parse(defCon.decrypt(_configuration));
+      useBing = _configuration_.useBing;
+      VerDetAuto = _configuration_.VerDetAuto;
+      checkUpdate = _configuration_.checkUpdate;
+      timeNumber = _configuration_.timeNumber;
+      timeUnit = _configuration_.timeUnit;
+      _data = { useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit };
+    }
 
     const CONST = {
       isSecurityPolicy: false,
@@ -619,22 +657,10 @@
       scrollspan2: defCon.randString(8, true),
       scrollbars: defCon.randString(8, true),
       scrollbars2: defCon.randString(8, true),
-      isUseBing: (() => {
-        if (isNaN(is_Use_Bing)) {
-          GMsetValue("_if_Use_Bing_", 0);
-          console.warn(
-            "%c[GB-Warning]%c\nThis is your first visit, the Bing search button will not be inserted by default.",
-            "font-weight:bold;color:salmon",
-            "color:1"
-          );
-          return false;
-        } else {
-          return Boolean(is_Use_Bing);
-        }
-      })(),
-      isVDResult: isVersionDetection ? (is_Ver_Det === undefined ? isVersionDetection : Boolean(is_Ver_Det)) : false,
+      isUseBing: Boolean(useBing),
+      isVDResult: checkUpdate ? Boolean(VerDetAuto) : false,
     };
-    CONST.noticeCss = `@charset "UTF-8";.${Notice.animated}{animation-duration:1s;animation-fill-mode:both}.${Notice.animated}.infinite{animation-iteration-count:infinite}.${Notice.animated}.hinge{animation-duration:2s}.${Notice.animated}.bounceIn,.${Notice.animated}.bounceOut,.${Notice.animated}.flipOutX,.${Notice.animated}.flipOutY{animation-duration:.75s}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.fadeOut{animation-name:fadeOut}#${CONST.rndidName} *,.${Notice.noticejs},.${Notice.noticejs} *{font-family:'Microsoft YaHei','Helvetica Neue',sans-serif!important;text-stroke:initial!important;-webkit-text-stroke:initial!important;text-shadow:initial!important}.${Notice.noticejs}-top{top:0;width:100%}.${Notice.noticejs}-top .${Notice.item}{border-radius:0!important;margin:0!important}.${Notice.noticejs}-topRight{top:10px;right:10px}.${Notice.noticejs}-topLeft{top:10px;left:10px}.${Notice.noticejs}-topCenter{top:10px;left:50%;transform:translate(-50%)}.${Notice.noticejs}-middleLeft,.${Notice.noticejs}-middleRight{right:10px;top:50%;transform:translateY(-50%)}.${Notice.noticejs}-middleLeft{left:10px}.${Notice.noticejs}-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.${Notice.noticejs}-bottom{bottom:0;width:100%}.${Notice.noticejs}-bottom .${Notice.item}{border-radius:0!important;margin:0!important}.${Notice.noticejs}-bottomRight{bottom:10px;right:10px}.${Notice.noticejs}-bottomLeft{bottom:10px;left:10px}.${Notice.noticejs}-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.${Notice.noticejs}{z-index:99999!important;font-family:Helvetica Neue,Helvetica,Arial,sans-serif}.${Notice.noticejs} .${Notice.item}{margin:0 0 10px;border-radius:3px;overflow:hidden}.${Notice.noticejs} .${Notice.item} .${Notice.close}{float:right;font-size:18px;font-weight:700;line-height:1;color:#fff;text-shadow:0 1px 0 #fff;opacity:1;margin-right:7px}.${Notice.noticejs} .${Notice.item} .${Notice.close}:hover{opacity:.5;color:#000;cursor:pointer}.${Notice.noticejs} .${Notice.item} a{color:#fff;border-bottom:1px dashed #fff}.${Notice.noticejs} .${Notice.item} a,.${Notice.noticejs} .${Notice.item} a:hover{text-decoration:none}.${Notice.noticejs} .${Notice.success}{background-color:#64ce83}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-heading{background-color:#3da95c;color:#fff;padding:10px}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-body{color:#fff;padding:10px!important}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.info}{background-color:#3ea2ff}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-heading{background-color:#067cea;color:#fff;padding:10px}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-body{color:#fff;padding:10px!important}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.warning}{background-color:#ff7f48}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-heading{background-color:#f44e06;color:#fff;padding:10px!important}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-body{color:#fff;padding:10px}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.error}{background-color:#e74c3c}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-heading{background-color:#ba2c1d;color:#fff;padding:10px!important}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-body{color:#fff;padding:10px}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-progressbar{width:100%;background-color:#64ce83;margin-top:-1px}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#3da95c}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-progressbar{width:100%;background-color:#3ea2ff;margin-top:-1px}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#067cea}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-progressbar{width:100%;background-color:#ff7f48;margin-top:-1px}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#f44e06}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-progressbar{width:100%;background-color:#e74c3c;margin-top:-1px}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#ba2c1d}@keyframes ${Notice.noticejs}-fadeOut{0%{opacity:1}to{opacity:0}}.${Notice.noticejs}-fadeOut{animation-name:${Notice.noticejs}-fadeOut}@keyframes ${Notice.noticejs}-modal-in{to{opacity:.3}}@keyframes ${Notice.noticejs}-modal-out{to{opacity:0}}.${Notice.noticejs}{position:fixed;z-index:10050}.${Notice.noticejs} ::-webkit-scrollbar{width:8px}.${Notice.noticejs} ::-webkit-scrollbar-button{width:8px;height:5px}.${Notice.noticejs} ::-webkit-scrollbar-track{border-radius:10px}.${Notice.noticejs} ::-webkit-scrollbar-thumb{background:hsla(0,0%,100%,.5);border-radius:10px}.${Notice.noticejs} ::-webkit-scrollbar-thumb:hover{background:#fff}.${Notice.noticejs}-modal{position:fixed;width:100%;height:100%;background-color:#000;z-index:10000;opacity:.3;left:0;top:0}.${Notice.noticejs}-modal-open{opacity:0;animation:${Notice.noticejs}-modal-in .3s ease-out}.${Notice.noticejs}-modal-close{animation:${Notice.noticejs}-modal-out .3s ease-out;animation-fill-mode:forwards}.${defCon.rName}{padding:2px!important}.${defCon.rName} dl{margin:0!important;padding:1px!important}.${defCon.rName} dl dt{margin:2px 0 6px 0!important;font-size:16px!important;font-weight:900!important}.${defCon.rName} dl dd{margin:2px 2px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${defCon.rName} .${Notice.center}{width:100%;text-align:center!important}.${defCon.rName} dl dd em{color:#fff;font-family:Candara,sans-serif!important;font-size:24px!important;padding:0 5px}.${defCon.rName} dl dd span{font-weight:700;font-size:15px!important;margin-right:8px}.${defCon.rName} dl dd i{font-family:Candara,sans-serif!important;font-size:20px!important}.${defCon.rName} dl dd .im{color:gold;font-size:16px;font-weight:900;padding:0 3px}.${defCon.rName} ul{width:90%;display:inline-block;text-align:left;vertical-align:top;color:rgba(255, 255, 255, 0.8);padding:0.2em;margin:0 0 0 1em;counter-reset:xxx 0}.${defCon.rName} li{list-style:none;font-style:italic!important;position:relative;padding:0 0 0 0.1em;margin:0 0 0 2px;-webkit-transition:.12s;transition:.12s}.${defCon.rName} li::before{content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-family:'Roboto Condensed';font-size:1em;display:inline-block;width:1.5em;margin-left:-1.5em;-webkit-transition:.5s;transition:.5s}.${defCon.rName} .disappear{display:none}`;
+    CONST.noticeCss = `@charset "UTF-8";.${Notice.animated}{animation-duration:1s;animation-fill-mode:both}.${Notice.animated}.infinite{animation-iteration-count:infinite}.${Notice.animated}.hinge{animation-duration:2s}.${Notice.animated}.bounceIn,.${Notice.animated}.bounceOut,.${Notice.animated}.flipOutX,.${Notice.animated}.flipOutY{animation-duration:.75s}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.fadeOut{animation-name:fadeOut}#${CONST.rndidName} *,.${Notice.noticejs},.${Notice.noticejs} *{font-family:'Microsoft YaHei','Helvetica Neue',sans-serif!important;text-stroke:initial!important;-webkit-text-stroke:initial!important;text-shadow:initial!important}.${Notice.noticejs}-top{top:0;width:100%}.${Notice.noticejs}-top .${Notice.item}{border-radius:0!important;margin:0!important}.${Notice.noticejs}-topRight{top:10px;right:10px}.${Notice.noticejs}-topLeft{top:10px;left:10px}.${Notice.noticejs}-topCenter{top:10px;left:50%;transform:translate(-50%)}.${Notice.noticejs}-middleLeft,.${Notice.noticejs}-middleRight{right:10px;top:50%;transform:translateY(-50%)}.${Notice.noticejs}-middleLeft{left:10px}.${Notice.noticejs}-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.${Notice.noticejs}-bottom{bottom:0;width:100%}.${Notice.noticejs}-bottom .${Notice.item}{border-radius:0!important;margin:0!important}.${Notice.noticejs}-bottomRight{bottom:10px;right:10px}.${Notice.noticejs}-bottomLeft{bottom:10px;left:10px}.${Notice.noticejs}-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.${Notice.noticejs}{z-index:99999999!important;font-family:Helvetica Neue,Helvetica,Arial,sans-serif}.${Notice.noticejs} .${Notice.item}{margin:0 0 10px;border-radius:3px;overflow:hidden}.${Notice.noticejs} .${Notice.item} .${Notice.close}{float:right;font-size:18px;font-weight:700;line-height:1;color:#fff;text-shadow:0 1px 0 #fff;opacity:1;margin-right:7px}.${Notice.noticejs} .${Notice.item} .${Notice.close}:hover{opacity:.5;color:#000;cursor:pointer}.${Notice.noticejs} .${Notice.item} a{color:#fff;border-bottom:1px dashed #fff}.${Notice.noticejs} .${Notice.item} a,.${Notice.noticejs} .${Notice.item} a:hover{text-decoration:none}.${Notice.noticejs} .${Notice.success}{background-color:#64ce83}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-heading{background-color:#3da95c;color:#fff;padding:10px}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-body{color:#fff;padding:10px!important}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.info}{background-color:#3ea2ff}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-heading{background-color:#067cea;color:#fff;padding:10px}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-body{color:#fff;padding:10px!important}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.warning}{background-color:#ff7f48}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-heading{background-color:#f44e06;color:#fff;padding:10px!important}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-body{color:#fff;padding:10px}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.error}{background-color:#e74c3c}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-heading{background-color:#ba2c1d;color:#fff;padding:10px!important}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-body{color:#fff;padding:10px}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-content{visibility:visible}.${Notice.configuration} input[disabled],.${Notice.configuration} select[disabled]{color:#bbb;background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:20px 20px!important;background-color:#fff7f7!important}.${Notice.noticejs} .${Notice.configuration}{background-color:linear-gradient(to right,#fcfcfc,#f2f2f7);background:-webkit-gradient(linear,0 0,0 100%,from(#fcfcfc),to(#f2f2f7));box-shadow:0 0 5px #888}.${Notice.noticejs} .${Notice.configuration} .${Notice.close}{float:right;font-size:18px;font-weight:700;line-height:1;color:#000;text-shadow:0 1px 0 #aaa;opacity:1;margin-right:7px}.${Notice.noticejs} .${Notice.configuration} .${Notice.close}:hover{opacity:.5;color:#555;cursor:pointer}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-heading{background-color:#F2F2F7;color:#333;padding:10px!important}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-body{color:#333;padding:10px}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-body ul{color:#333!important;list-style:none;margin:5px;padding:2px;font:italic 14px/140% "Microsoft YaHei",sans-serif}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-body ul ol{list-style:none;font-style:normal;margin:5px 0;cursor:default}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-progressbar{width:100%;background-color:#64ce83;margin-top:-1px}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#3da95c}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-progressbar{width:100%;background-color:#3ea2ff;margin-top:-1px}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#067cea}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-progressbar{width:100%;background-color:#ff7f48;margin-top:-1px}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#f44e06}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-progressbar{width:100%;background-color:#e74c3c;margin-top:-1px}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#ba2c1d}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-progressbar{width:100%;background-color:#efefef;margin-top:-1px}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{background:#ccc;width:100%;height:5px}@keyframes ${Notice.noticejs}-fadeOut{0%{opacity:1}to{opacity:0}}.${Notice.noticejs}-fadeOut{animation-name:${Notice.noticejs}-fadeOut}@keyframes ${Notice.noticejs}-modal-in{to{opacity:.3}}@keyframes ${Notice.noticejs}-modal-out{to{opacity:0}}.${Notice.noticejs}{position:fixed;z-index:10050}.${Notice.noticejs} ::-webkit-scrollbar{width:8px}.${Notice.noticejs} ::-webkit-scrollbar-button{width:8px;height:5px}.${Notice.noticejs} ::-webkit-scrollbar-track{border-radius:10px}.${Notice.noticejs} ::-webkit-scrollbar-thumb{background:hsla(0,0%,100%,.5);border-radius:10px}.${Notice.noticejs} ::-webkit-scrollbar-thumb:hover{background:#fff}.${Notice.noticejs}-modal{position:fixed;width:100%;height:100%;background-color:#000;z-index:10000;opacity:.3;left:0;top:0}.${Notice.noticejs}-modal-open{opacity:0;animation:${Notice.noticejs}-modal-in .3s ease-out}.${Notice.noticejs}-modal-close{animation:${Notice.noticejs}-modal-out .3s ease-out;animation-fill-mode:forwards}.${defCon.rName}{padding:2px!important}.${defCon.rName} dl{margin:0!important;padding:1px!important}.${defCon.rName} dl dt{margin:2px 0 6px 0!important;font-size:16px!important;font-weight:900!important}.${defCon.rName} dl dd{margin:2px 2px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${defCon.rName} .${Notice.center}{width:100%;text-align:center!important}.${defCon.rName} dl dd em{color:#fff;font-family:Candara,sans-serif!important;font-size:24px!important;padding:0 5px}.${defCon.rName} dl dd span{font-weight:700;font-size:15px!important;margin-right:8px}.${defCon.rName} dl dd i{font-family:Candara,sans-serif!important;font-size:20px!important}.${defCon.rName} dl dd .im{color:gold;font-size:16px;font-weight:900;padding:0 3px}.${defCon.rName} ul{width:90%;display:inline-block;text-align:left;vertical-align:top;color:rgba(255, 255, 255, 0.8);padding:0.2em;margin:0 0 0 1em;counter-reset:xxx 0}.${defCon.rName} li{list-style:none;font-style:italic!important;position:relative;padding:0 0 0 0.1em;margin:0 0 0 2px;-webkit-transition:.12s;transition:.12s}.${defCon.rName} li::before{content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-family:Candara,sans-serif;font-size:1em;display:inline-block;width:1.5em;margin-left:-1.5em;-webkit-transition:.5s;transition:.5s}.${defCon.rName} .disappear{display:none}/* checkbox */.${Notice.checkbox}{display:none!important}.${Notice.checkbox}+label{padding:11px 9px;margin:0 0 0 25px;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:58px;height:10px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);-webkit-box-sizing:content-box;box-sizing:content-box;word-wrap:normal!important}.${Notice.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;-webkit-border-radius:7px;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${Notice.checkbox}+label::after{position:absolute;top:0;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;-webkit-border-radius:100px;border-radius:100px;padding:5px;font-size:1em;font-weight:700;color:#fff;content:"OFF"}.${Notice.checkbox}:checked+label{margin:0 0 0 25px;-webkit-box-sizing:content-box;box-sizing:content-box;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.${Notice.checkbox}:checked+label::after{content:"ON";left:10px}.${Notice.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px}/* checkbox */#${Notice.fcUpdate},#${Notice.fcExpire},#${Notice.fcFeedback}{padding:2px 10px;height:45px;width:100%;font:bold 16px/140% "Microsoft YaHei",sans-serif}#${Notice.Expire}{-webkit-border-radius:4px;border-radius:4px;width:46px;padding:5px;border:2px solid #777;font-size:16px;font-family:Impact,sans-serif!important;text-align:center}#${Notice.timeUnit}{-webkit-border-radius:4px;border-radius:4px;padding:5px 5px 4px 5px;font-size:14px;border:2px solid #777}#${Notice.fcFeedback} .${Notice.feedback}{cursor:help;font-size:16px!important;margin-top:5px}#${Notice.fcFeedback} .${Notice.feedback}:hover{color:crimson}#${Notice.fcSubmit}{padding:2px 10px;height:30px;width:100%}#${Notice.fcSubmit} button{color:#333;font-weight:600;border:1px solid #777;font-size:16px;padding:5px 15px;margin-left:10px;border-radius:4px}#${Notice.fcSubmit} .${Notice.fcSave}{background-color:linear-gradient(to bottom,#fff7f7,#ffe9e9);background:-webkit-gradient(linear,0 0,0 100%,from(#fff7f7),to(#ffe9e9))}`;
 
     let curretSite = {
       SiteTypeID: 0,
@@ -744,15 +770,15 @@
     /* insert Menus */
 
     let menuManager = {
-      inUse_switch: (_status, Name, Tips) => {
+      inUse_switch: (_status, _data, Tips) => {
         const info = x => {
           return Notice.noticeHTML(`<dd class="${Notice.center}">${Tips}已<kbd class="im">${x}</kbd>，网页在<em>3</em>秒后刷新！</dd>`);
         };
+        _data.useBing = !_status;
+        GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
         if (_status) {
-          GMsetValue(`${Name}`, 0);
           GMnotification(info("\u6e05\u9664"), `${Notice.info}`, true, 30, callback_Countdown);
         } else {
-          GMsetValue(`${Name}`, 1);
           GMnotification(info("\u6dfb\u52a0"), `${Notice.info}`, true, 30, callback_Countdown);
         }
       },
@@ -763,78 +789,121 @@
 
       registerMenuCommand: function (e) {
         let yet, _Use_Bing__;
-        let _use_Bing_ID, in_Use_feedBack_ID, in_UpdateCheck_ID;
+        let in_Use_Configure, _use_Bing_ID, in_UpdateCheck_ID;
 
         // Remove menus if the menus exists.
         this.menuRemove(_use_Bing_ID);
-        this.menuRemove(in_Use_feedBack_ID);
+        this.menuRemove(in_Use_Configure);
         this.menuRemove(in_UpdateCheck_ID);
 
-        e ? (_Use_Bing__ = "\ufff0\u2705【已开启】") : (_Use_Bing__ = "\ufff0\u274c【已关闭】");
+        in_Use_Configure = GMregisterMenuCommand("\ufff0\ud83c\udfaf【脚本参数】跳转工具设置", () => {
+          GMnotification(
+            Notice.noticeHTML(
+              `<dt style="color:darkred">
+                搜索引擎跳转工具 设置
+                <span style="font:italic 14px/14px Candara,sans-serif!important">
+                 (Version ${defCon.curVersion})
+                <span>
+               </dt>
+                <dd>
+                  <ul id="${Notice.fc}">
+                    <ol id="${Notice.fcUpdate}">
+                      <div style="float:left">更新检测（默认：开）</div>
+                      <div style="float:right;margin:-2px 2px 0 10px">
+                        <input type="checkbox" id="${Notice.isUpdate}" class="${Notice.checkbox}" ${checkUpdate ? "checked" : ""} />
+                        <label for="${Notice.isUpdate}"></label>
+                      </div>
+                    </ol>
+                    <ol id="${Notice.fcExpire}">
+                      <div>更新频率（分/时/天/周）
+                        <input id="${Notice.Expire}" maxlength="3" placeholder="4" value="${timeNumber}"/>
+                        <select id="${Notice.timeUnit}">
+                          <option ${timeUnit === "m" ? "selected" : ""} value ="m">分钟</option>
+                          <option ${timeUnit === "h" ? "selected" : ""} value ="h">小时</option>
+                          <option ${timeUnit === "d" ? "selected" : ""} value="d">天</option>
+                          <option ${timeUnit === "w" ? "selected" : ""} value="w">周</option>
+                        </select>
+                      </div>
+                    </ol>
+                    <ol id="${Notice.fcFeedback}">
+                      <div class="${Notice.feedback}">\ud83e\udde1\u0020如果您遇到问题，请向我反馈\u0020\ud83e\udde1</div>
+                    </ol>
+                    <ol id="${Notice.fcSubmit}">
+                    <button class="${Notice.fcClose}">关闭</button>
+                    <button class="${Notice.fcSave}">保存</button>
+                    </ol>
+                  </ul>
+                </dd>`
+            ),
+            `${Notice.configuration}`,
+            true,
+            600,
+            {},
+            "topRight"
+          );
+          if (!document.querySelector(`#${Notice.isUpdate}`).checked) {
+            document.querySelector(`#${Notice.Expire}`).setAttribute("disabled", "disabled");
+            document.querySelector(`#${Notice.timeUnit}`).setAttribute("disabled", "disabled");
+          }
+          document.querySelector(`#${Notice.isUpdate}`).addEventListener("change", function () {
+            if (this.checked) {
+              document.querySelector(`#${Notice.Expire}`).removeAttribute("disabled");
+              document.querySelector(`#${Notice.timeUnit}`).removeAttribute("disabled");
+            } else {
+              document.querySelector(`#${Notice.Expire}`).setAttribute("disabled", "disabled");
+              document.querySelector(`#${Notice.timeUnit}`).setAttribute("disabled", "disabled");
+            }
+          });
+          document.querySelector(`#${Notice.Expire}`).addEventListener("input", function () {
+            this.value = this.value.replace(/[^0-9]/g, "");
+          });
+          document.querySelector(`#${Notice.fcFeedback} .${Notice.feedback}`).addEventListener("click", () => {
+            GMopenInTab(`${defCon.support ? defCon.support : "https://greasyfork.org/scripts/12909/feedback"}`, defCon._option);
+          });
+          document.querySelector(`#${Notice.fcSubmit} .${Notice.fcClose}`).addEventListener("click", function () {
+            document.querySelector(`.${Notice.noticejs} .${Notice.configuration} .${Notice.close}`).click();
+          });
+          document.querySelector(`#${Notice.fcSubmit} .${Notice.fcSave}`).addEventListener("click", function () {
+            const checkUpdate = document.querySelector(`#${Notice.isUpdate}`).checked;
+            let timeNumber = document.querySelector(`#${Notice.Expire}`).value;
+            let timeUnit = document.querySelector(`#${Notice.timeUnit}`).value;
+            _data.checkUpdate = checkUpdate;
+            _data.timeNumber = timeNumber.length ? timeNumber : 4;
+            _data.timeUnit = timeUnit.length ? timeUnit : "h";
+            if (!checkUpdate) {
+              GMdeleteValue("_Check_Version_Expire_");
+            }
+            GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
+            document.querySelector(`.${Notice.noticejs} .${Notice.configuration} .${Notice.close}`).click();
+            GMnotification(
+              Notice.noticeHTML(`<dd class="${Notice.center}">设置数据已<kbd class="im">成功保存</kbd>，网页在<em>3</em>秒后刷新！</dd>`),
+              `${Notice.info}`,
+              true,
+              30,
+              callback_Countdown
+            );
+          });
+        });
+        e ? (_Use_Bing__ = "\ufff2\ud83d\udfe2【已开启】") : (_Use_Bing__ = "\ufff2\u274c【已关闭】");
 
         _use_Bing_ID = GMregisterMenuCommand(`${_Use_Bing__}Bing 搜索跳转`, () => {
           if (!yet) {
-            this.inUse_switch(e, "_if_Use_Bing_", "Bing 按钮");
+            this.inUse_switch(e, _data, "Bing 按钮");
             yet = true;
           }
         });
-        // "false" is disabled forever.
-        if (isVersionDetection) {
-          // check VDR value to insert menu.
+
+        if (checkUpdate) {
           if (CONST.isVDResult) {
-            if (defCon._expireTime === _expireTime) {
-              in_UpdateCheck_ID = GMregisterMenuCommand(`\ufff5\ud83d\udd0e【版本更新】手动实时检查`, () => {
-                // Destroy cache before manual check.
-                GMdeleteValue("_Check_Version_Expire_");
-                checkVersion(true);
-              });
-            } else {
-              if (_expireTime !== "4h") {
-                in_UpdateCheck_ID = GMregisterMenuCommand(
-                  `\ufff5\ud83d\udd17【变更缓存时间】${defCon.showDate(defCon._expireTime)} \u27a4 ${defCon.showDate(_expireTime)}`,
-                  () => {
-                    // Destroy cache before change expireTime.
-                    GMdeleteValue("_Check_Version_Expire_");
-                    GMsetValue("_expire_time_", _expireTime);
-                    GMnotification(
-                      Notice.noticeHTML(
-                        `<dd class="${Notice.center}">缓存时间设定为<kbd class="im">${defCon.showDate(_expireTime)}</kbd>，网页在<em>3</em>秒后刷新！</dd>`
-                      ),
-                      `${Notice.info}`,
-                      true,
-                      30,
-                      callback_Countdown
-                    );
-                  }
-                );
-              } else {
-                in_UpdateCheck_ID = GMregisterMenuCommand(
-                  `\ufff5\ud83e\uddf2【版本更新】手动检查 ( ${defCon.showDate(defCon._expireTime)}重置为 ${defCon.showDate(_expireTime)})`,
-                  () => {
-                    // Destroy cache & session before change expireTime.
-                    GMdeleteValue("_Check_Version_Expire_");
-                    GMdeleteValue("_expire_time_");
-                    sessionStorage.removeItem("nCount");
-                    checkVersion(false);
-                    if (!defCon.isNeedUpdate) {
-                      GMnotification(
-                        Notice.noticeHTML(
-                          `<dd class="${Notice.center}">缓存时间重置为<kbd class="im">${defCon.showDate(_expireTime)}</kbd>，网页在<em>3</em>秒后刷新！</dd>`
-                        ),
-                        `${Notice.info}`,
-                        true,
-                        30,
-                        callback_Countdown
-                      );
-                    }
-                  }
-                );
-              }
-            }
+            in_UpdateCheck_ID = GMregisterMenuCommand(`\ufff5\ud83e\udded【版本更新】从服务器实时检查`, async () => {
+              // Destroy cache before manual check.
+              GMdeleteValue("_Check_Version_Expire_");
+              debug("//-> up-to-date? ", await checkVersion(checkUpdate));
+            });
           } else {
             in_UpdateCheck_ID = GMregisterMenuCommand("\ufff5\ud83d\udcdb【版本更新】已关闭 \u267b 重新开启", () => {
-              GMsetValue("_is_Ver_Det_", true);
-              // Destroy cache & session when restart detection.
+              _data.VerDetAuto = true;
+              GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
               GMdeleteValue("_Check_Version_Expire_");
               sessionStorage.removeItem("nCount");
               debug("//-> Destroy cache & session when restart detection.");
@@ -848,9 +917,6 @@
             });
           }
         }
-        in_Use_feedBack_ID = GMregisterMenuCommand("\ufff9\ud83e\udde1【建议反馈】说出您的意见！", () => {
-          GMopenInTab(`${defCon.support ? defCon.support : "https://greasyfork.org/scripts/12909/feedback"}`, defCon._option);
-        });
       },
 
       menuDisplay: function () {
@@ -1094,7 +1160,7 @@
             );
           }, 500);
         } catch (e) {
-          console.log("//->", e);
+          error("//-> getGlobalGoogle:", e);
         }
       }
     }
@@ -1666,13 +1732,14 @@
       } catch (e) {
         console.error("%c[GB-Error]%c\n%s", "font-weight:bold;color:red", "font-weight:bold;color:darkred", e);
       } finally {
-        if (isVersionDetection && !CONST.isVDResult) {
+        if (checkUpdate && !CONST.isVDResult) {
           debug("//-> Ready to Insert Random Tips.");
           if (Math.floor(Math.random() * 20) > 18) {
             setTimeout(function () {
               GMnotification(
                 Notice.noticeHTML(
-                  `<dd title="随机提示">若要恢复自动更新功能，请在覆盖安装新代码后,\
+                  `<dd title="请安装新版代码后恢复自动更新">若要恢复自动更新功能，请在覆盖安装<a target="_blank" style="margin:0 4px;font-size:16px;font-weight:600"\
+                  href="https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/Google_baidu_Switcher_(ALL_in_One)">新版代码</a>后,\
                   从脚本菜单中重新开启"版本更新"功能。</dd><dd class="${Notice.center}" title="随机提示">\
                   <img src="https://i.niupic.com/images/2021/06/13/9kVe.png" alt="开启自动检测"></dd>`
                 ),
