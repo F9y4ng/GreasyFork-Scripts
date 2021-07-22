@@ -4,7 +4,7 @@
 // @name:zh           字体渲染（自用脚本）
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:en           Font Rendering (Customized)
-// @version           2021.07.19.1
+// @version           2021.07.22.2
 // @author            F9y4ng
 // @description       让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @description:zh    让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
@@ -34,13 +34,11 @@
 // @run-at          document-start
 // ==/UserScript==
 
-!(function () {
+!(async function () {
   "use strict";
 
   /* customize */
 
-  const maxPersonalSites = 100; // set the maximum number of personal sites to ensure performance.
-  const isBackupFunction = true; // set "false" to disabled local backup function.
   const isdebug = false; // set "true" to debug scripts, May cause script response slower.
 
   /* Perfectly Compatible For Greasemonkey4.0+, TamperMonkey, ViolentMonkey * F9y4ng * 20210609 */
@@ -52,6 +50,25 @@
   const isGM = Boolean(handlerInfo.toLowerCase() === "greasemonkey");
   const debug = isdebug ? console.log.bind(console) : () => {};
   const error = isdebug ? console.error.bind(console) : () => {};
+
+  /* GM selector */
+
+  if (isGM) {
+    GMsetValue = GM.setValue;
+    GMgetValue = GM.getValue;
+    GMdeleteValue = GM.deleteValue;
+    GMregisterMenuCommand = GM.registerMenuCommand;
+    GMunregisterMenuCommand = () => {};
+  } else {
+    GMsetValue = GM_setValue;
+    GMgetValue = GM_getValue;
+    GMdeleteValue = GM_deleteValue;
+    GMregisterMenuCommand = GM_registerMenuCommand;
+    GMunregisterMenuCommand = GM_unregisterMenuCommand;
+  }
+
+  /* default CONST Values */
+
   const defCon = {
     scriptAuthor: isGM ? "F9y4ng" : GMinfo.script.author,
     scriptName: GMinfo.script.name,
@@ -61,6 +78,7 @@
     errorCount: 0,
     domainCount: 0,
     successId: false,
+    Val: [],
     encrypt: n => {
       return window.btoa(encodeURIComponent(n));
     },
@@ -182,6 +200,14 @@
     files: defCon.randString(5, true),
     tfiles: defCon.randString(5, true),
     db: defCon.randString(8, true),
+    bk: defCon.randString(7, true),
+    isbackup: defCon.randString(6, true),
+    pv: defCon.randString(7, true),
+    ispreview: defCon.randString(6, true),
+    mps: defCon.randString(7, true),
+    maxps: defCon.randString(6, true),
+    feedback: defCon.randString(6, true),
+    seed: defCon.randString(3, true),
   };
   defCon.class = {
     rndClass: defCon.randString(10, true),
@@ -255,20 +281,23 @@
     return document.createElement(str);
   };
 
-  /* GM selector */
+  /* get promise value */
 
-  if (isGM) {
-    GMsetValue = GM.setValue;
-    GMgetValue = GM.getValue;
-    GMdeleteValue = GM.deleteValue;
-    GMregisterMenuCommand = GM.registerMenuCommand;
-    GMunregisterMenuCommand = () => {};
+  let maxPersonalSites, isBackupFunction, isPreview, rebuild, _config_data_;
+  const configure = await GMgetValue("_configure_");
+  if (!configure) {
+    maxPersonalSites = 100;
+    isBackupFunction = true;
+    isPreview = false;
+    rebuild = true;
+    _config_data_ = { maxPersonalSites, isBackupFunction, isPreview, rebuild };
+    GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
   } else {
-    GMsetValue = GM_setValue;
-    GMgetValue = GM_getValue;
-    GMdeleteValue = GM_deleteValue;
-    GMregisterMenuCommand = GM_registerMenuCommand;
-    GMunregisterMenuCommand = GM_unregisterMenuCommand;
+    _config_data_ = JSON.parse(defCon.decrypt(configure));
+    maxPersonalSites = _config_data_.maxPersonalSites;
+    isBackupFunction = _config_data_.isBackupFunction;
+    isPreview = _config_data_.isPreview;
+    rebuild = _config_data_.rebuild;
   }
 
   /* Passive event listeners */
@@ -286,7 +315,7 @@
     error("//-> supportsPassive:", e.name);
   }
 
-  /* RAFInterval */
+  /* Initialize important functions */
 
   function RAFInterval(callback, period, runNow) {
     const needCount = (period / 1000) * 60;
@@ -313,6 +342,58 @@
       }
     }
     requestAnimationFrame(step);
+  }
+
+  function addStyle(css, className, addToTarget, isReload, initType) {
+    RAFInterval(
+      () => {
+        let addTo = qS(addToTarget);
+        let reNew = false;
+        if (typeof addToTarget === "undefined") {
+          addTo = document.head || document.body || document.documentElement || document;
+        }
+        isReload = isReload || false;
+        initType = initType || "text/css";
+        if (typeof addToTarget === "undefined" || (typeof addToTarget !== "undefined" && qS(addToTarget))) {
+          if (isReload === true && qS(`.${className}`)) {
+            safeRemove(`.${className}`);
+            reNew = true;
+          } else if (isReload === false && qS(`.${className}`)) {
+            return true;
+          }
+          const cssNode = cE("style");
+          if (className !== null) {
+            cssNode.className = className;
+          }
+          cssNode.id = "T" + Date.now().toString().slice(-8);
+          cssNode.setAttribute("type", initType);
+          cssNode.innerHTML = css;
+          addTo.appendChild(cssNode);
+          if (reNew && qS(`.${className}`)) {
+            return true;
+          }
+        }
+      },
+      20,
+      true
+    );
+  }
+
+  function safeRemove(s) {
+    safeFunction(() => {
+      const removeNodes = document.querySelectorAll(s);
+      for (let i = 0; i < removeNodes.length; i++) {
+        removeNodes[i].remove();
+      }
+    });
+  }
+
+  function safeFunction(func) {
+    try {
+      func();
+    } catch (e) {
+      error("//-> safeFunction:", e.name);
+    }
   }
 
   /* Get browser core & system parameters */
@@ -1196,8 +1277,20 @@
           });
           if (fontSet(`#${defCon.id.fontList} .${defCon.class.close}`).that.length === 0) {
             const submitButton = qS(`#${defCon.id.submit} .${defCon.class.submit}`);
-            if (submitButton.classList.contains(`${defCon.class.anim}`)) {
+            for (let i = defCon.Val.length - 1; i >= 0; i--) {
+              if (defCon.Val[i] === `${defCon.id.fontName}`) {
+                defCon.Val.splice(i, 1);
+                break;
+              }
+            }
+            if (submitButton.classList.contains(`${defCon.class.anim}`) && !defCon.Val.length) {
               submitButton.classList.remove(`${defCon.class.anim}`);
+              addStyle(defCon.tStyle, `${defCon.class.rndStyle}`, "head", true);
+              defCon.preview = false;
+              if (isPreview) {
+                submitButton.innerText = "\u4fdd\u5b58";
+                submitButton.removeAttribute("v-Preview");
+              }
             }
             fontSet(`#${defCon.id.fontList} .${defCon.class.selector}`).that[0].parentNode.style.cssText += "display:none;";
           }
@@ -1269,8 +1362,15 @@
                 }
                 removeFontSelector();
                 const submitButton = qS(`#${defCon.id.submit} .${defCon.class.submit}`);
+                if (!defCon.Val.includes(`${defCon.id.fontName}`)) {
+                  defCon.Val.push(`${defCon.id.fontName}`);
+                }
                 if (!submitButton.classList.contains(`${defCon.class.anim}`)) {
                   submitButton.classList.add(`${defCon.class.anim}`);
+                }
+                if (isPreview) {
+                  submitButton.innerText = "\u9884\u89c8";
+                  submitButton.setAttribute("v-Preview", "true");
                 }
               }
               fontSet(`.${defCon.class.selectFontId} dl`).hide();
@@ -1356,8 +1456,20 @@
               fontData.push(new selector(text, value, sort));
               if (fontSet(`#${defCon.id.fontList} .${defCon.class.close}`).that.length === 0) {
                 const submitButton = qS(`#${defCon.id.submit} .${defCon.class.submit}`);
-                if (submitButton.classList.contains(`${defCon.class.anim}`)) {
+                for (let i = defCon.Val.length - 1; i >= 0; i--) {
+                  if (defCon.Val[i] === `${defCon.id.fontName}`) {
+                    defCon.Val.splice(i, 1);
+                    break;
+                  }
+                }
+                if (submitButton.classList.contains(`${defCon.class.anim}`) && !defCon.Val.length) {
                   submitButton.classList.remove(`${defCon.class.anim}`);
+                  addStyle(defCon.tStyle, `${defCon.class.rndStyle}`, "head", true);
+                  defCon.preview = false;
+                  if (isPreview) {
+                    submitButton.innerText = "\u4fdd\u5b58";
+                    submitButton.removeAttribute("v-Preview");
+                  }
                 }
                 fontSet(`#${defCon.id.fontList} .${defCon.class.selector}`).that[0].parentNode.style.cssText += "display:none;";
               }
@@ -1382,6 +1494,8 @@
     { ch: "更纱黑体 SC", en: "Sarasa Gothic SC" },
     { ch: "冬青黑体简", en: "Hiragino Sans GB" },
     { ch: "兰亭黑-简", en: "Lantinghei SC" },
+    { ch: "霞鹜文楷", en: "LXGW WenKai" },
+    { ch: "霞鹜新晰黑", en: "LXGW New Clear Gothic" },
     { ch: "鸿蒙黑体", en: "HarmonyOS Sans SC" },
     { ch: "浪漫雅圆", en: "LMYY" },
     { ch: "思源黑体", en: "Source Han Sans CN" },
@@ -1491,17 +1605,21 @@
 
   !(async function () {
     // Rebuild data for update
-    const Val = false;
-    const rebuild = await GMgetValue("_rebuild_");
-    const res = rebuild === undefined ? Val : Boolean(rebuild);
-    if (curWindowtop) {
-      res === Val
-        ? (GMdeleteValue("_fonts_set_"),
-          GMdeleteValue("_Exclude_site_"),
-          GMdeleteValue("_domains_fonts_set_"),
-          GMsetValue("_rebuild_", !Val),
-          debug("//-> %cData has been rebuilt", "background-color:red;color:snow"))
-        : debug("//-> %cGood data status", "color:green");
+    const bool = true;
+    const tmp = await GMgetValue("_configure_");
+    _config_data_ = JSON.parse(defCon.decrypt(tmp));
+    let rebuild = _config_data_.rebuild;
+    const res = Boolean(rebuild);
+    if (curWindowtop && res === bool) {
+      GMdeleteValue("_fonts_set_");
+      GMdeleteValue("_Exclude_site_");
+      GMdeleteValue("_domains_fonts_set_");
+      GMdeleteValue("_rebuild_");
+      _config_data_.rebuild = !bool;
+      GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
+      debug("//-> %cData has been rebuilt", "background-color:red;color:snow");
+    } else {
+      debug("//-> %cGood data status", "color:green");
     }
     // Get Promise Value
     let fonts = await GMgetValue("_fonts_set_");
@@ -1523,10 +1641,11 @@
             messageText: String(`
             <p><span style="font:bold 22px Candara;color:crimson">您好！</span>这是您首次使用${defCon.scriptName}的新版本 <span style="font-family:Candara;color:darkorange;font-size:18px;font-weight:900;font-style:italic">v${defCon.curVersion}</span>，具体功能敬请试用。</p>
             <p><ul>
-              <li>新增多站点数据储存功能，个性化定义每个网站。</li>
-              <li>新增错误反馈功能，自动复制相关信息反馈给作者。</li>
-              <li>本地备份正式版：实现跨设备、跨浏览器数据共享。</li>
-              <li>修正逻辑bug，优化代码，功能性更新大完结。</li>
+              <li>新增开源中文字体，霞鹜文楷、霞鹜新晰黑两款字体。</li>
+              <li>新增高级功能设置页面，不再需要修改代码使用高级功能。</li>
+              <li>新增保存预览功能（实验性），需要在高级功能中开启。</li>
+              <li>优化脚本菜单，修正数据结构、修正CSS错误。</li>
+              <li>修正逻辑bugs，优化代码。</li>
             </ul></p>
             <p>稍后将为您打开新版帮助文件，要去看一下吗？</p>
           `),
@@ -1552,9 +1671,10 @@
     }
     let obj = ["workstation-xi"].sort();
     if (!exSite) {
-      GMsetValue("_Exclude_site_", obj);
+      GMsetValue("_Exclude_site_", defCon.encrypt(JSON.stringify(obj)));
       exSite = obj;
     } else {
+      exSite = JSON.parse(defCon.decrypt(exSite));
       defCon.siteIndex = real_Time_Update(exSite);
     }
 
@@ -1642,15 +1762,15 @@
       smoothing = `-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;`;
     }
 
-    const prefont = CONST.fontSelect.split(",")[0];
-    const refont = prefont ? prefont.replace(/"|'/g, "") : "";
+    let prefont = CONST.fontSelect.split(",")[0];
+    let refont = prefont ? prefont.replace(/"|'/g, "") : "";
 
     let fontfamily = "";
-    let fontface = "";
+    let fontfaces = "";
     const fontface_i = CONST.fontFace;
     if (fontface_i) {
       fontfamily = `font-family:${CONST.fontSelect};`;
-      fontface =
+      fontfaces =
         refont !== ""
           ? `@font-face{font-family:"宋体";src:local("${refont}")}@font-face{font-family:"黑体";src:local("${refont}")}@font-face{font-family:SimHei;src:local("${refont}")}@font-face{font-family:SimSun;src:local("${refont}")}@font-face{font-family:"serif";src:local("${refont}")}@font-face{font-family:"Microsoft YaHei UI";src:local("${refont}")}@font-face{font-family:"Segoe UI";src:local("${refont}")}@font-face{font-family:"sans-serif";src:local("${refont}")}@font-face{font-family:Tahoma;src:local("${refont}")}@font-face{font-family:Arial;src:local("${refont}")}@font-face{font-family:Helvetica;src:local("${refont}")}`
           : ``;
@@ -1667,9 +1787,9 @@
     const cssfun = CONST.fontCSS;
     let tshadow = "";
     if (defCon.siteIndex === undefined) {
-      tshadow = `${codeFont}${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontface}${exclude}`;
+      tshadow = `${codeFont}${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontfaces}${exclude}`;
     }
-    const fontStyle_db = `.${defCon.class.db}{max-width:420px;color:#444;z-index:9999999;border:2px solid #efefef}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei",sans-serif!important;text-stroke:initial!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #7b7b7b!important}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:45%;right:-200px;-webkit-border-radius:6px;border-radius:6px;width:100%;background:#fff;-webkit-box-shadow:0 0 10px 0 rgba(0,0,0,.3);box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .3s;transform:translate(-50%,-50%)}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important;text-stroke:initial!important}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223;color:#fff!important;border:1px solid #d93223;-webkit-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a;color:#fff!important;border:1px solid #038c5a;-webkit-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777;color:#fff!important;border:1px solid #777;-webkit-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px;font-weight:300;text-align:left}.${defCon.class.dbm} p{line-height:160%;margin:5px 0;text-indent:0em!important;font-size:16px;font-weight:400;text-align:left}.${defCon.class.dbm} ul{list-style:none;margin: 5px 0 0 15px;padding:2px;font:italic 14px/140% "Microsoft YaHei";color:grey}.${defCon.class.dbm} li{list-style-type:square;}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px;font-weight:700;text-align:left;width:100%}.${defCon.class.dbb}{display:inline-block;margin:0 1%;-webkit-border-radius:2px;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;transition:opacity .5s;cursor:pointer;-webkit-box-sizing:content-box;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}.${defCon.class.anim}{-webkit-animation:jiggle 1.8s ease-in infinite;animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}`;
+    const fontStyle_db = `.${defCon.class.db}{max-width:420px;color:#444;z-index:9999999;border:2px solid #efefef}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei",sans-serif!important;text-stroke:initial!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #7b7b7b!important}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:45%;right:-200px;-webkit-border-radius:6px;border-radius:6px;width:100%;background:#fff;-webkit-box-shadow:0 0 10px 0 rgba(0,0,0,.3);box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .3s;transform:translate(-50%,-50%)}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important;text-stroke:initial!important}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223;color:#fff!important;border:1px solid #d93223;-webkit-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a;color:#fff!important;border:1px solid #038c5a;-webkit-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777;color:#fff!important;border:1px solid #777;-webkit-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px;font-weight:300;text-align:left}.${defCon.class.dbm} p{line-height:160%;margin:5px 0;text-indent:0em!important;font-size:16px;font-weight:400;text-align:left}.${defCon.class.dbm} ul{list-style:none;margin: 5px 0 0 15px;padding:2px;font:italic 14px/140% "Microsoft YaHei";color:grey}.${defCon.class.dbm} li{list-style-type:square;}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px;font-weight:700;text-align:left;width:100%}.${defCon.class.dbb}{display:inline-block;margin:0 1%;-webkit-border-radius:2px;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;transition:opacity .5s;cursor:pointer;-webkit-box-sizing:content-box;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}.${defCon.class.anim}{-webkit-animation:jiggle 1.8s ease-in infinite;animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}#${defCon.id.bk},#${defCon.id.pv},#${defCon.id.mps},${defCon.id.feedback}{padding:2px 10px;height:40px;width:max-content;min-width:auto}`;
     const fontStyle_container = `body #${defCon.id.container}{position:fixed;top:10px;right:24px;-webkit-border-radius:6px;border-radius:6px;background:#f0f6ff;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 20px);z-index:9999999;padding:3px 8px;text-align:left;color:#333;font-size:16px;font-weight:900;-webkit-transition:all .1s ease-in;transition:all .1s ease-in;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.container} *{line-height:1.5!important;font-size:16px;font-weight:700;font-family:"Microsoft YaHei",sans-serif;text-shadow:initial!important;-webkit-text-stroke:initial!important;text-stroke:initial!important}#${defCon.id.container} ul li{list-style:none;margin:3px 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:none;float:none;cursor:default}#${defCon.id.container} fieldset{border:2px groove #67a5df;-webkit-border-radius:10px;border-radius:10px;padding:4px 9px;margin:2px;background:#f0f6ff;display:block;width:auto;height:auto;min-height:500px}#${defCon.id.container} legend{line-height:20px;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px;font-weight:700;font-family:"Microsoft YaHei",sans-serif;-webkit-box-sizing:content-box;box-sizing:content-box;width:auto!important;min-width:185px!important}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden;}#${defCon.id.container} fieldset>ul{padding:0;margin:0}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}#${defCon.id.container} .${defCon.class.title}{color:#8b0000}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50%;-webkit-transform:rotate(360deg);-webkit-animation:rotation 5s linear infinite;-o-animation:rotation 5s linear infinite;animation:rotation 5s linear infinite}#${defCon.id.fontList}{padding:2px 10px 10px 10px;min-height:80px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:max-content;min-width:auto}#${defCon.id.shadowColor}{padding:2px 10px;min-height:45px;margin:4px;width:max-content}#${defCon.id.shadowColor} *{-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.cps}{float:left;display:block;margin:0}#${defCon.id.shadowColor} .${defCon.class.colorPicker}{width:32px;height:30px;cursor:pointer;position:relative;border:2px solid #181a25;-webkit-border-radius:4px;border-radius:4px;float:left;display:inline-block}#${defCon.id.shadowColor} .${defCon.class.colorPicker2}{display:inline-block;width:auto;margin:0 0 0 5px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2} #${defCon.id.color}{width:135px;height:32px;text-indent:0;font-size:18px;font-weight:400;background:#fafafa;-webkit-box-sizing:content-box;box-sizing:content-box;font-family:Impact,"Courier New",sans-serif!important;color:#333;border:#67a5df 2px solid;-webkit-border-radius:4px;border-radius:4px;display:inline-block;padding:0;margin:0;text-align:center}#${defCon.id.fontShadow}{padding:2px 10px;height:70px}#${defCon.id.fontStroke}{padding:2px 10px;height:70px}#${defCon.id.submit}{padding:2px 10px;height:40px}#${defCon.id.submit} button{background-image:initial;background-color:#67a5df;color:#fff;padding:5px 10px;font-size:14px;font-weight:600;cursor:pointer;border:2px solid #6ba7e0;-webkit-border-radius:6px;border-radius:6px;width:auto;font-family:"Microsoft YaHei",sans-serif!important}#${defCon.id.backup}, #${defCon.id.files}{display:none}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;min-height:110px}#${defCon.id.fontEx} textarea{background:#fafafa}#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{min-width:calc(100% - 15px);max-width:calc(100% - 15px)!important;min-height:60px;line-height:140%;resize:none;border:2px solid #67a5df;-webkit-border-radius:6px;border-radius:6px;-webkit-box-sizing:content-box;box-sizing:content-box;padding:5px;font:bold 14px/140% "Roboto Mono",Monaco,"Courier New",sans-serif!important;color:#0b5b9c;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px rgba(0,0,0,.2);border-radius:10px;background:#ededed}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;color:#111;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:block;float:left;margin:2px 5px 2px 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:initial;-webkit-border-radius:2px;border-radius:2px;padding:2px 0;height:24px;font-weight:400;line-height:20px;color:#fff;background:#67a5df}#${defCon.id.fontList} .${defCon.class.label} span{color:#fff;font-size:16px;font-weight:normal;padding:5px;background:#67a5df}#${defCon.id.fontList} .${defCon.class.close}{padding:5px!important;color:#fff;background:#67a5df;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.fontList} .${defCon.class.close}:hover{-webkit-border-radius:2px;border-radius:2px;color:tomato;background-color:#366694}#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} label{width:auto;display:block;margin:5px 0;color:#333;cursor:initial}#${defCon.id.fontList} .${defCon.class.selectFontId} input{-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df;-webkit-border-radius:6px;border-radius:6px;padding:1px 23px!important;margin:0;width:calc(100% - 48px);max-width:calc(100% - 48px);height:36px!important;font-size:16px;font-weight:700;text-indent:0;background:#fafafa;outline-color:#67a5df;font-family:"Microsoft YaHei",sans-serif!important}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder} input:-moz-placeholder{color:#369!important;font-size:16px;font-weight:700;opacity:.65}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font-size:16px;font-weight:700;opacity:.65}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font-size:16px;font-weight:700;opacity:.65}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:8px 0 0 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df;-webkit-border-radius:4px;border-radius:4px;padding:4px 10px;width:auto;min-width:170px;max-width:252px;max-height:250px;font-size:18px;white-space:nowrap;background-color:#fff;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{margin:0 10px;padding:5px 0;font-weight:400;font-size:21px;min-width:135px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{background-color:#67a5df;color:#fff}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-y:auto;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df;-webkit-border-radius:6px;border-radius:6px;padding:6px;width:95%;max-width:267px;max-height:60px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}.${defCon.class.checkbox}{display:none!important}.${defCon.class.checkbox}+label{padding:11px 9px;margin:0 0 0 25px;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:58px;height:10px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);-webkit-box-sizing:content-box;box-sizing:content-box;word-wrap:normal!important}.${defCon.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;-webkit-border-radius:7px;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${defCon.class.checkbox}+label::after{position:absolute;top:0;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;-webkit-border-radius:100px;border-radius:100px;padding:5px;font-size:1em;font-weight:700;color:#fff;content:"OFF"}.${defCon.class.checkbox}:checked+label{margin:0 0 0 25px;-webkit-box-sizing:content-box;box-sizing:content-box;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.${defCon.class.checkbox}:checked+label::after{content:"ON";left:10px;-webkit-box-sizing:content-box;box-sizing:content-box}.${defCon.class.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.fface} label,#${defCon.id.fface}+label::after,#${defCon.id.fface}+label::before,#${defCon.id.smooth} label,#${defCon.id.smooth}+label::after,#${defCon.id.smooth}+label::before{-webkit-transition:all .1s ease-in;transition:all .1s ease-in;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.fontShadow} #${defCon.id.shadowSize},#${defCon.id.fontStroke} #${defCon.id.strokeSize}{color:#111;width:56px;text-indent:0;margin-bottom:2px;float:right;height:32px;font-size:17px;font-weight:400;font-family:Impact,"Courier New",sans-serif!important;border:#67a5df 2px solid;-webkit-border-radius:4px;border-radius:4px;margin-right:2px;text-align:center;-webkit-box-sizing:content-box;box-sizing:content-box;padding:0;background:#fafafa}.${defCon.class.Switch}{-webkit-box-sizing:content-box;box-sizing:content-box;display:inline-block;float:right;margin-right:4px;padding:0 6px;border:2px double #67a5df;color:#0A68C1;-webkit-border-radius:4px;border-radius:4px;}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent);background-size:50px 50px;background-color:#f7fff7}`;
     const fontStyle_cp = `#${defCon.id.cpm}{width:220px;height:200px;z-index:999;position:fixed;display:none;margin:10px 0 0 20px;-webkit-box-sizing:content-box;box-sizing:content-box;background-color:#d1f2fb;padding:10px;box-shadow:0 0 10px #000;border-radius:6px}.${defCon.class.cp},.${defCon.class.cp} *,.${defCon.class.cp} ::after,.${defCon.class.cp} ::before{border:0;margin:0;padding:0;display:block;box-sizing:border-box}.${defCon.class.cp}{background-color:#fff;display:block;min-width:128px;min-height:128px;position:relative}.${defCon.class.cp}>.${defCon.class.cprb}{border:solid #000 1px;background:linear-gradient(red,#f0f,#00f,#0ff,#0f0,#ff0,red);width:16px;height:calc(100% - 26px);position:absolute;right:12px;top:12px}.${defCon.class.cp} .${defCon.class.cprbp}{position:absolute;width:100%;height:1px}.${defCon.class.cp} .${defCon.class.cprbp}::after,.${defCon.class.cp} .${defCon.class.cprbp}::before{content:"";width:10px;height:7px;position:absolute;background:0 0;border:solid transparent 5px;border-width:3.5px 5px;top:-3px}.${defCon.class.cp} .${defCon.class.cprbp}::before{border-left:solid #404040 5px;left:-6px}.${defCon.class.cp} .${defCon.class.cprbp}::after{border-right:solid #404040 5px;right:-6px}.${defCon.class.cp}>.${defCon.class.cpg}{position:absolute;width:calc(100% - 50px);height:calc(100% - 26px);border:solid #000 1px;left:12px;top:12px}.${defCon.class.cp}>.${defCon.class.cpg},.${defCon.class.cp}>.${defCon.class.cpg} *{cursor:crosshair;-webkit-box-sizing:content-box;box-sizing:content-box}.${defCon.class.cp}>.${defCon.class.cpgb}{background:linear-gradient(rgba(0,0,0,0),#000)}.${defCon.class.cp}>.${defCon.class.cp}-color-block{position:absolute;border:solid #000 1px;background:#fff;width:calc(100% - 104px);max-width:72px;height:18px;left:12px;bottom:8px}.${defCon.class.cp} .${defCon.class.cpc}{background-color:transparent;position:absolute}.${defCon.class.cp} .${defCon.class.cpc}::before{border-radius:50%;width:11px;height:11px;border:solid #000 1px;background-color:transparent;position:relative;left:-6px;top:-6px;display:block;content:""}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcb}::before{border-color:#000}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcw}::before{border-color:#fff}`;
     const fontStyle_tooltip = `.${defCon.class.tooltip}{position:relative;cursor:help}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;visibility:hidden;position:absolute;z-index:999999;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #b8c4ce;-webkit-border-radius:6px;border-radius:6px;padding:10px;width:250px;max-width:250px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{display:block;margin:0 0 10px;line-height:140%;text-indent:0em!important}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei",sans-serif!important;font-size:14px!important}.${defCon.class.tooltip}:hover .${defCon.class.tooltip}{visibility:visible;display:block}.${defCon.class.ps1}{margin:-33px 0 0 0;right:8px;float:right}.${defCon.class.ps2}{top:30px;left:-242px}.${defCon.class.ps3}{top:-197px}.${defCon.class.ps4}{top:-175px}`;
@@ -1771,6 +1891,7 @@
     </div>`);
     const tCSS = `@charset "UTF-8";` + fontStyle;
     const tStyle = `@charset "UTF-8";` + tshadow;
+    defCon.tStyle = tStyle;
 
     /* SYSTEM INFO */
 
@@ -1788,11 +1909,10 @@
     if (curWindowtop) {
       if (defCon.siteIndex === undefined) {
         console.info(
-          `%c${defCon.scriptName}\n%cINTRO.URL:\u0020https://tiny.one/F9y4ng\n%c\u259e\u0020本地备份功能：%s\n\u259e\u0020个性化设置网站数量：%c%s%c/%s%s\n\u259e\u0020渲染字体：%s\n\u259e\u0020字体平滑：%s\u3000\u259a\u0020字体重写：%s\n\u259e\u0020字体描边：%s\u3000\u259a\u0020字体阴影：%s`,
+          `%c${defCon.scriptName}\n%cINTRO.URL:\u0020https://tiny.one/F9y4ng\n%c\u259e\u0020个性化设置网站数量：%c%s%c/%s%s\n\u259e\u0020渲染字体：%s\n\u259e\u0020本地备份：%s\u3000\u259a\u0020保存预览：%s\u0020(Alpha)\n\u259e\u0020字体平滑：%s\u3000\u259a\u0020字体重写：%s\n\u259e\u0020字体描边：%s\u3000\u259a\u0020字体阴影：%s`,
           "font-weight:bold;font-size:14px;color:crimson",
           "line-height:200%;font-size:10px;color:#777;font-style:italic",
           "line-height:180%;font-size:12px;color:teal",
-          isBackupFunction ? "\u5df2\u5f00\u542f" : "\u5df2\u5173\u95ed",
           defCon.domainCount > maxPersonalSites ? "color:crimson" : "color:teal",
           defCon.domainCount,
           "line-height:180%;font-size:12px;color:teal",
@@ -1801,6 +1921,8 @@
             ? "\uff08\u5f53\u524d\u8bbe\u7f6e\uff1a\u4e2a\u6027\u5316\uff09"
             : "\uff08\u5f53\u524d\u8bbe\u7f6e\uff1a\u5168\u5c40\uff09",
           fontface_i ? reFontFace : "\u5df2\u5173\u95ed\uff08\u91c7\u7528" + reFontFace + "\uff09",
+          isBackupFunction ? "ON " : "OFF",
+          isPreview ? "ON " : "OFF",
           CONST.fontSmooth ? "ON " : "OFF",
           CONST.fontFace ? "ON " : "OFF",
           Number(CONST.fontStroke) ? "ON " : "OFF",
@@ -1889,14 +2011,13 @@
     setTimeout(async () => {
       try {
         if (curWindowtop) {
-          let Val = [];
           let fontData = [];
-
-          /* Fonts selection */
-
           const fontReady = await document.fonts.ready;
           const checkFont = new isSupportFontFamily();
           const fontAvailable = new Set();
+
+          /* Fonts selection */
+
           try {
             let ii = 1;
             if (fontReady) {
@@ -1956,12 +2077,12 @@
           /* Fonts Face */
 
           const submitButton = qS(`#${defCon.id.submit} .${defCon.class.submit}`);
-          saveChangeStatus(ffaceT, CONST.fontFace, submitButton, Val);
+          saveChangeStatus(ffaceT, CONST.fontFace, submitButton, defCon.Val);
 
           /* Fonts Smoth */
 
           const smoothT = qS(`#${defCon.id.smooth}`);
-          saveChangeStatus(smoothT, CONST.fontSmooth, submitButton, Val);
+          saveChangeStatus(smoothT, CONST.fontSmooth, submitButton, defCon.Val);
 
           /* Fonts stroke */
 
@@ -1989,7 +2110,7 @@
             defCon.errorCount++;
             error("//-> Fonts stroke:", e.name);
           } finally {
-            saveChangeStatus(strock, Number(CONST.fontStroke), submitButton, Val);
+            saveChangeStatus(strock, Number(CONST.fontStroke), submitButton, defCon.Val);
           }
 
           /* Fonts shadow */
@@ -2018,7 +2139,7 @@
             defCon.errorCount++;
             error("//-> Fonts shadow:", e.name);
           } finally {
-            saveChangeStatus(shadows, Number(CONST.fontShadow), submitButton, Val);
+            saveChangeStatus(shadows, Number(CONST.fontShadow), submitButton, defCon.Val);
           }
 
           /* Fonts shadow color selection */
@@ -2059,7 +2180,7 @@
             defCon.errorCount++;
             error("//-> Fonts shadowColor:", e.name);
           } finally {
-            saveChangeStatus(colorshow, CONST.shadowColor, submitButton, Val);
+            saveChangeStatus(colorshow, CONST.shadowColor, submitButton, defCon.Val);
           }
 
           /* Double-click allows you to edit */
@@ -2074,8 +2195,8 @@
             });
           }
 
-          saveChangeStatus(fontCssT, CONST.fontCSS, submitButton, Val);
-          saveChangeStatus(fontExT, CONST.fontEx, submitButton, Val);
+          saveChangeStatus(fontCssT, CONST.fontCSS, submitButton, defCon.Val);
+          saveChangeStatus(fontExT, CONST.fontEx, submitButton, defCon.Val);
 
           /* Expand & Collapse */
 
@@ -2116,9 +2237,9 @@
             frDialog = null;
           });
 
-          qS(`#${defCon.id.submit} .${defCon.class.submit}`).addEventListener("click", async () => {
-            const fstrock = /[0-9]+(?:\.[0-9]{1,3})?/.test(strock.value) ? strock.value : strock.value === "OFF" ? "0.000" : defValue.fontStroke;
-            const fshadow = /[0-9]+(?:\.[0-9]{1,3})?/.test(shadows.value) ? shadows.value : shadows.value === "OFF" ? "0.00" : defValue.fontShadow;
+          qS(`#${defCon.id.submit} .${defCon.class.submit}`).addEventListener("click", async function () {
+            const fstrock = /[0-9]+(?:\.[0-9]{1,3})?/.test(strock.value) ? Number(strock.value) : strock.value === "OFF" ? 0 : Number(defValue.fontStroke);
+            const fshadow = /[0-9]+(?:\.[0-9]{1,3})?/.test(shadows.value) ? Number(shadows.value) : shadows.value === "OFF" ? 0 : Number(defValue.fontShadow);
             const pickedcolor = colorshow.value;
             const fscolor = colorReg.test(pickedcolor) ? pickedcolor : defValue.shadowColor;
             const fontlists = fontSet().fsearchList(`${defCon.id.fontName}`);
@@ -2136,123 +2257,147 @@
             const cssfun = fcss ? fcss.replace(/"|`/g, "'") : defValue.fontCSS;
             const fex = fontExT.value;
             const fontex = fex ? fex.replace(/"|`/g, "'") : "";
-            try {
-              let frDialog = new frDialogBox({
-                trueButtonText: "保存到全局数据",
-                falseButtonText: "保存到网站数据",
-                neutralButtonText: "取 消",
-                messageText: `<p style='color:darkgreen;font-weight:900'>保存到全局数据：</p><p>将当前设置保存为全局设置，默认使用全局参数。</p><p style='color:darkred;font-weight:900'>保存到当前网站数据：<span id='_All_Website_Data_list_'>[<span style='font-size:12px;font-weight:normal;padding:0 2px;margin:0;cursor:pointer;color:#3e3e3e'>全部数据列表</span>]</span></p><p><span title="保存到网站数据会自动覆盖之前的数据" style="cursor:help;color:indigo" id="_Current_Website_Data_">为 ${curHostname} 保存独立的设置数据。</span>`,
-                titleText: "保存设置数据",
-              });
-              let _domains, _domainsIndex_, _domains_;
-              _domains = await GMgetValue("_domains_fonts_set_");
-              _domains_ = _domains ? JSON.parse(defCon.decrypt(_domains)) : default_domains;
-              if (qS(`#_All_Website_Data_list_`)) {
-                if (_domains_.length > 0) {
-                  qS(`#_All_Website_Data_list_`).style.cssText += "display:line-block";
-                } else {
-                  qS(`#_All_Website_Data_list_`).style.cssText += "display:none";
-                }
-                qS(`#_All_Website_Data_list_`).addEventListener("click", async () => {
-                  closeAllDialog(`div.${defCon.class.db}`);
-                  manageDomainList();
-                });
+            if (isPreview && this.getAttribute("v-Preview")) {
+              try {
+                shadow = fshadow > 0 && fshadow <= 8 ? `text-shadow:0 0 ${fshadow}px ${fscolor};` : "";
+                stroke = fstrock > 0 && fstrock <= 1.0 ? `text-stroke:${fstrock}px currentcolor;-webkit-text-stroke:${fstrock}px currentcolor;` : "";
+                smoothing = smooth ? `-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;` : "";
+                fontfamily = fontface ? `font-family:${fontselect};` : "";
+                refont = fontselect.split(",")[0] ? fontselect.split(",")[0].replace(/"|'/g, "") : "";
+                fontfaces = fontface
+                  ? refont !== ""
+                    ? `@font-face{font-family:"宋体";src:local("${refont}")}@font-face{font-family:"黑体";src:local("${refont}")}@font-face{font-family:SimHei;src:local("${refont}")}@font-face{font-family:SimSun;src:local("${refont}")}@font-face{font-family:"serif";src:local("${refont}")}@font-face{font-family:"Microsoft YaHei UI";src:local("${refont}")}@font-face{font-family:"Segoe UI";src:local("${refont}")}@font-face{font-family:"sans-serif";src:local("${refont}")}@font-face{font-family:Tahoma;src:local("${refont}")}@font-face{font-family:Arial;src:local("${refont}")}@font-face{font-family:Helvetica;src:local("${refont}")}`
+                    : ``
+                  : "";
+                exclude = fontex ? `${fontex}{text-stroke:initial!important;-webkit-text-stroke:initial!important;text-shadow:initial!important}` : "";
+                tshadow = `${codeFont}${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontfaces}${exclude}`;
+                addStyle(tshadow, `${defCon.class.rndStyle}`, "head", true);
+                this.innerText = "\u4fdd\u5b58";
+                this.removeAttribute("v-Preview");
+                defCon.preview = true;
+              } catch (e) {
+                error("//->", e.name);
               }
-              _domains = await GMgetValue("_domains_fonts_set_");
-              _domains_ = _domains ? JSON.parse(defCon.decrypt(_domains)) : default_domains;
-              _domainsIndex_ = update_domain_index(_domains_);
-              if (_domainsIndex_ !== undefined && qS(`#_Current_Website_Data_`)) {
-                const fontDate = dateFormat("YYYY-mm-dd HH:MM:SS", new Date(_domains_[_domainsIndex_].fontDate));
-                qS(`#_Current_Website_Data_`).innerHTML = `<p>上次保存：${fontDate} <button id="_Current_Website_Data_delete_"\
-            style="padding:3px 5px;margin-left:15px;cursor:pointer;color:#333;font-size:12px;border:1px solid #777;border-radius:4px;" title="删除数据后将刷新页面">删除当前网站数据</button></p>`;
-                qS(`#_Current_Website_Data_delete_`).addEventListener("click", async () => {
-                  _domains_.splice(_domainsIndex_, 1);
-                  GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(_domains_)));
-                  closeAllDialog(`div.${defCon.class.db}`);
-                  qS(`#${defCon.id.rndId}`).style = "display:none";
-                  let frDialog = new frDialogBox({
-                    trueButtonText: "感谢使用",
-                    messageText: `<p style='color:darkred'>时间戳${fontDate}的数据已成功删除！</p><p>当前页面将自动刷新。</p>`,
-                    titleText: "个性化数据删除",
-                  });
-                  if (await frDialog.respond()) {
-                    closeAllDialog(`div.${defCon.class.db}`);
-                    location.reload();
-                  }
-                  frDialog = null;
+            } else {
+              try {
+                let frDialog = new frDialogBox({
+                  trueButtonText: "保存到全局数据",
+                  falseButtonText: "保存到网站数据",
+                  neutralButtonText: "取 消",
+                  messageText: `<p style='color:darkgreen;font-weight:900'>保存到全局数据：</p><p>将当前设置保存为全局设置，默认使用全局参数。</p><p style='color:darkred;font-weight:900'>保存到当前网站数据：<span id='${defCon.id.seed}_a_w_d_l_'>[<span style='font-size:12px;font-weight:normal;padding:0 2px;margin:0;cursor:pointer;color:#3e3e3e'>全部数据列表</span>]</span></p><p><span title="保存到网站数据会自动覆盖之前的数据" style="cursor:help;color:indigo" id="${defCon.id.seed}_c_w_d_">为 ${curHostname} 保存独立的设置数据。</span>`,
+                  titleText: "保存设置数据",
                 });
-              }
-              if (await frDialog.respond()) {
-                saveDate("_fonts_set_", {
-                  fontSelect: filterHtml(fontselect),
-                  fontFace: Boolean(fontface),
-                  fontStroke: Number(fstrock),
-                  fontShadow: Number(fshadow),
-                  shadowColor: filterHtml(fscolor),
-                  fontSmooth: Boolean(smooth),
-                  fontCSS: filterHtml(cssfun),
-                  fontEx: filterHtml(fontex),
-                });
-                defCon.successId = true;
-              } else {
-                const _savedata_ = {
-                  domain: curHostname,
-                  fontDate: new Date(),
-                  fontSelect: filterHtml(fontselect),
-                  fontFace: Boolean(fontface),
-                  fontStroke: Number(fstrock),
-                  fontShadow: Number(fshadow),
-                  shadowColor: filterHtml(fscolor),
-                  fontSmooth: Boolean(smooth),
-                  fontCSS: filterHtml(cssfun),
-                  fontEx: filterHtml(fontex),
-                };
+                let _domains, _domainsIndex_, _domains_;
                 _domains = await GMgetValue("_domains_fonts_set_");
-                _domains_ = _domains_ ? JSON.parse(defCon.decrypt(_domains)) : default_domains;
-                _domainsIndex_ = update_domain_index(_domains_);
-                if (_domainsIndex_ !== undefined) {
-                  _domains_.splice(_domainsIndex_, 1, _savedata_);
-                } else {
-                  _domains_.push(_savedata_);
+                _domains_ = _domains ? JSON.parse(defCon.decrypt(_domains)) : default_domains;
+                const _awdl = qS(`#${defCon.id.seed}_a_w_d_l_`);
+                if (_awdl) {
+                  if (_domains_.length > 0) {
+                    _awdl.style.cssText += "display:line-block";
+                  } else {
+                    _awdl.style.cssText += "display:none";
+                  }
+                  _awdl.addEventListener("click", async () => {
+                    closeAllDialog(`div.${defCon.class.db}`);
+                    manageDomainList();
+                  });
                 }
-                if (_domains_.length <= maxPersonalSites || _domainsIndex_ !== undefined) {
-                  GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(_domains_)));
+                _domains = await GMgetValue("_domains_fonts_set_");
+                _domains_ = _domains ? JSON.parse(defCon.decrypt(_domains)) : default_domains;
+                _domainsIndex_ = update_domain_index(_domains_);
+                if (_domainsIndex_ !== undefined && qS(`#${defCon.id.seed}_c_w_d_`)) {
+                  const fontDate = dateFormat("YYYY-mm-dd HH:MM:SS", new Date(_domains_[_domainsIndex_].fontDate));
+                  qS(`#${defCon.id.seed}_c_w_d_`).innerHTML = `<p>上次保存：${fontDate} <button id="${defCon.id.seed}_c_w_d_d_"\
+                  style="padding:3px 5px;margin-left:15px;cursor:pointer;color:#333;font-size:12px;border:1px solid #777;border-radius:4px;" title="删除数据后将刷新页面">删除当前网站数据</button></p>`;
+                  qS(`#${defCon.id.seed}_c_w_d_d_`).addEventListener("click", async () => {
+                    _domains_.splice(_domainsIndex_, 1);
+                    GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(_domains_)));
+                    closeAllDialog(`div.${defCon.class.db}`);
+                    qS(`#${defCon.id.rndId}`).style = "display:none";
+                    let frDialog = new frDialogBox({
+                      trueButtonText: "感谢使用",
+                      messageText: `<p style='color:darkred'>时间戳${fontDate}的数据已成功删除！</p><p>当前页面将自动刷新。</p>`,
+                      titleText: "个性化数据删除",
+                    });
+                    if (await frDialog.respond()) {
+                      closeAllDialog(`div.${defCon.class.db}`);
+                      location.reload();
+                    }
+                    frDialog = null;
+                  });
+                }
+                if (await frDialog.respond()) {
+                  saveDate("_fonts_set_", {
+                    fontSelect: filterHtml(fontselect),
+                    fontFace: Boolean(fontface),
+                    fontStroke: Number(fstrock),
+                    fontShadow: Number(fshadow),
+                    shadowColor: filterHtml(fscolor),
+                    fontSmooth: Boolean(smooth),
+                    fontCSS: filterHtml(cssfun),
+                    fontEx: filterHtml(fontex),
+                  });
                   defCon.successId = true;
                 } else {
-                  let frDialog = new frDialogBox({
-                    trueButtonText: "依然保存",
-                    falseButtonText: "管理列表",
-                    neutralButtonText: "我放弃",
-                    messageText: `<p style='color:darkgreen'>您已经保存超过${maxPersonalSites}个网站的个性化数据了，过多的数据会使脚本运行速度过慢，进而会影响您浏览网页的响应速度，建议您及时删除一些平时访问较少的站点设置，然后再进行新网站设置的数据保存。</p><p style='color:crimson'>您确认要继续保存吗？</p>`,
-                    titleText: "数据过多的提示",
-                  });
-                  if (await frDialog.respond()) {
+                  const _savedata_ = {
+                    domain: curHostname,
+                    fontDate: new Date(),
+                    fontSelect: filterHtml(fontselect),
+                    fontFace: Boolean(fontface),
+                    fontStroke: Number(fstrock),
+                    fontShadow: Number(fshadow),
+                    shadowColor: filterHtml(fscolor),
+                    fontSmooth: Boolean(smooth),
+                    fontCSS: filterHtml(cssfun),
+                    fontEx: filterHtml(fontex),
+                  };
+                  _domains = await GMgetValue("_domains_fonts_set_");
+                  _domains_ = _domains_ ? JSON.parse(defCon.decrypt(_domains)) : default_domains;
+                  _domainsIndex_ = update_domain_index(_domains_);
+                  if (_domainsIndex_ !== undefined) {
+                    _domains_.splice(_domainsIndex_, 1, _savedata_);
+                  } else {
+                    _domains_.push(_savedata_);
+                  }
+                  if (_domains_.length <= maxPersonalSites || _domainsIndex_ !== undefined) {
                     GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(_domains_)));
                     defCon.successId = true;
                   } else {
-                    manageDomainList();
-                    defCon.successId = false;
+                    let frDialog = new frDialogBox({
+                      trueButtonText: "依然保存",
+                      falseButtonText: "管理列表",
+                      neutralButtonText: "我放弃",
+                      messageText: `<p style='color:darkgreen'>您已经保存超过${maxPersonalSites}个网站的个性化数据了，过多的数据会使脚本运行速度过慢，进而会影响您浏览网页的响应速度，建议您及时删除一些平时访问较少的站点设置，然后再进行新网站设置的数据保存。</p><p style='color:crimson'>您确认要继续保存吗？</p>`,
+                      titleText: "数据过多的提示",
+                    });
+                    if (await frDialog.respond()) {
+                      GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(_domains_)));
+                      defCon.successId = true;
+                    } else {
+                      manageDomainList();
+                      defCon.successId = false;
+                    }
+                    frDialog = null;
                   }
-                  frDialog = null;
                 }
-              }
-              frDialog = null;
-            } catch (e) {
-              error("//-> saveDate:", e.name);
-              reportErrortoAuthor(e, true);
-              defCon.successId = false;
-            } finally {
-              if (defCon.successId) {
-                closeAllDialog(`div.${defCon.class.db}`);
-                let frDialog = new frDialogBox({
-                  trueButtonText: "感谢使用",
-                  messageText: `<p>您设置的参数已保存，页面将会自动刷新！</p>`,
-                  titleText: "数据保存完毕",
-                });
-                qS(`#${defCon.id.rndId}`).style = "display:none";
-                if (await frDialog.respond()) {
-                  frDialog = null;
-                  location.reload();
+                frDialog = null;
+              } catch (e) {
+                error("//-> saveDate:", e.name);
+                reportErrortoAuthor(e, true);
+                defCon.successId = false;
+              } finally {
+                if (defCon.successId) {
+                  closeAllDialog(`div.${defCon.class.db}`);
+                  let frDialog = new frDialogBox({
+                    trueButtonText: "感谢使用",
+                    messageText: `<p>您设置的参数已保存，页面将会自动刷新！</p>`,
+                    titleText: "数据保存完毕",
+                  });
+                  qS(`#${defCon.id.rndId}`).style = "display:none";
+                  if (await frDialog.respond()) {
+                    frDialog = null;
+                    location.reload();
+                  }
                 }
               }
             }
@@ -2274,7 +2419,7 @@
 
     /* Menus Insert */
 
-    let Error_Done, Font_Set, Exclude_site, Feed_Back;
+    let Error_Done, Font_Set, Feed_Back, Exclude_site, Parameter_Settings;
     debug("//-> errorCount:", defCon.errorCount);
     if (curWindowtop) {
       if (defCon.errorCount > 0) {
@@ -2295,7 +2440,7 @@
               window.open(`${defCon.guideUrl}`, "Guide");
             });
           });
-          Exclude_site = GMregisterMenuCommand(`\ufff3\ud83d\udeab 排除渲染 ${curHostname}`, async () => {
+          Exclude_site = GMregisterMenuCommand(`\ufff3\u26d4 排除渲染 ${curHostname}`, async () => {
             closeAllDialog(`div.${defCon.class.db}`);
             let frDialog = new frDialogBox({
               trueButtonText: "确 定",
@@ -2305,9 +2450,83 @@
             });
             if (await frDialog.respond()) {
               exSite = await GMgetValue("_Exclude_site_");
+              exSite = JSON.parse(defCon.decrypt(exSite));
               exSite.push(curHostname);
-              GMsetValue("_Exclude_site_", exSite);
+              GMsetValue("_Exclude_site_", defCon.encrypt(JSON.stringify(exSite)));
               location.reload();
+            }
+            frDialog = null;
+          });
+          Parameter_Settings ? GMunregisterMenuCommand(Parameter_Settings) : debug("//-> No Parameter_Settings_Menu");
+          Parameter_Settings = GMregisterMenuCommand("\ufff7\ud83d\udc8e VIP 高级功能开关", async () => {
+            let frDialog = new frDialogBox({
+              trueButtonText: "保 存",
+              neutralButtonText: "取 消",
+              messageText: `
+              <ul class="${defCon.class.main}" style="color:darkgoldenrod;font:500 16px/150% 'Microsoft YaHei',sans-serif!important">
+                <li id="${defCon.id.bk}">
+                  <div style="float:left;font-size:16px!important">本地备份功能（默认：开启）</div>
+                  <div style="float:right;margin:-2px 2px 0 10px;font-size:16px!important">
+                    <input type="checkbox" id="${defCon.id.isbackup}" class="${defCon.class.checkbox}" ${isBackupFunction ? "checked" : ""} />
+                    <label for="${defCon.id.isbackup}"></label>
+                  </div>
+                </li>
+                <li id="${defCon.id.pv}">
+                  <div style="float:left;font-size:16px!important">保存预览功能（实验性功能）</div>
+                  <div style="float:right;margin:-2px 2px 0 10px;font-size:16px!important">
+                    <input type="checkbox" id="${defCon.id.ispreview}" class="${defCon.class.checkbox}" ${isPreview ? "checked" : ""} />
+                    <label for="${defCon.id.ispreview}"></label>
+                  </div>
+                </li>
+                <li id="${defCon.id.mps}">
+                  <div style="float:left;font-size:16px!important">个性化设置网站总数</div>
+                  <div style="float:right;margin:-6px 2px 0 15px">
+                    <input style="border:2px solid darkgoldenrod;border-radius:4px;width:50px;text-align:center;padding:5px;color:#333;font:500 16px/140%\
+                    impact,serif-sans!important;" maxlength="4" id="${defCon.id.maxps}" placeholder="100" value="${maxPersonalSites}" />
+                  </div>
+                </li>
+                <ol id="${defCon.id.feedback}" title="建议遇到问题先看看脚本使用说明" style="padding:0;margin:0;font-size:16px;font-weight:700;cursor:help">
+                \ud83e\udde1\u0020如果您遇到问题，请向我反馈\u0020\ud83e\udde1
+                </ol>
+              </ul>`,
+              titleText: "参数设置 - VIP 高级功能",
+            });
+            let _bk, _pv, _mps;
+            _bk = Boolean(qS(`#${defCon.id.isbackup}`).checked);
+            _pv = Boolean(qS(`#${defCon.id.ispreview}`).checked);
+            _mps = qS(`#${defCon.id.maxps}`).value;
+            qS(`#${defCon.id.maxps}`).addEventListener("input", function () {
+              this.value = this.value.replace(/[^0-9]/g, "");
+            });
+            document.querySelector(`#${defCon.id.feedback}`).addEventListener("click", () => {
+              window.open(feedback, "feedback");
+            });
+            document.querySelectorAll(`#${defCon.id.isbackup}, #${defCon.id.ispreview}, #${defCon.id.maxps}`).forEach(items => {
+              items.addEventListener("change", function () {
+                _bk = Boolean(qS(`#${defCon.id.isbackup}`).checked);
+                _pv = Boolean(qS(`#${defCon.id.ispreview}`).checked);
+                _mps = qS(`#${defCon.id.maxps}`).value;
+              });
+            });
+            if (await frDialog.respond()) {
+              if (!_mps.length) {
+                _mps = 100;
+              }
+              const _tmp = await GMgetValue("_configure_");
+              _config_data_ = JSON.parse(defCon.decrypt(_tmp));
+              _config_data_.isBackupFunction = _bk;
+              _config_data_.isPreview = _pv;
+              _config_data_.maxPersonalSites = Number(_mps);
+              GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
+              let frDialog = new frDialogBox({
+                trueButtonText: "确 定",
+                messageText: `<p>VIP 高级功能参数已成功保存，页面即将刷新！</p>`,
+                titleText: "VIP 高级功能设置保存",
+              });
+              if (await frDialog.respond()) {
+                frDialog = null;
+                location.reload();
+              }
             }
             frDialog = null;
           });
@@ -2322,19 +2541,20 @@
             });
             if (await frDialog.respond()) {
               exSite = await GMgetValue("_Exclude_site_");
+              exSite = JSON.parse(defCon.decrypt(exSite));
               defCon.siteIndex = real_Time_Update(exSite);
               exSite.splice(defCon.siteIndex, 1);
-              GMsetValue("_Exclude_site_", exSite);
+              GMsetValue("_Exclude_site_", defCon.encrypt(JSON.stringify(exSite)));
               location.reload();
             }
             frDialog = null;
           });
+          Feed_Back ? GMunregisterMenuCommand(Feed_Back) : debug("//-> No Feed_Back_Menu");
+          Feed_Back = GMregisterMenuCommand("\ufff9\ud83e\udde1 向作者反馈问题或建议", () => {
+            window.open(feedback, "feedback");
+          });
         }
       }
-      Feed_Back ? GMunregisterMenuCommand(Feed_Back) : debug("//-> No Feed_Back_Menu");
-      Feed_Back = GMregisterMenuCommand("\ufff9\ud83e\udde1 建议反馈", () => {
-        window.open(feedback, "feedback");
-      });
     }
 
     /* important Functions */
@@ -2370,7 +2590,7 @@
               const db_R = defCon.encrypt(`${defCon.scriptName}\u26a1\u0046\u0039\u0079\u0034\u006e\u0067\ud83d\udc96`);
               const db_0 = defCon.encrypt(new Date());
               const db_1 = _fonts_set_;
-              const db_2 = defCon.encrypt(JSON.stringify(_Exclude_site_));
+              const db_2 = _Exclude_site_;
               const db_3 = _domains_fonts_set__;
               const db = { db_R, db_0, db_1, db_2, db_3 };
               const timeStamp = dateFormat("YYYYmmddHHMMSS", new Date());
@@ -2401,7 +2621,7 @@
                     const _data_3 = _rs.db_3 ? JSON.parse(defCon.decrypt(_rs.db_3)) : def;
                     if (!isNaN(Date.parse(_data_0)) && new Date(_data_0) <= new Date() && _data_R.includes(defCon.scriptAuthor)) {
                       GMsetValue("_fonts_set_", defCon.encrypt(JSON.stringify(_data_1)));
-                      GMsetValue("_Exclude_site_", _data_2);
+                      GMsetValue("_Exclude_site_", defCon.encrypt(JSON.stringify(_data_2)));
                       GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(_data_3)));
                       let frDialog = new frDialogBox({
                         trueButtonText: "确 定",
@@ -2522,6 +2742,10 @@
         const _value = t.attributes.v !== undefined ? (value === "OFF" ? 0 : Number(value)) : value;
         if (_value !== e) {
           !v.includes(t.id) ? v.push(t.id) : debug("//-> ID already exists");
+          if (isPreview) {
+            d.innerText = "\u9884\u89c8";
+            d.setAttribute("v-Preview", "true");
+          }
         } else {
           for (let i = v.length - 1; i >= 0; i--) {
             if (v[i] === t.id) {
@@ -2530,6 +2754,7 @@
             }
           }
         }
+        defCon.Val = v;
         if (v.length > 0) {
           if (!d.classList.contains(`${defCon.class.anim}`)) {
             d.classList.add(`${defCon.class.anim}`);
@@ -2537,6 +2762,14 @@
         } else {
           if (d.classList.contains(`${defCon.class.anim}`)) {
             d.classList.remove(`${defCon.class.anim}`);
+          }
+          if (isPreview) {
+            d.innerText = "\u4fdd\u5b58";
+            d.removeAttribute("v-Preview");
+            if (defCon.preview) {
+              addStyle(defCon.tStyle, `${defCon.class.rndStyle}`, "head", true);
+              defCon.preview = false;
+            }
           }
         }
       } catch (e) {
@@ -2550,49 +2783,51 @@
       _domains = await GMgetValue("_domains_fonts_set_");
       _domains_ = _domains ? JSON.parse(defCon.decrypt(_domains)) : default_domains;
       const _data_search_ =
-        _domains_.length > 10
-          ? `<p><input id="_d_s_" style="width:52%;font-size:12px;border:2px solid #777;border-radius:4px;margin:4px 4px 6px 0;padding:3px 15px"><button id="_d_s_s_" style="padding:3px 10px;cursor:pointer;font-size:12px;border:1px solid #777;border-radius:4px;">查 询</button><button id="_d_s_c_" style="margin-left:4px;padding:3px 10px;cursor:pointer;font-size:12px;border:1px solid #777;border-radius:4px;">清 除</button></p>`
+        _domains_.length > 6
+          ? `<p><input id="${defCon.id.seed}_d_s_" style="width:52%;font-size:12px;border:2px solid #777;border-radius:4px;margin:4px 4px 6px 0;padding:3px 15px"><button id="${defCon.id.seed}_d_s_s_" style="padding:3px 10px;cursor:pointer;font-size:12px;border:1px solid #777;border-radius:4px;">查 询</button><button id="${defCon.id.seed}_d_s_c_" style="margin-left:4px;padding:3px 10px;cursor:pointer;font-size:12px;border:1px solid #777;border-radius:4px;">清 除</button></p>`
           : "";
       for (let i = 0; i < _domains_.length; i++) {
-        Contents += `<li id="_d_d_l_${i}" style="list-style:none;font-size:14px;font-style:normal;padding:5px;color:#555">\
-                [<span id="_d_d_l_s_${i}" style="padding:3px;cursor:pointer;color:crimson;font-size:14px">删除</span>]\
+        Contents += `<li id="${defCon.id.seed}_d_d_l_${i}" style="list-style:none;font-size:14px;font-style:normal;padding:5px;color:#555">\
+                [<span id="${defCon.id.seed}_d_d_l_s_${i}" style="padding:3px;cursor:pointer;color:crimson;font-size:14px">删除</span>]\
                 <span>${i + 1}. ${filterHtml(_domains_[i].domain)} - ${dateFormat("YYYY/mm/dd HH:MM:SS", new Date(_domains_[i].fontDate))}</span></li>`;
       }
       let frDialog = new frDialogBox({
         trueButtonText: "确认操作，保存数据",
         neutralButtonText: "取 消",
-        messageText: `<p style="font-size:14px;color:darkred">请谨慎操作，删除数据将不可恢复，保存后生效！</p>${_data_search_}<ul id="_d_d_" style="margin:0;padding:0;list-style:none;overflow:auto;max-height:190px;white-space:nowrap">${Contents}</ul>`,
+        messageText: `<p style="font-size:14px;color:darkred">请谨慎操作，删除数据将不可恢复，保存后生效！</p>${_data_search_}<ul id="${defCon.id.seed}_d_d_" style="margin:0;padding:0;list-style:none;overflow:auto;max-height:190px;white-space:nowrap">${Contents}</ul>`,
         titleText: "网站个性化设置数据列表：",
       });
-      const items = document.querySelectorAll(`#_d_d_ li span[id^="_d_d_l_s_"]`);
-      if (qS(`#_d_s_`) && qS(`#_d_s_c_`) && qS(`#_d_s_s_`)) {
-        qS(`#_d_s_`).addEventListener("keydown", e => {
+      const items = document.querySelectorAll(`#${defCon.id.seed}_d_d_ li span[id^="${defCon.id.seed}_d_d_l_s_"]`);
+      if (qS(`#${defCon.id.seed}_d_s_`) && qS(`#${defCon.id.seed}_d_s_c_`) && qS(`#${defCon.id.seed}_d_s_s_`)) {
+        qS(`#${defCon.id.seed}_d_s_`).addEventListener("keydown", e => {
           const event = e || window.event;
           if (event.keyCode === 13) {
-            qS(`#_d_s_s_`).click();
+            qS(`#${defCon.id.seed}_d_s_s_`).click();
           }
         });
-        qS(`#_d_s_`).addEventListener("input", () => {
-          qS(`#_d_s_`).value = qS(`#_d_s_`).value.replace(/[^a-z0-9.-]/gi, "");
+        qS(`#${defCon.id.seed}_d_s_`).addEventListener("input", () => {
+          qS(`#${defCon.id.seed}_d_s_`).value = qS(`#${defCon.id.seed}_d_s_`).value.replace(/[^a-z0-9.-]/gi, "");
         });
-        qS(`#_d_s_c_`).addEventListener("click", () => {
-          qS(`#_d_s_`).value = "";
-          qS(`#_d_s_`).style.cssText += "border-color:#777";
-          qS(`#_d_d_`).scrollTop = 0;
-          qS(`#_d_s_`).focus();
+        qS(`#${defCon.id.seed}_d_s_c_`).addEventListener("click", () => {
+          qS(`#${defCon.id.seed}_d_s_`).value = "";
+          qS(`#${defCon.id.seed}_d_s_`).style.cssText += "border-color:#777";
+          qS(`#${defCon.id.seed}_d_d_`).scrollTop = 0;
+          qS(`#${defCon.id.seed}_d_s_`).focus();
         });
-        qS(`#_d_d_`).addEventListener("click", () => {
-          qS(`#_d_s_`).focus();
+        qS(`#${defCon.id.seed}_d_d_`).addEventListener("click", () => {
+          qS(`#${defCon.id.seed}_d_s_`).focus();
         });
-        qS(`#_d_s_s_`).addEventListener("click", () => {
-          if (qS(`#_d_s_`).value) {
+        qS(`#${defCon.id.seed}_d_s_s_`).addEventListener("click", () => {
+          if (qS(`#${defCon.id.seed}_d_s_`).value) {
             if (window.find) {
-              window.find(qS(`#_d_s_`).value, 0) ? (qS(`#_d_s_`).style.cssText += "border-color:#777") : (qS(`#_d_s_`).style.cssText += "border-color:red");
+              window.find(qS(`#${defCon.id.seed}_d_s_`).value, 0)
+                ? (qS(`#${defCon.id.seed}_d_s_`).style.cssText += "border-color:#777")
+                : (qS(`#${defCon.id.seed}_d_s_`).style.cssText += "border-color:red");
               if (window.getSelection) {
                 const _sTxt = window.getSelection();
-                const _rows = Number(_sTxt.anchorNode.parentNode.parentNode.id.replace("_d_d_l_", ""));
+                const _rows = Number(_sTxt.anchorNode.parentNode.parentNode.id.replace(`${defCon.id.seed}_d_d_l_`, ""));
                 const _offsetHeight = Number(_sTxt.anchorNode.parentNode.parentNode.offsetHeight);
-                qS(`#_d_d_`).scrollTop = _rows * _offsetHeight;
+                qS(`#${defCon.id.seed}_d_d_`).scrollTop = _rows * _offsetHeight;
               }
             }
           }
@@ -2601,7 +2836,7 @@
       for (let i = 0; i < items.length; i++) {
         items[i].addEventListener("click", () => {
           if (!items[i].getAttribute("data-del")) {
-            const _list_Id_ = Number(items[i].id.replace("_d_d_l_s_", ""));
+            const _list_Id_ = Number(items[i].id.replace(`${defCon.id.seed}_d_d_l_s_`, ""));
             _temp_.push(_domains_[_list_Id_].domain);
             items[i].setAttribute("data-del", _domains_[_list_Id_].domain);
             items[i].innerHTML = "恢复";
@@ -2652,10 +2887,10 @@
             closeAllDialog(`div.${defCon.class.db}`);
             let frDialog = new frDialogBox({
               trueButtonText: "反馈问题",
-              messageText: `<p style='color:crimson'>脚本运行过程中发生了错误，请向作者反馈！</p><p style='color:grey;font-size:14px'>以下信息会自动保存至您的剪切板：</p><p><ul id='_copy_to_author'><li>浏览器信息：${navigator.userAgent}</li><li>脚本插件信息：${handlerInfo} ${GMversion}</li><li>脚本版本：${defCon.curVersion}</li><li>域名信息：${curHostname}</li><li>错误信息：${e}</li></ul></p>`,
+              messageText: `<p style='color:crimson'>脚本运行过程中发生了错误，请向作者反馈！</p><p style='color:grey;font-size:14px'>以下信息会自动保存至您的剪切板：</p><p><ul id='${defCon.id.seed}_copy_to_author'><li>浏览器信息：${navigator.userAgent}</li><li>脚本插件信息：${handlerInfo} ${GMversion}</li><li>脚本版本：${defCon.curVersion}</li><li>域名信息：${curHostname}</li><li>错误信息：${e}</li></ul></p>`,
               titleText: "错误报告",
             });
-            const copyText = document.getElementById("_copy_to_author").innerText;
+            const copyText = document.getElementById(`${defCon.id.seed}_copy_to_author`).innerText;
             if (await frDialog.respond()) {
               copyToClipboard(copyText);
               qS(`#${defCon.id.rndId}`).style = "display:none";
@@ -2667,52 +2902,6 @@
             error("//-> REA:", e.name);
           }
         }, 2e3);
-      }
-    }
-
-    function addStyle(css, className, addToTarget, isReload, initType) {
-      RAFInterval(
-        () => {
-          let addTo = qS(addToTarget);
-          if (typeof addToTarget === "undefined") {
-            addTo = document.head || document.body || document.documentElement || document;
-          }
-          isReload = isReload || false;
-          initType = initType || "text/css";
-          if (typeof addToTarget === "undefined" || (typeof addToTarget !== "undefined" && qS(addToTarget))) {
-            if (isReload === true) {
-              safeRemove(`.${className}`);
-            } else if (isReload === false && qS(`.${className}`)) {
-              return true;
-            }
-            const cssNode = cE("style");
-            if (className !== null) {
-              cssNode.className = className;
-            }
-            cssNode.setAttribute("type", initType);
-            cssNode.innerHTML = css;
-            addTo.appendChild(cssNode);
-          }
-        },
-        20,
-        true
-      );
-    }
-
-    function safeRemove(Css) {
-      safeFunction(() => {
-        const removeNodes = document.querySelectorAll(Css);
-        for (let i = 0; i < removeNodes.length; i++) {
-          removeNodes[i].remove();
-        }
-      });
-    }
-
-    function safeFunction(func) {
-      try {
-        func();
-      } catch (e) {
-        error("//-> safeFunction:", e.name);
       }
     }
 
