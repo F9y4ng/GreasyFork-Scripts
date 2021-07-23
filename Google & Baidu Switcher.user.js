@@ -4,7 +4,7 @@
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh         谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.4.20210721.1
+// @version         3.4.20210723.1
 // @author          F9y4ng
 // @description         谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en      Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
@@ -27,7 +27,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            新增脚本设置页面，无需修改代码来设置参数。\n修正bugs，优化代码。
+// @note            修正几处bugs，优化代码。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -393,13 +393,12 @@
       GMdeleteValue("_if_Use_Bing_");
       GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
     } else {
-      const _n = JSON.parse(defCon.decrypt(n));
-      useBing = _n.useBing;
-      VerDetAuto = _n.VerDetAuto;
-      checkUpdate = _n.checkUpdate;
-      timeNumber = _n.timeNumber;
-      timeUnit = _n.timeUnit;
-      _data = { useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit };
+      _data = JSON.parse(defCon.decrypt(n));
+      useBing = _data.useBing;
+      VerDetAuto = _data.VerDetAuto;
+      checkUpdate = _data.checkUpdate;
+      timeNumber = _data.timeNumber;
+      timeUnit = _data.timeUnit;
     }
     setResult = checkUpdate ? Boolean(VerDetAuto) : false;
     const _expire_time = String(timeNumber + timeUnit);
@@ -637,13 +636,12 @@
       _data = { useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit };
       GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
     } else {
-      const _configuration_ = JSON.parse(defCon.decrypt(_configuration));
-      useBing = _configuration_.useBing;
-      VerDetAuto = _configuration_.VerDetAuto;
-      checkUpdate = _configuration_.checkUpdate;
-      timeNumber = _configuration_.timeNumber;
-      timeUnit = _configuration_.timeUnit;
-      _data = { useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit };
+      _data = JSON.parse(defCon.decrypt(_configuration));
+      useBing = _data.useBing;
+      VerDetAuto = _data.VerDetAuto;
+      checkUpdate = _data.checkUpdate;
+      timeNumber = _data.timeNumber;
+      timeUnit = _data.timeUnit;
     }
 
     const CONST = {
@@ -1207,14 +1205,16 @@
       RAFInterval(
         () => {
           let addTo = document.querySelector(addToTarget);
+          let reNew = false;
           if (typeof addToTarget === "undefined") {
             addTo = document.head || document.body || document.documentElement || document;
           }
           isReload = isReload || false;
           initType = initType || "text/css";
           if (typeof addToTarget === "undefined" || (typeof addToTarget !== "undefined" && document.querySelector(addToTarget))) {
-            if (isReload === true) {
+            if (isReload === true && document.querySelector(`.${className}`)) {
               safeRemove(`.${className}`);
+              reNew = true;
             } else if (isReload === false && document.querySelector(`.${className}`)) {
               return true;
             }
@@ -1222,9 +1222,13 @@
             if (className !== null) {
               cssNode.className = className;
             }
+            cssNode.id = "S" + Date.now().toString().slice(-8);
             cssNode.setAttribute("type", initType);
             cssNode.innerHTML = css;
             addTo.appendChild(cssNode);
+            if (reNew && document.querySelector(`.${className}`)) {
+              return true;
+            }
           }
         },
         20,
