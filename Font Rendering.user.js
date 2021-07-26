@@ -4,7 +4,7 @@
 // @name:zh           字体渲染（自用脚本）
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:en           Font Rendering (Customized)
-// @version           2021.07.23.4
+// @version           2021.07.26.1
 // @author            F9y4ng
 // @description       让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @description:zh    让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
@@ -34,7 +34,7 @@
 // @run-at          document-start
 // ==/UserScript==
 
-!(async function () {
+!(function () {
   "use strict";
 
   /* customize */
@@ -91,7 +91,7 @@
       let b = "abcdefghijklmnopqrstuvwxyz";
       let c = b.toUpperCase();
       n = Number.isFinite(n) ? n : 10;
-      v ? (r = b + c) : (r = a + b + a + c);
+      r = v ? b + c : a + b + a + c;
       for (; n > 0; --n) {
         s += r[Math.floor(Math.random() * r.length)];
       }
@@ -159,7 +159,8 @@
         return window.self === window.top;
       } catch (e) {
         error("//-> isWinTop:", e.name);
-        return !(parent.frames.length > 0);
+        const eI = parent.frames.length > 0;
+        return !eI;
       }
     },
   };
@@ -281,25 +282,6 @@
     return document.createElement(str);
   };
 
-  /* get promise value */
-
-  let maxPersonalSites, isBackupFunction, isPreview, rebuild, _config_data_;
-  const configure = await GMgetValue("_configure_");
-  if (!configure) {
-    maxPersonalSites = 100;
-    isBackupFunction = true;
-    isPreview = false;
-    rebuild = true;
-    _config_data_ = { maxPersonalSites, isBackupFunction, isPreview, rebuild };
-    GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
-  } else {
-    _config_data_ = JSON.parse(defCon.decrypt(configure));
-    maxPersonalSites = _config_data_.maxPersonalSites;
-    isBackupFunction = _config_data_.isBackupFunction;
-    isPreview = _config_data_.isPreview;
-    rebuild = _config_data_.rebuild;
-  }
-
   /* Passive event listeners */
 
   let supportsPassive = false;
@@ -344,13 +326,13 @@
     requestAnimationFrame(step);
   }
 
-  function addStyle(css, className, addToTarget, isReload, initType) {
+  function addStyle(T, css, className, addToTarget, isReload, initType, reNew = false) {
     RAFInterval(
       () => {
-        let reNew = false;
+        T = T || "T";
         isReload = isReload || false;
         initType = initType || "text/css";
-        if (typeof addToTarget !== "undefined" && addToTarget) {
+        if (typeof addToTarget === "object" && addToTarget) {
           if (isReload === true && addToTarget.querySelector(`.${className}`)) {
             safeRemove(`.${className}`, addToTarget);
             reNew = true;
@@ -361,7 +343,7 @@
           if (className !== null) {
             cssNode.className = className;
           }
-          cssNode.id = "T" + Date.now().toString().slice(-8);
+          cssNode.id = T + Date.now().toString().slice(-8);
           cssNode.setAttribute("type", initType);
           cssNode.innerHTML = css;
           addToTarget.appendChild(cssNode);
@@ -1282,26 +1264,29 @@
             if (submitButton.classList.contains(`${defCon.class.anim}`)) {
               if (!defCon.Val.length) {
                 submitButton.classList.remove(`${defCon.class.anim}`);
-                if (isPreview) {
+                if (defCon.isPreview) {
                   submitButton.innerText = "\u4fdd\u5b58";
                   submitButton.removeAttribute("style");
                   submitButton.removeAttribute("v-Preview");
                   defCon.preview = true;
                   if (defCon.preview) {
-                    addStyle(defCon.tStyle, `${defCon.class.rndStyle}`, document.head, true);
+                    addStyle("TS", defCon.tStyle, `${defCon.class.rndStyle}`, document.head, true);
                     document.querySelectorAll("iframe").forEach(items => {
                       const h = items.contentWindow;
                       if (items.src && h) {
                         const hn = new URL(items.src).hostname;
                         if (hn === curHostname) {
-                          addStyle(defCon.tStyle, `${defCon.class.rndStyle}`, h.document.head, true);
+                          const sT = h.document.querySelectorAll("style[id^='TS']");
+                          if (sT.length) {
+                            addStyle("TS", defCon.tStyle, sT[0].className, h.document.head, true);
+                          }
                         }
                       }
                     });
                     defCon.preview = false;
                   }
                 }
-              } else if (!defCon.Val.includes(`${defCon.id.fontName}`) && isPreview) {
+              } else if (!defCon.Val.includes(`${defCon.id.fontName}`) && defCon.isPreview) {
                 submitButton.innerText = "\u9884\u89c8";
                 submitButton.setAttribute("style", "background-color:coral!important;border-color:coral!important");
                 submitButton.setAttribute("v-Preview", "true");
@@ -1383,7 +1368,7 @@
                 if (!submitButton.classList.contains(`${defCon.class.anim}`)) {
                   submitButton.classList.add(`${defCon.class.anim}`);
                 }
-                if (isPreview) {
+                if (defCon.isPreview) {
                   submitButton.innerText = "\u9884\u89c8";
                   submitButton.setAttribute("style", "background-color:coral!important;border-color:coral!important");
                   submitButton.setAttribute("v-Preview", "true");
@@ -1481,26 +1466,29 @@
                 if (submitButton.classList.contains(`${defCon.class.anim}`)) {
                   if (!defCon.Val.length) {
                     submitButton.classList.remove(`${defCon.class.anim}`);
-                    if (isPreview) {
+                    if (defCon.isPreview) {
                       submitButton.innerText = "\u4fdd\u5b58";
                       submitButton.removeAttribute("style");
                       submitButton.removeAttribute("v-Preview");
                       defCon.preview = true;
                       if (defCon.preview) {
-                        addStyle(defCon.tStyle, `${defCon.class.rndStyle}`, document.head, true);
+                        addStyle("TS", defCon.tStyle, `${defCon.class.rndStyle}`, document.head, true);
                         document.querySelectorAll("iframe").forEach(items => {
                           const h = items.contentWindow;
                           if (items.src && h) {
                             const hn = new URL(items.src).hostname;
                             if (hn === curHostname) {
-                              addStyle(defCon.tStyle, `${defCon.class.rndStyle}`, h.document.head, true);
+                              const sT = h.document.querySelectorAll("style[id^='TS']");
+                              if (sT.length) {
+                                addStyle("TS", defCon.tStyle, sT[0].className, h.document.head, true);
+                              }
                             }
                           }
                         });
                         defCon.preview = false;
                       }
                     }
-                  } else if (!defCon.Val.includes(`${defCon.id.fontName}`) && isPreview) {
+                  } else if (!defCon.Val.includes(`${defCon.id.fontName}`) && defCon.isPreview) {
                     submitButton.innerText = "\u9884\u89c8";
                     submitButton.setAttribute("style", "background-color:coral!important;border-color:coral!important");
                     submitButton.setAttribute("v-Preview", "true");
@@ -1639,11 +1627,30 @@
   /* Start specific operation */
 
   !(async function () {
-    // Rebuild data for update
+    let maxPersonalSites, isBackupFunction, isPreview, rebuild, _config_data_;
+
+    /* get promise value */
+
+    let configure = await GMgetValue("_configure_");
+    if (!configure) {
+      maxPersonalSites = 100;
+      isBackupFunction = true;
+      isPreview = false;
+      rebuild = true;
+      _config_data_ = { maxPersonalSites, isBackupFunction, isPreview, rebuild };
+      GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
+    } else {
+      _config_data_ = JSON.parse(defCon.decrypt(configure));
+      maxPersonalSites = _config_data_.maxPersonalSites;
+      isBackupFunction = _config_data_.isBackupFunction;
+      isPreview = _config_data_.isPreview;
+      rebuild = _config_data_.rebuild;
+    }
+    defCon.isPreview = isPreview;
+
+    /* Rebuild data for update */
+
     const bool = true;
-    const tmp = await GMgetValue("_configure_");
-    _config_data_ = JSON.parse(defCon.decrypt(tmp));
-    let rebuild = _config_data_.rebuild;
     const res = Boolean(rebuild);
     if (curWindowtop && res === bool) {
       GMdeleteValue("_fonts_set_");
@@ -1676,11 +1683,9 @@
             messageText: String(`
             <p><span style="font:bold 22px Candara;color:crimson">您好！</span>这是您首次使用${defCon.scriptName}的新版本 <span style="font-family:Candara;color:darkorange;font-size:18px;font-weight:900;font-style:italic">v${defCon.curVersion}</span>，具体功能敬请试用。</p>
             <p><ul>
-              <li>新增开源中文字体，霞鹜文楷、霞鹜新晰黑两款字体。</li>
-              <li>新增高级功能设置页面，不再需要修改代码使用高级功能。</li>
-              <li>新增保存预览功能（Bate.2），需要在高级功能中开启。</li>
+              <li>发布保存预览功能（正式版），需要在高级功能中开启。</li>
               <li>优化脚本菜单，修正数据结构、修正CSS错误。</li>
-              <li>修正逻辑bugs，优化代码。</li>
+              <li>修正若干bugs，优化代码。</li>
             </ul></p>
             <p>稍后将为您打开新版帮助文件，要去看一下吗？</p>
           `),
@@ -1716,6 +1721,7 @@
     /* Set Default Value & initialize */
 
     const default_domains = [];
+    let fontValue, domainValue, domainValueIndex;
     function update_domain_index(s, t = curHostname) {
       for (let i = 0; i < s.length; i++) {
         if (s[i].domain === t) {
@@ -1726,9 +1732,9 @@
     if (!domains) {
       GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(default_domains)));
     } else {
-      const _temp_ = JSON.parse(defCon.decrypt(domains));
-      defCon.domainCount = _temp_.length;
-      defCon.domainIndex = update_domain_index(_temp_);
+      domainValue = JSON.parse(defCon.decrypt(domains));
+      defCon.domainCount = domainValue.length;
+      defCon.domainIndex = update_domain_index(domainValue);
     }
 
     if (!fonts) {
@@ -1751,8 +1757,7 @@
       CONST.fontCSS = defValue.fontCSS;
       CONST.fontEx = defValue.fontEx;
     } else {
-      let domainValueIndex, domainValue;
-      const fontValue = JSON.parse(defCon.decrypt(fonts));
+      fontValue = JSON.parse(defCon.decrypt(fonts));
       if (domains) {
         domainValue = JSON.parse(defCon.decrypt(domains));
         domainValueIndex = update_domain_index(domainValue);
@@ -1944,20 +1949,21 @@
     if (curWindowtop) {
       if (defCon.siteIndex === undefined) {
         console.info(
-          `%c${defCon.scriptName}\n%cINTRO.URL:\u0020https://tiny.one/F9y4ng\n%c\u259e\u0020个性化设置网站数量：%c%s%c/%s%s\n\u259e\u0020渲染字体：%s\n\u259e\u0020本地备份：%s\u3000\u259a\u0020保存预览：%s\u0020(Beta.2)\n\u259e\u0020字体平滑：%s\u3000\u259a\u0020字体重写：%s\n\u259e\u0020字体描边：%s\u3000\u259a\u0020字体阴影：%s`,
+          `%c${defCon.scriptName}\n%cINTRO.URL:\u0020https://tiny.one/F9y4ng\n%c\u259e\u0020个性化设置网站数量：%c%s%c/%s%s\n\u259e\u0020本地备份：%s\u3000\u259a\u0020保存预览：%s\n%c\u259e\u0020渲染字体：%s\n\u259e\u0020字体平滑：%s\u3000\u259a\u0020字体重写：%s\n\u259e\u0020字体描边：%s\u3000\u259a\u0020字体阴影：%s`,
           "font-weight:bold;font-size:14px;color:crimson",
           "line-height:200%;font-size:10px;color:#777;font-style:italic",
-          "line-height:180%;font-size:12px;color:teal",
-          defCon.domainCount > maxPersonalSites ? "color:crimson" : "color:teal",
+          "line-height:180%;font-size:12px;color:steelblue",
+          defCon.domainCount > maxPersonalSites ? "color:crimson" : "color:steelblue",
           defCon.domainCount,
-          "line-height:180%;font-size:12px;color:teal",
+          "line-height:180%;font-size:12px;color:steelblue",
           maxPersonalSites,
           defCon.domainIndex !== undefined
             ? "\uff08\u5f53\u524d\u8bbe\u7f6e\uff1a\u4e2a\u6027\u5316\uff09"
             : "\uff08\u5f53\u524d\u8bbe\u7f6e\uff1a\u5168\u5c40\uff09",
-          fontface_i ? reFontFace : "\u5df2\u5173\u95ed\uff08\u91c7\u7528" + reFontFace + "\uff09",
           isBackupFunction ? "ON " : "OFF",
           isPreview ? "ON " : "OFF",
+          "line-height:180%;font-size:12px;color:teal",
+          fontface_i ? reFontFace : "\u5df2\u5173\u95ed\uff08\u91c7\u7528" + reFontFace + "\uff09",
           CONST.fontSmooth ? "ON " : "OFF",
           CONST.fontFace ? "ON " : "OFF",
           Number(CONST.fontStroke) ? "ON " : "OFF",
@@ -1990,7 +1996,7 @@
 
     function insertCSS() {
       try {
-        addStyle(tCSS, `${defCon.class.rndClass}`, document.head);
+        addStyle("TC", tCSS, `${defCon.class.rndClass}`, document.head);
       } catch (e) {
         error("//-> insertCSS:", e.name);
       }
@@ -1998,7 +2004,7 @@
 
     function insertStyle() {
       try {
-        addStyle(tStyle, `${defCon.class.rndStyle}`, document.head);
+        addStyle("TS", tStyle, `${defCon.class.rndStyle}`, document.head);
       } catch (e) {
         error("//-> insertStyle:", e.name);
       }
@@ -2036,7 +2042,7 @@
       startRAFInterval();
       const callback = mutations => {
         mutations.forEach(mutation => {
-          if (!((!curWindowtop || qS(`#${defCon.id.rndId}`)) && qS(`.${defCon.class.rndClass}`) && qS(`.${defCon.class.rndStyle}`))) {
+          if (!((!curWindowtop || (qS(`#${defCon.id.rndId}`) && qS(`.${defCon.class.rndClass}`))) && qS(`.${defCon.class.rndStyle}`))) {
             debug(
               `//-> %cMutationObserver: %c%s %c%s`,
               "font-weight:bold;color:teal",
@@ -2318,13 +2324,16 @@
                   : "";
                 exclude = fontex ? `${fontex}{text-stroke:initial!important;-webkit-text-stroke:initial!important;text-shadow:initial!important}` : "";
                 tshadow = `${codeFont}${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontfaces}${exclude}`;
-                addStyle(tshadow, `${defCon.class.rndStyle}`, document.head, true);
+                addStyle("TS", tshadow, `${defCon.class.rndStyle}`, document.head, true);
                 document.querySelectorAll("iframe").forEach(items => {
                   const h = items.contentWindow;
                   if (items.src && h) {
                     const hn = new URL(items.src).hostname;
                     if (hn === curHostname) {
-                      addStyle(tshadow, `${defCon.class.rndStyle}`, h.document.head, true);
+                      const sT = h.document.querySelectorAll("style[id^='TS']");
+                      if (sT.length) {
+                        addStyle("TS", tshadow, sT[0].className, h.document.head, true);
+                      }
                     }
                   }
                 });
@@ -2344,12 +2353,11 @@
                   messageText: `<p style='color:darkgreen;font-weight:900'>保存到全局数据：</p><p>将当前设置保存为全局设置，默认使用全局参数。</p><p style='color:darkred;font-weight:900'>保存到当前网站数据：<span id='${defCon.id.seed}_a_w_d_l_'>[<span style='font-size:12px;font-weight:normal;padding:0 2px;margin:0;cursor:pointer;color:#3e3e3e'>全部数据列表</span>]</span></p><p><span title="保存到网站数据会自动覆盖之前的数据" style="cursor:help;color:indigo" id="${defCon.id.seed}_c_w_d_">为 ${curHostname} 保存独立的设置数据。</span>`,
                   titleText: "保存设置数据",
                 });
-                let _domains, _domainsIndex_, _domains_;
-                _domains = await GMgetValue("_domains_fonts_set_");
-                _domains_ = _domains ? JSON.parse(defCon.decrypt(_domains)) : default_domains;
+                domains = await GMgetValue("_domains_fonts_set_");
+                domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : default_domains;
                 const _awdl = qS(`#${defCon.id.seed}_a_w_d_l_`);
                 if (_awdl) {
-                  if (_domains_.length > 0) {
+                  if (domainValue.length > 0) {
                     _awdl.style.cssText += "display:line-block";
                   } else {
                     _awdl.style.cssText += "display:none";
@@ -2359,16 +2367,16 @@
                     manageDomainList();
                   });
                 }
-                _domains = await GMgetValue("_domains_fonts_set_");
-                _domains_ = _domains ? JSON.parse(defCon.decrypt(_domains)) : default_domains;
-                _domainsIndex_ = update_domain_index(_domains_);
-                if (_domainsIndex_ !== undefined && qS(`#${defCon.id.seed}_c_w_d_`)) {
-                  const fontDate = dateFormat("YYYY-mm-dd HH:MM:SS", new Date(_domains_[_domainsIndex_].fontDate));
+                domains = await GMgetValue("_domains_fonts_set_");
+                domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : default_domains;
+                domainValueIndex = update_domain_index(domainValue);
+                if (domainValueIndex !== undefined && qS(`#${defCon.id.seed}_c_w_d_`)) {
+                  const fontDate = dateFormat("YYYY-mm-dd HH:MM:SS", new Date(domainValue[domainValueIndex].fontDate));
                   qS(`#${defCon.id.seed}_c_w_d_`).innerHTML = `<p>上次保存：${fontDate} <button id="${defCon.id.seed}_c_w_d_d_"\
                   style="padding:3px 5px;margin-left:15px;cursor:pointer;color:#333;font-size:12px;border:1px solid #777;border-radius:4px;" title="删除数据后将刷新页面">删除当前网站数据</button></p>`;
                   qS(`#${defCon.id.seed}_c_w_d_d_`).addEventListener("click", async () => {
-                    _domains_.splice(_domainsIndex_, 1);
-                    GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(_domains_)));
+                    domainValue.splice(domainValueIndex, 1);
+                    GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
                     closeAllDialog(`div.${defCon.class.db}`);
                     qS(`#${defCon.id.rndId}`).style = "display:none";
                     let frDialog = new frDialogBox({
@@ -2408,16 +2416,16 @@
                     fontCSS: filterHtml(cssfun),
                     fontEx: filterHtml(fontex),
                   };
-                  _domains = await GMgetValue("_domains_fonts_set_");
-                  _domains_ = _domains_ ? JSON.parse(defCon.decrypt(_domains)) : default_domains;
-                  _domainsIndex_ = update_domain_index(_domains_);
-                  if (_domainsIndex_ !== undefined) {
-                    _domains_.splice(_domainsIndex_, 1, _savedata_);
+                  domains = await GMgetValue("_domains_fonts_set_");
+                  domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : default_domains;
+                  domainValueIndex = update_domain_index(domainValue);
+                  if (domainValueIndex !== undefined) {
+                    domainValue.splice(domainValueIndex, 1, _savedata_);
                   } else {
-                    _domains_.push(_savedata_);
+                    domainValue.push(_savedata_);
                   }
-                  if (_domains_.length <= maxPersonalSites || _domainsIndex_ !== undefined) {
-                    GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(_domains_)));
+                  if (domainValue.length <= maxPersonalSites || domainValueIndex !== undefined) {
+                    GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
                     defCon.successId = true;
                   } else {
                     let frDialog = new frDialogBox({
@@ -2428,7 +2436,7 @@
                       titleText: "数据过多的提示",
                     });
                     if (await frDialog.respond()) {
-                      GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(_domains_)));
+                      GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
                       defCon.successId = true;
                     } else {
                       manageDomainList();
@@ -2516,6 +2524,11 @@
           });
           Parameter_Settings ? GMunregisterMenuCommand(Parameter_Settings) : debug("//-> No Parameter_Settings_Menu");
           Parameter_Settings = GMregisterMenuCommand("\ufff7\ud83d\udc8e VIP 高级功能开关", async () => {
+            configure = await GMgetValue("_configure_");
+            _config_data_ = JSON.parse(defCon.decrypt(configure));
+            isBackupFunction = _config_data_.isBackupFunction;
+            isPreview = _config_data_.isPreview;
+            maxPersonalSites = _config_data_.maxPersonalSites;
             let frDialog = new frDialogBox({
               trueButtonText: "保存数据",
               falseButtonText: "帮助文件",
@@ -2530,7 +2543,7 @@
                   </div>
                 </li>
                 <li id="${defCon.id.pv}">
-                  <div style="float:left;font-size:16px!important">保存预览功能（实验性功能）</div>
+                  <div style="float:left;font-size:16px!important">保存预览功能（默认：关闭）</div>
                   <div style="float:right;margin:-2px 2px 0 10px;font-size:16px!important">
                     <input type="checkbox" id="${defCon.id.ispreview}" class="${defCon.class.checkbox}" ${isPreview ? "checked" : ""} />
                     <label for="${defCon.id.ispreview}"></label>
@@ -2539,13 +2552,12 @@
                 <li id="${defCon.id.mps}">
                   <div style="float:left;font-size:16px!important">个性化设置网站总数</div>
                   <div style="float:right;margin:-6px 2px 0 15px">
-                    <input style="border:2px solid darkgoldenrod;border-radius:4px;width:50px;text-align:center;padding:5px;color:#333;font:500 16px/140%\
-                    impact,serif-sans!important;" maxlength="4" id="${defCon.id.maxps}" placeholder="100" value="${maxPersonalSites}" />
+                    <input style="font:500 16px/140% impact,serif-sans!important;border:2px solid darkgoldenrod;border-radius:4px;width:50px;\
+                    text-align:center;padding:5px;color:#333;" maxlength="4" id="${defCon.id.maxps}" placeholder="100" value="${maxPersonalSites}" />
                   </div>
                 </li>
-                <ol id="${defCon.id.feedback}" title="遇到问题,建议先看看脚本帮助文件" style="padding:0;margin:0;font-size:16px;font-weight:700;cursor:help">
-                \ud83e\udde1\u0020如果您遇到问题，请向我反馈\u0020\ud83e\udde1
-                </ol>
+                <ol id="${defCon.id.feedback}" style="padding:0;margin:0;font-size:16px;color:#333;font-weight:600;cursor:help"\
+                title="遇到问题,建议先看看脚本帮助文件">\ud83e\udde1\u0020如果您遇到问题，请向我反馈\u0020\ud83e\udde1</ol>
               </ul>`,
               titleText: "参数设置 - VIP 高级功能",
             });
@@ -2563,18 +2575,14 @@
               items.addEventListener("change", function () {
                 _bk = Boolean(qS(`#${defCon.id.isbackup}`).checked);
                 _pv = Boolean(qS(`#${defCon.id.ispreview}`).checked);
-                _mps = qS(`#${defCon.id.maxps}`).value;
+                _mps = Number(qS(`#${defCon.id.maxps}`).value);
               });
             });
             if (await frDialog.respond()) {
-              if (!_mps.length) {
-                _mps = 100;
-              }
-              const _tmp = await GMgetValue("_configure_");
-              _config_data_ = JSON.parse(defCon.decrypt(_tmp));
+              _mps = !_mps ? 100 : _mps;
               _config_data_.isBackupFunction = _bk;
               _config_data_.isPreview = _pv;
-              _config_data_.maxPersonalSites = Number(_mps);
+              _config_data_.maxPersonalSites = _mps;
               GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
               let frDialog = new frDialogBox({
                 trueButtonText: "确 定",
@@ -2790,10 +2798,10 @@
             });
           }
         }
-      } catch (e) {
+      } catch (err) {
         defCon.errorCount++;
-        error("//-> saveChangeStatus:", e.name);
-        reportErrortoAuthor(e);
+        error("//-> saveChangeStatus:", err.name);
+        reportErrortoAuthor(err);
       }
     }
 
@@ -2834,13 +2842,16 @@
             d.removeAttribute("style");
             d.removeAttribute("v-Preview");
             if (defCon.preview) {
-              addStyle(defCon.tStyle, `${defCon.class.rndStyle}`, document.head, true);
+              addStyle("TS", defCon.tStyle, `${defCon.class.rndStyle}`, document.head, true);
               document.querySelectorAll("iframe").forEach(items => {
                 const h = items.contentWindow;
                 if (items.src && h) {
                   const hn = new URL(items.src).hostname;
                   if (hn === curHostname) {
-                    addStyle(defCon.tStyle, `${defCon.class.rndStyle}`, h.document.head, true);
+                    const sT = h.document.querySelectorAll("style[id^='TS']");
+                    if (sT.length) {
+                      addStyle("TS", defCon.tStyle, sT[0].className, h.document.head, true);
+                    }
                   }
                 }
               });
@@ -2848,24 +2859,24 @@
             }
           }
         }
-      } catch (e) {
+      } catch (err) {
         defCon.errorCount++;
-        error("//-> setEffectIntoSubmit:", e.name);
+        error("//-> setEffectIntoSubmit:", err.name);
       }
     }
 
     async function manageDomainList(_temp_ = [], Contents = "") {
-      let _domains, _domains_, _domainsIndex_;
-      _domains = await GMgetValue("_domains_fonts_set_");
-      _domains_ = _domains ? JSON.parse(defCon.decrypt(_domains)) : default_domains;
+      let domains, domainValue, domainValueIndex;
+      domains = await GMgetValue("_domains_fonts_set_");
+      domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : default_domains;
       const _data_search_ =
-        _domains_.length > 6
+        domainValue.length > 6
           ? `<p><input id="${defCon.id.seed}_d_s_" style="width:52%;font-size:12px;border:2px solid #777;border-radius:4px;margin:4px 4px 6px 0;padding:3px 15px"><button id="${defCon.id.seed}_d_s_s_" style="padding:3px 10px;cursor:pointer;font-size:12px;border:1px solid #777;border-radius:4px;">查 询</button><button id="${defCon.id.seed}_d_s_c_" style="margin-left:4px;padding:3px 10px;cursor:pointer;font-size:12px;border:1px solid #777;border-radius:4px;">清 除</button></p>`
           : "";
-      for (let i = 0; i < _domains_.length; i++) {
+      for (let i = 0; i < domainValue.length; i++) {
         Contents += `<li id="${defCon.id.seed}_d_d_l_${i}" style="list-style:none;font-size:14px;font-style:normal;padding:5px;color:#555">\
                 [<span id="${defCon.id.seed}_d_d_l_s_${i}" style="padding:3px;cursor:pointer;color:crimson;font-size:14px">删除</span>]\
-                <span>${i + 1}. ${filterHtml(_domains_[i].domain)} - ${dateFormat("YYYY/mm/dd HH:MM:SS", new Date(_domains_[i].fontDate))}</span></li>`;
+                <span>${i + 1}. ${filterHtml(domainValue[i].domain)} - ${dateFormat("YYYY/mm/dd HH:MM:SS", new Date(domainValue[i].fontDate))}</span></li>`;
       }
       let frDialog = new frDialogBox({
         trueButtonText: "确认操作，保存数据",
@@ -2896,9 +2907,7 @@
         qS(`#${defCon.id.seed}_d_s_s_`).addEventListener("click", () => {
           if (qS(`#${defCon.id.seed}_d_s_`).value) {
             if (window.find) {
-              window.find(qS(`#${defCon.id.seed}_d_s_`).value, 0)
-                ? (qS(`#${defCon.id.seed}_d_s_`).style.cssText += "border-color:#777")
-                : (qS(`#${defCon.id.seed}_d_s_`).style.cssText += "border-color:red");
+              qS(`#${defCon.id.seed}_d_s_`).style.cssText += window.find(qS(`#${defCon.id.seed}_d_s_`).value, 0) ? "border-color:#777" : "border-color:red";
               if (window.getSelection) {
                 const _sTxt = window.getSelection();
                 const _rows = Number(_sTxt.anchorNode.parentNode.parentNode.id.replace(`${defCon.id.seed}_d_d_l_`, ""));
@@ -2909,31 +2918,31 @@
           }
         });
       }
-      for (let i = 0; i < items.length; i++) {
-        items[i].addEventListener("click", () => {
-          if (!items[i].getAttribute("data-del")) {
-            const _list_Id_ = Number(items[i].id.replace(`${defCon.id.seed}_d_d_l_s_`, ""));
-            _temp_.push(_domains_[_list_Id_].domain);
-            items[i].setAttribute("data-del", _domains_[_list_Id_].domain);
-            items[i].innerHTML = "恢复";
-            items[i].style.cssText += "color:green";
-            items[i].nextElementSibling.style = "text-decoration:line-through";
+      for (let ii = 0; ii < items.length; ii++) {
+        items[ii].addEventListener("click", () => {
+          if (!items[ii].getAttribute("data-del")) {
+            const _list_Id_ = Number(items[ii].id.replace(`${defCon.id.seed}_d_d_l_s_`, ""));
+            _temp_.push(domainValue[_list_Id_].domain);
+            items[ii].setAttribute("data-del", domainValue[_list_Id_].domain);
+            items[ii].innerHTML = "恢复";
+            items[ii].style.cssText += "color:green";
+            items[ii].nextElementSibling.style = "text-decoration:line-through";
           } else {
-            _temp_.splice(_temp_.indexOf(items[i].getAttribute("data-del")), 1);
-            items[i].removeAttribute("data-del");
-            items[i].innerHTML = "删除";
-            items[i].style.cssText += "color:crimson";
-            items[i].nextElementSibling.style = "text-decoration:none";
+            _temp_.splice(_temp_.indexOf(items[ii].getAttribute("data-del")), 1);
+            items[ii].removeAttribute("data-del");
+            items[ii].innerHTML = "删除";
+            items[ii].style.cssText += "color:crimson";
+            items[ii].nextElementSibling.style = "text-decoration:none";
           }
         });
       }
       if (await frDialog.respond()) {
         for (let l = _temp_.length - 1; l >= 0; l--) {
-          _domains = await GMgetValue("_domains_fonts_set_");
-          _domains_ = _domains ? JSON.parse(defCon.decrypt(_domains)) : default_domains;
-          _domainsIndex_ = update_domain_index(_domains_, _temp_[l]);
-          _domains_.splice(_domainsIndex_, 1);
-          GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(_domains_)));
+          domains = await GMgetValue("_domains_fonts_set_");
+          domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : default_domains;
+          domainValueIndex = update_domain_index(domainValue, _temp_[l]);
+          domainValue.splice(domainValueIndex, 1);
+          GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
           if (_temp_[l] === curHostname) {
             defCon.equal = true;
             continue;
