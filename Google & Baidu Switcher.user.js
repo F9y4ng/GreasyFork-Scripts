@@ -4,7 +4,7 @@
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh         谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.4.20210803.1
+// @version         3.4.20210803.2
 // @author          F9y4ng
 // @description         谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en      Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
@@ -28,7 +28,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            修正bugs，优化代码。
+// @note            修正firefox下按钮样式错误。\n修正bugs，优化代码。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -748,7 +748,7 @@
           </span>`)
           : ``,
         StyleCode: CONST.isUseBing
-          ? `#${CONST.rndidName}{height:44px;width:120px;margin:2px 0}#${CONST.bdyx} input{cursor:pointer;min-width:60px;height:37px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px;font-weight:900;border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px}#${CONST.ggyx} input{cursor:pointer;min-width:60px;height:37px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;font-family:"Microsoft YaHei",sans-serif!important;font-size:17px;font-weight:900;border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 -3px;padding:0 18px 0 12px}.${CONST.scrollspan}{margin-right:5px!important}.${CONST.scrollbars}{text-decoration:none!important;padding-top:2px!important;border-radius:4px!important;max-height:33px;padding:0 12px!important;margin-right:2px!important}#${CONST.bdyx} input:hover,#${CONST.ggyx} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border:2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7;}`
+          ? `#${CONST.rndidName}{height:44px;width:120px;margin:2px 0}#${CONST.bdyx} input{cursor:pointer;min-width:60px;height:37px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px;font-weight:900;border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px}#${CONST.ggyx} input{cursor:pointer;min-width:60px;height:37px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px;font-weight:900;border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 -3px;padding:0 18px 0 12px}.${CONST.scrollspan}{margin-right:5px!important}.${CONST.scrollbars}{text-decoration:none!important;padding-top:2px!important;border-radius:4px!important;max-height:33px;padding:0 12px!important;margin-right:2px!important}#${CONST.bdyx} input:hover,#${CONST.ggyx} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border:2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7;}`
           : ``,
       },
       other: { SiteTypeID: 0 },
