@@ -2,11 +2,11 @@
 
 [![LICENSE](https://img.shields.io/badge/License-GPL--3.0--only-blue.svg?style=for-the-badge&logo=github "LICENSE")](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/LICENSE)  [![LAST COMMIT](https://img.shields.io/github/last-commit/F9y4ng/GreasyFork-Scripts?color=blue&logo=github&style=for-the-badge "LAST COMMIT")](https://github.com/F9y4ng/GreasyFork-Scripts/commits/master)  [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues)  [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/login?return_to=%2FF9y4ng%2FGreasyFork-Scripts)
 
-- ## **Font Rendering.user.js** (`version 2021.08.03.2`)
+- ## **Font Rendering.user.js** (`version 2021.08.06.1`)
 
   简介：让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 
-  > `version 2021.08.03.2`
+  > `version 2021.08.06.1`
 
   重大版本更新，请使用前仔细查看 [**脚本使用说明**](https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89)。```New```
 
@@ -15,12 +15,9 @@
   ```!!! 请勿使用来源未知的备份文件，以防跨站脚本攻击 !!!```
 
   ```text
-  @ 修正Firefox下选取文字发虚的bug。
-  @ 优化字体描边为外部描边，增强文本字重设置敏感度。
-
-  + 新增字体表新字体 OPPO Sans。
-  @ 修正选择文字时文字发虚的问题。
-  @ 修正bugs，优化代码。
+  + 新增多枚字体，优化字体表，修正错误。
+  @ 优化字体检测功能，修正在个别网站检测错误的问题。
+  @ 修正代码bugs，优化代码。
   ```
 
   > [关于字体的添加](#)

@@ -4,7 +4,7 @@
 // @name:zh           字体渲染（自用脚本）
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:en           Font Rendering (Customized)
-// @version           2021.08.03.2
+// @version           2021.08.06.1
 // @author            F9y4ng
 // @description       让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @description:zh    让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
@@ -210,6 +210,7 @@
     maxps: defCon.randString(6, true),
     feedback: defCon.randString(6, true),
     seed: defCon.randString(3, true),
+    fontTest: defCon.randString(16, true),
   };
   defCon.class = {
     rndClass: defCon.randString(10, true),
@@ -300,9 +301,8 @@
 
   /* Initialize important functions */
 
-  function RAFInterval(callback, period, runNow) {
+  function RAFInterval(callback, period, runNow, times = 0) {
     const needCount = (period / 1000) * 60;
-    let times = 0;
     if (runNow === true) {
       const shouldFinish = callback();
       if (shouldFinish) {
@@ -327,12 +327,9 @@
     requestAnimationFrame(step);
   }
 
-  function addStyle(T, css, className, addToTarget, isReload, initType, reNew = false) {
+  function addStyle(T = "T", css, className, addToTarget, isReload = false, initType = "text/css", reNew = false) {
     RAFInterval(
       () => {
-        T = T || "T";
-        isReload = isReload || false;
-        initType = initType || "text/css";
         if (typeof addToTarget === "object" && addToTarget) {
           if (isReload === true && addToTarget.querySelector(`.${className}`)) {
             safeRemove(`.${className}`, addToTarget);
@@ -1412,8 +1409,7 @@
               }
             });
             if (!judge_1) {
-              fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`).that[0].innerHTML =
-                "<dd>\u6682\u65e0\u60a8\u9700\u8981\u7684\u5b57\u4f53</dd>";
+              fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`).that[0].innerHTML = "<dd>\u6682\u65e0\u60a8\u9700\u8981\u7684\u5b57\u4f53</dd>";
             }
             clickEvent();
           }
@@ -1516,7 +1512,7 @@
   const fontCheck = new Set([
     { ch: "微软雅黑", en: "Microsoft YaHei" },
     { ch: "微软正黑体", en: "Microsoft JhengHei" },
-    { ch: "苹方 简", en: "PingFang SC" },
+    { ch: "苹方简体", en: "PingFang SC" },
     { ch: "苹方-简", en: "PingFangSC-Regular" },
     { ch: "苹方-港", en: "PingFangHK-Regular" },
     { ch: "更纱黑体 SC", en: "Sarasa Gothic SC" },
@@ -1528,12 +1524,21 @@
     { ch: "鸿蒙黑体", en: "HarmonyOS Sans SC" },
     { ch: "浪漫雅圆", en: "LMYY" },
     { ch: "思源黑体", en: "Source Han Sans CN" },
-    { ch: "思源简黑 Google", en: "Noto Sans CJK SC" },
+    { ch: "思源简黑", en: "Noto Sans CJK SC" },
+    { ch: "思源柔黑体", en: "Gen Jyuu Gothic" },
+    { ch: "思源真黑体", en: "Gen Shin Gothic" },
     { ch: "思源宋体", en: "Source Han Serif SC" },
+    { ch: "汉仪旗黑 60S", en: "HYQihei 60S" },
+    { ch: "汉仪中黑简", en: "HYZhongHeiJ" },
+    { ch: "汉仪综艺体简", en: "HYZongYiJ" },
     { ch: "文泉驿微米黑", en: "WenQuanYi Micro Hei" },
     { ch: "文泉驿正黑", en: "WenQuanYi Zen Hei" },
     { ch: "筑紫a丸", en: "Droid Sans Fallback" },
-    { ch: "汉仪旗黑 60S", en: "HYQihei 60S" },
+    { ch: "方正喵呜体", en: "FZMiaoWuS-GB" },
+    { ch: "方正悠黑简体 508R", en: "FZYouHeiS 508R" },
+    { ch: "方正兰亭刊宋", en: "FZLanTingKanSongS" },
+    { ch: "方正舒体", en: "FZShuTi" },
+    { ch: "方正姚体", en: "FZYaoti" },
     { ch: "华文仿宋", en: "STFangsong" },
     { ch: "华文楷体", en: "STKaiti" },
     { ch: "华文细黑", en: "STXihei" },
@@ -1542,30 +1547,30 @@
     { ch: "华文新魏", en: "STXinwei" },
     { ch: "华文隶书", en: "STLiti" },
     { ch: "华文行楷", en: "STXingkai" },
-    { ch: "方正悠黑简体 508R", en: "FZYouHeiS 508R" },
-    { ch: "方正兰亭刊宋", en: "FZLanTingKanSongS" },
-    { ch: "方正舒体", en: "FZShuTi" },
-    { ch: "方正姚体", en: "FZYaoti" },
-    { ch: "翩翩体-简", en: "Hanzipen SC" },
-    { ch: "手札体-简", en: "Hannotate SC" },
+    { ch: "华康翩翩体", en: "Hanzipen SC" },
+    { ch: "华康手札体", en: "Hannotate SC" },
     { ch: "娃娃体-简", en: "Wawati SC" },
     { ch: "雅痞-简", en: "Yapi SC" },
+    { ch: "圆体-简", en: "Yuanti SC" },
+    { ch: "手书体", en: "ShouShuti" },
     { ch: "幼圆", en: "YouYuan" },
   ]);
 
   class isSupportFontFamily {
     constructor() {
       const baseFonts = ["monospace", "serif", "Georgia", "sans-serif", "Tahoma"];
-      const testString = "wwwwwwwmmmmmmmllooii.这是测试，這是測試。";
+      const testString = "这是测试、這是測試：1234567890,WWWwwwMMMmmmLlOoIi.";
       const testSize = "72px";
       const h = qS("body");
       const s = cE("span");
+      s.className = `fa ${defCon.id.seed}_fontTest`;
+      s.id = `${defCon.id.fontTest}`;
       s.style.cssText += `font-size:${testSize}!important;`;
       s.innerHTML = testString;
       let defaultWidth = {};
       let defaultHeight = {};
       for (let index in baseFonts) {
-        s.style.fontFamily = baseFonts[index];
+        s.style.cssText += `font-family:${baseFonts[index]}!important;`;
         try {
           h.appendChild(s);
           defaultWidth[baseFonts[index]] = s.offsetWidth;
@@ -1607,7 +1612,7 @@
     fontShadow: browser.versions.webKit ? 2.0 : 1.5,
     shadowColor: "#7B7B7B",
     fontSmooth: true,
-    fontCSS: `:not(input):not(textarea):not(button):not(em):not(i):not([class*='fa']):not([class*='icon']):not([class*='logo']):not([class*='code'])`,
+    fontCSS: `:not([class*='fa']):not([class*='icon']):not([class*='logo']):not([class*='code'])`,
     fontEx: `* pre,* pre *,* code,* code *,* input,* button,* textarea,* kbd,* i,* em`,
   };
   const root = `\u8ab1\u004a\u0056\u0069\u0059\u7409\u67d3\u5b7a\u80ba\u0070\u0032\u004f\u64d3\u0030\u8151\u0074\u5c80\u5b9a\u81ba\u0065`;
@@ -1690,13 +1695,12 @@
             messageText: String(`
             <p><span style="font:bold 22px Candara;color:crimson">您好！</span>这是您首次使用${defCon.scriptName}的新版本 <span style="font-family:Candara;color:darkorange;font-size:18px;font-weight:900;font-style:italic">v${defCon.curVersion}</span>，具体功能敬请试用。</p>
             <p><ul>
-              <li>优化跨域检测，防止因页面跨域而造成全部渲染失效。</li>
-              <li>优化重置操作的新流程，提高体验性。</li>
-              <li>修正字体检测在部分网站失效的问题，修正字体名称错误。</li>
-              <li>修正CSS样式错误，优化代码。</li>
+              <li>新增多枚字体，优化字体表，修正错误。</li>
+              <li>优化字体检测方法，修正个别网站检测出错的问题。</li>
+              <li>修正代码bugs，优化代码。</li>
             </ul></p>
             <p>稍后将为您打开新版帮助文件，要去看一下吗？</p>
-          `),
+          `).trim(),
             titleText: "温馨提示",
           });
           sessionStorage.removeItem("_notice_");
@@ -1835,11 +1839,12 @@
     }
 
     const codeFont = `* pre,* pre *,* code,* code *{font:14px/130% 'Operator Mono Lig','Fira Code','Roboto Mono','Monaco','Courier New',monospace!important}`;
+    const fontTest = `body span.${defCon.id.seed}_fontTest{font-stretch:normal!important;font-weight:normal!important;line-height:initial!important;text-align:left!important;font-style:normal!important;text-decoration:none!important;letter-spacing:normal!important;word-wrap:normal!important;text-indent:initial!important}body #${defCon.id.fontTest}{margin:0!important;padding:0!important;width:max-content!important;height:max-content!important;text-shadow:none!important;-webkit-text-size-adjust:100%!important}`;
 
     const cssfun = CONST.fontCSS;
     let tshadow = "";
     if (defCon.siteIndex === undefined) {
-      tshadow = `${codeFont}${selection}${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontfaces}${exclude}`;
+      tshadow = `${codeFont}${selection}${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontfaces}${exclude}${fontTest}`;
     }
     const fontStyle_db = `.${defCon.class.db}{max-width:420px;color:#444;z-index:999999992;border:2px solid #efefef}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei",sans-serif!important;text-stroke:initial!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #7b7b7b!important}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:45%;right:-200px;-webkit-border-radius:6px;border-radius:6px;width:100%;background:#fff;-webkit-box-shadow:0 0 10px 0 rgba(0,0,0,.3);box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .3s;transform:translate(-50%,-50%)}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important;text-stroke:initial!important}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223;color:#fff!important;border:1px solid #d93223;-webkit-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a;color:#fff!important;border:1px solid #038c5a;-webkit-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777;color:#fff!important;border:1px solid #777;-webkit-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px;font-weight:300;text-align:left}.${defCon.class.dbm} p{line-height:160%;margin:5px 0;text-indent:0em!important;font-size:16px;font-weight:400;text-align:left}.${defCon.class.dbm} ul{list-style:none;margin: 5px 0 0 15px;padding:2px;font:italic 14px/140% "Microsoft YaHei";color:grey}.${defCon.class.dbm} li{list-style-type:square;}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px;font-weight:700;text-align:left;width:100%}.${defCon.class.dbb}{display:inline-block;margin:0 1%;-webkit-border-radius:2px;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;transition:opacity .5s;cursor:pointer;-webkit-box-sizing:content-box;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}.${defCon.class.anim}{-webkit-animation:jiggle 1.8s ease-in infinite;animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}#${defCon.id.bk},#${defCon.id.pv},#${defCon.id.mps},${defCon.id.feedback}{padding:2px 10px;height:40px;width:max-content;min-width:auto}`;
     const fontStyle_container = `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;-webkit-border-radius:6px;border-radius:6px;background:#f0f6ff!important;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 20px);z-index:999999;padding:3px 8px;text-align:left;color:#333;font-size:16px;font-weight:900;-webkit-transition:all .1s ease-in;transition:all .1s ease-in;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.container} *{line-height:1.5!important;font-size:16px;font-weight:700;font-family:"Microsoft YaHei",sans-serif!important;text-shadow:initial!important;-webkit-text-stroke:initial!important;text-stroke:initial!important}#${defCon.id.container} fieldset{border:2px groove #67a5df;-webkit-border-radius:10px;border-radius:10px;padding:4px 9px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:500px}#${defCon.id.container} legend{line-height:20px;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px;font-weight:700;font-family:"Microsoft YaHei",sans-serif!important;background:#f0f6ff!important;-webkit-box-sizing:content-box;box-sizing:content-box;width:auto!important;min-width:185px!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{list-style:none;margin:3px 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden;}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50%;-webkit-transform:rotate(360deg);-webkit-animation:rotation 5s linear infinite;-o-animation:rotation 5s linear infinite;animation:rotation 5s linear infinite}#${defCon.id.fontList}{padding:2px 10px 4px 6px;min-height:75px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex;align-items:center;justify-content:space-between}#${defCon.id.shadowColor}{padding:2px 10px;min-height:45px;margin:4px;width:max-content}#${defCon.id.shadowColor} *{-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.cps}{float:left;display:block;margin:0}#${defCon.id.shadowColor} .${defCon.class.colorPicker}{width:32px;height:30px;cursor:pointer;position:relative;border:2px solid #181a25;-webkit-border-radius:4px;border-radius:4px;float:left;display:inline-block}#${defCon.id.shadowColor} .${defCon.class.colorPicker2}{display:inline-block;width:auto;margin:0 0 0 5px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2} #${defCon.id.color}{width:135px;height:32px;text-indent:0;font-size:18px;font-weight:400;background:#fafafa;-webkit-box-sizing:content-box;box-sizing:content-box;font-family:Impact,"Courier New",sans-serif!important;color:#333;border:#67a5df 2px solid;-webkit-border-radius:4px;border-radius:4px;display:inline-block;padding:0;margin:0;text-align:center}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.submit}{padding:2px 10px;height:40px}#${defCon.id.submit} button{background-image:initial;background-color:#67a5df;color:#fff;padding:5px 10px;font-size:14px;font-weight:600;cursor:pointer;border:2px solid #6ba7e0;-webkit-border-radius:6px;border-radius:6px;width:auto;font-family:"Microsoft YaHei",sans-serif!important}#${defCon.id.backup}{margin:0 10px 0 0}#${defCon.id.backup}, #${defCon.id.files}{display:none}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;min-height:110px}#${defCon.id.fontEx} textarea{background:#fafafa}#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{min-width:calc(100% - 15px);max-width:calc(100% - 15px)!important;min-height:60px;line-height:140%;resize:none;border:2px solid #67a5df;-webkit-border-radius:6px;border-radius:6px;-webkit-box-sizing:content-box;box-sizing:content-box;padding:5px;font:bold 14px/140% "Roboto Mono",Monaco,"Courier New",sans-serif!important;color:#0b5b9c;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px rgba(0,0,0,.2);border-radius:10px;background:#ededed}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;color:#111;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:block;float:left;margin:2px 5px 2px 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:initial;-webkit-border-radius:2px;border-radius:2px;padding:2px 0;height:24px;font-weight:400;line-height:20px;color:#fff;background:#67a5df}#${defCon.id.fontList} .${defCon.class.label} span{color:#fff;font-size:16px;font-weight:normal;padding:5px;background:#67a5df}#${defCon.id.fontList} .${defCon.class.close}{padding:5px!important;color:#fff;background:#67a5df;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.fontList} .${defCon.class.close}:hover{-webkit-border-radius:2px;border-radius:2px;color:tomato;background-color:#366694}#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} label{width:auto;display:block;margin:5px 0;color:#333;cursor:initial}#${defCon.id.fontList} .${defCon.class.selectFontId} input{-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df;-webkit-border-radius:6px;border-radius:6px;padding:1px 23px!important;margin:0;width:calc(100% - 48px);max-width:calc(100% - 48px);height:36px!important;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px;font-weight:700;text-indent:0;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder} input:-moz-placeholder{color:#369!important;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px;font-weight:700;opacity:.65}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px;font-weight:700;opacity:.65}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px;font-weight:700;opacity:.65}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:8px 0 0 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df;-webkit-border-radius:4px;border-radius:4px;padding:4px 10px;width:auto;min-width:170px;max-width:252px;max-height:250px;font-size:18px;white-space:nowrap;background-color:#fff;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{margin:0 10px;padding:5px 0;font-weight:400;font-size:21px;min-width:135px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{background-color:#67a5df;color:#fff}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-y:auto;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df;-webkit-border-radius:6px;border-radius:6px;padding:6px;width:95%;max-width:267px;max-height:60px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}.${defCon.class.checkbox}{display:none!important}.${defCon.class.checkbox}+label{padding:11px 9px;margin:0;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:58px;height:10px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);-webkit-box-sizing:content-box;box-sizing:content-box;word-wrap:normal!important}.${defCon.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;-webkit-border-radius:7px;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${defCon.class.checkbox}+label::after{position:absolute;top:0;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;-webkit-border-radius:100px;border-radius:100px;padding:5px;font-size:1em;font-weight:700;color:#fff;content:"OFF"}.${defCon.class.checkbox}:checked+label{margin:0;-webkit-box-sizing:content-box;box-sizing:content-box;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.${defCon.class.checkbox}:checked+label::after{content:"ON";left:10px;-webkit-box-sizing:content-box;box-sizing:content-box}.${defCon.class.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.fface} label,#${defCon.id.fface}+label::after,#${defCon.id.fface}+label::before,#${defCon.id.smooth} label,#${defCon.id.smooth}+label::after,#${defCon.id.smooth}+label::before{-webkit-transition:all .1s ease-in;transition:all .1s ease-in;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.fontShadow} #${defCon.id.shadowSize},#${defCon.id.fontStroke} #${defCon.id.strokeSize}{color:#111;width:56px;text-indent:0;margin-right:10px!important;height:32px;font-size:17px;font-weight:400;font-family:Impact,"Courier New",sans-serif!important;border:#67a5df 2px solid;-webkit-border-radius:4px;border-radius:4px;margin-right:2px;text-align:center;-webkit-box-sizing:content-box;box-sizing:content-box;padding:0;background:#fafafa}.${defCon.class.Switch}{-webkit-box-sizing:content-box;box-sizing:content-box;display:inline-block;float:right;margin-right:4px;padding:0 6px;border:2px double #67a5df;color:#0A68C1;-webkit-border-radius:4px;border-radius:4px;}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent);background-size:50px 50px;background-color:#f7fff7}`;
@@ -1941,7 +1946,7 @@
           </li>
         </ul>
       </fieldset>
-    </div>`);
+    </div>`).trim();
     const tCSS = `@charset "UTF-8";` + fontStyle;
     const tStyle = `@charset "UTF-8";` + tshadow;
     defCon.tStyle = tStyle;
@@ -1970,9 +1975,7 @@
           defCon.domainCount,
           "line-height:180%;font-size:12px;color:steelblue",
           maxPersonalSites,
-          defCon.domainIndex !== undefined
-            ? "\uff08\u5f53\u524d\u8bbe\u7f6e\uff1a\u4e2a\u6027\u5316\uff09"
-            : "\uff08\u5f53\u524d\u8bbe\u7f6e\uff1a\u5168\u5c40\uff09",
+          defCon.domainIndex !== undefined ? "\uff08\u5f53\u524d\u8bbe\u7f6e\uff1a\u4e2a\u6027\u5316\uff09" : "\uff08\u5f53\u524d\u8bbe\u7f6e\uff1a\u5168\u5c40\uff09",
           isBackupFunction ? "ON " : "OFF",
           isPreview ? "ON " : "OFF",
           "line-height:180%;font-size:12px;color:teal",
@@ -2068,14 +2071,7 @@
       const callback = mutations => {
         mutations.forEach(mutation => {
           if (!((!curWindowtop || (qS(`#${defCon.id.rndId}`) && qS(`.${defCon.class.rndClass}`))) && qS(`.${defCon.class.rndStyle}`))) {
-            debug(
-              `//-> %cMutationObserver: %c%s %c%s`,
-              "font-weight:bold;color:teal",
-              "color:olive",
-              mutation.type,
-              "font-weight:bold;color:red",
-              startRAFInterval()
-            );
+            debug(`//-> %cMutationObserver: %c%s %c%s`, "font-weight:bold;color:teal", "color:olive", mutation.type, "font-weight:bold;color:red", startRAFInterval());
           }
         });
       };
@@ -2301,8 +2297,8 @@
               drawShadow.updateVal((Number(defValue.fontShadow) * 1e5) / drawShadow.range / 1e3);
               picker.value = defValue.shadowColor;
               picker._value_ = picker.value;
-              smoothT.checked = defValue.fontSmooth;
-              ffaceT.checked = defValue.fontFace;
+              smoothT.checked !== defValue.fontSmooth ? smoothT.click() : debug("//-> Not Modified");
+              ffaceT.checked !== defValue.fontFace ? ffaceT.click() : debug("//-> Not Modified");
               fontCssT.value = defValue.fontCSS;
               fontExT.value = defValue.fontEx;
               this.parentNode.children[3].click();
@@ -2316,8 +2312,8 @@
               drawShadow.updateVal((Number(CONST.fontShadow) * 1e5) / drawShadow.range / 1e3);
               picker.value = CONST.shadowColor;
               picker._value_ = picker.value;
-              smoothT.checked = CONST.fontSmooth;
-              ffaceT.checked = CONST.fontFace;
+              smoothT.checked !== CONST.fontSmooth ? smoothT.click() : debug("//-> Not Modified");
+              ffaceT.checked !== CONST.fontFace ? ffaceT.click() : debug("//-> Not Modified");
               fontCssT.value = CONST.fontCSS;
               fontExT.value = CONST.fontEx;
             }
@@ -2347,10 +2343,7 @@
             if (isPreview && this.getAttribute("v-Preview")) {
               try {
                 shadow = fshadow > 0 && fshadow <= 8 ? `text-shadow:0 0 ${fshadow}px ${fscolor};` : "";
-                stroke =
-                  fstrock > 0 && fstrock <= 1.0
-                    ? `text-stroke:${fstrock}px currentcolor;-webkit-text-stroke:${fstrock}px currentcolor;paint-order:stroke fill;`
-                    : "";
+                stroke = fstrock > 0 && fstrock <= 1.0 ? `text-stroke:${fstrock}px currentcolor;-webkit-text-stroke:${fstrock}px currentcolor;paint-order:stroke fill;` : "";
                 selection = stroke ? `::selection{color:#ffffff!important;background:#338fff!important}` : ``;
                 smoothing = smooth ? `-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;` : "";
                 fontfamily = fontface ? `font-family:${fontselect};` : "";
@@ -2598,7 +2591,7 @@
                 </li>
                 <ol id="${defCon.id.feedback}" style="padding:0;margin:0;font-size:16px;color:#333;font-weight:600;cursor:help"\
                 title="遇到问题,建议先看看脚本帮助文件">\ud83e\udde1\u0020如果您遇到问题，请向我反馈\u0020\ud83e\udde1</ol>
-              </ul>`),
+              </ul>`).trim(),
               titleText: "参数设置 - VIP 高级功能",
             });
             let _bk, _pv, _mps;
@@ -3055,7 +3048,7 @@
       if (html.substr(html.length - 1, 1) === ",") {
         html = html.substr(0, html.length - 1);
       }
-      html = html.replace(/expression|`|{|}/gi, "");
+      html = html.replace(/expression|\\|`|{|}/gi, "");
       const _tmp = document.createElement("div");
       _tmp.innerHTML = html;
       return _tmp.textContent || _tmp.innerText || "";
