@@ -4,7 +4,7 @@
 // @name:zh           字体渲染（自用脚本）
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:en           Font Rendering (Customized)
-// @version           2021.08.06.1
+// @version           2021.08.07.1
 // @author            F9y4ng
 // @description       让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @description:zh    让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
@@ -1559,18 +1559,17 @@
   class isSupportFontFamily {
     constructor() {
       const baseFonts = ["monospace", "serif", "Georgia", "sans-serif", "Tahoma"];
-      const testString = "这是测试、這是測試：1234567890,WWWwwwMMMmmmLlOoIi.";
+      const testString = "这是测试、這是測試：1234567890, WWWwwwMMMmmmLlOoIi.";
       const testSize = "72px";
       const h = qS("body");
       const s = cE("span");
       s.className = `fa ${defCon.id.seed}_fontTest`;
       s.id = `${defCon.id.fontTest}`;
-      s.style.cssText += `font-size:${testSize}!important;`;
       s.innerHTML = testString;
       let defaultWidth = {};
       let defaultHeight = {};
       for (let index in baseFonts) {
-        s.style.cssText += `font-family:${baseFonts[index]}!important;`;
+        s.style.cssText = `font-size:${testSize}!important;font-family:${baseFonts[index]}!important;`;
         try {
           h.appendChild(s);
           defaultWidth[baseFonts[index]] = s.offsetWidth;
@@ -1580,17 +1579,21 @@
           error("//-> isSupportFontFamily:", e.name);
         }
       }
+      debug("//-> offset:", defaultWidth, defaultHeight);
 
       function detect(font) {
         let detected = false;
         try {
           for (let index in baseFonts) {
-            s.style.cssText += `font-family:'${font}',${baseFonts[index]}!important;`;
+            s.style.cssText = `font-size:${testSize}!important;font-family:'${font}',${baseFonts[index]}!important;`;
             h.appendChild(s);
-            const matched = s.offsetWidth !== defaultWidth[baseFonts[index]] || s.offsetHeight !== defaultHeight[baseFonts[index]];
+            const _offsetWidth = s.offsetWidth;
+            const _offsetHeight = s.offsetHeight;
+            const matched = _offsetWidth !== defaultWidth[baseFonts[index]] || _offsetHeight !== defaultHeight[baseFonts[index]];
             h.removeChild(s);
             detected = detected || matched;
             if (detected) {
+              debug("//-> detect:", font, _offsetWidth, defaultWidth[baseFonts[index]], _offsetHeight, defaultHeight[baseFonts[index]]);
               break;
             }
           }
