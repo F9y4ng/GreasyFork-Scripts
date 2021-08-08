@@ -4,7 +4,7 @@
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh         谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.4.20210803.2
+// @version         3.4.20210808.1
 // @author          F9y4ng
 // @description         谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en      Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
@@ -28,7 +28,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            修正firefox下按钮样式错误。\n修正bugs，优化代码。
+// @note            修正bugs，优化代码。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -171,6 +171,425 @@
     GMopenInTab = GM_openInTab;
   }
 
+  /* Refactoring NoticeJs Functions */
+
+  -(function (q, d) {
+    typeof exports === "object" && typeof module === "object"
+      ? (window.module.exports = d())
+      : typeof define === "function" && window.define.amd
+      ? window.define("NoticeJs", [], d)
+      : typeof exports === "object"
+      ? (window.exports.NoticeJs = d())
+      : (q.NoticeJs = d());
+  })("undefined" !== typeof self ? self : this, function () {
+    return (function (q) {
+      let m = {};
+      function d(g) {
+        if (m[g]) {
+          return m[g].exports;
+        }
+        let l = (m[g] = {
+          i: g,
+          l: !1,
+          exports: {},
+        });
+        q[g].call(l.exports, l, l.exports, d);
+        l.l = !0;
+        return l.exports;
+      }
+      d.m = q;
+      d.c = m;
+      d.d = function (g, l, f) {
+        d.o(g, l) ||
+          Object.defineProperty(g, l, {
+            configurable: !1,
+            enumerable: !0,
+            get: f,
+          });
+      };
+      d.n = function (g) {
+        let l =
+          g && g.__esModule
+            ? function () {
+                return g.default;
+              }
+            : function () {
+                return g;
+              };
+        d.d(l, "a", l);
+        return l;
+      };
+      d.o = function (g, l) {
+        return Object.prototype.hasOwnProperty.call(g, l);
+      };
+      d.p = "dist/";
+      return d((d.s = 2));
+    })([
+      function (q, d, m) {
+        Object.defineProperty(d, "__esModule", { value: !0 });
+        d.noticeJsModalClassName = `${Notice.noticejs}-modal`;
+        d.closeAnimation = `${Notice.noticejs}-fadeOut`;
+        d.Defaults = {
+          title: "",
+          text: "",
+          type: `${Notice.success}`,
+          position: "bottomRight",
+          newestOnTop: !1,
+          timeout: 30,
+          progressBar: !0,
+          indeterminate: !1,
+          closeWith: ["button"],
+          animation: {
+            open: `${Notice.animated} fadeIn`,
+            close: `${Notice.animated} fadeOut`,
+          },
+          modal: !1,
+          width: 400,
+          scroll: {
+            maxHeightContent: 400,
+            showOnHover: !0,
+          },
+          rtl: !1,
+          callbacks: {
+            beforeShow: [],
+            onShow: [],
+            afterShow: [],
+            onClose: [],
+            afterClose: [],
+            onClick: [],
+            onHover: [],
+            onTemplate: [],
+          },
+        };
+      },
+      function (q, d, m) {
+        function g(a, b) {
+          a.callbacks.hasOwnProperty(b) &&
+            a.callbacks[b].forEach(function (c) {
+              typeof c === "function" && c.apply(a);
+            });
+        }
+        Object.defineProperty(d, "__esModule", { value: !0 });
+        d.appendNoticeJs = d.addListener = d.CloseItem = d.AddModal = void 0;
+        d.getCallback = g;
+        let l = (function (a) {
+          if (a && a.__esModule) {
+            return a;
+          }
+          let b = {};
+          if (null !== a) {
+            for (let c in a) {
+              Object.prototype.hasOwnProperty.call(a, c) && (b[c] = a[c]);
+            }
+          }
+          b.default = a;
+          return b;
+        })(m(0));
+        let f = l.Defaults;
+        let h = (d.AddModal = function () {
+          if (0 >= document.getElementsByClassName(l.noticeJsModalClassName).length) {
+            let a = document.createElement("div");
+            a.classList.add(l.noticeJsModalClassName);
+            a.classList.add(`${Notice.noticejs}-modal-open`);
+            document.body.appendChild(a);
+            setTimeout(function () {
+              a.className = l.noticeJsModalClassName;
+            }, 200);
+          }
+        });
+        let n = (d.CloseItem = function (a) {
+          g(f, "onClose");
+          null !== f.animation && null !== f.animation.close && (a.className += " " + f.animation.close);
+          setTimeout(function () {
+            a.remove();
+          }, 200);
+          !0 === f.modal &&
+            1 <= document.querySelectorAll(`[${Notice.noticejs}-modal='true']`).length &&
+            ((document.querySelector(`.${Notice.noticejs}-modal`).className += ` ${Notice.noticejs}-modal-close`),
+            setTimeout(function () {
+              document.querySelector(`.${Notice.noticejs}-modal`).remove();
+            }, 500));
+          let b = a.closest(`.${Notice.noticejs}`);
+          let c = b ? "." + b.className.replace(`${Notice.noticejs}`, "").trim() : ".null";
+          setTimeout(function () {
+            0 >= document.querySelectorAll(c + ` .${Notice.item}`).length && document.querySelector(c) && document.querySelector(c).remove();
+          }, 500);
+        });
+        let e = (d.addListener = function (a) {
+          f.closeWith.includes("button") &&
+            a.querySelector(`.${Notice.close}`).addEventListener("click", function () {
+              n(a);
+            });
+          f.closeWith.includes("click")
+            ? ((a.style.cursor = "pointer"),
+              a.addEventListener("click", function (b) {
+                `${Notice.close}` !== b.target.className && (g(f, "onClick"), n(a));
+              }))
+            : a.addEventListener("click", function (b) {
+                `${Notice.close}` !== b.target.className && g(f, "onClick");
+              });
+          a.addEventListener("mouseover", function () {
+            g(f, "onHover");
+          });
+        });
+        d.appendNoticeJs = function (a, b, c) {
+          let p = `.${Notice.noticejs}-` + f.position;
+          let k = document.createElement("div");
+          k.classList.add(`${Notice.item}`);
+          k.classList.add(f.type);
+          !0 === f.rtl && k.classList.add(`${Notice.noticejs}-rtl`);
+          "" !== f.width && Number.isInteger(f.width) && (k.style.width = f.width + "px");
+          a && "" !== a && k.appendChild(a);
+          k.appendChild(b);
+          c && "" !== c && k.appendChild(c);
+          ["top", "bottom"].includes(f.position) && (document.querySelector(p).innerHTML = "");
+          null !== f.animation && null !== f.animation.open && (k.className += " " + f.animation.open);
+          !0 === f.modal && (k.setAttribute(`${Notice.noticejs}-modal`, "true"), h());
+          e(k, f.closeWith);
+          g(f, "beforeShow");
+          g(f, "onShow");
+          !0 === f.newestOnTop ? document.querySelector(p).insertAdjacentElement("afterbegin", k) : document.querySelector(p).appendChild(k);
+          g(f, "afterShow");
+          return k;
+        };
+      },
+      function (q, d, m) {
+        function g(a) {
+          if (a && a.__esModule) {
+            return a;
+          }
+          let b = {};
+          if (null !== a) {
+            for (let c in a) {
+              Object.prototype.hasOwnProperty.call(a, c) && (b[c] = a[c]);
+            }
+          }
+          b.default = a;
+          return b;
+        }
+        Object.defineProperty(d, "__esModule", { value: !0 });
+        let l = (function () {
+          function a(b, c) {
+            for (let p = 0; p < c.length; p++) {
+              let k = c[p];
+              k.enumerable = k.enumerable || !1;
+              k.configurable = !0;
+              "value" in k && (k.writable = !0);
+              Object.defineProperty(b, k.key, k);
+            }
+          }
+          return function (b, c, p) {
+            c && a(b.prototype, c);
+            p && a(b, p);
+            return b;
+          };
+        })();
+        m(3);
+        let f = m(0);
+        let h = g(f);
+        let n = m(4);
+        m = m(1);
+        let e = g(m);
+        m = (function () {
+          class a {
+            constructor() {
+              let b = 0 < arguments.length && void 0 !== arguments[0] ? arguments[0] : {};
+              if (!(this instanceof a)) {
+                throw new TypeError("Cannot call a class as a function");
+              }
+              this.options = Object.assign(h.Defaults, b);
+              this.component = new n.Components();
+              this.id = `${Notice.noticejs}-` + defCon.randString(6);
+              this.on("beforeShow", this.options.callbacks.beforeShow);
+              this.on("onShow", this.options.callbacks.onShow);
+              this.on("afterShow", this.options.callbacks.afterShow);
+              this.on("onClose", this.options.callbacks.onClose);
+              this.on("afterClose", this.options.callbacks.afterClose);
+              this.on("onClick", this.options.callbacks.onClick);
+              this.on("onHover", this.options.callbacks.onHover);
+            }
+          }
+          l(
+            a,
+            [
+              {
+                key: "show",
+                value: function () {
+                  let b = this.component.createContainer();
+                  document.querySelector(`.${Notice.noticejs}-` + this.options.position) === null && document.body.appendChild(b);
+                  let c = void 0;
+                  b = this.component.createHeader(this.options.title, this.options.closeWith);
+                  let p = this.component.createBody(this.options.text);
+                  !0 === this.options.progressBar && (c = this.component.createProgressBar());
+                  b = e.appendNoticeJs(b, p, c);
+                  b.setAttribute("id", this.id);
+                  return (this.dom = b);
+                },
+              },
+              {
+                key: "on",
+                value: function (b) {
+                  let c = 1 < arguments.length && void 0 !== arguments[1] ? arguments[1] : function () {};
+                  typeof c === "function" && this.options.callbacks.hasOwnProperty(b) && this.options.callbacks[b].push(c);
+                  return this;
+                },
+              },
+              {
+                key: "close",
+                value: function () {
+                  e.CloseItem(this.dom);
+                },
+              },
+            ],
+            [
+              {
+                key: "overrideDefaults",
+                value: function (b) {
+                  this.options = Object.assign(h.Defaults, b);
+                  return this;
+                },
+              },
+            ]
+          );
+          return a;
+        })();
+        d.default = m;
+        q.exports = d.default;
+      },
+      function (q, d) {},
+      function (q, d, m) {
+        function g(n) {
+          if (n && n.__esModule) {
+            return n;
+          }
+          let e = {};
+          if (n === null) {
+            for (let a in n) {
+              Object.prototype.hasOwnProperty.call(n, a) && (e[a] = n[a]);
+            }
+          }
+          e.default = n;
+          return e;
+        }
+        Object.defineProperty(d, "__esModule", { value: !0 });
+        d.Components = void 0;
+        let l = (function () {
+          function n(e, a) {
+            for (let b = 0; b < a.length; b++) {
+              let c = a[b];
+              c.enumerable = c.enumerable || !1;
+              c.configurable = !0;
+              "value" in c && (c.writable = !0);
+              Object.defineProperty(e, c.key, c);
+            }
+          }
+          return function (e, a, b) {
+            a && n(e.prototype, a);
+            b && n(e, b);
+            return e;
+          };
+        })();
+        q = m(0);
+        q = g(q);
+        m = m(1);
+        let f = g(m);
+        let h = q.Defaults;
+        d.Components = (function () {
+          function n() {
+            if (!(this instanceof n)) {
+              throw new TypeError("Cannot call a class as a function");
+            }
+          }
+          l(n, [
+            {
+              key: "createContainer",
+              value: function () {
+                let e = `${Notice.noticejs}-` + h.position;
+                let a = document.createElement("div");
+                a.classList.add(`${Notice.noticejs}`);
+                a.classList.add(e);
+                return a;
+              },
+            },
+            {
+              key: "createHeader",
+              value: function () {
+                let e = void 0;
+                h.title && "" !== h.title && ((e = document.createElement("div")), e.setAttribute("class", `${Notice.noticejs}-heading`), (e.textContent = h.title));
+                if (h.closeWith.includes("button")) {
+                  let a = document.createElement("div");
+                  a.setAttribute("class", `${Notice.close}`);
+                  a.innerHTML = "&times;";
+                  e ? e.appendChild(a) : (e = a);
+                }
+                return e;
+              },
+            },
+            {
+              key: "createBody",
+              value: function () {
+                let e = document.createElement("div");
+                e.setAttribute("class", `${Notice.noticejs}-body`);
+                let a = document.createElement("div");
+                a.setAttribute("class", `${Notice.noticejs}-content`);
+                a.innerHTML = h.text;
+                e.appendChild(a);
+                null !== h.scroll &&
+                  "" !== h.scroll.maxHeight &&
+                  ((e.style.overflowY = "auto"), (e.style.maxHeight = h.scroll.maxHeight + "px"), !0 === h.scroll.showOnHover && (e.style.visibility = "hidden"));
+                return e;
+              },
+            },
+            {
+              key: "createProgressBar",
+              value: function () {
+                let e = document.createElement("div");
+                e.setAttribute("class", `${Notice.noticejs}-progressbar`);
+                let a = document.createElement("div");
+                a.setAttribute("class", `${Notice.noticejs}-bar`);
+                e.appendChild(a);
+                let b = 100;
+                let c = 0;
+                let p = 0;
+                let k = "";
+                if (!0 === h.progressBar && "boolean" !== typeof h.timeout && !1 !== h.timeout) {
+                  let u = function () {
+                    if (0 >= b) {
+                      clearInterval(p);
+                      let r = e.closest(`div.${Notice.item}`);
+                      if (null !== h.animation && null !== h.animation.close) {
+                        r.className = r.className.replace(new RegExp("(?:^|\\s)" + h.animation.open + "(?:\\s|$)"), " ");
+                        r.className += " " + h.animation.close;
+                        let t = parseInt(h.timeout) + 500;
+                        setTimeout(function () {
+                          f.CloseItem(r);
+                        }, t);
+                      } else {
+                        f.CloseItem(r);
+                      }
+                    } else {
+                      b--;
+                      a.style.width = b + "%";
+                    }
+                  };
+                  let v = function () {
+                    c === 0 ? (b--, b === 0 && (c = 1)) : (b++, b === 100 && (c = 0));
+                    document.getElementById(k) === null ? clearInterval(p) : (a.style.width = b + "%");
+                  };
+                  !0 === h.indeterminate
+                    ? ((p = setInterval(v, h.timeout)), (k = `${Notice.noticejs}-progressbar-` + p), e.setAttribute("id", k))
+                    : (p = setInterval(u, h.timeout));
+                }
+                return e;
+              },
+            },
+          ]);
+          return n;
+        })();
+      },
+    ]);
+  });
+
   /* Refactoring functions of GMsetValue/GMgetValue/GMdeleteValue with Expire */
 
   function GMsetExpire(key, value) {
@@ -189,12 +608,7 @@
     val = JSON.parse(defCon.decrypt(val));
     if (_expire) {
       expire = /(?!^0)^[0-9]+[smhdw]$/i.test(_expire) ? _expire : "4h";
-      expire = expire
-        .replace(/w/i, "*7*24*3600*1000")
-        .replace(/d/i, "*24*3600*1000")
-        .replace(/h/i, "*3600*1000")
-        .replace(/m/i, "*60*1000")
-        .replace(/s/i, "*1000");
+      expire = expire.replace(/w/i, "*7*24*3600*1000").replace(/d/i, "*24*3600*1000").replace(/h/i, "*3600*1000").replace(/m/i, "*60*1000").replace(/s/i, "*1000");
       expires = expire.split("*");
       expireTime = expires.reduce(function (a, b) {
         return a * b;
@@ -211,8 +625,8 @@
   /* Refactoring GMnotification Function */
 
   GMnotification = (text = "", type = `${Notice.info}`, closeWith = true, timeout = 30, { ...options } = {}, position = "bottomRight") => {
-    /* eslint-disable no-undef */
     try {
+      // eslint-disable-next-line no-undef
       new NoticeJs({
         text: text,
         type: type,
@@ -392,11 +806,7 @@
         timeUnit,
         GoogleJump,
       };
-      console.warn(
-        "%c[GB-Warning]%c\nThis is your first visit, the Bing search button will not be inserted by default.",
-        "font-weight:bold;color:salmon",
-        "color:1"
-      );
+      console.warn("%c[GB-Warning]%c\nThis is your first visit, the Bing search button will not be inserted by default.", "font-weight:bold;color:salmon", "color:1");
       // initialization
       GMdeleteValue("_Check_Version_Expire_");
       GMdeleteValue("_expire_time_");
@@ -428,12 +838,10 @@
         });
         // second: github
         if (defCon.fetchResult.includes("GreasyFork")) {
-          t = await fetchVersion(`https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`).catch(
-            async () => {
-              defCon.fetchResult = "Github - Failed to fetch";
-              error(defCon.fetchResult);
-            }
-          );
+          t = await fetchVersion(`https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`).catch(async () => {
+            defCon.fetchResult = "Github - Failed to fetch";
+            error(defCon.fetchResult);
+          });
         }
         // final: Jsdelivr points to gitee
         if (defCon.fetchResult.includes("Github")) {
@@ -539,11 +947,7 @@
           case 1:
             if (window.self === window.top) {
               console.info(
-                String(
-                  `%c[GB-Update]%c\nWe found a new version: %c${lastestVersion}%c.\n` +
-                    `Please upgrade from your update source to the latest version.` +
-                    `${repo}(${sourceSite})`
-                ),
+                String(`%c[GB-Update]%c\nWe found a new version: %c${lastestVersion}%c.\nPlease upgrade from your update source to the latest version.${repo}(${sourceSite})`),
                 "font-weight:bold;color:crimson",
                 "color:0",
                 "color:crimson",
@@ -1171,22 +1575,16 @@
           try {
             setTimeout(() => {
               defCon.s = GMopenInTab(`https://${google}/ncr`, true);
-              GMnotification(
-                Notice.noticeHTML(`<dd class="${Notice.center}"><span>智能跳转</span>即将跳转至Google国际站：<br/>${google}</dd>`),
-                `${Notice.info}`,
-                true,
-                20,
-                {
-                  onClose: [
-                    function () {
-                      if (defCon.s) {
-                        defCon.s.close();
-                      }
-                      location.href = top.location.href.replace(top.location.hostname, google);
-                    },
-                  ],
-                }
-              );
+              GMnotification(Notice.noticeHTML(`<dd class="${Notice.center}"><span>智能跳转</span>即将跳转至Google国际站：<br/>${google}</dd>`), `${Notice.info}`, true, 20, {
+                onClose: [
+                  function () {
+                    if (defCon.s) {
+                      defCon.s.close();
+                    }
+                    location.href = top.location.href.replace(top.location.hostname, google);
+                  },
+                ],
+              });
             }, 500);
           } catch (e) {
             error("//-> getGlobalGoogle:", e);
@@ -1233,16 +1631,13 @@
       }
     }
 
-    function addStyle(css, className, addToTarget, isReload, initType) {
+    function addStyle(css, className, addToTarget, isReload = false, initType = "text/css", reNew = false) {
       RAFInterval(
         () => {
           let addTo = document.querySelector(addToTarget);
-          let reNew = false;
           if (typeof addToTarget === "undefined") {
             addTo = document.head || document.body || document.documentElement || document;
           }
-          isReload = isReload || false;
-          initType = initType || "text/css";
           if (typeof addToTarget === "undefined" || (typeof addToTarget !== "undefined" && document.querySelector(addToTarget))) {
             if (isReload === true && document.querySelector(`.${className}`)) {
               safeRemove(`.${className}`);
@@ -1333,429 +1728,6 @@
       }
       requestAnimationFrame(step);
     }
-
-    /* Refactoring NoticeJs Functions */
-
-    (function (q, d) {
-      typeof exports === "object" && typeof module === "object"
-        ? (window.module.exports = d())
-        : typeof define === "function" && window.define.amd
-        ? window.define("NoticeJs", [], d)
-        : typeof exports === "object"
-        ? (window.exports.NoticeJs = d())
-        : (q.NoticeJs = d());
-    })("undefined" !== typeof self ? self : this, function () {
-      return (function (q) {
-        let m = {};
-        function d(g) {
-          if (m[g]) {
-            return m[g].exports;
-          }
-          let l = (m[g] = {
-            i: g,
-            l: !1,
-            exports: {},
-          });
-          q[g].call(l.exports, l, l.exports, d);
-          l.l = !0;
-          return l.exports;
-        }
-        d.m = q;
-        d.c = m;
-        d.d = function (g, l, f) {
-          d.o(g, l) ||
-            Object.defineProperty(g, l, {
-              configurable: !1,
-              enumerable: !0,
-              get: f,
-            });
-        };
-        d.n = function (g) {
-          let l =
-            g && g.__esModule
-              ? function () {
-                  return g.default;
-                }
-              : function () {
-                  return g;
-                };
-          d.d(l, "a", l);
-          return l;
-        };
-        d.o = function (g, l) {
-          return Object.prototype.hasOwnProperty.call(g, l);
-        };
-        d.p = "dist/";
-        return d((d.s = 2));
-      })([
-        function (q, d, m) {
-          Object.defineProperty(d, "__esModule", { value: !0 });
-          d.noticeJsModalClassName = `${Notice.noticejs}-modal`;
-          d.closeAnimation = `${Notice.noticejs}-fadeOut`;
-          d.Defaults = {
-            title: "",
-            text: "",
-            type: `${Notice.success}`,
-            position: "bottomRight",
-            newestOnTop: !1,
-            timeout: 30,
-            progressBar: !0,
-            indeterminate: !1,
-            closeWith: ["button"],
-            animation: {
-              open: `${Notice.animated} fadeIn`,
-              close: `${Notice.animated} fadeOut`,
-            },
-            modal: !1,
-            width: 400,
-            scroll: {
-              maxHeightContent: 400,
-              showOnHover: !0,
-            },
-            rtl: !1,
-            callbacks: {
-              beforeShow: [],
-              onShow: [],
-              afterShow: [],
-              onClose: [],
-              afterClose: [],
-              onClick: [],
-              onHover: [],
-              onTemplate: [],
-            },
-          };
-        },
-        function (q, d, m) {
-          function g(a, b) {
-            a.callbacks.hasOwnProperty(b) &&
-              a.callbacks[b].forEach(function (c) {
-                typeof c === "function" && c.apply(a);
-              });
-          }
-          Object.defineProperty(d, "__esModule", { value: !0 });
-          d.appendNoticeJs = d.addListener = d.CloseItem = d.AddModal = void 0;
-          d.getCallback = g;
-          let l = (function (a) {
-            if (a && a.__esModule) {
-              return a;
-            }
-            let b = {};
-            if (null !== a) {
-              for (let c in a) {
-                Object.prototype.hasOwnProperty.call(a, c) && (b[c] = a[c]);
-              }
-            }
-            b.default = a;
-            return b;
-          })(m(0));
-          let f = l.Defaults;
-          let h = (d.AddModal = function () {
-            if (0 >= document.getElementsByClassName(l.noticeJsModalClassName).length) {
-              let a = document.createElement("div");
-              a.classList.add(l.noticeJsModalClassName);
-              a.classList.add(`${Notice.noticejs}-modal-open`);
-              document.body.appendChild(a);
-              setTimeout(function () {
-                a.className = l.noticeJsModalClassName;
-              }, 200);
-            }
-          });
-          let n = (d.CloseItem = function (a) {
-            g(f, "onClose");
-            null !== f.animation && null !== f.animation.close && (a.className += " " + f.animation.close);
-            setTimeout(function () {
-              a.remove();
-            }, 200);
-            !0 === f.modal &&
-              1 <= document.querySelectorAll(`[${Notice.noticejs}-modal='true']`).length &&
-              ((document.querySelector(`.${Notice.noticejs}-modal`).className += ` ${Notice.noticejs}-modal-close`),
-              setTimeout(function () {
-                document.querySelector(`.${Notice.noticejs}-modal`).remove();
-              }, 500));
-            let b = a.closest(`.${Notice.noticejs}`);
-            let c = b ? "." + b.className.replace(`${Notice.noticejs}`, "").trim() : ".null";
-            setTimeout(function () {
-              0 >= document.querySelectorAll(c + ` .${Notice.item}`).length && document.querySelector(c) && document.querySelector(c).remove();
-            }, 500);
-          });
-          let e = (d.addListener = function (a) {
-            f.closeWith.includes("button") &&
-              a.querySelector(`.${Notice.close}`).addEventListener("click", function () {
-                n(a);
-              });
-            f.closeWith.includes("click")
-              ? ((a.style.cursor = "pointer"),
-                a.addEventListener("click", function (b) {
-                  `${Notice.close}` !== b.target.className && (g(f, "onClick"), n(a));
-                }))
-              : a.addEventListener("click", function (b) {
-                  `${Notice.close}` !== b.target.className && g(f, "onClick");
-                });
-            a.addEventListener("mouseover", function () {
-              g(f, "onHover");
-            });
-          });
-          d.appendNoticeJs = function (a, b, c) {
-            let p = `.${Notice.noticejs}-` + f.position;
-            let k = document.createElement("div");
-            k.classList.add(`${Notice.item}`);
-            k.classList.add(f.type);
-            !0 === f.rtl && k.classList.add(`${Notice.noticejs}-rtl`);
-            "" !== f.width && Number.isInteger(f.width) && (k.style.width = f.width + "px");
-            a && "" !== a && k.appendChild(a);
-            k.appendChild(b);
-            c && "" !== c && k.appendChild(c);
-            ["top", "bottom"].includes(f.position) && (document.querySelector(p).innerHTML = "");
-            null !== f.animation && null !== f.animation.open && (k.className += " " + f.animation.open);
-            !0 === f.modal && (k.setAttribute(`${Notice.noticejs}-modal`, "true"), h());
-            e(k, f.closeWith);
-            g(f, "beforeShow");
-            g(f, "onShow");
-            !0 === f.newestOnTop ? document.querySelector(p).insertAdjacentElement("afterbegin", k) : document.querySelector(p).appendChild(k);
-            g(f, "afterShow");
-            return k;
-          };
-        },
-        function (q, d, m) {
-          function g(a) {
-            if (a && a.__esModule) {
-              return a;
-            }
-            let b = {};
-            if (null !== a) {
-              for (let c in a) {
-                Object.prototype.hasOwnProperty.call(a, c) && (b[c] = a[c]);
-              }
-            }
-            b.default = a;
-            return b;
-          }
-          Object.defineProperty(d, "__esModule", { value: !0 });
-          let l = (function () {
-            function a(b, c) {
-              for (let p = 0; p < c.length; p++) {
-                let k = c[p];
-                k.enumerable = k.enumerable || !1;
-                k.configurable = !0;
-                "value" in k && (k.writable = !0);
-                Object.defineProperty(b, k.key, k);
-              }
-            }
-            return function (b, c, p) {
-              c && a(b.prototype, c);
-              p && a(b, p);
-              return b;
-            };
-          })();
-          m(3);
-          let f = m(0);
-          let h = g(f);
-          let n = m(4);
-          m = m(1);
-          let e = g(m);
-          m = (function () {
-            class a {
-              constructor() {
-                let b = 0 < arguments.length && void 0 !== arguments[0] ? arguments[0] : {};
-                if (!(this instanceof a)) {
-                  throw new TypeError("Cannot call a class as a function");
-                }
-                this.options = Object.assign(h.Defaults, b);
-                this.component = new n.Components();
-                this.id = `${Notice.noticejs}-` + defCon.randString(6);
-                this.on("beforeShow", this.options.callbacks.beforeShow);
-                this.on("onShow", this.options.callbacks.onShow);
-                this.on("afterShow", this.options.callbacks.afterShow);
-                this.on("onClose", this.options.callbacks.onClose);
-                this.on("afterClose", this.options.callbacks.afterClose);
-                this.on("onClick", this.options.callbacks.onClick);
-                this.on("onHover", this.options.callbacks.onHover);
-              }
-            }
-            l(
-              a,
-              [
-                {
-                  key: "show",
-                  value: function () {
-                    let b = this.component.createContainer();
-                    document.querySelector(`.${Notice.noticejs}-` + this.options.position) === null && document.body.appendChild(b);
-                    let c = void 0;
-                    b = this.component.createHeader(this.options.title, this.options.closeWith);
-                    let p = this.component.createBody(this.options.text);
-                    !0 === this.options.progressBar && (c = this.component.createProgressBar());
-                    b = e.appendNoticeJs(b, p, c);
-                    b.setAttribute("id", this.id);
-                    return (this.dom = b);
-                  },
-                },
-                {
-                  key: "on",
-                  value: function (b) {
-                    let c = 1 < arguments.length && void 0 !== arguments[1] ? arguments[1] : function () {};
-                    typeof c === "function" && this.options.callbacks.hasOwnProperty(b) && this.options.callbacks[b].push(c);
-                    return this;
-                  },
-                },
-                {
-                  key: "close",
-                  value: function () {
-                    e.CloseItem(this.dom);
-                  },
-                },
-              ],
-              [
-                {
-                  key: "overrideDefaults",
-                  value: function (b) {
-                    this.options = Object.assign(h.Defaults, b);
-                    return this;
-                  },
-                },
-              ]
-            );
-            return a;
-          })();
-          d.default = m;
-          q.exports = d.default;
-        },
-        function (q, d) {},
-        function (q, d, m) {
-          function g(n) {
-            if (n && n.__esModule) {
-              return n;
-            }
-            let e = {};
-            if (n === null) {
-              for (let a in n) {
-                Object.prototype.hasOwnProperty.call(n, a) && (e[a] = n[a]);
-              }
-            }
-            e.default = n;
-            return e;
-          }
-          Object.defineProperty(d, "__esModule", { value: !0 });
-          d.Components = void 0;
-          let l = (function () {
-            function n(e, a) {
-              for (let b = 0; b < a.length; b++) {
-                let c = a[b];
-                c.enumerable = c.enumerable || !1;
-                c.configurable = !0;
-                "value" in c && (c.writable = !0);
-                Object.defineProperty(e, c.key, c);
-              }
-            }
-            return function (e, a, b) {
-              a && n(e.prototype, a);
-              b && n(e, b);
-              return e;
-            };
-          })();
-          q = m(0);
-          q = g(q);
-          m = m(1);
-          let f = g(m);
-          let h = q.Defaults;
-          d.Components = (function () {
-            function n() {
-              if (!(this instanceof n)) {
-                throw new TypeError("Cannot call a class as a function");
-              }
-            }
-            l(n, [
-              {
-                key: "createContainer",
-                value: function () {
-                  let e = `${Notice.noticejs}-` + h.position;
-                  let a = document.createElement("div");
-                  a.classList.add(`${Notice.noticejs}`);
-                  a.classList.add(e);
-                  return a;
-                },
-              },
-              {
-                key: "createHeader",
-                value: function () {
-                  let e = void 0;
-                  h.title &&
-                    "" !== h.title &&
-                    ((e = document.createElement("div")), e.setAttribute("class", `${Notice.noticejs}-heading`), (e.textContent = h.title));
-                  if (h.closeWith.includes("button")) {
-                    let a = document.createElement("div");
-                    a.setAttribute("class", `${Notice.close}`);
-                    a.innerHTML = "&times;";
-                    e ? e.appendChild(a) : (e = a);
-                  }
-                  return e;
-                },
-              },
-              {
-                key: "createBody",
-                value: function () {
-                  let e = document.createElement("div");
-                  e.setAttribute("class", `${Notice.noticejs}-body`);
-                  let a = document.createElement("div");
-                  a.setAttribute("class", `${Notice.noticejs}-content`);
-                  a.innerHTML = h.text;
-                  e.appendChild(a);
-                  null !== h.scroll &&
-                    "" !== h.scroll.maxHeight &&
-                    ((e.style.overflowY = "auto"),
-                    (e.style.maxHeight = h.scroll.maxHeight + "px"),
-                    !0 === h.scroll.showOnHover && (e.style.visibility = "hidden"));
-                  return e;
-                },
-              },
-              {
-                key: "createProgressBar",
-                value: function () {
-                  let e = document.createElement("div");
-                  e.setAttribute("class", `${Notice.noticejs}-progressbar`);
-                  let a = document.createElement("div");
-                  a.setAttribute("class", `${Notice.noticejs}-bar`);
-                  e.appendChild(a);
-                  let b = 100;
-                  let c = 0;
-                  let p = 0;
-                  let k = "";
-                  if (!0 === h.progressBar && "boolean" !== typeof h.timeout && !1 !== h.timeout) {
-                    let u = function () {
-                      if (0 >= b) {
-                        clearInterval(p);
-                        let r = e.closest(`div.${Notice.item}`);
-                        if (null !== h.animation && null !== h.animation.close) {
-                          r.className = r.className.replace(new RegExp("(?:^|\\s)" + h.animation.open + "(?:\\s|$)"), " ");
-                          r.className += " " + h.animation.close;
-                          let t = parseInt(h.timeout) + 500;
-                          setTimeout(function () {
-                            f.CloseItem(r);
-                          }, t);
-                        } else {
-                          f.CloseItem(r);
-                        }
-                      } else {
-                        b--;
-                        a.style.width = b + "%";
-                      }
-                    };
-                    let v = function () {
-                      c === 0 ? (b--, b === 0 && (c = 1)) : (b++, b === 100 && (c = 0));
-                      document.getElementById(k) === null ? clearInterval(p) : (a.style.width = b + "%");
-                    };
-                    !0 === h.indeterminate
-                      ? ((p = setInterval(v, h.timeout)), (k = `${Notice.noticejs}-progressbar-` + p), e.setAttribute("id", k))
-                      : (p = setInterval(u, h.timeout));
-                  }
-                  return e;
-                },
-              },
-            ]);
-            return n;
-          })();
-        },
-      ]);
-    });
 
     /* Let`s enjoy it! */
 

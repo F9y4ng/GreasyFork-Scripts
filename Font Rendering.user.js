@@ -4,7 +4,7 @@
 // @name:zh           字体渲染（自用脚本）
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:en           Font Rendering (Customized)
-// @version           2021.08.07.1
+// @version           2021.08.08.1
 // @author            F9y4ng
 // @description       让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @description:zh    让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
@@ -369,6 +369,27 @@
       func();
     } catch (e) {
       error("//-> safeFunction:", e.name);
+    }
+  }
+
+  function __preview__(_preview_, ts = defCon.tStyle, s = true) {
+    if (_preview_) {
+      addStyle("TS", ts, `${defCon.class.rndStyle}`, document.head, true);
+      document.querySelectorAll("iframe").forEach(items => {
+        const h = items.contentWindow;
+        try {
+          const hn = h.location.hostname;
+          if (hn === curHostname) {
+            const sT = h.document.querySelectorAll("style[id^='TS']");
+            if (sT.length) {
+              addStyle("TS", ts, sT[0].className, h.document.head, true);
+            }
+          }
+        } catch (e) {
+          error("//-> window.frames:", e.name);
+        }
+      });
+      defCon.preview = !s;
     }
   }
 
@@ -1266,25 +1287,7 @@
                   submitButton.innerText = "\u4fdd\u5b58";
                   submitButton.removeAttribute("style");
                   submitButton.removeAttribute("v-Preview");
-                  defCon.preview = true;
-                  if (defCon.preview) {
-                    addStyle("TS", defCon.tStyle, `${defCon.class.rndStyle}`, document.head, true);
-                    document.querySelectorAll("iframe").forEach(items => {
-                      const h = items.contentWindow;
-                      try {
-                        const hn = h.location.hostname;
-                        if (hn === curHostname) {
-                          const sT = h.document.querySelectorAll("style[id^='TS']");
-                          if (sT.length) {
-                            addStyle("TS", defCon.tStyle, sT[0].className, h.document.head, true);
-                          }
-                        }
-                      } catch (e) {
-                        error("//-> window.frames:", e.name);
-                      }
-                    });
-                    defCon.preview = false;
-                  }
+                  __preview__(defCon.preview);
                 }
               } else if (!defCon.Val.includes(`${defCon.id.fontName}`) && defCon.isPreview) {
                 submitButton.innerText = "\u9884\u89c8";
@@ -1469,25 +1472,7 @@
                       submitButton.innerText = "\u4fdd\u5b58";
                       submitButton.removeAttribute("style");
                       submitButton.removeAttribute("v-Preview");
-                      defCon.preview = true;
-                      if (defCon.preview) {
-                        addStyle("TS", defCon.tStyle, `${defCon.class.rndStyle}`, document.head, true);
-                        document.querySelectorAll("iframe").forEach(items => {
-                          const h = items.contentWindow;
-                          try {
-                            const hn = h.location.hostname;
-                            if (hn === curHostname) {
-                              const sT = h.document.querySelectorAll("style[id^='TS']");
-                              if (sT.length) {
-                                addStyle("TS", defCon.tStyle, sT[0].className, h.document.head, true);
-                              }
-                            }
-                          } catch (e) {
-                            error("//-> window.frames:", e.name);
-                          }
-                        });
-                        defCon.preview = false;
-                      }
+                      __preview__(defCon.preview);
                     }
                   } else if (!defCon.Val.includes(`${defCon.id.fontName}`) && defCon.isPreview) {
                     submitButton.innerText = "\u9884\u89c8";
@@ -1699,8 +1684,8 @@
             <p><span style="font:bold 22px Candara;color:crimson">您好！</span>这是您首次使用${defCon.scriptName}的新版本 <span style="font-family:Candara;color:darkorange;font-size:18px;font-weight:900;font-style:italic">v${defCon.curVersion}</span>，具体功能敬请试用。</p>
             <p><ul>
               <li>新增多枚字体，优化字体表，修正错误。</li>
-              <li>优化字体检测方法，修正个别网站检测出错的问题。</li>
-              <li>修正代码bugs，优化代码。</li>
+              <li>修正字体检测在个别网站失效的问题。</li>
+              <li>修正bugs, 优化代码。</li>
             </ul></p>
             <p>稍后将为您打开新版帮助文件，要去看一下吗？</p>
           `).trim(),
@@ -1842,7 +1827,7 @@
     }
 
     const codeFont = `* pre,* pre *,* code,* code *{font:14px/130% 'Operator Mono Lig','Fira Code','Roboto Mono','Monaco','Courier New',monospace!important}`;
-    const fontTest = `body span.${defCon.id.seed}_fontTest{font-stretch:normal!important;font-weight:normal!important;line-height:initial!important;text-align:left!important;font-style:normal!important;text-decoration:none!important;letter-spacing:normal!important;word-wrap:normal!important;text-indent:initial!important}body #${defCon.id.fontTest}{margin:0!important;padding:0!important;width:max-content!important;height:max-content!important;text-shadow:none!important;-webkit-text-size-adjust:100%!important}`;
+    const fontTest = `body span.${defCon.id.seed}_fontTest{font-stretch:normal!important;font-weight:normal!important;line-height:initial!important;text-align:left!important;font-style:normal!important;text-decoration:none!important;letter-spacing:normal!important;word-wrap:normal!important;text-indent:initial!important}body #${defCon.id.fontTest}{margin:0!important;padding:0!important;width:max-content!important;height:max-content!important;text-shadow:none!important;-webkit-text-stroke:initial!important;-webkit-text-size-adjust:100%!important}`;
 
     const cssfun = CONST.fontCSS;
     let tshadow = "";
@@ -2358,25 +2343,10 @@
                   : "";
                 exclude = fontex ? `${fontex}{text-stroke:initial!important;-webkit-text-stroke:initial!important;text-shadow:initial!important}` : "";
                 tshadow = `${codeFont}${selection}${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontfaces}${exclude}`;
-                addStyle("TS", tshadow, `${defCon.class.rndStyle}`, document.head, true);
-                document.querySelectorAll("iframe").forEach(items => {
-                  const h = items.contentWindow;
-                  try {
-                    const hn = h.location.hostname;
-                    if (hn === curHostname) {
-                      const sT = h.document.querySelectorAll("style[id^='TS']");
-                      if (sT.length) {
-                        addStyle("TS", tshadow, sT[0].className, h.document.head, true);
-                      }
-                    }
-                  } catch (e) {
-                    error("//-> window.frames:", e.name);
-                  }
-                });
                 this.innerText = "\u4fdd\u5b58";
                 this.removeAttribute("style");
                 this.removeAttribute("v-Preview");
-                defCon.preview = true;
+                __preview__(true, tshadow, false);
               } catch (e) {
                 error("//->", e.name);
               }
@@ -2877,24 +2847,7 @@
             d.innerText = "\u4fdd\u5b58";
             d.removeAttribute("style");
             d.removeAttribute("v-Preview");
-            if (defCon.preview) {
-              addStyle("TS", defCon.tStyle, `${defCon.class.rndStyle}`, document.head, true);
-              document.querySelectorAll("iframe").forEach(items => {
-                const h = items.contentWindow;
-                try {
-                  const hn = h.location.hostname;
-                  if (hn === curHostname) {
-                    const sT = h.document.querySelectorAll("style[id^='TS']");
-                    if (sT.length) {
-                      addStyle("TS", defCon.tStyle, sT[0].className, h.document.head, true);
-                    }
-                  }
-                } catch (e) {
-                  error("//-> window.frames:", e.name);
-                }
-              });
-              defCon.preview = false;
-            }
+            __preview__(defCon.preview);
           }
         }
       } catch (err) {
