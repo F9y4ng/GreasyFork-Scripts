@@ -4,7 +4,7 @@
 // @name:zh           字体渲染（自用脚本）
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:en           Font Rendering (Customized)
-// @version           2021.08.11.1
+// @version           2021.08.11.2
 // @author            F9y4ng
 // @description       让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @description:zh    让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
@@ -933,7 +933,10 @@
     _destroy() {
       if (this.frDialog) {
         this.parent.removeChild(this.frDialog);
-        delete this;
+        for (let key in this) {
+          delete this[key];
+        }
+        debug("//->", this);
       }
     }
 
@@ -2925,23 +2928,25 @@
         });
       }
       for (let j = 0; j < items.length; j++) {
-        // eslint-disable-next-line no-loop-func
-        items[j].addEventListener("click", function () {
-          if (!this.getAttribute("data-del")) {
-            const _list_Id_ = Number(this.id.replace(`${defCon.id.seed}_d_d_l_s_`, ""));
-            _temp_.push(domainValue[_list_Id_].domain);
-            this.setAttribute("data-del", domainValue[_list_Id_].domain);
-            this.innerHTML = "恢复";
-            this.style.cssText += "color:green";
-            this.nextElementSibling.style = "text-decoration:line-through";
-          } else {
-            _temp_.splice(_temp_.indexOf(this.getAttribute("data-del")), 1);
-            this.removeAttribute("data-del");
-            this.innerHTML = "删除";
-            this.style.cssText += "color:crimson";
-            this.nextElementSibling.style = "text-decoration:none";
-          }
-        });
+        items[j].addEventListener(
+          "click",
+          function (a, b) {
+            if (!this.getAttribute("data-del")) {
+              const _list_Id_ = Number(this.id.replace(`${defCon.id.seed}_d_d_l_s_`, ""));
+              a.push(b[_list_Id_].domain);
+              this.setAttribute("data-del", b[_list_Id_].domain);
+              this.innerHTML = "恢复";
+              this.style.cssText += "color:green";
+              this.nextElementSibling.style = "text-decoration:line-through";
+            } else {
+              a.splice(a.indexOf(this.getAttribute("data-del")), 1);
+              this.removeAttribute("data-del");
+              this.innerHTML = "删除";
+              this.style.cssText += "color:crimson";
+              this.nextElementSibling.style = "text-decoration:none";
+            }
+          }.bind(items[j], _temp_, domainValue)
+        );
       }
       if (await frDialog.respond()) {
         for (let l = _temp_.length - 1; l >= 0; l--) {
