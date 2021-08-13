@@ -4,7 +4,7 @@
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh         谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.4.20210808.1
+// @version         3.5.20210813.1
 // @author          F9y4ng
 // @description         谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en      Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
@@ -843,9 +843,16 @@
             error(defCon.fetchResult);
           });
         }
-        // final: Jsdelivr points to gitee
+        // third: github.cdn
         if (defCon.fetchResult.includes("Github")) {
-          t = await fetchVersion(`https://cdn.jsdelivr.net/gh/F9y4ng/GreasyFork-Scripts@master/Google%20&%20Baidu%20Switcher.meta.js`).catch(async () => {
+          t = await fetchVersion(`https://cdn.staticaly.com/gh/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`).catch(async () => {
+            defCon.fetchResult = "GlobalCDN - Failed to fetch";
+            error(defCon.fetchResult);
+          });
+        }
+        // final: Jsdelivr points to gitee
+        if (defCon.fetchResult.includes("GlobalCDN")) {
+          t = await fetchVersion(`https://cdn.jsdelivr.net/gh/F9y4ng/GreasyFork-Scripts@master/Google%20%26%20Baidu%20Switcher.meta.js`).catch(async () => {
             defCon.fetchResult = "Jsdelivr - Failed to fetch";
             error(defCon.fetchResult);
           });
@@ -884,13 +891,15 @@
         const updateUrl = defCon.decrypt(t[3]).replace("meta", "user");
         const recheckURLs = new URL(
           updateUrl
-            .replace("raw.githubusercontent", "github")
+            .replace("raw.githubusercontent.com", "github.com")
+            .replace("cdn.staticaly.com/gh", "github_cdn.com")
             .replace("cdn.jsdelivr.net/gh", "gitee.com")
             .replace("@", "/")
             .replace("master", "blob/master")
             .replace(/code\/[^/]+\.js/, "")
         );
         let sourceSite = defCon.titleCase(recheckURLs.hostname).split(".")[0];
+        sourceSite = sourceSite.replace("_cdn", ".CDN");
         sourceSite = cache ? `${sourceSite} on Cache` : sourceSite;
         const repo = cache
           ? `\nCache expire:${defCon.durationTime(defCon.restTime)}\nDetection: ${defCon.lastRuntime()}\n`
@@ -923,7 +932,7 @@
                       <dd><span>发现版本异常</span>检测到新版本 <i>${lastestVersion}</i> 低于您的本地版本 <i>${defCon.curVersion}</i>。</dd>\
                       <dd>由于您编辑过本地脚本，或是手动在脚本网站上升级过新版本，从而造成缓存错误。为避免未知错误的出现，脚本将自动设置为禁止检测更新，\
                       直至您手动从脚本菜单中再次开启它。</dd><dd>[ ${sourceSite} ]</dd><dd style="font-size:12px!important;\
-                      color:lemonchiffon;font-style:italic">注：若要重新启用自动更新，您需要在<a href="${recheckURLs}"\
+                      color:lemonchiffon;font-style:italic">注：若要重新启用自动更新，您需要在<a href="${recheckURLs.replace("_cdn", "")}"\
                       target="_blank" style="padding:0 2px;font-size:14px;color:gold">脚本源网站</a>覆盖安装新版本后，从脚本菜单重新开启检测功能。</dd>\
                       <dd style="text-align: center"><img src="https://i.niupic.com/images/2021/06/13/9kVe.png" alt="开启自动检测"></dd>`
                   ),

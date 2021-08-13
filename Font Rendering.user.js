@@ -4,7 +4,7 @@
 // @name:zh           字体渲染（自用脚本）
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:en           Font Rendering (Customized)
-// @version           2021.08.11.2
+// @version           2021.08.13.1
 // @author            F9y4ng
 // @description       让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @description:zh    让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
@@ -398,26 +398,57 @@
 
   /* Get browser core & system parameters */
 
-  const browser = {
-    versions: (function () {
-      let u = navigator.userAgent;
-      return {
-        edge: u.indexOf("Edg") > -1 /* edge */,
-        presto: u.indexOf("Presto") > -1 /* opera */,
-        webKit: u.indexOf("AppleWebKit") > -1 && u.indexOf("Edg") === -1 /* chromium */,
-        gecko: u.indexOf("Gecko") > -1 && u.indexOf("KHTML") === -1 /* firefox */,
-        mobile: !!u.match(/AppleWebKit.*Mobile.*/) || !!u.match(/AppleWebKit/) /* mobile */,
-        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/) /* ios */,
-        android: u.indexOf("Android") > -1 || u.indexOf("Linux") > -1 /* android */,
-        iPhone: u.indexOf("iPhone") > -1 || u.indexOf("Mac") > -1 /* iPhone */,
-        iPad: u.indexOf("iPad") > -1 /* ipad */,
-        safari: u.indexOf("Safari") > -1 && u.indexOf("Chrome") === -1 /* safari */,
-        webApp: u.indexOf("Safari") === -1 /* webApp */,
-      };
-    })(),
-    language: (navigator.browserLanguage || navigator.language).toLowerCase() /* language */,
-    platform: navigator.platform /* platform */,
-    cookies: navigator.cookieEnabled /* cookies */,
+  const getBrowser = {
+    type: (info, system = "other", browserArray = {}, browserInfo = "unknow") => {
+      const u = navigator.userAgent.toLowerCase();
+      switch (info) {
+        case "core":
+          return {
+            Trident: u.includes("trident") || u.includes("compatible"),
+            Presto: u.includes("presto") || u.includes("opr"),
+            WebKit: u.includes("applewebkit"),
+            Gecko: u.includes("gecko") && !u.includes("khtml"),
+            EdgeHTML: u.includes("edge"),
+          };
+        case "system":
+          if (/windows|win32|win64|wow32|wow64/g.test(u)) {
+            system = "Windows";
+          } else if (/macintosh|macintel/g.test(u) || u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/)) {
+            system = "MacOS";
+          } else if (/x11/g.test(u)) {
+            system = "Linux";
+          } else if (/android|adr/g.test(u)) {
+            system = "Android";
+          } else if (/ios|iphone|ipad|ipod|iwatch/g.test(u)) {
+            system = "iOS";
+          }
+          return system;
+        case "browser":
+          browserArray = {
+            IE: window.ActiveXObject || "ActiveXObject" in window,
+            Chromium: u.includes("chromium"),
+            Chrome: u.includes("chrome") && !u.includes("edg") && !u.includes("chromium"),
+            Firefox: u.includes("firefox") && u.includes("gecko"),
+            Opera: u.includes("presto") || u.includes("opr") || u.includes("opera"),
+            Safari: u.includes("safari") && !u.includes("chrome"),
+            Edge: u.includes("edg"),
+            QQBrowser: /qqbrowser/g.test(u),
+            Wechat: /micromessenger/g.test(u),
+            UCBrowser: /ucbrowser/g.test(u),
+            Sougou: /metasr/g.test(u),
+            Maxthon: /maxthon/g.test(u),
+            CentBrowser: /cent/g.test(u),
+          };
+          for (let i in browserArray) {
+            if (browserArray[i]) {
+              browserInfo = i;
+            }
+          }
+          return browserInfo;
+        default:
+          return u;
+      }
+    },
   };
 
   /* Color Picker init */
@@ -1603,8 +1634,8 @@
   const defValue = {
     fontSelect: `'Microsoft YaHei','Helvetica Neue',Arial,sans-serif,'iconfont','icomoon','FontAwesome','Material Icons Extended'`,
     fontFace: true,
-    fontStroke: browser.versions.gecko ? 0.04 : 0.015,
-    fontShadow: browser.versions.webKit ? 2.0 : 1.5,
+    fontStroke: getBrowser.type("core").Gecko ? 0.04 : 0.015,
+    fontShadow: getBrowser.type("core").WebKit ? 2.0 : 1.5,
     shadowColor: "#7B7B7B",
     fontSmooth: true,
     fontCSS: `:not([class*='fa']):not([class*='icon']):not([class*='logo']):not([class*='code'])`,
@@ -1870,14 +1901,14 @@
           </li>
           <li id="${defCon.id.fontFace}">
             <div>字体重写（默认：开）</div>
-            <div style="margin:${browser.versions.gecko ? "6px 0 0 0" : "0"}">
+            <div style="margin:${getBrowser.type("core").Gecko ? "6px 0 0 0" : "0"}">
               <input type="checkbox" id="${defCon.id.fface}" class="${defCon.class.checkbox}" ${CONST.fontFace ? "checked" : ""} />
               <label for="${defCon.id.fface}"></label>
             </div>
           </li>
           <li id="${defCon.id.fontSmooth}">
             <div>字体平滑（默认：开）</div>
-            <div style="margin:${browser.versions.gecko ? "6px 0 0 0" : "0"}">
+            <div style="margin:${getBrowser.type("core").Gecko ? "6px 0 0 0" : "0"}">
               <input type="checkbox" id="${defCon.id.smooth}" class="${defCon.class.checkbox}" ${CONST.fontSmooth ? "checked" : ""} />
               <label for="${defCon.id.smooth}"></label>
             </div>
@@ -2660,7 +2691,7 @@
                 fs.click();
               });
               fs.addEventListener("change", () => {
-                tfs.innerHTML = `<em style="font-size:12px">${fs.files[0].name}</em>\u0020\ud83d\udc49\u0020[重新选择]`;
+                tfs.innerHTML = `<em style="color:indigo;font-size:12px">${fs.files[0].name}</em>\u0020\ud83d\udc49<span style="color:crimson">[重新选择]</span>`;
               });
             }
             if (await frDialog.respond()) {
@@ -2675,17 +2706,7 @@
               const db_3 = _domains_fonts_set__;
               const db = { db_R, db_0, db_1, db_2, db_3 };
               const timeStamp = dateFormat("YYYYmmddHHMMSS", new Date());
-              const via = browser.versions.edge
-                ? ".edge"
-                : browser.versions.webKit
-                ? ".chrome"
-                : browser.versions.gecko
-                ? ".firefox"
-                : browser.versions.safari
-                ? ".safari"
-                : browser.versions.presto
-                ? ".opera"
-                : "";
+              const via = `.${getBrowser.type("browser").toLowerCase()}`;
               dataDownload(`backup.${timeStamp}${via}.sqlitedb`, defCon.sqliteDB(JSON.stringify(db), true, root));
               let frDialog = new frDialogBox({
                 trueButtonText: "确 定",
