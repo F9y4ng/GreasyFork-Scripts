@@ -4,13 +4,14 @@
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:zh         谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @version         3.5.20210813.2
+// @version         3.6.20210814.1
 // @author          F9y4ng
 // @description         谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en      Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
 // @description:zh      谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:zh-TW   谷歌、百度、必應的搜索引擎跳轉工具，腳本默認自動更新檢測，可在菜單自定義設置必應按鈕，搜索引擎跳轉的最佳體驗。
 // @namespace       https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
+// @homepageURL     https://github.com/F9y4ng/GreasyFork-Scripts
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @icon            https://img.icons8.com/fluent/48/000000/google-logo.png
 // @include         *://*.google.*/search*
@@ -28,7 +29,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            修正bugs，优化代码。
+// @note            发布Release版本。\n修正bugs，优化代码。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -104,9 +105,9 @@
       return s.replace(/w/i, " 周 ").replace(/d/i, " 天 ").replace(/h/i, " 小时 ").replace(/m/i, " 分钟 ").replace(/s/i, " 秒 ");
     },
     randString: (n, v, r, s = "") => {
-      let a = "0123456789";
-      let b = "abcdefghijklmnopqrstuvwxyz";
-      let c = b.toUpperCase();
+      const a = "0123456789";
+      const b = "abcdefghijklmnopqrstuvwxyz";
+      const c = b.toUpperCase();
       n = Number.isFinite(n) ? n : 10;
       r = v ? b + c : a + b + a + c;
       for (; n > 0; --n) {
@@ -204,7 +205,7 @@
   };
 
   const noticeJsModalClassName = `${Notice.noticejs}-modal`;
-  let options = Defaults;
+  const options = Defaults;
 
   function getCallback(ref, eventName) {
     if (ref.callbacks.hasOwnProperty(eventName)) {
@@ -218,7 +219,7 @@
 
   const AddModal = () => {
     if (document.getElementsByClassName(noticeJsModalClassName).length <= 0) {
-      let element = document.createElement("div");
+      const element = document.createElement("div");
       element.classList.add(noticeJsModalClassName);
       element.classList.add(`${Notice.noticejs}-modal-open`);
       document.body.appendChild(element);
@@ -242,7 +243,9 @@
         document.querySelector(`.${Notice.noticejs}-modal`).remove();
       }, 500);
     }
-    let position = "." + item.closest(`.${Notice.noticejs}`).className.replace(`${Notice.noticejs}`, "").trim();
+    const iC = item.closest(`.${Notice.noticejs}`);
+    const iCC = iC ? iC.className.replace(`${Notice.noticejs}`, "").trim() : "bottomRight";
+    const position = "." + iCC;
     setTimeout(() => {
       if (document.querySelectorAll(position + ` .${Notice.item}`).length <= 0) {
         document.querySelector(position) && document.querySelector(position).remove();
@@ -279,8 +282,8 @@
   };
 
   const appendNoticeJs = (noticeJsHeader, noticeJsBody, noticeJsProgressBar) => {
-    let target_class = `.${Notice.noticejs}-` + options.position;
-    let noticeJsItem = document.createElement("div");
+    const target_class = `.${Notice.noticejs}-` + options.position;
+    const noticeJsItem = document.createElement("div");
     noticeJsItem.classList.add(`${Notice.item}`);
     noticeJsItem.classList.add(options.type);
     if (options.rtl === true) {
@@ -322,8 +325,8 @@
 
   class Components {
     createContainer() {
-      let element_class = `${Notice.noticejs}-` + options.position;
-      let element = document.createElement("div");
+      const element_class = `${Notice.noticejs}-` + options.position;
+      const element = document.createElement("div");
       element.classList.add(`${Notice.noticejs}`);
       element.classList.add(element_class);
       return element;
@@ -336,7 +339,7 @@
         element.textContent = options.title;
       }
       if (options.closeWith.includes("button")) {
-        let close = document.createElement("div");
+        const close = document.createElement("div");
         close.setAttribute("class", `${Notice.close}`);
         close.innerHTML = "&times;";
         if (element) {
@@ -348,9 +351,9 @@
       return element;
     }
     createBody() {
-      let element = document.createElement("div");
+      const element = document.createElement("div");
       element.setAttribute("class", `${Notice.noticejs}-body`);
-      let content = document.createElement("div");
+      const content = document.createElement("div");
       content.setAttribute("class", `${Notice.noticejs}-content`);
       content.innerHTML = options.text;
       element.appendChild(content);
@@ -364,21 +367,21 @@
       return element;
     }
     createProgressBar() {
-      let element = document.createElement("div");
+      const element = document.createElement("div");
       element.setAttribute("class", `${Notice.noticejs}-progressbar`);
-      let bar = document.createElement("div");
+      const bar = document.createElement("div");
       bar.setAttribute("class", `${Notice.noticejs}-bar`);
       element.appendChild(bar);
       if (options.progressBar === true && typeof options.timeout !== "boolean" && options.timeout !== false) {
         let width = 100;
-        let id = setInterval(() => {
+        const id = setInterval(() => {
           if (width <= 0) {
             clearInterval(id);
             let item = element.closest(`div.${Notice.item}`);
             if (options.animation !== null && options.animation.close !== null) {
               item.className = item.className.replace(new RegExp("(?:^|\\s)" + options.animation.open + "(?:\\s|$)"), " ");
               item.className += " " + options.animation.close;
-              let close_time = parseInt(options.timeout) + 500;
+              const close_time = parseInt(options.timeout) + 500;
               setTimeout(() => {
                 CloseItem(item);
               }, close_time);
@@ -408,19 +411,17 @@
       this.on("onHover", this.options.callbacks.onHover);
     }
     show() {
-      let container = this.component.createContainer();
+      const container = this.component.createContainer();
       if (document.querySelector(`.${Notice.noticejs}-` + this.options.position) === null) {
         document.body.appendChild(container);
       }
-      let noticeJsHeader;
-      let noticeJsBody;
-      let noticeJsProgressBar;
+      let noticeJsHeader, noticeJsBody, noticeJsProgressBar;
       noticeJsHeader = this.component.createHeader(this.options.title, this.options.closeWith);
       noticeJsBody = this.component.createBody(this.options.text);
       if (this.options.progressBar === true) {
         noticeJsProgressBar = this.component.createProgressBar();
       }
-      let noticeJs = appendNoticeJs(noticeJsHeader, noticeJsBody, noticeJsProgressBar);
+      const noticeJs = appendNoticeJs(noticeJsHeader, noticeJsBody, noticeJsProgressBar);
       return noticeJs;
     }
     on(eventName, cb = () => {}) {
@@ -438,7 +439,7 @@
   /* Refactoring functions of GMsetValue/GMgetValue/GMdeleteValue with Expire */
 
   function GMsetExpire(key, value) {
-    let obj = {
+    const obj = {
       data: value,
       time: Date.now(),
     };
@@ -552,7 +553,7 @@
     const controller = new window.AbortController();
     const signal = controller.signal;
     return new Promise((resolve, reject) => {
-      let t = setTimeout(() => {
+      const t = setTimeout(() => {
         controller.abort();
         resolve(new Response("timeout", { status: 504, statusText: `Request timeout. (User-Defined: ${time}ms)` }));
       }, time);
@@ -588,11 +589,11 @@
           let n = defCon.curVersion;
           let m = defCon.updateNote;
           t.split(/[\r\n]+/).forEach(function (item) {
-            let key = item.match(/^(\/\/\s+@version\s+)(\S+)$/);
+            const key = item.match(/^(\/\/\s+@version\s+)(\S+)$/);
             if (key) {
               n = key[2];
             }
-            let note = item.match(/^(\/\/\s+@note\s+)(.+)$/);
+            const note = item.match(/^(\/\/\s+@note\s+)(.+)$/);
             if (note) {
               m = note[2];
             }
@@ -607,8 +608,8 @@
   }
 
   function compareVersion(current, compare) {
-    let compare_array = compare.split(".");
-    let current_array = current.split(".");
+    const compare_array = compare.split(".");
+    const current_array = current.split(".");
     let upgradeID = 0;
     if (compare_array.length === current_array.length) {
       for (let i = 0; i < compare_array.length; i++) {
@@ -774,12 +775,12 @@
                       <dd>由于您编辑过本地脚本，或是手动在脚本网站上升级过新版本，从而造成缓存错误。为避免未知错误的出现，脚本将自动设置为禁止检测更新，\
                       直至您手动从脚本菜单中再次开启它。</dd><dd>[ ${sourceSite} ]</dd><dd style="font-size:12px!important;\
                       color:lemonchiffon;font-style:italic">注：若要重新启用自动更新，您需要在<a href="${sourceURL}" target="_blank"\
-                      style="padding:0 2px;font-size:14px;color:gold">脚本源网站</a>覆盖安装新版本后，从脚本菜单重新开启检测功能。</dd>\
+                      style="padding:0 2px;font-size:14px;color:gold">脚本源网站</a>覆盖安装正式版本后，从脚本菜单重新开启更新检测。</dd>\
                       <dd style="text-align: center"><img src="https://i.niupic.com/images/2021/06/13/9kVe.png" alt="开启自动检测"></dd>`
                   ),
                   `${Notice.error}`,
                   true,
-                  300,
+                  150,
                   {
                     onClose: [
                       function () {
@@ -1041,7 +1042,7 @@
 
     /* insert Menus */
 
-    let menuManager = {
+    const menuManager = {
       inUse_switch: (_status, _data, Tips) => {
         const info = x => {
           return Notice.noticeHTML(`<dd class="${Notice.center}">${Tips}已<kbd class="im">${x}</kbd>，网页在<em>3</em>秒后刷新！</dd>`);
@@ -1221,7 +1222,7 @@
 
     /* Insert search Button */
 
-    let searchManager = {
+    const searchManager = {
       insertCSS: function () {
         try {
           const doStyName = `${CONST.rndclassName}`;
@@ -1387,7 +1388,7 @@
                 });
               };
               const opts = { childList: true, subtree: true };
-              let observer = new MutationObserver(callback);
+              const observer = new MutationObserver(callback);
               observer.observe(document, opts);
               if (window.self === window.top) {
                 console.log(
@@ -1528,7 +1529,7 @@
         const kvl = location.search.substr(1).split("&");
         if (kvl) {
           for (let i = 0; i < kvl.length; i++) {
-            let value = kvl[i].replace(/^(wd|word|kw|query|q)=/, "");
+            const value = kvl[i].replace(/^(wd|word|kw|query|q)=/, "");
             if (value !== kvl[i]) {
               val = value;
             }
@@ -1547,9 +1548,8 @@
       return encodeURIComponent(val);
     }
 
-    function RAFInterval(callback, period, runNow) {
+    function RAFInterval(callback, period, runNow, times = 0) {
       const needCount = (period / 1000) * 60;
-      let times = 0;
       if (runNow === true) {
         const shouldFinish = callback();
         if (shouldFinish) {
@@ -1598,7 +1598,7 @@
                 ),
                 `${Notice.info}`,
                 true,
-                80
+                50
               );
             }, Math.random() * 10e3);
           }

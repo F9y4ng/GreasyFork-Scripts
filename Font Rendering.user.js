@@ -4,7 +4,7 @@
 // @name:zh           字体渲染（自用脚本）
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:en           Font Rendering (Customized)
-// @version           2021.08.13.1
+// @version           2021.08.14.1
 // @author            F9y4ng
 // @description       让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @description:zh    让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
@@ -91,9 +91,9 @@
     },
     randString: (n, v, r, s = "") => {
       // v: true for only letters.
-      let a = "0123456789";
-      let b = "abcdefghijklmnopqrstuvwxyz";
-      let c = b.toUpperCase();
+      const a = "0123456789";
+      const b = "abcdefghijklmnopqrstuvwxyz";
+      const c = b.toUpperCase();
       n = Number.isFinite(n) ? n : 10;
       r = v ? b + c : a + b + a + c;
       for (; n > 0; --n) {
@@ -135,7 +135,7 @@
         o += l;
         return o;
       } else {
-        let l = parseInt(e.substring(e.length - 8, e.length), 16);
+        const l = parseInt(e.substring(e.length - 8, e.length), 16);
         e = e.substring(0, e.length - 8);
         d += l;
         while (d.length > 10) {
@@ -291,9 +291,10 @@
 
   let supportsPassive = false;
   try {
-    let opts = Object.defineProperty({}, "passive", {
+    const opts = Object.defineProperty({}, "passive", {
       get: function () {
-        return (supportsPassive = true);
+        supportsPassive = true;
+        return supportsPassive;
       },
     });
     window.addEventListener("testPassive", null, opts);
@@ -558,12 +559,12 @@
 
   const rgbAToHex = (rgba, err) => {
     rgba = rgba.replace(/\s+/g, "");
-    let pattern = /^rgba?\((\d+),(\d+),(\d+),?(\d*(\.\d+)?)?\)$/;
-    let result = pattern.exec(rgba);
+    const pattern = /^rgba?\((\d+),(\d+),(\d+),?(\d*(\.\d+)?)?\)$/;
+    const result = pattern.exec(rgba);
     if (!result) {
       return err;
     }
-    let colors = [];
+    const colors = [];
     let alpha, r, g, b;
     if (/^rgba/.test(result[0])) {
       alpha = result[4];
@@ -759,8 +760,7 @@
       const { r, g, b } = this.getValue("rgb");
       return 0.299 * r + 0.587 * g + 0.114 * b;
     }
-    setValue(value, resetPosition = false) {
-      let hex = "";
+    setValue(value, resetPosition = false, hex = "") {
       const Hex6Reg = /^#([A-F0-9]{6}|[a-f0-9]{6})$/;
       const Hex3Reg = /^#([A-F0-9]{3}|[a-f0-9]{3})$/;
       const rgbaReg =
@@ -974,15 +974,12 @@
     respond() {
       return new Promise((resolve, reject) => {
         const somethingWentWrongUponCreation = !this.frDialog || !this.trueButton;
-
         if (somethingWentWrongUponCreation) {
           reject(new Error("Something went wrong upon modal creation"));
         }
-
         this.trueButton.addEventListener("click", () => {
           resolve(true);
         });
-
         if (this.hasFalse) {
           this.falseButton.addEventListener("click", () => {
             resolve(false);
@@ -1262,7 +1259,7 @@
 
   /* Font filtering & discriminating list */
 
-  let fontSet = function (s) {
+  const fontSet = function (s) {
     return {
       that: Array.prototype.slice.call(document.querySelectorAll(s), 0),
       stopPropagation: function (e) {
@@ -1300,12 +1297,12 @@
           }
         }
 
-        let close = fontSet(`#${defCon.id.fontList} .${defCon.class.close}`);
+        const close = fontSet(`#${defCon.id.fontList} .${defCon.class.close}`);
         close.that.forEach(function (item) {
           ddRemove(item.parentNode);
-          let value = item.parentNode.children[1].value;
-          let sort = Number(item.parentNode.children[1].attributes.sort.value);
-          let text = item.parentNode.children[0].innerHTML;
+          const value = item.parentNode.children[1].value;
+          const sort = Number(item.parentNode.children[1].attributes.sort.value);
+          const text = item.parentNode.children[0].innerHTML;
           fontData.push(new selector(text, value, sort));
           fontData.sort(function (a, b) {
             return a.sort - b.sort;
@@ -1338,16 +1335,15 @@
         });
         return Boolean(close.that.length);
       },
-      fsearchList: function (name) {
-        let arr = [];
+      fsearchList: function (name, arr = []) {
         fontSet("input[name=" + name + "]").that.forEach(item => {
           arr.push(item.value);
         });
         return arr;
       },
       fsearch: function (fontData) {
-        let domId = fontSet(s).that[0];
-        let html = String(
+        const domId = fontSet(s).that[0];
+        const html = String(
           `<div id="${defCon.id.selector}"><label>已选择字体：<span id="${defCon.id.cleaner}">[清空]</span></label><div class="${defCon.class.selector}"></div></div><div class="${defCon.class.selectFontId}"><label>设置字体，请选择：</label><input type="text" placeholder="输入关键字可检索字体" autocomplete="off" class="${defCon.class.placeholder}"><dl style="display:none"></dl><span class="${defCon.class.tooltip} ${defCon.class.ps1}">\ud83d\udd14<span class="${defCon.class.tooltip} ${defCon.class.ps2}"><p><strong>温馨提示 </strong>脚本预载了多种常用的、好看的中文字体，下拉菜单中所罗列的字体是您系统中已安装过的字体，没有安装过则不会显示。</p><p><em style="color:darkred">（注一）</em>如果没有重新选择字体，则使用上一次保存的字体。首次使用默认为微软雅黑字体。</p><p><em style="color:darkred">（注二）</em>输入框可输入关键字进行搜索，支持中文和英文字体名。</p><p><em style="color:darkred">（注三）</em>字体是按您选择的先后顺序进行优先渲染的，所以多选不如之选一个您最想要的。</p><p><em style="color:darkred">（注四）</em>如果字体重写功能被关闭，那么该字体替换功能将自动禁用，网页字体将采用“网站默认”的字体设置。</p></span></span></div>`
         );
         RAFInterval(
@@ -1385,8 +1381,8 @@
         function clickEvent() {
           fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd`).that.forEach(function (item) {
             item.onclick = function (e) {
-              let value = this.attributes.value.value.toString();
-              let sort = this.attributes.sort.value;
+              const value = this.attributes.value.value.toString();
+              const sort = this.attributes.sort.value;
               if (value) {
                 fontSet(`#${defCon.id.fontList} .${defCon.class.selector}`).that[0].innerHTML += String(
                   `<a class="${defCon.class.label}"><span style="font-family:${value}!important">${this.innerHTML}</span><input type="hidden" name="${defCon.id.fontName}" sort="${sort}" value="${value}"/><span class="${defCon.class.close}" style="cursor:pointer;font-family:${value}!important">×</span></a>`
@@ -1422,7 +1418,7 @@
           });
         }
         let ddRemove = function (dd) {
-          let temp = dd.nextElementSibling;
+          const temp = dd.nextElementSibling;
           dd.remove();
           if (temp !== null && temp.nodeName === "DD") {
             ddRemove(temp);
@@ -1430,15 +1426,15 @@
         };
 
         fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`).that[0].oninput = function () {
-          let val = this.value;
-          let dd = fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd`).that[0];
+          const val = this.value;
+          const dd = fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd`).that[0];
           if (dd === "DD") {
             ddRemove(dd);
           }
           fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`).hide();
           if (fontData.length > 0) {
             fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`).show();
-            let sear_1 = new RegExp(val, "i");
+            const sear_1 = new RegExp(val, "i");
             let judge_1 = false;
             fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`).that[0].innerHTML = "";
             fontData.forEach(function (item) {
@@ -1457,7 +1453,7 @@
         };
 
         fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`).that[0].onclick = function (e) {
-          let dd = fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd`).that[0];
+          const dd = fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd`).that[0];
           if (dd === "DD") {
             ddRemove(dd);
           }
@@ -1491,9 +1487,9 @@
           fontSet(`#${defCon.id.fontList} .${defCon.class.close}`).that.forEach(function (item) {
             item.onclick = function () {
               ddRemove(this.parentNode);
-              let value = this.parentNode.children[1].value;
-              let sort = Number(item.parentNode.children[1].attributes.sort.value);
-              let text = this.parentNode.children[0].innerHTML;
+              const value = this.parentNode.children[1].value;
+              const sort = Number(item.parentNode.children[1].attributes.sort.value);
+              const text = this.parentNode.children[0].innerHTML;
               fontData.push(new selector(text, value, sort));
               if (fontSet(`#${defCon.id.fontList} .${defCon.class.close}`).that.length === 0) {
                 const submitButton = qS(`#${defCon.id.submit} .${defCon.class.submit}`);
@@ -1702,7 +1698,7 @@
       debug("//-> %cGood data status", "color:green");
     }
 
-    let fonts = await GMgetValue("_fonts_set_");
+    const fonts = await GMgetValue("_fonts_set_");
     let exSite = await GMgetValue("_Exclude_site_");
     let domains = await GMgetValue("_domains_fonts_set_");
 
@@ -1747,7 +1743,7 @@
         }
       }
     }
-    let obj = ["workstation-xi"].sort();
+    const obj = ["workstation-xi"].sort();
     if (!exSite) {
       GMsetValue("_Exclude_site_", defCon.encrypt(JSON.stringify(obj)));
       exSite = obj;
@@ -1844,7 +1840,7 @@
       smoothing = `-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;`;
     }
 
-    let prefont = CONST.fontSelect.split(",")[0];
+    const prefont = CONST.fontSelect.split(",")[0];
     let refont = prefont ? prefont.replace(/"|'/g, "") : "";
 
     let fontfamily = "";
@@ -2025,7 +2021,7 @@
     function insertHTML() {
       if (document.body) {
         try {
-          let div = cE("div");
+          const div = cE("div");
           div.id = defCon.id.rndId;
           div.style = "visibility:hidden";
           div.innerHTML = tHTML;
@@ -2102,7 +2098,7 @@
         });
       };
       const opts = { childList: true, subtree: true };
-      let observer = new MutationObserver(callback);
+      const observer = new MutationObserver(callback);
       observer.observe(document, opts);
     } catch (e) {
       error("//-> createHTML:", e);
