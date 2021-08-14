@@ -776,7 +776,7 @@
                       直至您手动从脚本菜单中再次开启它。</dd><dd>[ ${sourceSite} ]</dd><dd style="font-size:12px!important;\
                       color:lemonchiffon;font-style:italic">注：若要重新启用自动更新，您需要在<a href="${sourceURL}" target="_blank"\
                       style="padding:0 2px;font-size:14px;color:gold">脚本源网站</a>覆盖安装正式版本后，从脚本菜单重新开启更新检测。</dd>\
-                      <dd style="text-align: center"><img src="https://i.niupic.com/images/2021/06/13/9kVe.png" alt="开启自动检测"></dd>`
+                      <dd style="text-align: center"><img src="https://z3.ax1x.com/2021/08/14/fyvfk6.png" alt="开启自动检测"></dd>`
                   ),
                   `${Notice.error}`,
                   true,
@@ -1594,7 +1594,7 @@
                   `<dd title="请安装新版代码后恢复自动更新">若要恢复自动更新功能，请在覆盖安装<a target="_blank" style="margin:0 4px;font-size:16px;font-weight:600"\
                   href="https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/Google_baidu_Switcher_(ALL_in_One)">新版代码</a>后,\
                   从脚本菜单中重新开启"版本更新"功能。</dd><dd class="${Notice.center}" title="随机提示">\
-                  <img src="https://i.niupic.com/images/2021/06/13/9kVe.png" alt="开启自动检测"></dd>`
+                  <img src="https://z3.ax1x.com/2021/08/14/fyvfk6.png" alt="开启自动检测"></dd>`
                 ),
                 `${Notice.info}`,
                 true,
