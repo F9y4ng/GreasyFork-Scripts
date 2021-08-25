@@ -5,12 +5,12 @@
 [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues)
 [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/login?return_to=%2FF9y4ng%2FGreasyFork-Scripts)
 
-- ## **Font Rendering.user.js** (`version 2021.08.22.1`)
+- ## **Font Rendering.user.js** (`version 2021.08.25.1`)
 
   简介：让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用
   设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 
-  > `version 2021.08.22.1`
+  > `version 2021.08.25.1`
 
   重大版本更新，请使用前仔细查看
   [**脚本使用说明**](https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89)。`New`
@@ -20,7 +20,8 @@
   `!!! 请勿使用来源未知的备份文件，以防跨站脚本攻击 !!!`
 
   ```text
-  @ 修正CSS样式bug.
+  @ 优化代码根据浏览器语言获取参数的问题。
+  @ 修正bugs，优化代码。
   ```
 
   > [关于字体的添加](#)
