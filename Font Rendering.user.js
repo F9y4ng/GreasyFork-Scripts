@@ -4,7 +4,7 @@
 // @name:zh           字体渲染（自用脚本）
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:en           Font Rendering (Customized)
-// @version           2021.08.25.1
+// @version           2021.08.28.1
 // @author            F9y4ng
 // @description       让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @description:zh    让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
@@ -73,7 +73,7 @@
 
   /* default CONST Values */
 
-  const scriptNameByLanguage = (str, _nbl) => {
+  const getScriptNameViaLanguage = (str, _nbl) => {
     let nbl = navigator.browserLanguage || navigator.language;
     for (let i in GMinfo.script.name_i18n) {
       _nbl = nbl ? nbl.replace("-", "_") : "";
@@ -93,7 +93,7 @@
 
   const defCon = {
     scriptAuthor: GMinfo.scriptMetaStr.match(/(\u0061\u0075\u0074\u0068\u006f\u0072\s+)(\S+)/)[2],
-    scriptName: scriptNameByLanguage(),
+    scriptName: getScriptNameViaLanguage(),
     curVersion: GMinfo.script.version,
     supportURL: GMinfo.script.supportURL,
     guideUrl: GMinfo.script.namespace,
@@ -1732,8 +1732,7 @@
             messageText: String(`
             <p><span style="font:bold 22px Candara;color:crimson">您好！</span>这是您首次使用${defCon.scriptName}的新版本 <span style="font-family:Candara;color:darkorange;font-size:18px;font-weight:900;font-style:italic">v${defCon.curVersion}</span>，具体功能敬请试用。</p>
             <p><ul>
-              <li>新增多枚字体，优化字体表，修正错误。</li>
-              <li>修正字体检测在个别网站失效的问题。</li>
+              <li>已发布Release版本。</li>
               <li>修正bugs, 优化代码。</li>
             </ul></p>
             <p>稍后将为您打开新版帮助文件，要去看一下吗？</p>
@@ -2063,24 +2062,34 @@
       }
     }
 
+    function reloadStyleTolastChild(t, f = false) {
+      if (f) {
+        if (document.head.lastChild.className !== defCon.class.rndStyle) {
+          insertStyle(true);
+        }
+      } else {
+        document.onreadystatechange = function () {
+          if (document.readyState === "complete") {
+            const aF = setInterval(() => {
+              const _aF_result_ = document.head.lastChild.className === defCon.class.rndStyle;
+              debug("//-> lastStyle:", _aF_result_);
+              insertStyle(true);
+              if (_aF_result_) {
+                clearInterval(aF);
+              }
+            }, t);
+          }
+        };
+      }
+    }
+
     function startRAFInterval() {
       RAFInterval(
         () => {
           if (!qS(`.${defCon.class.rndStyle}`)) {
             insertStyle(false);
           }
-          document.onreadystatechange = function () {
-            if (document.readyState === "complete") {
-              const aF = setInterval(() => {
-                const _aF_result_ = document.head.lastChild.className === defCon.class.rndStyle;
-                debug("//-> lastStyle:", _aF_result_);
-                insertStyle(true);
-                if (_aF_result_) {
-                  clearInterval(aF);
-                }
-              }, 2e3);
-            }
-          };
+          reloadStyleTolastChild(2e3);
           if (curWindowtop) {
             if (!qS(`#${defCon.id.rndId}`)) {
               insertHTML();
@@ -2109,6 +2118,9 @@
         mutations.forEach(mutation => {
           if (!((!curWindowtop || (qS(`#${defCon.id.rndId}`) && qS(`.${defCon.class.rndClass}`))) && qS(`.${defCon.class.rndStyle}`))) {
             debug(`//-> %cMutationObserver: %c%s %c%s`, "font-weight:bold;color:teal", "color:olive", mutation.type, "font-weight:bold;color:red", startRAFInterval());
+          }
+          if (qS(`.${defCon.class.rndStyle}`)) {
+            reloadStyleTolastChild(1e3, true);
           }
         });
       };
