@@ -4,7 +4,7 @@
 // @name:zh           字体渲染（自用脚本）
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:en           Font Rendering (Customized)
-// @version           2021.08.29.1
+// @version           2021.08.30.2
 // @author            F9y4ng
 // @description       让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @description:zh    让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
@@ -401,7 +401,7 @@
         try {
           const hn = h.location.hostname;
           if (hn === curHostname) {
-            const sT = h.document.querySelectorAll("style[id^='TS']");
+            const sT = h.document.head.querySelectorAll("style[id^='TS']");
             if (sT.length) {
               addStyle(ts, sT[0].className, h.document.head, "TS", true);
             }
@@ -2064,30 +2064,28 @@
 
     function reloadStyleTolastChild(t, f = false) {
       if (f) {
-        const curScriptCounts = document.querySelectorAll("style[id^='TS']").length;
-        if (curScriptCounts === 1) {
-          const aF = setInterval(() => {
+        if (document.head) {
+          const styleScriptCount = document.head.querySelectorAll("style[id^='TS']").length;
+          if (styleScriptCount === 1) {
             if (document.head.lastChild.className !== defCon.class.rndStyle) {
+              debug("//->[:before]", document.head.lastChild.className);
               insertStyle(true);
-            } else {
-              clearInterval(aF);
+              debug("//->[:after]", document.head.lastChild.className);
             }
-          }, t);
-        } else if (curScriptCounts && !defCon.scriptCounter) {
-          defCon.scriptCounter = true;
-          const e =
-            "\u7a0b\u5e8f\u68c0\u6d4b\u5230\uff1a\u60a8\u5b89\u88c5\u4e86\u91cd\u590d\u7684\u201c\u5b57\u4f53\u6e32\u67d3\u811a\u672c\u201d\uff0c\u8bf7\u68c0\u67e5\u60a8\u7684\u811a\u672c\u5217\u8868\uff0c\u5220\u9664\u91cd\u590d\u5b89\u88c5\u7684\u811a\u672c\u5e76\u4fdd\u7559\u5176\u4e2d\u4e4b\u4e00\u3002";
-          console.error("//-> ", e);
+          } else if (styleScriptCount && !defCon.scriptCount) {
+            defCon.scriptCount = true;
+            error("//-> \u53d1\u73b0\u91cd\u590d\u5b89\u88c5\u7684\u811a\u672c\uff0c\u8bf7\u5220\u9664\u5e76\u4fdd\u7559\u5176\u4e00\u3002");
+          }
         }
       } else {
         document.onreadystatechange = function () {
           if (document.readyState === "complete") {
             const aF = setInterval(() => {
-              const _aF_result_ = document.head.lastChild.className === defCon.class.rndStyle;
-              debug("//-> lastStyle:", _aF_result_);
-              insertStyle(true);
-              if (_aF_result_) {
+              debug("//-> isStyleInLastChild:", document.head.lastChild.className === defCon.class.rndStyle);
+              if (document.head.lastChild.className === defCon.class.rndStyle) {
                 clearInterval(aF);
+              } else {
+                insertStyle(true);
               }
             }, t);
           }
