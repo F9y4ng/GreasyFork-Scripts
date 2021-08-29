@@ -4,7 +4,7 @@
 // @name:zh           字体渲染（自用脚本）
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:en           Font Rendering (Customized)
-// @version           2021.08.28.1
+// @version           2021.08.29.1
 // @author            F9y4ng
 // @description       让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @description:zh    让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
@@ -2064,8 +2064,20 @@
 
     function reloadStyleTolastChild(t, f = false) {
       if (f) {
-        if (document.head.lastChild.className !== defCon.class.rndStyle) {
-          insertStyle(true);
+        const curScriptCounts = document.querySelectorAll("style[id^='TS']").length;
+        if (curScriptCounts === 1) {
+          const aF = setInterval(() => {
+            if (document.head.lastChild.className !== defCon.class.rndStyle) {
+              insertStyle(true);
+            } else {
+              clearInterval(aF);
+            }
+          }, t);
+        } else if (curScriptCounts && !defCon.scriptCounter) {
+          defCon.scriptCounter = true;
+          const e =
+            "\u7a0b\u5e8f\u68c0\u6d4b\u5230\uff1a\u60a8\u5b89\u88c5\u4e86\u91cd\u590d\u7684\u201c\u5b57\u4f53\u6e32\u67d3\u811a\u672c\u201d\uff0c\u8bf7\u68c0\u67e5\u60a8\u7684\u811a\u672c\u5217\u8868\uff0c\u5220\u9664\u91cd\u590d\u5b89\u88c5\u7684\u811a\u672c\u5e76\u4fdd\u7559\u5176\u4e2d\u4e4b\u4e00\u3002";
+          console.error("//-> ", e);
         }
       } else {
         document.onreadystatechange = function () {
@@ -3028,7 +3040,7 @@
             closeAllDialog(`div.${defCon.class.db}`);
             let frDialog = new frDialogBox({
               trueButtonText: "反馈问题",
-              messageText: `<p style='color:crimson'>脚本运行过程中发生了错误，请向作者反馈！</p><p style='color:grey;font-size:14px'>以下信息会自动保存至您的剪切板：</p><p><ul id='${defCon.id.seed}_copy_to_author'><li>浏览器信息：${navigator.userAgent}</li><li>脚本插件信息：${handlerInfo} ${GMversion}</li><li>脚本版本：${defCon.curVersion}</li><li>域名信息：${curHostname}</li><li>错误信息：${e}</li></ul></p>`,
+              messageText: `<p style='color:crimson'>脚本运行过程中发生了错误，请向作者反馈！</p><p style='color:grey;font-size:14px'>以下信息会自动保存至您的剪切板：</p><p><ul id='${defCon.id.seed}_copy_to_author'><li>浏览器信息：${navigator.userAgent}</li><li>脚本插件信息：${handlerInfo} ${GMversion}</li><li>脚本版本：${defCon.curVersion}</li><li>域名信息：${curHostname}</li><li>错误信息：<span style="color:crimson">${e}</span></li></ul></p>`,
               titleText: "错误报告",
             });
             const copyText = qS(`#${defCon.id.seed}_copy_to_author`).innerText;
