@@ -4,7 +4,7 @@
 // @name:zh           字体渲染（自用脚本）
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:en           Font Rendering (Customized)
-// @version           2021.08.30.3
+// @version           2021.08.30.4
 // @author            F9y4ng
 // @description       让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @description:zh    让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
@@ -2075,11 +2075,13 @@
       } else {
         document.onreadystatechange = function () {
           if (document.readyState === "complete") {
-            const isStyleInLastChild = document.head.lastChild.className === defCon.class.rndStyle;
-            debug("//-> isStyleInLastChild:", isStyleInLastChild);
-            if (!isStyleInLastChild) {
-              insertStyle(true);
-            }
+            setTimeout(() => {
+              if (document.head.lastChild.className !== defCon.class.rndStyle) {
+                insertStyle(true);
+              }
+              debug("//-> lastChildStyle:", document.head.lastChild.className);
+            }, 2e3);
+            debug("//-> isStyleInLastChild:", document.head.lastChild.className === defCon.class.rndStyle);
           }
         };
       }
@@ -2090,8 +2092,9 @@
         () => {
           if (!qS(`.${defCon.class.rndStyle}`)) {
             insertStyle(false);
+          } else {
+            reloadStyleTolastChild(false);
           }
-          reloadStyleTolastChild(false);
           if (curWindowtop) {
             if (!qS(`#${defCon.id.rndId}`)) {
               insertHTML();
@@ -2122,8 +2125,11 @@
             debug(`//-> %cMutationObserver: %c%s %c%s`, "font-weight:bold;color:teal", "color:olive", mutation.type, "font-weight:bold;color:red", startRAFInterval());
           }
           if (qS(`.${defCon.class.rndStyle}`) && document.head.lastChild.className !== defCon.class.rndStyle) {
-            debug("//-> [:before]", document.head.lastChild.className);
-            reloadStyleTolastChild(true);
+            // [Compatibility] Fixed the rogue Js behavior in Dark Reader.
+            if (qS(`.${defCon.class.rndStyle}`).nextSibling.nextSibling) {
+              debug("//-> [:before]", document.head.lastChild.className);
+              reloadStyleTolastChild(true);
+            }
           }
         });
       };
