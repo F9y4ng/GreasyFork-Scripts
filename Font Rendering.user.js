@@ -4,7 +4,7 @@
 // @name:zh           字体渲染（自用脚本）
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:en           Font Rendering (Customized)
-// @version           2021.08.30.4
+// @version           2021.08.31.1
 // @author            F9y4ng
 // @description       让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @description:zh    让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
@@ -2070,7 +2070,7 @@
           debug("//-> [:after]", document.head.lastChild.className);
         } else if (styleScriptCount && !defCon.scriptCount) {
           defCon.scriptCount = true;
-          console.error("//-> \u53d1\u73b0\u91cd\u590d\u5b89\u88c5\u7684\u811a\u672c\uff0c\u8bf7\u5220\u9664\u5e76\u4fdd\u7559\u5176\u4e00\u3002");
+          console.error("//-> \u53d1\u73b0\u5197\u4f59\u5b89\u88c5\u7684\u811a\u672c\uff0c\u8bf7\u5220\u9664\u91cd\u590d\u811a\u672c\u4fdd\u7559\u5176\u4e00\u3002");
         }
       } else {
         document.onreadystatechange = function () {
@@ -2081,7 +2081,10 @@
               }
               debug("//-> lastChildStyle:", document.head.lastChild.className);
             }, 2e3);
-            debug("//-> isStyleInLastChild:", document.head.lastChild.className === defCon.class.rndStyle);
+            debug(
+              "//-> isStylePositionAtLastChild:",
+              document.head.lastChild.className === defCon.class.rndStyle || document.head.lastChild.previousSibling.className === defCon.class.rndStyle
+            );
           }
         };
       }
@@ -2125,10 +2128,16 @@
             debug(`//-> %cMutationObserver: %c%s %c%s`, "font-weight:bold;color:teal", "color:olive", mutation.type, "font-weight:bold;color:red", startRAFInterval());
           }
           if (qS(`.${defCon.class.rndStyle}`) && document.head.lastChild.className !== defCon.class.rndStyle) {
-            // [Compatibility] Fixed the rogue Js behavior in Dark Reader.
-            if (qS(`.${defCon.class.rndStyle}`).nextSibling.nextSibling) {
-              debug("//-> [:before]", document.head.lastChild.className);
-              reloadStyleTolastChild(true);
+            try {
+              const lastChildEleclassName = document.head.lastChild.className || "lastChildEleclassName";
+              if (lastChildEleclassName.includes("darkreader") && document.head.lastChild.previousSibling.className === defCon.class.rndStyle) {
+                debug("//-> rndStyle is Ready, Causeby darkreader inserted");
+              } else if (qS(`.${defCon.class.rndStyle}`).nextSibling) {
+                debug("//-> [:before]", document.head.lastChild.className);
+                reloadStyleTolastChild(true);
+              }
+            } catch (e) {
+              error("//-> lastChildStyleError", e.name);
             }
           }
         });
@@ -2713,7 +2722,7 @@
               trueButtonText: "备 份",
               falseButtonText: "还 原",
               neutralButtonText: "取 消",
-              messageText: `<p style='color:darkgreen;font-weight:900'>备份到本地文件：</p><p>备份到本地，自动下载 backup.*.sqlitedb 文件。</p><p style='color:darkred;font-weight:900'>从本地文件还原：</p><p><span style="cursor:pointer;color:indigo" id="${defCon.id.tfiles}">\ud83d\udc49\u0020[点击这里载入*.sqlitedb备份文件]</span><input type="file" id="${defCon.id.files}"/></p>`,
+              messageText: `<p style='color:darkgreen;font-weight:900'>备份到本地文件：</p><p>备份到本地，自动下载 backup.*.sqlitedb 文件。</p><p style='color:darkred;font-weight:900'>从本地文件还原：</p><p><span style="cursor:pointer;color:indigo" id="${defCon.id.tfiles}">\ud83d\udc49\u0020[点击这里载入*.sqlitedb备份文件]</span><input accept=".sqlitedb" type="file" id="${defCon.id.files}"/></p>`,
               titleText: "备份与还原数据",
             });
             const tfs = qS(`#${defCon.id.tfiles}`);
