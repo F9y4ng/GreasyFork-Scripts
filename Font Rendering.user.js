@@ -4,7 +4,7 @@
 // @name:zh           字体渲染（自用脚本）
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:en           Font Rendering (Customized)
-// @version           2021.08.31.1
+// @version           2021.09.02.2
 // @author            F9y4ng
 // @description       让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @description:zh    让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
@@ -72,24 +72,6 @@
   }
 
   /* default CONST Values */
-
-  const getScriptNameViaLanguage = (str, _nbl) => {
-    let nbl = navigator.browserLanguage || navigator.language;
-    for (let i in GMinfo.script.name_i18n) {
-      _nbl = nbl ? nbl.replace("-", "_") : "";
-      if (i === _nbl) {
-        str = GMinfo.script.name_i18n[i];
-      }
-    }
-    if (str === undefined) {
-      str = GMinfo.script[`name:${nbl.toLowerCase()}`];
-    }
-    if (str) {
-      return str;
-    } else {
-      return GMinfo.script.name;
-    }
-  };
 
   const defCon = {
     scriptAuthor: GMinfo.scriptMetaStr.match(/(\u0061\u0075\u0074\u0068\u006f\u0072\s+)(\S+)/)[2],
@@ -321,6 +303,25 @@
   }
 
   /* Initialize important functions */
+
+  function getScriptNameViaLanguage() {
+    let languageString;
+    const navLang = navigator.browserLanguage || navigator.language || "";
+    const nbl = navLang.replace("-", "_");
+    for (let i in GMinfo.script.name_i18n) {
+      if (i === nbl) {
+        languageString = GMinfo.script.name_i18n[i];
+      }
+    }
+    if (languageString === undefined) {
+      languageString = GMinfo.script[`name:${nbl.toLowerCase()}`];
+    }
+    if (languageString) {
+      return languageString;
+    } else {
+      return GMinfo.script.name;
+    }
+  }
 
   function RAFInterval(callback, period, runNow, times = 0) {
     const needCount = (period / 1000) * 60;
@@ -1548,8 +1549,9 @@
     { ch: "微软正黑体", en: "Microsoft JhengHei" },
     { ch: "苹方简体", en: "PingFang SC" },
     { ch: "苹方-简", en: "PingFangSC-Regular" },
-    { ch: "苹方-港", en: "PingFangHK-Regular" },
+    { ch: "蘋方-港", en: "PingFangHK-Regular" },
     { ch: "更纱黑体 SC", en: "Sarasa Gothic SC" },
+    { ch: "更紗黑體 TC", en: "Sarasa Gothic TC" },
     { ch: "冬青黑体简", en: "Hiragino Sans GB" },
     { ch: "兰亭黑-简", en: "Lantinghei SC" },
     { ch: "OPPO Sans", en: "OPPOSans" },
@@ -1865,7 +1867,7 @@
       fontfaces =
         refont !== ""
           ? `@font-face{font-family:"宋体";src:local("${refont}")}@font-face{font-family:"黑体";src:local("${refont}")}@font-face{font-family:SimHei;src:local("${refont}")}@font-face{font-family:SimSun;src:local("${refont}")}@font-face{font-family:"serif";src:local("${refont}")}@font-face{font-family:"Microsoft YaHei UI";src:local("${refont}")}@font-face{font-family:"Segoe UI";src:local("${refont}")}@font-face{font-family:"sans-serif";src:local("${refont}")}@font-face{font-family:Tahoma;src:local("${refont}")}@font-face{font-family:Arial;src:local("${refont}")}@font-face{font-family:Helvetica;src:local("${refont}")}`
-          : ``;
+          : "";
     }
 
     let exclude = "";
@@ -2149,36 +2151,58 @@
       error("//-> createHTML:", e);
     }
 
+    async function fontCheck_sessionOnce(fontData = []) {
+      const fontReady = await document.fonts.ready;
+      const checkFont = new isSupportFontFamily();
+      const fontAvailable = new Set();
+      let ii = 1;
+      if (fontReady) {
+        for (const font of fontCheck.values()) {
+          if (checkFont.detect(font.en)) {
+            if (font.en !== refont) {
+              font.sort = ii;
+              fontAvailable.add(font);
+            }
+          } else if (checkFont.detect(convert2Unicode(font.ch)) && convert2Unicode(font.ch) !== refont) {
+            font.en = convert2Unicode(font.ch);
+            font.sort = ii;
+            fontAvailable.add(font);
+          }
+          ii++;
+        }
+      }
+      fontData = [...fontAvailable.values()].sort(function (a, b) {
+        return a.sort - b.sort;
+      });
+      return fontData;
+    }
+
     setTimeout(async () => {
       try {
         if (curWindowtop) {
           let fontData = [];
-          const fontReady = await document.fonts.ready;
-          const checkFont = new isSupportFontFamily();
-          const fontAvailable = new Set();
 
-          /* Fonts selection */
+          /* Fonts detection */
 
           try {
-            let ii = 1;
-            if (fontReady) {
-              for (const font of fontCheck.values()) {
-                if (checkFont.detect(font.en)) {
-                  if (font.en !== refont) {
-                    font.sort = ii;
-                    fontAvailable.add(font);
-                  }
-                } else if (checkFont.detect(convert2Unicode(font.ch)) && convert2Unicode(font.ch) !== refont) {
-                  font.en = convert2Unicode(font.ch);
-                  font.sort = ii;
-                  fontAvailable.add(font);
-                }
-                ii++;
-              }
+            if (sessionStorage.getItem("fontCheckList")) {
+              fontData = JSON.parse(defCon.decrypt(sessionStorage.getItem("fontCheckList")));
+              debug("//-> %cLoad font_Data from Session Cache", "color:green;font-weight:bold");
+            } else {
+              debug("//-> %cStart real-time font detection", "color:crimson;font-weight:bold");
+              fontData = await fontCheck_sessionOnce();
+              sessionStorage.setItem("fontCheckList", defCon.encrypt(JSON.stringify(fontData)));
             }
-            fontData = [...fontAvailable.values()].sort(function (a, b) {
-              return a.sort - b.sort;
-            });
+          } catch (e) {
+            debug("//-> %cInitialized font detection caused by font_Data errors: ", "background-color:yellow;color:red;font-weight:bold", e.name);
+            sessionStorage.removeItem("fontCheckList");
+            fontData = await fontCheck_sessionOnce();
+            sessionStorage.setItem("fontCheckList", defCon.encrypt(JSON.stringify(fontData)));
+          }
+
+          /* Fonts selectors */
+
+          try {
             if (qS(`#${defCon.id.fontList} .${defCon.class.fontList}`)) {
               fontSet(`#${defCon.id.fontList} .${defCon.class.fontList}`).fsearch(fontData);
             }
@@ -2537,6 +2561,7 @@
                 defCon.successId = false;
               } finally {
                 if (defCon.successId) {
+                  sessionStorage.removeItem("fontCheckList");
                   closeAllDialog(`div.${defCon.class.db}`);
                   let frDialog = new frDialogBox({
                     trueButtonText: "感谢使用",
