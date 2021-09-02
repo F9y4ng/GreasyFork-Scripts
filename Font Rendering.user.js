@@ -4,7 +4,7 @@
 // @name:zh           字体渲染（自用脚本）
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:en           Font Rendering (Customized)
-// @version           2021.09.02.2
+// @version           2021.09.02.3
 // @author            F9y4ng
 // @description       让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 // @description:zh    让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
@@ -305,19 +305,11 @@
   /* Initialize important functions */
 
   function getScriptNameViaLanguage() {
-    let languageString;
-    const navLang = navigator.browserLanguage || navigator.language || "";
-    const nbl = navLang.replace("-", "_");
-    for (let i in GMinfo.script.name_i18n) {
-      if (i === nbl) {
-        languageString = GMinfo.script.name_i18n[i];
-      }
-    }
-    if (languageString === undefined) {
-      languageString = GMinfo.script[`name:${nbl.toLowerCase()}`];
-    }
+    const language = navigator.browserLanguage || navigator.language;
+    const name_i18n = new RegExp(`(@name:${language}\\s+)(\\S+)`);
+    const languageString = GMinfo.scriptMetaStr.match(name_i18n);
     if (languageString) {
-      return languageString;
+      return languageString[2];
     } else {
       return GMinfo.script.name;
     }
