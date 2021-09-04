@@ -5,12 +5,12 @@
 [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues)
 [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/login?return_to=%2FF9y4ng%2FGreasyFork-Scripts)
 
-- ## **Font Rendering.user.js** (`version 2021.09.02.4`)
+- ## **Font Rendering.user.js** (`version 2021.09.05.2`)
 
   简介：让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用
   设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
 
-  > `version 2021.09.02.4`
+  > `version 2021.09.05.2`
 
   重大版本更新，请使用前仔细查看
   [**脚本使用说明**](https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89)。`New`
@@ -20,9 +20,6 @@
   `!!! 请勿使用来源未知的备份文件，以防跨站脚本攻击 !!!`
 
   ```text
-  @ 修正一个字体的读取bug.
-  + 新增字体表新字体 "更紗黑體 TC - Sarasa Gothic TC".
-  + 新增字体检测缓存机制，提升页面加载效率。
   @ 修正bugs, 优化代码。
   ```
 
@@ -38,17 +35,17 @@
   > 根据**自有显示器的配置及设置**的情况，通过[脚本配置界面](#脚本设置界面)修正相关的参数来达到最佳的显示效果。如在使用过程中遇到错误或使用问题，请到
   > [@Github](https://github.com/F9y4ng/GreasyFork-Scripts/issues) 或 [@Greasyfork](https://greasyfork.org/scripts/416688/feedback) 给我留言反馈。
 
-- ## **Google & Baidu Switcher.user.js** (`version 3.6.20210819.1`)
+- ## **Google & Baidu Switcher.user.js** (`version 3.6.20210905.2`)
 
   简介：最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓
   存，再次载入使用，感谢使用！
 
-  > `version 3.6.20210819.1`
+  > `version 3.6.20210905.2`
 
   重大版本更新，请使用前仔细查看 [**脚本使用说明**](<https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/Google_baidu_Switcher_(ALL_in_One)>)。`New`
 
   ```text
-  @ 修正Google中使用图片进行搜索时按钮的样式错误。
+  @ 修正bugs, 优化代码。
   ```
 
   > [**重要说明**](#)

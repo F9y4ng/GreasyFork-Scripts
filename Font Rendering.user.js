@@ -3,13 +3,15 @@
 // @name              字体渲染（自用脚本）
 // @name:zh           字体渲染（自用脚本）
 // @name:zh-TW        字體渲染（自用腳本）
+// @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.09.02.4
+// @version           2021.09.05.2
 // @author            F9y4ng
-// @description       让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
-// @description:zh    让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
-// @description:zh-TW 讓每個頁面的字體變得有質感，默認使用微軟雅黑字體，亦可自定義設置多種中文字體，附加字體描邊、字體重寫、字體陰影、字體平滑、對特殊樣式元素的過濾和許可等效果，腳本菜單中可使用設置界面進行參數設置，亦可對某域名下所有頁面進行排除渲染。
-// @description:en    Make the font of each page have texture. Microsoft YaHei font is used by default. You can also customize a variety of Chinese fonts, add font stroke, font rewriting, font shadow, font smoothing, filtering and permission for special style elements, etc. in the script menu, you can use the setting interface to set parameters, and exclude rendering for all pages under a domain name.
+// @description       让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。【PC脚本】
+// @description:zh    让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。【PC脚本】
+// @description:zh-TW 讓每個頁面的中文字體變得有質感，默認使用微軟雅黑字體，亦可自定義設置多種中文字體，附加字體描邊、字體重寫、字體陰影、字體平滑、對特殊樣式元素的過濾和許可等效果，腳本菜單中可使用設置界面進行參數設置，亦可對某域名下所有頁面進行排除渲染，兼容常用的Greasemonkey腳本和瀏覽器插件。【PC腳本】
+// @description:ja    各ページの中国語フォントに質感を持たせ、デフォルトではマイクロソフトの雅黒フォントを使って、複数の中国語フォントをカスタマイズできます。フォントの描画、フォントの陰影、フォントの平滑化、特殊なスタイル要素のフィルタリングと許可などの効果があります。スクリプトメニューでは設定画面を使ってパラメータ設定ができます。また、ドメイン名のすべてのページに対してレンダリングを排除することができ、よく使用されるGreasemonkeyスクリプトとブラウザプラグインとの互換性があります。【PCスクリプト】
+// @description:en    Let each page of the Chinese font becomes texture, the default uses Microsoft YaHei font, and you can customize the set of Chinese fonts, additional font strokes, font rewriting, font shadows, smooth, and special Filtering and licensing of style elements, etc., you can use the setting interface to perform parameter settings in the script menu, or you can exclude all pages under a domain name, compatible with common Greasemonkey scripts and browser plugins. [PC-script]
 // @namespace       https://openuserjs.org/scripts/f9y4ng/Font_Rendering_(Customized)
 // @icon            https://img.icons8.com/ios-filled/50/26e07f/font-style-formatting.png
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
@@ -213,6 +215,8 @@
     feedback: defCon.randString(6, true),
     seed: defCon.randString(3, true),
     fontTest: defCon.randString(16, true),
+    flc: defCon.randString(6, true),
+    flcid: defCon.randString(5, true),
   };
   defCon.class = {
     rndClass: defCon.randString(10, true),
@@ -344,24 +348,28 @@
   function addStyle(css, className, addToTarget, T = "T", isReload = false, initType = "text/css", reNew = false) {
     RAFInterval(
       () => {
-        if (typeof addToTarget === "object" && addToTarget) {
-          if (isReload === true && addToTarget.querySelector(`.${className}`)) {
-            safeRemove(`.${className}`, addToTarget);
-            reNew = true;
-          } else if (isReload === false && addToTarget.querySelector(`.${className}`)) {
-            return true;
+        try {
+          if (typeof addToTarget === "object" && addToTarget) {
+            if (isReload === true && addToTarget.querySelector(`.${className}`)) {
+              safeRemove(`.${className}`, addToTarget);
+              reNew = true;
+            } else if (isReload === false && addToTarget.querySelector(`.${className}`)) {
+              return true;
+            }
+            const cssNode = cE("style");
+            if (className !== null) {
+              cssNode.className = className;
+            }
+            cssNode.id = T + Date.now().toString().slice(-8);
+            cssNode.setAttribute("type", initType);
+            cssNode.innerHTML = css;
+            addToTarget.appendChild(cssNode);
+            if (reNew && addToTarget.querySelector(`.${className}`)) {
+              return true;
+            }
           }
-          const cssNode = cE("style");
-          if (className !== null) {
-            cssNode.className = className;
-          }
-          cssNode.id = T + Date.now().toString().slice(-8);
-          cssNode.setAttribute("type", initType);
-          cssNode.innerHTML = css;
-          addToTarget.appendChild(cssNode);
-          if (reNew && addToTarget.querySelector(`.${className}`)) {
-            return true;
-          }
+        } catch (e) {
+          error("//-> addStyle", e.name);
         }
       },
       20,
@@ -370,19 +378,13 @@
   }
 
   function safeRemove(s, t) {
-    safeFunction(() => {
+    try {
       const removeNodes = t.querySelectorAll(s);
       for (let i = 0; i < removeNodes.length; i++) {
         removeNodes[i].remove();
       }
-    });
-  }
-
-  function safeFunction(func) {
-    try {
-      func();
     } catch (e) {
-      error("//-> safeFunction:", e.name);
+      error("//-> safeRemove:", e.name);
     }
   }
 
@@ -406,6 +408,59 @@
       defCon.preview = !s;
     }
   }
+
+  /* expire for localstorge */
+
+  const cache = {
+    key: {
+      expiredTime: ":EXPIRED:TIME",
+      expiredStartTime: ":EXPIRED:STARTTIME",
+    },
+
+    set: function (key, value, expiredTimeMS) {
+      if (expiredTimeMS === 0 || expiredTimeMS === null) {
+        localStorage.setItem(key, value);
+      } else {
+        localStorage.setItem(key, defCon.encrypt(JSON.stringify(value)));
+        localStorage.setItem(key + cache.key.expiredTime, expiredTimeMS);
+        localStorage.setItem(key + cache.key.expiredStartTime, new Date().getTime());
+      }
+    },
+
+    get: function (key) {
+      const expiredTimeMS = localStorage.getItem(key + cache.key.expiredTime);
+      const expiredStartTime = localStorage.getItem(key + cache.key.expiredStartTime);
+      const curTime = new Date().getTime();
+      const sum = Number(expiredStartTime) + Number(expiredTimeMS);
+      if (sum > curTime) {
+        if (localStorage.getItem(key)) {
+          return JSON.parse(defCon.decrypt(localStorage.getItem(key)));
+        } else {
+          cache.remove(key);
+          return null;
+        }
+      } else {
+        cache.remove(key);
+        return null;
+      }
+    },
+
+    remove: function (key) {
+      localStorage.removeItem(key);
+      localStorage.removeItem(key + cache.key.expiredTime);
+      localStorage.removeItem(key + cache.key.expiredStartTime);
+    },
+
+    expired: function (key, expiredTimeMS) {
+      if (cache.get(key) !== null) {
+        localStorage.setItem(key + cache.key.expiredTime, expiredTimeMS);
+      }
+    },
+
+    clear: function () {
+      localStorage.clear();
+    },
+  };
 
   /* Get browser core & system parameters */
 
@@ -771,10 +826,21 @@
     setValue(value, resetPosition = false, hex = "") {
       const Hex6Reg = /^#([A-F0-9]{6}|[a-f0-9]{6})$/;
       const Hex3Reg = /^#([A-F0-9]{3}|[a-f0-9]{3})$/;
-      const rgbaReg =
-        /^rgba\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*((?!1.[1-9])[0-1]?(\.[0-9]{1,3})?)\)$/;
-      const rgbReg =
-        /^rgb\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))\)$/;
+      const rgbaReg = new RegExp(
+        String(
+          "^rgba\\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))" +
+            ",\\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))" +
+            ",\\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))" +
+            ",\\s*((?!1.[1-9])[0-1]?(\\.[0-9]{1,3})?)\\)$"
+        )
+      );
+      const rgbReg = new RegExp(
+        String(
+          "^rgb\\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))" +
+            ",\\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))" +
+            ",\\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))\\)$"
+        )
+      );
       switch (typeof value) {
         case "string": {
           if (Hex6Reg.test(value)) {
@@ -1551,7 +1617,7 @@
     { ch: "霞鹜新晰黑", en: "LXGW New Clear Gothic" },
     { ch: "鸿蒙黑体", en: "HarmonyOS Sans SC" },
     { ch: "浪漫雅圆", en: "LMYY" },
-    { ch: "思源黑体", en: "Source Han Sans CN" },
+    { ch: "思源黑体", en: "Source Han Sans SC" },
     { ch: "思源简黑", en: "Noto Sans CJK SC" },
     { ch: "思源柔黑体", en: "Gen Jyuu Gothic" },
     { ch: "思源真黑体", en: "Gen Shin Gothic" },
@@ -1670,10 +1736,18 @@
   /* Start specific operation */
 
   !(async function () {
-    let maxPersonalSites, isBackupFunction, isPreview, rebuild, _config_data_;
+    // Content-Security-Policy: trusted-types
+    if (window.trustedTypes && window.trustedTypes.createPolicy) {
+      window.trustedTypes.createPolicy("default", {
+        createHTML: (string, sink) => {
+          return string;
+        },
+      });
+    }
 
     /* get promise value */
 
+    let maxPersonalSites, isBackupFunction, isPreview, rebuild, _config_data_;
     let configure = await GMgetValue("_configure_");
     if (!configure) {
       maxPersonalSites = 100;
@@ -1876,10 +1950,10 @@
     if (defCon.siteIndex === undefined) {
       tshadow = `${codeFont}${selection}${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontfaces}${exclude}${fontTest}`;
     }
-    const fontStyle_db = `.${defCon.class.db}{max-width:420px;color:#444;z-index:999999992;border:2px solid #efefef}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei",sans-serif!important;text-stroke:initial!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #7b7b7b!important}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:45%;right:-200px;-webkit-border-radius:6px;border-radius:6px;width:100%;background:#fff;-webkit-box-shadow:0 0 10px 0 rgba(0,0,0,.3);box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .3s;transform:translate(-50%,-50%)}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important;text-stroke:initial!important}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223;color:#fff!important;border:1px solid #d93223;-webkit-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a;color:#fff!important;border:1px solid #038c5a;-webkit-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777;color:#fff!important;border:1px solid #777;-webkit-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px;font-weight:300;text-align:left}.${defCon.class.dbm} p{line-height:160%;margin:5px 0;text-indent:0em!important;font-size:16px;font-weight:400;text-align:left}.${defCon.class.dbm} ul{list-style:none;margin: 5px 0 0 15px;padding:2px;font:italic 14px/140% "Microsoft YaHei";color:grey}.${defCon.class.dbm} li{list-style-type:square;}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px;font-weight:700;text-align:left;width:100%}.${defCon.class.dbb}{display:inline-block;margin:0 1%;-webkit-border-radius:2px;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;transition:opacity .5s;cursor:pointer;-webkit-box-sizing:content-box;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}.${defCon.class.anim}{-webkit-animation:jiggle 1.8s ease-in infinite;animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}#${defCon.id.bk},#${defCon.id.pv},#${defCon.id.mps}{padding:2px 10px;height:40px;width:max-content;min-width:auto}#${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}#${defCon.id.feedback}:hover{color:crimson!important}`;
+    const fontStyle_db = `.${defCon.class.db}{max-width:420px;color:#444;z-index:999999992;border:2px solid #efefef}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei",sans-serif!important;text-stroke:initial!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #7b7b7b!important}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:45%;right:-200px;-webkit-border-radius:6px;border-radius:6px;width:100%;background:#fff;-webkit-box-shadow:0 0 10px 0 rgba(0,0,0,.3);box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .3s;transform:translate(-50%,-50%)}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important;text-stroke:initial!important}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223;color:#fff!important;border:1px solid #d93223;-webkit-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a;color:#fff!important;border:1px solid #038c5a;-webkit-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777;color:#fff!important;border:1px solid #777;-webkit-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px;font-weight:300;text-align:left}.${defCon.class.dbm} p{line-height:160%;margin:5px 0;text-indent:0em!important;font-size:16px;font-weight:400;text-align:left}.${defCon.class.dbm} ul{list-style:none;margin: 5px 0 0 15px;padding:2px;font:italic 14px/140% "Microsoft YaHei";color:grey}.${defCon.class.dbm} li{list-style-type:square;}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px;font-weight:700;text-align:left;width:100%}.${defCon.class.dbb}{display:inline-block;margin:0 1%;-webkit-border-radius:2px;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;transition:opacity .5s;cursor:pointer;-webkit-box-sizing:content-box;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}.${defCon.class.anim}{-webkit-animation:jiggle 1.8s ease-in infinite;animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}#${defCon.id.bk},#${defCon.id.pv},#${defCon.id.mps},#${defCon.id.flc}{padding:2px 10px;height:40px;width:max-content;min-width:auto}#${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}#${defCon.id.feedback}:hover{color:crimson!important}`;
     const fontStyle_container = `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;-webkit-border-radius:10px;border-radius:10px;background:#f0f6ff!important;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 30px);z-index:999999;padding:4px 8px 8px 8px;text-align:left;color:#333;font-size:16px;font-weight:900;-webkit-transition:all .1s ease-in;transition:all .1s ease-in;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.container} *{line-height:1.5!important;font-size:16px;font-weight:700;font-family:"Microsoft YaHei",sans-serif!important;text-shadow:initial!important;-webkit-text-stroke:initial!important;text-stroke:initial!important}#${defCon.id.container} fieldset{border:2px groove #67a5df;-webkit-border-radius:10px;border-radius:10px;padding:4px 9px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:500px}#${defCon.id.container} legend{line-height:20px;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px;font-weight:700;font-family:"Microsoft YaHei",sans-serif!important;background:#f0f6ff!important;-webkit-box-sizing:content-box;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{list-style:none;margin:3px 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden;}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50%;-webkit-transform:rotate(360deg);-webkit-animation:rotation 5s linear infinite;-o-animation:rotation 5s linear infinite;animation:rotation 5s linear infinite}#${defCon.id.fontList}{padding:2px 10px 4px 6px;min-height:75px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex;align-items:center;justify-content:space-between}#${defCon.id.shadowColor}{padding:2px 10px;min-height:45px;margin:4px;width:max-content}#${defCon.id.shadowColor} *{-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.cps}{float:left;display:block;margin:0}#${defCon.id.shadowColor} .${defCon.class.colorPicker}{width:32px;height:30px;cursor:pointer;position:relative;border:2px solid #181a25;-webkit-border-radius:4px;border-radius:4px;float:left;display:inline-block}#${defCon.id.shadowColor} .${defCon.class.colorPicker2}{display:inline-block;width:auto;margin:0 0 0 5px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2} #${defCon.id.color}{width:135px;height:32px;text-indent:0;font-size:18px;font-weight:400;background:#fafafa;-webkit-box-sizing:content-box;box-sizing:content-box;font-family:Impact,"Courier New",sans-serif!important;color:#333;border:#67a5df 2px solid;-webkit-border-radius:4px;border-radius:4px;display:inline-block;padding:0;margin:0;text-align:center}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.submit}{padding:2px 10px;height:40px}#${defCon.id.submit} button{background-image:initial;background-color:#67a5df;color:#fff;padding:5px 10px;font-size:14px;font-weight:600;cursor:pointer;border:2px solid #6ba7e0;-webkit-border-radius:6px;border-radius:6px;width:auto;font-family:"Microsoft YaHei",sans-serif!important}#${defCon.id.backup}{margin:0 10px 0 0}#${defCon.id.backup}, #${defCon.id.files}{display:none}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;min-height:110px}#${defCon.id.fontEx} textarea{background:#fafafa}#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{min-width:calc(100% - 15px);max-width:calc(100% - 15px)!important;min-height:60px;line-height:140%;resize:none;border:2px solid #67a5df;-webkit-border-radius:6px;border-radius:6px;-webkit-box-sizing:content-box;box-sizing:content-box;padding:5px;font:bold 14px/140% "Roboto Mono",Monaco,"Courier New",sans-serif!important;color:#0b5b9c;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px rgba(0,0,0,.2);border-radius:10px;background:#ededed}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;color:#111;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:block;float:left;margin:2px 5px 2px 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:initial;-webkit-border-radius:2px;border-radius:2px;padding:2px 0;height:24px;font-weight:400;line-height:20px;color:#fff;background:#67a5df}#${defCon.id.fontList} .${defCon.class.label} span{color:#fff;font-size:16px;font-weight:normal;padding:5px;background:#67a5df}#${defCon.id.fontList} .${defCon.class.close}{padding:5px!important;color:#fff;background:#67a5df;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.fontList} .${defCon.class.close}:hover{-webkit-border-radius:2px;border-radius:2px;color:tomato;background-color:#366694}#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} label{width:auto;display:block;margin:5px 0;color:#333;cursor:initial}#${defCon.id.fontList} .${defCon.class.selectFontId} input{-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df;-webkit-border-radius:6px;border-radius:6px;padding:1px 23px!important;margin:0;width:calc(100% - 48px);max-width:calc(100% - 48px);height:36px!important;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px;font-weight:700;text-indent:0;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder} input:-moz-placeholder{color:#369!important;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px;font-weight:700;opacity:.65}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px;font-weight:700;opacity:.65}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px;font-weight:700;opacity:.65}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:8px 0 0 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df;-webkit-border-radius:4px;border-radius:4px;padding:4px 10px;width:auto;min-width:170px;max-width:252px;max-height:250px;font-size:18px;white-space:nowrap;background-color:#fff;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{margin:0 10px;padding:5px 0;font-weight:400;font-size:21px;min-width:135px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{background-color:#67a5df;color:#fff}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-y:auto;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df;-webkit-border-radius:6px;border-radius:6px;padding:6px;width:95%;max-width:267px;max-height:60px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}.${defCon.class.checkbox}{display:none!important}.${defCon.class.checkbox}+label{padding:11px 9px;margin:0;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:58px;height:10px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);-webkit-box-sizing:content-box;box-sizing:content-box;word-wrap:normal!important}.${defCon.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;-webkit-border-radius:7px;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${defCon.class.checkbox}+label::after{position:absolute;top:0;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;-webkit-border-radius:100px;border-radius:100px;padding:5px;font-size:1em;font-weight:700;color:#fff;content:"OFF"}.${defCon.class.checkbox}:checked+label{margin:0;-webkit-box-sizing:content-box;box-sizing:content-box;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.${defCon.class.checkbox}:checked+label::after{content:"ON";left:10px;-webkit-box-sizing:content-box;box-sizing:content-box}.${defCon.class.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.fface} label,#${defCon.id.fface}+label::after,#${defCon.id.fface}+label::before,#${defCon.id.smooth} label,#${defCon.id.smooth}+label::after,#${defCon.id.smooth}+label::before{-webkit-transition:all .1s ease-in;transition:all .1s ease-in;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.fontShadow} #${defCon.id.shadowSize},#${defCon.id.fontStroke} #${defCon.id.strokeSize}{color:#111;width:56px;text-indent:0;margin-right:10px!important;height:32px;font-size:17px;font-weight:400;font-family:Impact,"Courier New",sans-serif!important;border:#67a5df 2px solid;-webkit-border-radius:4px;border-radius:4px;margin-right:2px;text-align:center;-webkit-box-sizing:content-box;box-sizing:content-box;padding:0;background:#fafafa}.${defCon.class.Switch}{-webkit-box-sizing:content-box;box-sizing:content-box;display:inline-block;float:right;margin-right:4px;padding:0 6px;border:2px double #67a5df;color:#0A68C1;-webkit-border-radius:4px;border-radius:4px;}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent);background-size:50px 50px;background-color:#f7fff7}`;
     const fontStyle_cp = `#${defCon.id.cpm}{width:220px;height:200px;z-index:999;position:fixed;display:none;margin:10px 0 0 20px;-webkit-box-sizing:content-box;box-sizing:content-box;background-color:#d1f2fb;padding:10px;box-shadow:0 0 10px #000;border-radius:6px}.${defCon.class.cp},.${defCon.class.cp} *,.${defCon.class.cp} ::after,.${defCon.class.cp} ::before{border:0;margin:0;padding:0;display:block;box-sizing:border-box}.${defCon.class.cp}{background-color:#fff;display:block;min-width:128px;min-height:128px;position:relative}.${defCon.class.cp}>.${defCon.class.cprb}{border:solid #000 1px;background:linear-gradient(red,#f0f,#00f,#0ff,#0f0,#ff0,red);width:16px;height:calc(100% - 26px);position:absolute;right:12px;top:12px}.${defCon.class.cp} .${defCon.class.cprbp}{position:absolute;width:100%;height:1px}.${defCon.class.cp} .${defCon.class.cprbp}::after,.${defCon.class.cp} .${defCon.class.cprbp}::before{content:"";width:10px;height:7px;position:absolute;background:0 0;border:solid transparent 5px;border-width:3.5px 5px;top:-3px}.${defCon.class.cp} .${defCon.class.cprbp}::before{border-left:solid #404040 5px;left:-6px}.${defCon.class.cp} .${defCon.class.cprbp}::after{border-right:solid #404040 5px;right:-6px}.${defCon.class.cp}>.${defCon.class.cpg}{position:absolute;width:calc(100% - 50px);height:calc(100% - 26px);border:solid #000 1px;left:12px;top:12px}.${defCon.class.cp}>.${defCon.class.cpg},.${defCon.class.cp}>.${defCon.class.cpg} *{cursor:crosshair;-webkit-box-sizing:content-box;box-sizing:content-box}.${defCon.class.cp}>.${defCon.class.cpgb}{background:linear-gradient(rgba(0,0,0,0),#000)}.${defCon.class.cp}>.${defCon.class.cp}-color-block{position:absolute;border:solid #000 1px;background:#fff;width:calc(100% - 104px);max-width:72px;height:18px;left:12px;bottom:8px}.${defCon.class.cp} .${defCon.class.cpc}{background-color:transparent;position:absolute}.${defCon.class.cp} .${defCon.class.cpc}::before{border-radius:50%;width:11px;height:11px;border:solid #000 1px;background-color:transparent;position:relative;left:-6px;top:-6px;display:block;content:""}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcb}::before{border-color:#000}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcw}::before{border-color:#fff}`;
-    const fontStyle_tooltip = `.${defCon.class.tooltip}{position:relative;cursor:help}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;visibility:hidden;position:absolute;z-index:999999;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #b8c4ce;-webkit-border-radius:6px;border-radius:6px;padding:10px;width:250px;max-width:250px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:140%;text-indent:0em!important}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei",sans-serif!important;font-size:14px!important}.${defCon.class.tooltip}:hover .${defCon.class.tooltip}{visibility:visible;display:block}.${defCon.class.ps1}{margin:-33px 0 0 0;right:8px;float:right}.${defCon.class.ps2}{top:30px;left:-242px}.${defCon.class.ps3}{top:-197px}.${defCon.class.ps4}{top:-175px}`;
+    const fontStyle_tooltip = `.${defCon.class.tooltip}{position:relative;cursor:help}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;visibility:hidden;position:absolute;z-index:999999;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #b8c4ce;-webkit-border-radius:6px;border-radius:6px;padding:10px;width:250px;max-width:250px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:140%;text-indent:0em!important}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei",sans-serif!important;font-size:14px!important}.${defCon.class.tooltip}:hover .${defCon.class.tooltip}{visibility:visible;display:block}.${defCon.class.ps1}{margin:-33px 0 0 0;right:8px;float:right}.${defCon.class.ps2}{top:30px;left:-245px}.${defCon.class.ps3}{top:-197px}.${defCon.class.ps4}{top:-175px}`;
     const fontStyle_Progress = `.${defCon.class.Progress}{margin:2px;width:calc(100% - 10px)}.${defCon.class.ProgressBar}{background:#f0f0f0;margin:2px;width:250px;box-sizing:border-box;display:flex;align-items:flex-end;box-shadow:0 0 1px 1px rgba(0,0,0,.1) inset}.${defCon.class.ProgressLine}{width:100%;height:100%;position:relative;border-radius:15px;background:#67a5df}.${defCon.class.ProgressLine} .${defCon.class.btnl}{position:absolute;height:100%;right:0;border-radius:50%;font-size:8px;background:#67a5df;border:6px solid #fff;top:50%;transform:translate(6px,-50%);box-sizing:content-box!important;box-shadow:0 0 0 1px rgba(0,0,0,.2);display:flex;justify-content:center;align-items:center}.${defCon.class.ProgressLine} .${defCon.class.btnl} .${defCon.class.tbdisable}{background:#ddd;border-color:#fafafa}.${defCon.class.ProgressLine} .${defCon.class.btnl} .${defCon.class.onload}{display:none;position:absolute;content:"";top:50%;left:50%;border-radius:50%;overflow:hidden;transform:translate(-50%,-50%);background:url(loading1.gif);background-position:center center;background-size:130%;opacity:.5}@keyframes rate{0%{transform:translate(-50%,-50%) rotate(0)}100%{transform:translate(-50%,-50%) rotate(360deg)}}.${defCon.class.vertical}{top:0!important;left:50%!important;transform:translate(-50%,-6px)!important}.${defCon.class.ProgressBar} .${defCon.class.ProgressVal}{position:absolute;right:0;background:rgba(0,0,0,.4);text-align:center;width:54px;box-sizing:border-box;padding:0 4px;font-size:10px;color:#fff;height:24px;line-height:24px;border-radius:4px;top:-35px;left:50%;transform:translateX(-50%);transition:.5s linear}.${defCon.class.ProgressBar} .${defCon.class.ProgressVal}.${defCon.class.tbbottom}{top:auto;bottom:-35px}.${defCon.class.ProgressBar} .${defCon.class.ProgressVal}::after{position:absolute;content:"";border-width:5px 5px 0;border-style:solid;border-color:rgba(0,0,0,.4) transparent transparent;bottom:-5px;left:50%;transform:translateX(-50%)}.${defCon.class.ProgressBar} .${defCon.class.ProgressVal}.${defCon.class.tbbottom}::after{bottom:auto;top:-5px;border-width:0 5px 5px;border-style:solid;border-color:transparent transparent rgba(0,0,0,.4)}.${defCon.class.ProgressBar} .${defCon.class.ProgressVal}.${defCon.class.tbleft}{top:auto;left:-40px}.${defCon.class.ProgressBar} .${defCon.class.ProgressVal}.${defCon.class.tbleft}::after{top:50%;transform:translateY(-50%);left:auto;right:-5px;bottom:auto;border-width:5px 0 5px 5px;border-style:solid;border-color:transparent transparent transparent rgba(0,0,0,.4)}.${defCon.class.ProgressBar} .${defCon.class.ProgressVal}.${defCon.class.tbright}{top:auto;right:-94px;left:auto}.${defCon.class.ProgressBar} .${defCon.class.ProgressVal}.${defCon.class.tbright}::after{top:50%;transform:translateY(-50%);right:auto;left:-5px;bottom:auto;border-width:5px 5px 5px 0;border-style:solid;border-color:transparent rgba(0,0,0,.4) transparent transparent}`;
     const fontStyle_welcome = `.${defCon.class.loading}{width:160px;height:160px;position:relative}.${defCon.class.loading}::after,.${defCon.class.loading}::before{content:"";position:absolute;width:0;height:0;background:#000;border-radius:50%;top:0;left:0;right:0;bottom:0;margin:auto;animation:toBig 1s linear infinite}.${defCon.class.loading}::after{animation-delay:.5s}@keyframes toBig{0%{width:0;height:0;opacity:1}100%{width:150px;height:150px;opacity:0}}.${defCon.class.welcome}{display:none;justify-content:center;align-items:center;position:fixed;top:0px;right:0px;width:auto;min-width:100%;height:auto;min-height:100%;padding:0;margin:0;border-radius:4px;-webkit-box-sizing:content-box;box-sizing:content-box;z-index:1000;opacity:.65}.${defCon.class.welcome}.${defCon.class.active}{display:flex;background:linear-gradient(45deg,#ccc 0,#ccc 25%,transparent 25%,transparent 50%,#ccc 50%,#ccc 75%,transparent 75%,transparent);background-size:50px 50px;background-color:#eee}`;
     const fontStyle = fontStyle_db + fontStyle_container + fontStyle_cp + fontStyle_tooltip + fontStyle_Progress + fontStyle_welcome;
@@ -2100,26 +2174,19 @@
               insertCSS();
             }
           }
+          return Boolean(qS(`.${defCon.class.rndStyle}`) && (!curWindowtop || (qS(`#${defCon.id.rndId}`) && qS(`.${defCon.class.rndClass}`))));
         },
         10,
         true
       );
-      return Boolean(qS(`.${defCon.class.rndStyle}`) && (!curWindowtop || (qS(`#${defCon.id.rndId}`) && qS(`.${defCon.class.rndClass}`))));
     }
 
     try {
-      if (window.trustedTypes && window.trustedTypes.createPolicy) {
-        window.trustedTypes.createPolicy("default", {
-          createHTML: (string, sink) => {
-            return string;
-          },
-        });
-      }
       startRAFInterval();
       const callback = mutations => {
         mutations.forEach(mutation => {
           if (!((!curWindowtop || (qS(`#${defCon.id.rndId}`) && qS(`.${defCon.class.rndClass}`))) && qS(`.${defCon.class.rndStyle}`))) {
-            debug(`//-> %cMutationObserver: %c%s %c%s`, "font-weight:bold;color:teal", "color:olive", mutation.type, "font-weight:bold;color:red", startRAFInterval());
+            debug(`//-> %cMutationObserver: %c%s %c%s`, "font-weight:bold;color:teal", "color:olive", mutation.type, "font-weight:bold;color:red", !startRAFInterval());
           }
           if (qS(`.${defCon.class.rndStyle}`) && document.head.lastChild.className !== defCon.class.rndStyle) {
             try {
@@ -2143,7 +2210,7 @@
       error("//-> createHTML:", e);
     }
 
-    async function fontCheck_sessionOnce(fontData = []) {
+    async function fontCheck_detectOnce(fontData = []) {
       const fontReady = await document.fonts.ready;
       const checkFont = new isSupportFontFamily();
       const fontAvailable = new Set();
@@ -2169,420 +2236,420 @@
       return fontData;
     }
 
-    setTimeout(async () => {
-      try {
-        if (curWindowtop) {
-          let fontData = [];
-
-          /* Fonts detection */
-
-          try {
-            if (sessionStorage.getItem("fontCheckList")) {
-              fontData = JSON.parse(defCon.decrypt(sessionStorage.getItem("fontCheckList")));
-              debug("//-> %cLoad font_Data from Session Cache", "color:green;font-weight:bold");
-            } else {
-              debug("//-> %cStart real-time font detection", "color:crimson;font-weight:bold");
-              fontData = await fontCheck_sessionOnce();
-              sessionStorage.setItem("fontCheckList", defCon.encrypt(JSON.stringify(fontData)));
-            }
-          } catch (e) {
-            debug("//-> %cInitialized font detection caused by font_Data errors: ", "background-color:yellow;color:red;font-weight:bold", e.name);
-            sessionStorage.removeItem("fontCheckList");
-            fontData = await fontCheck_sessionOnce();
-            sessionStorage.setItem("fontCheckList", defCon.encrypt(JSON.stringify(fontData)));
-          }
-
-          /* Fonts selectors */
-
-          try {
-            if (qS(`#${defCon.id.fontList} .${defCon.class.fontList}`)) {
-              fontSet(`#${defCon.id.fontList} .${defCon.class.fontList}`).fsearch(fontData);
-            }
-          } catch (e) {
-            defCon.errorCount++;
-            error("//-> Fonts selection:", e.name);
-          }
-
-          /* selector placeholder style */
-
-          const inputFont = qS(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`);
-          const ffaceT = qS(`#${defCon.id.fface}`);
-          if (ffaceT && inputFont) {
-            ffaceT.addEventListener("change", () => {
-              if (ffaceT.checked) {
-                fontCheck.forEach(item => {
-                  if (item.en === refont || convert2Unicode(item.ch) === refont) {
-                    curFont = item.ch;
-                  }
-                });
+    setTimeout(
+      async (fontData = []) => {
+        try {
+          if (curWindowtop) {
+            try {
+              if (cache.get("FONTLIST")) {
+                debug("//-> %cLoad font_Data from Cache", "color:green;font-weight:bold");
+                fontData = cache.get("FONTLIST");
               } else {
-                curFont = "\u7f51\u7ad9\u9ed8\u8ba4\u5b57\u4f53";
+                debug("//-> %cStart real-time font detection", "color:crimson;font-weight:bold");
+                fontData = await fontCheck_detectOnce();
+                cache.set("FONTLIST", fontData, 288e5);
               }
-              inputFont.setAttribute("placeholder", `\u5f53\u524d\u5b57\u4f53\uff1a${curFont}`);
-            });
-          }
-          if (inputFont) {
-            inputFont.setAttribute("placeholder", `\u5f53\u524d\u5b57\u4f53\uff1a${curFont}`);
-            inputFont.addEventListener("mouseover", () => {
-              inputFont.setAttribute("placeholder", `\u8f93\u5165\u5173\u952e\u5b57\u53ef\u68c0\u7d22\u5b57\u4f53`);
-            });
-            inputFont.addEventListener("mouseout", () => {
-              inputFont.setAttribute("placeholder", `\u5f53\u524d\u5b57\u4f53\uff1a${curFont}`);
-            });
-          }
-
-          /* Fonts Face */
-
-          const submitButton = qS(`#${defCon.id.submit} .${defCon.class.submit}`);
-          saveChangeStatus(ffaceT, CONST.fontFace, submitButton, defCon.Val);
-
-          /* Fonts Smoth */
-
-          const smoothT = qS(`#${defCon.id.smooth}`);
-          saveChangeStatus(smoothT, CONST.fontSmooth, submitButton, defCon.Val);
-
-          /* Fonts stroke */
-
-          const strock = qS(`#${defCon.id.strokeSize}`);
-          let drawStrock;
-          try {
-            drawStrock = new frProgress(`#${defCon.id.stroke}`, {
-              val: Number(CONST.fontStroke * 100),
-              size: 10,
-              precision: 1,
-              range: 1,
-              drag: true,
-              direction: "horizontal",
-              tip: {
-                trigger: "hover",
-                align: "right",
-              },
-              getVal: function (e) {
-                strock.value = Number(((e.val * 1e8) / 1e10) * e.range) ? (((e.val * 1e8) / 1e10) * e.range).toFixed(e.precision + 2) : "OFF";
-                strock._value_ = strock.value;
-              },
-            });
-            drawStrock.onLoad(false, checkdraw(strock, drawStrock, /OFF|\d+(?:\.\d{1,3})?/));
-          } catch (e) {
-            defCon.errorCount++;
-            error("//-> Fonts stroke:", e.name);
-          } finally {
-            saveChangeStatus(strock, Number(CONST.fontStroke), submitButton, defCon.Val);
-          }
-
-          /* Fonts shadow */
-
-          const shadows = qS(`#${defCon.id.shadowSize}`);
-          let drawShadow;
-          try {
-            drawShadow = new frProgress(`#${defCon.id.shadow}`, {
-              val: Number((CONST.fontShadow * 1e12) / 8e10),
-              size: 10,
-              precision: 0,
-              range: 8,
-              drag: true,
-              direction: "horizontal",
-              tip: {
-                trigger: "hover",
-                align: "right",
-              },
-              getVal: function (s) {
-                shadows.value = Number(((s.val * 1e8) / 1e10) * s.range) ? (((s.val * 1e8) / 1e10) * s.range).toFixed(s.precision + 2) : "OFF";
-                shadows._value_ = shadows.value;
-              },
-            });
-            drawShadow.onLoad(false, checkdraw(shadows, drawShadow, /OFF|\d+(?:\.\d{1,2})?/));
-          } catch (e) {
-            defCon.errorCount++;
-            error("//-> Fonts shadow:", e.name);
-          } finally {
-            saveChangeStatus(shadows, Number(CONST.fontShadow), submitButton, defCon.Val);
-          }
-
-          /* Fonts shadow color selection */
-
-          let picker;
-          const cpshow = qS(`#${defCon.id.cps}`);
-          const cp = qS(`#${defCon.id.cpm}`);
-          const body = qS("body");
-          const colorshow = qS(`#${defCon.id.color}`);
-          const colorReg =
-            /^currentcolor$|^#([A-F0-9]{6}|[a-f0-9]{6}|[A-F0-9]{3}|[a-f0-9]{3})$|^rgba\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*((?!1.[1-9])[0-1]?(\.[0-9]{1,3})?)\)$|^rgb\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))\)$/;
-          try {
-            picker = new ColorPicker({
-              dom: cp,
-              value: CONST.shadowColor,
-              def: CONST.shadowColor,
-            });
-            debug("//-> ColorPicker:", picker._lastValue);
-            cpshow.addEventListener("click", function (e) {
-              if (cp.style.display === "block") {
-                cp.style = "display:none";
-              } else {
-                e.stopPropagation();
-                cp.style = "display:block";
-              }
-            });
-            cp.addEventListener(
-              "click",
-              function (e) {
-                e.stopPropagation();
-              },
-              false
-            );
-            body.addEventListener("click", function () {
-              cp.style = "display:none";
-            });
-          } catch (e) {
-            defCon.errorCount++;
-            error("//-> Fonts shadowColor:", e.name);
-          } finally {
-            saveChangeStatus(colorshow, CONST.shadowColor, submitButton, defCon.Val);
-          }
-
-          /* Double-click allows you to edit */
-
-          const fontExT = qS(`#${defCon.id.exclude}`);
-          const fontCssT = qS(`#${defCon.id.cssfun}`);
-          if (fontCssT) {
-            fontCssT.addEventListener("dblclick", () => {
-              fontCssT.setAttribute("class", `${defCon.class.notreadonly}`);
-              fontCssT.title = "\u8bf7\u8c28\u614e\u4fee\u6539\u8be5\u53c2\u6570\uff01";
-              fontCssT.readOnly = false;
-            });
-          }
-
-          saveChangeStatus(fontCssT, CONST.fontCSS, submitButton, defCon.Val);
-          saveChangeStatus(fontExT, CONST.fontEx, submitButton, defCon.Val);
-
-          /* Expand & Collapse */
-
-          expandORcollapse(qS(`#${defCon.id.cSwitch}`), fontCssT, qS(`#${defCon.id.fontCSS}`));
-          expandORcollapse(qS(`#${defCon.id.eSwitch}`), fontExT, qS(`#${defCon.id.fontEx}`));
-
-          /* Buttons control */
-
-          qS(`#${defCon.id.submit} .${defCon.class.reset}`).addEventListener("click", async function () {
-            let frDialog = new frDialogBox({
-              trueButtonText: "重 置",
-              falseButtonText: "恢 复",
-              neutralButtonText: "取 消",
-              messageText: `<p>『重置/恢复』将当前设置初始化为 <span style="color:slategray">程序默认的初始数据</span> 或 <span style="color:slategrey">上次正确保存的数据</span>。一般是在您错误配置参数且造成无法挽回的情况下才进行重置参数的操作。</p><p style="color:darkgreen">重置：重置当前数据为程序初始值，手动保存生效。</p><p style="color:darkred">恢复：替换为上次正确保存的数据，自动恢复预览。</p><p style="color:gray">取消：放弃重置操作。</p>`,
-              titleText: "参数重置确认",
-            });
-            if (await frDialog.respond()) {
-              fontSet().fdeleteList(fontData);
-              strock.value = Number(defValue.fontStroke) ? defValue.fontStroke.toFixed(3) : "OFF";
-              strock._value_ = strock.value;
-              drawStrock.updateVal((Number(defValue.fontStroke) * 100) / drawStrock.range);
-              shadows.value = Number(defValue.fontShadow) ? defValue.fontShadow.toFixed(2) : "OFF";
-              shadows._value_ = shadows.value;
-              drawShadow.updateVal((Number(defValue.fontShadow) * 1e5) / drawShadow.range / 1e3);
-              picker.value = defValue.shadowColor;
-              picker._value_ = picker.value;
-              smoothT.checked !== defValue.fontSmooth ? smoothT.click() : debug("//-> Not Modified");
-              ffaceT.checked !== defValue.fontFace ? ffaceT.click() : debug("//-> Not Modified");
-              fontCssT.value = defValue.fontCSS;
-              fontExT.value = defValue.fontEx;
-              this.parentNode.children[3].click();
-            } else {
-              fontSet().fdeleteList(fontData);
-              strock.value = Number(CONST.fontStroke) ? CONST.fontStroke.toFixed(3) : "OFF";
-              strock._value_ = strock.value;
-              drawStrock.updateVal((Number(CONST.fontStroke) * 100) / drawStrock.range);
-              shadows.value = Number(CONST.fontShadow) ? CONST.fontShadow.toFixed(2) : "OFF";
-              shadows._value_ = shadows.value;
-              drawShadow.updateVal((Number(CONST.fontShadow) * 1e5) / drawShadow.range / 1e3);
-              picker.value = CONST.shadowColor;
-              picker._value_ = picker.value;
-              smoothT.checked !== CONST.fontSmooth ? smoothT.click() : debug("//-> Not Modified");
-              ffaceT.checked !== CONST.fontFace ? ffaceT.click() : debug("//-> Not Modified");
-              fontCssT.value = CONST.fontCSS;
-              fontExT.value = CONST.fontEx;
+            } catch (e) {
+              debug("//-> %cInitialized font_Data caused by Errors: ", "background-color:yellow;color:red;font-weight:bold", e.name);
+              cache.remove("FONTLIST");
+              fontData = await fontCheck_detectOnce();
+              cache.set("FONTLIST", fontData, 288e5);
             }
-            frDialog = null;
-          });
 
-          qS(`#${defCon.id.submit} .${defCon.class.submit}`).addEventListener("click", async function () {
-            const fstrock = /[0-9]+(?:\.[0-9]{1,3})?/.test(strock.value) ? Number(strock.value) : strock.value === "OFF" ? 0 : Number(defValue.fontStroke);
-            const fshadow = /[0-9]+(?:\.[0-9]{1,3})?/.test(shadows.value) ? Number(shadows.value) : shadows.value === "OFF" ? 0 : Number(defValue.fontShadow);
-            const pickedcolor = colorshow.value;
-            const fscolor = colorReg.test(pickedcolor) ? pickedcolor : defValue.shadowColor;
-            const fontlists = fontSet().fsearchList(`${defCon.id.fontName}`);
-            const fontselect =
-              fontlists.length > 0
-                ? fontlists.indexOf("Microsoft YaHei") === 0
-                  ? defValue.fontSelect
-                  : String(singleQuoteStr(fontlists) + defValue.fontSelect)
-                : CONST.fontSelect.indexOf("Microsoft YaHei") === 0
-                ? defValue.fontSelect
-                : CONST.fontSelect.split(",")[0] + "," + defValue.fontSelect;
-            const smooth = smoothT.checked;
-            const fontface = ffaceT.checked;
-            const fcss = fontCssT.value;
-            const cssfun = fcss ? fcss.replace(/"|`/g, "'") : defValue.fontCSS;
-            const fex = fontExT.value;
-            const fontex = fex ? fex.replace(/"|`/g, "'") : "";
-            if (isPreview && this.getAttribute("v-Preview")) {
-              try {
-                shadow = fshadow > 0 && fshadow <= 8 ? `text-shadow:0 0 ${fshadow}px ${fscolor};` : "";
-                stroke = fstrock > 0 && fstrock <= 1.0 ? `text-stroke:${fstrock}px currentcolor;-webkit-text-stroke:${fstrock}px currentcolor;paint-order:stroke fill;` : "";
-                selection = stroke ? `::selection{color:#ffffff!important;background:#338fff!important}` : ``;
-                smoothing = smooth ? `-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;` : "";
-                fontfamily = fontface ? `font-family:${fontselect};` : "";
-                refont = fontselect.split(",")[0] ? fontselect.split(",")[0].replace(/"|'/g, "") : "";
-                fontfaces = fontface
-                  ? refont !== ""
-                    ? `@font-face{font-family:"宋体";src:local("${refont}")}@font-face{font-family:"黑体";src:local("${refont}")}@font-face{font-family:SimHei;src:local("${refont}")}@font-face{font-family:SimSun;src:local("${refont}")}@font-face{font-family:"serif";src:local("${refont}")}@font-face{font-family:"Microsoft YaHei UI";src:local("${refont}")}@font-face{font-family:"Segoe UI";src:local("${refont}")}@font-face{font-family:"sans-serif";src:local("${refont}")}@font-face{font-family:Tahoma;src:local("${refont}")}@font-face{font-family:Arial;src:local("${refont}")}@font-face{font-family:Helvetica;src:local("${refont}")}`
-                    : ``
-                  : "";
-                exclude = fontex ? `${fontex}{text-stroke:initial!important;-webkit-text-stroke:initial!important;text-shadow:initial!important}` : "";
-                tshadow = `${codeFont}${selection}${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontfaces}${exclude}`;
-                this.innerText = "\u4fdd\u5b58";
-                this.removeAttribute("style");
-                this.removeAttribute("v-Preview");
-                __preview__(true, tshadow, false);
-              } catch (e) {
-                error("//->", e.name);
+            /* Fonts selection */
+
+            try {
+              if (qS(`#${defCon.id.fontList} .${defCon.class.fontList}`)) {
+                fontSet(`#${defCon.id.fontList} .${defCon.class.fontList}`).fsearch(fontData);
               }
-            } else {
-              try {
-                let frDialog = new frDialogBox({
-                  trueButtonText: "保存到全局数据",
-                  falseButtonText: "保存到网站数据",
-                  neutralButtonText: "取 消",
-                  messageText: `<p style='color:darkgreen;font-weight:900'>保存到全局数据：</p><p>将当前设置保存为全局设置，默认使用全局参数。</p><p style='color:darkred;font-weight:900'>保存到当前网站数据：<span id='${defCon.id.seed}_a_w_d_l_'>[<span style='font-size:12px;font-weight:normal;padding:0 2px;margin:0;cursor:pointer;color:#3e3e3e'>全部数据列表</span>]</span></p><p><span title="保存到网站数据会自动覆盖之前的数据" style="cursor:help;color:indigo" id="${defCon.id.seed}_c_w_d_">为 ${curHostname} 保存独立的设置数据。</span>`,
-                  titleText: "保存设置数据",
-                });
-                domains = await GMgetValue("_domains_fonts_set_");
-                domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : default_domains;
-                const _awdl = qS(`#${defCon.id.seed}_a_w_d_l_`);
-                if (_awdl) {
-                  if (domainValue.length > 0) {
-                    _awdl.style.cssText += "display:line-block";
-                  } else {
-                    _awdl.style.cssText += "display:none";
-                  }
-                  _awdl.addEventListener("click", async () => {
-                    closeAllDialog(`div.${defCon.class.db}`);
-                    manageDomainList();
-                  });
-                }
-                domains = await GMgetValue("_domains_fonts_set_");
-                domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : default_domains;
-                domainValueIndex = update_domain_index(domainValue);
-                if (domainValueIndex !== undefined && qS(`#${defCon.id.seed}_c_w_d_`)) {
-                  const fontDate = dateFormat("YYYY-mm-dd HH:MM:SS", new Date(domainValue[domainValueIndex].fontDate));
-                  qS(`#${defCon.id.seed}_c_w_d_`).innerHTML = `<p>上次保存：${fontDate} <button id="${defCon.id.seed}_c_w_d_d_"\
-                  style="padding:3px 5px;margin-left:15px;cursor:pointer;color:#333;font-size:12px;border:1px solid #777;border-radius:4px;" title="删除数据后将刷新页面">删除当前网站数据</button></p>`;
-                  qS(`#${defCon.id.seed}_c_w_d_d_`).addEventListener("click", async () => {
-                    domainValue.splice(domainValueIndex, 1);
-                    GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
-                    closeAllDialog(`div.${defCon.class.db}`);
-                    qS(`#${defCon.id.rndId}`).style = "display:none";
-                    let frDialog = new frDialogBox({
-                      trueButtonText: "感谢使用",
-                      messageText: `<p style='color:darkred'>时间戳${fontDate}的数据已成功删除！</p><p>当前页面将自动刷新。</p>`,
-                      titleText: "个性化数据删除",
-                    });
-                    if (await frDialog.respond()) {
-                      closeAllDialog(`div.${defCon.class.db}`);
-                      location.reload();
+            } catch (e) {
+              defCon.errorCount++;
+              error("//-> Fonts selection:", e.name);
+            }
+
+            /* selector placeholder style */
+
+            const inputFont = qS(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`);
+            const ffaceT = qS(`#${defCon.id.fface}`);
+            if (ffaceT && inputFont) {
+              ffaceT.addEventListener("change", () => {
+                if (ffaceT.checked) {
+                  fontCheck.forEach(item => {
+                    if (item.en === refont || convert2Unicode(item.ch) === refont) {
+                      curFont = item.ch;
                     }
-                    frDialog = null;
                   });
-                }
-                if (await frDialog.respond()) {
-                  saveDate("_fonts_set_", {
-                    fontSelect: filterHtml(fontselect),
-                    fontFace: Boolean(fontface),
-                    fontStroke: Number(fstrock),
-                    fontShadow: Number(fshadow),
-                    shadowColor: filterHtml(fscolor),
-                    fontSmooth: Boolean(smooth),
-                    fontCSS: filterHtml(cssfun),
-                    fontEx: filterHtml(fontex),
-                  });
-                  defCon.successId = true;
                 } else {
-                  const _savedata_ = {
-                    domain: curHostname,
-                    fontDate: new Date(),
-                    fontSelect: filterHtml(fontselect),
-                    fontFace: Boolean(fontface),
-                    fontStroke: Number(fstrock),
-                    fontShadow: Number(fshadow),
-                    shadowColor: filterHtml(fscolor),
-                    fontSmooth: Boolean(smooth),
-                    fontCSS: filterHtml(cssfun),
-                    fontEx: filterHtml(fontex),
-                  };
+                  curFont = "\u7f51\u7ad9\u9ed8\u8ba4\u5b57\u4f53";
+                }
+                inputFont.setAttribute("placeholder", `\u5f53\u524d\u5b57\u4f53\uff1a${curFont}`);
+              });
+            }
+            if (inputFont) {
+              inputFont.setAttribute("placeholder", `\u5f53\u524d\u5b57\u4f53\uff1a${curFont}`);
+              inputFont.addEventListener("mouseover", () => {
+                inputFont.setAttribute("placeholder", `\u8f93\u5165\u5173\u952e\u5b57\u53ef\u68c0\u7d22\u5b57\u4f53`);
+              });
+              inputFont.addEventListener("mouseout", () => {
+                inputFont.setAttribute("placeholder", `\u5f53\u524d\u5b57\u4f53\uff1a${curFont}`);
+              });
+            }
+
+            /* Fonts Face */
+
+            const submitButton = qS(`#${defCon.id.submit} .${defCon.class.submit}`);
+            saveChangeStatus(ffaceT, CONST.fontFace, submitButton, defCon.Val);
+
+            /* Fonts Smoth */
+
+            const smoothT = qS(`#${defCon.id.smooth}`);
+            saveChangeStatus(smoothT, CONST.fontSmooth, submitButton, defCon.Val);
+
+            /* Fonts stroke */
+
+            const strock = qS(`#${defCon.id.strokeSize}`);
+            let drawStrock;
+            try {
+              drawStrock = new frProgress(`#${defCon.id.stroke}`, {
+                val: Number(CONST.fontStroke * 100),
+                size: 10,
+                precision: 1,
+                range: 1,
+                drag: true,
+                direction: "horizontal",
+                tip: {
+                  trigger: "hover",
+                  align: "right",
+                },
+                getVal: function (e) {
+                  strock.value = Number(((e.val * 1e8) / 1e10) * e.range) ? (((e.val * 1e8) / 1e10) * e.range).toFixed(e.precision + 2) : "OFF";
+                  strock._value_ = strock.value;
+                },
+              });
+              drawStrock.onLoad(false, checkdraw(strock, drawStrock, /OFF|\d+(?:\.\d{1,3})?/));
+            } catch (e) {
+              defCon.errorCount++;
+              error("//-> Fonts stroke:", e.name);
+            } finally {
+              saveChangeStatus(strock, Number(CONST.fontStroke), submitButton, defCon.Val);
+            }
+
+            /* Fonts shadow */
+
+            const shadows = qS(`#${defCon.id.shadowSize}`);
+            let drawShadow;
+            try {
+              drawShadow = new frProgress(`#${defCon.id.shadow}`, {
+                val: Number((CONST.fontShadow * 1e12) / 8e10),
+                size: 10,
+                precision: 0,
+                range: 8,
+                drag: true,
+                direction: "horizontal",
+                tip: {
+                  trigger: "hover",
+                  align: "right",
+                },
+                getVal: function (s) {
+                  shadows.value = Number(((s.val * 1e8) / 1e10) * s.range) ? (((s.val * 1e8) / 1e10) * s.range).toFixed(s.precision + 2) : "OFF";
+                  shadows._value_ = shadows.value;
+                },
+              });
+              drawShadow.onLoad(false, checkdraw(shadows, drawShadow, /OFF|\d+(?:\.\d{1,2})?/));
+            } catch (e) {
+              defCon.errorCount++;
+              error("//-> Fonts shadow:", e.name);
+            } finally {
+              saveChangeStatus(shadows, Number(CONST.fontShadow), submitButton, defCon.Val);
+            }
+
+            /* Fonts shadow color selection */
+
+            let picker;
+            const cpshow = qS(`#${defCon.id.cps}`);
+            const cp = qS(`#${defCon.id.cpm}`);
+            const body = qS("body");
+            const colorshow = qS(`#${defCon.id.color}`);
+            const colorReg = /^currentcolor$|^#([A-F0-9]{6})$/;
+            try {
+              picker = new ColorPicker({
+                dom: cp,
+                value: CONST.shadowColor,
+                def: CONST.shadowColor,
+              });
+              debug("//-> ColorPicker:", picker._lastValue);
+              cpshow.addEventListener("click", function (e) {
+                if (cp.style.display === "block") {
+                  cp.style = "display:none";
+                } else {
+                  e.stopPropagation();
+                  cp.style = "display:block";
+                }
+              });
+              cp.addEventListener(
+                "click",
+                function (e) {
+                  e.stopPropagation();
+                },
+                false
+              );
+              body.addEventListener("click", function () {
+                cp.style = "display:none";
+              });
+            } catch (e) {
+              defCon.errorCount++;
+              error("//-> Fonts shadowColor:", e.name);
+            } finally {
+              saveChangeStatus(colorshow, CONST.shadowColor, submitButton, defCon.Val);
+            }
+
+            /* Double-click allows you to edit */
+
+            const fontExT = qS(`#${defCon.id.exclude}`);
+            const fontCssT = qS(`#${defCon.id.cssfun}`);
+            if (fontCssT) {
+              fontCssT.addEventListener("dblclick", () => {
+                fontCssT.setAttribute("class", `${defCon.class.notreadonly}`);
+                fontCssT.title = "\u8bf7\u8c28\u614e\u4fee\u6539\u8be5\u53c2\u6570\uff01";
+                fontCssT.readOnly = false;
+              });
+            }
+
+            saveChangeStatus(fontCssT, CONST.fontCSS, submitButton, defCon.Val);
+            saveChangeStatus(fontExT, CONST.fontEx, submitButton, defCon.Val);
+
+            /* Expand & Collapse */
+
+            expandORcollapse(qS(`#${defCon.id.cSwitch}`), fontCssT, qS(`#${defCon.id.fontCSS}`));
+            expandORcollapse(qS(`#${defCon.id.eSwitch}`), fontExT, qS(`#${defCon.id.fontEx}`));
+
+            /* Buttons control */
+
+            qS(`#${defCon.id.submit} .${defCon.class.reset}`).addEventListener("click", async function () {
+              let frDialog = new frDialogBox({
+                trueButtonText: "重 置",
+                falseButtonText: "恢 复",
+                neutralButtonText: "取 消",
+                messageText: `<p>『重置/恢复』将当前设置初始化为 <span style="color:slategray">程序默认的初始数据</span> 或 <span style="color:slategrey">上次正确保存的数据</span>。一般是在您错误配置参数且造成无法挽回的情况下才进行重置参数的操作。</p><p style="color:darkgreen">重置：重置当前数据为程序初始值，手动保存生效。</p><p style="color:darkred">恢复：替换为上次正确保存的数据，自动恢复预览。</p><p style="color:gray">取消：放弃重置操作。</p>`,
+                titleText: "参数重置确认",
+              });
+              if (await frDialog.respond()) {
+                fontSet().fdeleteList(fontData);
+                strock.value = Number(defValue.fontStroke) ? defValue.fontStroke.toFixed(3) : "OFF";
+                strock._value_ = strock.value;
+                drawStrock.updateVal((Number(defValue.fontStroke) * 100) / drawStrock.range);
+                shadows.value = Number(defValue.fontShadow) ? defValue.fontShadow.toFixed(2) : "OFF";
+                shadows._value_ = shadows.value;
+                drawShadow.updateVal((Number(defValue.fontShadow) * 1e5) / drawShadow.range / 1e3);
+                picker.value = defValue.shadowColor;
+                picker._value_ = picker.value;
+                smoothT.checked !== defValue.fontSmooth ? smoothT.click() : debug("//-> Not Modified");
+                ffaceT.checked !== defValue.fontFace ? ffaceT.click() : debug("//-> Not Modified");
+                fontCssT.value = defValue.fontCSS;
+                fontExT.value = defValue.fontEx;
+                this.parentNode.children[3].click();
+              } else {
+                fontSet().fdeleteList(fontData);
+                strock.value = Number(CONST.fontStroke) ? CONST.fontStroke.toFixed(3) : "OFF";
+                strock._value_ = strock.value;
+                drawStrock.updateVal((Number(CONST.fontStroke) * 100) / drawStrock.range);
+                shadows.value = Number(CONST.fontShadow) ? CONST.fontShadow.toFixed(2) : "OFF";
+                shadows._value_ = shadows.value;
+                drawShadow.updateVal((Number(CONST.fontShadow) * 1e5) / drawShadow.range / 1e3);
+                picker.value = CONST.shadowColor;
+                picker._value_ = picker.value;
+                smoothT.checked !== CONST.fontSmooth ? smoothT.click() : debug("//-> Not Modified");
+                ffaceT.checked !== CONST.fontFace ? ffaceT.click() : debug("//-> Not Modified");
+                fontCssT.value = CONST.fontCSS;
+                fontExT.value = CONST.fontEx;
+              }
+              frDialog = null;
+            });
+
+            qS(`#${defCon.id.submit} .${defCon.class.submit}`).addEventListener("click", async function () {
+              const fstrock = /[0-9]+(?:\.[0-9]{1,3})?/.test(strock.value) ? Number(strock.value) : strock.value === "OFF" ? 0 : Number(defValue.fontStroke);
+              const fshadow = /[0-9]+(?:\.[0-9]{1,3})?/.test(shadows.value) ? Number(shadows.value) : shadows.value === "OFF" ? 0 : Number(defValue.fontShadow);
+              const pickedcolor = colorshow.value;
+              const fscolor = colorReg.test(pickedcolor) ? pickedcolor : defValue.shadowColor;
+              const fontlists = fontSet().fsearchList(`${defCon.id.fontName}`);
+              const fontselect =
+                fontlists.length > 0
+                  ? fontlists.indexOf("Microsoft YaHei") === 0
+                    ? defValue.fontSelect
+                    : String(singleQuoteStr(fontlists) + defValue.fontSelect)
+                  : CONST.fontSelect.indexOf("Microsoft YaHei") === 0
+                  ? defValue.fontSelect
+                  : CONST.fontSelect.split(",")[0] + "," + defValue.fontSelect;
+              const smooth = smoothT.checked;
+              const fontface = ffaceT.checked;
+              const fcss = fontCssT.value;
+              const cssfun = fcss ? fcss.replace(/"|`/g, "'") : defValue.fontCSS;
+              const fex = fontExT.value;
+              const fontex = fex ? fex.replace(/"|`/g, "'") : "";
+              if (isPreview && this.getAttribute("v-Preview")) {
+                try {
+                  shadow = fshadow > 0 && fshadow <= 8 ? `text-shadow:0 0 ${fshadow}px ${fscolor};` : "";
+                  stroke = fstrock > 0 && fstrock <= 1.0 ? `text-stroke:${fstrock}px currentcolor;-webkit-text-stroke:${fstrock}px currentcolor;paint-order:stroke fill;` : "";
+                  selection = stroke ? `::selection{color:#ffffff!important;background:#338fff!important}` : ``;
+                  smoothing = smooth ? `-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;` : "";
+                  fontfamily = fontface ? `font-family:${fontselect};` : "";
+                  refont = fontselect.split(",")[0] ? fontselect.split(",")[0].replace(/"|'/g, "") : "";
+                  fontfaces = fontface
+                    ? refont !== ""
+                      ? `@font-face{font-family:"宋体";src:local("${refont}")}@font-face{font-family:"黑体";src:local("${refont}")}@font-face{font-family:SimHei;src:local("${refont}")}@font-face{font-family:SimSun;src:local("${refont}")}@font-face{font-family:"serif";src:local("${refont}")}@font-face{font-family:"Microsoft YaHei UI";src:local("${refont}")}@font-face{font-family:"Segoe UI";src:local("${refont}")}@font-face{font-family:"sans-serif";src:local("${refont}")}@font-face{font-family:Tahoma;src:local("${refont}")}@font-face{font-family:Arial;src:local("${refont}")}@font-face{font-family:Helvetica;src:local("${refont}")}`
+                      : ``
+                    : "";
+                  exclude = fontex ? `${fontex}{text-stroke:initial!important;-webkit-text-stroke:initial!important;text-shadow:initial!important}` : "";
+                  tshadow = `${codeFont}${selection}${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontfaces}${exclude}`;
+                  this.innerText = "\u4fdd\u5b58";
+                  this.removeAttribute("style");
+                  this.removeAttribute("v-Preview");
+                  __preview__(true, tshadow, false);
+                } catch (e) {
+                  error("//->", e.name);
+                }
+              } else {
+                try {
+                  let frDialog = new frDialogBox({
+                    trueButtonText: "保存到全局数据",
+                    falseButtonText: "保存到网站数据",
+                    neutralButtonText: "取 消",
+                    messageText: `<p style='color:darkgreen;font-weight:900'>保存到全局数据：</p><p>将当前设置保存为全局设置，默认使用全局参数。</p><p style='color:darkred;font-weight:900'>保存到当前网站数据：<span id='${defCon.id.seed}_a_w_d_l_'>[<span style='font-size:12px;font-weight:normal;padding:0 2px;margin:0;cursor:pointer;color:#3e3e3e'>全部数据列表</span>]</span></p><p><span title="保存到网站数据会自动覆盖之前的数据" style="cursor:help;color:indigo" id="${defCon.id.seed}_c_w_d_">为 ${curHostname} 保存独立的设置数据。</span>`,
+                    titleText: "保存设置数据",
+                  });
+                  domains = await GMgetValue("_domains_fonts_set_");
+                  domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : default_domains;
+                  const _awdl = qS(`#${defCon.id.seed}_a_w_d_l_`);
+                  if (_awdl) {
+                    if (domainValue.length > 0) {
+                      _awdl.style.cssText += "display:line-block";
+                    } else {
+                      _awdl.style.cssText += "display:none";
+                    }
+                    _awdl.addEventListener("click", async () => {
+                      closeAllDialog(`div.${defCon.class.db}`);
+                      manageDomainList();
+                    });
+                  }
                   domains = await GMgetValue("_domains_fonts_set_");
                   domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : default_domains;
                   domainValueIndex = update_domain_index(domainValue);
-                  if (domainValueIndex !== undefined) {
-                    domainValue.splice(domainValueIndex, 1, _savedata_);
-                  } else {
-                    domainValue.push(_savedata_);
+                  if (domainValueIndex !== undefined && qS(`#${defCon.id.seed}_c_w_d_`)) {
+                    const fontDate = dateFormat("YYYY-mm-dd HH:MM:SS", new Date(domainValue[domainValueIndex].fontDate));
+                    qS(`#${defCon.id.seed}_c_w_d_`).innerHTML = String(`<p>上次保存：${fontDate} <button id="${defCon.id.seed}_c_w_d_d_"\
+                    style="padding:3px 5px;margin-left:15px;cursor:pointer;color:#333;font-size:12px;border:1px solid #777;border-radius:4px;"\
+                    title="删除数据后将刷新页面">删除当前网站数据</button></p>`).trim();
+                    qS(`#${defCon.id.seed}_c_w_d_d_`).addEventListener("click", async () => {
+                      domainValue.splice(domainValueIndex, 1);
+                      GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
+                      cache.remove("FONTLIST");
+                      closeAllDialog(`div.${defCon.class.db}`);
+                      qS(`#${defCon.id.rndId}`).style = "display:none";
+                      let frDialog = new frDialogBox({
+                        trueButtonText: "感谢使用",
+                        messageText: `<p style='color:darkred'>时间戳${fontDate}的数据已成功删除！</p><p>当前页面将自动刷新。</p>`,
+                        titleText: "个性化数据删除",
+                      });
+                      if (await frDialog.respond()) {
+                        closeAllDialog(`div.${defCon.class.db}`);
+                        location.reload();
+                      }
+                      frDialog = null;
+                    });
                   }
-                  if (domainValue.length <= maxPersonalSites || domainValueIndex !== undefined) {
-                    GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
+                  if (await frDialog.respond()) {
+                    saveDate("_fonts_set_", {
+                      fontSelect: filterHtml(fontselect),
+                      fontFace: Boolean(fontface),
+                      fontStroke: Number(fstrock),
+                      fontShadow: Number(fshadow),
+                      shadowColor: filterHtml(fscolor),
+                      fontSmooth: Boolean(smooth),
+                      fontCSS: filterHtml(cssfun),
+                      fontEx: filterHtml(fontex),
+                    });
                     defCon.successId = true;
                   } else {
-                    let frDialog = new frDialogBox({
-                      trueButtonText: "依然保存",
-                      falseButtonText: "管理列表",
-                      neutralButtonText: "我放弃",
-                      messageText: `<p style='color:darkgreen'>您已经保存超过${maxPersonalSites}个网站的个性化数据了，过多的数据会使脚本运行速度过慢，进而会影响您浏览网页的响应速度，建议您及时删除一些平时访问较少的站点设置，然后再进行新网站设置的数据保存。</p><p style='color:crimson'>您确认要继续保存吗？</p>`,
-                      titleText: "数据过多的提示",
-                    });
-                    if (await frDialog.respond()) {
+                    const _savedata_ = {
+                      domain: curHostname,
+                      fontDate: new Date(),
+                      fontSelect: filterHtml(fontselect),
+                      fontFace: Boolean(fontface),
+                      fontStroke: Number(fstrock),
+                      fontShadow: Number(fshadow),
+                      shadowColor: filterHtml(fscolor),
+                      fontSmooth: Boolean(smooth),
+                      fontCSS: filterHtml(cssfun),
+                      fontEx: filterHtml(fontex),
+                    };
+                    domains = await GMgetValue("_domains_fonts_set_");
+                    domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : default_domains;
+                    domainValueIndex = update_domain_index(domainValue);
+                    if (domainValueIndex !== undefined) {
+                      domainValue.splice(domainValueIndex, 1, _savedata_);
+                    } else {
+                      domainValue.push(_savedata_);
+                    }
+                    if (domainValue.length <= maxPersonalSites || domainValueIndex !== undefined) {
                       GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
                       defCon.successId = true;
                     } else {
-                      manageDomainList();
-                      defCon.successId = false;
+                      let frDialog = new frDialogBox({
+                        trueButtonText: "依然保存",
+                        falseButtonText: "管理列表",
+                        neutralButtonText: "我放弃",
+                        messageText: `<p style='color:darkgreen'>您已经保存超过${maxPersonalSites}个网站的个性化数据了，过多的数据会使脚本运行速度过慢，进而会影响您浏览网页的响应速度，建议您及时删除一些平时访问较少的站点设置，然后再进行新网站设置的数据保存。</p><p style='color:crimson'>您确认要继续保存吗？</p>`,
+                        titleText: "数据过多的提示",
+                      });
+                      if (await frDialog.respond()) {
+                        GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
+                        defCon.successId = true;
+                      } else {
+                        manageDomainList();
+                        defCon.successId = false;
+                      }
+                      frDialog = null;
                     }
-                    frDialog = null;
                   }
-                }
-                frDialog = null;
-              } catch (e) {
-                error("//-> saveDate:", e.name);
-                reportErrortoAuthor(e, true);
-                defCon.successId = false;
-              } finally {
-                if (defCon.successId) {
-                  sessionStorage.removeItem("fontCheckList");
-                  closeAllDialog(`div.${defCon.class.db}`);
-                  let frDialog = new frDialogBox({
-                    trueButtonText: "感谢使用",
-                    messageText: `<p>您设置的参数已保存，页面将会自动刷新！</p>`,
-                    titleText: "数据保存完毕",
-                  });
-                  qS(`#${defCon.id.rndId}`).style = "display:none";
-                  if (await frDialog.respond()) {
-                    frDialog = null;
-                    location.reload();
+                  frDialog = null;
+                } catch (e) {
+                  error("//-> saveDate:", e.name);
+                  reportErrortoAuthor(e, true);
+                  defCon.successId = false;
+                } finally {
+                  if (defCon.successId) {
+                    cache.remove("FONTLIST");
+                    closeAllDialog(`div.${defCon.class.db}`);
+                    let frDialog = new frDialogBox({
+                      trueButtonText: "感谢使用",
+                      messageText: `<p>您设置的参数已保存，页面将会自动刷新！</p>`,
+                      titleText: "数据保存完毕",
+                    });
+                    qS(`#${defCon.id.rndId}`).style = "display:none";
+                    if (await frDialog.respond()) {
+                      frDialog = null;
+                      location.reload();
+                    }
                   }
                 }
               }
-            }
-          });
+            });
 
-          backupData(isBackupFunction, default_domains);
+            backupData(isBackupFunction, default_domains);
 
-          qS(`#${defCon.id.submit} .${defCon.class.cancel}`).addEventListener("click", () => {
-            qS(`#${defCon.id.rndId}`).style = "display:none";
-            closeAllDialog(`div.${defCon.class.db}`);
-          });
+            qS(`#${defCon.id.submit} .${defCon.class.cancel}`).addEventListener("click", () => {
+              qS(`#${defCon.id.rndId}`).style = "display:none";
+              closeAllDialog(`div.${defCon.class.db}`);
+            });
+          }
+        } catch (e) {
+          defCon.errorCount++;
+          error("%c[Error]%c\n%s", "font-weight:bold;color:red", "font-weight:bold;color:darkred", e);
+          reportErrortoAuthor(e);
         }
-      } catch (e) {
-        defCon.errorCount++;
-        error("%c[Error]%c\n%s", "font-weight:bold;color:red", "font-weight:bold;color:darkred", e);
-        reportErrortoAuthor(e);
-      }
-    }, 2e3);
+      },
+      cache.get("FONTLIST") ? 1e3 : 2e3
+    );
 
     /* Menus Insert */
 
@@ -2639,23 +2706,29 @@
               <ul class="${defCon.class.main}" style="color:darkgoldenrod;font:500 16px/150% 'Microsoft YaHei',sans-serif!important">
                 <li id="${defCon.id.bk}">
                   <div style="float:left;font-size:16px!important">本地备份功能（默认：开启）</div>
-                  <div style="float:right;margin:-2px 2px 0 10px;font-size:16px!important">
+                  <div style="float:right;margin:-2px 2px 0 28px;font-size:16px!important">
                     <input type="checkbox" id="${defCon.id.isbackup}" class="${defCon.class.checkbox}" ${isBackupFunction ? "checked" : ""} />
                     <label for="${defCon.id.isbackup}"></label>
                   </div>
                 </li>
                 <li id="${defCon.id.pv}">
                   <div style="float:left;font-size:16px!important">保存预览功能（默认：关闭）</div>
-                  <div style="float:right;margin:-2px 2px 0 10px;font-size:16px!important">
+                  <div style="float:right;margin:-2px 2px 0 28px;font-size:16px!important">
                     <input type="checkbox" id="${defCon.id.ispreview}" class="${defCon.class.checkbox}" ${isPreview ? "checked" : ""} />
                     <label for="${defCon.id.ispreview}"></label>
                   </div>
                 </li>
                 <li id="${defCon.id.mps}">
-                  <div style="float:left;font-size:16px!important">个性化设置网站总数</div>
-                  <div style="float:right;margin:-6px 2px 0 15px">
-                    <input style="font:500 16px/140% impact,serif-sans!important;border:2px solid darkgoldenrod;border-radius:4px;width:50px;\
-                    text-align:center;padding:5px;color:#333;" maxlength="4" id="${defCon.id.maxps}" placeholder="100" value="${maxPersonalSites}" />
+                  <div style="float:left;font-size:16px!important">个性化设置总数（默认：100）</div>
+                  <div style="float:right;margin:-6px 2px 0 16px">
+                    <input style="font:500 16px/140% impact,serif-sans!important;border:2px solid darkgoldenrod;border-radius:4px;width:70px;\
+                    text-align:center;padding:5px;color:#333;box-sizing:border-box" maxlength="4" id="${defCon.id.maxps}" placeholder="100" value="${maxPersonalSites}" />
+                  </div>
+                </li>
+               <li id="${defCon.id.flc}">
+                  <div style="float:left;font-size:16px!important">字体列表缓存（缓存：8小时）</div>
+                  <div style="float:right;margin:-4px 2px 0 20px">
+                    <button id="${defCon.id.flcid}" style="padding:4px 6px" title="如果字体列表内容不能更新，请重建缓存！">重建缓存</button>
                   </div>
                 </li>
                 <ol id="${defCon.id.feedback}" style="padding:0;margin:0;font-size:16px;color:#333;font-weight:600;cursor:help"\
@@ -2669,6 +2742,19 @@
             _mps = Number(qS(`#${defCon.id.maxps}`).value);
             qS(`#${defCon.id.maxps}`).addEventListener("input", function () {
               this.value = this.value.replace(/[^0-9]/g, "");
+            });
+            qS(`#${defCon.id.flcid}`).addEventListener("click", async () => {
+              closeAllDialog(`div.${defCon.class.db}`);
+              cache.remove("FONTLIST");
+              let frDialog = new frDialogBox({
+                trueButtonText: "确 定",
+                messageText: `<p style="font-size:18px;text-align:center;padding-bottom:6px;color:darkgoldenrod">字体列表缓存已重建，页面即将刷新！</p><p style="text-align:center"><a style="display:inline-block;border:2px solid darkgoldenrod;-webkit-border-radius:8px;border-radius:8px;width:302px;height:237px;background:url('https://img.zcool.cn/community/038dde458f9a874a8012160f7417f6e.gif') 50% 50% no-repeat;overflow:hidden"><img src='https://z3.ax1x.com/2021/09/04/h2KudK.gif' alt='字体列表缓存重建'/></a></p>`,
+                titleText: "字体列表缓存重建",
+              });
+              if (await frDialog.respond()) {
+                frDialog = null;
+                location.reload();
+              }
             });
             qS(`#${defCon.id.feedback}`).addEventListener("click", () => {
               window.open(feedback, "feedback");
@@ -2757,7 +2843,7 @@
               const _Exclude_site_ = await GMgetValue("_Exclude_site_");
               const _domains_fonts_set_ = await GMgetValue("_domains_fonts_set_");
               const _domains_fonts_set__ = _domains_fonts_set_ ? _domains_fonts_set_ : defCon.encrypt(JSON.stringify(def));
-              const db_R = defCon.encrypt(`\u26a1${GMinfo.scriptMetaStr.match(/(\u0074\u0068\u006f\u0072\s+)(\S+)/)[2]}\ud83d\udc96${defCon.scriptName}`);
+              const db_R = "QXV0aGVyJUUyJTlBJUExRjl5NG5nJUYwJTlGJTkyJTk2JTQw" + defCon.encrypt(defCon.scriptName);
               const db_0 = defCon.encrypt(new Date());
               const db_1 = _fonts_set_;
               const db_2 = _Exclude_site_;
@@ -3048,6 +3134,7 @@
           closeAllDialog(`div.${defCon.class.db}`);
           frDialog = null;
           if (defCon.equal) {
+            cache.remove("FONTLIST");
             qS(`#${defCon.id.rndId}`).style = "display:none";
             location.reload();
           }
