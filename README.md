@@ -6,12 +6,11 @@
 [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues)
 [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/login?return_to=%2FF9y4ng%2FGreasyFork-Scripts)
 
-- ## [**Font Rendering.user.js**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering) (`version 2021.09.05.3`)
+- ## [**Font Rendering.user.js**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering) (`version 2021.09.05.5`)
 
-  简介：让每个页面的字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用
-  设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染。
+  简介：让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的 Greasemonkey 脚本和浏览器插件。
 
-  > `version 2021.09.05.3`
+  > `version 2021.09.05.5`
 
   重大版本更新，请使用前仔细查看
   [**脚本使用说明**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering)。`New`
@@ -21,7 +20,7 @@
   `!!! 请勿使用来源未知的备份文件，以防跨站脚本攻击 !!!`
 
   ```text
-  @ 逐步替换面向OPENUSERJS所有链接指向。
+  ! 禁用 openuserJS 更新源地址，请至 Github/GreasyFork 更新最新版。
   @ 修正bugs, 优化代码。
   ```
 

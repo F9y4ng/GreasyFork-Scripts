@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.09.05.3
+// @version           2021.09.05.5
 // @author            F9y4ng
 // @description       让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。【PC脚本】
 // @description:zh    让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。【PC脚本】
@@ -1793,17 +1793,19 @@
 
     addLoadEvent(async () => {
       if (Number(sessionStorage.getItem("_notice_"))) {
-        if (curWindowtop) {
+        if (curWindowtop && !curHostname.includes("greasyfork.org")) {
           let frDialog = new frDialogBox({
             trueButtonText: "好，去看看",
             falseButtonText: "不，算了吧",
             messageText: String(`
-            <p><span style="font:bold 22px Candara;color:crimson">您好！</span>这是您首次使用${defCon.scriptName}的新版本 <span style="font-family:Candara;color:darkorange;font-size:18px;font-weight:900;font-style:italic">v${defCon.curVersion}</span>，具体功能敬请试用。</p>
+            <p><span style="font:bold 22px Candara;color:crimson">您好！</span>这是您首次使用${defCon.scriptName}的新版本\
+            <span style="font-family:Candara;color:darkorange;font-size:18px;font-weight:900;font-style:italic">v${defCon.curVersion}</span>，具体功能敬请试用。</p>
             <p><ul>
-              <li>已发布Release版本。</li>
+              <li>已发布 Release 版本。</li>
+              <li>已发布 Github WIKI。</li>
               <li>修正bugs, 优化代码。</li>
             </ul></p>
-            <p>稍后将为您打开新版帮助文件，要去看一下吗？</p>
+            <p>稍后将为您打开帮助文件，要去看一下吗？</p>
           `).trim(),
             titleText: "温馨提示",
           });
