@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.09.05.2
+// @version           2021.09.05.3
 // @author            F9y4ng
 // @description       让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。【PC脚本】
 // @description:zh    让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。【PC脚本】
@@ -80,7 +80,6 @@
     scriptName: getScriptNameViaLanguage(),
     curVersion: GMinfo.script.version,
     supportURL: GMinfo.script.supportURL,
-    guideUrl: GMinfo.script.namespace,
     errorCount: 0,
     domainCount: 0,
     successId: false,
@@ -283,6 +282,7 @@
 
   const curHostname = defCon.hostname();
   const curWindowtop = defCon.isWinTop();
+  const guideURI = defCon.decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkY0MTY2ODg=");
   const qS = str => {
     return document.querySelector(str);
   };
@@ -1809,7 +1809,7 @@
           });
           sessionStorage.removeItem("_notice_");
           if (await frDialog.respond()) {
-            window.open(`${defCon.guideUrl}`, "Guide");
+            window.open(`${guideURI}`, "Guide");
           }
           frDialog = null;
         }
@@ -2671,7 +2671,7 @@
               qS(`#${defCon.id.rndId}`).style = "display:none";
             });
             qS(`.${defCon.class.title} .${defCon.class.guide}`).addEventListener("click", () => {
-              window.open(`${defCon.guideUrl}`, "Guide");
+              window.open(`${guideURI}`, "Guide");
             });
           });
           Exclude_site = GMregisterMenuCommand(`\ufff3\u26d4 排除渲染 ${curHostname}`, async () => {
@@ -2782,7 +2782,7 @@
                 location.reload();
               }
             } else {
-              window.open(`${defCon.guideUrl}`, "Guide");
+              window.open(`${guideURI}`, "Guide");
             }
             frDialog = null;
           });
