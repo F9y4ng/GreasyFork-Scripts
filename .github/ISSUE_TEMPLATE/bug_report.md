@@ -1,38 +1,34 @@
 ---
-name: Bug report
-about: Create a report to help us improve
+name: 错误报告（Bug report）
+about: 创建错误报告以帮助我们改进
 title: ''
 labels: ''
 assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**描述错误信息**
+清楚而简洁地描述了错误是什么。
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+**错误再现**
+重现行为的步骤：（例如）
+1. 去XX网址 ..."
+2. 单击YY链接/按钮 "..."
+3. 向下滚动到ZZ位置 "..."
+4. 查看错误
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+**预期结果**
+清晰明了地描述你所期待的会发生。
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+**屏幕截图**
+如果适用，请添加屏幕截图以帮助解释您的问题。
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+**PC端（请填写以下信息）：**
+- 操作系统： [例如 Win10]
+- 浏览器 [例如 Chrome, Firefox]
+- 版本 [例如 93.0.4577.63]
+- 脚本扩展 [例如 TamperMonkey ]
+- 脚本扩展版本 [例如 4.13.6138 ]
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
-
-**Additional context**
-Add any other context about the problem here.
+**附加信息**
+在此处添加有关此问题的任何附加信息。
