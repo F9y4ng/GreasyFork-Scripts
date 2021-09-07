@@ -1,9 +1,9 @@
 ---
 name: 新功能要求（Feature request）
 about: 给这个项目的新想法或是提出新功能建议
-title: ''
-labels: ''
-assignees: ''
+title: "[新增功能] "
+labels: 新功能（Feature）
+assignees: F9y4ng
 
 ---
 

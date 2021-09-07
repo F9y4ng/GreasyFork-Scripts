@@ -1,9 +1,9 @@
 ---
 name: 错误报告（Bug report）
 about: 创建错误报告以帮助我们改进
-title: ''
-labels: ''
-assignees: ''
+title: "[发现错误] "
+labels: 错误（Bug）
+assignees: F9y4ng
 
 ---
 
