@@ -5,17 +5,17 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.09.05.5
+// @version           2021.09.08.1
 // @author            F9y4ng
-// @description       让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。【PC脚本】
-// @description:zh    让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。【PC脚本】
-// @description:zh-TW 讓每個頁面的中文字體變得有質感，默認使用微軟雅黑字體，亦可自定義設置多種中文字體，附加字體描邊、字體重寫、字體陰影、字體平滑、對特殊樣式元素的過濾和許可等效果，腳本菜單中可使用設置界面進行參數設置，亦可對某域名下所有頁面進行排除渲染，兼容常用的Greasemonkey腳本和瀏覽器插件。【PC腳本】
-// @description:ja    各ページの中国語フォントに質感を持たせ、デフォルトではマイクロソフトの雅黒フォントを使って、複数の中国語フォントをカスタマイズできます。フォントの描画、フォントの陰影、フォントの平滑化、特殊なスタイル要素のフィルタリングと許可などの効果があります。スクリプトメニューでは設定画面を使ってパラメータ設定ができます。また、ドメイン名のすべてのページに対してレンダリングを排除することができ、よく使用されるGreasemonkeyスクリプトとブラウザプラグインとの互換性があります。【PCスクリプト】
-// @description:en    Let each page of the Chinese font becomes texture, the default uses Microsoft YaHei font, and you can customize the set of Chinese fonts, additional font strokes, font rewriting, font shadows, smooth, and special Filtering and licensing of style elements, etc., you can use the setting interface to perform parameter settings in the script menu, or you can exclude all pages under a domain name, compatible with common Greasemonkey scripts and browser plugins. [PC-script]
+// @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
+// @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
+// @description:zh-TW 無需安裝MacType，優化浏覽器字體顯示，讓每個頁面的中文字體變得有質感，默認使用微軟雅黑字體，亦可自定義設置多種中文字體，附加字體描邊、字體重寫、字體陰影、字體平滑、對特殊樣式元素的過濾和許可等效果，腳本菜單中可使用設置界面進行參數設置，亦可對某域名下所有頁面進行排除渲染，兼容常用的Greasemonkey腳本和瀏覽器插件。
+// @description:ja    MacTypeをインストールすることなく、ブラウザのフォント表示を最適化し、，各ページの中国語フォントに質感を持たせ、デフォルトではマイクロソフトの雅黒フォントを使って、複数の中国語フォントをカスタマイズできます。フォントの描画、フォントの陰影、フォントの平滑化、特殊なスタイル要素のフィルタリングと許可などの効果があります。スクリプトメニューでは設定画面を使ってパラメータ設定ができます。また、ドメイン名のすべてのページに対してレンダリングを排除することができ、よく使用されるGreasemonkeyスクリプトとブラウザプラグインとの互換性があります。
+// @description:en    No need to install MacType to optimize browser font display, Let each page of the Chinese font becomes texture, the default uses Microsoft YaHei font, and you can customize the set of Chinese fonts, additional font strokes, font rewriting, font shadows, smooth, and special Filtering and licensing of style elements, etc., you can use the setting interface to perform parameter settings in the script menu, or you can exclude all pages under a domain name, compatible with common Greasemonkey scripts and browser plugins.
 // @namespace       https://openuserjs.org/scripts/f9y4ng/Font_Rendering_(Customized)
 // @icon            https://img.icons8.com/ios-filled/50/26e07f/font-style-formatting.png
+// @homepageURL     https://f9y4ng.github.io/GreasyFork-Scripts/
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
-// @homepageURL     https://github.com/F9y4ng/GreasyFork-Scripts
 // @updateURL       https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.meta.js
 // @downloadURL     https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
 // @include         *
@@ -409,56 +409,54 @@
     }
   }
 
-  /* expire for localstorge */
+  /* expire for fontlist cache */
 
   const cache = {
-    key: {
-      expiredTime: ":EXPIRED:TIME",
-      expiredStartTime: ":EXPIRED:STARTTIME",
+    value: function (data) {
+      const exp = 432e5; // 12 hrs
+      return {
+        data: data,
+        expired: new Date().getTime() + exp,
+      };
     },
 
-    set: function (key, value, expiredTimeMS) {
-      if (expiredTimeMS === 0 || expiredTimeMS === null) {
-        localStorage.setItem(key, value);
+    set: function (key, options) {
+      const obj = defCon.encrypt(JSON.stringify(cache.value(options)));
+      GMsetValue(key, obj);
+    },
+
+    get: async function (key) {
+      const obj = await GMgetValue(key);
+      if (!obj) {
+        return obj;
       } else {
-        localStorage.setItem(key, defCon.encrypt(JSON.stringify(value)));
-        localStorage.setItem(key + cache.key.expiredTime, expiredTimeMS);
-        localStorage.setItem(key + cache.key.expiredStartTime, new Date().getTime());
-      }
-    },
-
-    get: function (key) {
-      const expiredTimeMS = localStorage.getItem(key + cache.key.expiredTime);
-      const expiredStartTime = localStorage.getItem(key + cache.key.expiredStartTime);
-      const curTime = new Date().getTime();
-      const sum = Number(expiredStartTime) + Number(expiredTimeMS);
-      if (sum > curTime) {
-        if (localStorage.getItem(key)) {
-          return JSON.parse(defCon.decrypt(localStorage.getItem(key)));
-        } else {
+        try {
+          const value = JSON.parse(defCon.decrypt(obj));
+          const data = value.data;
+          const expiredTime = value.expired;
+          const curTime = new Date().getTime();
+          if (expiredTime > curTime) {
+            if (typeof data === "object") {
+              return data;
+            } else {
+              cache.remove(key);
+              return null;
+            }
+          } else {
+            cache.remove(key);
+            return null;
+          }
+        } catch (e) {
+          error("//-> cache.get Error:", e.name);
           cache.remove(key);
           return null;
         }
-      } else {
-        cache.remove(key);
-        return null;
       }
     },
 
     remove: function (key) {
-      localStorage.removeItem(key);
-      localStorage.removeItem(key + cache.key.expiredTime);
-      localStorage.removeItem(key + cache.key.expiredStartTime);
-    },
-
-    expired: function (key, expiredTimeMS) {
-      if (cache.get(key) !== null) {
-        localStorage.setItem(key + cache.key.expiredTime, expiredTimeMS);
-      }
-    },
-
-    clear: function () {
-      localStorage.clear();
+      localStorage.clear(); /* Temporary */
+      GMdeleteValue(key);
     },
   };
 
@@ -1612,9 +1610,11 @@
     { ch: "更紗黑體 TC", en: "Sarasa Gothic TC" },
     { ch: "冬青黑体简", en: "Hiragino Sans GB" },
     { ch: "兰亭黑-简", en: "Lantinghei SC" },
+    { ch: "小米兰亭", en: "MI Lanting" },
     { ch: "OPPO Sans", en: "OPPOSans" },
     { ch: "霞鹜文楷", en: "LXGW WenKai" },
     { ch: "霞鹜新晰黑", en: "LXGW New Clear Gothic" },
+    { ch: "字悦班马宋刻本", en: "ziyuebanmasongkeben" },
     { ch: "鸿蒙黑体", en: "HarmonyOS Sans SC" },
     { ch: "浪漫雅圆", en: "LMYY" },
     { ch: "思源黑体", en: "Source Han Sans SC" },
@@ -2243,19 +2243,20 @@
         try {
           if (curWindowtop) {
             try {
-              if (cache.get("FONTLIST")) {
+              const fontListwithExpire = await cache.get("_fontlist_");
+              if (fontListwithExpire) {
                 debug("//-> %cLoad font_Data from Cache", "color:green;font-weight:bold");
-                fontData = cache.get("FONTLIST");
+                fontData = fontListwithExpire;
               } else {
                 debug("//-> %cStart real-time font detection", "color:crimson;font-weight:bold");
                 fontData = await fontCheck_detectOnce();
-                cache.set("FONTLIST", fontData, 288e5);
+                cache.set("_fontlist_", fontData);
               }
             } catch (e) {
-              debug("//-> %cInitialized font_Data caused by Errors: ", "background-color:yellow;color:red;font-weight:bold", e.name);
-              cache.remove("FONTLIST");
+              debug("//-> %cInitialized font_Data caused by Errors: ", "background-color:yellow;color:red;font-weight:bold", e);
+              cache.remove("_fontlist_");
               fontData = await fontCheck_detectOnce();
-              cache.set("FONTLIST", fontData, 288e5);
+              cache.set("_fontlist_", fontData);
             }
 
             /* Fonts selection */
@@ -2544,7 +2545,7 @@
                     qS(`#${defCon.id.seed}_c_w_d_d_`).addEventListener("click", async () => {
                       domainValue.splice(domainValueIndex, 1);
                       GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
-                      cache.remove("FONTLIST");
+                      cache.remove("_fontlist_");
                       closeAllDialog(`div.${defCon.class.db}`);
                       qS(`#${defCon.id.rndId}`).style = "display:none";
                       let frDialog = new frDialogBox({
@@ -2620,7 +2621,7 @@
                   defCon.successId = false;
                 } finally {
                   if (defCon.successId) {
-                    cache.remove("FONTLIST");
+                    cache.remove("_fontlist_");
                     closeAllDialog(`div.${defCon.class.db}`);
                     let frDialog = new frDialogBox({
                       trueButtonText: "感谢使用",
@@ -2650,7 +2651,7 @@
           reportErrortoAuthor(e);
         }
       },
-      cache.get("FONTLIST") ? 1e3 : 2e3
+      (await cache.get("_fontlist_")) ? 1e3 : 2e3
     );
 
     /* Menus Insert */
@@ -2728,8 +2729,8 @@
                   </div>
                 </li>
                <li id="${defCon.id.flc}">
-                  <div style="float:left;font-size:16px!important">字体列表缓存（缓存：8小时）</div>
-                  <div style="float:right;margin:-4px 2px 0 20px">
+                  <div style="float:left;font-size:16px!important">字体列表缓存（缓存：12小时）</div>
+                  <div style="float:right;margin:-4px 2px 0 10px">
                     <button id="${defCon.id.flcid}" style="padding:4px 6px" title="如果字体列表内容不能更新，请重建缓存！">重建缓存</button>
                   </div>
                 </li>
@@ -2747,7 +2748,7 @@
             });
             qS(`#${defCon.id.flcid}`).addEventListener("click", async () => {
               closeAllDialog(`div.${defCon.class.db}`);
-              cache.remove("FONTLIST");
+              cache.remove("_fontlist_");
               let frDialog = new frDialogBox({
                 trueButtonText: "确 定",
                 messageText: `<p style="font-size:18px;text-align:center;padding-bottom:6px;color:darkgoldenrod">字体列表缓存已重建，页面即将刷新！</p><p style="text-align:center"><a style="display:inline-block;border:2px solid darkgoldenrod;-webkit-border-radius:8px;border-radius:8px;width:302px;height:237px;background:url('https://img.zcool.cn/community/038dde458f9a874a8012160f7417f6e.gif') 50% 50% no-repeat;overflow:hidden"><img src='https://z3.ax1x.com/2021/09/04/h2KudK.gif' alt='字体列表缓存重建'/></a></p>`,
@@ -3136,7 +3137,7 @@
           closeAllDialog(`div.${defCon.class.db}`);
           frDialog = null;
           if (defCon.equal) {
-            cache.remove("FONTLIST");
+            cache.remove("_fontlist_");
             qS(`#${defCon.id.rndId}`).style = "display:none";
             location.reload();
           }

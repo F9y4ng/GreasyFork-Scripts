@@ -5,7 +5,7 @@
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:jp         Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version         3.6.20210905.2
+// @version         3.6.20210908.1
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:zh  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
@@ -13,8 +13,10 @@
 // @description:zh-TW 谷歌、百度、必應的搜索引擎跳轉工具，腳本默認自動更新檢測，可在菜單自定義設置必應按鈕，搜索引擎跳轉的最佳體驗。
 // @description:jp  Google、Baidu、Bingの検索エンジンのジャンプツールは、スクリプトのデフォルトの自動更新検出は、メニューのカスタマイズに必要なボタンを設定することができます。
 // @namespace       https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
-// @homepageURL     https://github.com/F9y4ng/GreasyFork-Scripts
+// @homepageURL     https://f9y4ng.github.io/GreasyFork-Scripts
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
+// @updateURL       https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.meta.js
+// @downloadURL     https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js
 // @icon            https://img.icons8.com/fluent/48/000000/google-logo.png
 // @include         *://*.google.*/search*
 // @include         *://*.google.*/webhp*
@@ -23,8 +25,6 @@
 // @include         *://www1.baidu.com/*
 // @include         *://image.baidu.com/*
 // @include         *://*.bing.com/*
-// @exclude         *://*.google.*/sorry*
-// @exclude         *://*.google.*/url*
 // @exclude         *://www.baidu.com/link*
 // @compatible      edge 兼容TamperMonkey, ViolentMonkey
 // @compatible      Chrome 兼容TamperMonkey, ViolentMonkey
