@@ -4,14 +4,14 @@
 // @name:zh         谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
-// @name:jp         Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version         3.7.20210914.2
+// @name:ja         Google、Baidu、Bingの検索エンジンのジャンプツール
+// @version         3.7.20210919.1
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:zh  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:en  Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
 // @description:zh-TW 谷歌、百度、必應的搜索引擎跳轉工具，腳本默認自動更新檢測，可在菜單自定義設置必應按鈕，搜索引擎跳轉的最佳體驗。
-// @description:jp  Google、Baidu、Bingの検索エンジンのジャンプツールは、スクリプトのデフォルトの自動更新検出は、メニューのカスタマイズに必要なボタンを設定することができます。
+// @description:ja  Google、Baidu、Bingの検索エンジンのジャンプツールは、スクリプトのデフォルトの自動更新検出は、メニューのカスタマイズに必要なボタンを設定することができます。
 // @namespace       https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
 // @homepageURL     https://f9y4ng.github.io/GreasyFork-Scripts
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
@@ -31,7 +31,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            适配页面缩放，修正位移问题。\n优化CSS，增强CSS样式兼容性。\n修正其他bugs, 优化代码。
+// @note            修正语言适配的错误。\n修正bugs, 优化代码。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -532,9 +532,9 @@
   function fixedtransformmatrix() {
     const _transform = window.getComputedStyle(document.body, null).getPropertyValue("transform");
     if (_transform && _transform !== "none") {
-      window.scrollTo(document.documentElement.clientWidth, 0);
       const _clientY = Number(_transform.split(",")[3]);
       if (_clientY && _clientY !== 1) {
+        window.scrollTo(document.documentElement.clientWidth, 0);
         document.querySelectorAll(`.${Notice.noticejs}-bottomRight`).forEach(item => {
           item.style = `top:${(document.documentElement.clientHeight - item.clientHeight) / _clientY - 30 * _clientY}px;right:10px`;
         });
