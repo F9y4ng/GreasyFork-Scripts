@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.09.19.1
+// @version           2021.09.19.2
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -1854,7 +1854,7 @@
       ? String(`
           <li id="${defCon.id.fontSize}">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;min-width:auto">
-              字体比例缩放<input id="${defCon.id.fontZoom}" v="number" maxlength="4" />
+              字体比例缩放<input id="${defCon.id.fontZoom}" v="number" maxlength="5" />
             </div>
             <div class="${defCon.class.slider}">
               <input type="text" id="${defCon.id.zoomSize}" />
@@ -1896,7 +1896,7 @@
           ${tFontSize}
           <li id="${defCon.id.fontStroke}">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;min-width:auto">
-              字体描边尺寸<input id="${defCon.id.strokeSize}" v="number" maxlength="4" />
+              字体描边尺寸<input id="${defCon.id.strokeSize}" v="number" maxlength="5" />
             </div>
             <div class="${defCon.class.slider}">
               <input type="text" id="${defCon.id.stroke}" />
@@ -2055,6 +2055,8 @@
               qS(`.${defCon.class.title} .${defCon.class.guide}`).addEventListener("click", () => {
                 GMopenInTab(guideURI, defCon.options);
               });
+            } else if (defCon.tZoom !== 1 && (getBrowser.type("core").Gecko || getBrowser.type("core").Presto)) {
+              window.scrollTo(document.documentElement.clientWidth, 0);
             }
           });
           Exclude_site ? GMunregisterMenuCommand(Exclude_site) : debug("//-> No Exclude_site_Menu");
