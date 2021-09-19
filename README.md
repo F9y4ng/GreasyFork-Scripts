@@ -5,11 +5,11 @@
 [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues)
 [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/login?return_to=%2FF9y4ng%2FGreasyFork-Scripts)
 
-## 字体渲染（自用脚本）[**Font Rendering.user.js**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering) (`version 2021.09.19.2`)
+## 字体渲染（自用脚本）[**Font Rendering.user.js**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering) (`version 2021.09.20.1`)
 
 简介：无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的 Greasemonkey 脚本和浏览器插件。
 
-> `version 2021.09.19.2`
+> `version 2021.09.20.1`
 
 `!!! 重大版本更新，请使用前仔细查看 !!!` 【[**脚本使用说明**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering)】`New`
 
@@ -27,7 +27,7 @@
 @ 优化字体列表缓存，独立缓存每个网站设置，缓存时间24小时。
 @ 优化与MarkDownload浏览器扩展的兼容性。
 @ 优化CSS样式，优化部分代码逻辑，兼容更多网站。
-@ 修正bugs, 优化代码。
+@ 修正bugs, 优化代码*。
 ```
 
 > **关于字体缩放**

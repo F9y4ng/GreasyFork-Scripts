@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.09.19.2
+// @version           2021.09.20.1
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -160,7 +160,7 @@
       try {
         return top.location.hostname;
       } catch (e) {
-        error("//-> hostname:", e.name);
+        error("\u27A4 hostname:", e.name);
         return location.hostname;
       }
     },
@@ -168,7 +168,7 @@
       try {
         return window.self === window.top;
       } catch (e) {
-        error("//-> isWinTop:", e.name);
+        error("\u27A4 isWinTop:", e.name);
         const eI = parent.frames.length > 0;
         return !eI;
       }
@@ -212,7 +212,7 @@
     backup: defCon.randString(6, true),
     files: defCon.randString(5, true),
     tfiles: defCon.randString(5, true),
-    db: defCon.randString(8, true),
+    db: defCon.randString(12, true),
     bk: defCon.randString(7, true),
     isbackup: defCon.randString(6, true),
     pv: defCon.randString(7, true),
@@ -265,7 +265,7 @@
     cpgb: defCon.randString(6, true),
     cpc: defCon.randString(7, true),
     cprb: defCon.randString(7, true),
-    db: defCon.randString(9, true),
+    db: defCon.randString(10, true),
     dbbc: defCon.randString(8, true),
     dbb: defCon.randString(7, true),
     dbm: defCon.randString(7, true),
@@ -300,7 +300,7 @@
     window.addEventListener("testPassive", null, opts);
     window.removeEventListener("testPassive", null, opts);
   } catch (e) {
-    error("//-> supportsPassive:", e.name);
+    error("\u27A4 supportsPassive:", e.name);
   }
 
   /* Initialized important functions */
@@ -366,7 +366,7 @@
             }
           }
         } catch (e) {
-          error("//-> addStyle", e);
+          error("\u27A4 addStyle", e);
         }
       },
       20,
@@ -388,7 +388,7 @@
         removeNodes[i].remove();
       }
     } catch (e) {
-      error("//-> safeRemove:", e);
+      error("\u27A4 safeRemove:", e);
     }
   }
 
@@ -406,7 +406,7 @@
             }
           }
         } catch (e) {
-          error("//-> window.frames:", e);
+          error("\u27A4 window.frames:", e);
         }
       });
       defCon.preview = !s;
@@ -469,7 +469,7 @@
   const cache = {
     value: function (data) {
       const exp = 864e5; // 24 hrs
-      debug("//-> cache expires define: %s hrs", exp / 36e5);
+      debug("\u27A4 cache expires define: %s hrs", exp / 36e5);
       return {
         data: data,
         expired: new Date().getTime() + exp,
@@ -491,7 +491,7 @@
           const data = value.data;
           const expiredTime = value.expired;
           const curTime = new Date().getTime();
-          debug("//-> cache expires remain: %s hrs", ((expiredTime - curTime) / 36e5).toFixed(2));
+          debug("\u27A4 cache expires remain: %s hrs", ((expiredTime - curTime) / 36e5).toFixed(2));
           if (expiredTime > curTime) {
             if (typeof data === "object") {
               return data;
@@ -504,7 +504,7 @@
             return null;
           }
         } catch (e) {
-          error("//-> cache.get error:", e);
+          error("\u27A4 cache.get error:", e);
           cache.remove(key);
           return null;
         }
@@ -1057,21 +1057,6 @@
       this._resetfrDialogPosition(0, 0);
     }
 
-    _resetfrDialogPosition(X, Y) {
-      const zoom = Number(window.getComputedStyle(this.parent, null).getPropertyValue("zoom")) || defCon.tZoom || 1;
-      if (zoom !== 1) {
-        if (getBrowser.type("core").Gecko || getBrowser.type("core").Presto) {
-          Y = Number(zoom > 1 ? 130 * (0.4 + 1 / zoom) : 250 * (2 - zoom));
-          X = Number(zoom > 1 ? (zoom - 1) * 55 * (1 + zoom) - 10 / zoom : (((zoom - 1) * 95 * zoom - 10) * 2.25) / zoom);
-          this.zoomText = `transform:matrix(${1 / zoom}, 0, 0, ${1 / zoom}, ${X}, ${Y});top:0;right:0`;
-          window.scrollTo(document.documentElement.clientWidth, 0);
-        } else {
-          this.zoomText = `zoom:${1 / zoom}`;
-        }
-      }
-      this.frDialog.style.cssText += this.zoomText;
-    }
-
     _createfrDialog(context) {
       this.frDialog = cE("div");
       this.frDialog.id = defCon.id.db;
@@ -1133,13 +1118,28 @@
       }
     }
 
+    _resetfrDialogPosition(X, Y) {
+      const zoom = Number(window.getComputedStyle(this.parent, null).getPropertyValue("zoom")) || defCon.tZoom || 1;
+      if (zoom !== 1) {
+        if (getBrowser.type("core").Gecko || getBrowser.type("core").Presto) {
+          Y = Number(zoom > 1 ? 130 * (0.4 + 1 / zoom) : 250 * (2 - zoom));
+          X = Number(zoom > 1 ? (zoom - 1) * 55 * (1 + zoom) - 10 / zoom : (((zoom - 1) * 95 * zoom - 10) * 2.25) / zoom);
+          this.zoomText = `transform:matrix(${1 / zoom}, 0, 0, ${1 / zoom}, ${X}, ${Y});top:0;right:0`;
+          window.scrollTo(document.documentElement.clientWidth, 0);
+        } else {
+          this.zoomText = `zoom:${1 / zoom}`;
+        }
+      }
+      this.frDialog.style.cssText += this.zoomText;
+    }
+
     _destroy() {
       if (this.frDialog) {
         this.parent.removeChild(this.frDialog);
         for (let key in this) {
           delete this[key];
         }
-        debug("//->", this);
+        debug("\u27A4", this);
       }
     }
 
@@ -1240,10 +1240,11 @@
           defaultHeight[baseFonts[index]] = s.offsetHeight;
           h.removeChild(s);
         } catch (e) {
-          error("//-> isSupportFontFamily:", e);
+          error("\u27A4 isSupportFontFamily:", e);
         }
       }
-      debug("//-> offset:", defaultWidth, defaultHeight);
+
+      debug("\u27A4 offset:", defaultWidth, defaultHeight);
 
       function detect(font) {
         let detected = false;
@@ -1257,12 +1258,12 @@
             h.removeChild(s);
             detected = detected || matched;
             if (detected) {
-              debug("//-> detect:", font, _offsetWidth, defaultWidth[baseFonts[index]], _offsetHeight, defaultHeight[baseFonts[index]]);
+              debug("\u27A4 detect:", font, _offsetWidth, defaultWidth[baseFonts[index]], _offsetHeight, defaultHeight[baseFonts[index]]);
               break;
             }
           }
         } catch (e) {
-          error("//-> FontFamily.detect:", e);
+          error("\u27A4 FontFamily.detect:", e);
         }
         return detected;
       }
@@ -1591,9 +1592,9 @@
     document.addEventListener("readystatechange", event => {
       if (event.target.readyState === "interactive") {
         fn();
-        debug("//-> %c[DOM]: Loading...", "background-color:darkorange;color:snow");
+        debug("\u27A4 %c[DOM]: Loading...", "background-color:darkorange;color:snow");
       } else if (event.target.readyState === "complete") {
-        debug("//-> %c[DOM]: Load complete!%c\u0020\u27A4\u0020%s", "background-color:green;color:snow", "color:0", window.location.host);
+        debug("\u27A4 %c[DOM]: Load complete!%c - %s", "background-color:green;color:snow", "color:0", window.location.host);
       }
     });
   }
@@ -1649,9 +1650,9 @@
       GMdeleteValue("_fontlist_"); /* Temporary */
       _config_data_.rebuild = !bool;
       GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
-      debug("//-> %cData has been rebuilt", "background-color:red;color:snow");
+      debug("\u27A4 %cData has been rebuilt", "background-color:red;color:snow");
     } else {
-      debug("//-> %cGood data status", "color:green");
+      debug("\u27A4 %cGood data status", "color:green");
     }
 
     const fonts = await GMgetValue("_fonts_set_");
@@ -1845,7 +1846,7 @@
       tshadow = `${bodyZoom}${codeFont}${selection}${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontfaces}${exclude}${fontTest}`;
     }
     const fontStyle_db = `.${defCon.class.db}{max-width:420px;color:#444;z-index:999999992;border:2px solid #efefef}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei",sans-serif!important;text-stroke:initial!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #7b7b7b!important}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:25%;right:15px;-webkit-border-radius:6px;border-radius:6px;width:100%;background:#fff;-webkit-box-shadow:0 0 10px 0 rgba(0,0,0,.3);box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s;}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important;text-stroke:initial!important}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223;color:#fff!important;border:1px solid #d93223;-webkit-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a;color:#fff!important;border:1px solid #038c5a;-webkit-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777;color:#fff!important;border:1px solid #777;-webkit-border-radius:6px;border-radius:6px;font-size:14px!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:300;text-align:left}.${defCon.class.dbm} p{line-height:160%;margin:5px 0;text-indent:0em!important;font-size:16px!important;font-weight:400;text-align:left}.${defCon.class.dbm} ul{list-style:none;margin: 5px 0 0 15px;padding:2px;font:italic 14px/140% "Microsoft YaHei";color:grey}.${defCon.class.dbm} li{list-style-type:square;}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:100%}.${defCon.class.dbb}{display:inline-block;margin:0 1%;-webkit-border-radius:2px;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;transition:opacity .5s;cursor:pointer;-webkit-box-sizing:content-box;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}.${defCon.class.anim}{-webkit-animation:jiggle 1.8s ease-in infinite;animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}#${defCon.id.bk},#${defCon.id.pv},#${defCon.id.fs},#${defCon.id.mps},#${defCon.id.flc}{padding:2px 10px;height:40px;width:max-content;min-width:auto}#${defCon.id.flc}:after{content:"";background:url('https://img.zcool.cn/community/038dde458f9a874a8012160f7417f6e.gif') no-repeat -400px -300px}#${defCon.id.flc} button{background-color:#eee;color:#444;font-weight:normal;border:1px solid #999;font-size:14px!important;border-radius:4px}#${defCon.id.flc} button:hover{cursor:pointer;background-color:#f7f7f7;}#${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}#${defCon.id.feedback}:hover{color:crimson!important}`;
-    const fontStyle_container = `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:999999991;transition:opacity .5s;}body #${defCon.id.container}{position:fixed;top:10px;right:24px;-webkit-border-radius:10px;border-radius:10px;background:#f0f6ff!important;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 30px);z-index:999999;padding:4px 8px 8px 8px;text-align:left;color:#333;font-size:16px!important;font-weight:900;-webkit-transition:all .1s ease-in;transition:all .1s ease-in;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.container} *{line-height:1.5!important;font-size:16px;font-weight:700;font-family:"Microsoft YaHei",sans-serif!important;text-shadow:initial!important;-webkit-text-stroke:initial!important;text-stroke:initial!important}#${defCon.id.container} fieldset{border:2px groove #67a5df!important;-webkit-border-radius:10px;border-radius:10px;padding:4px 9px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:500px}#${defCon.id.container} legend{line-height:20px;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei",sans-serif!important;background:#f0f6ff!important;-webkit-box-sizing:content-box;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{list-style:none;margin:3px 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden;}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50%;-webkit-transform:rotate(360deg);-webkit-animation:rotation 5s linear infinite;-o-animation:rotation 5s linear infinite;animation:rotation 5s linear infinite}#${defCon.id.fontList}{padding:2px 10px 4px 6px;min-height:75px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex;align-items:center;justify-content:space-between}#${defCon.id.shadowColor}{padding:2px 10px;min-height:45px;margin:4px;width:max-content}#${defCon.id.shadowColor} *{-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.cps}{float:left;display:block;margin:0}#${defCon.id.shadowColor} .${defCon.class.colorPicker}{width:32px;height:30px;cursor:pointer;position:relative;border:2px solid #181a25;-webkit-border-radius:4px;border-radius:4px;float:left;display:inline-block}#${defCon.id.shadowColor} .${defCon.class.colorPicker2}{display:inline-block;width:auto;margin:0 0 0 5px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2} #${defCon.id.color}{width:135px!important;height:32px!important;text-indent:0;font-size:18px!important;font-weight:400!important;background:#fafafa;-webkit-box-sizing:content-box;box-sizing:content-box;font-family:Impact,"Courier New",sans-serif!important;color:#333!important;border:#67a5df 2px solid!important;-webkit-border-radius:4px;border-radius:4px;display:inline-block;padding:0;margin:0;text-align:center}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.fontSize}{padding:2px 10px;height:60px}#${defCon.id.submit}{padding:2px 10px;height:40px}#${defCon.id.submit} button{background-image:initial;background-color:#67a5df;color:#fff!important;padding:5px 10px;font-size:14px!important;font-weight:600;cursor:pointer;border:2px solid #6ba7e0;-webkit-border-radius:6px;border-radius:6px;width:auto;font-family:"Microsoft YaHei",sans-serif!important}#${defCon.id.backup}{margin:0 10px 0 0}#${defCon.id.backup}, #${defCon.id.files}{display:none}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;min-height:110px}#${defCon.id.fontEx} textarea{background:#fafafa}#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{min-width:calc(100% - 15px);max-width:calc(100% - 15px);width:calc(100% - 15px)!important;min-height:60px;line-height:140%;resize:none;border:2px solid #67a5df!important;-webkit-border-radius:6px;border-radius:6px;-webkit-box-sizing:content-box;box-sizing:content-box;padding:5px;font:bold 14px/140% "Roboto Mono",Monaco,"Courier New",sans-serif!important;color:#0b5b9c;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px rgba(0,0,0,.2);border-radius:10px;background:#ededed}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;color:#111;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:block;float:left;margin:2px 5px 2px 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:initial;-webkit-border-radius:2px;border-radius:2px;padding:2px 0;height:24px;font-weight:400;line-height:20px;color:#fff;background:#67a5df}#${defCon.id.fontList} .${defCon.class.label} span{color:#fff;font-size:16px!important;font-weight:normal;padding:5px;background:#67a5df}#${defCon.id.fontList} .${defCon.class.close}{padding:5px!important;color:#fff;background:#67a5df;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.fontList} .${defCon.class.close}:hover{-webkit-border-radius:2px;border-radius:2px;color:tomato;background-color:#366694}#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} label{width:auto;display:block;margin:5px 0;color:#333;cursor:initial}#${defCon.id.fontList} .${defCon.class.selectFontId} input{-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df!important;-webkit-border-radius:6px;border-radius:6px;padding:1px 23px!important;margin:0;width:calc(100% - 48px)!important;max-width:calc(100% - 48px);min-width:calc(100% - 48px);height:36px!important;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px!important;font-weight:700;text-indent:0;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder} input:-moz-placeholder{color:#369!important;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px!important;font-weight:700;opacity:.65}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px!important;font-weight:700;opacity:.65}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px!important;font-weight:700;opacity:.65}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:8px 0 0 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df!important;-webkit-border-radius:4px;border-radius:4px;padding:4px 10px;width:auto;min-width:170px;max-width:252px;max-height:250px;font-size:18px!important;white-space:nowrap;background-color:#fff;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{margin:0 10px;padding:5px 0;font-weight:400;font-size:21px!important;min-width:135px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{background-color:#67a5df;color:#fff}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-y:auto;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df!important;-webkit-border-radius:6px;border-radius:6px;padding:6px;width:95%;max-width:267px;max-height:60px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}.${defCon.class.checkbox}{display:none!important}.${defCon.class.checkbox}+label{cursor:pointer;padding:11px 9px;margin:0;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:58px;height:10px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);-webkit-box-sizing:content-box;box-sizing:content-box;word-wrap:normal!important}.${defCon.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;-webkit-border-radius:7px;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${defCon.class.checkbox}+label::after{position:absolute;top:0;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;-webkit-border-radius:100px;border-radius:100px;padding:5px;font-size:1em;font-weight:700;color:#fff;content:"OFF"}.${defCon.class.checkbox}:checked+label{cursor:pointer;margin:0;-webkit-box-sizing:content-box;box-sizing:content-box;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.${defCon.class.checkbox}:checked+label::after{content:"ON";left:10px;-webkit-box-sizing:content-box;box-sizing:content-box}.${defCon.class.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.fface} label,#${defCon.id.fface}+label::after,#${defCon.id.fface}+label::before,#${defCon.id.smooth} label,#${defCon.id.smooth}+label::after,#${defCon.id.smooth}+label::before{-webkit-transition:all .1s ease-in;transition:all .1s ease-in;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.fontShadow} #${defCon.id.shadowSize},#${defCon.id.fontStroke} #${defCon.id.strokeSize},#${defCon.id.fontSize} #${defCon.id.fontZoom}{color:#111!important;width:56px!important;text-indent:0;margin-right:10px!important;height:32px!important;font-size:17px!important;font-weight:400!important;font-family:Impact,"Courier New",sans-serif!important;border:#67a5df 2px solid!important;-webkit-border-radius:4px;border-radius:4px;margin-right:2px;text-align:center;-webkit-box-sizing:content-box;box-sizing:content-box;padding:0;background:#fafafa}.${defCon.class.Switch}{-webkit-box-sizing:content-box;box-sizing:content-box;display:inline-block;float:right;margin-right:4px;padding:0 6px;border:2px double #67a5df;color:#0A68C1;-webkit-border-radius:4px;border-radius:4px;}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent);background-size:50px 50px;background-color:#f7fff7}`;
+    const fontStyle_container = `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:999999991;transition:opacity .5s;}body #${defCon.id.container}{position:fixed;top:10px;right:24px;-webkit-border-radius:10px;border-radius:10px;background:#f0f6ff!important;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 30px);z-index:999999;padding:4px 8px 8px 8px;text-align:left;color:#333;font-size:16px!important;font-weight:900;-webkit-transition:all .1s ease-in;transition:all .1s ease-in;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.container} *{line-height:1.5!important;font-size:16px;font-weight:700;font-family:"Microsoft YaHei",sans-serif!important;text-shadow:initial!important;-webkit-text-stroke:initial!important;text-stroke:initial!important}#${defCon.id.container} fieldset{border:2px groove #67a5df!important;-webkit-border-radius:10px;border-radius:10px;padding:4px 9px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:500px}#${defCon.id.container} legend{line-height:20px;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei",sans-serif!important;background:#f0f6ff!important;-webkit-box-sizing:content-box;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{list-style:none;margin:3px 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden;}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50%;-webkit-transform:rotate(360deg);-webkit-animation:rotation 5s linear infinite;-o-animation:rotation 5s linear infinite;animation:rotation 5s linear infinite}#${defCon.id.fontList}{padding:2px 10px 4px 6px;min-height:75px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex;align-items:center;justify-content:space-between}#${defCon.id.shadowColor}{padding:2px 10px;min-height:45px;margin:4px;width:max-content}#${defCon.id.shadowColor} *{-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.cps}{float:left;display:block;margin:0}#${defCon.id.shadowColor} .${defCon.class.colorPicker}{width:32px;height:30px;cursor:pointer;position:relative;border:2px solid #181a25;-webkit-border-radius:4px;border-radius:4px;float:left;display:inline-block}#${defCon.id.shadowColor} .${defCon.class.colorPicker2}{display:inline-block;width:auto;margin:0 0 0 5px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2} #${defCon.id.color}{width:135px!important;height:32px!important;text-indent:0;font-size:18px!important;font-weight:400!important;background:#fafafa;-webkit-box-sizing:content-box;box-sizing:content-box;font-family:Impact,"Courier New",sans-serif!important;color:#333!important;border:#67a5df 2px solid!important;-webkit-border-radius:4px;border-radius:4px;display:inline-block;padding:0;margin:0;text-align:center}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.fontSize}{padding:2px 10px;height:60px}#${defCon.id.submit}{padding:2px 10px;height:40px}#${defCon.id.submit} button{background-image:initial;background-color:#67a5df;color:#fff!important;padding:5px 10px;font-size:14px!important;font-weight:600;cursor:pointer;border:2px solid #6ba7e0;-webkit-border-radius:6px;border-radius:6px;width:auto;font-family:"Microsoft YaHei",sans-serif!important}#${defCon.id.backup}{margin:0 10px 0 0}#${defCon.id.backup}, #${defCon.id.files}{display:none}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;min-height:110px}#${defCon.id.fontEx} textarea{background:#fafafa}#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{min-width:calc(100% - 15px);max-width:calc(100% - 15px);width:calc(100% - 15px)!important;min-height:60px;line-height:140%;resize:none;border:2px solid #67a5df!important;-webkit-border-radius:6px;border-radius:6px;-webkit-box-sizing:content-box;box-sizing:content-box;padding:5px;font:bold 14px/140% "Roboto Mono",Monaco,"Courier New",sans-serif!important;color:#0b5b9c;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px rgba(0,0,0,.2);border-radius:10px;background:#ededed}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;color:#111;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:block;float:left;margin:2px 5px 2px 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:initial;-webkit-border-radius:2px;border-radius:2px;padding:2px 0;height:24px;font-weight:400;line-height:20px;color:#fff;background:#67a5df}#${defCon.id.fontList} .${defCon.class.label} span{color:#fff;font-size:16px!important;font-weight:normal;padding:5px;background:#67a5df}#${defCon.id.fontList} .${defCon.class.close}{padding:5px!important;color:#fff;background:#67a5df;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.fontList} .${defCon.class.close}:hover{-webkit-border-radius:2px;border-radius:2px;color:tomato;background-color:#366694}#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} label{width:auto;display:block;margin:5px 0;color:#333;cursor:initial}#${defCon.id.fontList} .${defCon.class.selectFontId} input{-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df!important;-webkit-border-radius:6px;border-radius:6px;padding:1px 23px!important;margin:0;width:calc(100% - 48px)!important;max-width:calc(100% - 48px);min-width:calc(100% - 48px);height:36px!important;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px!important;font-weight:700;text-indent:0;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder} input:-moz-placeholder{color:#369!important;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px!important;font-weight:700;opacity:.65}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px!important;font-weight:700;opacity:.65}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px!important;font-weight:700;opacity:.65}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:8px 0 0 0;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df!important;-webkit-border-radius:4px;border-radius:4px;padding:4px 10px;width:auto;min-width:170px;max-width:252px;max-height:250px;font-size:18px!important;white-space:nowrap;background-color:#fff;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{margin:0 10px;padding:5px 0;font-weight:400;font-size:21px!important;min-width:135px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{background-color:#67a5df;color:#fff}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-y:auto;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #67a5df!important;-webkit-border-radius:6px;border-radius:6px;padding:6px;width:95%;max-width:267px;max-height:60px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}.${defCon.class.checkbox}{display:none!important}.${defCon.class.checkbox}+label{cursor:pointer;padding:11px 9px;margin:0;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:58px;height:10px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);-webkit-box-sizing:content-box;box-sizing:content-box;word-wrap:normal!important}.${defCon.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;-webkit-border-radius:7px;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${defCon.class.checkbox}+label::after{position:absolute;top:0;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;-webkit-border-radius:100px;border-radius:100px;padding:5px;font-size:1em;font-weight:700;color:#fff;content:"OFF"}.${defCon.class.checkbox}:checked+label{cursor:pointer;margin:0;-webkit-box-sizing:content-box;box-sizing:content-box;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.${defCon.class.checkbox}:checked+label::after{content:"ON";left:10px;-webkit-box-sizing:content-box;box-sizing:content-box}.${defCon.class.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.fface} label,#${defCon.id.fface}+label::after,#${defCon.id.fface}+label::before,#${defCon.id.smooth} label,#${defCon.id.smooth}+label::after,#${defCon.id.smooth}+label::before{-webkit-transition:all .1s ease-in;transition:all .1s ease-in;-webkit-box-sizing:content-box;box-sizing:content-box}#${defCon.id.fontShadow} #${defCon.id.shadowSize},#${defCon.id.fontStroke} #${defCon.id.strokeSize},#${defCon.id.fontSize} #${defCon.id.fontZoom}{color:#111!important;width:56px!important;text-indent:0;margin-right:10px!important;height:32px!important;font-size:17px!important;font-weight:400!important;font-family:Impact,"Courier New",sans-serif!important;border:#67a5df 2px solid!important;-webkit-border-radius:4px;border-radius:4px;margin-right:2px;text-align:center;-webkit-box-sizing:content-box;box-sizing:content-box;padding:0;background:#fafafa}.${defCon.class.slider} input{visibility:hidden}.${defCon.class.Switch}{-webkit-box-sizing:content-box;box-sizing:content-box;display:inline-block;float:right;margin-right:4px;padding:0 6px;border:2px double #67a5df;color:#0A68C1;-webkit-border-radius:4px;border-radius:4px;}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent);background-size:50px 50px;background-color:#f7fff7}`;
     const fontStyle_cp = `#${defCon.id.cpm}{width:220px;height:200px;z-index:999;position:fixed;display:none;margin:10px 0 0 20px;-webkit-box-sizing:content-box;box-sizing:content-box;background-color:#d1f2fb;padding:10px;box-shadow:0 0 10px #000;border-radius:6px}.${defCon.class.cp},.${defCon.class.cp} *,.${defCon.class.cp} ::after,.${defCon.class.cp} ::before{border:0;margin:0;padding:0;display:block;box-sizing:border-box}.${defCon.class.cp}{background-color:#fff;display:block;min-width:128px;min-height:128px;position:relative}.${defCon.class.cp}>.${defCon.class.cprb}{border:solid #000 1px;background:linear-gradient(red,#f0f,#00f,#0ff,#0f0,#ff0,red);width:16px;height:calc(100% - 26px);position:absolute;right:12px;top:12px}.${defCon.class.cp} .${defCon.class.cprbp}{position:absolute;width:100%;height:1px}.${defCon.class.cp} .${defCon.class.cprbp}::after,.${defCon.class.cp} .${defCon.class.cprbp}::before{content:"";width:10px;height:7px;position:absolute;background:0 0;border:solid transparent 5px;border-width:3.5px 5px;top:-3px}.${defCon.class.cp} .${defCon.class.cprbp}::before{border-left:solid #404040 5px;left:-6px}.${defCon.class.cp} .${defCon.class.cprbp}::after{border-right:solid #404040 5px;right:-6px}.${defCon.class.cp}>.${defCon.class.cpg}{position:absolute;width:calc(100% - 50px);height:calc(100% - 26px);border:solid #000 1px;left:12px;top:12px}.${defCon.class.cp}>.${defCon.class.cpg},.${defCon.class.cp}>.${defCon.class.cpg} *{cursor:crosshair;-webkit-box-sizing:content-box;box-sizing:content-box}.${defCon.class.cp}>.${defCon.class.cpgb}{background:linear-gradient(rgba(0,0,0,0),#000)}.${defCon.class.cp}>.${defCon.class.cp}-color-block{position:absolute;border:solid #000 1px;background:#fff;width:calc(100% - 104px);max-width:72px;height:18px;left:12px;bottom:8px}.${defCon.class.cp} .${defCon.class.cpc}{background-color:transparent;position:absolute}.${defCon.class.cp} .${defCon.class.cpc}::before{border-radius:50%;width:11px;height:11px;border:solid #000 1px;background-color:transparent;position:relative;left:-6px;top:-6px;display:block;content:""}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcb}::before{border-color:#000}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcw}::before{border-color:#fff}`;
     const fontStyle_tooltip = `.${defCon.class.tooltip}{position:relative;cursor:help}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;visibility:hidden;position:absolute;z-index:999999;-webkit-box-sizing:content-box;box-sizing:content-box;border:2px solid #b8c4ce;-webkit-border-radius:6px;border-radius:6px;padding:10px;width:250px;max-width:250px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:140%;text-indent:0em!important}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei",sans-serif!important;font-size:14px!important}.${defCon.class.tooltip}:hover .${defCon.class.tooltip}{visibility:visible;display:block}.${defCon.class.ps1}{margin:-33px 0 0 0;right:8px;float:right}.${defCon.class.ps2}{top:30px;left:-245px}.${defCon.class.ps3}{top:-197px}.${defCon.class.ps4}{top:-175px}`;
     const fontStyle_Progress = `.fr-range-bar{background-color:#a9acb1;border-radius:15px;display:block;height:10px;position:relative;width:100%;margin-top:8px;box-shadow:0 0 1px 1px rgba(0,0,0,.1) inset}.fr-range-quantity{background-color:#67a5df;border-radius:15px;display:block;height:100%;width:0}.fr-range-handle{background-color:#fff;border-radius:100%;cursor:e-resize;height:22px;left:0;top:-6px;position:absolute;width:22px;-webkit-box-shadow:0 1px 3px rgba(0,0,0,.4);box-shadow:0 1px 3px rgba(0,0,0,.4)}.fr-range-handle::after{content:"";position:absolute;width:10px;height:10px;background:#67a5df;border-radius:50%;top:0;left:0;right:0;bottom:0;margin:auto}.fr-range-max,.fr-range-min{color:#181819;font-size:12px;height:20px;padding-top:4px;position:absolute;text-align:center;top:-9px;width:24px}.fr-range-min{left:-30px}.fr-range-max{right:-30px}.fr-vertical{height:100%;width:4px}.fr-vertical .fr-range-quantity{bottom:0;height:0;position:absolute;width:100%}.fr-vertical .fr-range-handle{bottom:0;left:-13px;top:auto}.fr-vertical .fr-range-max,.fr-vertical .fr-range-min{left:-10px;right:auto;top:auto}.fr-vertical .fr-range-min{bottom:-30px}.fr-vertical .fr-range-max{top:-30px}.fr-unselectable{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.fr-range-disabled{cursor:default}`;
@@ -2008,19 +2009,19 @@
       const callback = mutations => {
         mutations.forEach(mutation => {
           if (!((!curWindowtop || qS(`.${defCon.class.rndClass}`)) && qS(`.${defCon.class.rndStyle}`))) {
-            debug(`//-> %cMutationObserver: %c%s %c%s`, "font-weight:bold;color:teal", "color:olive", mutation.type, "font-weight:bold;color:red", !startRAFInterval());
+            debug(`\u27A4 %cMutationObserver: %c%s %c%s`, "font-weight:bold;color:teal", "color:olive", mutation.type, "font-weight:bold;color:red", !startRAFInterval());
           }
           if (qS(`.${defCon.class.rndStyle}`) && document.head.lastChild.className !== defCon.class.rndStyle) {
             try {
               const lastChildEleclassName = document.head.lastChild.className || "lastChildEleclassName";
               if (lastChildEleclassName.includes("darkreader") && document.head.lastChild.previousSibling.className === defCon.class.rndStyle) {
-                debug("//-> %s is Ready, Causeby darkreader inserted", defCon.class.rndStyle);
+                debug("\u27A4 %s is Ready, Causeby darkreader inserted", defCon.class.rndStyle);
               } else if (qS(`.${defCon.class.rndStyle}`).nextSibling) {
-                debug("//-> [:before]", document.head.lastChild.className);
+                debug("\u27A4 [:before]", document.head.lastChild.className);
                 reloadStyleTolastChild(true);
               }
             } catch (e) {
-              error("//-> lastChildStyle error", e);
+              error("\u27A4 lastChildStyle error", e);
             }
           }
         });
@@ -2029,17 +2030,16 @@
       const observer = new MutationObserver(callback);
       observer.observe(document, opts);
     } catch (e) {
-      error("//-> createHTML:", e);
+      error("\u27A4 createHTML:", e);
     }
 
     /* Menus Insert */
 
-    setTimeout(() => {
+    setTimeout((Font_Set, Feed_Back, Exclude_site, Parameter_Set) => {
       if (curWindowtop) {
-        let Font_Set, Feed_Back, Exclude_site, Parameter_Settings;
-        loading ? GMunregisterMenuCommand(loading) : debug("//-> No Loading_Menu");
+        loading ? GMunregisterMenuCommand(loading) : debug("\u27A4 No Loading_Menu");
         if (defCon.siteIndex === undefined) {
-          Font_Set ? GMunregisterMenuCommand(Font_Set) : debug("//-> No Font_Set_Menu");
+          Font_Set ? GMunregisterMenuCommand(Font_Set) : debug("\u27A4 No Font_Set_Menu");
           Font_Set = GMregisterMenuCommand("\ufff2\ud83c\udf13 字体渲染设置", () => {
             if (!qS(`#${defCon.id.rndId}`)) {
               insertHTML();
@@ -2047,7 +2047,7 @@
               setTimeout(() => {
                 qS(`#${defCon.id.rndId}`).style.opacity = "1";
                 autoZoomFontSize(`#${defCon.id.rndId}`, defCon.tZoom);
-                debug("//-> errorCount:", defCon.errors.length);
+                debug("\u27A4 errorCount:", defCon.errors.length);
                 if (defCon.errors.length) {
                   reportErrortoAuthor(defCon.errors, true);
                 }
@@ -2059,7 +2059,7 @@
               window.scrollTo(document.documentElement.clientWidth, 0);
             }
           });
-          Exclude_site ? GMunregisterMenuCommand(Exclude_site) : debug("//-> No Exclude_site_Menu");
+          Exclude_site ? GMunregisterMenuCommand(Exclude_site) : debug("\u27A4 No Exclude_site_Menu");
           Exclude_site = GMregisterMenuCommand(`\ufff3\u26d4 排除渲染 ${curHostname}`, async () => {
             closeAllDialog(`div.${defCon.class.db}`);
             let frDialog = new frDialogBox({
@@ -2077,8 +2077,8 @@
             }
             frDialog = null;
           });
-          Parameter_Settings ? GMunregisterMenuCommand(Parameter_Settings) : debug("//-> No Parameter_Settings_Menu");
-          Parameter_Settings = GMregisterMenuCommand("\ufff7\ud83d\udc8e VIP 高级功能开关", async () => {
+          Parameter_Set ? GMunregisterMenuCommand(Parameter_Set) : debug("\u27A4 No Parameter_Set_Menu");
+          Parameter_Set = GMregisterMenuCommand("\ufff7\ud83d\udc8e VIP 高级功能开关", async () => {
             configure = await GMgetValue("_configure_");
             _config_data_ = JSON.parse(defCon.decrypt(configure));
             isBackupFunction = Boolean(_config_data_.isBackupFunction);
@@ -2184,7 +2184,7 @@
             frDialog = null;
           });
         } else {
-          Exclude_site ? GMunregisterMenuCommand(Exclude_site) : debug("//-> No Exclude_site_Menu");
+          Exclude_site ? GMunregisterMenuCommand(Exclude_site) : debug("\u27A4 No Exclude_site_Menu");
           Exclude_site = GMregisterMenuCommand(`\ufff2\ud83c\udf40 重新渲染 ${curHostname}`, async () => {
             closeAllDialog(`div.${defCon.class.db}`);
             let frDialog = new frDialogBox({
@@ -2203,7 +2203,7 @@
             }
             frDialog = null;
           });
-          Feed_Back ? GMunregisterMenuCommand(Feed_Back) : debug("//-> No Feed_Back_Menu");
+          Feed_Back ? GMunregisterMenuCommand(Feed_Back) : debug("\u27A4 No Feed_Back_Menu");
           Feed_Back = GMregisterMenuCommand("\ufff9\ud83e\udde1 向作者反馈问题或建议", () => {
             GMopenInTab(feedback, defCon.options);
           });
@@ -2223,7 +2223,7 @@
           qS("body").appendChild(div);
         } catch (e) {
           defCon.errors.push(e);
-          error("//-> insertHTML:", e);
+          error("\u27A4 insertHTML:", e);
         }
       }
     }
@@ -2232,7 +2232,7 @@
       try {
         addStyle(tCSS, `${defCon.class.rndClass}`, document.head, "TC");
       } catch (e) {
-        error("//-> insertCSS:", e);
+        error("\u27A4 insertCSS:", e);
       }
     }
 
@@ -2240,7 +2240,7 @@
       try {
         addStyle(tStyle, `${defCon.class.rndStyle}`, document.head, "TS", t);
       } catch (e) {
-        error("//-> insertStyle:", e);
+        error("\u27A4 insertStyle:", e);
       }
     }
 
@@ -2249,10 +2249,10 @@
         const styleScriptCount = document.head.querySelectorAll("style[id^='TS']").length;
         if (styleScriptCount === 1) {
           insertStyle(true);
-          debug("//-> [:after]", document.head.lastChild.className);
+          debug("\u27A4 [:after]", document.head.lastChild.className);
         } else if (styleScriptCount && !defCon.scriptCount) {
           defCon.scriptCount = true;
-          console.error("//-> \u53d1\u73b0\u5197\u4f59\u5b89\u88c5\u7684\u811a\u672c\uff0c\u8bf7\u5220\u9664\u91cd\u590d\u811a\u672c\u4fdd\u7559\u5176\u4e00\u3002");
+          console.error("\u27A4 \u53d1\u73b0\u5197\u4f59\u5b89\u88c5\u7684\u811a\u672c\uff0c\u8bf7\u5220\u9664\u91cd\u590d\u811a\u672c\u4fdd\u7559\u5176\u4e00\u3002");
         }
       } else {
         document.onreadystatechange = function () {
@@ -2261,10 +2261,10 @@
               if (document.head.lastChild.className !== defCon.class.rndStyle) {
                 insertStyle(true);
               }
-              debug("//-> lastChildStyle:", document.head.lastChild.className);
+              debug("\u27A4 lastChildStyle:", document.head.lastChild.className);
             }, 2e3);
             debug(
-              "//-> isStylePositionAtLastChild:",
+              "\u27A4 isStylePositionAtLastChild:",
               document.head.lastChild.className === defCon.class.rndStyle || document.head.lastChild.previousSibling.className === defCon.class.rndStyle
             );
           }
@@ -2325,15 +2325,15 @@
           try {
             const fontListwithExpire = cache.get("_fontlist_");
             if (fontListwithExpire) {
-              debug("//-> %cLoad font_Data from Cache", "color:green;font-weight:bold");
+              debug("\u27A4 %cLoad font_Data from Cache", "color:green;font-weight:bold");
               fontData = fontListwithExpire;
             } else {
-              debug("//-> %cStart real-time font detection", "color:crimson;font-weight:bold");
+              debug("\u27A4 %cStart real-time font detection", "color:crimson;font-weight:bold");
               fontData = await fontCheck_detectOnce();
               cache.set("_fontlist_", fontData);
             }
           } catch (e) {
-            debug("//-> %cInitialized font_Data caused by Errors: ", "background-color:yellow;color:red;font-weight:bold", e);
+            debug("\u27A4 %cInitialized font_Data caused by Errors: ", "background-color:yellow;color:red;font-weight:bold", e);
             cache.remove("_fontlist_");
             fontData = await fontCheck_detectOnce();
             cache.set("_fontlist_", fontData);
@@ -2347,7 +2347,7 @@
             }
           } catch (e) {
             defCon.errors.push(e);
-            error("//-> Fonts selection:", e);
+            error("\u27A4 Fonts selection:", e);
           }
 
           /* selector placeholder style */
@@ -2404,7 +2404,7 @@
               checkdraw(zoom, drawZoom, /[0-9](\.[0-9]{1,3})?/);
             } catch (e) {
               defCon.errors.push(e);
-              error("//-> FontSize Zoom:", e);
+              error("\u27A4 FontSize Zoom:", e);
             } finally {
               saveChangeStatus(zoom, Number(CONST.fontSize), submitButton, defCon.Val);
             }
@@ -2433,7 +2433,7 @@
             checkdraw(strock, drawStrock, /[0-9](\.[0-9]{1,3})?/);
           } catch (e) {
             defCon.errors.push(e);
-            error("//-> Fonts stroke:", e);
+            error("\u27A4 Fonts stroke:", e);
           } finally {
             saveChangeStatus(strock, Number(CONST.fontStroke), submitButton, defCon.Val);
           }
@@ -2461,7 +2461,7 @@
             checkdraw(shadows, drawShadow, /[0-9](\.[0-9]{1,2})?/);
           } catch (e) {
             defCon.errors.push(e);
-            error("//-> Fonts shadow:", e);
+            error("\u27A4 Fonts shadow:", e);
           } finally {
             saveChangeStatus(shadows, Number(CONST.fontShadow), submitButton, defCon.Val);
           }
@@ -2480,7 +2480,7 @@
               value: CONST.shadowColor,
               def: CONST.shadowColor,
             });
-            debug("//-> ColorPicker:", picker._lastValue);
+            debug("\u27A4 ColorPicker:", picker._lastValue);
             cpshow.addEventListener("click", function (e) {
               if (cp.style.display === "block") {
                 cp.style = "display:none";
@@ -2501,7 +2501,7 @@
             });
           } catch (e) {
             defCon.errors.push(e);
-            error("//-> Fonts shadowColor:", e);
+            error("\u27A4 Fonts shadowColor:", e);
           } finally {
             saveChangeStatus(colorshow, CONST.shadowColor, submitButton, defCon.Val);
           }
@@ -2552,8 +2552,8 @@
               drawShadow.setStart(Number(defValue.fontShadow));
               picker.value = defValue.shadowColor;
               picker._value_ = picker.value;
-              smoothT.checked !== defValue.fontSmooth ? smoothT.click() : debug("//-> fontSmooth Not Modified");
-              ffaceT.checked !== defValue.fontFace ? ffaceT.click() : debug("//-> fontFace Not Modified");
+              smoothT.checked !== defValue.fontSmooth ? smoothT.click() : debug("\u27A4 fontSmooth Not Modified");
+              ffaceT.checked !== defValue.fontFace ? ffaceT.click() : debug("\u27A4 fontFace Not Modified");
               fontCssT.value = defValue.fontCSS;
               fontExT.value = defValue.fontEx;
               this.parentNode.children[3].click();
@@ -2573,8 +2573,8 @@
               drawShadow.setStart(Number(CONST.fontShadow));
               picker.value = CONST.shadowColor;
               picker._value_ = picker.value;
-              smoothT.checked !== CONST.fontSmooth ? smoothT.click() : debug("//-> fontSmooth Not Modified");
-              ffaceT.checked !== CONST.fontFace ? ffaceT.click() : debug("//-> fontFace Not Modified");
+              smoothT.checked !== CONST.fontSmooth ? smoothT.click() : debug("\u27A4 fontSmooth Not Modified");
+              ffaceT.checked !== CONST.fontFace ? ffaceT.click() : debug("\u27A4 fontFace Not Modified");
               fontCssT.value = CONST.fontCSS;
               fontExT.value = CONST.fontEx;
               __preview__(defCon.preview);
@@ -2588,7 +2588,7 @@
             const perfzoom = isFontsize ? (/[0-9]+(?:\.[0-9]{1,3})?/.test(zoom.value) ? Number(zoom.value) : zoom.value === "OFF" ? 0 : Number(defValue.fontStroke)) : 1;
             const fzoom = perfzoom < 0.8 ? 0.8 : perfzoom > 1.5 ? 1.5 : perfzoom;
             const fstrock = /[0-9]+(?:\.[0-9]{1,3})?/.test(strock.value) ? Number(strock.value) : strock.value === "OFF" ? 0 : Number(defValue.fontStroke);
-            const fshadow = /[0-9]+(?:\.[0-9]{1,3})?/.test(shadows.value) ? Number(shadows.value) : shadows.value === "OFF" ? 0 : Number(defValue.fontShadow);
+            const fshadow = /[0-9]+(?:\.[0-9]{1,2})?/.test(shadows.value) ? Number(shadows.value) : shadows.value === "OFF" ? 0 : Number(defValue.fontShadow);
             const pickedcolor = colorshow.value;
             const fscolor = colorReg.test(pickedcolor) ? pickedcolor : defValue.shadowColor;
             const fontlists = fontSet().fsearchList(`${defCon.id.fontName}`);
@@ -2642,7 +2642,8 @@
                 GetCurFont(fontface, _refont, defautlFont);
                 autoZoomFontSize(`#${defCon.id.rndId}`, fzoom);
               } catch (e) {
-                error("//->", e);
+                defCon.errors.push(e);
+                error("\u27A4", e);
               }
             } else {
               try {
@@ -2753,7 +2754,7 @@
                 frDialog = null;
               } catch (e) {
                 defCon.errors.push(e);
-                error("//-> saveDate:", e);
+                error("\u27A4 saveDate:", e);
                 defCon.successId = false;
               } finally {
                 if (defCon.successId) {
@@ -2791,12 +2792,14 @@
     function closeConfigurePage(isReload) {
       if (qS(`#${defCon.id.rndId}`)) {
         qS(`#${defCon.id.rndId}`).style = "opacity:0";
-        qS(`#${defCon.id.rndId}`).remove();
+        setTimeout(() => {
+          qS(`#${defCon.id.rndId}`).remove();
+        }, 500);
         if (!isReload) {
           if (defCon.preview) {
             __preview__(defCon.isPreview);
+            defCon.tZoom = CONST.fontSize;
           }
-          defCon.tZoom = CONST.fontSize;
           closeAllDialog(`div.${defCon.class.db}`);
         }
       }
@@ -2868,7 +2871,7 @@
             } else {
               try {
                 const thatFile = fs.files[0];
-                debug(`//-> backupData:`, thatFile.name, thatFile.size);
+                debug(`\u27A4 backupData:`, thatFile.name, thatFile.size);
                 let reader = new FileReader();
                 reader.readAsText(thatFile);
                 reader.onload = async function () {
@@ -2898,7 +2901,7 @@
                       throw new Error("Invalid Date Error");
                     }
                   } catch (e) {
-                    error("//-> FileReader.onload:", e.name);
+                    error("\u27A4 FileReader.onload:", e.name);
                     let frDialog = new frDialogBox({
                       trueButtonText: "确 定",
                       messageText: `<p style="color:red">数据校验错误，请选择正确的本地备份文件！</p>`,
@@ -2911,7 +2914,7 @@
                   }
                 };
               } catch (e) {
-                error("//-> thatFile:", e.name);
+                error("\u27A4 thatFile:", e.name);
                 let frDialog = new frDialogBox({
                   trueButtonText: "确 定",
                   messageText: `<p style="color:indigo">载入文件为空，请选择要还原的备份文件！</p>`,
@@ -2926,7 +2929,7 @@
             frDialog = null;
           } catch (e) {
             reportErrortoAuthor(e);
-            error("//-> backupData:", e);
+            error("\u27A4 backupData:", e);
           }
         });
       }
@@ -2986,7 +2989,7 @@
         }
       } catch (e) {
         defCon.errors.push(e);
-        error("//-> saveChangeStatus:", e);
+        error("\u27A4 saveChangeStatus:", e);
       }
     }
 
@@ -2994,7 +2997,7 @@
       try {
         const _value = t.attributes.v !== undefined ? (value === "OFF" ? 0 : Number(value)) : value;
         if (_value !== e) {
-          !v.includes(t.id) ? v.push(t.id) : debug("//-> ID already exists");
+          !v.includes(t.id) ? v.push(t.id) : debug("\u27A4 ID already exists");
           if (defCon.isPreview) {
             d.innerText = "\u9884\u89c8";
             d.setAttribute("style", "background-color:coral!important;border-color:coral!important");
@@ -3009,7 +3012,7 @@
           }
         }
         defCon.Val = v;
-        debug("//-> Changed Elements", defCon.Val);
+        debug("\u27A4 Changed Elements", defCon.Val);
         if (defCon.Val.length > 0) {
           if (!d.classList.contains(`${defCon.class.anim}`)) {
             d.classList.add(`${defCon.class.anim}`);
@@ -3034,7 +3037,7 @@
         }
       } catch (e) {
         defCon.errors.push(e);
-        error("//-> setEffectIntoSubmit:", e);
+        error("\u27A4 setEffectIntoSubmit:", e);
       }
     }
 
@@ -3164,7 +3167,7 @@
             }
             frDialog = null;
           } catch (e) {
-            error("//-> reportError:", e);
+            error("\u27A4 reportError:", e);
           }
         }, Math.round(1e3 * Math.random()));
       }
@@ -3212,11 +3215,11 @@
         }
       } catch (e) {
         defCon.errors.push(e);
-        error("//-> autoZoomFontSize:", e);
+        error("\u27A4 autoZoomFontSize:", e);
       } finally {
         if (curZoom !== 1) {
           debug(
-            "//-> FontSize Zoom: save[%s%] current[%c%s% %c%s%]",
+            "\u27A4 FontSize Zoom: save[%s%] current[%c%s% %c%s%]",
             (CONST.fontSize * 100).toFixed(2),
             "color:teal",
             (curZoom * 100).toFixed(2),
@@ -3253,7 +3256,7 @@
       try {
         GMsetValue(key, defCon.encrypt(JSON.stringify(obj)));
       } catch (e) {
-        error("//-> saveDate:", e);
+        error("\u27A4 saveDate:", e);
       }
     }
   })();
