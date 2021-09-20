@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.09.20.1
+// @version           2021.09.20.2
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -393,23 +393,27 @@
   }
 
   function __preview__(_preview_, ts = defCon.tStyle, s = true) {
-    if (_preview_) {
-      addStyle(ts, `${defCon.class.rndStyle}`, document.head, "TS", true);
-      document.querySelectorAll("iframe").forEach(items => {
-        const h = items.contentWindow;
-        try {
-          const hn = h.location.hostname;
-          if (hn === curHostname) {
-            const sT = h.document.head.querySelectorAll("style[id^='TS']");
-            if (sT.length) {
-              addStyle(ts, sT[0].className, h.document.head, "TS", true);
+    try {
+      if (_preview_) {
+        addStyle(ts, `${defCon.class.rndStyle}`, document.head, "TS", true);
+        document.querySelectorAll("iframe").forEach(items => {
+          const h = items.contentWindow;
+          try {
+            const hn = h.location.hostname;
+            if (hn === curHostname) {
+              const sT = h.document.head.querySelectorAll("style[id^='TS']");
+              if (sT.length) {
+                addStyle(ts, sT[0].className, h.document.head, "TS", true);
+              }
             }
+          } catch (e) {
+            error("\u27A4 window.frames:", e);
           }
-        } catch (e) {
-          error("\u27A4 window.frames:", e);
-        }
-      });
-      defCon.preview = !s;
+        });
+        defCon.preview = !s;
+      }
+    } catch (e) {
+      error("\u27A4 __preview__:", e);
     }
   }
 
@@ -1975,10 +1979,11 @@
     if (curWindowtop) {
       if (defCon.siteIndex === undefined) {
         console.info(
-          `%c${defCon.scriptName}\n%cINTRO.URL:\u0020https://tiny.one/FontsRendering\n%c\u259e\u0020个性化设置网站数量：%c%s%c/%s%s\n\u259e\u0020本地备份：%s\u3000\u259a\u0020保存预览：%s\n%c\u259e\u0020渲染字体：%s\n\u259e\u0020字体平滑：%s\u3000\u259a\u0020字体重写：%s\n\u259e\u0020字体描边：%s\u3000\u259a\u0020字体阴影：%s`,
+          `%c${defCon.scriptName}\n%cINTRO.URL:\u0020https://tiny.one/FontsRendering\n%c\u259e\u0020脚本版本信息：Version %s\n\u259e\u0020个性化设置网站数量：%c%s%c/%s%s\n\u259e\u0020本地备份：%s\u3000\u259a\u0020保存预览：%s\n%c\u259e\u0020渲染字体：%s\n\u259e\u0020字体平滑：%s\u3000\u259a\u0020字体重写：%s\n\u259e\u0020字体描边：%s\u3000\u259a\u0020字体阴影：%s`,
           "font-weight:bold;font-size:14px;color:crimson",
           "line-height:200%;font-size:10px;color:#777;font-style:italic",
           "line-height:180%;font-size:12px;color:steelblue",
+          defCon.curVersion,
           defCon.domainCount > maxPersonalSites ? "color:crimson" : "color:steelblue",
           defCon.domainCount,
           "line-height:180%;font-size:12px;color:steelblue",
@@ -2222,7 +2227,6 @@
           div.innerHTML = tHTML;
           qS("body").appendChild(div);
         } catch (e) {
-          defCon.errors.push(e);
           error("\u27A4 insertHTML:", e);
         }
       }
@@ -2245,30 +2249,37 @@
     }
 
     function reloadStyleTolastChild(isMutationObserver) {
-      if (isMutationObserver) {
-        const styleScriptCount = document.head.querySelectorAll("style[id^='TS']").length;
-        if (styleScriptCount === 1) {
-          insertStyle(true);
-          debug("\u27A4 [:after]", document.head.lastChild.className);
-        } else if (styleScriptCount && !defCon.scriptCount) {
-          defCon.scriptCount = true;
-          console.error("\u27A4 \u53d1\u73b0\u5197\u4f59\u5b89\u88c5\u7684\u811a\u672c\uff0c\u8bf7\u5220\u9664\u91cd\u590d\u811a\u672c\u4fdd\u7559\u5176\u4e00\u3002");
-        }
-      } else {
-        document.onreadystatechange = function () {
-          if (document.readyState === "complete") {
-            setTimeout(() => {
-              if (document.head.lastChild.className !== defCon.class.rndStyle) {
-                insertStyle(true);
-              }
-              debug("\u27A4 lastChildStyle:", document.head.lastChild.className);
-            }, 2e3);
-            debug(
-              "\u27A4 isStylePositionAtLastChild:",
-              document.head.lastChild.className === defCon.class.rndStyle || document.head.lastChild.previousSibling.className === defCon.class.rndStyle
-            );
+      try {
+        if (isMutationObserver) {
+          const styleScriptCount = document.head.querySelectorAll("style[id^='TS']").length;
+          if (styleScriptCount === 1) {
+            insertStyle(true);
+            debug("\u27A4 [:after]", document.head.lastChild.className);
+          } else if (styleScriptCount && !defCon.scriptCount) {
+            defCon.scriptCount = true;
+            const info = `\u53d1\u73b0\u5197\u4f59\u5b89\u88c5\u7684\u201c${defCon.scriptName}\u201d\u811a\u672c\uff0c\u8bf7\u5220\u9664\u91cd\u590d\u811a\u672c\u4fdd\u7559\u5176\u4e00\u3002`;
+            defCon.errors.push(`[tooManyScripts]: ${info}`);
+            reportErrortoAuthor(defCon.errors, true);
+            console.error("\u27A4 ", info);
           }
-        };
+        } else {
+          document.onreadystatechange = function () {
+            if (document.readyState === "complete") {
+              setTimeout(() => {
+                if (document.head.lastChild.className !== defCon.class.rndStyle) {
+                  insertStyle(true);
+                }
+                debug("\u27A4 lastChildStyle:", document.head.lastChild.className);
+              }, 2e3);
+              debug(
+                "\u27A4 isStylePositionAtLastChild:",
+                document.head.lastChild.className === defCon.class.rndStyle || document.head.lastChild.previousSibling.className === defCon.class.rndStyle
+              );
+            }
+          };
+        }
+      } catch (e) {
+        error("\u27A4 reloadStyleTolastChild:", e);
       }
     }
 
@@ -2321,19 +2332,19 @@
     async function operationConfigure(fontData = []) {
       try {
         if (curWindowtop) {
-          // fontlist cache with expires
+          // fontlist with cache expires
           try {
-            const fontListwithExpire = cache.get("_fontlist_");
-            if (fontListwithExpire) {
+            const fontlist_Cache = cache.get("_fontlist_");
+            if (fontlist_Cache) {
               debug("\u27A4 %cLoad font_Data from Cache", "color:green;font-weight:bold");
-              fontData = fontListwithExpire;
+              fontData = fontlist_Cache;
             } else {
               debug("\u27A4 %cStart real-time font detection", "color:crimson;font-weight:bold");
               fontData = await fontCheck_detectOnce();
               cache.set("_fontlist_", fontData);
             }
           } catch (e) {
-            debug("\u27A4 %cInitialized font_Data caused by Errors: ", "background-color:yellow;color:red;font-weight:bold", e);
+            error("\u27A4 fontlist with cache expires: ", e);
             cache.remove("_fontlist_");
             fontData = await fontCheck_detectOnce();
             cache.set("_fontlist_", fontData);
@@ -2346,7 +2357,7 @@
               fontSet(`#${defCon.id.fontList} .${defCon.class.fontList}`).fsearch(fontData);
             }
           } catch (e) {
-            defCon.errors.push(e);
+            defCon.errors.push(`[Fonts selection]: ${e}`);
             error("\u27A4 Fonts selection:", e);
           }
 
@@ -2403,7 +2414,7 @@
               });
               checkdraw(zoom, drawZoom, /[0-9](\.[0-9]{1,3})?/);
             } catch (e) {
-              defCon.errors.push(e);
+              defCon.errors.push(`[FontSize Zoom]: ${e}`);
               error("\u27A4 FontSize Zoom:", e);
             } finally {
               saveChangeStatus(zoom, Number(CONST.fontSize), submitButton, defCon.Val);
@@ -2432,7 +2443,7 @@
             });
             checkdraw(strock, drawStrock, /[0-9](\.[0-9]{1,3})?/);
           } catch (e) {
-            defCon.errors.push(e);
+            defCon.errors.push(`[Fonts stroke]: ${e}`);
             error("\u27A4 Fonts stroke:", e);
           } finally {
             saveChangeStatus(strock, Number(CONST.fontStroke), submitButton, defCon.Val);
@@ -2460,7 +2471,7 @@
             });
             checkdraw(shadows, drawShadow, /[0-9](\.[0-9]{1,2})?/);
           } catch (e) {
-            defCon.errors.push(e);
+            defCon.errors.push(`[Fonts shadow]: ${e}`);
             error("\u27A4 Fonts shadow:", e);
           } finally {
             saveChangeStatus(shadows, Number(CONST.fontShadow), submitButton, defCon.Val);
@@ -2500,7 +2511,7 @@
               cp.style = "display:none";
             });
           } catch (e) {
-            defCon.errors.push(e);
+            defCon.errors.push(`[Fonts shadowColor]: ${e}`);
             error("\u27A4 Fonts shadowColor:", e);
           } finally {
             saveChangeStatus(colorshow, CONST.shadowColor, submitButton, defCon.Val);
@@ -2576,7 +2587,9 @@
               smoothT.checked !== CONST.fontSmooth ? smoothT.click() : debug("\u27A4 fontSmooth Not Modified");
               ffaceT.checked !== CONST.fontFace ? ffaceT.click() : debug("\u27A4 fontFace Not Modified");
               fontCssT.value = CONST.fontCSS;
+              setEffectIntoSubmit(fontCssT.value, CONST.fontCSS, defCon.Val, fontCssT, submitButton);
               fontExT.value = CONST.fontEx;
+              setEffectIntoSubmit(fontExT.value, CONST.fontEx, defCon.Val, fontExT, submitButton);
               __preview__(defCon.preview);
               GetCurFont(ffaceT.checked, defCon.refont, defautlFont);
               autoZoomFontSize(`#${defCon.id.rndId}`, defCon.tZoom);
@@ -2642,8 +2655,9 @@
                 GetCurFont(fontface, _refont, defautlFont);
                 autoZoomFontSize(`#${defCon.id.rndId}`, fzoom);
               } catch (e) {
-                defCon.errors.push(e);
-                error("\u27A4", e);
+                defCon.errors.push(`[submitPreview]: ${e}`);
+                reportErrortoAuthor(defCon.errors, true);
+                error("\u27A4 submitPreview:", e);
               }
             } else {
               try {
@@ -2753,7 +2767,8 @@
                 }
                 frDialog = null;
               } catch (e) {
-                defCon.errors.push(e);
+                defCon.errors.push(`[saveDate]: ${e}`);
+                reportErrortoAuthor(defCon.errors, true);
                 error("\u27A4 saveDate:", e);
                 defCon.successId = false;
               } finally {
@@ -2784,8 +2799,8 @@
           });
         }
       } catch (e) {
-        defCon.errors.push(e);
-        error("%c[Error]%c\n%s", "font-weight:bold;color:red", "font-weight:bold;color:darkred", e);
+        defCon.errors.push(`[operationConfigure]: ${e}`);
+        error("\u27A4 operationConfigure:", e);
       }
     }
 
@@ -2928,7 +2943,8 @@
             }
             frDialog = null;
           } catch (e) {
-            reportErrortoAuthor(e);
+            defCon.errors.push(`[backupData]: ${e}`);
+            reportErrortoAuthor(defCon.errors, true);
             error("\u27A4 backupData:", e);
           }
         });
@@ -2988,7 +3004,7 @@
           }
         }
       } catch (e) {
-        defCon.errors.push(e);
+        defCon.errors.push(`[saveChangeStatus]: ${e}`);
         error("\u27A4 saveChangeStatus:", e);
       }
     }
@@ -3036,127 +3052,145 @@
           }
         }
       } catch (e) {
-        defCon.errors.push(e);
         error("\u27A4 setEffectIntoSubmit:", e);
       }
     }
 
     async function manageDomainList(_temp_ = [], Contents = "") {
       let domains, domainValue, domainValueIndex;
-      domains = await GMgetValue("_domains_fonts_set_");
-      domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : default_domains;
-      const _data_search_ =
-        domainValue.length > 6
-          ? `<p><input id="${defCon.id.seed}_d_s_" style="width:52%;font-size:12px!important;border:2px solid #777;border-radius:4px;margin:4px 4px 6px 0;padding:3px 15px"><button id="${defCon.id.seed}_d_s_s_" style="padding:3px 10px;cursor:pointer;font-size:12px!important;border:1px solid #777;border-radius:4px;">查 询</button><button id="${defCon.id.seed}_d_s_c_" style="margin-left:4px;padding:3px 10px;cursor:pointer;font-size:12px!important;border:1px solid #777;border-radius:4px;">清 除</button></p>`
-          : "";
-      for (let i = 0; i < domainValue.length; i++) {
-        Contents += `<li id="${defCon.id.seed}_d_d_l_${i}" style="list-style:none;font-size:14px!important;font-style:normal;padding:5px;color:#555">\
+      try {
+        domains = await GMgetValue("_domains_fonts_set_");
+        domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : default_domains;
+        const _data_search_ =
+          domainValue.length > 6
+            ? `<p><input id="${defCon.id.seed}_d_s_" style="width:52%;font-size:12px!important;border:2px solid #777;border-radius:4px;margin:4px 4px 6px 0;padding:3px 15px"><button id="${defCon.id.seed}_d_s_s_" style="padding:3px 10px;cursor:pointer;font-size:12px!important;border:1px solid #777;border-radius:4px;">查 询</button><button id="${defCon.id.seed}_d_s_c_" style="margin-left:4px;padding:3px 10px;cursor:pointer;font-size:12px!important;border:1px solid #777;border-radius:4px;">清 除</button></p>`
+            : "";
+        for (let i = 0; i < domainValue.length; i++) {
+          Contents += `<li id="${defCon.id.seed}_d_d_l_${i}" style="list-style:none;font-size:14px!important;font-style:normal;padding:5px;color:#555">\
                 [<span id="${defCon.id.seed}_d_d_l_s_${i}" style="padding:3px;cursor:pointer;color:crimson;font-size:14px!important">删除</span>]\
                 <span>${i + 1}. ${filterHtml(domainValue[i].domain)} - ${dateFormat("YYYY/mm/dd HH:MM:SS", new Date(domainValue[i].fontDate))}</span></li>`;
-      }
-      let frDialog = new frDialogBox({
-        trueButtonText: "确认操作，保存数据",
-        neutralButtonText: "取 消",
-        messageText: `<p style="font-size:14px!important;color:darkred">请谨慎操作，保存后生效，已删除的数据将不可恢复！</p>${_data_search_}<ul id="${defCon.id.seed}_d_d_" style="margin:0;padding:0;list-style:none;overflow:auto;max-height:190px;white-space:nowrap">${Contents}</ul>`,
-        titleText: "网站个性化设置数据列表：",
-      });
-      const items = document.querySelectorAll(`#${defCon.id.seed}_d_d_ li span[id^="${defCon.id.seed}_d_d_l_s_"]`);
-      if (qS(`#${defCon.id.seed}_d_s_`) && qS(`#${defCon.id.seed}_d_s_c_`) && qS(`#${defCon.id.seed}_d_s_s_`)) {
-        qS(`#${defCon.id.seed}_d_s_`).addEventListener("keydown", e => {
-          const event = e || window.event;
-          if (event.keyCode === 13) {
-            qS(`#${defCon.id.seed}_d_s_s_`).click();
-          }
-        });
-        qS(`#${defCon.id.seed}_d_s_`).addEventListener("input", () => {
-          qS(`#${defCon.id.seed}_d_s_`).value = qS(`#${defCon.id.seed}_d_s_`).value.replace(/[^a-z0-9.-]/gi, "");
-        });
-        qS(`#${defCon.id.seed}_d_s_c_`).addEventListener("click", () => {
-          qS(`#${defCon.id.seed}_d_s_`).value = "";
-          qS(`#${defCon.id.seed}_d_s_`).style.cssText += "border-color:#777";
-          qS(`#${defCon.id.seed}_d_d_`).scrollTop = 0;
-          qS(`#${defCon.id.seed}_d_s_`).focus();
-        });
-        qS(`#${defCon.id.seed}_d_d_`).addEventListener("click", () => {
-          qS(`#${defCon.id.seed}_d_s_`).focus();
-        });
-        qS(`#${defCon.id.seed}_d_s_s_`).addEventListener("click", () => {
-          if (qS(`#${defCon.id.seed}_d_s_`).value) {
-            if (window.find) {
-              qS(`#${defCon.id.seed}_d_s_`).style.cssText += window.find(qS(`#${defCon.id.seed}_d_s_`).value, 0) ? "border-color:#777" : "border-color:red";
-              if (window.getSelection) {
-                const _sTxt = window.getSelection();
-                const _rows = Number(_sTxt.anchorNode.parentNode.parentNode.id.replace(`${defCon.id.seed}_d_d_l_`, ""));
-                const _offsetHeight = Number(_sTxt.anchorNode.parentNode.parentNode.offsetHeight);
-                qS(`#${defCon.id.seed}_d_d_`).scrollTop = _rows * _offsetHeight;
-              }
-            }
-          }
-        });
-      }
-      for (let j = 0; j < items.length; j++) {
-        items[j].addEventListener(
-          "click",
-          function (a, b) {
-            if (!this.getAttribute("data-del")) {
-              const _list_Id_ = Number(this.id.replace(`${defCon.id.seed}_d_d_l_s_`, ""));
-              a.push(b[_list_Id_].domain);
-              this.setAttribute("data-del", b[_list_Id_].domain);
-              this.innerHTML = "恢复";
-              this.style.cssText += "color:green";
-              this.nextElementSibling.style = "text-decoration:line-through";
-            } else {
-              a.splice(a.indexOf(this.getAttribute("data-del")), 1);
-              this.removeAttribute("data-del");
-              this.innerHTML = "删除";
-              this.style.cssText += "color:crimson";
-              this.nextElementSibling.style = "text-decoration:none";
-            }
-          }.bind(items[j], _temp_, domainValue)
-        );
-      }
-      if (await frDialog.respond()) {
-        for (let l = _temp_.length - 1; l >= 0; l--) {
-          domains = await GMgetValue("_domains_fonts_set_");
-          domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : default_domains;
-          domainValueIndex = update_domain_index(domainValue, _temp_[l]);
-          domainValue.splice(domainValueIndex, 1);
-          GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
-          if (_temp_[l] === curHostname) {
-            defCon.equal = true;
-            continue;
-          }
         }
         let frDialog = new frDialogBox({
-          trueButtonText: "感谢使用",
-          messageText: `<p style="color:darkgreen">网站个性化设置数据已保存！${
-            defCon.equal ? "</p><p>当前页面将在您确认后自动刷新。" : "</p><p>确认后您可以在当前页面继续其他操作。"
-          }</p>`,
-          titleText: "数据保存完毕",
+          trueButtonText: "确认操作，保存数据",
+          neutralButtonText: "取 消",
+          messageText: `<p style="font-size:14px!important;color:darkred">请谨慎操作，保存后生效，已删除的数据将不可恢复！</p>${_data_search_}<ul id="${defCon.id.seed}_d_d_" style="margin:0;padding:0;list-style:none;overflow:auto;max-height:190px;white-space:nowrap">${Contents}</ul>`,
+          titleText: "网站个性化设置数据列表：",
         });
+        const items = document.querySelectorAll(`#${defCon.id.seed}_d_d_ li span[id^="${defCon.id.seed}_d_d_l_s_"]`);
+        if (qS(`#${defCon.id.seed}_d_s_`) && qS(`#${defCon.id.seed}_d_s_c_`) && qS(`#${defCon.id.seed}_d_s_s_`)) {
+          qS(`#${defCon.id.seed}_d_s_`).addEventListener("keydown", e => {
+            const event = e || window.event;
+            if (event.keyCode === 13) {
+              qS(`#${defCon.id.seed}_d_s_s_`).click();
+            }
+          });
+          qS(`#${defCon.id.seed}_d_s_`).addEventListener("input", () => {
+            qS(`#${defCon.id.seed}_d_s_`).value = qS(`#${defCon.id.seed}_d_s_`).value.replace(/[^a-z0-9.-]/gi, "");
+          });
+          qS(`#${defCon.id.seed}_d_s_c_`).addEventListener("click", () => {
+            qS(`#${defCon.id.seed}_d_s_`).value = "";
+            qS(`#${defCon.id.seed}_d_s_`).style.cssText += "border-color:#777";
+            qS(`#${defCon.id.seed}_d_d_`).scrollTop = 0;
+            qS(`#${defCon.id.seed}_d_s_`).focus();
+          });
+          qS(`#${defCon.id.seed}_d_d_`).addEventListener("click", () => {
+            qS(`#${defCon.id.seed}_d_s_`).focus();
+          });
+          qS(`#${defCon.id.seed}_d_s_s_`).addEventListener("click", () => {
+            if (qS(`#${defCon.id.seed}_d_s_`).value) {
+              if (window.find) {
+                qS(`#${defCon.id.seed}_d_s_`).style.cssText += window.find(qS(`#${defCon.id.seed}_d_s_`).value, 0) ? "border-color:#777" : "border-color:red";
+                if (window.getSelection) {
+                  const _sTxt = window.getSelection();
+                  const _rows = Number(_sTxt.anchorNode.parentNode.parentNode.id.replace(`${defCon.id.seed}_d_d_l_`, ""));
+                  const _offsetHeight = Number(_sTxt.anchorNode.parentNode.parentNode.offsetHeight);
+                  qS(`#${defCon.id.seed}_d_d_`).scrollTop = _rows * _offsetHeight;
+                }
+              }
+            }
+          });
+        }
+        for (let j = 0; j < items.length; j++) {
+          items[j].addEventListener(
+            "click",
+            function (a, b) {
+              if (!this.getAttribute("data-del")) {
+                const _list_Id_ = Number(this.id.replace(`${defCon.id.seed}_d_d_l_s_`, ""));
+                a.push(b[_list_Id_].domain);
+                this.setAttribute("data-del", b[_list_Id_].domain);
+                this.innerHTML = "恢复";
+                this.style.cssText += "color:green";
+                this.nextElementSibling.style = "text-decoration:line-through";
+              } else {
+                a.splice(a.indexOf(this.getAttribute("data-del")), 1);
+                this.removeAttribute("data-del");
+                this.innerHTML = "删除";
+                this.style.cssText += "color:crimson";
+                this.nextElementSibling.style = "text-decoration:none";
+              }
+            }.bind(items[j], _temp_, domainValue)
+          );
+        }
         if (await frDialog.respond()) {
-          closeAllDialog(`div.${defCon.class.db}`);
-          frDialog = null;
-          if (defCon.equal) {
-            cache.remove("_fontlist_");
-            closeConfigurePage(true);
-            location.reload();
+          for (let l = _temp_.length - 1; l >= 0; l--) {
+            domains = await GMgetValue("_domains_fonts_set_");
+            domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : default_domains;
+            domainValueIndex = update_domain_index(domainValue, _temp_[l]);
+            domainValue.splice(domainValueIndex, 1);
+            GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
+            if (_temp_[l] === curHostname) {
+              defCon.equal = true;
+              continue;
+            }
+          }
+          let frDialog = new frDialogBox({
+            trueButtonText: "感谢使用",
+            messageText: `<p style="color:darkgreen">网站个性化设置数据已保存！${
+              defCon.equal ? "</p><p>当前页面将在您确认后自动刷新。" : "</p><p>确认后您可以在当前页面继续其他操作。"
+            }</p>`,
+            titleText: "数据保存完毕",
+          });
+          if (await frDialog.respond()) {
+            closeAllDialog(`div.${defCon.class.db}`);
+            frDialog = null;
+            if (defCon.equal) {
+              cache.remove("_fontlist_");
+              closeConfigurePage(true);
+              location.reload();
+            }
           }
         }
+        frDialog = null;
+      } catch (e) {
+        defCon.errors.push(`[manageDomainList]: ${e}`);
+        reportErrortoAuthor(defCon.errors, true);
+        error("\u27A4 manageDomainList:", e);
       }
-      frDialog = null;
     }
 
-    async function reportErrortoAuthor(e, show = isdebug) {
+    async function reportErrortoAuthor(e, show = isdebug, errors = "") {
       if (show) {
         closeConfigurePage(true);
         setTimeout(async () => {
           try {
             closeAllDialog(`div.${defCon.class.db}`);
+            const br = e.length > 1 ? "\u3000<br/>" : "";
+            for (let i in e) {
+              errors += e[i] + br;
+            }
             let frDialog = new frDialogBox({
               trueButtonText: "反馈问题",
-              messageText: `<p style='color:crimson'>脚本运行过程中发生了错误，请向作者反馈！</p><p style='color:grey;font-size:14px!important'>以下信息在您确认后会保存至您的剪切板：</p><p><ul id='${defCon.id.seed}_copy_to_author'><li>浏览器信息：${navigator.userAgent}\u3000</li><li>脚本插件信息：${handlerInfo} ${GMversion}\u3000</li><li>脚本版本：${defCon.curVersion}\u3000</li><li>域名信息：${curHostname}\u3000</li><li>错误信息：<span style="color:crimson">${e}</span>\u3000</li></ul></p>`,
-              titleText: "错误报告",
+              messageText: String(
+                `<p style='color:crimson'>脚本运行过程中发生了错误，请及时告知作者，感谢您的反馈！以下信息会自动保存至您的剪切板：</p>\
+                <p><ul id='${defCon.id.seed}_copy_to_author'>\
+                <li>浏览器信息：${getBrowser.type()}\u3000</li>\
+                <li>脚本扩展信息：${handlerInfo} ${GMversion}\u3000</li>\
+                <li>脚本版本信息：${defCon.curVersion}\u3000</li>\
+                <li>当前访问域名：${curHostname}\u3000</li>\
+                <li>错误信息：<span style="color:tan">${errors}</span>\u3000</li>\
+                </ul></p>`
+              ).trim(),
+              titleText: defCon.scriptName + "错误报告",
             });
             const copyText = qS(`#${defCon.id.seed}_copy_to_author`).innerText.replace(/\u3000/g, "\n");
             defCon.errors.length = 0;
@@ -3214,7 +3248,7 @@
           }
         }
       } catch (e) {
-        defCon.errors.push(e);
+        defCon.errors.push(`[autoZoomFontSize]: ${e}`);
         error("\u27A4 autoZoomFontSize:", e);
       } finally {
         if (curZoom !== 1) {
