@@ -3181,14 +3181,16 @@
             let frDialog = new frDialogBox({
               trueButtonText: "反馈问题",
               messageText: String(
-                `<p style='color:crimson'>脚本运行过程中发生了错误，请及时告知作者，感谢您的反馈！以下信息会自动保存至您的剪切板：</p>\
-                <p><ul id='${defCon.id.seed}_copy_to_author'>\
-                <li>浏览器信息：${getBrowser.type()}\u3000</li>\
-                <li>脚本扩展信息：${handlerInfo} ${GMversion}\u3000</li>\
-                <li>脚本版本信息：${defCon.curVersion}\u3000</li>\
-                <li>当前访问域名：${curHostname}\u3000</li>\
-                <li>错误信息：<span style="color:tan">${errors}</span>\u3000</li>\
-                </ul></p>`
+                `<p style='color:crimson'>脚本运行过程中发生了错误，请及时告知作者，感谢您的反馈！以下信息会自动保存至您的剪切板：</p>
+                <p>
+                  <ul id='${defCon.id.seed}_copy_to_author'>
+                    <li>浏览器信息：${getBrowser.type()}\u3000</li>
+                    <li>脚本扩展信息：${handlerInfo} ${GMversion}\u3000</li>
+                    <li>脚本版本信息：${defCon.curVersion}\u3000</li>
+                    <li>当前访问域名：${curHostname}\u3000</li>
+                    <li>错误信息：<span style="color:tan">${errors}</span>\u3000</li>
+                  </ul>
+                </p>`
               ).trim(),
               titleText: defCon.scriptName + "错误报告",
             });
