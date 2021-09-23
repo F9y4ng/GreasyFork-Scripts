@@ -5,7 +5,7 @@
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:ja         Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version         3.7.20210919.1
+// @version         3.8.20210923.1
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:zh  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
@@ -31,7 +31,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            修正语言适配的错误。\n修正bugs, 优化代码。
+// @note            优化自动更新检测逻辑，提升提示体验度。\n修正Google搜索的搜索栏样式bug.\n修正bugs, 优化代码。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -65,6 +65,27 @@
   const isGM = Boolean(handlerInfo.toLowerCase() === "greasemonkey");
   const debug = isdebug ? console.log.bind(console) : () => {};
   const error = isdebug ? console.error.bind(console) : () => {};
+
+  /* GM selector */
+
+  if (isGM) {
+    GMsetValue = GM.setValue;
+    GMgetValue = GM.getValue;
+    GMdeleteValue = GM.deleteValue;
+    GMregisterMenuCommand = GM.registerMenuCommand;
+    GMunregisterMenuCommand = () => {};
+    GMopenInTab = GM.openInTab;
+  } else {
+    GMsetValue = GM_setValue;
+    GMgetValue = GM_getValue;
+    GMdeleteValue = GM_deleteValue;
+    GMregisterMenuCommand = GM_registerMenuCommand;
+    GMunregisterMenuCommand = GM_unregisterMenuCommand;
+    GMopenInTab = GM_openInTab;
+  }
+
+  /* default CONST Values */
+
   const defCon = {
     scriptName: GMinfo.script.name,
     curVersion: GMinfo.script.version,
@@ -88,7 +109,7 @@
     isNeedUpdate: 0,
     updateNote: "",
     restTime: 0,
-    _option: isGM ? false : { active: true, insert: true, setParent: true },
+    options: isGM ? false : { active: true, insert: true, setParent: true },
     durationTime: t => {
       let w, d, h, m, s;
       const wks = Math.floor(t / 1000 / 60 / 60 / 24 / 7);
@@ -100,7 +121,7 @@
       d = ds > 0 ? ` ${ds}d` : "";
       h = hs > 0 ? ` ${hs}h` : "";
       m = ms > 0 ? ` ${ms}min` : "";
-      s = wks > 0 || ds > 0 || hs > 0 || ms > 0 ? "" : ss > 0 ? ` ${ss}s` : " Destroying cache.";
+      s = wks > 0 || ds > 0 || hs > 0 || ms > 0 ? "" : ss > 0 ? ` ${ss}s` : " expired";
       return `${w}${d}${h}${m}${s}`;
     },
     showDate: s => {
@@ -126,6 +147,8 @@
     },
   };
   defCon.rName = defCon.randString(7, true);
+
+  /* Define random aliases */
 
   const Notice = {
     noticejs: defCon.randString(7, true),
@@ -156,22 +179,6 @@
       return String(`<div class="${defCon.rName}"><dl>${str}<dl></div>`);
     },
   };
-
-  if (isGM) {
-    GMsetValue = GM.setValue;
-    GMgetValue = GM.getValue;
-    GMdeleteValue = GM.deleteValue;
-    GMregisterMenuCommand = GM.registerMenuCommand;
-    GMunregisterMenuCommand = () => {};
-    GMopenInTab = GM.openInTab;
-  } else {
-    GMsetValue = GM_setValue;
-    GMgetValue = GM_getValue;
-    GMdeleteValue = GM_deleteValue;
-    GMregisterMenuCommand = GM_registerMenuCommand;
-    GMunregisterMenuCommand = GM_unregisterMenuCommand;
-    GMopenInTab = GM_openInTab;
-  }
 
   /* Refactoring NoticeJs Functions */
 
@@ -449,26 +456,27 @@
     GMsetValue(key, defCon.encrypt(JSON.stringify(obj)));
   }
 
-  function GMgetExpire(key, val, _expire) {
-    let expire, expires, expireTime;
-    if (!val) {
-      return val;
+  async function GMgetExpire(key, curExpire) {
+    let vals, expire, expires, expireTime;
+    vals = await GMgetValue(key);
+    if (!vals) {
+      return vals;
     }
-    val = JSON.parse(defCon.decrypt(val));
-    if (_expire) {
-      expire = /(?!^0)^[0-9]+[smhdw]$/i.test(_expire) ? _expire : "4h";
+    vals = JSON.parse(defCon.decrypt(vals));
+    if (curExpire) {
+      expire = /(?!^0)^[0-9]+[smhdw]$/i.test(curExpire) ? curExpire : "24h";
       expire = expire.replace(/w/i, "*7*24*3600*1000").replace(/d/i, "*24*3600*1000").replace(/h/i, "*3600*1000").replace(/m/i, "*60*1000").replace(/s/i, "*1000");
       expires = expire.split("*");
       expireTime = expires.reduce(function (a, b) {
         return a * b;
       }, 1);
     }
-    defCon.restTime = val.time + expireTime - Date.now();
+    defCon.restTime = vals.time + expireTime - Date.now();
     if (defCon.restTime <= 0) {
       GMdeleteValue(key);
       return null;
     }
-    return val.data;
+    return vals.data;
   }
 
   /* Refactoring GMnotification Function */
@@ -530,13 +538,13 @@
   }
 
   function fixedtransformmatrix() {
-    const _transform = window.getComputedStyle(document.body, null).getPropertyValue("transform");
-    if (_transform && _transform !== "none") {
-      const _clientY = Number(_transform.split(",")[3]);
-      if (_clientY && _clientY !== 1) {
+    const transform = window.getComputedStyle(document.body, null).getPropertyValue("transform");
+    if (transform && transform !== "none") {
+      const clientY = Number(transform.split(",")[3]);
+      if (clientY && clientY !== 1) {
         window.scrollTo(document.documentElement.clientWidth, 0);
         document.querySelectorAll(`.${Notice.noticejs}-bottomRight`).forEach(item => {
-          item.style = `top:${(document.documentElement.clientHeight - item.clientHeight) / _clientY - 30 * _clientY}px;right:10px`;
+          item.style = `top:${(document.documentElement.clientHeight - item.clientHeight) / clientY - 30 * clientY}px;right:10px`;
         });
       }
     }
@@ -588,7 +596,7 @@
         credentials: "omit",
       })
         .then(e => {
-          debug("//-> %c%s %s", "color:green", e.ok, e.status);
+          debug("//-> %c%s %s %s", "color:green", new URL(u).hostname, e.ok, e.status);
           if (!e.ok) {
             throw Error(`${e.status} ${e.statusText}`);
           }
@@ -611,7 +619,6 @@
         })
         .catch(e => {
           error("//-> %cfetchVersion:\n%c%s", "font-weight:bold", "font-weight:normal", e);
-          t();
         });
     });
   }
@@ -623,7 +630,7 @@
     if (compare_array.length === current_array.length) {
       for (let i = 0; i < compare_array.length; i++) {
         if (parseInt(compare_array[i]) < parseInt(current_array[i])) {
-          upgradeID = 2;
+          upgradeID = 3;
           break;
         } else {
           if (parseInt(compare_array[i]) === parseInt(current_array[i])) {
@@ -641,14 +648,13 @@
   }
 
   async function checkVersion(s = false) {
-    let t, setResult, info;
+    let t, setResult, useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit, GoogleJump, _data;
     const _configuration = await GMgetValue("_configuration_");
-    let useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit, GoogleJump, _data;
     if (!_configuration) {
       useBing = 0;
       VerDetAuto = true;
       checkUpdate = true;
-      timeNumber = 4;
+      timeNumber = 24;
       timeUnit = "h";
       GoogleJump = false;
       _data = {
@@ -677,10 +683,9 @@
     }
     setResult = checkUpdate ? Boolean(VerDetAuto) : false;
     const _expire_time = String(timeNumber + timeUnit);
-    const _expire_time_ = /(?!^0)^[0-9]+[smhdw]$/i.test(_expire_time) ? _expire_time : "4h";
+    const _expire_time_ = /(?!^0)^[0-9]+[smhdw]$/i.test(_expire_time) ? _expire_time : "24h";
     if (setResult) {
-      const exp = await GMgetValue("_Check_Version_Expire_");
-      const cache = GMgetExpire("_Check_Version_Expire_", exp, _expire_time_);
+      const cache = await GMgetExpire("_Check_Version_Expire_", _expire_time_);
       if (!cache) {
         // first: greasyfork
         t = await fetchVersion(`https://greasyfork.org/scripts/12909/code/${defCon.randString(32)}.meta.js`).catch(async () => {
@@ -726,7 +731,7 @@
       // Resolution return data
       if (typeof t !== "undefined") {
         const lastestVersion = defCon.decrypt(t[1]);
-        defCon.isNoticed = Number(sessionStorage.getItem("nCount")) || 0;
+        defCon.isNoticed = await GMgetExpire("_nCount_", _expire_time_);
         defCon.isNeedUpdate = cache ? compareVersion(defCon.curVersion, lastestVersion) : t[0];
         const updateNote = ((w = "") => {
           if (defCon.decrypt(t[2])) {
@@ -753,39 +758,28 @@
         sourceSite = sourceSite.replace("_cdn", ".CDN");
         sourceSite = cache ? `${sourceSite} on Cache` : sourceSite;
         const repo = cache
-          ? `\nCacheExpire:${defCon.durationTime(defCon.restTime)}\nDetectTime: ${defCon.lastRuntime()}\n`
-          : `\nExpireTime: ${_expire_time_}\nDetectTime: ${defCon.lastRuntime()}\n`;
+          ? `\ncache expire:${defCon.durationTime(defCon.restTime)}\ndetect time: ${defCon.lastRuntime()}\n`
+          : `\nexpire time: ${_expire_time_}\ndetect time: ${defCon.lastRuntime()}\n`;
         const sourceURL = recheckURLs.toString().replace("_cdn", "");
         switch (defCon.isNeedUpdate) {
           case 2:
             if (window.self === window.top) {
               console.warn(
                 String(
-                  `%c[GB-Update]%c\nWe found a new version, But %cthe latest version ` +
-                    `%c${lastestVersion}%c is lower than your local version %c${defCon.curVersion}.%c\n\n` +
-                    `Please confirm whether you need to upgrade your local script, and then you need to update it manually.\n` +
-                    `${repo}(${sourceSite})`
+                  `%c[GB-Update]%c\nWe found your local version %c${defCon.curVersion} %cis not current.\nPlease confirm whether you had edited your local script, then you need to update it manually.\n${repo}(${sourceSite})`
                 ),
                 "font-weight:bold;color:crimson",
-                "font-weight:bold;color:0",
                 "color:0",
                 "font-weight:bold;color:tomato",
-                "color:0",
-                "font-weight:bold;color:darkred",
                 "color:0"
               );
             }
-            if (defCon.isNoticed < 2 || s) {
+            if (!defCon.isNoticed || s || isdebug) {
               setTimeout(function () {
                 GMnotification(
                   Notice.noticeHTML(
                     `<dt>${defCon.scriptName}</dt>
-                      <dd><span>发现版本异常</span>检测到新版本 <i>${lastestVersion}</i> 低于您的本地版本 <i>${defCon.curVersion}</i>。</dd>\
-                      <dd>由于您编辑过本地脚本，或是手动在脚本网站上升级过新版本，从而造成缓存错误。为避免未知错误的出现，脚本将自动设置为禁止检测更新，\
-                      直至您手动从脚本菜单中再次开启它。</dd><dd>[ ${sourceSite} ]</dd><dd style="font-size:12px!important;\
-                      color:lemonchiffon;font-style:italic">注：若要重新启用自动更新，您需要在<a href="${sourceURL}" target="_blank"\
-                      style="padding:0 2px;font-size:14px!important;color:gold">脚本源网站</a>覆盖安装正式版本后，从脚本菜单重新开启更新检测。</dd>\
-                      <dd style="text-align: center"><img src="https://z3.ax1x.com/2021/08/14/fyvfk6.png" alt="开启自动检测"></dd>`
+                      <dd><span>发现版本异常</span>版本号 <i>${defCon.curVersion}</i> 错误。由于您手动编辑过本地脚本，为避免未知错误的出现，脚本将自动设置为禁止检测更新。</dd><dd style="text-align: center;margin-top:8px!important"><img src="https://z3.ax1x.com/2021/08/14/fyvfk6.png" alt="开启自动检测"></dd><dd style="color:lemonchiffon;font-style:italic">注：若要重新启用自动更新，您需要在<a href="${sourceURL}" target="_blank" style="padding:0 2px;font-weight:700;color:gold">脚本源网站</a>覆盖安装正式版本后，从脚本菜单重新开启更新检测。</dd><dd>[ ${sourceSite} ]</dd>`
                   ),
                   `${Notice.error}`,
                   true,
@@ -798,10 +792,10 @@
                     ],
                   }
                 );
-              }, 500);
+              }, 100);
               _data.VerDetAuto = false;
               GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
-              sessionStorage.setItem("nCount", ++defCon.isNoticed);
+              GMsetExpire("_nCount_", true);
             }
             return false;
           case 1:
@@ -814,19 +808,17 @@
                 "color:0"
               );
             }
-            if (defCon.isNoticed < 2 || s) {
+            if (!defCon.isNoticed || s || isdebug) {
               let showdDetail = "";
               if (updateNote) {
-                showdDetail = `<dd onmouseover="this.parentNode.children[2].style.display='block';\
-                      this.style.display='none'" style="text-align:center">&gt;&gt; 查看更新内容 &lt;&lt;</dd>`;
+                showdDetail = `<dd onmouseover="this.previousElementSibling.previousElementSibling.style.display='block';this.style.display='none'" style="text-align:center">&gt;&gt; 查看更新内容 &lt;&lt;</dd>`;
               }
               setTimeout(function () {
                 GMnotification(
                   Notice.noticeHTML(
-                    `<dt>${defCon.scriptName}</dt>\
-                      <dd><span>发现版本更新</span>最新版本 <i>${lastestVersion}</i>，如果您现在需要更新脚本，请点击这里完成升级安装。</dd>\
-                      ${updateNote}<dd>[ ${sourceSite} ]<kbd style="float:right;font-size:11px!important;">\
-                      ( 缓存时间：${defCon.showDate(_expire_time_)} )</kbd></dd>${showdDetail}`
+                    `<dt>${defCon.scriptName}</dt>
+                      <dd><span>发现版本更新</span>最新版本 <i>${lastestVersion}</i>，如果您现在需要更新脚本，请点击这里完成升级安装。</dd>${updateNote}
+                      <dd>[ ${sourceSite} ]<kbd style="float:right;font-size:11px!important;">( 缓存时间：${defCon.showDate(_expire_time_)} )</kbd></dd>${showdDetail}`
                   ),
                   `${Notice.warning}`,
                   false,
@@ -841,9 +833,7 @@
                           GMdeleteValue("_Check_Version_Expire_");
                           GMnotification(
                             Notice.noticeHTML(
-                              `<dd class="${Notice.center}">如果您已更新了脚本，请点击<a href="javascript:void(0)"\
-                                  onclick="location.replace(location.href.replace(/&zn=[^&]*/i,'')+'&Zn=1')"\
-                                  class="im">这里</a>刷新使其生效。</a></dd>`
+                              `<dd class="${Notice.center}">如果您已更新了脚本，请点击<a href="javascript:void(0)" onclick="location.replace(location.href.replace(/&zn=[^&]*/i,'')+'&Zn=1')" class="im">这里</a>刷新使其生效。</a></dd>`
                             ),
                             `${Notice.info}`,
                             true,
@@ -854,32 +844,30 @@
                     ],
                   }
                 );
-              }, 500);
-              sessionStorage.setItem("nCount", ++defCon.isNoticed);
+              }, 100);
+              GMsetExpire("_nCount_", true);
             }
             return false;
           default:
-            if (window.self === window.top) {
-              info = !defCon.isNoticed || s ? console.info.bind(console) : debug.bind(console);
-              sessionStorage.setItem("nCount", 1);
-              info(
+            if (window.self === window.top && (s || isdebug)) {
+              console.info(
                 `%c[GB-Update]%c\nCurretVersion: %c${defCon.curVersion}%c is up-to-date!${repo}(${sourceSite})`,
                 "font-weight:bold;color:darkcyan",
                 "color:0",
                 "color:red",
                 "color:0"
               );
-            }
-            if (s) {
               setTimeout(function () {
                 GMnotification(
                   Notice.noticeHTML(
-                    `<dt>${defCon.scriptName}</dt>\
-                      <dd><span>更新成功</span>当前版本 <i>${defCon.curVersion}</i> 已为最新！</dd>\
-                      <dd>[ ${sourceSite} ]<kbd style="float:right;font-size:11px!important">\
-                      ( 缓存时间：${defCon.showDate(_expire_time_)} )</kbd></dd>`
+                    `<dt>${defCon.scriptName}</dt>
+                      <dd><span>更新成功</span>当前版本 <i>${defCon.curVersion}</i> 已为最新！</dd>` +
+                      String(defCon.isNeedUpdate === 3 ? `<dd style="color:yellow;font-style:italic">（注意：您的本地版本高于服务器版本，请核验）</dd>` : ``) +
+                      `<dd>[ ${sourceSite} ]<kbd style="float:right;font-size:11px!important">( 缓存时间：${defCon.showDate(_expire_time_)} )</kbd></dd>`
                   ),
-                  `${Notice.success}`
+                  `${Notice.success}`,
+                  false,
+                  defCon.isNeedUpdate === 3 ? 50 : 30
                 );
               }, 100);
             }
@@ -888,7 +876,7 @@
       }
     } else {
       if (window.self === window.top) {
-        console.warn(`%c[GB-Update]%c\nVersion detection turned off ${!checkUpdate ? "Manually" : "Automatically"}.`, "font-weight:bold;color:red", "color:0");
+        console.log(`%c[GB-Update]%c\nUpdate detection has been ${!checkUpdate ? "manually" : "automatically"} turned off.`, "font-weight:bold;color:red", "color:0");
       }
       return false;
     }
@@ -906,7 +894,7 @@
       useBing = 0;
       VerDetAuto = true;
       checkUpdate = true;
-      timeNumber = 4;
+      timeNumber = 24;
       timeUnit = "h";
       GoogleJump = false;
       _data = {
@@ -1066,7 +1054,9 @@
       },
 
       menuRemove: t => {
-        t ? GMunregisterMenuCommand(t) : debug("//-> menuRemove() not found item: %s.", typeof t);
+        if (t) {
+          GMunregisterMenuCommand(t);
+        }
       },
 
       registerMenuCommand: function (e) {
@@ -1104,7 +1094,7 @@
                     </ol>
                     <ol id="${Notice.fcExpire}">
                       <div>更新频率（分/时/天/周）
-                        <input id="${Notice.Expire}" maxlength="3" placeholder="4" value="${timeNumber}"/>
+                        <input id="${Notice.Expire}" maxlength="3" placeholder="24" value="${timeNumber}"/>
                         <select id="${Notice.timeUnit}">
                           <option ${timeUnit === "m" ? "selected" : ""} value ="m">分钟</option>
                           <option ${timeUnit === "h" ? "selected" : ""} value ="h">小时</option>
@@ -1146,7 +1136,7 @@
             this.value = this.value.replace(/[^0-9]/g, "");
           });
           document.querySelector(`#${Notice.fcFeedback} .${Notice.feedback}`).addEventListener("click", () => {
-            GMopenInTab(`${defCon.support ? defCon.support : "https://greasyfork.org/scripts/12909/feedback"}`, defCon._option);
+            GMopenInTab(`${defCon.support ? defCon.support : "https://greasyfork.org/scripts/12909/feedback"}`, defCon.options);
           });
           document.querySelector(`#${Notice.fcSubmit} .${Notice.fcClose}`).addEventListener("click", function () {
             document.querySelector(`.${Notice.noticejs} .${Notice.configuration} .${Notice.close}`).click();
@@ -1157,7 +1147,7 @@
             let timeNumber = document.querySelector(`#${Notice.Expire}`).value;
             let timeUnit = document.querySelector(`#${Notice.timeUnit}`).value;
             _data.checkUpdate = checkUpdate;
-            _data.timeNumber = timeNumber.length ? Number(timeNumber) : 4;
+            _data.timeNumber = timeNumber.length ? Number(timeNumber) : 24;
             _data.timeUnit = timeUnit.length ? timeUnit : "h";
             _data.GoogleJump = GoogleJump;
             if (!checkUpdate) {
@@ -1186,14 +1176,14 @@
           if (CONST.isVDResult) {
             in_UpdateCheck_ID = GMregisterMenuCommand(`\ufff5\ud83e\udded【版本更新】从服务器实时检查`, async () => {
               GMdeleteValue("_Check_Version_Expire_");
-              debug("//-> up-to-date? ", await checkVersion(checkUpdate));
+              debug("//-> up-to-date? ", Boolean(await checkVersion(checkUpdate)));
             });
           } else {
             in_UpdateCheck_ID = GMregisterMenuCommand("\ufff5\ud83d\udcdb【版本更新】已关闭 \u267b 重新开启", () => {
               _data.VerDetAuto = true;
               GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
               GMdeleteValue("_Check_Version_Expire_");
-              sessionStorage.removeItem("nCount");
+              GMdeleteValue("_nCount_");
               debug("//-> Destroy cache & session when restart detection.");
               GMnotification(
                 Notice.noticeHTML(`<dd class="${Notice.center}">更新检测已<kbd class="im">开启</kbd>，网页在<em>3</em>秒后刷新！</dd>`),
@@ -1273,9 +1263,10 @@
                     });
                   }
                 }
-                // Search with an image on Google fixed
-                if (curretSite.SiteTypeID === newSiteType.GOOGLE && GetUrlParam("tbs")) {
-                  document.querySelector(SpanID).parentNode.style.width = "max-content";
+                // Google Search by image fixed
+                if (curretSite.SiteTypeID === newSiteType.GOOGLE && CONST.isUseBing && GetUrlParam("tbs")) {
+                  document.querySelector(SpanID).parentNode.style.width = "auto";
+                  document.querySelector(SpanID).parentNode.style.minWidth = "max-content"; // firefox fixed
                 }
               }
 
@@ -1309,7 +1300,7 @@
                     default:
                       break;
                   }
-                  GMopenInTab(decodeURI(gotoUrl + getSearchValue()), defCon._option);
+                  GMopenInTab(decodeURI(gotoUrl + getSearchValue()), defCon.options);
                 });
               });
             }
@@ -1604,25 +1595,6 @@
         searchManager.init();
       } catch (e) {
         console.error("%c[GB-Error]%c\n%s", "font-weight:bold;color:red", "font-weight:bold;color:darkred", e);
-      } finally {
-        if (checkUpdate && !CONST.isVDResult) {
-          debug("//-> Ready to Insert Random Tips.");
-          if (Math.floor(Math.random() * 20) > 18) {
-            setTimeout(function () {
-              GMnotification(
-                Notice.noticeHTML(
-                  `<dd title="请安装新版代码后恢复自动更新">若要恢复自动更新功能，请在覆盖安装<a target="_blank" style="margin:0 4px;font-size:16px!important;font-weight:600"\
-                  href="https://openuserjs.org/scripts/t3xtf0rm4tgmail.com/Google_baidu_Switcher_(ALL_in_One)">新版代码</a>后,\
-                  从脚本菜单中重新开启"版本更新"功能。</dd><dd class="${Notice.center}" title="随机提示">\
-                  <img src="https://z3.ax1x.com/2021/08/14/fyvfk6.png" alt="开启自动检测"></dd>`
-                ),
-                `${Notice.info}`,
-                true,
-                50
-              );
-            }, Math.random() * 10e3);
-          }
-        }
       }
     })();
   })();

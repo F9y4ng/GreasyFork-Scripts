@@ -5,11 +5,11 @@
 [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues)
 [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/login?return_to=%2FF9y4ng%2FGreasyFork-Scripts)
 
-## 字体渲染（自用脚本）[**Font Rendering.user.js**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering) (`version 2021.09.20.2`)
+## 字体渲染（自用脚本）[**Font Rendering.user.js**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering) (`version 2021.09.23.1`)
 
 简介：无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的 Greasemonkey 脚本和浏览器插件。
 
-> `version 2021.09.20.2`
+> `version 2021.09.23.1`
 
 `!!! 重大版本更新，请使用前仔细查看 !!!` 【[**脚本使用说明**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering)】`New`
 
@@ -21,11 +21,12 @@
 ! 重大版本更新，本次更新会重置设置数据，请更新前备份您的数据！！
 ! 由于字体列表缓存逻辑改变，程序会自动为每个域名网站自动重建缓存。
 
+@ 字体缩放功能兼容新版WebKit(Opera)内核。
 @ 优化脚本错误捕捉及错误反馈功能。
 
 + 更换滑块算法函数，提高对个别网站的兼容性。
 @ 提升脚本配置菜单及页面的容错率，减少出错几率。
-@ 优化字体缩放功能，修正偏移问题。(Gecko & Presto)
+@ 优化字体缩放功能，修正偏移问题。(Gecko)
 @ 优化字体列表缓存，独立缓存每个网站设置，缓存时间24小时。
 @ 优化与MarkDownload浏览器扩展的兼容性。
 @ 优化CSS样式，优化部分代码逻辑，兼容更多网站。
@@ -34,7 +35,7 @@
 
 > **关于字体缩放**
 >
-> 字体比例缩放，目前为Beta版的实验性功能，默认关闭，如需试用，请在 ```VIP 高级功能开关``` 打开字体缩放功能。经本地测试，此功能在WebKit(Chrome)内核下运行良好；在Gecko(Firefox)及Presto(Opera)内核下，由于内核对脚本及CSS样式的限制，对部分网站兼容性较差，且暂无修正的方法，所以建议Gecko(Firefox)及Presto(Opera)的用户谨慎使用该功能。
+> 字体比例缩放，目前为Beta版的实验性功能，默认关闭，如需试用，请在 ```VIP 高级功能开关``` 打开字体缩放功能。经本地测试，此功能在WebKit(Chrome/edge/safari)及新版WebKit(Opera)内核下运行良好；在Gecko(Firefox)内核下，由于内核对脚本及CSS样式的限制，对部分网站兼容性较差，且暂无修正的方法，所以建议Gecko(Firefox)的用户谨慎使用该功能。
 >
 > **关于字体的添加**
 >
@@ -51,19 +52,20 @@
 > 请根据**自有显示器的配置及设置**的情况，通过**脚本配置界面**修正相关的参数来达到最佳的显示效果。如在使用过程中遇到错误或使用问题，请到
 > [@Github](https://github.com/F9y4ng/GreasyFork-Scripts/issues) 或 [@Greasyfork](https://greasyfork.org/scripts/416688/feedback) 给我留言反馈。
 
-## 谷歌、百度、必应的搜索引擎跳转工具 [**Google & Baidu Switcher.user.js**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Google_Baidu_Switcher) (`version 3.7.20210919.1`)
+## 谷歌、百度、必应的搜索引擎跳转工具 [**Google & Baidu Switcher.user.js**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Google_Baidu_Switcher) (`version 3.8.20210923.1`)
 
 简介：最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓
 存，再次载入使用，感谢使用！
 
-> `version 3.7.20210919.1`
+> `version 3.8.20210923.1`
 
 `!!! 重大版本更新，请使用前仔细查看 !!!` 【[**脚本使用说明**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Google_Baidu_Switcher)】`New`
 
 `!!! 自动更新检测默认开启 !!!`
 
 ```text
-@ 修正语言适配的错误。
+@ 优化自动更新检测逻辑，提升提示体验度。
+@ 修正Google搜索的搜索栏样式bug.
 @ 修正bugs, 优化代码。
 ```
 
