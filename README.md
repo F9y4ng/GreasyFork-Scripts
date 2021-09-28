@@ -50,9 +50,7 @@
 
 > **字体渲染（自用脚本）的新版本已完成，在使用新版脚本前，请注意以下事项：**
 >
-> 新版脚本中内置了默认的字体渲染样式，该样式为我本地计算机的配置，并不能完美适配于你的计算机，所以，首次使用时，如果出现渲染效果没有达到理想状态，属于正常情况。
-> 请根据**自有显示器的配置及设置**的情况，通过**脚本配置界面**修正相关的参数来达到最佳的显示效果。如在使用过程中遇到错误或使用问题，请到
-> [@Github](https://github.com/F9y4ng/GreasyFork-Scripts/issues) 或 [@Greasyfork](https://greasyfork.org/scripts/416688/feedback) 给我留言反馈。
+> 新版脚本中内置了默认的字体渲染样式，该样式为我本地配置，并不能完美适配于你的计算机，所以，首次使用时，如果出现渲染效果没有达到理想状态，属于正常情况。请根据**自有显示器的配置及设置**，通过**脚本配置界面**修正相关参数来达到最佳显示效果。如在使用过程中遇到错误或使用问题，请到 [@Github](https://github.com/F9y4ng/GreasyFork-Scripts/issues) 或 [@Greasyfork](https://greasyfork.org/scripts/416688/feedback) 给我留言反馈。
 
 ## 谷歌、百度、必应的搜索引擎跳转工具 [**Google & Baidu Switcher.user.js**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Google_Baidu_Switcher)
 
