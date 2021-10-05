@@ -5,11 +5,11 @@
 [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues)
 [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/login?return_to=%2FF9y4ng%2FGreasyFork-Scripts)
 
-## 字体渲染（自用脚本）[**Font Rendering.user.js**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering)
+## 字体渲染（自用脚本）[**Font Rendering.user.js**](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Font%20Rendering.user.js)
 
 简介：无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的 Greasemonkey 脚本和浏览器插件。
 
-> `version 2021.09.28.1`
+> `version 2021.10.05.1`
 
 `!!! 重大版本更新，请使用前仔细查看 !!!` 【[**脚本使用说明**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering)】`New`
 
@@ -18,14 +18,10 @@
 `!!! 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件 !!!`
 
 ```text
-! 重大版本更新，本次更新会重置设置数据，请更新前备份您的数据！！！
-! 本次更新增添了新功能，请在恢复旧备份数据后重新备份您的新数据！！！
-! 提前祝各位脚本用户“十一”国庆节快乐！！！
-
-+ 新增“彩蛋”功能：自定义字体表添加。(请自行发现彩蛋吧！)
-+ 新增字体表字体：剔骨仿宋 (tkFangSong)
-@ 发布字体比例缩放RC版，修正Gecko(Firefox)因缩放引发的位移问题。
-@ 修正部分Css及Js，兼容更多网站。
++ 发布自定义字体添加（正式版）功能。
++ 发布字体比例缩放（正式版）功能。
+@ 优化备份还原功能，养成定期备份的好习惯。
+@ 优化升级提示逻辑，提高体验度。
 @ 修正bugs, 优化代码。
 ```
 
@@ -56,20 +52,20 @@
 
 ***
 
-## 谷歌、百度、必应的搜索引擎跳转工具 [**Google & Baidu Switcher.user.js**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Google_Baidu_Switcher)
+## 谷歌、百度、必应的搜索引擎跳转工具 [**Google & Baidu Switcher.user.js**](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Google%20%26%20Baidu%20Switcher.user.js)
 
 简介：最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓
 存，再次载入使用，感谢使用！
 
-> `version 3.8.20210928.1`
+> `version 3.8.20211005.1`
 
 `!!! 重大版本更新，请使用前仔细查看 !!!` 【[**脚本使用说明**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Google_Baidu_Switcher)】`New`
 
 `!!! 自动更新检测默认开启 !!!`
 
 ```text
-@ 修正Gecko内核因transform缩放造成的位移。
-@ 优化CSS样式，解决一些特殊情况下的样式bug。
++ 新增搜索关键词高亮增强功能，默认关闭。
+@ 修正Google在CSS样式上的一些bug。
 @ 修正bugs, 优化代码。
 ```
 
