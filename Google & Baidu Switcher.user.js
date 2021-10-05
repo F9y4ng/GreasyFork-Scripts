@@ -1304,7 +1304,8 @@
       insertCSS: () => {
         try {
           const doStyName = `${CONST.rndclassName}`;
-          const doStyle = CONST.noticeCss + curretSite.StyleCode + keywordHighlight ? curretSite.keyStyle : "";
+          const keywordHighlightStyle = keywordHighlight ? curretSite.keyStyle : "";
+          const doStyle = CONST.noticeCss + curretSite.StyleCode + keywordHighlightStyle;
           addStyle(doStyle, doStyName, "head");
         } catch (e) {
           error("//-> %csearchManager.insertCSS:\n%c%s", "font-weight:bold", "font-weight:normal", e);
