@@ -4,8 +4,8 @@
 // @name:zh-TW    谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en       Google & baidu & Bing Switcher (ALL in One)
 // @name:ja       Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version       3.8.20211005.1
+// @version       3.8.20211012.1
 // @author        F9y4ng
 // @namespace     https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
-// @note          新增搜索关键词高亮增强功能，默认关闭。\n修正Google在CSS样式上的一些bug。\n修正bugs, 优化代码。
+// @note          修正NoticeJs类的bugs，提高兼容性。\n修正关键词高亮的bugs.\n修正其他bugs, 优化代码。
 // ==/UserScript==

@@ -5,7 +5,7 @@
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:ja         Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version         3.8.20211005.1
+// @version         3.8.20211012.1
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:zh  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
@@ -31,7 +31,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            新增搜索关键词高亮增强功能，默认关闭。\n修正Google在CSS样式上的一些bug。\n修正bugs, 优化代码。
+// @note            修正NoticeJs类的bugs，提高兼容性。\n修正关键词高亮的bugs.\n修正其他bugs, 优化代码。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -147,6 +147,12 @@
     },
   };
   defCon.rName = defCon.randString(7, true);
+  const qS = str => {
+    return document.querySelector(str);
+  };
+  const cE = str => {
+    return document.createElement(str);
+  };
 
   /* Define random aliases */
 
@@ -234,7 +240,7 @@
 
   const AddModal = () => {
     if (document.getElementsByClassName(noticeJsModalClassName).length <= 0) {
-      const element = document.createElement("div");
+      const element = cE("div");
       element.classList.add(noticeJsModalClassName);
       element.classList.add(`${Notice.noticejs}-modal-open`);
       document.body.appendChild(element);
@@ -253,9 +259,9 @@
       item.remove();
     }, 200);
     if (options.modal === true && document.querySelectorAll(`[${Notice.noticejs}-modal='true']`).length >= 1) {
-      document.querySelector(`.${Notice.noticejs}-modal`).className += ` ${Notice.noticejs}-modal-close`;
+      qS(`.${Notice.noticejs}-modal`).className += ` ${Notice.noticejs}-modal-close`;
       setTimeout(() => {
-        document.querySelector(`.${Notice.noticejs}-modal`).remove();
+        qS(`.${Notice.noticejs}-modal`).remove();
       }, 500);
     }
     const iC = item.closest(`.${Notice.noticejs}`);
@@ -264,7 +270,7 @@
     const position = "." + iCC;
     setTimeout(() => {
       if (document.querySelectorAll(position + ` .${Notice.item}`).length <= 0) {
-        document.querySelector(position) && document.querySelector(position).remove();
+        qS(position) && qS(position).remove();
         if (isGecko() && defCon[iCId]) {
           document.removeEventListener("scroll", defCon[iCId]);
           delete defCon[iCId];
@@ -303,7 +309,7 @@
 
   const appendNoticeJs = (noticeJsHeader, noticeJsBody, noticeJsProgressBar) => {
     const target_class = `.${Notice.noticejs}-` + options.position;
-    const noticeJsItem = document.createElement("div");
+    const noticeJsItem = cE("div");
     noticeJsItem.classList.add(`${Notice.item}`);
     noticeJsItem.classList.add(options.type);
     if (options.rtl === true) {
@@ -322,7 +328,7 @@
       noticeJsItem.appendChild(noticeJsProgressBar);
     }
     if (["top", "bottom"].includes(options.position)) {
-      document.querySelector(target_class).innerHTML = "";
+      qS(target_class).innerHTML = "";
     }
     if (options.animation !== null && options.animation.open !== null) {
       noticeJsItem.className += " " + options.animation.open;
@@ -335,9 +341,9 @@
     getCallback(options, "beforeShow");
     getCallback(options, "onShow");
     if (options.newestOnTop === true) {
-      document.querySelector(target_class).insertAdjacentElement("afterbegin", noticeJsItem);
+      qS(target_class) && qS(target_class).insertAdjacentElement("afterbegin", noticeJsItem);
     } else {
-      document.querySelector(target_class).appendChild(noticeJsItem);
+      qS(target_class) && qS(target_class).appendChild(noticeJsItem);
     }
     getCallback(options, "afterShow");
     return noticeJsItem;
@@ -346,21 +352,22 @@
   class Components {
     createContainer() {
       const element_class = `${Notice.noticejs}-` + options.position;
-      const element = document.createElement("div");
+      const element = cE("gb-notice");
       element.classList.add(`${Notice.noticejs}`);
       element.classList.add(element_class);
       element.id = element_class;
       return element;
     }
+
     createHeader() {
       let element;
       if (options.title && options.title !== "") {
-        element = document.createElement("div");
+        element = cE("div");
         element.setAttribute("class", `${Notice.noticejs}-heading`);
         element.textContent = options.title;
       }
       if (options.closeWith.includes("button")) {
-        const close = document.createElement("div");
+        const close = cE("div");
         close.setAttribute("class", `${Notice.close}`);
         close.innerHTML = "&times;";
         if (element) {
@@ -371,10 +378,11 @@
       }
       return element;
     }
+
     createBody() {
-      const element = document.createElement("div");
+      const element = cE("div");
       element.setAttribute("class", `${Notice.noticejs}-body`);
-      const content = document.createElement("div");
+      const content = cE("div");
       content.setAttribute("class", `${Notice.noticejs}-content`);
       content.innerHTML = options.text;
       element.appendChild(content);
@@ -387,10 +395,11 @@
       }
       return element;
     }
+
     createProgressBar() {
-      const element = document.createElement("div");
+      const element = cE("div");
       element.setAttribute("class", `${Notice.noticejs}-progressbar`);
-      const bar = document.createElement("div");
+      const bar = cE("div");
       bar.setAttribute("class", `${Notice.noticejs}-bar`);
       element.appendChild(bar);
       if (options.progressBar === true && typeof options.timeout !== "boolean" && options.timeout !== false) {
@@ -431,9 +440,10 @@
       this.on("onClick", this.options.callbacks.onClick);
       this.on("onHover", this.options.callbacks.onHover);
     }
+
     show() {
-      const container = this.component.createContainer();
-      if (document.querySelector(`.${Notice.noticejs}-` + this.options.position) === null) {
+      let container = this.component.createContainer();
+      if (document.body && qS(`.${Notice.noticejs}-` + this.options.position) === null) {
         document.body.appendChild(container);
       }
       let noticeJsHeader, noticeJsBody, noticeJsProgressBar;
@@ -445,12 +455,14 @@
       const noticeJs = appendNoticeJs(noticeJsHeader, noticeJsBody, noticeJsProgressBar);
       return noticeJs;
     }
+
     on(eventName, cb = () => {}) {
       if (typeof cb === "function" && this.options.callbacks.hasOwnProperty(eventName)) {
         this.options.callbacks[eventName].push(cb);
       }
       return this;
     }
+
     static overrideDefaults(options) {
       this.options = Object.assign(Defaults, options);
       return this;
@@ -491,54 +503,56 @@
   }
 
   function transformFixedtoScroll(position) {
-    const zoom = Number(window.getComputedStyle(document.body, null).getPropertyValue("zoom"));
-    const transform = window.getComputedStyle(document.body, null).getPropertyValue("transform");
-    const thatNotice = document.querySelector(`#${Notice.noticejs}-${position}`);
-    const rePosition = (item, ratio, _top, distTop) => {
-      let sT = document.body.scrollTop || document.documentElement.scrollTop;
-      item.style.top = `${(_top + sT) / ratio}px`;
-      window.scrollTo(0, sT - 1e-5);
-      if (item.childNodes.length === 1) {
-        defCon[distTop] = () => {
-          sT = document.body.scrollTop || document.documentElement.scrollTop;
-          item.style.top = `${(_top + sT) / ratio}px`;
-        };
-        document.addEventListener("scroll", defCon[distTop]);
-      }
-    };
+    if (document.body) {
+      const zoom = Number(window.getComputedStyle(document.body, null).getPropertyValue("zoom"));
+      const transform = window.getComputedStyle(document.body, null).getPropertyValue("transform");
+      const thatNotice = qS(`#${Notice.noticejs}-${position}`);
+      const rePosition = (item, ratio, _top, distTop) => {
+        let sT = document.body.scrollTop || document.documentElement.scrollTop;
+        item.style.top = `${(_top + sT) / ratio}px`;
+        window.scrollTo(0, sT - 1e-5);
+        if (item.childNodes.length === 1) {
+          defCon[distTop] = () => {
+            sT = document.body.scrollTop || document.documentElement.scrollTop;
+            item.style.top = `${(_top + sT) / ratio}px`;
+          };
+          document.addEventListener("scroll", defCon[distTop]);
+        }
+      };
 
-    if (zoom && zoom !== 1) {
-      thatNotice.style.cssText += `zoom:${1 / zoom}!important`;
-    } else if (isGecko() && transform && transform !== "none") {
-      const ratio = Number(transform.split(",")[3]);
-      if (ratio && ratio !== 1) {
-        if (thatNotice) {
-          thatNotice.style.cssText += `width:${document.documentElement.clientWidth / ratio}px;height:${document.documentElement.clientHeight / ratio}px;top:0;left:0`;
-          thatNotice.childNodes.forEach((item, index, array, curItem = 0) => {
-            switch (position) {
-              case "topRight":
-                item.style.cssText += String(
-                  `transform-origin:right top 0px;
+      if (zoom && zoom !== 1) {
+        thatNotice.style.cssText += `zoom:${1 / zoom}!important`;
+      } else if (isGecko() && transform && transform !== "none") {
+        const ratio = Number(transform.split(",")[3]);
+        if (ratio && ratio !== 1) {
+          if (thatNotice) {
+            thatNotice.style.cssText += `width:${document.documentElement.clientWidth / ratio}px;height:${document.documentElement.clientHeight / ratio}px;top:0;left:0`;
+            thatNotice.childNodes.forEach((item, index, array, curItem = 0) => {
+              switch (position) {
+                case "topRight":
+                  item.style.cssText += String(
+                    `transform-origin:right top 0px;
                   transform:scale(${1 / ratio});
                   position:absolute;
                   right:${10 / ratio}px;
                   top:${10 / ratio}px`
-                );
-                break;
+                  );
+                  break;
 
-              default:
-                curItem = !index ? 10 / ratio : (array[index - 1].clientHeight + 10) / ratio + Number(array[index - 1].style.bottom.replace("px", ""));
-                item.style.cssText += String(
-                  `transform-origin:right bottom 0px;
+                default:
+                  curItem = !index ? 10 / ratio : (array[index - 1].clientHeight + 10) / ratio + Number(array[index - 1].style.bottom.replace("px", ""));
+                  item.style.cssText += String(
+                    `transform-origin:right bottom 0px;
                   transform:scale(${1 / ratio});
                   position:absolute;
                   right:${10 / ratio}px;
                   bottom:${curItem}px`
-                );
-                break;
-            }
-          });
-          rePosition(thatNotice, ratio, 0, position);
+                  );
+                  break;
+              }
+            });
+            rePosition(thatNotice, ratio, 0, position);
+          }
         }
       }
     }
@@ -567,7 +581,7 @@
       (Interval = 3) => {
         const m = setInterval(() => {
           Interval ? --Interval : clearInterval(m);
-          const emText = document.querySelector(`.${defCon.rName} dl dd em`);
+          const emText = qS(`.${defCon.rName} dl dd em`);
           if (emText) {
             emText.innerHTML = Interval;
           }
@@ -578,6 +592,13 @@
   };
 
   /* Common functions */
+
+  function getCookie(sKey) {
+    const cookies = decodeURIComponent(
+      document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[-.+*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")
+    );
+    return cookies ? cookies.replace(/[a-z=]+/gi, "") : 0;
+  }
 
   function GetUrlParam(paraName, arr = "") {
     if (!paraName) {
@@ -740,194 +761,196 @@
     const _expire_time = String(timeNumber + timeUnit);
     const _expire_time_ = /(?!^0)^[0-9]+[smhdw]$/i.test(_expire_time) ? _expire_time : "24h";
     if (setResult) {
-      const cache = await GMgetExpire("_Check_Version_Expire_", _expire_time_);
-      if (!cache) {
-        // first: greasyfork
-        t = await fetchVersion(`https://greasyfork.org/scripts/12909/code/${defCon.randString(32)}.meta.js`).catch(async () => {
-          defCon.fetchResult = "GreasyFork - Failed to fetch";
-          error(defCon.fetchResult);
-        });
-        // second: github
-        if (defCon.fetchResult.includes("GreasyFork")) {
-          t = await fetchVersion(`https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`).catch(async () => {
-            defCon.fetchResult = "Github - Failed to fetch";
+      if (window.self === window.top) {
+        const cache = await GMgetExpire("_Check_Version_Expire_", _expire_time_);
+        if (!cache) {
+          // first: greasyfork
+          t = await fetchVersion(`https://greasyfork.org/scripts/12909/code/${defCon.randString(32)}.meta.js`).catch(async () => {
+            defCon.fetchResult = "GreasyFork - Failed to fetch";
             error(defCon.fetchResult);
           });
-        }
-        // third: github.cdn
-        if (defCon.fetchResult.includes("Github")) {
-          t = await fetchVersion(`https://cdn.staticaly.com/gh/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`).catch(async () => {
-            defCon.fetchResult = "GlobalCDN - Failed to fetch";
-            error(defCon.fetchResult);
-          });
-        }
-        // final: Jsdelivr points to gitee
-        if (defCon.fetchResult.includes("GlobalCDN")) {
-          t = await fetchVersion(`https://cdn.jsdelivr.net/gh/F9y4ng/GreasyFork-Scripts@master/Google%20%26%20Baidu%20Switcher.meta.js`).catch(async () => {
-            defCon.fetchResult = "Jsdelivr - Failed to fetch";
-            error(defCon.fetchResult);
-          });
-        }
-        // Set value with expire
-        if (t !== undefined) {
-          GMsetExpire("_Check_Version_Expire_", t);
-          debug("//-> %ccheckVersion: Loading Data from Server.", "background-color:darkorange;color:snow");
-        } else {
-          console.error(
-            "%c[GB-Update]\n%cSome unknown exceptions cause version detection failure, most likely by a network error. Please try again later.",
-            "font-weight:bold;color:red",
-            "font-weight:bold;color:darkred"
-          );
-        }
-      } else {
-        t = cache;
-        debug("//-> %ccheckVersion: Loading Data from Cache.", "background-color:green;color:snow");
-      }
-      // Resolution return data
-      if (typeof t !== "undefined") {
-        const lastestVersion = defCon.decrypt(t[1]);
-        defCon.isNoticed = Boolean(await GMgetExpire("_nCount_", _expire_time_));
-        defCon.isNeedUpdate = cache ? compareVersion(defCon.curVersion, lastestVersion) : t[0];
-        const updateNote = ((w = "") => {
-          if (defCon.decrypt(t[2])) {
-            defCon
-              .decrypt(t[2])
-              .split(/\\n/)
-              .forEach(item => {
-                w += `<li>${item}</li>`;
-              });
+          // second: github
+          if (defCon.fetchResult.includes("GreasyFork")) {
+            t = await fetchVersion(`https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`).catch(async () => {
+              defCon.fetchResult = "Github - Failed to fetch";
+              error(defCon.fetchResult);
+            });
           }
-          return w ? `<dd class="disappear"><ul>${w}</ul></dd>` : "";
-        })();
-        const updateUrl = defCon.decrypt(t[3]).replace("meta", "user");
-        const recheckURLs = new URL(
-          updateUrl
-            .replace("raw.githubusercontent.com", "github.com")
-            .replace("cdn.staticaly.com/gh", "github_cdn.com")
-            .replace("cdn.jsdelivr.net/gh", "gitee.com")
-            .replace("@", "/")
-            .replace("master", "blob/master")
-            .replace(/code\/[^/]+\.js/, "")
-        );
-        let sourceSite = defCon.titleCase(recheckURLs.hostname).split(".")[0];
-        sourceSite = sourceSite.replace("_cdn", ".CDN");
-        sourceSite = cache ? `${sourceSite} on Cache` : sourceSite;
-        const repo = cache
-          ? `\nCache expire:${defCon.durationTime(defCon.restTime._Check_Version_Expire_)}\nDetect time: ${defCon.lastRuntime()}\n`
-          : `\nExpire time: ${_expire_time_}\nDetect time: ${defCon.lastRuntime()}\n`;
-        const sourceURL = recheckURLs.toString().replace("_cdn", "");
-        switch (defCon.isNeedUpdate) {
-          case 2:
-            if (window.self === window.top) {
-              console.warn(
-                String(
-                  `%c[GB-Update]%c\nWe found your local version %c${defCon.curVersion} %cis not current.\nPlease confirm whether you had edited your local script, then you need to update it manually.\n${repo}(${sourceSite})`
-                ),
-                "font-weight:bold;color:crimson",
-                "color:0",
-                "font-weight:bold;color:tomato",
-                "color:0"
-              );
+          // third: github.cdn
+          if (defCon.fetchResult.includes("Github")) {
+            t = await fetchVersion(`https://cdn.staticaly.com/gh/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`).catch(async () => {
+              defCon.fetchResult = "GlobalCDN - Failed to fetch";
+              error(defCon.fetchResult);
+            });
+          }
+          // final: Jsdelivr points to gitee
+          if (defCon.fetchResult.includes("GlobalCDN")) {
+            t = await fetchVersion(`https://cdn.jsdelivr.net/gh/F9y4ng/GreasyFork-Scripts@master/Google%20%26%20Baidu%20Switcher.meta.js`).catch(async () => {
+              defCon.fetchResult = "Jsdelivr - Failed to fetch";
+              error(defCon.fetchResult);
+            });
+          }
+          // Set value with expire
+          if (t !== undefined) {
+            GMsetExpire("_Check_Version_Expire_", t);
+            debug("//-> %ccheckVersion: Loading Data from Server.", "background-color:darkorange;color:snow");
+          } else {
+            console.error(
+              "%c[GB-Update]\n%cSome unknown exceptions cause version detection failure, most likely by a network error. Please try again later.",
+              "font-weight:bold;color:red",
+              "font-weight:bold;color:darkred"
+            );
+          }
+        } else {
+          t = cache;
+          debug("//-> %ccheckVersion: Loading Data from Cache.", "background-color:green;color:snow");
+        }
+        // Resolution return data
+        if (typeof t !== "undefined") {
+          const lastestVersion = defCon.decrypt(t[1]);
+          defCon.isNoticed = Boolean(await GMgetExpire("_nCount_", _expire_time_));
+          defCon.isNeedUpdate = cache ? compareVersion(defCon.curVersion, lastestVersion) : t[0];
+          const updateNote = ((w = "") => {
+            if (defCon.decrypt(t[2])) {
+              defCon
+                .decrypt(t[2])
+                .split(/\\n/)
+                .forEach(item => {
+                  w += `<li>${item}</li>`;
+                });
             }
-            if (!defCon.isNoticed || s || isdebug) {
-              setTimeout(() => {
-                GMnotification(
-                  Notice.noticeHTML(
-                    `<dt>${defCon.scriptName}</dt>
-                      <dd><span>发现版本异常</span>版本号 <i>${defCon.curVersion}</i> 错误。由于您手动编辑过本地脚本，为避免未知错误的出现，脚本将自动设置为禁止检测更新。</dd><dd style="text-align: center;margin-top:8px!important"><img src="https://z3.ax1x.com/2021/08/14/fyvfk6.png" alt="开启自动检测"></dd><dd style="color:lemonchiffon;font-style:italic">注：若要重新启用自动更新，您需要在<a href="${sourceURL}" target="_blank" style="padding:0 2px;font-weight:700;color:gold">脚本源网站</a>覆盖安装正式版本后，从脚本菜单重新开启更新检测。</dd><dd>[ ${sourceSite} ]</dd>`
+            return w ? `<dd class="disappear"><ul>${w}</ul></dd>` : "";
+          })();
+          const updateUrl = defCon.decrypt(t[3]).replace("meta", "user");
+          const recheckURLs = new URL(
+            updateUrl
+              .replace("raw.githubusercontent.com", "github.com")
+              .replace("cdn.staticaly.com/gh", "github_cdn.com")
+              .replace("cdn.jsdelivr.net/gh", "gitee.com")
+              .replace("@", "/")
+              .replace("master", "blob/master")
+              .replace(/code\/[^/]+\.js/, "")
+          );
+          let sourceSite = defCon.titleCase(recheckURLs.hostname).split(".")[0];
+          sourceSite = sourceSite.replace("_cdn", ".CDN");
+          sourceSite = cache ? `${sourceSite} on Cache` : sourceSite;
+          const repo = cache
+            ? `\nCache expire:${defCon.durationTime(defCon.restTime._Check_Version_Expire_)}\nDetect time: ${defCon.lastRuntime()}\n`
+            : `\nExpire time: ${_expire_time_}\nDetect time: ${defCon.lastRuntime()}\n`;
+          const sourceURL = recheckURLs.toString().replace("_cdn", "");
+          switch (defCon.isNeedUpdate) {
+            case 2:
+              if (window.self === window.top) {
+                console.warn(
+                  String(
+                    `%c[GB-Update]%c\nWe found your local version %c${defCon.curVersion} %cis not current.\nPlease confirm whether you had edited your local script, then you need to update it manually.\n${repo}(${sourceSite})`
                   ),
-                  `${Notice.error}`,
-                  true,
-                  150,
-                  {
-                    onClose: [
-                      () => {
-                        location.reload();
-                      },
-                    ],
-                  }
+                  "font-weight:bold;color:crimson",
+                  "color:0",
+                  "font-weight:bold;color:tomato",
+                  "color:0"
                 );
-              }, 100);
-              _data.VerDetAuto = false;
-              GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
-              GMsetExpire("_nCount_", true);
-            }
-            return false;
-          case 1:
-            if (window.self === window.top) {
-              console.info(
-                String(`%c[GB-Update]%c\nWe found a new version: %c${lastestVersion}%c.\nPlease upgrade from your update source to the latest version.${repo}(${sourceSite})`),
-                "font-weight:bold;color:crimson",
-                "color:0",
-                "color:crimson",
-                "color:0"
-              );
-            }
-            if (!defCon.isNoticed || s || isdebug) {
-              let showdDetail = "";
-              if (updateNote) {
-                showdDetail = `<dd onmouseover="this.previousElementSibling.previousElementSibling.style.display='block';this.style.display='none'" style="text-align:center">&gt;&gt; 查看更新内容 &lt;&lt;</dd>`;
               }
-              setTimeout(() => {
-                GMnotification(
-                  Notice.noticeHTML(
-                    `<dt>${defCon.scriptName}</dt>
+              if (!defCon.isNoticed || s || isdebug) {
+                setTimeout(() => {
+                  GMnotification(
+                    Notice.noticeHTML(
+                      `<dt>${defCon.scriptName}</dt>
+                      <dd><span>发现版本异常</span>版本号 <i>${defCon.curVersion}</i> 错误。由于您手动编辑过本地脚本，为避免未知错误的出现，脚本将自动设置为禁止检测更新。</dd><dd style="text-align: center;margin-top:8px!important"><img src="https://z3.ax1x.com/2021/08/14/fyvfk6.png" alt="开启自动检测"></dd><dd style="color:lemonchiffon;font-style:italic">注：若要重新启用自动更新，您需要在<a href="${sourceURL}" target="_blank" style="padding:0 2px;font-weight:700;color:gold">脚本源网站</a>覆盖安装正式版本后，从脚本菜单重新开启更新检测。</dd><dd>[ ${sourceSite} ]</dd>`
+                    ),
+                    `${Notice.error}`,
+                    true,
+                    150,
+                    {
+                      onClose: [
+                        () => {
+                          location.reload();
+                        },
+                      ],
+                    }
+                  );
+                }, 100);
+                _data.VerDetAuto = false;
+                GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
+                GMsetExpire("_nCount_", true);
+              }
+              return false;
+            case 1:
+              if (window.self === window.top) {
+                console.info(
+                  String(`%c[GB-Update]%c\nWe found a new version: %c${lastestVersion}%c.\nPlease upgrade from your update source to the latest version.${repo}(${sourceSite})`),
+                  "font-weight:bold;color:crimson",
+                  "color:0",
+                  "color:crimson",
+                  "color:0"
+                );
+              }
+              if (!defCon.isNoticed || s || isdebug) {
+                let showdDetail = "";
+                if (updateNote) {
+                  showdDetail = `<dd onmouseover="this.previousElementSibling.previousElementSibling.style.display='block';this.style.display='none'" style="text-align:center">&gt;&gt; 查看更新内容 &lt;&lt;</dd>`;
+                }
+                setTimeout(() => {
+                  GMnotification(
+                    Notice.noticeHTML(
+                      `<dt>${defCon.scriptName}</dt>
                       <dd><span>发现版本更新</span>最新版本 <i>${lastestVersion}</i>，如果您现在需要更新脚本，请点击这里完成升级安装。</dd>${updateNote}
                       <dd>[ ${sourceSite} ]<kbd style="float:right;font-size:11px!important;">( 缓存时间：${defCon.showDate(_expire_time_)} )</kbd></dd>${showdDetail}`
-                  ),
-                  `${Notice.warning}`,
-                  false,
-                  60,
-                  {
-                    onClick: [
-                      () => {
-                        const w = window.open(updateUrl, "Update.Scripts");
-                        setTimeout(() => {
-                          isGM ? (window.opener = null) : debug("Not Greasemonkey");
-                          w ? w.close() : debug("window not exsits.");
-                          GMdeleteValue("_Check_Version_Expire_");
-                          GMnotification(
-                            Notice.noticeHTML(
-                              `<dd class="${Notice.center}">如果您已更新了脚本，请点击<a href="javascript:void(0)" onclick="location.replace(location.href.replace(/&zn=[^&]*/i,'')+'&Zn=1')" class="im">这里</a>刷新使其生效。</a></dd>`
-                            ),
-                            `${Notice.info}`,
-                            true,
-                            80
-                          );
-                        }, 3e3);
-                      },
-                    ],
-                  }
+                    ),
+                    `${Notice.warning}`,
+                    false,
+                    60,
+                    {
+                      onClick: [
+                        () => {
+                          const w = window.open(updateUrl, "Update.Scripts");
+                          setTimeout(() => {
+                            isGM ? (window.opener = null) : debug("Not Greasemonkey");
+                            w ? w.close() : debug("window not exsits.");
+                            GMdeleteValue("_Check_Version_Expire_");
+                            GMnotification(
+                              Notice.noticeHTML(
+                                `<dd class="${Notice.center}">如果您已更新了脚本，请点击<a href="javascript:void(0)" onclick="location.replace(location.href.replace(/&zn=[^&]*/i,'')+'&Zn=1')" class="im">这里</a>刷新使其生效。</a></dd>`
+                              ),
+                              `${Notice.info}`,
+                              true,
+                              80
+                            );
+                          }, 3e3);
+                        },
+                      ],
+                    }
+                  );
+                }, 100);
+                GMsetExpire("_nCount_", true);
+              }
+              return false;
+            default:
+              if (window.self === window.top && (s || isdebug)) {
+                console.info(
+                  `%c[GB-Update]%c\nCurretVersion: %c${defCon.curVersion}%c is up-to-date!${repo}(${sourceSite})`,
+                  "font-weight:bold;color:darkcyan",
+                  "color:0",
+                  "color:red",
+                  "color:0"
                 );
-              }, 100);
-              GMsetExpire("_nCount_", true);
-            }
-            return false;
-          default:
-            if (window.self === window.top && (s || isdebug)) {
-              console.info(
-                `%c[GB-Update]%c\nCurretVersion: %c${defCon.curVersion}%c is up-to-date!${repo}(${sourceSite})`,
-                "font-weight:bold;color:darkcyan",
-                "color:0",
-                "color:red",
-                "color:0"
-              );
-              setTimeout(() => {
-                GMnotification(
-                  Notice.noticeHTML(
-                    `<dt>${defCon.scriptName}</dt>
+                setTimeout(() => {
+                  GMnotification(
+                    Notice.noticeHTML(
+                      `<dt>${defCon.scriptName}</dt>
                       <dd><span>更新成功</span>当前版本 <i>${defCon.curVersion}</i> 已为最新！</dd>` +
-                      String(defCon.isNeedUpdate === 3 ? `<dd style="color:yellow;font-style:italic">（注意：您的本地版本高于服务器版本，请核验）</dd>` : ``) +
-                      `<dd>[ ${sourceSite} ]<kbd style="float:right;font-size:11px!important">( 缓存时间：${defCon.showDate(_expire_time_)} )</kbd></dd>`
-                  ),
-                  `${Notice.success}`,
-                  false,
-                  defCon.isNeedUpdate === 3 ? 50 : 30
-                );
-                GMdeleteValue("_nCount_");
-              }, 100);
-            }
-            return true;
+                        String(defCon.isNeedUpdate === 3 ? `<dd style="color:yellow;font-style:italic">（注意：您的本地版本高于服务器版本，请核验）</dd>` : ``) +
+                        `<dd>[ ${sourceSite} ]<kbd style="float:right;font-size:11px!important">( 缓存时间：${defCon.showDate(_expire_time_)} )</kbd></dd>`
+                    ),
+                    `${Notice.success}`,
+                    false,
+                    defCon.isNeedUpdate === 3 ? 50 : 30
+                  );
+                  GMdeleteValue("_nCount_");
+                }, 100);
+              }
+              return true;
+          }
         }
       }
     } else {
@@ -1022,8 +1045,7 @@
         StyleCode: CONST.isUseBing
           ? `#form{white-space:nowrap}#u{z-index:1!important}#${CONST.rndidName}{position:relative;z-index:999999999}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-1.5px}#${CONST.rndidName} #${CONST.ggyx}{margin-left:2px}#${CONST.bbyx} input{background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px!important;font-weight:bold}#${CONST.ggyx} input{background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px!important;font-weight:bold}#${CONST.ggyx} input:hover,#${CONST.bbyx} input:hover{background: #4662D9;border:1px solid #3476d2}`
           : `#form{white-space:nowrap}#u{z-index:1!important}#${CONST.rndidName}{position:relative;margin-left:2px;z-index:999999999}#${CONST.ggyx} input{background:#4e6ef2;border-radius:10px;cursor:pointer;height:40px;color:#fff;width:112px;border:1px solid #3476d2;text-shadow:0 0 2px #ffffff!important;font-size:16px!important}#${CONST.ggyx} input:hover{background:#4662D9;border:1px solid #3476d2;}`,
-        keyStyle:
-          "#wrapper_wrapper em{color:#f73131!important;background-color:yellow!important;font-weight:700!important;paint-order:stroke fill!important;-webkit-text-stroke:0.5px!important}",
+        keyStyle: keywordHighlight ? "#wrapper_wrapper em{color:#f73131!important;background-color:yellow!important;font-weight:900!important}" : "",
       },
       google: {
         SiteTypeID: 2,
@@ -1045,8 +1067,9 @@
         StyleCode: CONST.isUseBing
           ? `#${CONST.rndidName}{margin:3px 4px 0 -5px;z-index:100}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd;}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-2px}.${CONST.scrollspan}{display:inline-block;margin:0;min-height:26px}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}.${CONST.scrollbars2}{display:inline-block;margin-top:-4px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}#${CONST.bdyx} input{cursor:pointer;padding:1px 1px 1px 6px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;width:90px;height:38px;font-size:15px!important;font-weight:600;color:#fff;}#${CONST.bbyx} input{cursor:pointer;padding:1px 6px 1px 1px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;width:90px;height:38px;font-size:15px!important;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover,#${CONST.bbyx} input:hover{background:#2b7de9;}`
           : `#${CONST.rndidName}{margin:3px 4px 0 -5px;z-index:100}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd}.${CONST.scrollspan}{display:inline-block;margin:0;min-height:26px}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-size:13px!important;font-weight:normal!important; text-shadow:0 0 1px #fff!important}.${CONST.scrollbars2}{display:inline-block;margin-top:-4px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #fff!important}#${CONST.bdyx} input{cursor:pointer;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-radius:24px;width:90px;height:38px;font-size:14px!important;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover{background:#2b7de9;}`,
-        keyStyle:
-          ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe{color:#ea4335!important;background-color:yellow!important;font-weight:700!important;paint-order:stroke fill!important;-webkit-text-stroke:0.5px!important}",
+        keyStyle: keywordHighlight
+          ? ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe{color:#ea4335!important;background-color:yellow!important;font-weight:900!important}"
+          : "",
       },
       bing: {
         SiteTypeID: 3,
@@ -1065,8 +1088,13 @@
         StyleCode: CONST.isUseBing
           ? `#${CONST.rndidName}{height:44px;width:120px;margin:2px 0;z-index:999999}#${CONST.bdyx} input{cursor:pointer;min-width:60px;height:37px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px!important;font-weight:900;border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px}#${CONST.ggyx} input{cursor:pointer;min-width:60px;height:37px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px!important;font-weight:900;border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 -3px;padding:0 18px 0 12px}.${CONST.scrollspan}{margin-right:5px!important}.${CONST.scrollbars}{text-decoration:none!important;padding-top:2px!important;border-radius:4px!important;max-height:33px;padding:0 12px!important;margin-right:2px!important}#${CONST.bdyx} input:hover,#${CONST.ggyx} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border:2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7;}`
           : ``,
-        keyStyle:
-          "#sp_requery strong, #sp_recourse strong, #tile_link_cn strong, .b_ad .ad_esltitle~div strong, h2 strong, .b_caption p strong, .b_snippetBigText strong, .recommendationsTableTitle+.b_slideexp strong, .recommendationsTableTitle+table strong, .recommendationsTableTitle+ul strong, .pageRecoContainer .b_module_expansion_control strong, .b_rs strong, .b_rrsr strong, #dict_ans strong, .b_listnav>.b_ans_stamp>strong, .adltwrnmsg strong{color:#c00!important;background-color:yellow!important",
+        keyStyle: keywordHighlight
+          ? String(
+              Number(GetUrlParam("ensearch")) || Number(getCookie("ENSEARCH"))
+                ? ".b_caption p strong, .b_caption .b_factrow strong, .b_secondaryText strong,th, h2 strong, h3 strong"
+                : "#sp_requery strong, #sp_recourse strong, #tile_link_cn strong, .b_ad .ad_esltitle~div strong, h2 strong, .b_caption p strong, .b_snippetBigText strong, .recommendationsTableTitle+.b_slideexp strong, .recommendationsTableTitle+table strong, .recommendationsTableTitle+ul strong, .pageRecoContainer .b_module_expansion_control strong, .b_rs strong, .b_rrsr strong, #dict_ans strong, .b_listnav>.b_ans_stamp>strong, .adltwrnmsg strong"
+            ) + "{font-weight:900!important;color:#c00!important;background-color:yellow!important}"
+          : "",
       },
       other: { SiteTypeID: 0 },
     };
@@ -1134,7 +1162,7 @@
         this.menuRemove(in_UpdateCheck_ID);
 
         in_Use_Configure = GMregisterMenuCommand("\ufff0\ud83c\udfaf【脚本参数】功能设置开关", () => {
-          if (!document.querySelector(`.${Notice.noticejs} .${Notice.configuration}`)) {
+          if (!qS(`.${Notice.noticejs} .${Notice.configuration}`)) {
             GMnotification(
               Notice.noticeHTML(
                 `<dt style="color:darkred">
@@ -1193,35 +1221,35 @@
               {},
               "topRight"
             );
-            if (!document.querySelector(`#${Notice.isUpdate}`).checked) {
-              document.querySelector(`#${Notice.Expire}`).setAttribute("disabled", "disabled");
-              document.querySelector(`#${Notice.timeUnit}`).setAttribute("disabled", "disabled");
+            if (!qS(`#${Notice.isUpdate}`).checked) {
+              qS(`#${Notice.Expire}`).setAttribute("disabled", "disabled");
+              qS(`#${Notice.timeUnit}`).setAttribute("disabled", "disabled");
             }
-            document.querySelector(`#${Notice.isUpdate}`).addEventListener("change", function () {
+            qS(`#${Notice.isUpdate}`).addEventListener("change", function () {
               if (this.checked) {
-                document.querySelector(`#${Notice.Expire}`).removeAttribute("disabled");
-                document.querySelector(`#${Notice.timeUnit}`).removeAttribute("disabled");
+                qS(`#${Notice.Expire}`).removeAttribute("disabled");
+                qS(`#${Notice.timeUnit}`).removeAttribute("disabled");
               } else {
-                document.querySelector(`#${Notice.Expire}`).setAttribute("disabled", "disabled");
-                document.querySelector(`#${Notice.timeUnit}`).setAttribute("disabled", "disabled");
+                qS(`#${Notice.Expire}`).setAttribute("disabled", "disabled");
+                qS(`#${Notice.timeUnit}`).setAttribute("disabled", "disabled");
               }
             });
-            document.querySelector(`#${Notice.Expire}`).addEventListener("input", function () {
+            qS(`#${Notice.Expire}`).addEventListener("input", function () {
               this.value = this.value.replace(/[^0-9]/g, "");
             });
-            document.querySelector(`#${Notice.fcFeedback} .${Notice.feedback}`).addEventListener("click", () => {
+            qS(`#${Notice.fcFeedback} .${Notice.feedback}`).addEventListener("click", () => {
               GMopenInTab(`${defCon.support ? defCon.support : "https://greasyfork.org/scripts/12909/feedback"}`, defCon.options);
             });
-            document.querySelector(`#${Notice.fcSubmit} .${Notice.fcClose}`).addEventListener("click", () => {
-              document.querySelector(`.${Notice.noticejs} .${Notice.configuration} .${Notice.close}`).click();
+            qS(`#${Notice.fcSubmit} .${Notice.fcClose}`).addEventListener("click", () => {
+              qS(`.${Notice.noticejs} .${Notice.configuration} .${Notice.close}`).click();
             });
-            document.querySelector(`#${Notice.fcSubmit} .${Notice.fcSave}`).addEventListener("click", () => {
+            qS(`#${Notice.fcSubmit} .${Notice.fcSave}`).addEventListener("click", () => {
               try {
-                const GoogleJump = document.querySelector(`#${Notice.google}`).checked;
-                const keywordHighlight = document.querySelector(`#${Notice.kwhl}`).checked;
-                const checkUpdate = document.querySelector(`#${Notice.isUpdate}`).checked;
-                let timeNumber = document.querySelector(`#${Notice.Expire}`).value;
-                let timeUnit = document.querySelector(`#${Notice.timeUnit}`).value;
+                const GoogleJump = qS(`#${Notice.google}`).checked;
+                const keywordHighlight = qS(`#${Notice.kwhl}`).checked;
+                const checkUpdate = qS(`#${Notice.isUpdate}`).checked;
+                let timeNumber = qS(`#${Notice.Expire}`).value;
+                let timeUnit = qS(`#${Notice.timeUnit}`).value;
                 _data.checkUpdate = checkUpdate;
                 _data.timeNumber = timeNumber.length ? Number(timeNumber) : 24;
                 _data.timeUnit = timeUnit.length ? timeUnit : "h";
@@ -1231,7 +1259,7 @@
                   GMdeleteValue("_Check_Version_Expire_");
                 }
                 GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
-                document.querySelector(`.${Notice.noticejs} .${Notice.configuration} .${Notice.close}`).click();
+                qS(`.${Notice.noticejs} .${Notice.configuration} .${Notice.close}`).click();
                 GMnotification(
                   Notice.noticeHTML(`<dd class="${Notice.center}">设置数据已<kbd class="im">成功保存</kbd>，网页在<em>3</em>秒后刷新！</dd>`),
                   `${Notice.info}`,
@@ -1304,8 +1332,7 @@
       insertCSS: () => {
         try {
           const doStyName = `${CONST.rndclassName}`;
-          const keywordHighlightStyle = keywordHighlight ? curretSite.keyStyle : "";
-          const doStyle = CONST.noticeCss + curretSite.StyleCode + keywordHighlightStyle;
+          const doStyle = CONST.noticeCss + curretSite.StyleCode + curretSite.keyStyle;
           addStyle(doStyle, doStyName, "head");
         } catch (e) {
           error("//-> %csearchManager.insertCSS:\n%c%s", "font-weight:bold", "font-weight:normal", e);
@@ -1317,29 +1344,29 @@
           const getTarget = curretSite.MainType;
           const doHtml = curretSite.HtmlCode;
           const indexPage = location.pathname === "/";
-          const userSpan = document.createElement("span");
+          const userSpan = cE("span");
           userSpan.id = `${CONST.rndidName}`;
           userSpan.innerHTML = doHtml;
           const SpanID = `#${userSpan.id}`;
-          let Target = document.querySelector(getTarget);
+          let Target = qS(getTarget);
           if (!indexPage && Target) {
-            if (!document.querySelector(SpanID) && getSearchValue()) {
+            if (!qS(SpanID) && getSearchValue()) {
               if (/^(nws|vid|bks)$/.test(CONST.vim.trim())) {
                 Target = Target.parentNode.parentNode.firstChild;
                 Target.insertBefore(userSpan, Target.firstChild);
-                if (document.querySelector(SpanID)) {
-                  document.querySelector(SpanID).setAttribute("style", "float:right");
+                if (qS(SpanID)) {
+                  qS(SpanID).setAttribute("style", "float:right");
                 }
               } else {
                 insterAfter(userSpan, Target);
                 // Baidu image fixed
-                if (document.querySelector(SpanID) && /^baiduimage$/.test(CONST.vim.trim())) {
-                  document.querySelector(SpanID).setAttribute("style", "margin-left:12px");
+                if (qS(SpanID) && /^baiduimage$/.test(CONST.vim.trim())) {
+                  qS(SpanID).setAttribute("style", "margin-left:12px");
                 }
                 // Bing image fixed
-                if (document.querySelector(".b_searchboxForm") && /^images$/.test(CONST.vim.trim())) {
+                if (qS(".b_searchboxForm") && /^images$/.test(CONST.vim.trim())) {
                   if (location.href.includes("view=detailV2") && CONST.isUseBing) {
-                    document.querySelector(".b_searchboxForm").setAttribute("style", "width:max-content!important;padding-right:10px!important");
+                    qS(".b_searchboxForm").setAttribute("style", "width:max-content!important;padding-right:10px!important");
                     document.querySelectorAll(`#${CONST.rndidName} input`).forEach(item => {
                       item.style = "height:35px!important;border-radius:4px!important;padding:0 12px;";
                     });
@@ -1347,8 +1374,8 @@
                 }
                 // Google fixed
                 if (curretSite.SiteTypeID === newSiteType.GOOGLE) {
-                  document.querySelector(SpanID).parentNode.style.width = "auto";
-                  document.querySelector(SpanID).parentNode.style.minWidth = "max-content";
+                  qS(SpanID).parentNode.style.width = "auto";
+                  qS(SpanID).parentNode.style.minWidth = "max-content";
                 }
               }
 
@@ -1396,7 +1423,7 @@
         let scrollbars, height, e;
         const getTarget = curretSite.MainType;
         const indexPage = location.pathname === "/";
-        if (!indexPage && document.querySelector(getTarget)) {
+        if (!indexPage && qS(getTarget)) {
           switch (curretSite.SiteTypeID) {
             case newSiteType.GOOGLE:
               // Google image fixed
@@ -1428,14 +1455,14 @@
       startRAFInterval: function () {
         RAFInterval(
           () => {
-            if (!document.querySelector(`.${CONST.rndclassName}`)) {
+            if (!qS(`.${CONST.rndclassName}`)) {
               this.insertCSS();
             }
-            if (!document.querySelector(`#${CONST.rndidName}`)) {
+            if (!qS(`#${CONST.rndidName}`)) {
               this.insertSearchButton();
               this.scrollDetect();
             }
-            return document.querySelector(`.${CONST.rndclassName}`) && document.querySelector(`#${CONST.rndidName}`);
+            return qS(`.${CONST.rndclassName}`) && qS(`#${CONST.rndidName}`);
           },
           200,
           true
@@ -1460,7 +1487,7 @@
               this.startRAFInterval();
               const callback = mutations => {
                 mutations.forEach(mutation => {
-                  if (!(document.querySelector(`.${CONST.rndclassName}`) && document.querySelector(`#${CONST.rndidName}`))) {
+                  if (!(qS(`.${CONST.rndclassName}`) && qS(`#${CONST.rndidName}`))) {
                     debug(
                       "%c[GB-MutationObserver]\n%c(%c%s%c: %c%s%c)",
                       "font-weight:bold;color:olive",
@@ -1531,13 +1558,13 @@
     }
 
     function getRealHostName(_index) {
-      _index = _index ? _index : top.location.hostname;
-      return _index.substring(_index.indexOf("google"));
+      const index = _index ? _index : top.location.hostname;
+      return index.substring(index.indexOf("google"));
     }
 
     function scrollButton(paraName, classNameIn, scrollSize) {
       debug(`//-> ${curretSite.SiteName} Scrolling Detecting: ${paraName}`);
-      const oDiv = document.querySelector(paraName);
+      const oDiv = qS(paraName);
       let H = 0;
       let Y = oDiv;
       if (Y !== null) {
@@ -1571,18 +1598,18 @@
     function addStyle(css, className, addToTarget, isReload = false, initType = "text/css", reNew = false) {
       RAFInterval(
         () => {
-          let addTo = document.querySelector(addToTarget);
+          let addTo = qS(addToTarget);
           if (typeof addToTarget === "undefined") {
             addTo = document.head || document.body || document.documentElement || document;
           }
-          if (typeof addToTarget === "undefined" || (typeof addToTarget !== "undefined" && document.querySelector(addToTarget))) {
-            if (isReload === true && document.querySelector(`.${className}`)) {
+          if (typeof addToTarget === "undefined" || (typeof addToTarget !== "undefined" && qS(addToTarget))) {
+            if (isReload === true && qS(`.${className}`)) {
               safeRemove(`.${className}`);
               reNew = true;
-            } else if (isReload === false && document.querySelector(`.${className}`)) {
+            } else if (isReload === false && qS(`.${className}`)) {
               return true;
             }
-            const cssNode = document.createElement("style");
+            const cssNode = cE("style");
             if (className !== null) {
               cssNode.className = className;
             }
@@ -1590,7 +1617,7 @@
             cssNode.setAttribute("type", initType);
             cssNode.innerHTML = css;
             addTo.appendChild(cssNode);
-            if (reNew && document.querySelector(`.${className}`)) {
+            if (reNew && qS(`.${className}`)) {
               return true;
             }
           }
@@ -1641,6 +1668,16 @@
       return encodeURIComponent(val);
     }
 
+    function ContentSecurityPolicy() {
+      if (window.trustedTypes && window.trustedTypes.createPolicy) {
+        window.trustedTypes.createPolicy("default", {
+          createHTML: (string, sink) => {
+            return string;
+          },
+        });
+      }
+    }
+
     function RAFInterval(callback, period, runNow, times = 0) {
       const needCount = (period / 1000) * 60;
       if (runNow === true) {
@@ -1649,7 +1686,6 @@
           return;
         }
       }
-
       const step = () => {
         if (times < needCount) {
           times++;
@@ -1672,6 +1708,8 @@
 
     !(function () {
       try {
+        debug("//-> Content-Security-Policy: trusted-types.");
+        ContentSecurityPolicy();
         debug("//-> Insert Ext Menu.");
         menuManager.init();
         debug("//-> Insert Search Button.");
