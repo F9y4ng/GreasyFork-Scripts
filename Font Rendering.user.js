@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.10.12.1
+// @version           2021.10.15.1
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -18,7 +18,7 @@
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL       https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.meta.js
 // @downloadURL     https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
-// @require         https://greasyfork.org/scripts/432508-powerange/code/Powerange.js?version=971797
+// @require         https://greasyfork.org/scripts/432508-powerange/code/Powerange.js?version=978367
 // @include         *
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
@@ -323,7 +323,6 @@
         return;
       }
     }
-
     const step = () => {
       if (times < needCount) {
         times++;
@@ -338,7 +337,6 @@
         }
       }
     };
-
     requestAnimationFrame(step);
   }
 
@@ -349,6 +347,11 @@
           if (typeof addToTarget === "object" && addToTarget) {
             if (isReload === true && addToTarget.querySelector(`.${className}`)) {
               safeRemove(`.${className}`, addToTarget);
+              debug(`\u27A4 style[${T}] View:`, Boolean(addToTarget.querySelector(`style[id^="${T}"]`)));
+              while (addToTarget.querySelector(`style[id^="${T}"]`)) {
+                safeRemove(`style[id^="${T}"]`, addToTarget);
+                debug(`\u27A4 style[${T}] Review:`, Boolean(addToTarget.querySelector(`style[id^="${T}"]`)));
+              }
               reNew = true;
             } else if (isReload === false && addToTarget.querySelector(`.${className}`)) {
               return true;
@@ -415,6 +418,8 @@
               const sT = h.document.head.querySelectorAll("style[id^='TS']");
               if (sT.length) {
                 addStyle(ts, sT[0].className, h.document.head, "TS", true);
+              } else {
+                addStyle(ts, `${defCon.class.rndStyle}`, h.document.head, "TS", false);
               }
             }
           } catch (e) {
@@ -1198,7 +1203,7 @@
       const testSize = "72px";
       const h = qS("body");
       const s = cE("fr-fontfamily");
-      s.className = `fa ${defCon.id.seed}_fontTest`;
+      s.classList.add(`fa`, `${defCon.id.seed}_fontTest`);
       s.id = `${defCon.id.fontTest}`;
       s.innerHTML = testString;
       let defaultWidth = {};
@@ -1599,7 +1604,14 @@
         fn();
         debug("\u27A4 %c[DOM]: Loading...", "background-color:darkorange;color:snow");
       } else if (event.target.readyState === "complete") {
-        debug("\u27A4 %c[DOM]: Load complete!\n%c\u3000 \u27A6 %s", "background-color:green;color:snow", "color:0;line-height:180%", window.location.host);
+        debug(
+          "\u27A4 %c[DOM]: Load complete!\n%c\u3000 \u27A6 %s %c%s",
+          "background-color:green;color:snow",
+          "color:0;line-height:180%",
+          window.location.hostname,
+          "color:grey;line-height:180%",
+          window.location.pathname
+        );
       }
     });
   }
@@ -2028,7 +2040,7 @@
               if (lastChildEleclassName.includes("darkreader") && document.head.lastChild.previousSibling.className === defCon.class.rndStyle) {
                 debug("\u27A4 %s is Ready, Causeby darkreader inserted", defCon.class.rndStyle);
               } else if (qS(`.${defCon.class.rndStyle}`).nextSibling) {
-                debug("\u27A4 [:before]", document.head.lastChild.className);
+                debug("\u27A4 [:before] %c%s", "font-style:italic", document.head.lastChild.className || "<empty string>");
                 reloadStyleTolastChild(true);
               }
             } catch (e) {
@@ -2062,7 +2074,7 @@
                 if (defCon.errors.length) {
                   reportErrortoAuthor(defCon.errors, true);
                 }
-              }, 10);
+              }, 100);
               qS(`.${defCon.class.title} .${defCon.class.guide}`).addEventListener("click", () => {
                 GMopenInTab(guideURI, defCon.options);
               });
@@ -2262,16 +2274,19 @@
     function reloadStyleTolastChild(isMutationObserver) {
       try {
         if (isMutationObserver) {
-          const styleScriptCount = document.head.querySelectorAll("style[id^='TS']").length;
-          if (styleScriptCount === 1) {
+          const cssScriptCount = document.head.querySelectorAll("style[id^='TC']").length;
+          if (cssScriptCount > 1) {
+            if (!defCon.scriptCount) {
+              defCon.scriptCount = true;
+              const info = `\u53d1\u73b0\u5197\u4f59\u5b89\u88c5\u7684\u201c${defCon.scriptName}\u201d\u811a\u672c\uff0c\u8bf7\u5220\u9664\u91cd\u590d\u811a\u672c\u4fdd\u7559\u5176\u4e00\u3002`;
+              defCon.errors.push(`[Redundant Scripts]: ${info}`);
+              reportErrortoAuthor(defCon.errors, true);
+              console.error("\u27A4 ", info);
+            }
+            return false;
+          } else if (document.head.querySelectorAll("style[id^='TS']").length >= 1) {
             insertStyle(true);
             debug("\u27A4 [:after]", document.head.lastChild.className);
-          } else if (styleScriptCount && !defCon.scriptCount) {
-            defCon.scriptCount = true;
-            const info = `\u53d1\u73b0\u5197\u4f59\u5b89\u88c5\u7684\u201c${defCon.scriptName}\u201d\u811a\u672c\uff0c\u8bf7\u5220\u9664\u91cd\u590d\u811a\u672c\u4fdd\u7559\u5176\u4e00\u3002`;
-            defCon.errors.push(`[Redundant Scripts]: ${info}`);
-            reportErrortoAuthor(defCon.errors, true);
-            console.error("\u27A4 ", info);
           }
         } else {
           document.onreadystatechange = () => {
@@ -2280,10 +2295,11 @@
                 if (document.head.lastChild.className !== defCon.class.rndStyle) {
                   insertStyle(true);
                 }
-                debug("\u27A4 lastChildStyle:", document.head.lastChild.className);
+                debug("\u27A4 [lastChild] className: %c%s", "font-weight:bold", document.head.lastChild.className);
               }, 2e3);
               debug(
-                "\u27A4 isStylePositionAtLastChild:",
+                "\u27A4 Style.Position@lastChild: %c%s",
+                "color:crimson;font-weight:bold",
                 document.head.lastChild.className === defCon.class.rndStyle || document.head.lastChild.previousSibling.className === defCon.class.rndStyle
               );
             }
@@ -2487,7 +2503,7 @@
             try {
               const zoomId = document.querySelector(`#${defCon.id.zoomSize}`);
               // eslint-disable-next-line no-undef
-              drawZoom = new Powerange(zoomId, {
+              drawZoom = new FrPowerange(zoomId, {
                 callback: () => {
                   const _value = Number(zoomId.value);
                   zoom.value = _value.toFixed(3);
@@ -2516,7 +2532,7 @@
           try {
             const strokeId = document.querySelector(`#${defCon.id.stroke}`);
             // eslint-disable-next-line no-undef
-            drawStrock = new Powerange(strokeId, {
+            drawStrock = new FrPowerange(strokeId, {
               callback: () => {
                 const _value = Number(strokeId.value);
                 strock.value = _value === 0 ? "OFF" : _value.toFixed(3);
@@ -2544,7 +2560,7 @@
           try {
             const shadowId = document.querySelector(`#${defCon.id.shadow}`);
             // eslint-disable-next-line no-undef
-            drawShadow = new Powerange(shadowId, {
+            drawShadow = new FrPowerange(shadowId, {
               callback: () => {
                 const _value = Number(shadowId.value);
                 shadows.value = _value === 0 ? "OFF" : _value.toFixed(2);
@@ -2752,7 +2768,7 @@
                 autoZoomFontSize(`#${defCon.id.rndId}`, fzoom);
               } catch (e) {
                 defCon.errors.push(`[submitPreview]: ${e}`);
-                reportErrortoAuthor(defCon.errors, true);
+                reportErrortoAuthor(defCon.errors);
                 error("\u27A4 submitPreview:", e);
               }
             } else {
@@ -3058,7 +3074,7 @@
             frDialog = null;
           } catch (e) {
             defCon.errors.push(`[backupData]: ${e}`);
-            reportErrortoAuthor(defCon.errors, true);
+            reportErrortoAuthor(defCon.errors);
             error("\u27A4 backupData:", e);
           }
         });
@@ -3276,25 +3292,25 @@
         frDialog = null;
       } catch (e) {
         defCon.errors.push(`[manageDomainList]: ${e}`);
-        reportErrortoAuthor(defCon.errors, true);
+        reportErrortoAuthor(defCon.errors);
         error("\u27A4 manageDomainList:", e);
       }
     }
 
     async function reportErrortoAuthor(e, show = isdebug, errors = "") {
       if (show) {
-        closeConfigurePage(true);
+        closeConfigurePage(false);
         setTimeout(async () => {
           try {
-            closeAllDialog(`#${defCon.id.dialogbox}`);
-            const br = e.length > 1 ? "\u3000<br/>" : "";
-            for (let i in e) {
-              errors += e[i] + br;
-            }
-            let frDialog = new frDialogBox({
-              trueButtonText: "反馈问题",
-              messageText: String(
-                `<p style="font-size:14px!important;color:crimson">脚本在运行过程中发生了重大异常或错误，请及时告知作者，感谢您的反馈！以下信息会自动保存至您的剪切板：</p>
+            if (!document.querySelector("fr-dialogbox[error='true']")) {
+              const br = e.length > 1 ? "\u3000<br/>" : "";
+              for (let i in e) {
+                errors += e[i] + br;
+              }
+              let frDialog = new frDialogBox({
+                trueButtonText: "反馈问题",
+                messageText: String(
+                  `<p style="font-size:14px!important;color:crimson">脚本在运行过程中发生了重大异常或错误，请及时告知作者，感谢您的反馈！以下信息会自动保存至您的剪切板：</p>
                   <p>
                     <ul id="${defCon.id.seed}_copy_to_author" style="list-style-position:outside;margin:0!important;padding:0!important;max-height:300px;overflow-y:auto">
                       <li>浏览器信息：${getBrowser.type()}\u3000</li>
@@ -3304,17 +3320,19 @@
                       <li>错误信息：<span style="color:tan">${errors}</span></li>
                     </ul>
                   </p>`
-              ).trim(),
-              titleText: defCon.scriptName + "错误报告",
-            });
-            const copyText = qS(`#${defCon.id.seed}_copy_to_author`).innerText.replace(/\u3000/g, "\n");
-            defCon.errors.length = 0;
-            if (await frDialog.respond()) {
-              copyToClipboard(copyText);
-              closeAllDialog(`#${defCon.id.dialogbox}`);
-              GMopenInTab(feedback, defCon.options);
+                ).trim(),
+                titleText: defCon.scriptName + "错误报告",
+              });
+              frDialog.container.setAttribute("error", true);
+              const copyText = qS(`#${defCon.id.seed}_copy_to_author`).innerText.replace(/\u3000/g, "\n");
+              defCon.errors.length = 0;
+              if (await frDialog.respond()) {
+                copyToClipboard(copyText);
+                closeAllDialog(`#${defCon.id.dialogbox}`);
+                GMopenInTab(feedback, defCon.options);
+              }
+              frDialog = null;
             }
-            frDialog = null;
           } catch (e) {
             error("\u27A4 reportError:", e);
           }
