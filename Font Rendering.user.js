@@ -1685,10 +1685,9 @@
           messageText: String(`
               <p><span style="font:bold 22px Candara;color:crimson">您好！</span>这是您首次使用新版 <strong>${defCon.scriptName}</strong> 版本号<span style="font-family:Candara;color:darkorange;font-size:18px!important;font-weight:900;font-style:italic">V${defCon.curVersion}</span>，如下是近期更新内容：</p>
               <p><ul>
-                <li>优化字体列表显示，修正关键词搜索bug.</li>
-                <li>优化重置功能，修正重置初始字体bug.</li>
-                <li>修正备份还原功能的bug.</li>
-                <li>修正CSS样式，兼容更多网站。</li>
+                <li>优化与“金山文档”、“outlook”等网站的兼容性。</li>
+                <li>修正冗余脚本检测功能的bug.</li>
+                <li>修正错误报告反馈功能的bug.</li>
                 <li>修正其他bugs, 优化代码。</li>
               </ul></p>
               <p>强烈建议您看看<span style="color:crimson">最新的帮助文档</span>，要去看一下吗？</p>
