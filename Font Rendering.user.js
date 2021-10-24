@@ -1586,7 +1586,7 @@
     fontSize: 1.0,
     shadowColor: "#7B7B7B",
     fontSmooth: true,
-    fontCSS: `:not(.fa):not([class*='icon']):not([class*='logo']):not([class*='code'])`,
+    fontCSS: `:not(i):not(.fa):not([class*='icon']):not([class*='logo']):not([class*='code'])`,
     fontEx: `pre,code,textarea,input,select,button,kbd,i,em,pre *,code *`,
   };
   const root = `\u8ab1\u004a\u0056\u0069\u0059\u7409\u67d3\u5b7a\u80ba\u0070\u0032\u004f\u64d3\u0030\u8151\u0074\u5c80\u5b9a\u81ba\u0065`;
