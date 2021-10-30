@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.10.30.1
+// @version           2021.10.30.2
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -554,7 +554,7 @@
   /* Slider Movements init */
 
   function setSliderProperty(a, b, c) {
-    a.value = Number(b).toFixed(3);
+    a.value = Number(b).toFixed(c);
     a.setAttribute("value", Number(b));
     a.parentNode.style.setProperty("--value", Number(b));
     a.parentNode.style.setProperty("--text-value", JSON.stringify(Number(b).toFixed(c).toString()));
@@ -1390,24 +1390,24 @@
       fsearch: fontData => {
         const html = String(
           `<div id="${defCon.id.selector}">
-              <span class="label">已选择字体：<span id="${defCon.id.cleaner}">[清空]</span></span>
-              <div class="${defCon.class.selector}"></div>
-            </div>
-            <div class="${defCon.class.selectFontId}">
-              <span class="label">设置字体，请选择：</span>
-              <input type="search" placeholder="输入关键字可检索字体" autocomplete="off" class="${defCon.class.placeholder}">
-              <dl style="display:none"></dl>
-              <span title="\u53cc\u51fb\u6211\u8bd5\u8bd5\u770b" class="${defCon.class.tooltip} ${defCon.class.ps1}" id="${defCon.id.fonttooltip}">
-                <span>\ud83d\udd14</span>
-                <span class="${defCon.class.tooltip} ${defCon.class.ps2}">
-                <p><strong>温馨提示 </strong>脚本预载了多种常用的、好看的中文字体，下拉菜单中所罗列的字体是您系统中已安装过的字体，没有安装过则不会显示。</p>
-                <p><em style="color:darkred">（注一）</em>如果没有重新选择字体，则使用上一次保存的字体。首次使用默认为微软雅黑字体。</p>
-                <p><em style="color:darkred">（注二）</em>输入框可输入关键字进行搜索，支持中文和英文字体名。</p>
-                <p><em style="color:darkred">（注三）</em>字体是按您选择的先后顺序进行优先渲染的，所以多选不如只选一个您最想要的。</p>
-                <p><em style="color:darkred">（注四）</em>如果字体重写功能被关闭，那么该字体替换功能将自动禁用，网页字体将采用“网站默认”的字体设置。</p>
-                </span>
+            <span class="label">已选择字体：<span id="${defCon.id.cleaner}">[清空]</span></span>
+            <div class="${defCon.class.selector}"></div>
+          </div>
+          <div class="${defCon.class.selectFontId}">
+            <span class="label">设置字体，请选择：</span>
+            <input type="search" placeholder="输入关键字可检索字体" autocomplete="off" class="${defCon.class.placeholder}">
+            <dl style="display:none"></dl>
+            <span title="\u53cc\u51fb\u6211\u8bd5\u8bd5\u770b" class="${defCon.class.tooltip} ${defCon.class.ps1}" id="${defCon.id.fonttooltip}">
+              <span>\ud83d\udd14</span>
+              <span class="${defCon.class.tooltip} ${defCon.class.ps2}">
+              <p><strong>温馨提示 </strong>脚本预载了多种常用的、好看的中文字体，下拉菜单中所罗列的字体是您系统中已安装过的字体，没有安装过则不会显示。</p>
+              <p><em style="color:darkred">（注一）</em>如果没有重新选择字体，则使用上一次保存的字体。首次使用默认为微软雅黑字体。</p>
+              <p><em style="color:darkred">（注二）</em>输入框可输入关键字进行搜索，支持中文和英文字体名。</p>
+              <p><em style="color:darkred">（注三）</em>字体是按您选择的先后顺序进行优先渲染的，所以多选不如只选一个您最想要的。</p>
+              <p><em style="color:darkred">（注四）</em>如果字体重写功能被关闭，那么该字体替换功能将自动禁用，网页字体将采用“网站默认”的字体设置。</p>
               </span>
-            </div>`
+            </span>
+          </div>`
         ).trim();
         const domId = fontSet(s).that[0];
         RAFInterval(
@@ -1699,12 +1699,12 @@
           falseButtonText: "不，算了吧",
           messageText: String(
             `<p><span style="font-weight:bold;font-size:22px;color:crimson">您好！</span>这是您首次使用新版 <strong>${defCon.scriptName}</strong> 版本号<span style="font-family:Candara;color:darkorange;font-size:18px!important;font-weight:900;font-style:italic">V${defCon.curVersion}</span>，如下是近期更新内容：</p>
-              <p><ul>
-                <li>优化字体渲染样式，优化重置功能。</li>
-                <li>重构滑块算法及样式，兼容更多网站。</li>
-                <li>优化CSS样式兼容性，修正代码bugs，优化代码。</li>
-              </ul></p>
-              <p>强烈建议您看看<span style="color:crimson">最新的帮助文档</span>，要去看一下吗？</p>`
+            <p><ul>
+              <li>优化字体渲染样式，优化重置功能。</li>
+              <li>重构滑块算法及样式，兼容更多网站。</li>
+              <li>优化CSS样式兼容性，修正代码bugs，优化代码。</li>
+            </ul></p>
+            <p>强烈建议您看看<span style="color:crimson">最新的帮助文档</span>，要去看一下吗？</p>`
           ).trim(),
           titleText: "温馨提示",
         });
@@ -2195,8 +2195,9 @@
                         style="box-sizing:border-box;padding:4px 6px;color:#333!important;min-width:60px;min-height:34px">重建缓存</button>
                     </div>
                   </li>
-                  <ol id="${defCon.id.feedback}" style="margin:0 8px;font-size:16px!important;color:#333;font-weight:600;cursor:help"\
-                  title="遇到问题,建议先看看脚本帮助文件">\ud83e\udde1\u0020如果您遇到问题，请向我反馈\u0020\ud83e\udde1</ol>
+                  <ol id="${defCon.id.feedback}" title="遇到问题,建议先看看脚本帮助文件" style="margin:0 8px;font-size:16px!important;color:#333;font-weight:600;cursor:help">
+                    \ud83e\udde1\u0020如果您遇到问题，请向我反馈\u0020\ud83e\udde1
+                  </ol>
                 </ul>`
               ).trim(),
               titleText: "参数设置 - VIP 高级功能",
@@ -3223,9 +3224,12 @@
             ? `<p style="display:flex;justify-content:left;align-items:center"><input id="${defCon.id.seed}_d_s_" style="box-sizing:content-box;width:50%;height:22px;font:normal 16px/1.5 monospace,sans-serif!important;border:2px solid #777;border-radius:4px;margin:4px 6px;padding:2px 15px"><button id="${defCon.id.seed}_d_s_s_" style="box-sizing:border-box;background-color:#efefef!important;color:#333!important;vertical-align:initial;padding:3px 10px;margin:0;cursor:pointer;font-size:12px!important;border:1px solid #777;border-radius:4px;min-width:60px;min-height:30px">查 询</button><button id="${defCon.id.seed}_d_s_c_" style="box-sizing:border-box;background-color:#efefef!important;color:#333!important;vertical-align:initial;margin:0 0 0 4px;padding:3px 10px;cursor:pointer;font-size:12px!important;border:1px solid #777;border-radius:4px;min-width:60px;min-height:30px">清 除</button></p>`
             : ``;
         for (let i = 0; i < domainValue.length; i++) {
-          Contents += `<li id="${defCon.id.seed}_d_d_l_${i}" style="list-style:none;font-size:14px!important;font-style:normal;padding:5px;margin:0;color:#555">\
-                [<span id="${defCon.id.seed}_d_d_l_s_${i}" style="padding:3px;cursor:pointer;color:crimson;font-size:14px!important">删除</span>]\
-                <span>${i + 1}. ${filterHtml(domainValue[i].domain)} - ${dateFormat("YYYY/mm/dd HH:MM:SS", new Date(domainValue[i].fontDate))}</span></li>`;
+          Contents += String(
+            `<li id="${defCon.id.seed}_d_d_l_${i}" style="list-style:none;font-size:14px!important;font-style:normal;padding:5px;margin:0;color:#555">
+              <span>[<a id="${defCon.id.seed}_d_d_l_s_${i}" style="padding:3px;cursor:pointer;color:crimson;font-size:14px!important">删除</a>]</span>
+              <span>${i + 1}. ${filterHtml(domainValue[i].domain)} - ${dateFormat("YYYY/mm/dd HH:MM:SS", new Date(domainValue[i].fontDate))}</span>
+            </li>`
+          ).trim();
         }
         let frDialog = new frDialogBox({
           trueButtonText: "确认操作，保存数据",
@@ -3233,7 +3237,7 @@
           messageText: `<p style="font-size:14px!important;color:darkred">请谨慎操作，保存后生效，已删除的数据将不可恢复！</p>${_data_search_}<ul id="${defCon.id.seed}_d_d_" style="margin:0!important;padding:0!important;list-style:none!important;overflow:auto;max-height:190px;white-space:nowrap">${Contents}</ul>`,
           titleText: "网站个性化设置数据列表：",
         });
-        const items = document.querySelectorAll(`#${defCon.id.seed}_d_d_ li span[id^="${defCon.id.seed}_d_d_l_s_"]`);
+        const items = document.querySelectorAll(`#${defCon.id.seed}_d_d_ li span>a[id^="${defCon.id.seed}_d_d_l_s_"]`);
         if (qS(`#${defCon.id.seed}_d_s_`) && qS(`#${defCon.id.seed}_d_s_c_`) && qS(`#${defCon.id.seed}_d_s_s_`)) {
           qS(`#${defCon.id.seed}_d_s_`).addEventListener("keydown", e => {
             const event = e || window.event;
@@ -3277,13 +3281,13 @@
                 this.setAttribute("data-del", b[_list_Id_].domain);
                 this.innerHTML = "恢复";
                 this.style.cssText += "color:green";
-                this.nextElementSibling.style = "text-decoration:line-through";
+                this.parentNode.nextElementSibling.style = "text-decoration:line-through";
               } else {
                 a.splice(a.indexOf(this.getAttribute("data-del")), 1);
                 this.removeAttribute("data-del");
                 this.innerHTML = "删除";
                 this.style.cssText += "color:crimson";
-                this.nextElementSibling.style = "text-decoration:none";
+                this.parentNode.nextElementSibling.style = "text-decoration:none";
               }
             }.bind(items[j], _temp_, domainValue)
           );
@@ -3302,9 +3306,9 @@
           }
           let frDialog = new frDialogBox({
             trueButtonText: "感谢使用",
-            messageText: `<p style="color:darkgreen">网站个性化设置数据已保存！${
-              defCon.equal ? "</p><p>当前页面将在您确认后自动刷新。" : "</p><p>确认后您可以在当前页面继续其他操作。"
-            }</p>`,
+            messageText: String(
+              `<p style="color:darkgreen">网站个性化设置数据已保存！${defCon.equal ? "</p><p>当前页面将在您确认后自动刷新。" : "</p><p>确认后您可以在当前页面继续其他操作。"}</p>`
+            ).trim(),
             titleText: "数据保存完毕",
           });
           if (await frDialog.respond()) {
@@ -3339,15 +3343,13 @@
                 trueButtonText: "反馈问题",
                 messageText: String(
                   `<p style="font-size:14px!important;color:crimson">脚本在运行过程中发生了重大异常或错误，请及时告知作者，感谢您的反馈！以下信息会自动保存至您的剪切板：</p>
-                  <p>
-                    <ul id="${defCon.id.seed}_copy_to_author" style="list-style-position:outside;margin:0!important;padding:0!important;max-height:300px;overflow-y:auto">
+                  <p><ul id="${defCon.id.seed}_copy_to_author" style="list-style-position:outside;margin:0!important;padding:0!important;max-height:300px;overflow-y:auto">
                       <li>浏览器信息：${getBrowser.type()}\u3000</li>
                       <li>脚本扩展信息：${handlerInfo} ${GMversion}\u3000</li>
                       <li>脚本版本信息：${defCon.curVersion}\u3000</li>
                       <li>当前访问域名：${curHostname}\u3000</li>
                       <li>错误信息：<span style="color:tan">${errors}</span></li>
-                    </ul>
-                  </p>`
+                  </ul></p>`
                 ).trim(),
                 titleText: defCon.scriptName + "错误报告",
               });
