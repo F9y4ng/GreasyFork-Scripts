@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.10.24.1
+// @version           2021.10.30.1
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -18,7 +18,6 @@
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL       https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.meta.js
 // @downloadURL     https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
-// @require         https://greasyfork.org/scripts/432508-powerange/code/Powerange.js?version=978367
 // @include         *
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
@@ -241,6 +240,7 @@
     label: defCon.randString(5, true),
     placeholder: defCon.randString(5, true),
     checkbox: defCon.randString(7, true),
+    flex: defCon.randString(9, true),
     tooltip: defCon.randString(8, true),
     tooltiptext: defCon.randString(9, true),
     ps1: defCon.randString(4, true),
@@ -277,6 +277,8 @@
     dbbn: defCon.randString(6, true),
     switch: defCon.randString(5, true),
     anim: defCon.randString(5, true),
+    range: defCon.randString(11, true),
+    rangeProgress: defCon.randString(11, true),
   };
 
   const defaultArray = [];
@@ -551,13 +553,29 @@
 
   /* Slider Movements init */
 
-  function checkdraw(b, a, c) {
+  function setSliderProperty(a, b, c) {
+    a.value = Number(b).toFixed(3);
+    a.setAttribute("value", Number(b));
+    a.parentNode.style.setProperty("--value", Number(b));
+    a.parentNode.style.setProperty("--text-value", JSON.stringify(Number(b).toFixed(c).toString()));
+  }
+
+  function checkDraw(b, a, c, f, g = false) {
     b.addEventListener("input", function () {
       this.value = this.value.replace(/[^0-9.]/, "");
     });
-    b.addEventListener("blur", function () {
-      const thatValue = this.value === "OFF" ? 0 : Number(this.value);
-      !c.test(thatValue) || thatValue < a.options.min || thatValue > a.options.max ? a.setStart(a.options.start) : a.setStart(thatValue);
+    b.addEventListener("change", function () {
+      const thatValue = this.value === "OFF" ? (g ? 1 : 0) : Number(this.value);
+      const d = Number(a.parentNode.style.getPropertyValue("--value"));
+      if (!c.test(thatValue) || thatValue < a.parentNode.style.getPropertyValue("--min") || thatValue > a.parentNode.style.getPropertyValue("--max")) {
+        setSliderProperty(a, d, f);
+        b.value = g ? (d === 1 ? "OFF" : d.toFixed(f)) : d === 0 ? "OFF" : d.toFixed(f);
+        b._value_ = d;
+      } else {
+        setSliderProperty(a, thatValue, f);
+        b.value = g ? (thatValue === 1 ? "OFF" : thatValue.toFixed(f)) : thatValue === 0 ? "OFF" : thatValue.toFixed(f);
+        b._value_ = thatValue;
+      }
     });
   }
 
@@ -734,7 +752,7 @@
       this.getDOM().appendChild(gradientBlack);
 
       qS(`.${defCon.class.colorPicker2} #${defCon.id.color}`).addEventListener("change", () => {
-        let color = qS(`.${defCon.class.colorPicker2} #${defCon.id.color}`).value;
+        let color = qS(`.${defCon.class.colorPicker2} #${defCon.id.color}`).value.trim();
         this.setValue(color, true);
         this.onchange();
         this.updatePicker();
@@ -872,7 +890,7 @@
           "^rgba\\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))" +
             ",\\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))" +
             ",\\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))" +
-            ",\\s*((?!1.[1-9])[0-1]?(\\.[0-9]{1,3})?)\\)$"
+            ",\\s*((?!1\\.[0-9]+)[0-1]?(\\.[0-9]{1,5})?)\\)$"
         )
       );
       const rgbReg = new RegExp(
@@ -1165,7 +1183,7 @@
     { ch: "思源宋体", en: "Source Han Serif SC" },
     { ch: "思源柔黑体", en: "Gen Jyuu Gothic" },
     { ch: "思源真黑体", en: "Gen Shin Gothic" },
-    { ch: "汉仪旗黑 60S", en: "HYQihei 60S" },
+    { ch: "汉仪旗黑", en: "HYQiHei" },
     { ch: "文泉驿微米黑", en: "WenQuanYi Micro Hei" },
     { ch: "文泉驿正黑", en: "WenQuanYi Zen Hei" },
     { ch: "方正悠黑简体 508R", en: "FZYouHeiS 508R" },
@@ -1348,7 +1366,7 @@
           }
         }
         fontSet(`#${defCon.id.fontList} .${defCon.class.selector}`).that[0].innerHTML += String(
-          `<a class="${defCon.class.label}"><span style="font-family:'Microsoft YaHei'!important">微软雅黑</span><input type="hidden" name="${defCon.id.fontName}" sort="1" value="Microsoft YaHei"/><span class="${defCon.class.close}" style="cursor:pointer;font-family:'Microsoft YaHei'!important">×</span></a>`
+          `<a class="${defCon.class.label}"><span style="border-bottom-left-radius:4px;border-top-left-radius:4px;font-family:'Microsoft YaHei'!important">微软雅黑</span><input type="hidden" name="${defCon.id.fontName}" sort="1" value="Microsoft YaHei"/><span class="${defCon.class.close}" style="border-bottom-right-radius:4px;border-top-right-radius:4px;cursor:pointer;font-family:system-ui,-apple-system,BlinkMacSystemFont,serif!important">\u0026\u0023\u0032\u0031\u0035\u003b</span></a>`
         );
         fontSet(`#${defCon.id.fontList} .${defCon.class.selector}`).that[0].parentNode.style.cssText += "display:block;";
         defCon.vals.push(`${defCon.id.fontName}`);
@@ -1377,10 +1395,10 @@
             </div>
             <div class="${defCon.class.selectFontId}">
               <span class="label">设置字体，请选择：</span>
-              <input type="text" placeholder="输入关键字可检索字体" autocomplete="off" class="${defCon.class.placeholder}">
+              <input type="search" placeholder="输入关键字可检索字体" autocomplete="off" class="${defCon.class.placeholder}">
               <dl style="display:none"></dl>
               <span title="\u53cc\u51fb\u6211\u8bd5\u8bd5\u770b" class="${defCon.class.tooltip} ${defCon.class.ps1}" id="${defCon.id.fonttooltip}">
-              \ud83d\udd14
+                <span>\ud83d\udd14</span>
                 <span class="${defCon.class.tooltip} ${defCon.class.ps2}">
                 <p><strong>温馨提示 </strong>脚本预载了多种常用的、好看的中文字体，下拉菜单中所罗列的字体是您系统中已安装过的字体，没有安装过则不会显示。</p>
                 <p><em style="color:darkred">（注一）</em>如果没有重新选择字体，则使用上一次保存的字体。首次使用默认为微软雅黑字体。</p>
@@ -1440,7 +1458,7 @@
                 return a.sort - b.sort;
               });
               fontData.forEach(item => {
-                dlshow.that[0].innerHTML += String(`<dd style="font-family:${item.en}!important" sort="${item.sort}" value="${item.en}">${item.ch}</dd>`);
+                dlshow.that[0].innerHTML += String(`<dd style="font-family:'${item.en}'!important" sort="${item.sort}" value="${item.en}">${item.ch}</dd>`);
               });
             }
             clickEvent();
@@ -1462,7 +1480,7 @@
             fontData.forEach(item => {
               if (searchReg.test(item.ch) || searchReg.test(item.en)) {
                 searchResult = true;
-                dlshow.that[0].innerHTML += String(`<dd style="font-family:${item.en}!important" sort="${item.sort}" value="${item.en}">${item.ch}</dd>`);
+                dlshow.that[0].innerHTML += String(`<dd style="font-family:'${item.en}'!important" sort="${item.sort}" value="${item.en}">${item.ch}</dd>`);
               }
             });
             if (!searchResult) {
@@ -1479,7 +1497,7 @@
               const sort = this.attributes.sort.value;
               if (value) {
                 fontSet(`#${defCon.id.fontList} .${defCon.class.selector}`).that[0].innerHTML += String(
-                  `<a class="${defCon.class.label}"><span style="font-family:${value}!important">${this.innerHTML}</span><input type="hidden" name="${defCon.id.fontName}" sort="${sort}" value="${value}"/><span class="${defCon.class.close}" style="cursor:pointer;font-family:${value}!important">×</span></a>`
+                  `<a class="${defCon.class.label}"><span style="border-bottom-left-radius:4px;border-top-left-radius:4px;font-family:'${value}'!important">${this.innerHTML}</span><input type="hidden" name="${defCon.id.fontName}" sort="${sort}" value="${value}"/><span class="${defCon.class.close}" style="border-bottom-right-radius:4px;border-top-right-radius:4px;cursor:pointer;font-family:system-ui,-apple-system,BlinkMacSystemFont,serif!important">\u0026\u0023\u0032\u0031\u0035\u003b</span></a>`
                 );
                 fontSet(`#${defCon.id.fontList} .${defCon.class.selector}`).that[0].parentNode.style.cssText += "display:block;";
                 qS(`#${defCon.id.cleaner}`).addEventListener("click", () => {
@@ -1581,13 +1599,13 @@
   const defValue = {
     fontSelect: `'Microsoft YaHei',system-ui,-apple-system,BlinkMacSystemFont,Helvetica,sans-serif,'iconfont','icomoon','FontAwesome','Material Icons Extended','Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji',emoji`,
     fontFace: true,
-    fontStroke: getBrowser.type("core").Gecko ? 0.04 : 0,
-    fontShadow: 1.5,
-    fontSize: 1.0,
-    shadowColor: "#7B7B7B",
     fontSmooth: true,
+    fontSize: 1.0,
+    fontStroke: 0.0,
+    fontShadow: 1.5,
+    shadowColor: "#7B7B7B",
     fontCSS: `:not(i):not(.fa):not([class*='icon']):not([class*='logo']):not([class*='code'])`,
-    fontEx: `pre,code,textarea,input,select,button,kbd,i,em,pre *,code *`,
+    fontEx: `input,select,button,textarea,kbd,pre,pre *,code,code *`,
   };
   const root = `\u8ab1\u004a\u0056\u0069\u0059\u7409\u67d3\u5b7a\u80ba\u0070\u0032\u004f\u64d3\u0030\u8151\u0074\u5c80\u5b9a\u81ba\u0065`;
   const feedback = defCon.supportURL ? defCon.supportURL : defCon.decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkY0MTY2ODglMkZmZWVkYmFjaw==");
@@ -1680,11 +1698,11 @@
           trueButtonText: "好，去看看",
           falseButtonText: "不，算了吧",
           messageText: String(
-            `<p><span style="font:bold 22px Candara;color:crimson">您好！</span>这是您首次使用新版 <strong>${defCon.scriptName}</strong> 版本号<span style="font-family:Candara;color:darkorange;font-size:18px!important;font-weight:900;font-style:italic">V${defCon.curVersion}</span>，如下是近期更新内容：</p>
+            `<p><span style="font-weight:bold;font-size:22px;color:crimson">您好！</span>这是您首次使用新版 <strong>${defCon.scriptName}</strong> 版本号<span style="font-family:Candara;color:darkorange;font-size:18px!important;font-weight:900;font-style:italic">V${defCon.curVersion}</span>，如下是近期更新内容：</p>
               <p><ul>
-                <li>优化既定字体表，修正部分字体名称。</li>
-                <li>修正某些黑暗模式下CSS样式问题。</li>
-                <li>修正bugs, 优化代码。</li>
+                <li>优化字体渲染样式，优化重置功能。</li>
+                <li>重构滑块算法及样式，兼容更多网站。</li>
+                <li>优化CSS样式兼容性，修正代码bugs，优化代码。</li>
               </ul></p>
               <p>强烈建议您看看<span style="color:crimson">最新的帮助文档</span>，要去看一下吗？</p>`
           ).trim(),
@@ -1797,7 +1815,7 @@
     const shadow_r = parseFloat(CONST.fontShadow);
     const shadow_c = CONST.shadowColor;
     if (!isNaN(shadow_r) && shadow_r > 0 && shadow_r <= 8) {
-      shadow = `text-shadow:0 0 ${shadow_r}px ${shadow_c};`;
+      shadow = `text-shadow:0 0 ${shadow_r}px ${shadow_c},0 0 ${shadow_r / 2}px ${shadow_c};`;
     }
     let stroke = "";
     const stroke_r = parseFloat(CONST.fontStroke);
@@ -1836,7 +1854,6 @@
     const refont = prefont ? prefont.replace(/"|'/g, "") : "";
     let fontfamily = "";
     let fontfaces = "";
-    let codeFont = "";
     const fontface_i = CONST.fontFace;
     if (fontface_i) {
       fontfamily = `font-family:${CONST.fontSelect};`;
@@ -1844,13 +1861,19 @@
         refont !== ""
           ? `@font-face{font-family:"宋体";src:local("${refont}")}@font-face{font-family:"SimSun";src:local("${refont}")}@font-face{font-family:"新宋体";src:local("${refont}")}@font-face{font-family:"NSimSun";src:local("${refont}")}@font-face{font-family:"黑体";src:local("${refont}")}@font-face{font-family:"SimHei";src:local("${refont}")}@font-face{font-family:"Microsoft YaHei UI";src:local("${refont}")}@font-face{font-family:"Microsoft JhengHei UI";src:local("${refont}")}@font-face{font-family:"MingLiU";src:local("${refont}")}@font-face{font-family:"MingLiU-ExtB";src:local("${refont}")}@font-face{font-family:"PMingLiU";src:local("${refont}")}@font-face{font-family:"PMingLiU-ExtB";src:local("${refont}")}@font-face{font-family:Arial;src:local("${refont}")}@font-face{font-family:"Georgia";src:local("${refont}")}@font-face{font-family:"MS Gothic";src:local("${refont}")}@font-face{font-family:"MS PGothic";src:local("${refont}")}@font-face{font-family:"MS UI Gothic";src:local("${refont}")}@font-face{font-family:"Yu Gothic";src:local("${refont}")}@font-face{font-family:"Yu Gothic UI";src:local("${refont}")}@font-face{font-family:"Malgun Gothic";src:local("${refont}")}`
           : "";
-      codeFont = `pre,pre *,code,code *{font:14px/130% 'Operator Mono Lig','Fira Code','Roboto Mono',Monaco,monospace,Consolas!important;font-feature-settings:"liga" 0,"zero"!important;}`;
     }
 
     let exclude = "";
+    let codeFont = "";
     const cssexlude = CONST.fontEx;
     if (cssexlude) {
       exclude = `${cssexlude}{-webkit-text-stroke:initial!important;text-shadow:initial!important}`;
+      if (cssexlude.includes("pre") || cssexlude.includes("code")) {
+        const pre = cssexlude.includes("pre") ? ["pre", "pre *"] : [];
+        const code = cssexlude.includes("code") ? ["code", "code *"] : [];
+        const precode = pre.concat(code);
+        codeFont = `${precode.toString()}{font:normal 400 14px/150% 'Operator Mono Lig','Fira Code','Roboto Mono',Monaco,monospace,Consolas!important;font-feature-settings:"liga" 0,"zero"!important;}`;
+      }
     }
 
     const fontTest = `body span.${defCon.id.seed}_fontTest{font-stretch:normal!important;font-weight:normal!important;line-height:initial!important;text-align:left!important;font-style:normal!important;text-decoration:none!important;letter-spacing:normal!important;word-wrap:normal!important;text-indent:initial!important}body #${defCon.id.fontTest}{margin:0!important;padding:0!important;width:max-content!important;height:max-content!important;text-shadow:none!important;-webkit-text-stroke:initial!important;-webkit-text-size-adjust:none!important;-moz-text-size-adjust:none!important}`;
@@ -1860,20 +1883,25 @@
     if (defCon.siteIndex === undefined) {
       tshadow = `${bodyZoom}${codeFont}${selection}${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontfaces}${exclude}${fontTest}`;
     }
-    const fontStyle_db = `#${defCon.id.dialogbox}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:999999992}#${defCon.id.dialogbox} .${defCon.class.db}{max-width:420px;color:#444;border:2px solid #efefef}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #7b7b7b!important}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:200px;right:15px;border-radius:6px;width:100%;background:#fff;-webkit-box-shadow:0 0 10px 0 rgba(0,0,0,.3);box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223!important;color:#fff!important;border:1px solid #d93223!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a!important;color:#fff!important;border:1px solid #038c5a!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777!important;color:#fff!important;border:1px solid #777!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:500;text-align:left}.${defCon.class.dbm} p{line-height:1.5!important;margin:5px 0!important;text-indent:0em!important;font-size:16px!important;font-weight:400;text-align:left}.${defCon.class.dbm} ul{list-style:none;margin:5px 0 0 15px!important;padding:2px;font:italic 14px/140% "Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;color:grey}.${defCon.class.dbm} li{list-style-type:square;}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:100%}.${defCon.class.dbb}{display:inline-block;margin:0 1%;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;cursor:pointer;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}.${defCon.class.anim}{-webkit-animation:jiggle 1.8s ease-in infinite;animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}#${defCon.id.bk},#${defCon.id.pv},#${defCon.id.fs},#${defCon.id.mps},#${defCon.id.flc}{color:darkgoldenrod!important;padding:2px 10px!important;height:40px;width:max-content;min-width:auto;margin:2px 0 2px 25px!important;list-style-type:disclosure-closed!important;font-weight:500;font-size:16px}#${defCon.id.flc}:after{content:"";background:url('${loadingIMG}') no-repeat -400px -300px}#${defCon.id.flc} button{background-color:#eee;color:#444;font-weight:normal;border:1px solid #999;font-size:14px!important;border-radius:4px}#${defCon.id.flc} button:hover{cursor:pointer;background-color:#f7f7f7;}#${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}#${defCon.id.feedback}:hover{color:crimson!important}#${defCon.id.seed}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#555!important}#${defCon.id.seed}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#aaa!important}`;
-    const fontStyle_container = `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;border-radius:10px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 30px);z-index:999999;padding:4px 6px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.container} *{line-height:1.5!important;font-size:16px;font-weight:700;font-family:"Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;text-shadow:initial!important;-webkit-text-stroke:initial!important}#${defCon.id.container} fieldset{border:2px groove #67a5df!important;border-radius:10px;padding:4px 9px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:500px}#${defCon.id.container} legend{line-height:20px;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;background:#f0f6ff!important;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{list-style:none;margin:3px 0;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden;}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50%;-webkit-transform:rotate(360deg);-webkit-animation:rotation 5s linear infinite;-o-animation:rotation 5s linear infinite;animation:rotation 5s linear infinite}#${defCon.id.fontList}{padding:2px 10px 0 6px;min-height:75px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex;align-items:center;justify-content:space-between}#${defCon.id.shadowColor}{padding:2px 10px;min-height:45px;margin:4px;width:max-content}#${defCon.id.shadowColor} *{box-sizing:content-box}#${defCon.id.cps}{float:left;display:block;margin:0}#${defCon.id.shadowColor} .${defCon.class.colorPicker}{width:32px;height:30px;cursor:pointer;position:relative;border:2px solid #181a25;border-radius:4px;float:left;display:inline-block}#${defCon.id.shadowColor} .${defCon.class.colorPicker2}{display:inline-block;width:auto;margin:0 0 0 5px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2} #${defCon.id.color}{width:135px!important;height:32px!important;text-indent:0;font-size:18px!important;font-weight:400!important;background:#fafafa;box-sizing:content-box;font-family:Impact,Times,serif!important;color:#333!important;border:#67a5df 2px solid!important;border-radius:4px;display:inline-block;padding:0;margin:0;text-align:center}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.fontSize}{padding:2px 10px;height:60px}#${defCon.id.submit}{padding:2px 10px;height:40px}#${defCon.id.submit} button{background-image:initial;background-color:#67a5df;color:#fff!important;padding:5px 10px;font-size:14px!important;font-weight:600;cursor:pointer;border:2px solid #6ba7e0;border-radius:6px;width:auto;font-family:"Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important}#${defCon.id.backup}{margin:0 10px 0 0}#${defCon.id.backup}, #${defCon.id.files}{display:none}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;min-height:110px}#${defCon.id.fontEx} textarea{background:#fafafa!important}#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{min-width:calc(100% - 15px);max-width:calc(100% - 15px);width:calc(100% - 15px)!important;min-height:60px;line-height:140%;resize:none;border:2px solid #67a5df!important;border-radius:6px;box-sizing:content-box;padding:5px;font:bold 14px/140% "Roboto Mono",Monaco,"Courier New",sans-serif!important;color:#0b5b9c!important;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px rgba(0,0,0,.2);border-radius:10px;background:#ededed}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;color:#111;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:block;float:left;margin:2px 5px 2px 0;box-sizing:content-box;border:initial;border-radius:2px;padding:2px 0;height:24px;font-weight:400;line-height:20px;color:#fff;background:#67a5df}#${defCon.id.fontList} .${defCon.class.label} span{color:#fff;font-size:16px!important;font-weight:normal;padding:5px;background:#67a5df}#${defCon.id.fontList} .${defCon.class.close}{padding:5px!important;color:#fff;background:#67a5df;box-sizing:content-box}#${defCon.id.fontList} .${defCon.class.close}:hover{border-radius:2px;color:tomato;background-color:#366694}#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} span.label,#${defCon.id.selector} span.label{margin:0!important;width:auto;display:block!important;padding:0 0 4px 0;color:#333;border:0;text-align:left!important}#${defCon.id.fontList} .${defCon.class.selectFontId} input{box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:1px 23px!important;margin:0;width:calc(100% - 48px)!important;max-width:calc(100% - 48px);min-width:calc(100% - 48px);height:36px!important;font-family:"Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;font-size:16px!important;font-weight:700;text-indent:0;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder} input:-moz-placeholder{color:#369!important;font:normal 700 16px/1.5 "Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;opacity:.65}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font:normal 700 16px/1.5 "Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;opacity:.65}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font:normal 700 16px/1.5 "Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;opacity:.65}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:8px 0 0 0;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:4px;padding:4px 10px;width:auto;min-width:170px;max-width:256px;max-height:250px;font-size:18px!important;white-space:nowrap;background-color:#fff;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{margin:0 10px;padding:5px 0;font-weight:400;font-size:21px!important;min-width:135px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{background-color:#67a5df;color:#fff}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-y:auto;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:6px;width:95%;max-width:267px;max-height:60px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}.${defCon.class.checkbox}{display:none!important}.${defCon.class.checkbox}+label{cursor:pointer;padding:11px 9px;margin:0;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:58px;height:10px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);box-sizing:content-box;word-wrap:normal!important}.${defCon.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${defCon.class.checkbox}+label::after{position:absolute;top:0;left:28px;box-sizing:content-box;border-radius:100px;padding:5px;font-size:1em;font-weight:700;color:#fff;content:"OFF"}.${defCon.class.checkbox}:checked+label{cursor:pointer;margin:0;box-sizing:content-box;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.${defCon.class.checkbox}:checked+label::after{content:"ON";left:10px;box-sizing:content-box}.${defCon.class.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px;box-sizing:content-box}#${defCon.id.fface} label,#${defCon.id.fface}+label::after,#${defCon.id.fface}+label::before,#${defCon.id.smooth} label,#${defCon.id.smooth}+label::after,#${defCon.id.smooth}+label::before{-webkit-transition:all .1s ease-in;transition:all .1s ease-in;box-sizing:content-box}#${defCon.id.fontShadow} #${defCon.id.shadowSize},#${defCon.id.fontStroke} #${defCon.id.strokeSize},#${defCon.id.fontSize} #${defCon.id.fontZoom}{color:#111!important;width:56px!important;text-indent:0;margin-right:10px!important;height:32px!important;font-size:17px!important;font-weight:400!important;font-family:Impact,Times,serif!important;border:#67a5df 2px solid!important;border-radius:4px;margin-right:2px;text-align:center;box-sizing:content-box;padding:0;background:#fafafa!important}.${defCon.class.slider} input{visibility:hidden}.${defCon.class.switch}{box-sizing:content-box;display:inline-block;float:right;margin-right:4px;padding:0 6px;border:2px double #67a5df;color:#0a68c1;border-radius:4px}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent)!important;background-size:50px 50px;background-color:#f7fff7!important}`;
-    const fontStyle_cp = `#${defCon.id.cpm}{width:220px;height:200px;z-index:999;position:fixed;display:none;margin:10px 0 0 20px;box-sizing:content-box;background-color:#d1f2fb;padding:10px;box-shadow:0 0 10px #000;border-radius:6px}.${defCon.class.cp},.${defCon.class.cp} *,.${defCon.class.cp} ::after,.${defCon.class.cp} ::before{border:0;margin:0;padding:0;display:block;box-sizing:border-box}.${defCon.class.cp}{background-color:#fff;display:block;min-width:128px;min-height:128px;position:relative}.${defCon.class.cp}>.${defCon.class.cprb}{border:solid #000 1px;background:linear-gradient(red,#f0f,#00f,#0ff,#0f0,#ff0,red);width:16px;height:calc(100% - 26px);position:absolute;right:12px;top:12px}.${defCon.class.cp} .${defCon.class.cprbp}{position:absolute;width:100%;height:1px}.${defCon.class.cp} .${defCon.class.cprbp}::after,.${defCon.class.cp} .${defCon.class.cprbp}::before{content:"";width:10px;height:7px;position:absolute;background:0 0;border:solid transparent 5px;border-width:3.5px 5px;top:-3px}.${defCon.class.cp} .${defCon.class.cprbp}::before{border-left:solid #404040 5px;left:-6px}.${defCon.class.cp} .${defCon.class.cprbp}::after{border-right:solid #404040 5px;right:-6px}.${defCon.class.cp}>.${defCon.class.cpg}{position:absolute;width:calc(100% - 50px);height:calc(100% - 26px);border:solid #000 1px;left:12px;top:12px}.${defCon.class.cp}>.${defCon.class.cpg},.${defCon.class.cp}>.${defCon.class.cpg} *{cursor:crosshair;box-sizing:content-box}.${defCon.class.cp}>.${defCon.class.cpgb}{background:linear-gradient(rgba(0,0,0,0),#000)}.${defCon.class.cp}>.${defCon.class.cp}-color-block{position:absolute;border:solid #000 1px;background:#fff;width:calc(100% - 104px);max-width:72px;height:18px;left:12px;bottom:8px}.${defCon.class.cp} .${defCon.class.cpc}{background-color:transparent;position:absolute}.${defCon.class.cp} .${defCon.class.cpc}::before{border-radius:50%;width:11px;height:11px;border:solid #000 1px;background-color:transparent;position:relative;left:-6px;top:-6px;display:block;content:""}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcb}::before{border-color:#000}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcw}::before{border-color:#fff}`;
-    const fontStyle_tooltip = `.${defCon.class.tooltip}{position:relative;cursor:help}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;visibility:hidden;position:absolute;z-index:999999;box-sizing:content-box;border:2px solid #b8c4ce;border-radius:6px;padding:10px;width:250px;max-width:250px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:140%;text-indent:0em!important}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;font-size:14px!important}.${defCon.class.tooltip}:hover .${defCon.class.tooltip}{visibility:visible;display:block}.${defCon.class.ps1}{margin:-33px 0 0 0;right:8px;float:right}.${defCon.class.ps2}{top:30px;left:-245px}.${defCon.class.ps3}{top:-197px}.${defCon.class.ps4}{top:-175px}`;
-    const fontStyle_Progress = `.fr-range-bar{background-color:#a9acb1;border-radius:15px;display:block;height:10px;position:relative;width:100%;margin-top:8px;box-shadow:0 0 1px 1px rgba(0,0,0,.1) inset}.fr-range-quantity{background-color:#67a5df;border-radius:15px;display:block;height:100%;width:0}.fr-range-handle{background-color:#fff;border-radius:100%;cursor:e-resize;height:22px;left:0;top:-6px;position:absolute;width:22px;-webkit-box-shadow:0 1px 3px rgba(0,0,0,.4);box-shadow:0 1px 3px rgba(0,0,0,.4)}.fr-range-handle::after{content:"";position:absolute;width:10px;height:10px;background:#67a5df;border-radius:50%;top:0;left:0;right:0;bottom:0;margin:auto}.fr-range-max,.fr-range-min{color:#181819;font-size:12px;height:20px;padding-top:4px;position:absolute;text-align:center;top:-9px;width:24px}.fr-range-min{left:-30px}.fr-range-max{right:-30px}.fr-vertical{height:100%;width:4px}.fr-vertical .fr-range-quantity{bottom:0;height:0;position:absolute;width:100%}.fr-vertical .fr-range-handle{bottom:0;left:-13px;top:auto}.fr-vertical .fr-range-max,.fr-vertical .fr-range-min{left:-10px;right:auto;top:auto}.fr-vertical .fr-range-min{bottom:-30px}.fr-vertical .fr-range-max{top:-30px}.fr-unselectable{-webkit-touch-callout:none;-webkit-user-select:none;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.fr-range-disabled{cursor:default}`;
+
+    const fontStyle_db = `#${defCon.id.dialogbox}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999992}#${defCon.id.dialogbox} .${defCon.class.db}{max-width:420px;color:#444;border:2px solid #efefef}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #7b7b7b!important}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:200px;right:15px;border-radius:6px;width:100%;background:#fff;-webkit-box-shadow:0 0 10px 0 rgba(0,0,0,.3);box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223!important;color:#fff!important;border:1px solid #d93223!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a!important;color:#fff!important;border:1px solid #038c5a!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777!important;color:#fff!important;border:1px solid #777!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:500;text-align:left}.${defCon.class.dbm} p{line-height:1.5!important;margin:5px 0!important;text-indent:0!important;font-size:16px!important;font-weight:400;text-align:left}.${defCon.class.dbm} ul{list-style:none;margin:5px 0 0 15px!important;padding:2px;font:italic 14px/140% "Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;color:grey}.${defCon.class.dbm} li{display:list-item;list-style-type:square;}.${defCon.class.dbm} li:before{display:none}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:100%}.${defCon.class.dbb}{display:inline-block;margin:0 1%;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;cursor:pointer;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}.${defCon.class.anim}{-webkit-animation:jiggle 1.8s ease-in infinite;animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}#${defCon.id.bk},#${defCon.id.pv},#${defCon.id.fs},#${defCon.id.mps},#${defCon.id.flc}{color:darkgoldenrod!important;padding:2px 10px!important;height:40px;width:max-content;min-width:auto;margin:2px 0 2px 25px!important;list-style-type:disclosure-closed!important;font-weight:500;font-size:16px}#${defCon.id.flc}:after{content:"";background:url('${loadingIMG}') no-repeat -400px -300px}#${defCon.id.flc} button{background-color:#eee;color:#444;font-weight:normal;border:1px solid #999;font-size:14px!important;border-radius:4px}#${defCon.id.flc} button:hover{cursor:pointer;background-color:#f7f7f7;}#${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}#${defCon.id.feedback}:hover{color:crimson!important}#${defCon.id.seed}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#555!important}#${defCon.id.seed}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#aaa!important}`;
+    const fontStyle_container = `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;border-radius:12px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 30px);z-index:999999;padding:4px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.container} *{line-height:1.5!important;font-size:16px;font-weight:700;font-family:"Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;text-shadow:initial!important;-webkit-text-stroke:initial!important}#${defCon.id.container} fieldset{border:2px groove #67a5df!important;border-radius:10px;padding:4px 6px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:475px}#${defCon.id.container} legend{line-height:20px;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;background:#f0f6ff!important;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{display:inherit;list-style:none;margin:3px 0;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default}#${defCon.id.container} ul li:before{display:none}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden;}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50%;-webkit-transform:rotate(360deg);-webkit-animation:rotation 5s linear infinite;-o-animation:rotation 5s linear infinite;animation:rotation 5s linear infinite}#${defCon.id.fontList}{padding:2px 10px 0 6px;min-height:75px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex!important;align-items:center;justify-content:space-between}#${defCon.id.shadowColor}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;padding:2px 10px;min-height:45px;margin:4px;width:auto}#${defCon.id.shadowColor} *{box-sizing:content-box}#${defCon.id.cps}{margin:0}#${defCon.id.shadowColor} .${defCon.class.colorPicker}{width:32px;height:30px;cursor:pointer;position:relative;border:2px solid #181a25;border-radius:4px;}#${defCon.id.shadowColor} .${defCon.class.colorPicker2}{width:auto;margin:0 0 0 5px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2} #${defCon.id.color}{width:123px!important;height:32px!important;text-indent:0;font-size:18px!important;font-weight:400!important;background:#fafafa;box-sizing:content-box;font-family:Impact,Times,serif!important;color:#333!important;border:#67a5df 2px solid!important;border-radius:4px;padding:0;margin:0;text-align:center}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.fontSize}{padding:2px 10px;height:60px}#${defCon.id.submit}{padding:2px 10px;height:40px}#${defCon.id.submit} button{box-sizing:border-box;background-image:initial;background-color:#67a5df;color:#fff!important;margin:0;padding:5px 10px;cursor:pointer;border:2px solid #6ba7e0;border-radius:6px;width:auto;min-width:min-content;min-height:35px;font:normal 600 14px/1.5 "Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important}#${defCon.id.backup}{margin:0 10px 0 0}#${defCon.id.backup}, #${defCon.id.files}{display:none}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${defCon.id.fontEx} textarea{background:#fafafa!important}#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{font:bold 14px/140% "Roboto Mono",Monaco,"Courier New",sans-serif!important;min-width:248px;max-width:calc(100% - 15px);width:calc(100% - 15px)!important;min-height:60px;line-height:140%;resize:none;border:2px solid #67a5df!important;border-radius:6px;box-sizing:content-box;padding:5px;color:#0b5b9c!important;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px rgba(0,0,0,.2);border-radius:10px;background:#ededed}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;color:#111;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${defCon.id.fontList} .${defCon.class.label} span{color:#fff;font-size:16px!important;font-weight:400;height:max-content;width:max-content;min-width:12px;max-width:205px;padding:5px;background:#67a5df;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap;}#${defCon.id.fontList} .${defCon.class.close}{width:12px}#${defCon.id.fontList} .${defCon.class.close}:hover{color:tomato;background-color:#2D7DCA;border-radius:2px}#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} span.label,#${defCon.id.selector} span.label{margin:0!important;width:auto;display:block!important;padding:0 0 4px 0;color:#333;border:0;text-align:left!important;background-color:transparent!important}#${defCon.id.fontList} .${defCon.class.selectFontId} input{text-overflow:ellipsis;overflow:hidden;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:1px 15px!important;margin:0;width:calc(100% - 32px);max-width:calc(100% - 32px);min-width:calc(100% - 32px);height:36px!important;font-family:"Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;font-size:16px!important;font-weight:700;text-indent:0;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font:normal 700 16px/1.5 "Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;opacity:.65!important}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font:normal 700 16px/1.5 "Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;opacity:.65!important}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:4px 0 0 0;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:4px 8px;width:auto;min-width:calc(40%);max-width:calc(100% - 72px);max-height:298px;font-size:18px!important;white-space:nowrap;background-color:#fff;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;margin:1px 8px;padding:5px 0;font-weight:400;font-size:21px!important;min-width:100%;max-width:100%;width:-moz-available;width:-webkit-fill-available;}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-x:hidden;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:6px 6px 0 6px;margin:0 0 6px 0;width:calc(100%);min-width:calc(100% - 14px);max-width:fit-content;max-width:-moz-min-content;max-height:80px;min-height:40px;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}.${defCon.class.checkbox}{display:none!important}.${defCon.class.checkbox}+label{cursor:pointer;padding:0;margin:0;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:76px;height:32px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;box-sizing:content-box}.${defCon.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${defCon.class.checkbox}+label::after{position:absolute;top:0;left:28px;border-radius:100px;padding:5px;font-size:1em;font-weight:700;color:#fff;content:"OFF"}.${defCon.class.checkbox}:checked+label{cursor:pointer;margin:0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.${defCon.class.checkbox}:checked+label::after{content:"ON";left:10px}.${defCon.class.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px}#${defCon.id.fface} label,#${defCon.id.fface}+label::after,#${defCon.id.fface}+label::before,#${defCon.id.smooth} label,#${defCon.id.smooth}+label::after,#${defCon.id.smooth}+label::before{-webkit-transition:all .1s ease-in;transition:all .1s ease-in}.${defCon.class.flex}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;width:auto;min-width:100%}#${defCon.id.fontShadow} div.${defCon.class.flex}:before,#${defCon.id.fontShadow} div.${defCon.class.flex}:after,#${defCon.id.fontStroke} div.${defCon.class.flex}:before,#${defCon.id.fontStroke} div.${defCon.class.flex}:after,#${defCon.id.fontSize} div.${defCon.class.flex}:before,#${defCon.id.fontSize} div.${defCon.class.flex}:after{display:none}#${defCon.id.fontShadow} #${defCon.id.shadowSize},#${defCon.id.fontStroke} #${defCon.id.strokeSize},#${defCon.id.fontSize} #${defCon.id.fontZoom}{color:#111!important;width:56px!important;text-indent:0;margin:0 10px 0 0!important;height:32px!important;font-size:17px!important;font-weight:400!important;font-family:Impact,Times,serif!important;border:#67a5df 2px solid!important;border-radius:4px;text-align:center;box-sizing:content-box;padding:0;background:#fafafa!important}.${defCon.class.slider} input{visibility:hidden}.${defCon.class.switch}{box-sizing:content-box;display:inline-block;float:right;margin-right:4px;padding:0 6px;border:2px double #67a5df;color:#0a68c1;border-radius:4px}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent)!important;background-size:50px 50px;background-color:#f7fff7!important}`;
+    const fontStyle_cp = `#${defCon.id.cpm}{width:240px;height:216px;margin:calc(-90%) 0 0 2px;z-index:999;position:fixed;display:none;box-sizing:content-box;background-color:#d1f2fb;padding:10px;box-shadow:0 0 10px #000;border-radius:6px}.${defCon.class.cp},.${defCon.class.cp} *,.${defCon.class.cp} ::after,.${defCon.class.cp} ::before{border:0;margin:0;padding:0;display:block;box-sizing:border-box}.${defCon.class.cp}{background-color:#fff;display:block;min-width:128px;min-height:128px;position:relative}.${defCon.class.cp}>.${defCon.class.cprb}{border:solid #000 1px;background:linear-gradient(red,#f0f,#00f,#0ff,#0f0,#ff0,red);width:16px;height:calc(100% - 26px);position:absolute;right:12px;top:12px}.${defCon.class.cp} .${defCon.class.cprbp}{position:absolute;width:100%;height:1px}.${defCon.class.cp} .${defCon.class.cprbp}::after,.${defCon.class.cp} .${defCon.class.cprbp}::before{content:"";width:10px;height:7px;position:absolute;background:0 0;border:solid transparent 5px;border-width:3.5px 5px;top:-3px}.${defCon.class.cp} .${defCon.class.cprbp}::before{border-left:solid #404040 5px;left:-6px}.${defCon.class.cp} .${defCon.class.cprbp}::after{border-right:solid #404040 5px;right:-6px}.${defCon.class.cp}>.${defCon.class.cpg}{position:absolute;width:calc(100% - 50px);height:calc(100% - 26px);border:solid #000 1px;left:12px;top:12px}.${defCon.class.cp}>.${defCon.class.cpg},.${defCon.class.cp}>.${defCon.class.cpg} *{cursor:crosshair;box-sizing:content-box}.${defCon.class.cp}>.${defCon.class.cpgb}{background:linear-gradient(rgba(0,0,0,0),#000)}.${defCon.class.cp}>.${defCon.class.cp}-color-block{position:absolute;border:solid #000 1px;background:#fff;width:calc(100% - 104px);max-width:72px;height:18px;left:12px;bottom:8px}.${defCon.class.cp} .${defCon.class.cpc}{background-color:transparent;position:absolute}.${defCon.class.cp} .${defCon.class.cpc}::before{border-radius:50%;width:11px;height:11px;border:solid #000 1px;background-color:transparent;position:relative;left:-6px;top:-6px;display:block;content:""}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcb}::before{border-color:#000}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcw}::before{border-color:#fff}`;
+    const fontStyle_tooltip = `.${defCon.class.tooltip}{position:relative;cursor:help}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;box-sizing:content-box;position:absolute;z-index:999999;border:2px solid #b8c4ce;border-radius:6px;padding:10px;width:250px;max-width:250px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:140%;text-indent:0em!important}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;font-size:14px!important}.${defCon.class.tooltip}:active .${defCon.class.tooltip}{display:block}.${defCon.class.ps1}{position:relative;top:-33px;height:0;width:24px;margin:0;padding:0;right:8px;float:right}.${defCon.class.ps2}{top:35px;right:-14px}.${defCon.class.ps3}{top:-197px;margin-left:-5px}.${defCon.class.ps4}{top:-175px;margin-left:-5px}`;
+    const fontStyle_Progress = `.${defCon.class.range}{width:auto;min-width:105%!important;margin:-3px 0 0 -5px}.${defCon.class.range}{--primary-color:#67a5df;--value-offset-y:var(--ticks-gap);--value-active-color:white;--value-background:transparent;--value-background-hover:var(--primary-color);--value-font:italic bold 14px/14px monospace,arial;--fill-color:var(--primary-color);--progress-background:rgb(223, 223, 223);--progress-radius:20px;--show-min-max:none;--track-height:calc(var(--thumb-size) / 2);--min-max-font:12px arial;--min-max-opacity:0.5;--min-max-x-offset:10%;--thumb-size:22px;--thumb-color:white;--thumb-shadow:0 0 3px rgba(0, 0, 0, 0.4),0 0 1px rgba(0, 0, 0, 0.5) inset,0 0 0 99px var(--thumb-color) inset;--thumb-shadow-active:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px var(--primary-color) inset,0 0 3px rgba(0, 0, 0, 0.4);--thumb-shadow-hover:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px darkorange inset,0 0 3px rgba(0, 0, 0, 0.4);--ticks-thickness:1px;--ticks-height:5px;--ticks-gap:var(--ticks-height, 0);--ticks-color:transparent;--step:1;--ticks-count:(var(--max) - var(--min))/var(--step);--maxTicksAllowed:1000;--too-many-ticks:Min(1, Max(var(--ticks-count) - var(--maxTicksAllowed), 0));--x-step:Max(var(--step), var(--too-many-ticks) * (var(--max) - var(--min)));--tickIntervalPerc_1:Calc((var(--max) - var(--min)) / var(--x-step));--tickIntervalPerc:calc((100% - var(--thumb-size)) / var(--tickIntervalPerc_1) * var(--tickEvery, 1));--value-a:Clamp(var(--min), var(--value, 0), var(--max));--value-b:var(--value, 0);--text-value-a:var(--text-value, "");--completed-a:calc((var(--value-a) - var(--min)) / (var(--max) - var(--min)) * 100);--completed-b:calc((var(--value-b) - var(--min)) / (var(--max) - var(--min)) * 100);--ca:Min(var(--completed-a), var(--completed-b));--cb:Max(var(--completed-a), var(--completed-b));--thumbs-too-close:Clamp(-1, 1000 * (Min(1, Max(var(--cb) - var(--ca) - 5, -1)) + 0.001), 1);--thumb-close-to-min:Min(1, Max(var(--ca) - 5, 0));--thumb-close-to-max:Min(1, Max(95 - var(--cb), 0));box-sizing:content-box;display:inline-block;height:Max(var(--track-height),var(--thumb-size));background:linear-gradient(to right,var(--ticks-color) var(--ticks-thickness),transparent 1px) repeat-x;background-size:var(--tickIntervalPerc) var(--ticks-height);background-position-x:calc(var(--thumb-size)/ 2 - var(--ticks-thickness)/ 2);background-position-y:var(--flip-y,bottom);padding-bottom:var(--flip-y,var(--ticks-gap));padding-top:calc(var(--flip-y) * var(--ticks-gap));position:relative;z-index:1}.${defCon.class.range}[data-ticks-position=top]{--flip-y:1}.${defCon.class.range}::after,.${defCon.class.range}::before{--offset:calc(var(--thumb-size) / 2);content:counter(x);display:var(--show-min-max,block);font:var(--min-max-font);position:absolute;bottom:var(--flip-y,-2.5ch);top:calc(-2.5ch * var(--flip-y));opacity:Clamp(0,var(--at-edge),var(--min-max-opacity));transform:translateX(calc(var(--min-max-x-offset) * var(--before,-1) * -1)) scale(var(--at-edge));pointer-events:none}.${defCon.class.range}::before{--before:1;--at-edge:var(--thumb-close-to-min);counter-reset:x var(--min);left:var(--offset)}.${defCon.class.range}::after{--at-edge:var(--thumb-close-to-max);counter-reset:x var(--max);right:var(--offset)}.${defCon.class.rangeProgress}{--start-end:calc(var(--thumb-size) / 2);--clip-end:calc(100% - (var(--cb)) * 1%);--clip-start:calc(var(--ca) * 1%);--clip:inset(-20px var(--clip-end) -20px var(--clip-start));position:absolute;left:var(--start-end);right:var(--start-end);top:calc(var(--ticks-gap) * var(--flip-y,0) + var(--thumb-size)/ 2 - var(--track-height)/ 2);height:calc(var(--track-height));background:var(--progress-background,#eee);pointer-events:none;z-index:-1;border-radius:var(--progress-radius)}.${defCon.class.rangeProgress}::before{content:"";position:absolute;left:0;right:0;clip-path:var(--clip);top:0;bottom:0;background:var(--fill-color,#000);box-shadow:var(--progress-flll-shadow);z-index:1;border-radius:inherit}.${defCon.class.rangeProgress}::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;box-shadow:var(--progress-shadow);pointer-events:none;border-radius:inherit}.${defCon.class.range}>input{-webkit-appearance:none;width:100%;height:var(--thumb-size)!important;margin:0!important;padding:0!important;position:absolute!important;left:0;top:calc(50% - Max(var(--track-height),var(--thumb-size))/ 2 + calc(var(--ticks-gap)/ 2 * var(--flip-y,-1)))!important;border:0!important;cursor:grab;outline:0!important;background:0 0!important;--thumb-shadow:var(--thumb-shadow-active)}.${defCon.class.range}>input:not(:only-of-type){pointer-events:none}.${defCon.class.range}>input::-webkit-slider-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${defCon.class.range}>input::-moz-range-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${defCon.class.range}>input::-ms-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${defCon.class.range}>input:hover{--thumb-shadow:var(--thumb-shadow-active)}.${defCon.class.range}>input:hover+output{--value-background:var(--value-background-hover);--y-offset:-1px;color:var(--value-active-color);box-shadow:0 0 0 3px var(--value-background)}.${defCon.class.range}>input:active{--thumb-shadow:var(--thumb-shadow-hover);cursor:grabbing;z-index:2}.${defCon.class.range}>input:active+output{transition:0s;opacity:0.9}.${defCon.class.range}>input:nth-of-type(1){--is-left-most:Clamp(0, (var(--value-a) - var(--value-b)) * 99999, 1)}.${defCon.class.range}>input:nth-of-type(1)+output{--value:var(--value-a);--x-offset:calc(var(--completed-a) * -1%)}.${defCon.class.range}>input:nth-of-type(1)+output:not(:only-of-type){--flip:calc(var(--thumbs-too-close) * -1)}.${defCon.class.range}>input:nth-of-type(1)+output::after{content:var(--prefix, "") var(--text-value-a) var(--suffix, "")}.${defCon.class.range}>input:nth-of-type(2){--is-left-most:Clamp(0, (var(--value-b) - var(--value-a)) * 99999, 1)}.${defCon.class.range}>input:nth-of-type(2)+output{--value:var(--value-b)}.${defCon.class.range}>input:only-of-type~.${defCon.class.rangeProgress}{--clip-start:0}.${defCon.class.range}>input+output{--flip:-1;--x-offset:calc(var(--completed-b) * -1%);--pos:calc(((var(--value) - var(--min)) / (var(--max) - var(--min))) * 100%);pointer-events:none;line-height:100%;width:auto;min-width:40px;min-height:12px;text-align:center;position:absolute;z-index:5;background:var(--value-background);border-radius:4px;padding:0 6px;left:var(--pos);transform:translate(var(--x-offset),calc(150% * var(--flip) - (var(--y-offset,0) + var(--value-offset-y)) * var(--flip)));transition:all .12s ease-out,left 0s;opacity:0;box-sizing:content-box}.${defCon.class.range}>input+output::after{content:var(--prefix, "") var(--text-value-b) var(--suffix, "");font:var(--value-font)}`;
     const fontStyle = fontStyle_db + fontStyle_container + fontStyle_cp + fontStyle_tooltip + fontStyle_Progress;
     const tFontSize = isFontsize
       ? String(
           `<li id="${defCon.id.fontSize}">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;min-width:auto">
-              字体比例缩放<input id="${defCon.id.fontZoom}" v="number" maxlength="5" />
+            <div class="${defCon.class.flex}">
+              <span>字体比例缩放</span>
+              <input id="${defCon.id.fontZoom}" type="text" v="number" maxlength="5" />
             </div>
-            <div class="${defCon.class.slider}">
-              <input type="text" id="${defCon.id.zoomSize}" />
+            <div class="${defCon.class.range}" data-ticks-position="top"
+              style="--min:.8;--max:1.5;--step:.001;--value:${CONST.fontSize};--text-value:'${CONST.fontSize.toFixed(3).toString()}'">
+              <input id="${defCon.id.zoomSize}" type="range" min=".8" max="1.5" step=".001" value="${Number(CONST.fontSize).toFixed(3)}">
+              <output></output>
+              <div class='${defCon.class.rangeProgress}'></div>
             </div>
           </li>`
         ).trim()
@@ -1897,38 +1925,48 @@
             </li>
             <li id="${defCon.id.fontFace}">
               <div>字体重写（默认：开）</div>
-              <div style="margin:${getBrowser.type("core").Gecko ? "6px 0 0 0" : "0"}">
+              <div style="height:32px;margin:0;padding:0;align-self:center">
                 <input type="checkbox" id="${defCon.id.fface}" class="${defCon.class.checkbox}" ${CONST.fontFace ? "checked" : ""} />
                 <label for="${defCon.id.fface}"></label>
               </div>
             </li>
             <li id="${defCon.id.fontSmooth}">
               <div>字体平滑（默认：开）</div>
-              <div style="margin:${getBrowser.type("core").Gecko ? "6px 0 0 0" : "0"}">
+              <div style="height:32px;margin:0;padding:0;align-self:center">
                 <input type="checkbox" id="${defCon.id.smooth}" class="${defCon.class.checkbox}" ${CONST.fontSmooth ? "checked" : ""} />
                 <label for="${defCon.id.smooth}"></label>
               </div>
             </li>
             ${tFontSize}
             <li id="${defCon.id.fontStroke}">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;min-width:auto">
-                字体描边尺寸<input id="${defCon.id.strokeSize}" v="number" maxlength="5" />
+              <div class="${defCon.class.flex}">
+                <span>字体描边尺寸</span>
+                <input id="${defCon.id.strokeSize}" type="text" v="number" maxlength="5" />
               </div>
-              <div class="${defCon.class.slider}">
-                <input type="text" id="${defCon.id.stroke}" />
+              <div class="${defCon.class.range}" data-ticks-position="top"
+                style="--step:.001;--min:0;--max:1;--value:${CONST.fontStroke};--text-value:'${CONST.fontStroke.toFixed(3).toString()}'">
+                <input id="${defCon.id.stroke}" type="range" min="0" max="1" step=".001" value="${Number(CONST.fontStroke).toFixed(3)}" />
+                <output></output>
+                <div class="${defCon.class.rangeProgress}"></div>
               </div>
             </li>
             <li id="${defCon.id.fontShadow}">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;min-width:auto">
-                字体阴影尺寸<input id="${defCon.id.shadowSize}" v="number" maxlength="4" />
+              <div class="${defCon.class.flex}">
+                <span>字体阴影尺寸</span>
+                <input id="${defCon.id.shadowSize}" type="text" v="number" maxlength="4" />
               </div>
-              <div class="${defCon.class.slider}">
-                <input type="text" id="${defCon.id.shadow}" />
+              <div class="${defCon.class.range}" data-ticks-position="top"
+                style="--step:.01;--min:0;--max:8;--value:${CONST.fontShadow};--text-value:'${CONST.fontShadow.toFixed(2).toString()}'">
+                <input id="${defCon.id.shadow}" type="range" min="0" max="8" step=".01" value="${Number(CONST.fontShadow).toFixed(2)}" />
+                <output></output>
+                <div class="${defCon.class.rangeProgress}"></div>
               </div>
             </li>
             <li id="${defCon.id.shadowColor}">
-              <div style="float:left;margin:6px 5px 0 0">阴影颜色
-                <span class="${defCon.class.tooltip}">\ud83d\udd14
+              <div style="margin:6px 5px 0 0">
+                <span>阴影颜色</span>
+                <span class="${defCon.class.tooltip}">
+                  <span>\ud83d\udd14</span>
                   <span class="${defCon.class.tooltip} ${defCon.class.ps3}">
                     <p>阴影颜色可通过点击色块激活拾色器选择，也可自定义填写，格式支持: <em style="color:#cecece">RGB, RGBA, HEX{3}, HEX{6}</em>。纯白色的所有格式表示自身颜色 <em style="color:#cecece">currentcolor</em></p>
                     <p><em style="color:darkred">注意：输入数值会自动转化为HEX{6}，但数值保持一致性。错误格式会被替换为上次保存的数据。</em></p>
@@ -1936,12 +1974,13 @@
                 </span>
               </div>
               <div class="${defCon.class.colorPicker}" id="${defCon.id.cps}"></div>
-              <div class="${defCon.class.colorPicker2}"><input id="${defCon.id.color}"/></div>
+              <div class="${defCon.class.colorPicker2}"><input type="text" id="${defCon.id.color}" /></div>
               <div id="${defCon.id.cpm}"></div>
             </li>
             <li id="${defCon.id.fontCSS}">
               <div style="margin-bottom: 6px">需要渲染的网页元素：
-                <span class="${defCon.class.tooltip}">\ud83d\udd14
+                <span class="${defCon.class.tooltip}">
+                  <span>\ud83d\udd14</span>
                   <span class="${defCon.class.tooltip} ${defCon.class.ps4}">
                     <p>默认为排除大多数网站常用的特殊CSS样式后需要渲染的页面元素。填写格式：<em style="color:#cecece">:not(.fa)</em> 或 <em style="color:#cecece">:not([class*="fa"])</em></p>
                     <p><em style="color:darkred">该选项为重要参数，默认只读，双击解锁。请尽量不要修改，避免造成样式失效。若失效请重置。</em></p>
@@ -1954,7 +1993,8 @@
             </li>
             <li id="${defCon.id.fontEx}">
               <div style="margin-bottom: 6px">排除渲染的HTML标签：
-                <span class="${defCon.class.tooltip}">\ud83d\udd14
+                <span class="${defCon.class.tooltip}">
+                  <span>\ud83d\udd14</span>
                   <span class="${defCon.class.tooltip} ${defCon.class.ps3}">
                     <p>该选项排除渲染字体描边、字体阴影效果，请将排除渲染的HTML标签用逗号分隔。具体规则请点击顶部旋转的帮助文件图标。</p>
                     <p><em style="color:darkred">编辑该选项需要CSS知识，如需要排除复杂的样式或标签可通过这里进行添加，样式若混乱请重置。</em></p>
@@ -1991,11 +2031,11 @@
     if (curWindowtop) {
       if (defCon.siteIndex === undefined) {
         console.info(
-          `%c${defCon.scriptName}\n%cINTRO.URL:\u0020https://tiny.one/FontsRendering\n%c\u259e\u0020脚本版本：%cV%s%c\n\u259e\u0020个性化设置数量：%c%s%c/%s%s\n\u259e\u0020本地备份：%s\u3000\u259a\u0020保存预览：%s\n%c\u259e\u0020渲染字体：%s\n\u259e\u0020字体平滑：%s\u3000\u259a\u0020字体重写：%s\n\u259e\u0020字体描边：%s\u3000\u259a\u0020字体阴影：%s`,
+          `%c${defCon.scriptName}\n%cINTRO.URL:\u0020https://tiny.one/FontsRendering\n%c\u259e\u0020脚本版本：%cV%s%c\n\u259e\u0020个性化设置：%c%s%c/%s%s\n%c\u259e\u0020字体缩放：%s%s\n\u259e\u0020本地备份：%s\u3000\u259a\u0020保存预览：%s\n%c\u259e\u0020渲染字体：%s\n\u259e\u0020字体平滑：%s\u3000\u259a\u0020字体重写：%s\n\u259e\u0020字体描边：%s\u3000\u259a\u0020字体阴影：%s`,
           "font-weight:bold;font-size:14px;color:crimson",
           "line-height:200%;font-size:10px;color:#777;font-style:italic",
-          "line-height:180%;font-size:12px;color:steelblue",
-          "color:crimson;font:italic 16px Candara;",
+          "line-height:180%;font-size:12px;color:slategray",
+          "color:slategrey;font:italic 18px Candara,monospace;",
           defCon.curVersion,
           "line-height:180%;font-size:12px;color:steelblue",
           defCon.domainCount > maxPersonalSites ? "color:crimson" : "color:steelblue",
@@ -2003,6 +2043,13 @@
           "line-height:180%;font-size:12px;color:steelblue",
           maxPersonalSites,
           defCon.domainIndex !== undefined ? "\uff08\u5f53\u524d\uff1a\u4e2a\u6027\u5316\uff09" : "\uff08\u5f53\u524d\uff1a\u5168\u5c40\uff09",
+          "line-height:180%;font-size:12px;color:steelblue",
+          isFontsize ? "ON " : "OFF",
+          isFontsize
+            ? CONST.fontSize === 1
+              ? "\uff08\u7f29\u653e\u6bd4\u4f8b\uff1a\u7f51\u7ad9\u5b9a\u4e49\uff09"
+              : `\uff08\u7f29\u653e\u6bd4\u4f8b\uff1a${Number(CONST.fontSize * 100).toFixed(2) + "%"}\uff09`
+            : "\uff08\u7f29\u653e\u6bd4\u4f8b\uff1a\u6d4f\u89c8\u5668\u5b9a\u4e49\uff09",
           isBackupFunction ? "ON " : "OFF",
           isPreview ? "ON " : "OFF",
           "line-height:180%;font-size:12px;color:teal",
@@ -2034,7 +2081,7 @@
             try {
               const lastChildEleclassName = document.head.lastChild.className || "lastChildEleclassName";
               if (lastChildEleclassName.includes("darkreader") && document.head.lastChild.previousSibling.className === defCon.class.rndStyle) {
-                debug("\u27A4 %s is Ready, Causeby darkreader inserted", defCon.class.rndStyle);
+                debug("\u27A4 %s is Ready, Caused by darkreader inserted", defCon.class.rndStyle);
               } else if (qS(`.${defCon.class.rndStyle}`).nextSibling) {
                 debug("\u27A4 [:before] %c%s", "font-style:italic", document.head.lastChild.className || "<empty string>");
                 reloadStyleTolastChild(true);
@@ -2111,8 +2158,8 @@
               falseButtonText: "帮助文件",
               neutralButtonText: "取 消",
               messageText: String(
-                `<ul class="${defCon.class.main}"\
-                style="margin:0!important;padding:0!important;color:darkgoldenrod;list-style-position:outside;font:normal 500 16px/150% 'Microsoft YaHei',system-ui,-apple-system,sans-serif!important">
+                `<ul class="${defCon.class.main}"
+                  style="margin:0!important;padding:0!important;color:darkgoldenrod;list-style-position:outside;font:normal 500 16px/150% 'Microsoft YaHei',system-ui,-apple-system,sans-serif!important">
                   <li id="${defCon.id.bk}">
                     <div style="float:left;font-size:16px!important">本地备份功能（默认：开启）</div>
                     <div style="float:right;margin:-2px 2px 0 28px;font-size:16px!important">
@@ -2137,16 +2184,15 @@
                   <li id="${defCon.id.mps}">
                     <div style="float:left;font-size:16px!important">个性化设置总数（默认：100）</div>
                     <div style="float:right;margin:-6px 2px 0 16px">
-                      <input maxlength="4" id="${defCon.id.maxps}" placeholder="100" value="${maxPersonalSites}"\
-                      style="font:normal 500 16px/140% Impact,Times,serif!important;border:2px solid darkgoldenrod;border-radius:4px;width:70px;text-align:center;padding:5px;color:#333;box-sizing:border-box" />
+                      <input maxlength="4" id="${defCon.id.maxps}" placeholder="100" value="${maxPersonalSites}"
+                        style="font:normal 500 16px/140% Impact,Times,serif!important;border:2px solid darkgoldenrod;border-radius:4px;width:70px;text-align:center;padding:5px;color:#333;box-sizing:border-box" />
                     </div>
                   </li>
                   <li id="${defCon.id.flc}">
                     <div style="float:left;font-size:16px!important">字体列表缓存（缓存：24小时）</div>
                     <div style="float:right;margin:-4px 2px 0 10px">
-                      <button id="${defCon.id.flcid}" style="padding:4px 6px;color:#333!important" title="重建当前网站字体列表缓存（如果你已安装新字体，但字体列表未及时更新）">
-                        重建缓存
-                      </button>
+                      <button id="${defCon.id.flcid}" title="重建当前网站字体列表缓存（如果你已安装新字体，但字体列表未及时更新）"
+                        style="box-sizing:border-box;padding:4px 6px;color:#333!important;min-width:60px;min-height:34px">重建缓存</button>
                     </div>
                   </li>
                   <ol id="${defCon.id.feedback}" style="margin:0 8px;font-size:16px!important;color:#333;font-weight:600;cursor:help"\
@@ -2396,7 +2442,7 @@
                   trueButtonText: "保 存",
                   falseButtonText: "帮助文档",
                   neutralButtonText: "取 消",
-                  messageText: `<p style="color:#666;font-size:14px!important">以下文本域可按预定格式增加您自定义的字体。请按照格式样例填写，输入格式有误将被自动过滤。重复添加字体将在字体表合并时被自动忽略。<span style="color:red">（请勿添加过多字体，避免响应缓慢）</span></p><p><textarea id="${defCon.id.seed}_custom_Fontlist" style="min-height:200px!important;min-width:377px!important;resize:vertical;padding:5px;border:1px solid #999;border-radius:6px;font:normal 14px monospace,Consolas!important;white-space:pre!important;cursor:text" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下：\n\n{ "ch": "中文字体名一", "en": "EN Fontname 1" }\u21b2\n{ "ch": "中文字体名二", "en": "EN Fontname 2" }\u21b2\n{ "ch": "中文字体名三", "en": "EN Fontname 3" }\u21b2\n\n（注意：\u21b2为换行符号，输入(Enter)回车即可）'>${_Custom_fontlist_}</textarea></p>`,
+                  messageText: `<p style="color:#666;font-size:14px!important">以下文本域可按预定格式增加您自定义的字体。请按照格式样例填写，输入格式有误将被自动过滤。重复添加字体将在字体表合并时被自动忽略。<span style="color:red">（请勿添加过多字体，避免响应缓慢）</span></p><p><textarea id="${defCon.id.seed}_custom_Fontlist" style="min-height:160px!important;min-width:377px!important;resize:vertical;padding:5px;border:1px solid #999;border-radius:6px;font:normal 14px monospace,Consolas!important;white-space:pre!important;cursor:text" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下：\n\n{ "ch": "中文字体名一", "en": "EN Fontname 1" }\u21b2\n{ "ch": "中文字体名二", "en": "EN Fontname 2" }\u21b2\n{ "ch": "中文字体名三", "en": "EN Fontname 3" }\u21b2\n\n（注意：\u21b2为换行符号，输入(Enter)回车即可）'>${_Custom_fontlist_}</textarea></p>`,
                   titleText: "自定义字体表",
                 });
                 let custom_Fontlist;
@@ -2498,27 +2544,15 @@
           const zoom = qS(`#${defCon.id.fontZoom}`);
           if (isFontsize) {
             try {
-              const zoomId = document.querySelector(`#${defCon.id.zoomSize}`);
-              // eslint-disable-next-line no-undef
-              drawZoom = new FrPowerange(zoomId, {
-                callback: () => {
-                  const _value = Number(zoomId.value);
-                  zoom.value = _value.toFixed(3);
-                  zoom._value_ = _value;
-                },
-                decimal: true,
-                hideRange: true,
-                min: 0.8,
-                max: 1.5,
-                start: CONST.fontSize,
-                step: 0.001,
-              });
-              checkdraw(zoom, drawZoom, /[0-9](\.[0-9]{1,3})?/);
+              drawZoom = document.querySelector(`#${defCon.id.zoomSize}`);
+              zoom.value = Number(CONST.fontSize) === 1 ? "OFF" : Number(CONST.fontSize).toFixed(3);
+              rangeSliderWidget(drawZoom, zoom, 3, true);
+              checkDraw(zoom, drawZoom, /[0-9](\.[0-9]{1,3})?/, 3, true);
             } catch (e) {
               defCon.errors.push(`[FontSize Zoom]: ${e}`);
               error("\u27A4 FontSize Zoom:", e);
             } finally {
-              saveChangeStatus(zoom, Number(CONST.fontSize), submitButton, defCon.vals);
+              saveChangeStatus(zoom, Number(CONST.fontSize), submitButton, defCon.vals, true);
             }
           }
 
@@ -2527,22 +2561,10 @@
           let drawStrock;
           const strock = qS(`#${defCon.id.strokeSize}`);
           try {
-            const strokeId = document.querySelector(`#${defCon.id.stroke}`);
-            // eslint-disable-next-line no-undef
-            drawStrock = new FrPowerange(strokeId, {
-              callback: () => {
-                const _value = Number(strokeId.value);
-                strock.value = _value === 0 ? "OFF" : _value.toFixed(3);
-                strock._value_ = _value;
-              },
-              decimal: true,
-              hideRange: true,
-              min: 0,
-              max: 1.0,
-              start: CONST.fontStroke,
-              step: 0.001,
-            });
-            checkdraw(strock, drawStrock, /[0-9](\.[0-9]{1,3})?/);
+            drawStrock = document.querySelector(`#${defCon.id.stroke}`);
+            strock.value = Number(CONST.fontStroke) === 0 ? "OFF" : Number(CONST.fontStroke).toFixed(3);
+            rangeSliderWidget(drawStrock, strock, 3);
+            checkDraw(strock, drawStrock, /[0-9](\.[0-9]{1,3})?/, 3);
           } catch (e) {
             defCon.errors.push(`[Fonts stroke]: ${e}`);
             error("\u27A4 Fonts stroke:", e);
@@ -2555,22 +2577,11 @@
           let drawShadow;
           const shadows = qS(`#${defCon.id.shadowSize}`);
           try {
-            const shadowId = document.querySelector(`#${defCon.id.shadow}`);
-            // eslint-disable-next-line no-undef
-            drawShadow = new FrPowerange(shadowId, {
-              callback: () => {
-                const _value = Number(shadowId.value);
-                shadows.value = _value === 0 ? "OFF" : _value.toFixed(2);
-                shadows._value_ = _value;
-              },
-              decimal: true,
-              hideRange: true,
-              min: 0,
-              max: 8.0,
-              start: CONST.fontShadow,
-              step: 0.01,
-            });
-            checkdraw(shadows, drawShadow, /[0-9](\.[0-9]{1,2})?/);
+            drawShadow = document.querySelector(`#${defCon.id.shadow}`);
+            shadows.value = Number(CONST.fontShadow) === 0 ? "OFF" : Number(CONST.fontShadow).toFixed(2);
+            qS(`#${defCon.id.shadowColor}`).style.display = shadows.value === "OFF" ? "none" : "flex";
+            rangeSliderWidget(drawShadow, shadows, 2);
+            checkDraw(shadows, drawShadow, /[0-9](\.[0-9]{1,2})?/, 2);
           } catch (e) {
             defCon.errors.push(`[Fonts shadow]: ${e}`);
             error("\u27A4 Fonts shadow:", e);
@@ -2650,39 +2661,41 @@
             if (await frDialog.respond()) {
               CONST.fontSelect.split(",")[0] !== defValue.fontSelect.split(",")[0] ? fontSet().fresetList(fontData) : fontSet().fdeleteList(fontData);
               if (isFontsize) {
-                zoom.value = Number(defValue.fontSize) ? Number(defValue.fontSize).toFixed(3) : "OFF";
+                zoom.value = Number(defValue.fontSize) === 1 ? "OFF" : Number(defValue.fontSize).toFixed(3);
                 zoom._value_ = Number(defValue.fontSize);
-                drawZoom.setStart(Number(defValue.fontSize));
+                setSliderProperty(drawZoom, defValue.fontSize, 3);
                 defCon.tZoom = Number(defValue.fontSize);
               }
-              strock.value = Number(defValue.fontStroke) ? Number(defValue.fontStroke).toFixed(3) : "OFF";
+              strock.value = Number(defValue.fontStroke) === 0 ? "OFF" : Number(defValue.fontStroke).toFixed(3);
               strock._value_ = Number(defValue.fontStroke);
-              drawStrock.setStart(Number(defValue.fontStroke));
-              shadows.value = Number(defValue.fontShadow) ? Number(defValue.fontShadow).toFixed(2) : "OFF";
+              setSliderProperty(drawStrock, defValue.fontStroke, 3);
+              shadows.value = Number(defValue.fontShadow) === 0 ? "OFF" : Number(defValue.fontShadow).toFixed(2);
               shadows._value_ = Number(defValue.fontShadow);
-              drawShadow.setStart(Number(defValue.fontShadow));
+              setSliderProperty(drawShadow, defValue.fontShadow, 2);
               picker.value = defValue.shadowColor;
               picker._value_ = picker.value;
               smoothT.checked !== defValue.fontSmooth ? smoothT.click() : debug("\u27A4 fontSmooth Not Modified");
               ffaceT.checked !== defValue.fontFace ? ffaceT.click() : debug("\u27A4 fontFace Not Modified");
               fontCssT.value = defValue.fontCSS;
+              setEffectIntoSubmit(fontCssT.value, CONST.fontCSS, defCon.vals, fontCssT, submitButton);
               fontExT.value = defValue.fontEx;
+              setEffectIntoSubmit(fontExT.value, CONST.fontEx, defCon.vals, fontExT, submitButton);
               const submit = qS(`#${defCon.id.submit} .${defCon.class.submit}[v-Preview="true"]`);
               submit ? submit.click() : debug("\u27A4 v-Preview is ", submit);
             } else {
               fontSet().fdeleteList(fontData);
               if (isFontsize) {
-                zoom.value = Number(CONST.fontSize) ? Number(CONST.fontSize).toFixed(3) : "OFF";
+                zoom.value = Number(CONST.fontSize) === 1 ? "OFF" : Number(CONST.fontSize).toFixed(3);
                 zoom._value_ = Number(CONST.fontSize);
-                drawZoom.setStart(Number(CONST.fontSize));
+                setSliderProperty(drawZoom, CONST.fontSize, 3);
                 defCon.tZoom = Number(CONST.fontSize);
               }
-              strock.value = Number(CONST.fontStroke) ? Number(CONST.fontStroke).toFixed(3) : "OFF";
+              strock.value = Number(CONST.fontStroke) === 0 ? "OFF" : Number(CONST.fontStroke).toFixed(3);
               strock._value_ = Number(CONST.fontStroke);
-              drawStrock.setStart(Number(CONST.fontStroke));
-              shadows.value = Number(CONST.fontShadow) ? Number(CONST.fontShadow).toFixed(2) : "OFF";
+              setSliderProperty(drawStrock, CONST.fontStroke, 3);
+              shadows.value = Number(CONST.fontShadow) === 0 ? "OFF" : Number(CONST.fontShadow).toFixed(2);
               shadows._value_ = Number(CONST.fontShadow);
-              drawShadow.setStart(Number(CONST.fontShadow));
+              setSliderProperty(drawShadow, CONST.fontShadow, 2);
               picker.value = CONST.shadowColor;
               picker._value_ = picker.value;
               smoothT.checked !== CONST.fontSmooth ? smoothT.click() : debug("\u27A4 fontSmooth not modified");
@@ -2731,7 +2744,7 @@
                       `}`
                     : ``
                   : ``;
-                const _shadow = fshadow > 0 && fshadow <= 8 ? `text-shadow:0 0 ${fshadow}px ${fscolor};` : ``;
+                const _shadow = fshadow > 0 && fshadow <= 8 ? `text-shadow:0 0 ${fshadow}px ${fscolor},0 0 ${fshadow / 2}px ${fscolor};` : ``;
                 const _stroke = fstrock > 0 && fstrock <= 1.0 ? `-webkit-text-stroke:${fstrock}px currentcolor;paint-order:stroke fill;` : ``;
                 const _selection = stroke ? `::selection{color:#ffffff!important;background:#338fff!important}` : ``;
                 const kernel_define = getBrowser.type("core").WebKit
@@ -2751,11 +2764,18 @@
                       ).trim()
                     : ``
                   : ``;
-                const _codeFont = fontface
-                  ? `pre,pre *,code,code *{font:14px/130% 'Operator Mono Lig','Fira Code','Roboto Mono',Monaco,monospace,Consolas!important;font-feature-settings:"liga" 0,"zero"!important}`
-                  : ``;
+                let _codeFont = "";
                 const _exclude = fontex ? `${filterHtml(fontex)}{-webkit-text-stroke:initial!important;text-shadow:initial!important}` : "";
-                const _tshadow = `${_bodyZoom}${_codeFont}${_selection}${filterHtml(cssfun)}{${_shadow}${_stroke}${_smoothing}${_fontfamily}}${_fontfaces}${_exclude}`;
+                if (fontex) {
+                  if (fontex.includes("pre") || fontex.includes("code")) {
+                    const pre = fontex.includes("pre") ? ["pre", "pre *"] : [];
+                    const code = fontex.includes("code") ? ["code", "code *"] : [];
+                    const precode = pre.concat(code);
+                    _codeFont = `${precode.toString()}{font:normal 400 14px/150% 'Operator Mono Lig','Fira Code','Roboto Mono',Monaco,monospace,Consolas!important;font-feature-settings:"liga" 0,"zero"!important;}`;
+                  }
+                }
+                const tshadow = `${_bodyZoom}${_codeFont}${_selection}${filterHtml(cssfun)}{${_shadow}${_stroke}${_smoothing}${_fontfamily}}${_fontfaces}${_exclude}`;
+                const _tshadow = `@charset "UTF-8";${tshadow}`;
                 defCon.tZoom = fzoom;
                 this.innerText = "\u4fdd\u5b58";
                 this.removeAttribute("style");
@@ -2797,7 +2817,7 @@
                 if (domainValueIndex !== undefined && qS(`#${defCon.id.seed}_c_w_d_`)) {
                   const fontDate = dateFormat("YYYY-mm-dd HH:MM:SS", new Date(domainValue[domainValueIndex].fontDate));
                   qS(`#${defCon.id.seed}_c_w_d_`).innerHTML = String(
-                    `<p>上次保存：${fontDate} <button id="${defCon.id.seed}_c_w_d_d_" style="padding:3px 5px;margin-left:15px;cursor:pointer;color:#333;font-size:12px!important;border:1px solid #777;border-radius:4px;" title="删除数据后将刷新页面">删除当前网站数据</button></p>`
+                    `<p>上次保存：${fontDate} <button id="${defCon.id.seed}_c_w_d_d_" style="box-sizing:border-box;padding:3px 5px;margin-left:15px;cursor:pointer;color:#333;font-size:12px!important;border:1px solid #777;border-radius:4px;min-height:30px;background-color:#eee;" title="删除数据后将刷新页面">删除当前网站数据</button></p>`
                   ).trim();
                   qS(`#${defCon.id.seed}_c_w_d_d_`).addEventListener("click", async () => {
                     domainValue.splice(domainValueIndex, 1);
@@ -3095,23 +3115,34 @@
           if (at.value === "ON") {
             b.style = "display:none";
             a.textContent = "\u2228";
-            c.style = "min-height:35px";
+            c.style = "height:35px;min-height:35px";
             at.value = "OFF";
           } else {
             b.style = "display:block";
             a.textContent = "\u2227";
-            c.style = "min-height:110px";
+            c.style = "height:110px;min-height:110px";
             at.value = "ON";
           }
         });
       }
     }
 
-    function saveChangeStatus(t, e, d, v) {
+    function rangeSliderWidget(linstener, target, m, g = false) {
+      linstener.addEventListener("input", function () {
+        setSliderProperty(this, this.value, m);
+        target.value = g ? (Number(this.value) === 1 ? "OFF" : Number(this.value).toFixed(m)) : Number(this.value) === 0 ? "OFF" : Number(this.value).toFixed(m);
+        target._value_ = Number(this.value).toFixed(m);
+        if (linstener.id === defCon.id.shadow) {
+          qS(`#${defCon.id.shadowColor}`).style.display = target.value === "OFF" ? "none" : "flex";
+        }
+      });
+    }
+
+    function saveChangeStatus(t, e, d, v, g = false) {
       try {
         if (t && d) {
           if (t.type !== "text") {
-            const method = t.type === "textarea" ? "keyup" : "change";
+            const method = t.type === "textarea" ? "input" : "change";
             t.addEventListener(method, () => {
               const value = t.type === "checkbox" ? t.checked : t.value;
               setEffectIntoSubmit(value, e, v, t, d);
@@ -3124,7 +3155,7 @@
                 return this._value_;
               },
               set: newVal => {
-                setEffectIntoSubmit(newVal, e, v, t, d);
+                setEffectIntoSubmit(newVal, e, v, t, d, g);
               },
             });
           }
@@ -3135,9 +3166,9 @@
       }
     }
 
-    function setEffectIntoSubmit(value, e, v, t, d) {
+    function setEffectIntoSubmit(value, e, v, t, d, h = false) {
       try {
-        const _value = t.attributes.v !== undefined ? (value === "OFF" ? 0 : Number(value)) : value;
+        const _value = t.attributes.v !== undefined ? (value === "OFF" ? (h ? 1 : 0) : Number(value)) : value;
         if (_value !== e) {
           !v.includes(t.id) ? v.push(t.id) : debug(`\u27A4 ID["${t.id}"] already exists`);
           if (defCon.isPreview) {
@@ -3189,7 +3220,7 @@
         domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : defaultArray;
         const _data_search_ =
           domainValue.length > 6
-            ? `<p><input id="${defCon.id.seed}_d_s_" style="width:52%;font-size:12px!important;border:2px solid #777;border-radius:4px;margin:4px 4px 6px 0;padding:3px 15px"><button id="${defCon.id.seed}_d_s_s_" style="background-color:#efefef!important;color:#333!important;vertical-align:initial;padding:3px 10px;margin:0;cursor:pointer;font-size:12px!important;border:1px solid #777;border-radius:4px;">查 询</button><button id="${defCon.id.seed}_d_s_c_" style="background-color:#efefef!important;color:#333!important;vertical-align:initial;margin:0 0 0 4px;padding:3px 10px;cursor:pointer;font-size:12px!important;border:1px solid #777;border-radius:4px;">清 除</button></p>`
+            ? `<p style="display:flex;justify-content:left;align-items:center"><input id="${defCon.id.seed}_d_s_" style="box-sizing:content-box;width:50%;height:22px;font:normal 16px/1.5 monospace,sans-serif!important;border:2px solid #777;border-radius:4px;margin:4px 6px;padding:2px 15px"><button id="${defCon.id.seed}_d_s_s_" style="box-sizing:border-box;background-color:#efefef!important;color:#333!important;vertical-align:initial;padding:3px 10px;margin:0;cursor:pointer;font-size:12px!important;border:1px solid #777;border-radius:4px;min-width:60px;min-height:30px">查 询</button><button id="${defCon.id.seed}_d_s_c_" style="box-sizing:border-box;background-color:#efefef!important;color:#333!important;vertical-align:initial;margin:0 0 0 4px;padding:3px 10px;cursor:pointer;font-size:12px!important;border:1px solid #777;border-radius:4px;min-width:60px;min-height:30px">清 除</button></p>`
             : ``;
         for (let i = 0; i < domainValue.length; i++) {
           Contents += `<li id="${defCon.id.seed}_d_d_l_${i}" style="list-style:none;font-size:14px!important;font-style:normal;padding:5px;margin:0;color:#555">\
