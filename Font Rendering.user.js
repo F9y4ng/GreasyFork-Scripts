@@ -2033,7 +2033,7 @@
     let reFontFace = defautlFont;
     defCon.curFont = defautlFont;
 
-    getCurFont(CONST.fontFace, defCon.refont, defautlFont);
+    await getCurFont(CONST.fontFace, defCon.refont, defautlFont);
 
     if (curWindowtop) {
       if (defCon.siteIndex === undefined) {
@@ -2521,9 +2521,9 @@
           const inputFont = qS(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`);
           const ffaceT = qS(`#${defCon.id.fface}`);
           if (ffaceT && inputFont) {
-            getCurFont(CONST.fontFace, defCon.refont, defautlFont);
-            ffaceT.addEventListener("change", () => {
-              getCurFont(ffaceT.checked, defCon.refont, defautlFont);
+            await getCurFont(CONST.fontFace, defCon.refont, defautlFont);
+            ffaceT.addEventListener("change", async () => {
+              await getCurFont(ffaceT.checked, defCon.refont, defautlFont);
             });
           }
           if (inputFont) {
@@ -2713,7 +2713,7 @@
               fontExT.value = CONST.fontEx;
               setEffectIntoSubmit(fontExT.value, CONST.fontEx, defCon.vals, fontExT, submitButton);
               __preview__(defCon.preview);
-              getCurFont(ffaceT.checked, defCon.refont, defautlFont);
+              await getCurFont(ffaceT.checked, defCon.refont, defautlFont);
               autoZoomFontSize(`#${defCon.id.rndId}`, defCon.tZoom);
             }
             frDialog = null;
@@ -2789,7 +2789,7 @@
                 this.removeAttribute("style");
                 this.removeAttribute("v-Preview");
                 __preview__(defCon.isPreview, _tshadow, false);
-                getCurFont(fontface, _refont, defautlFont);
+                await getCurFont(fontface, _refont, defautlFont);
                 autoZoomFontSize(`#${defCon.id.rndId}`, fzoom);
               } catch (e) {
                 defCon.errors.push(`[submitPreview]: ${e}`);
