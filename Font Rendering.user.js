@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.10.31.1
+// @version           2021.10.31.2
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -2054,9 +2054,9 @@
           isFontsize ? "ON " : "OFF",
           isFontsize
             ? CONST.fontSize === 1
-              ? "\uff08\u7f29\u653e\u6bd4\u4f8b\uff1a\u7f51\u7ad9\u5b9a\u4e49\uff09"
-              : `\uff08\u7f29\u653e\u6bd4\u4f8b\uff1a${Number(CONST.fontSize * 100).toFixed(2) + "%"}\uff09`
-            : "\uff08\u7f29\u653e\u6bd4\u4f8b\uff1a\u6d4f\u89c8\u5668\u5b9a\u4e49\uff09",
+              ? "\u3000\u259a\u0020\u7f29\u653e\u6bd4\u4f8b\uff1a(WEBSITE DEFINED)"
+              : `\u3000\u259a\u0020\u7f29\u653e\u6bd4\u4f8b\uff1a${Number(CONST.fontSize * 100).toFixed(2) + "%"}`
+            : "\u3000\u259a\u0020\u7f29\u653e\u6bd4\u4f8b\uff1a(SYSTEM DEFINED)",
           isBackupFunction ? "ON " : "OFF",
           isPreview ? "ON " : "OFF",
           "line-height:180%;font-size:12px;color:teal",
