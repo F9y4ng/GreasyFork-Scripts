@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.10.30.2
+// @version           2021.10.31.1
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -1303,7 +1303,7 @@
         });
       },
 
-      cloze: (item, fontData) => {
+      cloze: async (item, fontData) => {
         ddRemove(item.parentNode);
         const value = item.parentNode.children[1].value;
         const sort = Number(item.parentNode.children[1].attributes.sort.value);
@@ -1317,6 +1317,9 @@
           const ffaceT = qS(`#${defCon.id.fface}`);
           const inputFont = qS(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`);
           if (ffaceT.checked) {
+            const cfl = await GMgetValue("_Custom_fontlist_");
+            const _cfl = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
+            fontCheck = unique([...fontCheck, ..._cfl]);
             fontCheck.forEach(item => {
               if (item.en === defCon.refont || convert2Unicode(item.ch) === defCon.refont) {
                 defCon.curFont = item.ch;
@@ -1510,7 +1513,7 @@
                   }
                 }
                 fontSet(`#${defCon.id.fontList} .${defCon.class.close}`).that.forEach(function (item) {
-                  item.onclick = function () {
+                  item.onclick = async function () {
                     ddRemove(this.parentNode);
                     const value = this.parentNode.children[1].value;
                     const sort = Number(item.parentNode.children[1].attributes.sort.value);
@@ -1524,6 +1527,9 @@
                       const ffaceT = qS(`#${defCon.id.fface}`);
                       const inputFont = qS(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`);
                       if (ffaceT.checked) {
+                        const cfl = await GMgetValue("_Custom_fontlist_");
+                        const _cfl = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
+                        fontCheck = unique([...fontCheck, ..._cfl]);
                         fontCheck.forEach(item => {
                           if (item.en === defCon.refont || convert2Unicode(item.ch) === defCon.refont) {
                             defCon.curFont = item.ch;
@@ -1651,7 +1657,7 @@
 
     /* get promise value */
 
-    let maxPersonalSites, isBackupFunction, isPreview, isFontsize, rebuild, curVersion, _config_data_, cfl;
+    let maxPersonalSites, isBackupFunction, isPreview, isFontsize, rebuild, curVersion, _config_data_;
     let configure = await GMgetValue("_configure_");
     if (!configure) {
       maxPersonalSites = 100;
@@ -1700,6 +1706,7 @@
           messageText: String(
             `<p><span style="font-weight:bold;font-size:22px;color:crimson">您好！</span>这是您首次使用新版 <strong>${defCon.scriptName}</strong> 版本号<span style="font-family:Candara;color:darkorange;font-size:18px!important;font-weight:900;font-style:italic">V${defCon.curVersion}</span>，如下是近期更新内容：</p>
             <p><ul>
+              <li style="color:burlywood">紧急修复字体列表及当前字体的bug.</li>
               <li>优化字体渲染样式，优化重置功能。</li>
               <li>重构滑块算法及样式，兼容更多网站。</li>
               <li>优化CSS样式兼容性，修正代码bugs，优化代码。</li>
@@ -2380,7 +2387,7 @@
       const fontAvailable = new Set();
       let ii = 1;
       if (fontReady) {
-        cfl = await GMgetValue("_Custom_fontlist_");
+        const cfl = await GMgetValue("_Custom_fontlist_");
         CONST.cfl = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
         fontCheck = unique([...fontCheck, ...CONST.cfl]);
         for (const font of fontCheck.values()) {
@@ -2431,7 +2438,7 @@
               fontSet(`#${defCon.id.fontList} .${defCon.class.fontList}`).fsearch(fontData);
               qS(`#${defCon.id.fonttooltip}`).addEventListener("dblclick", async () => {
                 let _Custom_fontlist_ = "";
-                cfl = await GMgetValue("_Custom_fontlist_");
+                const cfl = await GMgetValue("_Custom_fontlist_");
                 CONST.cfl = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
                 if (CONST.cfl.length && Array.isArray(CONST.cfl)) {
                   CONST.cfl.forEach(item => {
@@ -2954,11 +2961,14 @@
       }
     }
 
-    function getCurFont(_isfontface_, refont, def) {
+    async function getCurFont(_isfontface_, refont, def) {
       const inputFont = qS(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`);
       reFontFace = def;
       defCon.curFont = def;
       if (_isfontface_) {
+        const cfl = await GMgetValue("_Custom_fontlist_");
+        CONST.cfl = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
+        fontCheck = unique([...fontCheck, ...CONST.cfl]);
         fontCheck.forEach(item => {
           if (item.en === refont || convert2Unicode(item.ch) === refont) {
             defCon.curFont = refont.includes("\\") ? "" : " (" + item.en + ")";
