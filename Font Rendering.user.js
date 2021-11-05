@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.10.31.2
+// @version           2021.11.06.1
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -95,16 +95,18 @@
     decrypt: n => {
       return decodeURIComponent(window.atob(n));
     },
-    randString: (n, v, r, s = "") => {
+    randString: (n, v, s = "") => {
       const a = "0123456789";
       const b = "abcdefghijklmnopqrstuvwxyz";
       const c = b.toUpperCase();
-      n = Number.isFinite(n) ? n : 10;
-      r = v ? b + c : a + b + a + c;
+      const x = b + c;
+      const y = c + a + b;
+      const r = v ? x : y;
+      n = Number(n) ? n : 10;
       for (; n > 0; --n) {
         s += r[Math.floor(Math.random() * r.length)];
       }
-      return s;
+      return v ? s : x[Math.floor(Math.random() * x.length)].concat(s);
     },
     sqliteDB: (e, t, p, d = "", g = "", o = "") => {
       for (let i = 0; i < p.length; i += 1) {
@@ -195,9 +197,9 @@
     fontSize: defCon.randString(8, true),
     fontZoom: defCon.randString(6, true),
     zoomSize: defCon.randString(7, true),
-    strokeSize: defCon.randString(6, true),
+    strokeSize: defCon.randString(6, false),
     stroke: defCon.randString(7, true),
-    shadowSize: defCon.randString(6, true),
+    shadowSize: defCon.randString(6, false),
     shadow: defCon.randString(7, true),
     cps: defCon.randString(9, true),
     cpm: defCon.randString(9, true),
@@ -208,63 +210,64 @@
     cleaner: defCon.randString(7, true),
     fonttooltip: defCon.randString(7, true),
     fontName: defCon.randString(6, true),
-    cSwitch: defCon.randString(5, true),
-    eSwitch: defCon.randString(5, true),
+    cSwitch: defCon.randString(5, false),
+    eSwitch: defCon.randString(5, false),
     backup: defCon.randString(6, true),
-    files: defCon.randString(5, true),
-    tfiles: defCon.randString(5, true),
+    files: defCon.randString(5, false),
+    tfiles: defCon.randString(5, false),
     db: defCon.randString(12, true),
     bk: defCon.randString(7, true),
-    isbackup: defCon.randString(6, true),
+    isbackup: defCon.randString(6, false),
     pv: defCon.randString(7, true),
-    ispreview: defCon.randString(6, true),
+    ispreview: defCon.randString(6, false),
     fs: defCon.randString(7, true),
-    isfontsize: defCon.randString(6, true),
+    isfontsize: defCon.randString(6, false),
     mps: defCon.randString(7, true),
     maxps: defCon.randString(6, true),
     feedback: defCon.randString(6, true),
-    seed: defCon.randString(3, true),
+    seed: defCon.randString(4, false),
     fontTest: defCon.randString(16, true),
     flc: defCon.randString(6, true),
-    flcid: defCon.randString(5, true),
+    flcid: defCon.randString(5, false),
   };
   defCon.class = {
     rndClass: defCon.randString(10, true),
     rndStyle: defCon.randString(10, true),
-    guide: defCon.randString(5, true),
+    guide: defCon.randString(5, false),
     title: defCon.randString(7, true),
-    help: defCon.randString(5, true),
+    help: defCon.randString(5, false),
     rotation: defCon.randString(6, true),
     main: defCon.randString(7, true),
     fontList: defCon.randString(7, true),
-    label: defCon.randString(5, true),
-    placeholder: defCon.randString(5, true),
+    spanlabel: defCon.randString(5, false),
+    label: defCon.randString(5, false),
+    placeholder: defCon.randString(5, false),
     checkbox: defCon.randString(7, true),
     flex: defCon.randString(9, true),
     tooltip: defCon.randString(8, true),
     tooltiptext: defCon.randString(9, true),
-    ps1: defCon.randString(4, true),
-    ps2: defCon.randString(4, true),
-    ps3: defCon.randString(4, true),
-    ps4: defCon.randString(4, true),
+    ps1: defCon.randString(4, false),
+    ps2: defCon.randString(4, false),
+    ps3: defCon.randString(4, false),
+    ps4: defCon.randString(4, false),
     slider: defCon.randString(7, true),
     colorPicker: defCon.randString(8, true),
     colorPicker2: defCon.randString(8, true),
     readonly: defCon.randString(7, true),
     notreadonly: defCon.randString(7, true),
-    reset: defCon.randString(6, true),
-    cancel: defCon.randString(6, true),
-    submit: defCon.randString(6, true),
+    reset: defCon.randString(6, false),
+    cancel: defCon.randString(6, false),
+    submit: defCon.randString(6, false),
     selector: defCon.randString(9, true),
     selectFontId: defCon.randString(8, true),
     close: defCon.randString(6, true),
     cp: defCon.randString(10, true),
     cpcb: defCon.randString(6, true),
-    cpcw: defCon.randString(6, true),
+    cpcw: defCon.randString(6, false),
     cprbp: defCon.randString(7, true),
     cpg: defCon.randString(7, true),
     cpgc: defCon.randString(6, true),
-    cpgb: defCon.randString(6, true),
+    cpgb: defCon.randString(6, false),
     cpc: defCon.randString(7, true),
     cprb: defCon.randString(7, true),
     db: defCon.randString(10, true),
@@ -272,13 +275,13 @@
     dbb: defCon.randString(7, true),
     dbm: defCon.randString(7, true),
     dbt: defCon.randString(7, true),
-    dbbt: defCon.randString(6, true),
-    dbbf: defCon.randString(6, true),
-    dbbn: defCon.randString(6, true),
-    switch: defCon.randString(5, true),
-    anim: defCon.randString(5, true),
+    dbbt: defCon.randString(6, false),
+    dbbf: defCon.randString(6, false),
+    dbbn: defCon.randString(6, false),
+    switch: defCon.randString(5, false),
+    anim: defCon.randString(5, false),
     range: defCon.randString(11, true),
-    rangeProgress: defCon.randString(11, true),
+    rangeProgress: defCon.randString(10, false),
   };
 
   const defaultArray = [];
@@ -723,6 +726,20 @@
     };
   };
 
+  const toColordepth = (hex, s, t = "light") => {
+    hex = hex.toLowerCase() === "currentcolor" ? "FFFFFF" : hex.substring(1);
+    const { r, g, b } = hexToRgb(hex);
+    const tl = x => {
+      switch (t) {
+        case "dark":
+          return Math.floor(x * s);
+        default:
+          return x * s > 255 ? 255 : Math.floor(x * s);
+      }
+    };
+    return `#${rgbToHex({ r: tl(r), g: tl(g), b: tl(b) })}`;
+  };
+
   class ColorPicker {
     constructor({ dom = cE("div"), value = "FFF", def = "FFF" } = {}) {
       this.dom = dom;
@@ -810,7 +827,6 @@
         mouseMoveFunBar(e);
         window.addEventListener("mousemove", mouseMoveFunBar);
       });
-
       if ("ontouchstart" in window) {
         const touchFun = e => {
           e.preventDefault();
@@ -836,7 +852,6 @@
         this._rightBar.addEventListener("touchmove", touchFunBar, supportsPassive ? { passive: true } : false);
         this._rightBar.addEventListener("touchstart", touchFunBar, supportsPassive ? { passive: true } : false);
       }
-
       this._changeFunctions = defaultArray;
     }
     onchange() {
@@ -848,7 +863,6 @@
         });
       });
     }
-
     addEventListener(type, fun) {
       if (typeof fun !== "function") {
         return;
@@ -860,7 +874,6 @@
         }
       }
     }
-
     getValue(mode = "value") {
       switch (mode) {
         case "hex": {
@@ -958,7 +971,6 @@
       }
       this._lastValue = this.value;
     }
-
     getDOM() {
       return this.dom;
     }
@@ -1174,21 +1186,14 @@
     { ch: "更紗黑體 TC", en: "Sarasa Gothic TC" },
     { ch: "冬青黑体简", en: "Hiragino Sans GB" },
     { ch: "兰亭黑-简", en: "Lantinghei SC" },
-    { ch: "小米兰亭", en: "MI Lanting" },
     { ch: "OPPOSans", en: "OPPOSans" },
     { ch: "霞鹜文楷", en: "LXGW WenKai" },
     { ch: "鸿蒙黑体", en: "HarmonyOS Sans SC" },
     { ch: "浪漫雅圆", en: "LMYY" },
     { ch: "思源黑体", en: "Source Han Sans SC" },
     { ch: "思源宋体", en: "Source Han Serif SC" },
-    { ch: "思源柔黑体", en: "Gen Jyuu Gothic" },
-    { ch: "思源真黑体", en: "Gen Shin Gothic" },
     { ch: "汉仪旗黑", en: "HYQiHei" },
     { ch: "文泉驿微米黑", en: "WenQuanYi Micro Hei" },
-    { ch: "文泉驿正黑", en: "WenQuanYi Zen Hei" },
-    { ch: "方正悠黑简体 508R", en: "FZYouHeiS 508R" },
-    { ch: "方正兰亭刊宋", en: "FZLanTingKanSongS" },
-    { ch: "方正准圆_GBK", en: "FZZhunYuan-M02" },
     { ch: "方正舒体", en: "FZShuTi" },
     { ch: "方正姚体", en: "FZYaoti" },
     { ch: "华文仿宋", en: "STFangsong" },
@@ -1204,9 +1209,6 @@
     { ch: "娃娃体-简", en: "Wawati SC" },
     { ch: "雅痞-简", en: "Yapi SC" },
     { ch: "圆体-简", en: "Yuanti SC" },
-    { ch: "筑紫a丸", en: "Droid Sans Fallback" },
-    { ch: "字悦班马宋刻本", en: "ziyuebanmasongkeben" },
-    { ch: "剔骨仿宋", en: "tkFangSong" },
     { ch: "手书体", en: "ShouShuti" },
     { ch: "幼圆", en: "YouYuan" },
   ]);
@@ -1234,9 +1236,6 @@
           error("\u27A4 isSupportFontFamily:", e);
         }
       }
-
-      debug("\u27A4 offset:", defaultWidth, defaultHeight);
-
       const detect = font => {
         let detected = false;
         try {
@@ -1249,7 +1248,13 @@
             h.removeChild(s);
             detected = detected || matched;
             if (detected) {
-              debug("\u27A4 detect:", font, _offsetWidth, defaultWidth[baseFonts[index]], _offsetHeight, defaultHeight[baseFonts[index]]);
+              debug("\u27A4 detect:", {
+                font: font,
+                width: _offsetWidth,
+                defwidth: defaultWidth[baseFonts[index]],
+                height: _offsetHeight,
+                defheihgt: defaultHeight[baseFonts[index]],
+              });
               break;
             }
           }
@@ -1258,7 +1263,6 @@
         }
         return detected;
       };
-
       this.detect = detect;
     }
   }
@@ -1318,8 +1322,8 @@
           const inputFont = qS(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`);
           if (ffaceT.checked) {
             const cfl = await GMgetValue("_Custom_fontlist_");
-            const _cfl = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
-            fontCheck = unique([...fontCheck, ..._cfl]);
+            const cusFontList = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
+            fontCheck = unique([...fontCheck, ...cusFontList]);
             fontCheck.forEach(item => {
               if (item.en === defCon.refont || convert2Unicode(item.ch) === defCon.refont) {
                 defCon.curFont = item.ch;
@@ -1393,21 +1397,22 @@
       fsearch: fontData => {
         const html = String(
           `<div id="${defCon.id.selector}">
-            <span class="label">已选择字体：<span id="${defCon.id.cleaner}">[清空]</span></span>
+            <span class="${defCon.class.spanlabel}">已选择字体：<span id="${defCon.id.cleaner}">[清空]</span></span>
             <div class="${defCon.class.selector}"></div>
           </div>
           <div class="${defCon.class.selectFontId}">
-            <span class="label">设置字体，请选择：</span>
+            <span class="${defCon.class.spanlabel}">设置字体，请选择：</span>
             <input type="search" placeholder="输入关键字可检索字体" autocomplete="off" class="${defCon.class.placeholder}">
             <dl style="display:none"></dl>
-            <span title="\u53cc\u51fb\u6211\u8bd5\u8bd5\u770b" class="${defCon.class.tooltip} ${defCon.class.ps1}" id="${defCon.id.fonttooltip}">
+            <span title="单击查看帮助" class="${defCon.class.tooltip} ${defCon.class.ps1}" id="${defCon.id.fonttooltip}">
               <span>\ud83d\udd14</span>
               <span class="${defCon.class.tooltip} ${defCon.class.ps2}">
-              <p><strong>温馨提示 </strong>脚本预载了多种常用的、好看的中文字体，下拉菜单中所罗列的字体是您系统中已安装过的字体，没有安装过则不会显示。</p>
+              <p><strong>温馨提示 </strong>脚本预载了常用的中文字体，下拉菜单中所罗列的字体是在代码字体表中您已安装过的字体，没有安装过则不会显示。</p>
               <p><em style="color:darkred">（注一）</em>如果没有重新选择字体，则使用上一次保存的字体。首次使用默认为微软雅黑字体。</p>
               <p><em style="color:darkred">（注二）</em>输入框可输入关键字进行搜索，支持中文和英文字体名。</p>
               <p><em style="color:darkred">（注三）</em>字体是按您选择的先后顺序进行优先渲染的，所以多选不如只选一个您最想要的。</p>
-              <p><em style="color:darkred">（注四）</em>如果字体重写功能被关闭，那么该字体替换功能将自动禁用，网页字体将采用“网站默认”的字体设置。</p>
+              <p><em style="color:darkred">（注四）</em>如果“字体重写”被关闭，那么本功能将自动禁用，网页字体将采用“网站默认”的字体设置。</p>
+              <p><em style="color:darkred">（注五）</em>双击我可以打开自定义字体的添加工具，以使用更多新字体。</p>
               </span>
             </span>
           </div>`
@@ -1431,24 +1436,10 @@
             changeSelectorStatus(ffaceT.checked, fselectorT, `${defCon.class.readonly}`);
           });
         }
-
-        function changeSelectorStatus(inputCheckedStatus, f, css) {
-          if (inputCheckedStatus) {
-            f.removeAttribute("disabled");
-            f.classList.remove(css);
-          } else {
-            fontSet().fdeleteList(fontData);
-            f.setAttribute("disabled", "disabled");
-            f.classList.add(css);
-          }
-        }
-
         fontSet(`#${defCon.id.selector}`).that[0].style.cssText += "display:none;";
-
         fselectorT.oninput = function () {
           searchEvent(this.value);
         };
-
         fselectorT.onclick = function (e) {
           if (this.value.length === 0) {
             const dlshow = fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`);
@@ -1471,6 +1462,17 @@
             e.stopPropagation();
           }
         };
+
+        function changeSelectorStatus(inputCheckedStatus, f, css) {
+          if (inputCheckedStatus) {
+            f.removeAttribute("disabled");
+            f.classList.remove(css);
+          } else {
+            fontSet().fdeleteList(fontData);
+            f.setAttribute("disabled", "disabled");
+            f.classList.add(css);
+          }
+        }
 
         function searchEvent(t) {
           const dlshow = fontSet(`#${defCon.id.fontList} .${defCon.class.selectFontId} dl`);
@@ -1528,8 +1530,8 @@
                       const inputFont = qS(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`);
                       if (ffaceT.checked) {
                         const cfl = await GMgetValue("_Custom_fontlist_");
-                        const _cfl = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
-                        fontCheck = unique([...fontCheck, ..._cfl]);
+                        const cusFontList = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
+                        fontCheck = unique([...fontCheck, ...cusFontList]);
                         fontCheck.forEach(item => {
                           if (item.en === defCon.refont || convert2Unicode(item.ch) === defCon.refont) {
                             defCon.curFont = item.ch;
@@ -1607,9 +1609,9 @@
     fontFace: true,
     fontSmooth: true,
     fontSize: 1.0,
-    fontStroke: 0.0,
-    fontShadow: 1.5,
-    shadowColor: "#7B7B7B",
+    fontStroke: getBrowser.type("core").Gecko ? 0.04 : 0.0,
+    fontShadow: getBrowser.type("core").Gecko ? 1.0 : 1.5,
+    shadowColor: getBrowser.type("core").Gecko ? "#8E8E8E" : "#7B7B7B",
     fontCSS: `:not(i):not(.fa):not([class*='icon']):not([class*='logo']):not([class*='code'])`,
     fontEx: `input,select,button,textarea,kbd,pre,pre *,code,code *`,
   };
@@ -1683,7 +1685,7 @@
 
     const bool = true;
     const res = Boolean(rebuild);
-    if (curWindowtop && (res === bool || rebuild === undefined)) {
+    if (curWindowtop && res === bool && rebuild !== undefined) {
       GMdeleteValue("_fonts_set_");
       GMdeleteValue("_Exclude_site_");
       GMdeleteValue("_domains_fonts_set_");
@@ -1691,9 +1693,13 @@
       _config_data_.rebuild = !bool;
       _config_data_.curVersion = undefined;
       GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
-      debug("\u27A4 %cData has been rebuilt", "background-color:red;color:snow");
+      debug("\u27A4 %cData has been rebuilt: %s", "font-style:italic;background-color:red;color:snow", res === bool);
+    } else if (rebuild === undefined) {
+      _config_data_.rebuild = !bool;
+      GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
+      debug(`\u27A4 %c${!curVersion ? "Configdata is undefined, rebuilding!" : "Data has been restored!"}`, `font-style:italic;color:${!curVersion ? "crimson" : "dodgerblue"}`);
     } else {
-      debug("\u27A4 %cGood data status: %s", "color:green", curVersion === defCon.curVersion);
+      debug("\u27A4 %cGood data status: %s", "font-style:italic;color:green", curVersion === defCon.curVersion);
     }
 
     /* DialogBox for the first visit after upgrading */
@@ -1704,21 +1710,23 @@
           trueButtonText: "好，去看看",
           falseButtonText: "不，算了吧",
           messageText: String(
-            `<p><span style="font-weight:bold;font-size:22px;color:crimson">您好！</span>这是您首次使用新版 <strong>${defCon.scriptName}</strong> 版本号<span style="font-family:Candara;color:darkorange;font-size:18px!important;font-weight:900;font-style:italic">V${defCon.curVersion}</span>，如下是近期更新内容：</p>
-            <p><ul>
-              <li style="color:burlywood">紧急修复字体列表及当前字体的bug.</li>
-              <li>优化字体渲染样式，优化重置功能。</li>
-              <li>重构滑块算法及样式，兼容更多网站。</li>
-              <li>优化CSS样式兼容性，修正代码bugs，优化代码。</li>
+            `<p><span style="font-style:italic;font-weight:bold;font-size:22px;color:tomato">您好！</span>这是您首次使用<strong style="padding:0 2px;font-style:italic">${defCon.scriptName}</strong>的新版本<span style="padding:0 2px;color:tomato;font:italic 900 18px/140% Candara,Airal">V${defCon.curVersion}</span>，近期更新内容：</p>
+            <p><ul id="${defCon.id.seed}_update">
+              <li class="${defCon.id.seed}_new">新增自定义字体添加辅助工具，优化输入格式的兼容性。</li>
+              <li class="${defCon.id.seed}_fix">优化脚本配置页面样式，修正CSSbugs，兼容更多网站。</li>
+              <li class="${defCon.id.seed}_fix">优化精简既定字体表，优化字体渲染效果。</li>
+              <li class="${defCon.id.seed}_fix">修正其他bugs，优化代码。</li>
+              <li class="${defCon.id.seed}_wng">由于渲染效果优化，建议您重新配置以获得最佳效果。</li>
             </ul></p>
-            <p>强烈建议您看看<span style="color:crimson">最新的帮助文档</span>，要去看一下吗？</p>`
+            <p>建议您先看看 <strong style="color:tomato">新版帮助文档</strong> ，去看一下吗？</p>`
           ).trim(),
           titleText: "温馨提示",
         });
         _config_data_.curVersion = defCon.curVersion;
         GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
+        debug("\u27A4 %cThe script has been upgraded to V%s", "font-style:italic;background-color:yellow;color:crimson", defCon.curVersion);
         if (await frDialog.respond()) {
-          GMopenInTab(guideURI, defCon.options);
+          GMopenInTab(defCon.decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkY0MTY2ODglMjN1cGRhdGU="), defCon.options);
         }
         frDialog = null;
       }
@@ -1813,7 +1821,6 @@
         CONST.fontEx = filterHtml(fontValue.fontEx);
       }
     }
-
     defCon.tZoom = CONST.fontSize;
 
     /* Operation of CSS value */
@@ -1822,7 +1829,7 @@
     const shadow_r = parseFloat(CONST.fontShadow);
     const shadow_c = CONST.shadowColor;
     if (!isNaN(shadow_r) && shadow_r > 0 && shadow_r <= 8) {
-      shadow = `text-shadow:0 0 ${shadow_r}px ${shadow_c},0 0 ${shadow_r / 2}px ${shadow_c};`;
+      shadow = `text-shadow:0 0 ${shadow_r * 1.25}px ${toColordepth(shadow_c, 1.5)},0 0 ${shadow_r}px ${shadow_c},0 0 ${shadow_r / 4}px ${toColordepth(shadow_c, 0.975, "dark")};`;
     }
     let stroke = "";
     const stroke_r = parseFloat(CONST.fontStroke);
@@ -1841,9 +1848,10 @@
         : getBrowser.type("core").Gecko
         ? "-moz-text-size-adjust:none;"
         : "";
-      smoothing = `font-feature-settings:"liga" 0;font-variant:no-common-ligatures proportional-nums;font-optical-sizing:auto;font-stretch:normal;font-kerning:auto;${kernel_define}text-rendering:optimizeLegibility!important;`;
+      smoothing = String(
+        `font-feature-settings:"liga" 0;font-variant:no-common-ligatures proportional-nums;font-optical-sizing:auto;font-stretch:normal;font-kerning:auto;${kernel_define}text-rendering:optimizeLegibility!important;`
+      );
     }
-
     let bodyZoom = "";
     if (CONST.fontSize >= 0.8 && CONST.fontSize <= 1.5 && isFontsize && CONST.fontSize !== 1) {
       bodyZoom = String(
@@ -1856,7 +1864,6 @@
           `}`
       ).trim();
     }
-
     const prefont = CONST.fontSelect.split(",")[0];
     const refont = prefont ? prefont.replace(/"|'/g, "") : "";
     let fontfamily = "";
@@ -1864,44 +1871,69 @@
     const fontface_i = CONST.fontFace;
     if (fontface_i) {
       fontfamily = `font-family:${CONST.fontSelect};`;
-      fontfaces =
-        refont !== ""
-          ? `@font-face{font-family:"宋体";src:local("${refont}")}@font-face{font-family:"SimSun";src:local("${refont}")}@font-face{font-family:"新宋体";src:local("${refont}")}@font-face{font-family:"NSimSun";src:local("${refont}")}@font-face{font-family:"黑体";src:local("${refont}")}@font-face{font-family:"SimHei";src:local("${refont}")}@font-face{font-family:"Microsoft YaHei UI";src:local("${refont}")}@font-face{font-family:"Microsoft JhengHei UI";src:local("${refont}")}@font-face{font-family:"MingLiU";src:local("${refont}")}@font-face{font-family:"MingLiU-ExtB";src:local("${refont}")}@font-face{font-family:"PMingLiU";src:local("${refont}")}@font-face{font-family:"PMingLiU-ExtB";src:local("${refont}")}@font-face{font-family:Arial;src:local("${refont}")}@font-face{font-family:"Georgia";src:local("${refont}")}@font-face{font-family:"MS Gothic";src:local("${refont}")}@font-face{font-family:"MS PGothic";src:local("${refont}")}@font-face{font-family:"MS UI Gothic";src:local("${refont}")}@font-face{font-family:"Yu Gothic";src:local("${refont}")}@font-face{font-family:"Yu Gothic UI";src:local("${refont}")}@font-face{font-family:"Malgun Gothic";src:local("${refont}")}`
-          : "";
+      fontfaces = refont.length
+        ? String(
+            `@font-face{font-family:"宋体";src:local("${refont}")}@font-face{font-family:"SimSun";src:local("${refont}")}@font-face{font-family:"新宋体";src:local("${refont}")}@font-face{font-family:"NSimSun";src:local("${refont}")}@font-face{font-family:"黑体";src:local("${refont}")}@font-face{font-family:"SimHei";src:local("${refont}")}@font-face{font-family:"Microsoft YaHei UI";src:local("${refont}")}@font-face{font-family:"Microsoft JhengHei UI";src:local("${refont}")}@font-face{font-family:"MingLiU";src:local("${refont}")}@font-face{font-family:"MingLiU-ExtB";src:local("${refont}")}@font-face{font-family:"PMingLiU";src:local("${refont}")}@font-face{font-family:"PMingLiU-ExtB";src:local("${refont}")}@font-face{font-family:Arial;src:local("${refont}")}@font-face{font-family:"Georgia";src:local("${refont}")}@font-face{font-family:"MS Gothic";src:local("${refont}")}@font-face{font-family:"MS PGothic";src:local("${refont}")}@font-face{font-family:"MS UI Gothic";src:local("${refont}")}@font-face{font-family:"Yu Gothic";src:local("${refont}")}@font-face{font-family:"Yu Gothic UI";src:local("${refont}")}@font-face{font-family:"Malgun Gothic";src:local("${refont}")}`
+          )
+        : ``;
     }
-
     let exclude = "";
     let codeFont = "";
     const cssexlude = CONST.fontEx;
     if (cssexlude) {
       exclude = `${cssexlude}{-webkit-text-stroke:initial!important;text-shadow:initial!important}`;
-      if (cssexlude.includes("pre") || cssexlude.includes("code")) {
-        const pre = cssexlude.includes("pre") ? ["pre", "pre *"] : [];
-        const code = cssexlude.includes("code") ? ["code", "code *"] : [];
+      if (cssexlude.search(/\bpre\b|\bcode\b/gi) !== -1) {
+        const pre = cssexlude.search(/\bpre\b/gi) > -1 ? ["pre", "pre *"] : [];
+        const code = cssexlude.search(/\bcode\b/gi) > -1 ? ["code", "code *"] : [];
         const precode = pre.concat(code);
         codeFont = `${precode.toString()}{font:normal 400 14px/150% 'Operator Mono Lig','Fira Code','Roboto Mono',Monaco,monospace,Consolas!important;font-feature-settings:"liga" 0,"zero"!important;}`;
       }
     }
-
-    const fontTest = `body span.${defCon.id.seed}_fontTest{font-stretch:normal!important;font-weight:normal!important;line-height:initial!important;text-align:left!important;font-style:normal!important;text-decoration:none!important;letter-spacing:normal!important;word-wrap:normal!important;text-indent:initial!important}body #${defCon.id.fontTest}{margin:0!important;padding:0!important;width:max-content!important;height:max-content!important;text-shadow:none!important;-webkit-text-stroke:initial!important;-webkit-text-size-adjust:none!important;-moz-text-size-adjust:none!important}`;
-
+    const fontTest = String(
+      `body span.${defCon.id.seed}_fontTest{font-stretch:normal!important;font-weight:normal!important;line-height:initial!important;text-align:left!important;font-style:normal!important;text-decoration:none!important;letter-spacing:normal!important;word-wrap:normal!important;text-indent:initial!important}body #${defCon.id.fontTest}{margin:0!important;padding:0!important;width:max-content!important;height:max-content!important;text-shadow:none!important;-webkit-text-stroke:initial!important;-webkit-text-size-adjust:none!important;-moz-text-size-adjust:none!important}`
+    );
     const cssfun = CONST.fontCSS;
     let tshadow = "";
     if (defCon.siteIndex === undefined) {
       tshadow = `${bodyZoom}${codeFont}${selection}${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontfaces}${exclude}${fontTest}`;
     }
+    const fontStyle_db = String(
+      `#${defCon.id.dialogbox}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999992}#${defCon.id.dialogbox} .${defCon.class.db}{box-sizing:content-box;max-width:420px;color:#444;border:2px solid #efefef}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:200px;right:15px;border-radius:6px;width:100%;background:#fff;-webkit-box-shadow:0 0 10px 0 rgba(0,0,0,.3);box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #7b7b7b!important}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:100%}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:500;text-align:left}.${defCon.class.dbb}{display:inline-block;margin:0 1%;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;cursor:pointer;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important;box-sizing:content-box}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important;user-select:none}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223!important;color:#fff!important;border:1px solid #d93223!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a!important;color:#fff!important;border:1px solid #038c5a!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777!important;color:#fff!important;border:1px solid #777!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}` +
+        `.${defCon.class.dbm} button:hover{cursor:pointer;background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important}.${defCon.class.dbm} p{line-height:1.5!important;margin:5px 0!important;text-indent:0!important;font-size:16px!important;font-weight:400;text-align:left;user-select:none}.${defCon.class.dbm} ul{list-style:none;margin:5px 0 0 15px!important;padding:2px;font:italic 14px/140% "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;color:grey}.${defCon.class.dbm} ul li{display:list-item;list-style-type:none;user-select:none}.${defCon.class.dbm} li:before{display:none}.${defCon.class.dbm} #${defCon.id.bk},.${defCon.class.dbm} #${defCon.id.pv},.${defCon.class.dbm} #${defCon.id.fs},.${defCon.class.dbm} #${defCon.id.mps},.${defCon.class.dbm} #${defCon.id.flc}{box-sizing:content-box;list-style:none;font-style:normal;display:flex;justify-content:space-between;align-items:flex-start;margin:0;padding:2px 4px!important;width:calc(95% - 10px);min-width:auto;height:40px;min-height:40px}.${defCon.class.dbm} #${defCon.id.bk} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.pv} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.fs} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.mps} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.flc} .${defCon.id.seed}_VIP{margin:2px 0 0 0;color:darkgoldenrod!important;font:normal 16px/140% "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${defCon.class.dbm} #${defCon.id.flc} button{background-color:#eee;color:#444!important;font-weight:normal;border:1px solid #999;font-size:14px!important;border-radius:4px}.${defCon.class.dbm} #${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}.${defCon.class.dbm} #${defCon.id.files}{display:none}.${defCon.class.dbm} #${defCon.id.feedback}:hover{color:crimson!important}.${defCon.class.dbm} #${defCon.id.feedback}:after{width:0;height:0;content:"";background:url('${loadingIMG}') no-repeat -400px -300px}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#555!important}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#aaa!important}` +
+        `.${defCon.class.dbm} #${defCon.id.seed}_update li{font-style:italic!important;font-family:Consolas,'Microsoft YaHei'!important}.${defCon.class.dbm} .${defCon.id.seed}_new:before{content:"+";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_fix:before{content:"@";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_wng{color:burlywood}.${defCon.class.dbm} .${defCon.id.seed}_wng:before{content:"!";display:inline;margin:0 4px 0 -10px}`
+    );
+    const fontStyle_container = String(
+      `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;border-radius:12px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 20px);z-index:999999;padding:4px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.container} *{line-height:1.5!important;font-size:16px;font-weight:700;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;text-shadow:initial!important;-webkit-text-stroke:initial!important}` +
+        `#${defCon.id.container} fieldset{border:2px groove #67a5df!important;border-radius:10px;padding:4px 6px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:475px}#${defCon.id.container} legend{line-height:20px;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;background:#f0f6ff!important;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{display:inherit;list-style:none;margin:3px 0;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default;min-width:-moz-available;min-width:-webkit-fill-available;user-select:none}#${defCon.id.container} ul li:before{display:none}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden;}#${defCon.id.container} .${defCon.class.help}:hover{cursor:help}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{padding:0;margin:0;width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50%;-webkit-transform:rotate(360deg);-webkit-animation:rotation 5s linear infinite;-o-animation:rotation 5s linear infinite;animation:rotation 5s linear infinite}` +
+        `#${defCon.id.fontList}{padding:2px 10px 0 6px;min-height:75px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex!important;align-items:center;justify-content:space-between}#${defCon.id.fontSize}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.shadowColor}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;padding:2px 10px;min-height:45px;margin:4px;width:auto}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${defCon.id.submit}{padding:2px 10px;height:40px}` +
+        `#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;color:#111;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${defCon.id.fontList} .${defCon.class.label} span{color:#fff;font-size:16px!important;font-weight:400;height:max-content;width:max-content;min-width:12px;max-width:205px;padding:5px;background:#67a5df;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap}#${defCon.id.fontList} .${defCon.class.close}{width:12px}#${defCon.id.fontList} .${defCon.class.close}:hover{color:tomato;background-color:#2D7DCA;border-radius:2px}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-x:hidden;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:6px 6px 0 6px;margin:0 0 6px 0;width:calc(100%);min-width:calc(100% - 14px);max-width:fit-content;max-width:-moz-min-content;max-height:80px;min-height:40px;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selectFontId} span.${defCon.class.spanlabel},#${defCon.id.selector} span.${defCon.class.spanlabel}{margin:0!important;width:auto;display:block!important;padding:0 0 4px 0;color:#333;border:0;text-align:left!important;background-color:transparent!important}` +
+        `#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} input{text-overflow:ellipsis;overflow:hidden;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:1px 15px!important;margin:0;width:calc(100% - 32px);max-width:calc(100% - 32px);min-width:calc(100% - 32px);height:36px!important;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:16px!important;font-weight:700;text-indent:0;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font:normal 700 16px/1.5 "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font:normal 700 16px/1.5 "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:4px 0 0 0;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:4px 8px;width:auto;min-width:calc(60%);max-width:calc(100% - 72px);max-height:298px;font-size:18px!important;white-space:nowrap;background-color:#fff;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;margin:1px 8px;padding:5px 0;font-weight:400;font-size:21px!important;min-width:100%;max-width:100%;width:-moz-available;width:-webkit-fill-available;}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff}` +
+        `.${defCon.class.checkbox}{display:none!important}.${defCon.class.checkbox}+label{cursor:pointer;padding:0;margin:0;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:76px;height:32px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;box-sizing:content-box}.${defCon.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${defCon.class.checkbox}+label::after{position:absolute;top:0;left:28px;border-radius:100px;padding:5px;font-size:16px;font-weight:700;font-style:normal;color:#fff;content:"OFF"}.${defCon.class.checkbox}:checked+label{cursor:pointer;margin:0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.${defCon.class.checkbox}:checked+label::after{content:"ON";left:10px}.${defCon.class.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px}#${defCon.id.fface} label,#${defCon.id.fface}+label::after,#${defCon.id.fface}+label::before,#${defCon.id.smooth} label,#${defCon.id.smooth}+label::after,#${defCon.id.smooth}+label::before{-webkit-transition:all .3s ease-in;transition:all .3s ease-in}` +
+        `#${defCon.id.fontShadow} div.${defCon.class.flex}:before,#${defCon.id.fontShadow} div.${defCon.class.flex}:after,#${defCon.id.fontStroke} div.${defCon.class.flex}:before,#${defCon.id.fontStroke} div.${defCon.class.flex}:after,#${defCon.id.fontSize} div.${defCon.class.flex}:before,#${defCon.id.fontSize} div.${defCon.class.flex}:after{display:none}#${defCon.id.fontShadow} #${defCon.id.shadowSize},#${defCon.id.fontStroke} #${defCon.id.strokeSize},#${defCon.id.fontSize} #${defCon.id.fontZoom}{color:#111!important;width:56px!important;text-indent:0;margin:0 10px 0 0!important;height:32px!important;font-size:17px!important;font-weight:400!important;font-family:Impact,Times,serif!important;border:#67a5df 2px solid!important;border-radius:4px;text-align:center;box-sizing:content-box;padding:0;background:#fafafa!important}.${defCon.class.flex}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;width:auto;min-width:100%}.${defCon.class.slider} input{visibility:hidden}` +
+        `#${defCon.id.shadowColor} *{box-sizing:content-box}#${defCon.id.cps}{margin:0}#${defCon.id.shadowColor} .${defCon.class.colorPicker}{width:32px;height:30px;cursor:pointer;position:relative;border:2px solid #181a25;border-radius:4px;}#${defCon.id.shadowColor} .${defCon.class.colorPicker2}{width:auto;margin:0 0 0 5px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2} #${defCon.id.color}{width:123px!important;height:32px!important;text-indent:0;font-size:18px!important;font-weight:400!important;background:#fafafa;box-sizing:content-box;font-family:Impact,Times,serif!important;color:#333!important;border:#67a5df 2px solid!important;border-radius:4px;padding:0;margin:0;text-align:center}` +
+        `#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{font:bold 14px/140% "Roboto Mono",Monaco,"Courier New",sans-serif!important;min-width:248px;max-width:calc(100% - 15px);width:calc(100% - 15px)!important;height:60px;min-height:60px;line-height:140%;resize:none;border:2px solid #67a5df!important;border-radius:6px;box-sizing:content-box;padding:5px;color:#0b5b9c!important;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px rgba(0,0,0,.2);border-radius:10px;background:#ededed}#${defCon.id.fontEx} textarea{background:#fafafa!important}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}.${defCon.class.switch}{box-sizing:content-box;display:inline-block;float:right;margin-right:4px;padding:0 6px;border:2px double #67a5df;color:#0a68c1;border-radius:4px}#${defCon.id.cSwitch}:hover,#${defCon.id.eSwitch}:hover{cursor:pointer;user-select:none}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent)!important;background-size:50px 50px;background-color:#f7fff7!important}` +
+        `#${defCon.id.submit} button{box-sizing:border-box;background-image:initial;background-color:#67a5df;color:#fff!important;margin:0;padding:5px 10px;cursor:pointer;border:2px solid #6ba7e0;border-radius:6px;width:auto;min-width:min-content;min-height:35px;font:normal 600 14px/1.5 "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${defCon.id.submit} button:hover{box-shadow:0 0 5px rgba(0,0,0,.4)!important}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.submit} #${defCon.id.backup}{margin:0 10px 0 0;display:none}.${defCon.class.anim}{-webkit-animation:jiggle 1.8s ease-in infinite;animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}`
+    );
+    const fontStyle_cp = String(
+      `#${defCon.id.cpm}{width:240px;height:216px;margin:calc(-90%) 0 0 2px;z-index:999;position:fixed;display:none;box-sizing:content-box;background-color:#d1f2fb;padding:10px;box-shadow:0 0 10px #000;border-radius:6px}.${defCon.class.cp},.${defCon.class.cp} *,.${defCon.class.cp} ::after,.${defCon.class.cp} ::before{border:0;margin:0;padding:0;display:block;box-sizing:border-box}.${defCon.class.cp}{background-color:#fff;display:block;min-width:128px;min-height:128px;position:relative}.${defCon.class.cp}>.${defCon.class.cprb}{border:solid #000 1px;background:linear-gradient(red,#f0f,#00f,#0ff,#0f0,#ff0,red);width:16px;height:calc(100% - 26px);position:absolute;right:12px;top:12px}.${defCon.class.cp} .${defCon.class.cprbp}{position:absolute;width:100%;height:1px}.${defCon.class.cp} .${defCon.class.cprbp}::after,.${defCon.class.cp} .${defCon.class.cprbp}::before{content:"";width:10px;height:7px;position:absolute;background:0 0;border:solid transparent 5px;border-width:3.5px 5px;top:-3px}.${defCon.class.cp} .${defCon.class.cprbp}::before{border-left:solid #404040 5px;left:-6px}.${defCon.class.cp} .${defCon.class.cprbp}::after{border-right:solid #404040 5px;right:-6px}.${defCon.class.cp}>.${defCon.class.cpg}{position:absolute;width:calc(100% - 50px);height:calc(100% - 26px);border:solid #000 1px;left:12px;top:12px}.${defCon.class.cp}>.${defCon.class.cpg},.${defCon.class.cp}>.${defCon.class.cpg} *{cursor:crosshair;box-sizing:content-box}.${defCon.class.cp}>.${defCon.class.cpgb}{background:linear-gradient(rgba(0,0,0,0),#000)}.${defCon.class.cp}>.${defCon.class.cp}-color-block{position:absolute;border:solid #000 1px;background:#fff;width:calc(100% - 104px);max-width:72px;height:18px;left:12px;bottom:8px}.${defCon.class.cp} .${defCon.class.cpc}{background-color:transparent;position:absolute}.${defCon.class.cp} .${defCon.class.cpc}::before{border-radius:50%;width:11px;height:11px;border:solid #000 1px;background-color:transparent;position:relative;left:-6px;top:-6px;display:block;content:""}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcb}::before{border-color:#000}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcw}::before{border-color:#fff}`
+    );
+    const fontStyle_tooltip = String(
+      `.${defCon.class.tooltip}{position:relative;cursor:help;user-select:none}.${defCon.class.tooltip}:active .${defCon.class.tooltip}{display:block}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;box-sizing:content-box;position:absolute;z-index:999999;border:2px solid #b8c4ce;border-radius:6px;padding:10px;width:250px;max-width:250px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:14px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} em{font-style:normal!important}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:140%;text-indent:0!important}.${defCon.class.ps1}{position:relative;top:-33px;height:0;width:24px;margin:0;padding:0;right:8px;float:right}.${defCon.class.ps2}{top:35px;right:-14px}.${defCon.class.ps3}{top:-197px;margin-left:-5px}.${defCon.class.ps4}{top:-175px;margin-left:-5px}`
+    );
+    const fontStyle_Progress = String(
+      `.${defCon.class.range}{--primary-color:#67a5df;--value-offset-y:var(--ticks-gap);--value-active-color:white;--value-background:transparent;--value-background-hover:var(--primary-color);--value-font:italic bold 14px/14px monospace,arial;--fill-color:var(--primary-color);--progress-background:rgb(223, 223, 223);--progress-radius:20px;--show-min-max:none;--track-height:calc(var(--thumb-size) / 2);--min-max-font:12px arial;--min-max-opacity:0.5;--min-max-x-offset:10%;--thumb-size:22px;--thumb-color:white;--thumb-shadow:0 0 3px rgba(0, 0, 0, 0.4),0 0 1px rgba(0, 0, 0, 0.5) inset,0 0 0 99px var(--thumb-color) inset;--thumb-shadow-active:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px var(--primary-color) inset,0 0 3px rgba(0, 0, 0, 0.4);--thumb-shadow-hover:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px darkorange inset,0 0 3px rgba(0, 0, 0, 0.4);--ticks-thickness:1px;--ticks-height:5px;--ticks-gap:var(--ticks-height, 0);--ticks-color:transparent;--step:1;--ticks-count:(var(--max) - var(--min))/var(--step);--maxTicksAllowed:1000;--too-many-ticks:Min(1, Max(var(--ticks-count) - var(--maxTicksAllowed), 0));--x-step:Max(var(--step), var(--too-many-ticks) * (var(--max) - var(--min)));--tickIntervalPerc_1:Calc((var(--max) - var(--min)) / var(--x-step));--tickIntervalPerc:calc((100% - var(--thumb-size)) / var(--tickIntervalPerc_1) * var(--tickEvery, 1));--value-a:Clamp(var(--min), var(--value, 0), var(--max));--value-b:var(--value, 0);--text-value-a:var(--text-value, "");--completed-a:calc((var(--value-a) - var(--min)) / (var(--max) - var(--min)) * 100);--completed-b:calc((var(--value-b) - var(--min)) / (var(--max) - var(--min)) * 100);--ca:Min(var(--completed-a), var(--completed-b));--cb:Max(var(--completed-a), var(--completed-b));--thumbs-too-close:Clamp(-1, 1000 * (Min(1, Max(var(--cb) - var(--ca) - 5, -1)) + 0.001), 1);--thumb-close-to-min:Min(1, Max(var(--ca) - 5, 0));--thumb-close-to-max:Min(1, Max(95 - var(--cb), 0))}` +
+        `.${defCon.class.range}{width:auto;min-width:105%!important;margin:-3px 0 0 -5px;box-sizing:content-box;display:inline-block;height:Max(var(--track-height),var(--thumb-size));background:linear-gradient(to right,var(--ticks-color) var(--ticks-thickness),transparent 1px) repeat-x;background-size:var(--tickIntervalPerc) var(--ticks-height);background-position-x:calc(var(--thumb-size)/ 2 - var(--ticks-thickness)/ 2);background-position-y:var(--flip-y,bottom);padding-bottom:var(--flip-y,var(--ticks-gap));padding-top:calc(var(--flip-y) * var(--ticks-gap));position:relative;z-index:1}.${defCon.class.range}[data-ticks-position=top]{--flip-y:1}.${defCon.class.range}::after,.${defCon.class.range}::before{--offset:calc(var(--thumb-size) / 2);content:counter(x);display:var(--show-min-max,block);font:var(--min-max-font);position:absolute;bottom:var(--flip-y,-2.5ch);top:calc(-2.5ch * var(--flip-y));opacity:Clamp(0,var(--at-edge),var(--min-max-opacity));transform:translateX(calc(var(--min-max-x-offset) * var(--before,-1) * -1)) scale(var(--at-edge));pointer-events:none}.${defCon.class.range}::before{--before:1;--at-edge:var(--thumb-close-to-min);counter-reset:x var(--min);left:var(--offset)}.${defCon.class.range}::after{--at-edge:var(--thumb-close-to-max);counter-reset:x var(--max);right:var(--offset)}` +
+        `.${defCon.class.rangeProgress}{--start-end:calc(var(--thumb-size) / 2);--clip-end:calc(100% - (var(--cb)) * 1%);--clip-start:calc(var(--ca) * 1%);--clip:inset(-20px var(--clip-end) -20px var(--clip-start));position:absolute;left:var(--start-end);right:var(--start-end);top:calc(var(--ticks-gap) * var(--flip-y,0) + var(--thumb-size)/ 2 - var(--track-height)/ 2);height:calc(var(--track-height));background:var(--progress-background,#eee);pointer-events:none;z-index:-1;border-radius:var(--progress-radius)}.${defCon.class.rangeProgress}::before{content:"";position:absolute;left:0;right:0;clip-path:var(--clip);top:0;bottom:0;background:var(--fill-color,#000);box-shadow:var(--progress-flll-shadow);z-index:1;border-radius:inherit}.${defCon.class.rangeProgress}::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;box-shadow:var(--progress-shadow);pointer-events:none;border-radius:inherit}.${defCon.class.range}>input:only-of-type~.${defCon.class.rangeProgress}{--clip-start:0}` +
+        `.${defCon.class.range}>input{-webkit-appearance:none;width:100%;height:var(--thumb-size)!important;margin:0!important;padding:0!important;position:absolute!important;left:0;top:calc(50% - Max(var(--track-height),var(--thumb-size))/ 2 + calc(var(--ticks-gap)/ 2 * var(--flip-y,-1)))!important;border:0!important;cursor:grab;outline:0!important;background:0 0!important;--thumb-shadow:var(--thumb-shadow-active)}.${defCon.class.range}>input:not(:only-of-type){pointer-events:none}.${defCon.class.range}>input::-webkit-slider-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${defCon.class.range}>input::-moz-range-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${defCon.class.range}>input::-ms-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}` +
+        `.${defCon.class.range}>input:hover{--thumb-shadow:var(--thumb-shadow-active)}.${defCon.class.range}>input:hover+output{--value-background:var(--value-background-hover);--y-offset:-1px;color:var(--value-active-color);box-shadow:0 0 0 3px var(--value-background)}.${defCon.class.range}>input:active{--thumb-shadow:var(--thumb-shadow-hover);cursor:grabbing;z-index:2}.${defCon.class.range}>input:active+output{transition:0s;opacity:0.9;display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;-moz-box-orient:horizontal;-moz-box-pack:center;-moz-box-align:center}.${defCon.class.range}>input:nth-of-type(1){--is-left-most:Clamp(0, (var(--value-a) - var(--value-b)) * 99999, 1)}.${defCon.class.range}>input:nth-of-type(1)+output{--value:var(--value-a);--x-offset:calc(var(--completed-a) * -1%)}.${defCon.class.range}>input:nth-of-type(1)+output:not(:only-of-type){--flip:calc(var(--thumbs-too-close) * -1)}.${defCon.class.range}>input:nth-of-type(1)+output::after{content:var(--prefix, "") var(--text-value-a) var(--suffix, "")}.${defCon.class.range}>input:nth-of-type(2){--is-left-most:Clamp(0, (var(--value-b) - var(--value-a)) * 99999, 1)}.${defCon.class.range}>input:nth-of-type(2)+output{--value:var(--value-b)}.${defCon.class.range}>input+output{--flip:-1;--x-offset:calc(var(--completed-b) * -1%);--pos:calc(((var(--value) - var(--min)) / (var(--max) - var(--min))) * 100%);pointer-events:none;width:auto;min-width:40px;height:24px;min-height:24px;text-align:center;position:absolute;z-index:5;background:var(--value-background);border-radius:4px;padding:0 6px;left:var(--pos);transform:translate(var(--x-offset),calc(150% * var(--flip) - (var(--y-offset,0) + var(--value-offset-y)) * var(--flip)));transition:all .12s ease-out,left 0s;opacity:0;box-sizing:content-box}.${defCon.class.range}>input+output::after{content:var(--prefix, "") var(--text-value-b) var(--suffix, "");font:var(--value-font)}`
+    );
 
-    const fontStyle_db = `#${defCon.id.dialogbox}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999992}#${defCon.id.dialogbox} .${defCon.class.db}{max-width:420px;color:#444;border:2px solid #efefef}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #7b7b7b!important}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:200px;right:15px;border-radius:6px;width:100%;background:#fff;-webkit-box-shadow:0 0 10px 0 rgba(0,0,0,.3);box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223!important;color:#fff!important;border:1px solid #d93223!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a!important;color:#fff!important;border:1px solid #038c5a!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777!important;color:#fff!important;border:1px solid #777!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:500;text-align:left}.${defCon.class.dbm} p{line-height:1.5!important;margin:5px 0!important;text-indent:0!important;font-size:16px!important;font-weight:400;text-align:left}.${defCon.class.dbm} ul{list-style:none;margin:5px 0 0 15px!important;padding:2px;font:italic 14px/140% "Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;color:grey}.${defCon.class.dbm} li{display:list-item;list-style-type:square;}.${defCon.class.dbm} li:before{display:none}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:100%}.${defCon.class.dbb}{display:inline-block;margin:0 1%;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;cursor:pointer;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}.${defCon.class.anim}{-webkit-animation:jiggle 1.8s ease-in infinite;animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}#${defCon.id.bk},#${defCon.id.pv},#${defCon.id.fs},#${defCon.id.mps},#${defCon.id.flc}{color:darkgoldenrod!important;padding:2px 10px!important;height:40px;width:max-content;min-width:auto;margin:2px 0 2px 25px!important;list-style-type:disclosure-closed!important;font-weight:500;font-size:16px}#${defCon.id.flc}:after{content:"";background:url('${loadingIMG}') no-repeat -400px -300px}#${defCon.id.flc} button{background-color:#eee;color:#444;font-weight:normal;border:1px solid #999;font-size:14px!important;border-radius:4px}#${defCon.id.flc} button:hover{cursor:pointer;background-color:#f7f7f7;}#${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}#${defCon.id.feedback}:hover{color:crimson!important}#${defCon.id.seed}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#555!important}#${defCon.id.seed}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#aaa!important}`;
-    const fontStyle_container = `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;border-radius:12px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 30px);z-index:999999;padding:4px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.container} *{line-height:1.5!important;font-size:16px;font-weight:700;font-family:"Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;text-shadow:initial!important;-webkit-text-stroke:initial!important}#${defCon.id.container} fieldset{border:2px groove #67a5df!important;border-radius:10px;padding:4px 6px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:475px}#${defCon.id.container} legend{line-height:20px;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;background:#f0f6ff!important;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{display:inherit;list-style:none;margin:3px 0;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default}#${defCon.id.container} ul li:before{display:none}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden;}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50%;-webkit-transform:rotate(360deg);-webkit-animation:rotation 5s linear infinite;-o-animation:rotation 5s linear infinite;animation:rotation 5s linear infinite}#${defCon.id.fontList}{padding:2px 10px 0 6px;min-height:75px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex!important;align-items:center;justify-content:space-between}#${defCon.id.shadowColor}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;padding:2px 10px;min-height:45px;margin:4px;width:auto}#${defCon.id.shadowColor} *{box-sizing:content-box}#${defCon.id.cps}{margin:0}#${defCon.id.shadowColor} .${defCon.class.colorPicker}{width:32px;height:30px;cursor:pointer;position:relative;border:2px solid #181a25;border-radius:4px;}#${defCon.id.shadowColor} .${defCon.class.colorPicker2}{width:auto;margin:0 0 0 5px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2} #${defCon.id.color}{width:123px!important;height:32px!important;text-indent:0;font-size:18px!important;font-weight:400!important;background:#fafafa;box-sizing:content-box;font-family:Impact,Times,serif!important;color:#333!important;border:#67a5df 2px solid!important;border-radius:4px;padding:0;margin:0;text-align:center}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.fontSize}{padding:2px 10px;height:60px}#${defCon.id.submit}{padding:2px 10px;height:40px}#${defCon.id.submit} button{box-sizing:border-box;background-image:initial;background-color:#67a5df;color:#fff!important;margin:0;padding:5px 10px;cursor:pointer;border:2px solid #6ba7e0;border-radius:6px;width:auto;min-width:min-content;min-height:35px;font:normal 600 14px/1.5 "Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important}#${defCon.id.backup}{margin:0 10px 0 0}#${defCon.id.backup}, #${defCon.id.files}{display:none}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${defCon.id.fontEx} textarea{background:#fafafa!important}#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{font:bold 14px/140% "Roboto Mono",Monaco,"Courier New",sans-serif!important;min-width:248px;max-width:calc(100% - 15px);width:calc(100% - 15px)!important;min-height:60px;line-height:140%;resize:none;border:2px solid #67a5df!important;border-radius:6px;box-sizing:content-box;padding:5px;color:#0b5b9c!important;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px rgba(0,0,0,.2);border-radius:10px;background:#ededed}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;color:#111;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${defCon.id.fontList} .${defCon.class.label} span{color:#fff;font-size:16px!important;font-weight:400;height:max-content;width:max-content;min-width:12px;max-width:205px;padding:5px;background:#67a5df;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap;}#${defCon.id.fontList} .${defCon.class.close}{width:12px}#${defCon.id.fontList} .${defCon.class.close}:hover{color:tomato;background-color:#2D7DCA;border-radius:2px}#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} span.label,#${defCon.id.selector} span.label{margin:0!important;width:auto;display:block!important;padding:0 0 4px 0;color:#333;border:0;text-align:left!important;background-color:transparent!important}#${defCon.id.fontList} .${defCon.class.selectFontId} input{text-overflow:ellipsis;overflow:hidden;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:1px 15px!important;margin:0;width:calc(100% - 32px);max-width:calc(100% - 32px);min-width:calc(100% - 32px);height:36px!important;font-family:"Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;font-size:16px!important;font-weight:700;text-indent:0;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font:normal 700 16px/1.5 "Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;opacity:.65!important}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font:normal 700 16px/1.5 "Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;opacity:.65!important}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:4px 0 0 0;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:4px 8px;width:auto;min-width:calc(40%);max-width:calc(100% - 72px);max-height:298px;font-size:18px!important;white-space:nowrap;background-color:#fff;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;margin:1px 8px;padding:5px 0;font-weight:400;font-size:21px!important;min-width:100%;max-width:100%;width:-moz-available;width:-webkit-fill-available;}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-x:hidden;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:6px 6px 0 6px;margin:0 0 6px 0;width:calc(100%);min-width:calc(100% - 14px);max-width:fit-content;max-width:-moz-min-content;max-height:80px;min-height:40px;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}.${defCon.class.checkbox}{display:none!important}.${defCon.class.checkbox}+label{cursor:pointer;padding:0;margin:0;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:76px;height:32px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;box-sizing:content-box}.${defCon.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${defCon.class.checkbox}+label::after{position:absolute;top:0;left:28px;border-radius:100px;padding:5px;font-size:1em;font-weight:700;color:#fff;content:"OFF"}.${defCon.class.checkbox}:checked+label{cursor:pointer;margin:0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.${defCon.class.checkbox}:checked+label::after{content:"ON";left:10px}.${defCon.class.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px}#${defCon.id.fface} label,#${defCon.id.fface}+label::after,#${defCon.id.fface}+label::before,#${defCon.id.smooth} label,#${defCon.id.smooth}+label::after,#${defCon.id.smooth}+label::before{-webkit-transition:all .1s ease-in;transition:all .1s ease-in}.${defCon.class.flex}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;width:auto;min-width:100%}#${defCon.id.fontShadow} div.${defCon.class.flex}:before,#${defCon.id.fontShadow} div.${defCon.class.flex}:after,#${defCon.id.fontStroke} div.${defCon.class.flex}:before,#${defCon.id.fontStroke} div.${defCon.class.flex}:after,#${defCon.id.fontSize} div.${defCon.class.flex}:before,#${defCon.id.fontSize} div.${defCon.class.flex}:after{display:none}#${defCon.id.fontShadow} #${defCon.id.shadowSize},#${defCon.id.fontStroke} #${defCon.id.strokeSize},#${defCon.id.fontSize} #${defCon.id.fontZoom}{color:#111!important;width:56px!important;text-indent:0;margin:0 10px 0 0!important;height:32px!important;font-size:17px!important;font-weight:400!important;font-family:Impact,Times,serif!important;border:#67a5df 2px solid!important;border-radius:4px;text-align:center;box-sizing:content-box;padding:0;background:#fafafa!important}.${defCon.class.slider} input{visibility:hidden}.${defCon.class.switch}{box-sizing:content-box;display:inline-block;float:right;margin-right:4px;padding:0 6px;border:2px double #67a5df;color:#0a68c1;border-radius:4px}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent)!important;background-size:50px 50px;background-color:#f7fff7!important}`;
-    const fontStyle_cp = `#${defCon.id.cpm}{width:240px;height:216px;margin:calc(-90%) 0 0 2px;z-index:999;position:fixed;display:none;box-sizing:content-box;background-color:#d1f2fb;padding:10px;box-shadow:0 0 10px #000;border-radius:6px}.${defCon.class.cp},.${defCon.class.cp} *,.${defCon.class.cp} ::after,.${defCon.class.cp} ::before{border:0;margin:0;padding:0;display:block;box-sizing:border-box}.${defCon.class.cp}{background-color:#fff;display:block;min-width:128px;min-height:128px;position:relative}.${defCon.class.cp}>.${defCon.class.cprb}{border:solid #000 1px;background:linear-gradient(red,#f0f,#00f,#0ff,#0f0,#ff0,red);width:16px;height:calc(100% - 26px);position:absolute;right:12px;top:12px}.${defCon.class.cp} .${defCon.class.cprbp}{position:absolute;width:100%;height:1px}.${defCon.class.cp} .${defCon.class.cprbp}::after,.${defCon.class.cp} .${defCon.class.cprbp}::before{content:"";width:10px;height:7px;position:absolute;background:0 0;border:solid transparent 5px;border-width:3.5px 5px;top:-3px}.${defCon.class.cp} .${defCon.class.cprbp}::before{border-left:solid #404040 5px;left:-6px}.${defCon.class.cp} .${defCon.class.cprbp}::after{border-right:solid #404040 5px;right:-6px}.${defCon.class.cp}>.${defCon.class.cpg}{position:absolute;width:calc(100% - 50px);height:calc(100% - 26px);border:solid #000 1px;left:12px;top:12px}.${defCon.class.cp}>.${defCon.class.cpg},.${defCon.class.cp}>.${defCon.class.cpg} *{cursor:crosshair;box-sizing:content-box}.${defCon.class.cp}>.${defCon.class.cpgb}{background:linear-gradient(rgba(0,0,0,0),#000)}.${defCon.class.cp}>.${defCon.class.cp}-color-block{position:absolute;border:solid #000 1px;background:#fff;width:calc(100% - 104px);max-width:72px;height:18px;left:12px;bottom:8px}.${defCon.class.cp} .${defCon.class.cpc}{background-color:transparent;position:absolute}.${defCon.class.cp} .${defCon.class.cpc}::before{border-radius:50%;width:11px;height:11px;border:solid #000 1px;background-color:transparent;position:relative;left:-6px;top:-6px;display:block;content:""}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcb}::before{border-color:#000}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcw}::before{border-color:#fff}`;
-    const fontStyle_tooltip = `.${defCon.class.tooltip}{position:relative;cursor:help}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;box-sizing:content-box;position:absolute;z-index:999999;border:2px solid #b8c4ce;border-radius:6px;padding:10px;width:250px;max-width:250px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:140%;text-indent:0em!important}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei","Microsoft JhengHei",system-ui,-apple-system,sans-serif!important;font-size:14px!important}.${defCon.class.tooltip}:active .${defCon.class.tooltip}{display:block}.${defCon.class.ps1}{position:relative;top:-33px;height:0;width:24px;margin:0;padding:0;right:8px;float:right}.${defCon.class.ps2}{top:35px;right:-14px}.${defCon.class.ps3}{top:-197px;margin-left:-5px}.${defCon.class.ps4}{top:-175px;margin-left:-5px}`;
-    const fontStyle_Progress = `.${defCon.class.range}{width:auto;min-width:105%!important;margin:-3px 0 0 -5px}.${defCon.class.range}{--primary-color:#67a5df;--value-offset-y:var(--ticks-gap);--value-active-color:white;--value-background:transparent;--value-background-hover:var(--primary-color);--value-font:italic bold 14px/14px monospace,arial;--fill-color:var(--primary-color);--progress-background:rgb(223, 223, 223);--progress-radius:20px;--show-min-max:none;--track-height:calc(var(--thumb-size) / 2);--min-max-font:12px arial;--min-max-opacity:0.5;--min-max-x-offset:10%;--thumb-size:22px;--thumb-color:white;--thumb-shadow:0 0 3px rgba(0, 0, 0, 0.4),0 0 1px rgba(0, 0, 0, 0.5) inset,0 0 0 99px var(--thumb-color) inset;--thumb-shadow-active:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px var(--primary-color) inset,0 0 3px rgba(0, 0, 0, 0.4);--thumb-shadow-hover:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px darkorange inset,0 0 3px rgba(0, 0, 0, 0.4);--ticks-thickness:1px;--ticks-height:5px;--ticks-gap:var(--ticks-height, 0);--ticks-color:transparent;--step:1;--ticks-count:(var(--max) - var(--min))/var(--step);--maxTicksAllowed:1000;--too-many-ticks:Min(1, Max(var(--ticks-count) - var(--maxTicksAllowed), 0));--x-step:Max(var(--step), var(--too-many-ticks) * (var(--max) - var(--min)));--tickIntervalPerc_1:Calc((var(--max) - var(--min)) / var(--x-step));--tickIntervalPerc:calc((100% - var(--thumb-size)) / var(--tickIntervalPerc_1) * var(--tickEvery, 1));--value-a:Clamp(var(--min), var(--value, 0), var(--max));--value-b:var(--value, 0);--text-value-a:var(--text-value, "");--completed-a:calc((var(--value-a) - var(--min)) / (var(--max) - var(--min)) * 100);--completed-b:calc((var(--value-b) - var(--min)) / (var(--max) - var(--min)) * 100);--ca:Min(var(--completed-a), var(--completed-b));--cb:Max(var(--completed-a), var(--completed-b));--thumbs-too-close:Clamp(-1, 1000 * (Min(1, Max(var(--cb) - var(--ca) - 5, -1)) + 0.001), 1);--thumb-close-to-min:Min(1, Max(var(--ca) - 5, 0));--thumb-close-to-max:Min(1, Max(95 - var(--cb), 0));box-sizing:content-box;display:inline-block;height:Max(var(--track-height),var(--thumb-size));background:linear-gradient(to right,var(--ticks-color) var(--ticks-thickness),transparent 1px) repeat-x;background-size:var(--tickIntervalPerc) var(--ticks-height);background-position-x:calc(var(--thumb-size)/ 2 - var(--ticks-thickness)/ 2);background-position-y:var(--flip-y,bottom);padding-bottom:var(--flip-y,var(--ticks-gap));padding-top:calc(var(--flip-y) * var(--ticks-gap));position:relative;z-index:1}.${defCon.class.range}[data-ticks-position=top]{--flip-y:1}.${defCon.class.range}::after,.${defCon.class.range}::before{--offset:calc(var(--thumb-size) / 2);content:counter(x);display:var(--show-min-max,block);font:var(--min-max-font);position:absolute;bottom:var(--flip-y,-2.5ch);top:calc(-2.5ch * var(--flip-y));opacity:Clamp(0,var(--at-edge),var(--min-max-opacity));transform:translateX(calc(var(--min-max-x-offset) * var(--before,-1) * -1)) scale(var(--at-edge));pointer-events:none}.${defCon.class.range}::before{--before:1;--at-edge:var(--thumb-close-to-min);counter-reset:x var(--min);left:var(--offset)}.${defCon.class.range}::after{--at-edge:var(--thumb-close-to-max);counter-reset:x var(--max);right:var(--offset)}.${defCon.class.rangeProgress}{--start-end:calc(var(--thumb-size) / 2);--clip-end:calc(100% - (var(--cb)) * 1%);--clip-start:calc(var(--ca) * 1%);--clip:inset(-20px var(--clip-end) -20px var(--clip-start));position:absolute;left:var(--start-end);right:var(--start-end);top:calc(var(--ticks-gap) * var(--flip-y,0) + var(--thumb-size)/ 2 - var(--track-height)/ 2);height:calc(var(--track-height));background:var(--progress-background,#eee);pointer-events:none;z-index:-1;border-radius:var(--progress-radius)}.${defCon.class.rangeProgress}::before{content:"";position:absolute;left:0;right:0;clip-path:var(--clip);top:0;bottom:0;background:var(--fill-color,#000);box-shadow:var(--progress-flll-shadow);z-index:1;border-radius:inherit}.${defCon.class.rangeProgress}::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;box-shadow:var(--progress-shadow);pointer-events:none;border-radius:inherit}.${defCon.class.range}>input{-webkit-appearance:none;width:100%;height:var(--thumb-size)!important;margin:0!important;padding:0!important;position:absolute!important;left:0;top:calc(50% - Max(var(--track-height),var(--thumb-size))/ 2 + calc(var(--ticks-gap)/ 2 * var(--flip-y,-1)))!important;border:0!important;cursor:grab;outline:0!important;background:0 0!important;--thumb-shadow:var(--thumb-shadow-active)}.${defCon.class.range}>input:not(:only-of-type){pointer-events:none}.${defCon.class.range}>input::-webkit-slider-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${defCon.class.range}>input::-moz-range-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${defCon.class.range}>input::-ms-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${defCon.class.range}>input:hover{--thumb-shadow:var(--thumb-shadow-active)}.${defCon.class.range}>input:hover+output{--value-background:var(--value-background-hover);--y-offset:-1px;color:var(--value-active-color);box-shadow:0 0 0 3px var(--value-background)}.${defCon.class.range}>input:active{--thumb-shadow:var(--thumb-shadow-hover);cursor:grabbing;z-index:2}.${defCon.class.range}>input:active+output{transition:0s;opacity:0.9}.${defCon.class.range}>input:nth-of-type(1){--is-left-most:Clamp(0, (var(--value-a) - var(--value-b)) * 99999, 1)}.${defCon.class.range}>input:nth-of-type(1)+output{--value:var(--value-a);--x-offset:calc(var(--completed-a) * -1%)}.${defCon.class.range}>input:nth-of-type(1)+output:not(:only-of-type){--flip:calc(var(--thumbs-too-close) * -1)}.${defCon.class.range}>input:nth-of-type(1)+output::after{content:var(--prefix, "") var(--text-value-a) var(--suffix, "")}.${defCon.class.range}>input:nth-of-type(2){--is-left-most:Clamp(0, (var(--value-b) - var(--value-a)) * 99999, 1)}.${defCon.class.range}>input:nth-of-type(2)+output{--value:var(--value-b)}.${defCon.class.range}>input:only-of-type~.${defCon.class.rangeProgress}{--clip-start:0}.${defCon.class.range}>input+output{--flip:-1;--x-offset:calc(var(--completed-b) * -1%);--pos:calc(((var(--value) - var(--min)) / (var(--max) - var(--min))) * 100%);pointer-events:none;line-height:100%;width:auto;min-width:40px;min-height:12px;text-align:center;position:absolute;z-index:5;background:var(--value-background);border-radius:4px;padding:0 6px;left:var(--pos);transform:translate(var(--x-offset),calc(150% * var(--flip) - (var(--y-offset,0) + var(--value-offset-y)) * var(--flip)));transition:all .12s ease-out,left 0s;opacity:0;box-sizing:content-box}.${defCon.class.range}>input+output::after{content:var(--prefix, "") var(--text-value-b) var(--suffix, "");font:var(--value-font)}`;
     const fontStyle = fontStyle_db + fontStyle_container + fontStyle_cp + fontStyle_tooltip + fontStyle_Progress;
     const tFontSize = isFontsize
       ? String(
           `<li id="${defCon.id.fontSize}">
             <div class="${defCon.class.flex}">
-              <span>字体比例缩放</span>
+              <span style="margin:0;padding:0">字体比例缩放</span>
               <input id="${defCon.id.fontZoom}" type="text" v="number" maxlength="5" />
             </div>
             <div class="${defCon.class.range}" data-ticks-position="top"
@@ -1912,7 +1944,7 @@
             </div>
           </li>`
         ).trim()
-      : "";
+      : ``;
     const tHTML = String(
       `<div id="${defCon.id.container}">
         <fieldset id="${defCon.id.field}" style="display:block">
@@ -1931,14 +1963,14 @@
               <div class="${defCon.class.fontList}"></div>
             </li>
             <li id="${defCon.id.fontFace}">
-              <div>字体重写（默认：开）</div>
+              <div style="margin:0;padding:0">字体重写（默认：开）</div>
               <div style="height:32px;margin:0;padding:0;align-self:center">
                 <input type="checkbox" id="${defCon.id.fface}" class="${defCon.class.checkbox}" ${CONST.fontFace ? "checked" : ""} />
                 <label for="${defCon.id.fface}"></label>
               </div>
             </li>
             <li id="${defCon.id.fontSmooth}">
-              <div>字体平滑（默认：开）</div>
+              <div style="margin:0;padding:0">字体平滑（默认：开）</div>
               <div style="height:32px;margin:0;padding:0;align-self:center">
                 <input type="checkbox" id="${defCon.id.smooth}" class="${defCon.class.checkbox}" ${CONST.fontSmooth ? "checked" : ""} />
                 <label for="${defCon.id.smooth}"></label>
@@ -1947,7 +1979,7 @@
             ${tFontSize}
             <li id="${defCon.id.fontStroke}">
               <div class="${defCon.class.flex}">
-                <span>字体描边尺寸</span>
+                <span style="margin:0;padding:0">字体描边尺寸</span>
                 <input id="${defCon.id.strokeSize}" type="text" v="number" maxlength="5" />
               </div>
               <div class="${defCon.class.range}" data-ticks-position="top"
@@ -1959,7 +1991,7 @@
             </li>
             <li id="${defCon.id.fontShadow}">
               <div class="${defCon.class.flex}">
-                <span>字体阴影尺寸</span>
+                <span style="margin:0;padding:0">字体阴影尺寸</span>
                 <input id="${defCon.id.shadowSize}" type="text" v="number" maxlength="4" />
               </div>
               <div class="${defCon.class.range}" data-ticks-position="top"
@@ -1970,24 +2002,24 @@
               </div>
             </li>
             <li id="${defCon.id.shadowColor}">
-              <div style="margin:6px 5px 0 0">
-                <span>阴影颜色</span>
+              <div style="margin:0px 5px 0 0">
+                <span style="margin:0;padding:0">阴影颜色</span>
                 <span class="${defCon.class.tooltip}">
-                  <span>\ud83d\udd14</span>
+                  <span title="单击查看帮助">\ud83d\udd14</span>
                   <span class="${defCon.class.tooltip} ${defCon.class.ps3}">
                     <p>阴影颜色可通过点击色块激活拾色器选择，也可自定义填写，格式支持: <em style="color:#cecece">RGB, RGBA, HEX{3}, HEX{6}</em>。纯白色的所有格式表示自身颜色 <em style="color:#cecece">currentcolor</em></p>
                     <p><em style="color:darkred">注意：输入数值会自动转化为HEX{6}，但数值保持一致性。错误格式会被替换为上次保存的数据。</em></p>
                   </span>
                 </span>
               </div>
-              <div class="${defCon.class.colorPicker}" id="${defCon.id.cps}"></div>
-              <div class="${defCon.class.colorPicker2}"><input type="text" id="${defCon.id.color}" /></div>
+              <div title="选取颜色" class="${defCon.class.colorPicker}" id="${defCon.id.cps}"></div>
+              <div class="${defCon.class.colorPicker2}"><input title="输入颜色代码" type="text" id="${defCon.id.color}" /></div>
               <div id="${defCon.id.cpm}"></div>
             </li>
             <li id="${defCon.id.fontCSS}">
-              <div style="margin-bottom: 6px">需要渲染的网页元素：
+              <div style="margin: 0 0 6px 0">需要渲染的网页元素：
                 <span class="${defCon.class.tooltip}">
-                  <span>\ud83d\udd14</span>
+                  <span title="单击查看帮助">\ud83d\udd14</span>
                   <span class="${defCon.class.tooltip} ${defCon.class.ps4}">
                     <p>默认为排除大多数网站常用的特殊CSS样式后需要渲染的页面元素。填写格式：<em style="color:#cecece">:not(.fa)</em> 或 <em style="color:#cecece">:not([class*="fa"])</em></p>
                     <p><em style="color:darkred">该选项为重要参数，默认只读，双击解锁。请尽量不要修改，避免造成样式失效。若失效请重置。</em></p>
@@ -1995,13 +2027,13 @@
                 </span>
                 <div id="${defCon.id.cSwitch}" class="${defCon.class.switch}" data-switch="ON">\u2227</div>
               </div>
-              <textarea placeholder="请谨慎清除默认值，避免渲染失效。" id="${defCon.id.cssfun}" class="${defCon.class.readonly}"\
-              title="重要参数，默认只读，双击解锁。" readonly="readonly">${CONST.fontCSS ? CONST.fontCSS : defValue.fontCSS}</textarea>
+              <textarea placeholder="请谨慎修改默认值，避免渲染失效。" id="${defCon.id.cssfun}" class="${defCon.class.readonly}"
+                title="重要参数，默认只读，双击解锁。" readonly="readonly">${CONST.fontCSS ? CONST.fontCSS : defValue.fontCSS}</textarea>
             </li>
             <li id="${defCon.id.fontEx}">
-              <div style="margin-bottom: 6px">排除渲染的HTML标签：
+              <div style="margin: 0 0 6px 0">排除渲染的HTML标签：
                 <span class="${defCon.class.tooltip}">
-                  <span>\ud83d\udd14</span>
+                  <span title="单击查看帮助">\ud83d\udd14</span>
                   <span class="${defCon.class.tooltip} ${defCon.class.ps3}">
                     <p>该选项排除渲染字体描边、字体阴影效果，请将排除渲染的HTML标签用逗号分隔。具体规则请点击顶部旋转的帮助文件图标。</p>
                     <p><em style="color:darkred">编辑该选项需要CSS知识，如需要排除复杂的样式或标签可通过这里进行添加，样式若混乱请重置。</em></p>
@@ -2009,8 +2041,8 @@
                 </span>
                 <div id="${defCon.id.eSwitch}" class="${defCon.class.switch}" data-switch="ON">\u2227</div>
               </div>
-              <textarea placeholder="请输入要排除渲染的HTML标签，形如: * input, * i, div[id='test']"\
-              id="${defCon.id.exclude}">${CONST.fontEx ? CONST.fontEx : ""}</textarea>
+              <textarea placeholder="请输入要排除渲染的HTML标签，形如: input, em, div[id='test']"
+                id="${defCon.id.exclude}">${CONST.fontEx ? CONST.fontEx : ""}</textarea>
             </li>
             <li id="${defCon.id.submit}">
               <button class="${defCon.class.reset}">重置</button>
@@ -2038,7 +2070,7 @@
     if (curWindowtop) {
       if (defCon.siteIndex === undefined) {
         console.info(
-          `%c${defCon.scriptName}\n%cINTRO.URL:\u0020https://tiny.one/FontsRendering\n%c\u259e\u0020脚本版本：%cV%s%c\n\u259e\u0020个性化设置：%c%s%c/%s%s\n%c\u259e\u0020字体缩放：%s%s\n\u259e\u0020本地备份：%s\u3000\u259a\u0020保存预览：%s\n%c\u259e\u0020渲染字体：%s\n\u259e\u0020字体平滑：%s\u3000\u259a\u0020字体重写：%s\n\u259e\u0020字体描边：%s\u3000\u259a\u0020字体阴影：%s`,
+          `%c${defCon.scriptName}\n%cINTRO.URL:\u0020https://f9y4ng.likes.fans/FontRendering\n%c\u259e\u0020脚本版本：%cV%s%c\n\u259e\u0020个性化设置：%c%s%c/%s%s\n%c\u259e\u0020字体缩放：%s%s\n\u259e\u0020本地备份：%s\u3000\u259a\u0020保存预览：%s\n%c\u259e\u0020渲染字体：%s\n\u259e\u0020字体平滑：%s\u3000\u259a\u0020字体重写：%s\n\u259e\u0020字体描边：%s\u3000\u259a\u0020字体阴影：%s`,
           "font-weight:bold;font-size:14px;color:crimson",
           "line-height:200%;font-size:10px;color:#777;font-style:italic",
           "line-height:180%;font-size:12px;color:slategray",
@@ -2056,7 +2088,7 @@
             ? CONST.fontSize === 1
               ? "\u3000\u259a\u0020\u7f29\u653e\u6bd4\u4f8b\uff1a(WEBSITE DEFINED)"
               : `\u3000\u259a\u0020\u7f29\u653e\u6bd4\u4f8b\uff1a${Number(CONST.fontSize * 100).toFixed(2) + "%"}`
-            : "\u3000\u259a\u0020\u7f29\u653e\u6bd4\u4f8b\uff1a(SYSTEM DEFINED)",
+            : "\u3000\u259a\u0020\u7f29\u653e\u6bd4\u4f8b\uff1a(BROWSER DEFINED)",
           isBackupFunction ? "ON " : "OFF",
           isPreview ? "ON " : "OFF",
           "line-height:180%;font-size:12px;color:teal",
@@ -2165,47 +2197,47 @@
               falseButtonText: "帮助文件",
               neutralButtonText: "取 消",
               messageText: String(
-                `<ul class="${defCon.class.main}"
-                  style="margin:0!important;padding:0!important;color:darkgoldenrod;list-style-position:outside;font:normal 500 16px/150% 'Microsoft YaHei',system-ui,-apple-system,sans-serif!important">
+                `<ul class="${defCon.class.main}" style="margin:0;padding:0;list-style:none">
                   <li id="${defCon.id.bk}">
-                    <div style="float:left;font-size:16px!important">本地备份功能（默认：开启）</div>
-                    <div style="float:right;margin:-2px 2px 0 28px;font-size:16px!important">
+                    <div class="${defCon.id.seed}_VIP">\u2460 本地备份功能（默认：开启）</div>
+                    <div style="margin:0;padding:0">
                       <input type="checkbox" id="${defCon.id.isbackup}" class="${defCon.class.checkbox}" ${isBackupFunction ? "checked" : ""} />
                       <label for="${defCon.id.isbackup}"></label>
                     </div>
                   </li>
                   <li id="${defCon.id.pv}">
-                    <div style="float:left;font-size:16px!important">保存预览功能（默认：关闭）</div>
-                    <div style="float:right;margin:-2px 2px 0 28px;font-size:16px!important">
+                    <div class="${defCon.id.seed}_VIP">\u2461 保存预览功能（默认：关闭）</div>
+                    <div style="margin:0;padding:0">
                       <input type="checkbox" id="${defCon.id.ispreview}" class="${defCon.class.checkbox}" ${isPreview ? "checked" : ""} />
                       <label for="${defCon.id.ispreview}"></label>
                     </div>
                   </li>
                   <li id="${defCon.id.fs}">
-                    <div style="float:left;font-size:16px!important">字体缩放功能（默认：关闭）</div>
-                    <div style="float:right;margin:-2px 2px 0 28px;font-size:16px!important">
+                    <div class="${defCon.id.seed}_VIP">\u2462 字体缩放功能（默认：关闭）</div>
+                    <div style="margin:0;padding:0">
                       <input type="checkbox" id="${defCon.id.isfontsize}" class="${defCon.class.checkbox}" ${isFontsize ? "checked" : ""} />
                       <label for="${defCon.id.isfontsize}"></label>
                     </div>
                   </li>
                   <li id="${defCon.id.mps}">
-                    <div style="float:left;font-size:16px!important">个性化设置总数（默认：100）</div>
-                    <div style="float:right;margin:-6px 2px 0 16px">
+                    <div class="${defCon.id.seed}_VIP">\u2463 个性化设置总数（默认：100）</div>
+                    <div style="margin:0 5px 0 0;padding:0">
                       <input maxlength="4" id="${defCon.id.maxps}" placeholder="100" value="${maxPersonalSites}"
-                        style="font:normal 500 16px/140% Impact,Times,serif!important;border:2px solid darkgoldenrod;border-radius:4px;width:70px;text-align:center;padding:5px;color:#333;box-sizing:border-box" />
+                        style="box-sizing:border-box;font:normal 500 16px/140% Impact,Times,serif!important;border:2px solid darkgoldenrod;border-radius:4px;width:70px;min-width:70px;text-align:center;padding:4px 5px;color:#333" />
                     </div>
                   </li>
                   <li id="${defCon.id.flc}">
-                    <div style="float:left;font-size:16px!important">字体列表缓存（缓存：24小时）</div>
-                    <div style="float:right;margin:-4px 2px 0 10px">
-                      <button id="${defCon.id.flcid}" title="重建当前网站字体列表缓存（如果你已安装新字体，但字体列表未及时更新）"
-                        style="box-sizing:border-box;padding:4px 6px;color:#333!important;min-width:60px;min-height:34px">重建缓存</button>
-                    </div>
+                    <div class="${defCon.id.seed}_VIP">\u2464 字体列表缓存（时效：24小时）</div>
+                    <button id="${defCon.id.flcid}" title="重建当前网站字体列表缓存（如果你已安装新字体，但字体列表未及时更新）"
+                      style="box-sizing:border-box;margin:0 5px 0 0;padding:2px 5px;width:max-content;height:max-content;min-width:70px;min-height:32px;background:#eee;letter-spacing:normal">
+                      重建缓存
+                    </button>
                   </li>
-                  <ol id="${defCon.id.feedback}" title="遇到问题,建议先看看脚本帮助文件" style="margin:0 8px;font-size:16px!important;color:#333;font-weight:600;cursor:help">
+                </ul>
+                <div id="${defCon.id.feedback}" title="遇到问题，建议先看看脚本帮助文件。"
+                  style="box-sizing:content-box;height:auto;margin:0 0 0 15px;padding:2px 0 6px 0;font-size:16px;font-style:normal;color:#333;font-weight:600;cursor:help">
                     \ud83e\udde1\u0020如果您遇到问题，请向我反馈\u0020\ud83e\udde1
-                  </ol>
-                </ul>`
+                </div>`
               ).trim(),
               titleText: "参数设置 - VIP 高级功能",
             });
@@ -2270,7 +2302,7 @@
             let frDialog = new frDialogBox({
               trueButtonText: "确 定",
               neutralButtonText: "取 消",
-              messageText: `<p style="font:bold italic 22px/1.4 Candara,serif!important">${curHostname}</p><p style="color:darkgreen">该域名下所有页面将重新进行字体渲染！</p><p>确定后页面将自动刷新，请确认是否恢复？</p>`,
+              messageText: `<p style="font:italic bold 22px/1.4 Candara,serif!important">${curHostname}</p><p style="color:darkgreen">该域名下所有页面将重新进行字体渲染！</p><p>确定后页面将自动刷新，请确认是否恢复？</p>`,
               titleText: "恢复字体渲染",
             });
             if (await frDialog.respond()) {
@@ -2450,14 +2482,42 @@
                   trueButtonText: "保 存",
                   falseButtonText: "帮助文档",
                   neutralButtonText: "取 消",
-                  messageText: `<p style="color:#666;font-size:14px!important">以下文本域可按预定格式增加您自定义的字体。请按照格式样例填写，输入格式有误将被自动过滤。重复添加字体将在字体表合并时被自动忽略。<span style="color:red">（请勿添加过多字体，避免响应缓慢）</span></p><p><textarea id="${defCon.id.seed}_custom_Fontlist" style="min-height:160px!important;min-width:377px!important;resize:vertical;padding:5px;border:1px solid #999;border-radius:6px;font:normal 14px monospace,Consolas!important;white-space:pre!important;cursor:text" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下：\n\n{ "ch": "中文字体名一", "en": "EN Fontname 1" }\u21b2\n{ "ch": "中文字体名二", "en": "EN Fontname 2" }\u21b2\n{ "ch": "中文字体名三", "en": "EN Fontname 3" }\u21b2\n\n（注意：\u21b2为换行符号，输入(Enter)回车即可）'>${_Custom_fontlist_}</textarea></p>`,
+                  messageText: `<p style="color:#666;font-size:14px!important">以下文本域可按预定格式增加您自定义的字体。请按照格式样例填写，输入格式有误将被自动过滤。重复添加字体将在字体表合并时被自动忽略。【功能小贴士：<span id="${defCon.id.seed}_addTools" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${defCon.id.seed}_custom_Fontlist" style="min-height:160px!important;min-width:377px!important;resize:vertical;padding:5px;border:1px solid #999;border-radius:6px;font:normal 14px monospace,Consolas!important;white-space:pre!important;cursor:text" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下：\n\n{ "ch": "中文字体名一", "en": "EN Fontname 1" }\u21b2\n{ "ch": "中文字体名二", "en": "EN Fontname 2" }\u21b2\n{ "ch": "中文字体名三", "en": "EN Fontname 3" }\u21b2\n\n（注意：\u21b2为换行符号，输入(Enter)回车即可）'>${_Custom_fontlist_}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:crimson;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`,
                   titleText: "自定义字体表",
                 });
                 let custom_Fontlist;
                 let save_Fontlist = defaultArray;
-                custom_Fontlist = qS(`#${defCon.id.seed}_custom_Fontlist`).value.trim();
-                qS(`#${defCon.id.seed}_custom_Fontlist`).addEventListener("input", function () {
-                  custom_Fontlist = this.value.trim().replace(/`|'/g, `"`);
+                qS(`#${defCon.id.seed}_addTools`).addEventListener("click", () => {
+                  let chName, enName, cusFontName;
+                  // eslint-disable-next-line no-alert
+                  chName = prompt("请输入中文字体名：(例如：鸿蒙黑体，仅支持半角输入模式，包括中文、日文、韩文、英文，数字、减号、下划线、空格、@)", "鸿蒙黑体");
+                  if (chName === null) {
+                    return;
+                  } else if (/^@?[a-zA-Z0-9\u2E80-\uD7FF\-_ ]+$/.test(chName.trim())) {
+                    // eslint-disable-next-line no-alert
+                    enName = prompt("请输入英文字体名：(例如：HarmonyOS Sans SC，仅支持半角输入模式，包括英文、数字、减号、下划线、空格、@)", "HarmonyOS Sans SC");
+                    if (enName === null) {
+                      return;
+                    } else if (/^@?[a-zA-Z0-9\-_ ]+$/.test(enName.trim())) {
+                      cusFontName = `{"ch":"${chName.trim()}","en":"${enName.trim()}"}`;
+                      const aTrim = qS(`#${defCon.id.seed}_custom_Fontlist`).value.trim() ? "\n" : "";
+                      qS(`#${defCon.id.seed}_custom_Fontlist`).value = qS(`#${defCon.id.seed}_custom_Fontlist`).value.trim().concat(aTrim, cusFontName, "\n");
+                      custom_Fontlist = qS(`#${defCon.id.seed}_custom_Fontlist`).value.trim();
+                    } else {
+                      // eslint-disable-next-line no-alert
+                      alert("英文字体名 格式输入错误！");
+                    }
+                  } else {
+                    // eslint-disable-next-line no-alert
+                    alert("中文字体名 格式输入错误！");
+                  }
+                });
+                qS(`#${defCon.id.seed}_custom_Fontlist`).addEventListener("change", function () {
+                  this.value = filteToCDB(this.value)
+                    .replace(/'|`|·|“|”|‘|’/g, `"`)
+                    .replace(/，/g, `,`)
+                    .replace(/：/g, `:`);
+                  custom_Fontlist = this.value.trim();
                 });
                 if (await frDialog.respond()) {
                   const fontlistArray = custom_Fontlist.match(/{\s*"ch":\s*"@?[a-zA-Z0-9\u2E80-\uD7FF\-_ ]+"\s*,\s*"en":\s*"@?[a-zA-Z0-9\-_ ]+"\s*}/g);
@@ -2679,17 +2739,18 @@
               setSliderProperty(drawStrock, defValue.fontStroke, 3);
               shadows.value = Number(defValue.fontShadow) === 0 ? "OFF" : Number(defValue.fontShadow).toFixed(2);
               shadows._value_ = Number(defValue.fontShadow);
+              qS(`#${defCon.id.shadowColor}`).style.display = shadows.value === "OFF" ? "none" : "flex";
               setSliderProperty(drawShadow, defValue.fontShadow, 2);
               picker.value = defValue.shadowColor;
               picker._value_ = picker.value;
-              smoothT.checked !== defValue.fontSmooth ? smoothT.click() : debug("\u27A4 fontSmooth Not Modified");
-              ffaceT.checked !== defValue.fontFace ? ffaceT.click() : debug("\u27A4 fontFace Not Modified");
+              smoothT.checked !== defValue.fontSmooth ? smoothT.click() : debug("\u27A4 <fontSmooth> NOT MODIFIED");
+              ffaceT.checked !== defValue.fontFace ? ffaceT.click() : debug("\u27A4 <fontFace> NOT MODIFIED");
               fontCssT.value = defValue.fontCSS;
               setEffectIntoSubmit(fontCssT.value, CONST.fontCSS, defCon.vals, fontCssT, submitButton);
               fontExT.value = defValue.fontEx;
               setEffectIntoSubmit(fontExT.value, CONST.fontEx, defCon.vals, fontExT, submitButton);
               const submit = qS(`#${defCon.id.submit} .${defCon.class.submit}[v-Preview="true"]`);
-              submit ? submit.click() : debug("\u27A4 v-Preview is ", submit);
+              submit ? submit.click() : debug("\u27A4 v-Preview is", submit);
             } else {
               fontSet().fdeleteList(fontData);
               if (isFontsize) {
@@ -2703,11 +2764,12 @@
               setSliderProperty(drawStrock, CONST.fontStroke, 3);
               shadows.value = Number(CONST.fontShadow) === 0 ? "OFF" : Number(CONST.fontShadow).toFixed(2);
               shadows._value_ = Number(CONST.fontShadow);
+              qS(`#${defCon.id.shadowColor}`).style.display = shadows.value === "OFF" ? "none" : "flex";
               setSliderProperty(drawShadow, CONST.fontShadow, 2);
               picker.value = CONST.shadowColor;
               picker._value_ = picker.value;
-              smoothT.checked !== CONST.fontSmooth ? smoothT.click() : debug("\u27A4 fontSmooth not modified");
-              ffaceT.checked !== CONST.fontFace ? ffaceT.click() : debug("\u27A4 fontFace not modified");
+              smoothT.checked !== CONST.fontSmooth ? smoothT.click() : debug("\u27A4 <fontSmooth> NOT MODIFIED");
+              ffaceT.checked !== CONST.fontFace ? ffaceT.click() : debug("\u27A4 <fontFace> NOT MODIFIED");
               fontCssT.value = CONST.fontCSS;
               setEffectIntoSubmit(fontCssT.value, CONST.fontCSS, defCon.vals, fontCssT, submitButton);
               fontExT.value = CONST.fontEx;
@@ -2746,13 +2808,16 @@
                     ? `body{` +
                       String(
                         getBrowser.type("core").Gecko
-                          ? `transform:scale(${fzoom});transform-origin:left top 0px;width:${100 / fzoom}%;height:${100 / fzoom}%;overflow-x:hidden`
+                          ? `transform:scale(${fzoom});transform-origin:left top 0px;width:${100 / fzoom}%;height:${100 / fzoom}%;overflow-x:hidden;`
                           : `zoom:${fzoom}!important;`
                       ).trim() +
                       `}`
                     : ``
                   : ``;
-                const _shadow = fshadow > 0 && fshadow <= 8 ? `text-shadow:0 0 ${fshadow}px ${fscolor},0 0 ${fshadow / 2}px ${fscolor};` : ``;
+                const _shadow =
+                  fshadow > 0 && fshadow <= 8
+                    ? `text-shadow:0 0 ${fshadow * 1.25}px ${toColordepth(fscolor, 1.5)},0 0 ${fshadow}px ${fscolor},0 0 ${fshadow / 4}px ${toColordepth(fscolor, 0.975, "dark")};`
+                    : ``;
                 const _stroke = fstrock > 0 && fstrock <= 1.0 ? `-webkit-text-stroke:${fstrock}px currentcolor;paint-order:stroke fill;` : ``;
                 const _selection = stroke ? `::selection{color:#ffffff!important;background:#338fff!important}` : ``;
                 const kernel_define = getBrowser.type("core").WebKit
@@ -2763,10 +2828,10 @@
                 const _smoothing = smooth
                   ? `font-feature-settings:"liga" 0;font-variant:no-common-ligatures proportional-nums;font-optical-sizing:auto;font-stretch:normal;font-kerning:auto;${kernel_define}text-rendering:optimizeLegibility!important;`
                   : ``;
-                const _fontfamily = fontface ? `font-family:${fontselect};` : "";
+                const _fontfamily = fontface ? `font-family:${fontselect};` : ``;
                 const _refont = fontselect.split(",")[0] ? fontselect.split(",")[0].replace(/"|'/g, "") : "";
                 const _fontfaces = fontface
-                  ? _refont !== ""
+                  ? _refont.length
                     ? String(
                         `@font-face{font-family:"宋体";src:local("${_refont}")}@font-face{font-family:"SimSun";src:local("${_refont}")}@font-face{font-family:"新宋体";src:local("${_refont}")}@font-face{font-family:"NSimSun";src:local("${_refont}")}@font-face{font-family:"黑体";src:local("${_refont}")}@font-face{font-family:"SimHei";src:local("${_refont}")}@font-face{font-family:"Microsoft YaHei UI";src:local("${_refont}")}@font-face{font-family:"Microsoft JhengHei UI";src:local("${_refont}")}@font-face{font-family:"MingLiU";src:local("${_refont}")}@font-face{font-family:"MingLiU-ExtB";src:local("${_refont}")}@font-face{font-family:"PMingLiU";src:local("${_refont}")}@font-face{font-family:"PMingLiU-ExtB";src:local("${_refont}")}@font-face{font-family:Arial;src:local("${_refont}")}@font-face{font-family:Helvetica;src:local("${_refont}")}@font-face{font-family:"Georgia";src:local("${_refont}")}@font-face{font-family:"sans-serif";src:local("${_refont}")}@font-face{font-family:"MS Gothic";src:local("${_refont}")}@font-face{font-family:"MS PGothic";src:local("${_refont}")}@font-face{font-family:"MS UI Gothic";src:local("${_refont}")}@font-face{font-family:"Yu Gothic";src:local("${_refont}")}@font-face{font-family:"Yu Gothic UI";src:local("${_refont}")}@font-face{font-family:"Malgun Gothic";src:local("${_refont}")}`
                       ).trim()
@@ -2775,9 +2840,9 @@
                 let _codeFont = "";
                 const _exclude = fontex ? `${filterHtml(fontex)}{-webkit-text-stroke:initial!important;text-shadow:initial!important}` : "";
                 if (fontex) {
-                  if (fontex.includes("pre") || fontex.includes("code")) {
-                    const pre = fontex.includes("pre") ? ["pre", "pre *"] : [];
-                    const code = fontex.includes("code") ? ["code", "code *"] : [];
+                  if (fontex.search(/\bpre\b|\bcode\b/gi) !== -1) {
+                    const pre = fontex.search(/\bpre\b/gi) > -1 ? ["pre", "pre *"] : [];
+                    const code = fontex.search(/\bcode\b/gi) > -1 ? ["code", "code *"] : [];
                     const precode = pre.concat(code);
                     _codeFont = `${precode.toString()}{font:normal 400 14px/150% 'Operator Mono Lig','Fira Code','Roboto Mono',Monaco,monospace,Consolas!important;font-feature-settings:"liga" 0,"zero"!important;}`;
                   }
@@ -2802,7 +2867,7 @@
                   trueButtonText: "保存到全局数据",
                   falseButtonText: "保存到网站数据",
                   neutralButtonText: "取 消",
-                  messageText: `<p style="color:darkgreen;font-weight:900">保存到全局数据：</p><p>将当前设置保存为全局设置，默认使用全局参数。</p><p style="color:darkred;font-weight:900">保存到当前网站数据：<span id="${defCon.id.seed}_a_w_d_l_">[<span style="font-size:12px!important;font-weight:normal;padding:0 2px;margin:0;cursor:pointer;color:#3e3e3e">全部数据列表</span>]</span></p><p><span title="保存到网站数据会自动覆盖之前的数据" style="cursor:help;color:indigo" id="${defCon.id.seed}_c_w_d_">为 ${curHostname} 保存独立的设置数据。</span>`,
+                  messageText: `<p style="color:darkgreen;font-weight:900">保存到全局数据：</p><p>将当前设置保存为全局设置，默认使用全局参数。</p><p style="color:darkred;font-weight:900">保存到当前网站数据：<span id="${defCon.id.seed}_a_w_d_l_">[<span style="font-size:12px!important;font-weight:normal;padding:0 2px;margin:0;cursor:pointer;color:#3e3e3e">全部数据列表</span>]</span></p><p style="height:22px"><span title="保存到网站数据会自动覆盖之前的数据" style="cursor:help;color:indigo" id="${defCon.id.seed}_c_w_d_">为 ${curHostname} 保存独立的设置数据。</span>`,
                   titleText: "保存设置数据",
                 });
                 domains = await GMgetValue("_domains_fonts_set_");
@@ -2825,7 +2890,7 @@
                 if (domainValueIndex !== undefined && qS(`#${defCon.id.seed}_c_w_d_`)) {
                   const fontDate = dateFormat("YYYY-mm-dd HH:MM:SS", new Date(domainValue[domainValueIndex].fontDate));
                   qS(`#${defCon.id.seed}_c_w_d_`).innerHTML = String(
-                    `<p>上次保存：${fontDate} <button id="${defCon.id.seed}_c_w_d_d_" style="box-sizing:border-box;padding:3px 5px;margin-left:15px;cursor:pointer;color:#333;font-size:12px!important;border:1px solid #777;border-radius:4px;min-height:30px;background-color:#eee;" title="删除数据后将刷新页面">删除当前网站数据</button></p>`
+                    `<p style="color:indigo;height:22px">上次保存：${fontDate} <button id="${defCon.id.seed}_c_w_d_d_" style="box-sizing:border-box;padding:3px 5px;margin-left:15px;cursor:pointer;color:#333;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;height:max-contant;min-height:30px;background-color:#eee;letter-spacing:normal" title="删除数据后将刷新页面">删除当前网站数据</button></p>`
                   ).trim();
                   qS(`#${defCon.id.seed}_c_w_d_d_`).addEventListener("click", async () => {
                     domainValue.splice(domainValueIndex, 1);
@@ -3013,7 +3078,7 @@
               const _Custom_fontlist_ = await GMgetValue("_Custom_fontlist_");
               const _Custom_fontlist__ = _Custom_fontlist_ ? _Custom_fontlist_ : defCon.encrypt(JSON.stringify(def));
               const _configure_ = await GMgetValue("_configure_");
-              const db_R = "QXV0aGVyJUUyJTlBJUExRjl5NG5nJUYwJTlGJTkyJTk2JTQw" + defCon.encrypt(defCon.scriptName);
+              const db_R = "QXV0aGVyJUUyJTlBJUExRjl5NG5nJUYwJTlGJTkyJTk2JTQw".concat(defCon.encrypt(defCon.scriptName));
               const db_0 = defCon.encrypt(new Date());
               const db_1 = _fonts_set_;
               const db_2 = _Exclude_site_;
@@ -3056,6 +3121,7 @@
                       GMsetValue("_Custom_fontlist_", defCon.encrypt(JSON.stringify(_data_4)));
                       if (_data_5) {
                         _data_5.curVersion = defCon.curVersion;
+                        _data_5.rebuild = undefined;
                         GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_data_5)));
                       } else {
                         debug("\u27A4 no configure data");
@@ -3231,12 +3297,13 @@
         domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : defaultArray;
         const _data_search_ =
           domainValue.length > 6
-            ? `<p style="display:flex;justify-content:left;align-items:center"><input id="${defCon.id.seed}_d_s_" style="box-sizing:content-box;width:50%;height:22px;font:normal 16px/1.5 monospace,sans-serif!important;border:2px solid #777;border-radius:4px;margin:4px 6px;padding:2px 15px"><button id="${defCon.id.seed}_d_s_s_" style="box-sizing:border-box;background-color:#efefef!important;color:#333!important;vertical-align:initial;padding:3px 10px;margin:0;cursor:pointer;font-size:12px!important;border:1px solid #777;border-radius:4px;min-width:60px;min-height:30px">查 询</button><button id="${defCon.id.seed}_d_s_c_" style="box-sizing:border-box;background-color:#efefef!important;color:#333!important;vertical-align:initial;margin:0 0 0 4px;padding:3px 10px;cursor:pointer;font-size:12px!important;border:1px solid #777;border-radius:4px;min-width:60px;min-height:30px">清 除</button></p>`
+            ? `<p style="display:flex;justify-content:left;align-items:center"><input id="${defCon.id.seed}_d_s_" style="box-sizing:content-box;width:50%;height:22px;font:normal 16px/1.5 monospace,sans-serif!important;border:2px solid #777;border-radius:4px;margin:4px 6px;padding:2px 15px"><button id="${defCon.id.seed}_d_s_s_" style="box-sizing:border-box;background:#eee;color:#333!important;vertical-align:initial;padding:3px 10px;margin:0;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;min-width:60px;min-height:30px;letter-spacing:normal">查 询</button><button id="${defCon.id.seed}_d_s_c_" style="box-sizing:border-box;background:#eee;color:#333!important;vertical-align:initial;margin:0 0 0 4px;padding:3px 10px;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;min-width:60px;min-height:30px;letter-spacing:normal">清 除</button></p>`
             : ``;
         for (let i = 0; i < domainValue.length; i++) {
           Contents += String(
-            `<li id="${defCon.id.seed}_d_d_l_${i}" style="list-style:none;font-size:14px!important;font-style:normal;padding:5px;margin:0;color:#555">
-              <span>[<a id="${defCon.id.seed}_d_d_l_s_${i}" style="padding:3px;cursor:pointer;color:crimson;font-size:14px!important">删除</a>]</span>
+            `<li id="${defCon.id.seed}_d_d_l_${i}"
+              style="margin:0;padding:5px;list-style:none;font:normal 400 14px/140% 'Microsoft YaHei',system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;color:#555">
+              <span>[<a id="${defCon.id.seed}_d_d_l_s_${i}" style="display:inline;padding:3px;cursor:pointer;color:crimson;font-size:14px!important">删除</a>]</span>
               <span>${i + 1}. ${filterHtml(domainValue[i].domain)} - ${dateFormat("YYYY/mm/dd HH:MM:SS", new Date(domainValue[i].fontDate))}</span>
             </li>`
           ).trim();
@@ -3244,7 +3311,7 @@
         let frDialog = new frDialogBox({
           trueButtonText: "确认操作，保存数据",
           neutralButtonText: "取 消",
-          messageText: `<p style="font-size:14px!important;color:darkred">请谨慎操作，保存后生效，已删除的数据将不可恢复！</p>${_data_search_}<ul id="${defCon.id.seed}_d_d_" style="margin:0!important;padding:0!important;list-style:none!important;overflow:auto;max-height:190px;white-space:nowrap">${Contents}</ul>`,
+          messageText: `<p style="font-size:14px!important;color:darkred">请谨慎操作，保存后生效，已删除的数据将不可恢复！</p>${_data_search_}<ul id="${defCon.id.seed}_d_d_" style="margin:0!important;padding:0!important;list-style:none!important;overflow-x:hidden;max-height:190px;white-space:nowrap">${Contents}</ul>`,
           titleText: "网站个性化设置数据列表：",
         });
         const items = document.querySelectorAll(`#${defCon.id.seed}_d_d_ li span>a[id^="${defCon.id.seed}_d_d_l_s_"]`);
@@ -3376,7 +3443,7 @@
           } catch (e) {
             error("\u27A4 reportError:", e);
           }
-        }, Math.round(1e3 * Math.random()));
+        }, Math.round(2e3 * Math.random()));
       }
     }
 
@@ -3439,6 +3506,21 @@
           );
         }
       }
+    }
+
+    function filteToCDB(str, tmp = "") {
+      for (let i = 0; i < str.length; i++) {
+        if (str.charCodeAt(i) === 12288) {
+          tmp += String.fromCharCode(str.charCodeAt(i) - 12256);
+          continue;
+        }
+        if (str.charCodeAt(i) > 65280 && str.charCodeAt(i) < 65375) {
+          tmp += String.fromCharCode(str.charCodeAt(i) - 65248);
+        } else {
+          tmp += String.fromCharCode(str.charCodeAt(i));
+        }
+      }
+      return tmp;
     }
 
     function filterHtml(html) {
