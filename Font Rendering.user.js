@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.11.06.1
+// @version           2021.11.07.1
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -312,6 +312,29 @@
   } catch (e) {
     error("\u27A4 supportsPassive:", e.name);
   }
+
+  const definePropertyForMouseEvent = function (t) {
+    Object.defineProperties(MouseEvent.prototype, {
+      clientX: {
+        get: function () {
+          return this.x / t;
+        },
+        configurable: true,
+      },
+      clientY: {
+        get: function () {
+          return this.y / t;
+        },
+        configurable: true,
+      },
+      pageX: {
+        get: function () {
+          return this.x / t;
+        },
+        configurable: true,
+      },
+    });
+  };
 
   /* Initialized important functions */
 
@@ -799,8 +822,8 @@
           window.removeEventListener("mouseup", mouseUpFun);
         });
         const bbox = thisClass._gradientBlack.getBoundingClientRect();
-        this._mouseX = e.clientX - bbox.left;
-        this._mouseY = e.clientY - bbox.top;
+        this._mouseX = e.x - bbox.left;
+        this._mouseY = e.y - bbox.top;
         this.mouseBorder();
         this.setValue(heightAddLAndT_ToRGB(this.height, this.position.x, this.position.y));
         this.updatePicker();
@@ -812,7 +835,7 @@
           window.removeEventListener("mouseup", mouseUpFunBar);
         });
         const bbox = thisClass._rightBar.getBoundingClientRect();
-        this._height = e.clientY - bbox.top;
+        this._height = e.y - bbox.top;
         this.mouseBorderBar();
         this.setValue(heightAddLAndT_ToRGB(this.height, this.position.x, this.position.y));
         this.updatePicker();
@@ -832,8 +855,8 @@
           e.preventDefault();
           e = e.touches[0];
           const bbox = thisClass._gradientBlack.getBoundingClientRect();
-          this._mouseX = e.clientX - bbox.left;
-          this._mouseY = e.clientY - bbox.top;
+          this._mouseX = e.x - bbox.left;
+          this._mouseY = e.y - bbox.top;
           this.mouseBorder();
           this.setValue(heightAddLAndT_ToRGB(this.height, this.position.x, this.position.y));
           this.updatePicker();
@@ -842,7 +865,7 @@
           e.preventDefault();
           e = e.touches[0];
           const bbox = this._rightBar.getBoundingClientRect();
-          this._height = e.clientY - bbox.top;
+          this._height = e.y - bbox.top;
           this.mouseBorderBar();
           this.setValue(heightAddLAndT_ToRGB(this.height, this.position.x, this.position.y));
           this.updatePicker();
@@ -1710,15 +1733,15 @@
           trueButtonText: "好，去看看",
           falseButtonText: "不，算了吧",
           messageText: String(
-            `<p><span style="font-style:italic;font-weight:bold;font-size:22px;color:tomato">您好！</span>这是您首次使用<strong style="padding:0 2px;font-style:italic">${defCon.scriptName}</strong>的新版本<span style="padding:0 2px;color:tomato;font:italic 900 18px/140% Candara,Airal">V${defCon.curVersion}</span>，近期更新内容：</p>
+            `<p><span style="font-style:italic;font-weight:bold;font-size:22px;color:crimson">您好！</span>这是您首次使用<strong style="padding:0 2px;font-style:italic;font-weight:900">${defCon.scriptName}</strong>的新版本<span style="padding:0 2px;color:tomato;font:italic 900 18px/140% Candara,Airal">V${defCon.curVersion}</span>，近期更新内容：</p>
             <p><ul id="${defCon.id.seed}_update">
+              <li class="${defCon.id.seed}_fix">修正包含拖拽方法网站的坐标位移问题（实验性）<b style="color:crimson">new!</b></li>
               <li class="${defCon.id.seed}_new">新增自定义字体添加辅助工具，优化输入格式的兼容性。</li>
               <li class="${defCon.id.seed}_fix">优化脚本配置页面样式，修正CSSbugs，兼容更多网站。</li>
               <li class="${defCon.id.seed}_fix">优化精简既定字体表，优化字体渲染效果。</li>
               <li class="${defCon.id.seed}_fix">修正其他bugs，优化代码。</li>
-              <li class="${defCon.id.seed}_wng">由于渲染效果优化，建议您重新配置以获得最佳效果。</li>
             </ul></p>
-            <p>建议您先看看 <strong style="color:tomato">新版帮助文档</strong> ，去看一下吗？</p>`
+            <p>建议您先看看 <strong style="color:crimson;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
           ).trim(),
           titleText: "温馨提示",
         });
@@ -1854,6 +1877,7 @@
     }
     let bodyZoom = "";
     if (CONST.fontSize >= 0.8 && CONST.fontSize <= 1.5 && isFontsize && CONST.fontSize !== 1) {
+      definePropertyForMouseEvent(CONST.fontSize);
       bodyZoom = String(
         `body{` +
           String(
