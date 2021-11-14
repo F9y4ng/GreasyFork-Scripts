@@ -1,5 +1,5 @@
 // ==UserScript==
-// @version     2021.11.11.1
+// @version     2021.11.14.1
 // @author      F9y4ng
 // @name        字体渲染（自用脚本）
 // @name:zh     字体渲染（自用脚本）

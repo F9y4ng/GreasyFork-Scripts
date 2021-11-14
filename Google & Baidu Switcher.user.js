@@ -5,7 +5,7 @@
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:ja         Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version         3.8.20211111.1
+// @version         3.8.20211114.1
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:zh  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
@@ -31,7 +31,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            修正bugs，优化代码。
+// @note            修正Microsoft Edge版本95.0.1020.53在google下的样式异常。（似乎是小范围的灰度测试版本）
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -1398,7 +1398,7 @@
                 }
                 // Google fixed
                 if (curretSite.SiteTypeID === newSiteType.GOOGLE) {
-                  qS(SpanID).parentNode.style.width = "auto";
+                  qS(SpanID).parentNode.style.width = "100%";
                   qS(SpanID).parentNode.style.minWidth = "max-content";
                 }
               }

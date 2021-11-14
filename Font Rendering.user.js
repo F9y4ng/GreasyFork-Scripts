@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.11.11.1
+// @version           2021.11.14.1
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -557,15 +557,14 @@
   /* Redefine Propertise */
 
   const definePropertyForZoom = function (t) {
-    const setValue = (s, g, mod) => {
+    const setValue = (s, g, mod, z = 0) => {
       const f = getBrowser.type("core").Gecko;
       switch (mod) {
         case 1:
           if (s.target.parentNode && s.target.parentNode !== document) {
-            return s.target.parentNode.getBoundingClientRect()[g] / (f ? t : 1);
-          } else {
-            return 0;
+            z = s.target.parentNode.getBoundingClientRect()[g] / (f ? t : 1);
           }
+          return z;
         case 2:
           return 0 - s.getBoundingClientRect()[g] / t;
       }
@@ -1408,8 +1407,8 @@
           const inputFont = qS(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`);
           if (ffaceT.checked) {
             const cfl = await GMgetValue("_Custom_fontlist_");
-            const cusFontList = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
-            fontCheck = unique([...fontCheck, ...cusFontList]);
+            const cusFontCheck = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
+            fontCheck = unique([...fontCheck, ...cusFontCheck]);
             fontCheck.forEach(item => {
               if (item.en === defCon.refont || convert2Unicode(item.ch) === defCon.refont) {
                 defCon.curFont = item.ch;
@@ -1538,7 +1537,7 @@
                 return a.sort - b.sort;
               });
               fontData.forEach(item => {
-                dlshow.that[0].innerHTML += String(`<dd style="font-family:'${item.en}'!important" sort="${item.sort}" value="${item.en}">${item.ch}</dd>`);
+                dlshow.that[0].innerHTML += String(`<dd title="${item.ch}" style="font-family:'${item.en}'!important" sort="${item.sort}" value="${item.en}">${item.ch}</dd>`);
               });
             }
             clickEvent();
@@ -1571,7 +1570,7 @@
             fontData.forEach(item => {
               if (searchReg.test(item.ch) || searchReg.test(item.en)) {
                 searchResult = true;
-                dlshow.that[0].innerHTML += String(`<dd style="font-family:'${item.en}'!important" sort="${item.sort}" value="${item.en}">${item.ch}</dd>`);
+                dlshow.that[0].innerHTML += String(`<dd title="${item.ch}" style="font-family:'${item.en}'!important" sort="${item.sort}" value="${item.en}">${item.ch}</dd>`);
               }
             });
             if (!searchResult) {
@@ -1616,8 +1615,8 @@
                       const inputFont = qS(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`);
                       if (ffaceT.checked) {
                         const cfl = await GMgetValue("_Custom_fontlist_");
-                        const cusFontList = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
-                        fontCheck = unique([...fontCheck, ...cusFontList]);
+                        const cusFontCheck = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
+                        fontCheck = unique([...fontCheck, ...cusFontCheck]);
                         fontCheck.forEach(item => {
                           if (item.en === defCon.refont || convert2Unicode(item.ch) === defCon.refont) {
                             defCon.curFont = item.ch;
@@ -1697,7 +1696,7 @@
     fontSize: 1.0,
     fontStroke: getBrowser.type("core").Gecko ? 0.04 : 0.0,
     fontShadow: getBrowser.type("core").Gecko ? 1.0 : 1.5,
-    shadowColor: getBrowser.type("core").Gecko ? "#8E8E8E" : "#7B7B7B",
+    shadowColor: getBrowser.type("core").Gecko ? "#808080" : "#7B7B7B",
     fontCSS: `:not(i):not(.fa):not([class*='icon']):not([class*='logo']):not([class*='code'])`,
     fontEx: `input,select,button,textarea,kbd,pre,pre *,code,code *`,
   };
@@ -1773,21 +1772,23 @@
 
     const bool = true;
     const res = Boolean(rebuild);
-    if (curWindowtop && res === bool && rebuild !== undefined) {
-      GMdeleteValue("_fonts_set_");
-      GMdeleteValue("_Exclude_site_");
-      GMdeleteValue("_domains_fonts_set_");
-      GMdeleteValue("_Custom_fontlist_");
-      _config_data_.rebuild = !bool;
-      _config_data_.curVersion = undefined;
-      GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
-      debug("\u27A4 %cData has been rebuilt: %s", "font-style:italic;background-color:red;color:snow", res === bool);
-    } else if (rebuild === undefined) {
-      _config_data_.rebuild = !bool;
-      GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
-      debug(`\u27A4 %c${!curVersion ? "Configdata is undefined, rebuilding!" : "Data has been restored!"}`, `font-style:italic;color:${!curVersion ? "crimson" : "dodgerblue"}`);
-    } else {
-      debug("\u27A4 %cGood data status: %s", "font-style:italic;color:green", curVersion === defCon.curVersion);
+    if (curWindowtop) {
+      if (res === bool && rebuild !== undefined) {
+        GMdeleteValue("_fonts_set_");
+        GMdeleteValue("_Exclude_site_");
+        GMdeleteValue("_domains_fonts_set_");
+        GMdeleteValue("_Custom_fontlist_");
+        _config_data_.rebuild = !bool;
+        _config_data_.curVersion = undefined;
+        GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
+        debug("\u27A4 %cData has been rebuilt: %s", "font-style:italic;background-color:red;color:snow", res === bool);
+      } else if (rebuild === undefined) {
+        _config_data_.rebuild = !bool;
+        GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
+        debug(`\u27A4 %c${!curVersion ? "Configdata is undefined, rebuilding!" : "Data has been restored!"}`, `font-style:italic;color:${!curVersion ? "crimson" : "dodgerblue"}`);
+      } else {
+        debug("\u27A4 %cGood data status: %s", "font-style:italic;color:green", curVersion === defCon.curVersion);
+      }
     }
 
     /* DialogBox for the first visit after upgrading */
@@ -1800,9 +1801,8 @@
           messageText: String(
             `<p><span style="font-style:italic;font-weight:bold;font-size:20px;color:tomato">您好！</span>这是您首次运行<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="margin-left:3px;color:tomato;font:italic 900 22px/1.5 Candara,monospace!important">V${defCon.curVersion}</span>，以下为更新内容：</p>
             <p><ul id="${defCon.id.seed}_update">
-              <li class="${defCon.id.seed}_wng">由于Firefox(Gecko)内核的对Css及Javascript的兼容性原因，请谨慎在Firefox中使用字体缩放功能。</li>
-              <li class="${defCon.id.seed}_fix">修正字体缩放所引起的坐标漂移、位移异常问题。<span style="color:tomato;font-weight:900">Beta!</span></li>
-              <li class="${defCon.id.seed}_fix">修正其他bugs，优化代码。</li>
+              <li class="${defCon.id.seed}_fix">修正设置页面的样式问题，优化超长字体名的截取。</li>
+              <li class="${defCon.id.seed}_fix">修正一些bugs，优化代码。</li>
             </ul></p>
             <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
           ).trim(),
@@ -1994,20 +1994,20 @@
     const fontStyle_container = String(
       `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;border-radius:12px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 20px);z-index:999999;padding:4px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.container} *{line-height:1.5!important;font-size:16px;font-weight:700;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;text-shadow:initial!important;-webkit-text-stroke:initial!important}` +
         `#${defCon.id.container} fieldset{border:2px groove #67a5df!important;border-radius:10px;padding:4px 6px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:475px}#${defCon.id.container} legend{line-height:20px;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;background:#f0f6ff!important;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{display:inherit;list-style:none;margin:3px 0;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default;min-width:-moz-available;min-width:-webkit-fill-available;user-select:none}#${defCon.id.container} ul li:before{display:none}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden;}#${defCon.id.container} .${defCon.class.help}:hover{cursor:help}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{padding:0;margin:0;width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50%;-webkit-transform:rotate(360deg);-webkit-animation:rotation 5s linear infinite;-o-animation:rotation 5s linear infinite;animation:rotation 5s linear infinite}` +
-        `#${defCon.id.fontList}{padding:2px 10px 0 6px;min-height:75px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex!important;align-items:center;justify-content:space-between}#${defCon.id.fontSize}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.shadowColor}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;padding:2px 10px;min-height:45px;margin:4px;width:auto}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${defCon.id.submit}{padding:2px 10px;height:40px}` +
-        `#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;color:#111;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${defCon.id.fontList} .${defCon.class.label} span{color:#fff;font-size:16px!important;font-weight:400;height:max-content;width:max-content;min-width:12px;max-width:205px;padding:5px;background:#67a5df;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap}#${defCon.id.fontList} .${defCon.class.close}{width:12px}#${defCon.id.fontList} .${defCon.class.close}:hover{color:tomato;background-color:#2D7DCA;border-radius:2px}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-x:hidden;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:6px 6px 0 6px;margin:0 0 6px 0;width:calc(100%);min-width:calc(100% - 14px);max-width:fit-content;max-width:-moz-min-content;max-height:80px;min-height:40px;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selectFontId} span.${defCon.class.spanlabel},#${defCon.id.selector} span.${defCon.class.spanlabel}{margin:0!important;width:auto;display:block!important;padding:0 0 4px 0;color:#333;border:0;text-align:left!important;background-color:transparent!important}` +
-        `#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} input{text-overflow:ellipsis;overflow:hidden;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:1px 15px!important;margin:0;width:calc(100% - 32px);max-width:calc(100% - 32px);min-width:calc(100% - 32px);height:36px!important;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:16px!important;font-weight:700;text-indent:0;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font:normal 700 16px/1.5 "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font:normal 700 16px/1.5 "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:4px 0 0 0;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:4px 8px;width:auto;min-width:calc(60%);max-width:calc(100% - 72px);max-height:298px;font-size:18px!important;white-space:nowrap;background-color:#fff;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;margin:1px 8px;padding:5px 0;font-weight:400;font-size:21px!important;min-width:100%;max-width:100%;width:-moz-available;width:-webkit-fill-available;}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff}` +
-        `.${defCon.class.checkbox}{display:none!important}.${defCon.class.checkbox}+label{cursor:pointer;padding:0;margin:0;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:76px;height:32px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;box-sizing:content-box}.${defCon.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${defCon.class.checkbox}+label::after{position:absolute;top:0;left:28px;border-radius:100px;padding:5px;font-size:16px;font-weight:700;font-style:normal;color:#fff;content:"OFF"}.${defCon.class.checkbox}:checked+label{cursor:pointer;margin:0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.${defCon.class.checkbox}:checked+label::after{content:"ON";left:10px}.${defCon.class.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px}#${defCon.id.fface} label,#${defCon.id.fface}+label::after,#${defCon.id.fface}+label::before,#${defCon.id.smooth} label,#${defCon.id.smooth}+label::after,#${defCon.id.smooth}+label::before{-webkit-transition:all .3s ease-in;transition:all .3s ease-in}` +
+        `#${defCon.id.fontList}{padding:2px 10px 0 10px;min-height:73px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex!important;align-items:center;justify-content:space-between}#${defCon.id.fontSize}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.shadowColor}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;padding:2px 10px;min-height:45px;margin:4px;width:auto}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${defCon.id.submit}{padding:2px 10px;height:40px}` +
+        `#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${defCon.id.fontList} .${defCon.class.label} span{box-sizing:border-box;color:#fff;font-size:16px!important;font-weight:400;height:max-content;width:max-content;min-width:12px;max-width:210px;padding:5px;background:#67a5df;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap}#${defCon.id.fontList} .${defCon.class.close}{width:12px}#${defCon.id.fontList} .${defCon.class.close}:hover{color:tomato;background-color:#2D7DCA;border-radius:2px}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-x:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;padding:6px 6px 0 6px;margin:0 0 6px 0;width:100%;min-width:100%;max-width:fit-content;max-width:-moz-min-content;max-height:90px;min-height:45px;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selectFontId} span.${defCon.class.spanlabel},#${defCon.id.selector} span.${defCon.class.spanlabel}{margin:0!important;width:auto;display:block!important;padding:0 0 4px 0;color:#333;border:0;text-align:left!important;background-color:transparent!important}` +
+        `#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} input{text-overflow:ellipsis;overflow:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;padding:1px 32px 1px 2px;margin:0;width:100%;max-width:100%;min-width:100%;height:42px!important;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:16px!important;font-weight:700;text-indent:8px;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font:normal 700 16px/1.5 "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font:normal 700 16px/1.5 "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:4px 0 0 0;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:4px 8px;width:auto;min-width:calc(60%);max-width:calc(100% - 68px);max-height:298px;font-size:18px!important;white-space:nowrap;background-color:#fff;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;margin:1px 8px;padding:5px 0;font-weight:400;font-size:21px!important;min-width:100%;max-width:100%;width:-moz-available;width:-webkit-fill-available;}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff}` +
+        `.${defCon.class.checkbox}{display:none!important}.${defCon.class.checkbox}+label{cursor:pointer;padding:0;margin:0 2px 0 0;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:76px;height:32px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;box-sizing:content-box}.${defCon.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${defCon.class.checkbox}+label::after{position:absolute;top:0;left:28px;border-radius:100px;padding:5px;font-size:16px;font-weight:700;font-style:normal;color:#fff;content:"OFF"}.${defCon.class.checkbox}:checked+label{cursor:pointer;margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.${defCon.class.checkbox}:checked+label::after{content:"ON";left:10px}.${defCon.class.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px}#${defCon.id.fface} label,#${defCon.id.fface}+label::after,#${defCon.id.fface}+label::before,#${defCon.id.smooth} label,#${defCon.id.smooth}+label::after,#${defCon.id.smooth}+label::before{-webkit-transition:all .3s ease-in;transition:all .3s ease-in}` +
         `#${defCon.id.fontShadow} div.${defCon.class.flex}:before,#${defCon.id.fontShadow} div.${defCon.class.flex}:after,#${defCon.id.fontStroke} div.${defCon.class.flex}:before,#${defCon.id.fontStroke} div.${defCon.class.flex}:after,#${defCon.id.fontSize} div.${defCon.class.flex}:before,#${defCon.id.fontSize} div.${defCon.class.flex}:after{display:none}#${defCon.id.fontShadow} #${defCon.id.shadowSize},#${defCon.id.fontStroke} #${defCon.id.strokeSize},#${defCon.id.fontSize} #${defCon.id.fontZoom}{color:#111!important;width:56px!important;text-indent:0;margin:0 10px 0 0!important;height:32px!important;font-size:17px!important;font-weight:400!important;font-family:Impact,Times,serif!important;border:#67a5df 2px solid!important;border-radius:4px;text-align:center;box-sizing:content-box;padding:0;background:#fafafa!important}.${defCon.class.flex}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;width:auto;min-width:100%}.${defCon.class.slider} input{visibility:hidden}` +
-        `#${defCon.id.shadowColor} *{box-sizing:content-box}#${defCon.id.cps}{margin:0}#${defCon.id.shadowColor} .${defCon.class.colorPicker}{width:32px;height:30px;cursor:pointer;position:relative;border:2px solid #181a25;border-radius:4px;}#${defCon.id.shadowColor} .${defCon.class.colorPicker2}{width:auto;margin:0 0 0 5px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2} #${defCon.id.color}{width:123px!important;height:32px!important;text-indent:0;font-size:18px!important;font-weight:400!important;background:#fafafa;box-sizing:content-box;font-family:Impact,Times,serif!important;color:#333!important;border:#67a5df 2px solid!important;border-radius:4px;padding:0;margin:0;text-align:center}` +
-        `#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{font:bold 14px/140% "Roboto Mono",Monaco,"Courier New",sans-serif!important;min-width:246px;max-width:calc(100% - 15px);width:calc(100% - 15px)!important;height:60px;min-height:60px;line-height:140%;resize:none;border:2px solid #67a5df!important;border-radius:6px;box-sizing:content-box;padding:5px;color:#0b5b9c!important;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px rgba(0,0,0,.2);border-radius:10px;background:#ededed}#${defCon.id.fontEx} textarea{background:#fafafa!important}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}.${defCon.class.switch}{box-sizing:content-box;display:inline-block;float:right;margin-right:4px;padding:0 6px;border:2px double #67a5df;color:#0a68c1;border-radius:4px}#${defCon.id.cSwitch}:hover,#${defCon.id.eSwitch}:hover{cursor:pointer;user-select:none}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent)!important;background-size:50px 50px;background-color:#f7fff7!important}` +
+        `#${defCon.id.shadowColor} *{box-sizing:content-box}#${defCon.id.cps}{margin:0}#${defCon.id.shadowColor} .${defCon.class.colorPicker}{width:32px;height:30px;cursor:pointer;position:relative;border:2px solid #181a25;border-radius:4px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2}{width:auto;margin:0 0 0 5px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2} #${defCon.id.color}{width:125px!important;min-width:125px;height:36px!important;text-indent:0;font-size:18px!important;font-weight:400!important;background:#fafafa;box-sizing:border-box;font-family:Impact,Times,serif!important;color:#333!important;border:#67a5df 2px solid!important;border-radius:4px;padding:0;margin:0;text-align:center}` +
+        `#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{font:bold 14px/140% "Roboto Mono",Monaco,"Courier New",sans-serif!important;min-width:249px;max-width:calc(100% - 15px);width:calc(100% - 15px)!important;height:60px;min-height:60px;max-height:60px;resize:none;border:2px solid #67a5df!important;border-radius:6px;box-sizing:content-box;padding:5px;margin:0;color:#0b5b9c!important;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px rgba(0,0,0,.2);border-radius:10px;background:#ededed}#${defCon.id.fontEx} textarea{background:#fafafa!important}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}.${defCon.class.switch}{box-sizing:content-box;display:inline-block;float:right;margin-right:4px;padding:0 6px;border:2px double #67a5df;color:#0a68c1;border-radius:4px}#${defCon.id.cSwitch}:hover,#${defCon.id.eSwitch}:hover{cursor:pointer;user-select:none}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent)!important;background-size:50px 50px;background-color:#f7fff7!important}` +
         `#${defCon.id.submit} button{box-sizing:border-box;background-image:initial;background-color:#67a5df;color:#fff!important;margin:0;padding:5px 10px;cursor:pointer;border:2px solid #6ba7e0;border-radius:6px;width:auto;min-width:min-content;min-height:35px;font:normal 600 14px/1.5 "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${defCon.id.submit} button:hover{box-shadow:0 0 5px rgba(0,0,0,.4)!important}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.submit} #${defCon.id.backup}{margin:0 10px 0 0;display:none}.${defCon.class.anim}{-webkit-animation:jiggle 1.8s ease-in infinite;animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}`
     );
     const fontStyle_cp = String(
       `#${defCon.id.cpm}{width:240px;height:216px;margin:calc(-90%) 0 0 2px;z-index:999;position:fixed;display:none;box-sizing:content-box;background-color:#d1f2fb;padding:10px;box-shadow:0 0 10px #000;border-radius:6px}.${defCon.class.cp},.${defCon.class.cp} *,.${defCon.class.cp} ::after,.${defCon.class.cp} ::before{border:0;margin:0;padding:0;display:block;box-sizing:border-box}.${defCon.class.cp}{background-color:#fff;display:block;min-width:128px;min-height:128px;position:relative}.${defCon.class.cp}>.${defCon.class.cprb}{border:solid #000 1px;background:linear-gradient(red,#f0f,#00f,#0ff,#0f0,#ff0,red);width:16px;height:calc(100% - 26px);position:absolute;right:12px;top:12px}.${defCon.class.cp} .${defCon.class.cprbp}{position:absolute;width:100%;height:1px}.${defCon.class.cp} .${defCon.class.cprbp}::after,.${defCon.class.cp} .${defCon.class.cprbp}::before{content:"";width:10px;height:7px;position:absolute;background:0 0;border:solid transparent 5px;border-width:3.5px 5px;top:-3px}.${defCon.class.cp} .${defCon.class.cprbp}::before{border-left:solid #404040 5px;left:-6px}.${defCon.class.cp} .${defCon.class.cprbp}::after{border-right:solid #404040 5px;right:-6px}.${defCon.class.cp}>.${defCon.class.cpg}{position:absolute;width:calc(100% - 50px);height:calc(100% - 26px);border:solid #000 1px;left:12px;top:12px}.${defCon.class.cp}>.${defCon.class.cpg},.${defCon.class.cp}>.${defCon.class.cpg} *{cursor:crosshair;box-sizing:content-box}.${defCon.class.cp}>.${defCon.class.cpgb}{background:linear-gradient(rgba(0,0,0,0),#000)}.${defCon.class.cp}>.${defCon.class.cp}-color-block{position:absolute;border:solid #000 1px;background:#fff;width:calc(100% - 104px);max-width:72px;height:18px;left:12px;bottom:8px}.${defCon.class.cp} .${defCon.class.cpc}{background-color:transparent;position:absolute}.${defCon.class.cp} .${defCon.class.cpc}::before{border-radius:50%;width:11px;height:11px;border:solid #000 1px;background-color:transparent;position:relative;left:-6px;top:-6px;display:block;content:""}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcb}::before{border-color:#000}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcw}::before{border-color:#fff}`
     );
     const fontStyle_tooltip = String(
-      `.${defCon.class.tooltip}{position:relative;cursor:help;user-select:none}.${defCon.class.tooltip}:active .${defCon.class.tooltip}{display:block}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;box-sizing:content-box;position:absolute;z-index:999999;border:2px solid #b8c4ce;border-radius:6px;padding:10px;width:250px;max-width:250px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:14px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} em{font-style:normal!important}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:140%;text-indent:0!important}.${defCon.class.ps1}{position:relative;top:-33px;height:0;width:24px;margin:0;padding:0;right:8px;float:right}.${defCon.class.ps2}{top:35px;right:-14px}.${defCon.class.ps3}{top:-197px;margin-left:-5px}.${defCon.class.ps4}{top:-175px;margin-left:-5px}`
+      `.${defCon.class.tooltip}{position:relative;cursor:help;user-select:none}.${defCon.class.tooltip}:active .${defCon.class.tooltip}{display:block}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;box-sizing:content-box;position:absolute;z-index:999999;border:2px solid #b8c4ce;border-radius:6px;padding:10px;width:242px;max-width:242px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:14px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} em{font-style:normal!important}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:140%;text-indent:0!important}.${defCon.class.ps1}{position:relative;top:-33px;height:0;width:24px;margin:0;padding:0;right:5px;float:right}.${defCon.class.ps2}{top:35px;right:-7px}.${defCon.class.ps3}{top:-197px;margin-left:-1px}.${defCon.class.ps4}{top:-175px;margin-left:-1px}`
     );
     const fontStyle_Progress = String(
       `.${defCon.class.range}{--primary-color:#67a5df;--value-offset-y:var(--ticks-gap);--value-active-color:white;--value-background:transparent;--value-background-hover:var(--primary-color);--value-font:italic bold 14px/14px monospace,arial;--fill-color:var(--primary-color);--progress-background:rgb(223, 223, 223);--progress-radius:20px;--show-min-max:none;--track-height:calc(var(--thumb-size) / 2);--min-max-font:12px arial;--min-max-opacity:0.5;--min-max-x-offset:10%;--thumb-size:22px;--thumb-color:white;--thumb-shadow:0 0 3px rgba(0, 0, 0, 0.4),0 0 1px rgba(0, 0, 0, 0.5) inset,0 0 0 99px var(--thumb-color) inset;--thumb-shadow-active:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px var(--primary-color) inset,0 0 3px rgba(0, 0, 0, 0.4);--thumb-shadow-hover:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px darkorange inset,0 0 3px rgba(0, 0, 0, 0.4);--ticks-thickness:1px;--ticks-height:5px;--ticks-gap:var(--ticks-height, 0);--ticks-color:transparent;--step:1;--ticks-count:(var(--max) - var(--min))/var(--step);--maxTicksAllowed:1000;--too-many-ticks:Min(1, Max(var(--ticks-count) - var(--maxTicksAllowed), 0));--x-step:Max(var(--step), var(--too-many-ticks) * (var(--max) - var(--min)));--tickIntervalPerc_1:Calc((var(--max) - var(--min)) / var(--x-step));--tickIntervalPerc:calc((100% - var(--thumb-size)) / var(--tickIntervalPerc_1) * var(--tickEvery, 1));--value-a:Clamp(var(--min), var(--value, 0), var(--max));--value-b:var(--value, 0);--text-value-a:var(--text-value, "");--completed-a:calc((var(--value-a) - var(--min)) / (var(--max) - var(--min)) * 100);--completed-b:calc((var(--value-b) - var(--min)) / (var(--max) - var(--min)) * 100);--ca:Min(var(--completed-a), var(--completed-b));--cb:Max(var(--completed-a), var(--completed-b));--thumbs-too-close:Clamp(-1, 1000 * (Min(1, Max(var(--cb) - var(--ca) - 5, -1)) + 0.001), 1);--thumb-close-to-min:Min(1, Max(var(--ca) - 5, 0));--thumb-close-to-max:Min(1, Max(95 - var(--cb), 0))}` +
@@ -2097,7 +2097,7 @@
                   <span title="单击查看帮助">\ud83d\udd14</span>
                   <span class="${defCon.class.tooltip} ${defCon.class.ps3}">
                     <p>阴影颜色可通过点击色块激活拾色器选择，也可自定义填写，格式支持: <em style="color:#cecece">RGB, RGBA, HEX{3}, HEX{6}</em>。纯白色的所有格式表示自身颜色 <em style="color:#cecece">currentcolor</em></p>
-                    <p><em style="color:darkred">注意：输入数值会自动转化为HEX{6}，但数值保持一致性。错误格式会被替换为上次保存的数据。</em></p>
+                    <p><em style="color:darkred">注意：输入数值会自动转化为HEX，但数值保持一致性。错误格式会被替换为上次保存的数据。</em></p>
                   </span>
                 </span>
               </div>
@@ -2105,7 +2105,7 @@
               <div class="${defCon.class.colorPicker2}"><input title="输入颜色代码" type="text" id="${defCon.id.color}" /></div>
               <div id="${defCon.id.cpm}"></div>
             </li>
-            <li id="${defCon.id.fontCSS}">
+            <li id="${defCon.id.fontCSS}" style="min-width:${getBrowser.type("core").Gecko ? 264 : 254}px">
               <div style="margin: 0 0 6px 0">需要渲染的网页元素：
                 <span class="${defCon.class.tooltip}">
                   <span title="单击查看帮助">\ud83d\udd14</span>
@@ -2119,7 +2119,7 @@
               <textarea placeholder="请谨慎修改默认值，避免渲染失效。" id="${defCon.id.cssfun}" class="${defCon.class.readonly}"
                 title="重要参数，默认只读，双击解锁。" readonly="readonly">${CONST.fontCSS ? CONST.fontCSS : defValue.fontCSS}</textarea>
             </li>
-            <li id="${defCon.id.fontEx}">
+            <li id="${defCon.id.fontEx}" style="min-width:${getBrowser.type("core").Gecko ? 264 : 254}px">
               <div style="margin: 0 0 6px 0">排除渲染的HTML标签：
                 <span class="${defCon.class.tooltip}">
                   <span title="单击查看帮助">\ud83d\udd14</span>
@@ -2519,8 +2519,8 @@
       let ii = 1;
       if (fontReady) {
         const cfl = await GMgetValue("_Custom_fontlist_");
-        CONST.cfl = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
-        fontCheck = unique([...fontCheck, ...CONST.cfl]);
+        const cusFontCheck = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
+        fontCheck = unique([...fontCheck, ...cusFontCheck]);
         for (const font of fontCheck.values()) {
           if (checkFont.detect(font.en)) {
             if (font.en !== refont) {
@@ -2570,9 +2570,9 @@
               qS(`#${defCon.id.fonttooltip}`).addEventListener("dblclick", async () => {
                 let _Custom_fontlist_ = "";
                 const cfl = await GMgetValue("_Custom_fontlist_");
-                CONST.cfl = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
-                if (CONST.cfl.length && Array.isArray(CONST.cfl)) {
-                  CONST.cfl.forEach(item => {
+                const cusFontCheck = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
+                if (cusFontCheck.length && Array.isArray(cusFontCheck)) {
+                  cusFontCheck.forEach(item => {
                     delete item.sort;
                     _Custom_fontlist_ += JSON.stringify(item) + "\n";
                   });
@@ -2832,6 +2832,8 @@
             });
             if (await frDialog.respond()) {
               CONST.fontSelect.split(",")[0] !== defValue.fontSelect.split(",")[0] ? fontSet().fresetList(fontData) : fontSet().fdeleteList(fontData);
+              smoothT.checked !== defValue.fontSmooth ? smoothT.click() : debug("\u27A4 <fontSmooth> NOT MODIFIED");
+              ffaceT.checked !== defValue.fontFace ? ffaceT.click() : debug("\u27A4 <fontFace> NOT MODIFIED");
               if (isFontsize) {
                 zoom.value = Number(defValue.fontSize) === 1 ? "OFF" : Number(defValue.fontSize).toFixed(3);
                 zoom._value_ = Number(defValue.fontSize);
@@ -2843,12 +2845,10 @@
               setSliderProperty(drawStrock, defValue.fontStroke, 3);
               shadows.value = Number(defValue.fontShadow) === 0 ? "OFF" : Number(defValue.fontShadow).toFixed(2);
               shadows._value_ = Number(defValue.fontShadow);
-              qS(`#${defCon.id.shadowColor}`).style.display = shadows.value === "OFF" ? "none" : "flex";
               setSliderProperty(drawShadow, defValue.fontShadow, 2);
+              qS(`#${defCon.id.shadowColor}`).style.display = shadows.value === "OFF" ? "none" : "flex";
               picker.value = defValue.shadowColor;
               picker._value_ = picker.value;
-              smoothT.checked !== defValue.fontSmooth ? smoothT.click() : debug("\u27A4 <fontSmooth> NOT MODIFIED");
-              ffaceT.checked !== defValue.fontFace ? ffaceT.click() : debug("\u27A4 <fontFace> NOT MODIFIED");
               fontCssT.value = defValue.fontCSS;
               setEffectIntoSubmit(fontCssT.value, CONST.fontCSS, defCon.vals, fontCssT, submitButton);
               fontExT.value = defValue.fontEx;
@@ -2857,6 +2857,8 @@
               submit ? submit.click() : debug("\u27A4 v-Preview is", submit);
             } else {
               fontSet().fdeleteList(fontData);
+              smoothT.checked !== CONST.fontSmooth ? smoothT.click() : debug("\u27A4 <fontSmooth> NOT MODIFIED");
+              ffaceT.checked !== CONST.fontFace ? ffaceT.click() : debug("\u27A4 <fontFace> NOT MODIFIED");
               if (isFontsize) {
                 zoom.value = Number(CONST.fontSize) === 1 ? "OFF" : Number(CONST.fontSize).toFixed(3);
                 zoom._value_ = Number(CONST.fontSize);
@@ -2868,12 +2870,10 @@
               setSliderProperty(drawStrock, CONST.fontStroke, 3);
               shadows.value = Number(CONST.fontShadow) === 0 ? "OFF" : Number(CONST.fontShadow).toFixed(2);
               shadows._value_ = Number(CONST.fontShadow);
-              qS(`#${defCon.id.shadowColor}`).style.display = shadows.value === "OFF" ? "none" : "flex";
               setSliderProperty(drawShadow, CONST.fontShadow, 2);
+              qS(`#${defCon.id.shadowColor}`).style.display = shadows.value === "OFF" ? "none" : "flex";
               picker.value = CONST.shadowColor;
               picker._value_ = picker.value;
-              smoothT.checked !== CONST.fontSmooth ? smoothT.click() : debug("\u27A4 <fontSmooth> NOT MODIFIED");
-              ffaceT.checked !== CONST.fontFace ? ffaceT.click() : debug("\u27A4 <fontFace> NOT MODIFIED");
               fontCssT.value = CONST.fontCSS;
               setEffectIntoSubmit(fontCssT.value, CONST.fontCSS, defCon.vals, fontCssT, submitButton);
               fontExT.value = CONST.fontEx;
@@ -2886,12 +2886,6 @@
           });
 
           qS(`#${defCon.id.submit} .${defCon.class.submit}`).addEventListener("click", async function () {
-            const perfzoom = isFontsize ? (/[0-9]+(?:\.[0-9]{1,3})?/.test(zoom.value) ? Number(zoom.value) : Number(defValue.fontSize)) : 1;
-            const fzoom = perfzoom < 0.8 ? 0.8 : perfzoom > 1.5 ? 1.5 : perfzoom;
-            const fstrock = /[0-9]+(?:\.[0-9]{1,3})?/.test(strock.value) ? Number(strock.value) : strock.value === "OFF" ? 0 : Number(defValue.fontStroke);
-            const fshadow = /[0-9]+(?:\.[0-9]{1,2})?/.test(shadows.value) ? Number(shadows.value) : shadows.value === "OFF" ? 0 : Number(defValue.fontShadow);
-            const pickedcolor = colorshow.value;
-            const fscolor = colorReg.test(pickedcolor) ? pickedcolor : defValue.shadowColor;
             const fontlists = fontSet().fsearchList(`${defCon.id.fontName}`);
             const fontselect =
               fontlists.length > 0
@@ -2899,8 +2893,14 @@
                   ? defValue.fontSelect
                   : String(singleQuoteStr(fontlists) + defValue.fontSelect).trim()
                 : CONST.fontSelect;
-            const smooth = smoothT.checked;
             const fontface = ffaceT.checked;
+            const smooth = smoothT.checked;
+            const perfzoom = isFontsize ? (/[0-9]+(?:\.[0-9]{1,3})?/.test(zoom.value) ? Number(zoom.value) : Number(defValue.fontSize)) : 1;
+            const fzoom = perfzoom < 0.8 ? 0.8 : perfzoom > 1.5 ? 1.5 : perfzoom;
+            const fstrock = /[0-9]+(?:\.[0-9]{1,3})?/.test(strock.value) ? Number(strock.value) : strock.value === "OFF" ? 0 : Number(defValue.fontStroke);
+            const fshadow = /[0-9]+(?:\.[0-9]{1,2})?/.test(shadows.value) ? Number(shadows.value) : shadows.value === "OFF" ? 0 : Number(defValue.fontShadow);
+            const pickedcolor = colorshow.value;
+            const fscolor = colorReg.test(pickedcolor) ? pickedcolor : defValue.shadowColor;
             const fcss = fontCssT.value;
             const cssfun = fcss ? fcss.replace(/"|`/g, "'") : defValue.fontCSS;
             const fex = fontExT.value;
@@ -3136,8 +3136,8 @@
       defCon.curFont = def;
       if (_isfontface_) {
         const cfl = await GMgetValue("_Custom_fontlist_");
-        CONST.cfl = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
-        fontCheck = unique([...fontCheck, ...CONST.cfl]);
+        const cusFontCheck = cfl ? JSON.parse(defCon.decrypt(cfl)) : defaultArray;
+        fontCheck = unique([...fontCheck, ...cusFontCheck]);
         fontCheck.forEach(item => {
           if (item.en === refont || convert2Unicode(item.ch) === refont) {
             defCon.curFont = refont.includes("\\") ? "" : " (" + item.en + ")";
@@ -3296,12 +3296,12 @@
           if (at.value === "ON") {
             b.style = "display:none";
             a.textContent = "\u2228";
-            c.style = "height:35px;min-height:35px";
+            c.style.cssText += `height:35px;min-height:35px`;
             at.value = "OFF";
           } else {
             b.style = "display:block";
             a.textContent = "\u2227";
-            c.style = "height:110px;min-height:110px";
+            c.style.cssText += `height:110px;min-height:110px`;
             at.value = "ON";
           }
         });
