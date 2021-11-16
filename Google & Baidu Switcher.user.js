@@ -5,7 +5,7 @@
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:ja         Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version         3.8.20211114.1
+// @version         3.8.20211116.1
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:zh  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
@@ -31,7 +31,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            修正Microsoft Edge版本95.0.1020.53在google下的样式异常。（似乎是小范围的灰度测试版本）
+// @note            修正Ubuntu系统下Bing的跳转按钮的样式异常。\n新增Bing搜索网页的滚动搜索框样式。（似乎是Firefox下小范围的灰度测试版本）
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -1058,7 +1058,7 @@
                 <input type="button" title="Google一下" value="Google一下"/>
             </span>`),
         StyleCode: CONST.isUseBing
-          ? `#form{white-space:nowrap}#u{z-index:1!important}#${CONST.rndidName}{position:relative;z-index:999999999}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-1.5px}#${CONST.rndidName} #${CONST.ggyx}{margin-left:2px}#${CONST.bbyx} input{background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px!important;font-weight:bold}#${CONST.ggyx} input{background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px!important;font-weight:bold}#${CONST.ggyx} input:hover,#${CONST.bbyx} input:hover{background: #4662D9;border:1px solid #3476d2}`
+          ? `#form{white-space:nowrap}#u{z-index:1!important}#${CONST.rndidName}{position:relative;z-index:999999}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-1.5px}#${CONST.rndidName} #${CONST.ggyx}{margin-left:2px}#${CONST.bbyx} input{background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px!important;font-weight:bold}#${CONST.ggyx} input{background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px!important;font-weight:bold}#${CONST.ggyx} input:hover,#${CONST.bbyx} input:hover{background: #4662D9;border:1px solid #3476d2}`
           : `#form{white-space:nowrap}#u{z-index:1!important}#${CONST.rndidName}{position:relative;margin-left:2px;z-index:999999999}#${CONST.ggyx} input{background:#4e6ef2;border-radius:10px;cursor:pointer;height:40px;color:#fff;width:112px;border:1px solid #3476d2;text-shadow:0 0 2px #ffffff!important;font-size:16px!important}#${CONST.ggyx} input:hover{background:#4662D9;border:1px solid #3476d2;}`,
         keyStyle: keywordHighlight ? "#wrapper_wrapper em{color:#f73131!important;background-color:yellow!important;font-weight:900!important}" : "",
       },
@@ -1080,8 +1080,8 @@
                 <input type="button" title="百度一下" value="百度一下"/>
             </span>`),
         StyleCode: CONST.isUseBing
-          ? `#${CONST.rndidName}{margin:3px 4px 0 -5px;z-index:100}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd;}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-2px}.${CONST.scrollspan}{display:inline-block;margin:0;min-height:26px}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}.${CONST.scrollbars2}{display:inline-block;margin-top:-4px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}#${CONST.bdyx} input{cursor:pointer;padding:1px 1px 1px 6px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;width:90px;height:38px;font-size:15px!important;font-weight:600;color:#fff;}#${CONST.bbyx} input{cursor:pointer;padding:1px 6px 1px 1px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;width:90px;height:38px;font-size:15px!important;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover,#${CONST.bbyx} input:hover{background:#2b7de9;}`
-          : `#${CONST.rndidName}{margin:3px 4px 0 -5px;z-index:100}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd}.${CONST.scrollspan}{display:inline-block;margin:0;min-height:26px}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-size:13px!important;font-weight:normal!important; text-shadow:0 0 1px #fff!important}.${CONST.scrollbars2}{display:inline-block;margin-top:-4px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #fff!important}#${CONST.bdyx} input{cursor:pointer;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-radius:24px;width:90px;height:38px;font-size:14px!important;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover{background:#2b7de9;}`,
+          ? `#${CONST.rndidName}{position:relative;margin:3px 4px 0 -5px;z-index:100}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd;}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-2px}.${CONST.scrollspan}{display:inline-block;margin:0;min-height:26px}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}.${CONST.scrollbars2}{display:inline-block;margin-top:-4px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}#${CONST.bdyx} input{cursor:pointer;padding:1px 1px 1px 6px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;width:90px;height:38px;font-size:15px!important;font-weight:600;color:#fff;}#${CONST.bbyx} input{cursor:pointer;padding:1px 6px 1px 1px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;width:90px;height:38px;font-size:15px!important;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover,#${CONST.bbyx} input:hover{background:#2b7de9;}`
+          : `#${CONST.rndidName}{position:relative;margin:3px 4px 0 -5px;z-index:100}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd}.${CONST.scrollspan}{display:inline-block;margin:0;min-height:26px}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-size:13px!important;font-weight:normal!important; text-shadow:0 0 1px #fff!important}.${CONST.scrollbars2}{display:inline-block;margin-top:-4px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #fff!important}#${CONST.bdyx} input{cursor:pointer;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-radius:24px;width:90px;height:38px;font-size:14px!important;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover{background:#2b7de9;}`,
         keyStyle: keywordHighlight
           ? ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe{color:#ea4335!important;background-color:yellow!important;font-weight:900!important}"
           : "",
@@ -1090,7 +1090,7 @@
         SiteTypeID: 3,
         SiteName: "Bing",
         SplitName: "",
-        MainType: "#sb_go_par",
+        MainType: "#sb_search",
         HtmlCode: CONST.isUseBing
           ? String(`
           <span id="${CONST.bdyx}">
@@ -1101,7 +1101,7 @@
           </span>`)
           : ``,
         StyleCode: CONST.isUseBing
-          ? `#${CONST.rndidName}{height:44px;width:120px;margin:2px 0;z-index:999999}#${CONST.bdyx} input{cursor:pointer;min-width:60px;height:37px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px!important;font-weight:900;border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px}#${CONST.ggyx} input{cursor:pointer;min-width:60px;height:37px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;font-family:"Microsoft YaHei",sans-serif!important;font-size:16px!important;font-weight:900;border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 -3px;padding:0 18px 0 12px}.${CONST.scrollspan}{margin-right:5px!important}.${CONST.scrollbars}{text-decoration:none!important;padding-top:2px!important;border-radius:4px!important;max-height:33px;padding:0 12px!important;margin-right:2px!important}#${CONST.bdyx} input:hover,#${CONST.ggyx} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border:2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7;}`
+          ? `#${CONST.rndidName}{position:relative;z-index:999;display:inline-block;height:40px;min-width:193px;width:max-content;vertical-align:top;margin:0 0 0 8px}#${CONST.bdyx},#${CONST.ggyx}{display:inline-block}#${CONST.rndidName} span>input{box-sizing:border-box;cursor:pointer;min-width:96px;height:40px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;font:normal 900 16px/1.5 "Microsoft YaHei",sans-serif!important}#${CONST.bdyx} input{border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px}#${CONST.ggyx} input{border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 -3px;padding:0 18px 0 12px}.${CONST.scrollspan}{max-height:33px;margin:3px 3px 0 8px!important}.${CONST.scrollspan2}{max-height:30px;margin:5px 0 0 8px!important}.${CONST.scrollbars}{border-radius:4px!important;max-height:33px;padding:0 12px!important;margin-right:1px!important}.${CONST.scrollbars2}{max-height:30px}#${CONST.bdyx} input:hover,#${CONST.ggyx} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border:2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7}`
           : ``,
         keyStyle: keywordHighlight
           ? String(
@@ -1381,20 +1381,27 @@
                 if (qS(SpanID)) {
                   qS(SpanID).setAttribute("style", "float:right");
                 }
+              } else if (curretSite.SiteTypeID === newSiteType.BING) {
+                if (CONST.isUseBing) {
+                  Target.appendChild(userSpan);
+                  if (Target.parentNode.childNodes[0].tagName === "INPUT") {
+                    Target.parentNode.childNodes[0].style.width = "400px";
+                  }
+                  // Bing image fixed
+                  if (qS(".b_searchboxForm") && /^images$/.test(CONST.vim.trim())) {
+                    if (location.search.includes("view=detailV2") && CONST.isUseBing) {
+                      qS(".b_searchboxForm").setAttribute("style", "width:max-content!important;padding-right:5px!important");
+                      document.querySelectorAll(`#${CONST.rndidName} input`).forEach(item => {
+                        item.style.cssText += "height:36px!important;border-radius:6px!important;padding:0 12px!important;margin:2px -2px 0 0!important;";
+                      });
+                    }
+                  }
+                }
               } else {
                 insterAfter(userSpan, Target);
                 // Baidu image fixed
                 if (qS(SpanID) && /^baiduimage$/.test(CONST.vim.trim())) {
                   qS(SpanID).setAttribute("style", "margin-left:12px");
-                }
-                // Bing image fixed
-                if (qS(".b_searchboxForm") && /^images$/.test(CONST.vim.trim())) {
-                  if (location.href.includes("view=detailV2") && CONST.isUseBing) {
-                    qS(".b_searchboxForm").setAttribute("style", "width:max-content!important;padding-right:10px!important");
-                    document.querySelectorAll(`#${CONST.rndidName} input`).forEach(item => {
-                      item.style = "height:35px!important;border-radius:4px!important;padding:0 12px;";
-                    });
-                  }
                 }
                 // Google fixed
                 if (curretSite.SiteTypeID === newSiteType.GOOGLE) {
@@ -1434,7 +1441,7 @@
                       break;
                   }
                   if (localWindow) {
-                    location.href = decodeURI(gotoUrl + getSearchValue());
+                    top.location.href = decodeURI(gotoUrl + getSearchValue());
                   } else {
                     GMopenInTab(decodeURI(gotoUrl + getSearchValue()), defCon.options);
                   }
@@ -1465,10 +1472,12 @@
               }
               break;
             case newSiteType.BING:
-              if (/^(images|videos)$/.test(CONST.vim.trim()) && CONST.isUseBing) {
-                scrollButton(`#${CONST.rndidName}`, `${CONST.scrollspan}`, 50);
-                scrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, `${CONST.scrollbars}`, 50);
-                scrollButton(`#${CONST.rndidName} #${CONST.ggyx} input`, `${CONST.scrollbars}`, 50);
+              if (CONST.isUseBing) {
+                const spanCssName = /^(images|videos)$/.test(CONST.vim.trim()) ? CONST.scrollspan : CONST.scrollspan2;
+                const barsCssName = /^(images|videos)$/.test(CONST.vim.trim()) ? CONST.scrollbars : CONST.scrollbars2;
+                scrollButton(`#${CONST.rndidName}`, `${spanCssName}`, 50);
+                scrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, `${barsCssName}`, 50);
+                scrollButton(`#${CONST.rndidName} #${CONST.ggyx} input`, `${barsCssName}`, 50);
               } else {
                 debug(`//-> No scrolling detecting.`);
               }
