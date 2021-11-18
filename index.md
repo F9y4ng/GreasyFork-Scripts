@@ -5,6 +5,12 @@
 [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues)
 [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/login?return_to=%2FF9y4ng%2FGreasyFork-Scripts)
 
+请先根据你的浏览器**选择一个用户脚本管理器**（如TamperMonkey, ViolentMonkey）安装，然后再来**安装脚本**。
+
+(不建议使用AdGuard来安装浏览器脚本，因为脚本菜单中的功能或设置你将无法查看或使用)
+
+***
+
 ## 字体渲染（自用脚本）[**Font Rendering.user.js**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering) `WIKI`
  　[[查看源代码](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Font%20Rendering.user.js)] 　[[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)] 　[[访问 GreasyFork](https://greasyfork.org/scripts/416688)]
 
