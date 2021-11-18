@@ -5,7 +5,7 @@
 [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues)
 [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/login?return_to=%2FF9y4ng%2FGreasyFork-Scripts)
 
-请先根据你的浏览器**选择一个用户脚本管理器**（如TamperMonkey, ViolentMonkey）安装，然后再来**安装脚本**。
+请先根据你的浏览器安装一个**用户脚本管理器**（如TamperMonkey, ViolentMonkey），然后再**安装脚本**。
 
 (不建议使用AdGuard来安装浏览器脚本，因为脚本菜单中的功能或设置你将无法查看或使用)
 
