@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.11.14.1
+// @version           2021.11.20.2
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -88,6 +88,7 @@
     errors: [],
     domainCount: 0,
     successId: false,
+    timer: 0,
     options: isGM ? false : { active: true, insert: true, setParent: true },
     encrypt: n => {
       return window.btoa(encodeURIComponent(n));
@@ -237,6 +238,7 @@
     title: defCon.randString(7, true),
     help: defCon.randString(5, false),
     rotation: defCon.randString(6, true),
+    emoji: defCon.randString(4, false),
     main: defCon.randString(7, true),
     fontList: defCon.randString(7, true),
     spanlabel: defCon.randString(5, false),
@@ -287,7 +289,7 @@
   const defaultArray = [];
   const curHostname = defCon.getHostname();
   const curWindowtop = defCon.isWinTop();
-  const guideURI = defCon.decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkY0MTY2ODglMjNndWlkZQ==");
+  const hostURI = defCon.decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkY0MTY2ODg=");
   const fontlistIMG = defCon.decrypt("aHR0cHMlM0ElMkYlMkZ6My5heDF4LmNvbSUyRjIwMjElMkYwOSUyRjA0JTJGaDJLdWRLLmdpZg==");
   const loadingIMG = defCon.decrypt("aHR0cHMlM0ElMkYlMkZpbWcuemNvb2wuY24lMkZjb21tdW5pdHklMkYwMzhkZGU0NThmOWE4NzRhODAxMjE2MGY3NDE3ZjZlLmdpZg==");
   const qS = str => {
@@ -514,15 +516,15 @@
             EdgeHTML: u.includes("edge"),
           };
         case "system":
-          if (/windows|win32|win64|wow32|wow64/g.test(u)) {
+          if (/windows|win32|win64|wow32|wow64/gi.test(u)) {
             system = "Windows";
-          } else if (/macintosh|macintel/g.test(u) || u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/)) {
+          } else if (/macintosh|macintel|mac os x/gi.test(u) || u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/i)) {
             system = "MacOS";
-          } else if (/x11/g.test(u)) {
+          } else if (/x11/gi.test(u)) {
             system = "Linux";
-          } else if (/android|adr/g.test(u)) {
+          } else if (/android|adr/gi.test(u)) {
             system = "Android";
-          } else if (/ios|iphone|ipad|ipod|iwatch/g.test(u)) {
+          } else if (/ios|iphone|ipad|ipod|iwatch/gi.test(u)) {
             system = "iOS";
           }
           return system;
@@ -575,14 +577,18 @@
         get: function () {
           return setValue(this, "left", 2);
         },
-        set: Value => {},
+        set: Value => {
+          document.documentElement.scrollTo(Value * t, 0);
+        },
         configurable: true,
       },
       scrollTop: {
         get: function () {
           return setValue(this, "top", 2);
         },
-        set: Value => {},
+        set: Value => {
+          document.documentElement.scrollTo(0, Value * t);
+        },
         configurable: true,
       },
     });
@@ -1489,8 +1495,8 @@
             <span class="${defCon.class.spanlabel}">设置字体，请选择：</span>
             <input type="search" placeholder="输入关键字可检索字体" autocomplete="off" class="${defCon.class.placeholder}">
             <dl style="display:none"></dl>
-            <span title="单击查看帮助" class="${defCon.class.tooltip} ${defCon.class.ps1}" id="${defCon.id.fonttooltip}">
-              <span>\ud83d\udd14</span>
+            <span class="${defCon.class.tooltip} ${defCon.class.ps1}" id="${defCon.id.fonttooltip}">
+              <span class="${defCon.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
               <span class="${defCon.class.tooltip} ${defCon.class.ps2}">
               <p><strong>温馨提示 </strong>脚本预载了常用的中文字体，下拉菜单中所罗列的字体是在代码字体表中您已安装过的字体，没有安装过则不会显示。</p>
               <p><em style="color:darkred">（注一）</em>如果没有重新选择字体，则使用上一次保存的字体。首次使用默认为微软雅黑字体。</p>
@@ -1690,7 +1696,7 @@
   /* define default value */
 
   const defValue = {
-    fontSelect: `'Microsoft YaHei',system-ui,-apple-system,BlinkMacSystemFont,Helvetica,sans-serif,'iconfont','icomoon','FontAwesome','Material Icons Extended','Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji',emoji`,
+    fontSelect: `'Microsoft YaHei',system-ui,-apple-system,BlinkMacSystemFont,Helvetica,sans-serif,'iconfont','icomoon','FontAwesome','Material Icons Extended','Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji','Android Emoji',EmojiSymbols,'emojione mozilla','twemoji mozilla'`,
     fontFace: true,
     fontSmooth: true,
     fontSize: 1.0,
@@ -1801,8 +1807,11 @@
           messageText: String(
             `<p><span style="font-style:italic;font-weight:bold;font-size:20px;color:tomato">您好！</span>这是您首次运行<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="margin-left:3px;color:tomato;font:italic 900 22px/1.5 Candara,monospace!important">V${defCon.curVersion}</span>，以下为更新内容：</p>
             <p><ul id="${defCon.id.seed}_update">
-              <li class="${defCon.id.seed}_fix">修正设置页面的样式问题，优化超长字体名的截取。</li>
-              <li class="${defCon.id.seed}_fix">修正一些bugs，优化代码。</li>
+              <li class="${defCon.id.seed}_new">新增键盘快捷键(Alt+字母)操作脚本菜单的配置项。</li>
+              <li class="${defCon.id.seed}_fix">修正字体缩放引起的元素定位问题。<span style="color:red;font-weight:700">Release Candidate!</span></li>
+              <li class="${defCon.id.seed}_fix">修正chrome96+版本中字体描边对粗体样式的渲染错误。</li>
+              <li class="${defCon.id.seed}_fix">优化配置页面样式，修正unicode-icon的样式问题。</li>
+              <li class="${defCon.id.seed}_fix">修正其他小bugs，优化代码。</li>
             </ul></p>
             <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
           ).trim(),
@@ -1812,7 +1821,7 @@
         GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
         debug("\u27A4 %cThe script has been upgraded to V%s", "font-style:italic;background-color:yellow;color:crimson", defCon.curVersion);
         if (await frDialog.respond()) {
-          GMopenInTab(defCon.decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkY0MTY2ODglMjN1cGRhdGU="), defCon.options);
+          GMopenInTab(`${hostURI}#update`, defCon.options);
         }
         frDialog = null;
       }
@@ -1915,12 +1924,12 @@
     const shadow_r = parseFloat(CONST.fontShadow);
     const shadow_c = CONST.shadowColor;
     if (!isNaN(shadow_r) && shadow_r > 0 && shadow_r <= 8) {
-      shadow = `text-shadow:0 0 ${shadow_r * 1.25}px ${toColordepth(shadow_c, 1.5)},0 0 ${shadow_r}px ${shadow_c},0 0 ${shadow_r / 4}px ${toColordepth(shadow_c, 0.975, "dark")};`;
+      shadow = `text-shadow:0 0 ${shadow_r * 1.25}px ${toColordepth(shadow_c, 1.5)},0 0 ${shadow_r}px ${shadow_c},0 0 ${shadow_r / 4}px ${toColordepth(shadow_c, 0.985, "dark")};`;
     }
     let stroke = "";
     const stroke_r = parseFloat(CONST.fontStroke);
     if (!isNaN(stroke_r) && stroke_r > 0 && stroke_r <= 1.0) {
-      stroke = `-webkit-text-stroke:${stroke_r}px currentcolor;paint-order:stroke fill;`;
+      stroke = `-webkit-text-stroke:${stroke_r}px currentcolor;`;
     }
     let selection = "";
     if (stroke) {
@@ -1941,7 +1950,11 @@
     let bodyZoom = "";
     if (CONST.fontSize >= 0.8 && CONST.fontSize <= 1.5 && isFontsize && CONST.fontSize !== 1) {
       if (defCon.siteIndex === undefined) {
-        definePropertyForZoom(CONST.fontSize);
+        try {
+          definePropertyForZoom(CONST.fontSize);
+        } catch (e) {
+          error("\u27A4 defineProperty error", e);
+        }
       }
       bodyZoom = String(
         `body{` +
@@ -1987,13 +2000,13 @@
       tshadow = `${bodyZoom}${codeFont}${selection}${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontfaces}${exclude}${fontTest}`;
     }
     const fontStyle_db = String(
-      `#${defCon.id.dialogbox}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999992}#${defCon.id.dialogbox} .${defCon.class.db}{box-sizing:content-box;max-width:420px;color:#444;border:2px solid #efefef}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:200px;right:15px;border-radius:6px;width:100%;background:#fff;-webkit-box-shadow:0 0 10px 0 rgba(0,0,0,.3);box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #7b7b7b!important}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:100%}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:500;text-align:left}.${defCon.class.dbb}{display:inline-block;margin:0 1%;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;cursor:pointer;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important;box-sizing:content-box}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important;user-select:none}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223!important;color:#fff!important;border:1px solid #d93223!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a!important;color:#fff!important;border:1px solid #038c5a!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777!important;color:#fff!important;border:1px solid #777!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}` +
+      `#${defCon.id.dialogbox}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999992}#${defCon.id.dialogbox} .${defCon.class.db}{box-sizing:content-box;max-width:420px;color:#444;border:2px solid #efefef}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:200px;right:15px;border-radius:6px;width:100%;background:#fff;box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #7b7b7b!important}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:100%}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:500;text-align:left}.${defCon.class.dbb}{display:inline-block;margin:0 1%;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;cursor:pointer;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important;box-sizing:content-box}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important;user-select:none}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223!important;color:#fff!important;border:1px solid #d93223!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a!important;color:#fff!important;border:1px solid #038c5a!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777!important;color:#fff!important;border:1px solid #777!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}` +
         `.${defCon.class.dbm} button:hover{cursor:pointer;background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important}.${defCon.class.dbm} p{line-height:1.5!important;margin:5px 0!important;text-indent:0!important;font-size:16px!important;font-weight:400;text-align:left;user-select:none}.${defCon.class.dbm} ul{list-style:none;margin:5px 0 0 15px!important;padding:2px;font:italic 14px/140% "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;color:grey}.${defCon.class.dbm} ul li{display:list-item;list-style-type:none;user-select:none}.${defCon.class.dbm} li:before{display:none}.${defCon.class.dbm} #${defCon.id.bk},.${defCon.class.dbm} #${defCon.id.pv},.${defCon.class.dbm} #${defCon.id.fs},.${defCon.class.dbm} #${defCon.id.mps},.${defCon.class.dbm} #${defCon.id.flc}{box-sizing:content-box;list-style:none;font-style:normal;display:flex;justify-content:space-between;align-items:flex-start;margin:0;padding:2px 4px!important;width:calc(95% - 10px);min-width:auto;height:40px;min-height:40px}.${defCon.class.dbm} #${defCon.id.bk} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.pv} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.fs} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.mps} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.flc} .${defCon.id.seed}_VIP{margin:2px 0 0 0;color:darkgoldenrod!important;font:normal 16px/140% "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${defCon.class.dbm} #${defCon.id.flc} button{background-color:#eee;color:#444!important;font-weight:normal;border:1px solid #999;font-size:14px!important;border-radius:4px}.${defCon.class.dbm} #${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}.${defCon.class.dbm} #${defCon.id.files}{display:none}.${defCon.class.dbm} #${defCon.id.feedback}:hover{color:crimson!important}.${defCon.class.dbm} #${defCon.id.feedback}:after{width:0;height:0;content:"";background:url('${loadingIMG}') no-repeat -400px -300px}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#555!important}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#aaa!important}` +
         `.${defCon.class.dbm} #${defCon.id.seed}_update li{font-style:italic!important;font-family:Consolas,'Microsoft YaHei'!important}.${defCon.class.dbm} .${defCon.id.seed}_new:before{content:"+";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_del:before{content:"-";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_fix:before{content:"@";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_wng{color:#bdb59b}.${defCon.class.dbm} .${defCon.id.seed}_wng:before{content:"!";display:inline;margin:0 4px 0 -10px}`
     );
     const fontStyle_container = String(
-      `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;border-radius:12px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 20px);z-index:999999;padding:4px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.container} *{line-height:1.5!important;font-size:16px;font-weight:700;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;text-shadow:initial!important;-webkit-text-stroke:initial!important}` +
-        `#${defCon.id.container} fieldset{border:2px groove #67a5df!important;border-radius:10px;padding:4px 6px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:475px}#${defCon.id.container} legend{line-height:20px;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;background:#f0f6ff!important;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{display:inherit;list-style:none;margin:3px 0;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default;min-width:-moz-available;min-width:-webkit-fill-available;user-select:none}#${defCon.id.container} ul li:before{display:none}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden;}#${defCon.id.container} .${defCon.class.help}:hover{cursor:help}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{padding:0;margin:0;width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50%;-webkit-transform:rotate(360deg);-webkit-animation:rotation 5s linear infinite;-o-animation:rotation 5s linear infinite;animation:rotation 5s linear infinite}` +
+      `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;border-radius:12px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 20px);z-index:999999;padding:4px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.container} *{line-height:1.5!important;font-size:16px;font-weight:700;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Android Emoji",EmojiSymbols!important;text-shadow:initial!important;-webkit-text-stroke:initial!important}` +
+        `#${defCon.id.container} fieldset{border:2px groove #67a5df!important;border-radius:10px;padding:4px 6px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:475px}#${defCon.id.container} legend{line-height:20px;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;background:#f0f6ff!important;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{display:inherit;list-style:none;margin:3px 0;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default;min-width:-moz-available;min-width:-webkit-fill-available;user-select:none}#${defCon.id.container} ul li:before{display:none}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden;}#${defCon.id.container} .${defCon.class.help}:hover{cursor:help}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{padding:0;margin:0;width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50%;-webkit-transform:rotate(360deg);animation:rotation 5s linear infinite}` +
         `#${defCon.id.fontList}{padding:2px 10px 0 10px;min-height:73px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex!important;align-items:center;justify-content:space-between}#${defCon.id.fontSize}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.shadowColor}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;padding:2px 10px;min-height:45px;margin:4px;width:auto}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${defCon.id.submit}{padding:2px 10px;height:40px}` +
         `#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${defCon.id.fontList} .${defCon.class.label} span{box-sizing:border-box;color:#fff;font-size:16px!important;font-weight:400;height:max-content;width:max-content;min-width:12px;max-width:210px;padding:5px;background:#67a5df;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap}#${defCon.id.fontList} .${defCon.class.close}{width:12px}#${defCon.id.fontList} .${defCon.class.close}:hover{color:tomato;background-color:#2D7DCA;border-radius:2px}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-x:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;padding:6px 6px 0 6px;margin:0 0 6px 0;width:100%;min-width:100%;max-width:fit-content;max-width:-moz-min-content;max-height:90px;min-height:45px;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selectFontId} span.${defCon.class.spanlabel},#${defCon.id.selector} span.${defCon.class.spanlabel}{margin:0!important;width:auto;display:block!important;padding:0 0 4px 0;color:#333;border:0;text-align:left!important;background-color:transparent!important}` +
         `#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} input{text-overflow:ellipsis;overflow:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;padding:1px 32px 1px 2px;margin:0;width:100%;max-width:100%;min-width:100%;height:42px!important;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:16px!important;font-weight:700;text-indent:8px;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font:normal 700 16px/1.5 "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font:normal 700 16px/1.5 "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:4px 0 0 0;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:4px 8px;width:auto;min-width:calc(60%);max-width:calc(100% - 68px);max-height:298px;font-size:18px!important;white-space:nowrap;background-color:#fff;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;margin:1px 8px;padding:5px 0;font-weight:400;font-size:21px!important;min-width:100%;max-width:100%;width:-moz-available;width:-webkit-fill-available;}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff}` +
@@ -2001,13 +2014,13 @@
         `#${defCon.id.fontShadow} div.${defCon.class.flex}:before,#${defCon.id.fontShadow} div.${defCon.class.flex}:after,#${defCon.id.fontStroke} div.${defCon.class.flex}:before,#${defCon.id.fontStroke} div.${defCon.class.flex}:after,#${defCon.id.fontSize} div.${defCon.class.flex}:before,#${defCon.id.fontSize} div.${defCon.class.flex}:after{display:none}#${defCon.id.fontShadow} #${defCon.id.shadowSize},#${defCon.id.fontStroke} #${defCon.id.strokeSize},#${defCon.id.fontSize} #${defCon.id.fontZoom}{color:#111!important;width:56px!important;text-indent:0;margin:0 10px 0 0!important;height:32px!important;font-size:17px!important;font-weight:400!important;font-family:Impact,Times,serif!important;border:#67a5df 2px solid!important;border-radius:4px;text-align:center;box-sizing:content-box;padding:0;background:#fafafa!important}.${defCon.class.flex}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;width:auto;min-width:100%}.${defCon.class.slider} input{visibility:hidden}` +
         `#${defCon.id.shadowColor} *{box-sizing:content-box}#${defCon.id.cps}{margin:0}#${defCon.id.shadowColor} .${defCon.class.colorPicker}{width:32px;height:30px;cursor:pointer;position:relative;border:2px solid #181a25;border-radius:4px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2}{width:auto;margin:0 0 0 5px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2} #${defCon.id.color}{width:125px!important;min-width:125px;height:36px!important;text-indent:0;font-size:18px!important;font-weight:400!important;background:#fafafa;box-sizing:border-box;font-family:Impact,Times,serif!important;color:#333!important;border:#67a5df 2px solid!important;border-radius:4px;padding:0;margin:0;text-align:center}` +
         `#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{font:bold 14px/140% "Roboto Mono",Monaco,"Courier New",sans-serif!important;min-width:249px;max-width:calc(100% - 15px);width:calc(100% - 15px)!important;height:60px;min-height:60px;max-height:60px;resize:none;border:2px solid #67a5df!important;border-radius:6px;box-sizing:content-box;padding:5px;margin:0;color:#0b5b9c!important;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px rgba(0,0,0,.2);border-radius:10px;background:#ededed}#${defCon.id.fontEx} textarea{background:#fafafa!important}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;box-shadow:inset 0 0 5px #67a5df;background:#369}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;border-radius:10px;background:#ededed}.${defCon.class.switch}{box-sizing:content-box;display:inline-block;float:right;margin-right:4px;padding:0 6px;border:2px double #67a5df;color:#0a68c1;border-radius:4px}#${defCon.id.cSwitch}:hover,#${defCon.id.eSwitch}:hover{cursor:pointer;user-select:none}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent)!important;background-size:50px 50px;background-color:#f7fff7!important}` +
-        `#${defCon.id.submit} button{box-sizing:border-box;background-image:initial;background-color:#67a5df;color:#fff!important;margin:0;padding:5px 10px;cursor:pointer;border:2px solid #6ba7e0;border-radius:6px;width:auto;min-width:min-content;min-height:35px;font:normal 600 14px/1.5 "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${defCon.id.submit} button:hover{box-shadow:0 0 5px rgba(0,0,0,.4)!important}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.submit} #${defCon.id.backup}{margin:0 10px 0 0;display:none}.${defCon.class.anim}{-webkit-animation:jiggle 1.8s ease-in infinite;animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}`
+        `#${defCon.id.submit} button{box-sizing:border-box;background-image:initial;background-color:#67a5df;color:#fff!important;margin:0;padding:5px 10px;cursor:pointer;border:2px solid #6ba7e0;border-radius:6px;width:auto;min-width:min-content;min-height:35px;font:normal 600 14px/1.5 "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${defCon.id.submit} button:hover{box-shadow:0 0 5px rgba(0,0,0,.4)!important}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.submit} #${defCon.id.backup}{margin:0 10px 0 0;display:none}.${defCon.class.anim}{animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}`
     );
     const fontStyle_cp = String(
       `#${defCon.id.cpm}{width:240px;height:216px;margin:calc(-90%) 0 0 2px;z-index:999;position:fixed;display:none;box-sizing:content-box;background-color:#d1f2fb;padding:10px;box-shadow:0 0 10px #000;border-radius:6px}.${defCon.class.cp},.${defCon.class.cp} *,.${defCon.class.cp} ::after,.${defCon.class.cp} ::before{border:0;margin:0;padding:0;display:block;box-sizing:border-box}.${defCon.class.cp}{background-color:#fff;display:block;min-width:128px;min-height:128px;position:relative}.${defCon.class.cp}>.${defCon.class.cprb}{border:solid #000 1px;background:linear-gradient(red,#f0f,#00f,#0ff,#0f0,#ff0,red);width:16px;height:calc(100% - 26px);position:absolute;right:12px;top:12px}.${defCon.class.cp} .${defCon.class.cprbp}{position:absolute;width:100%;height:1px}.${defCon.class.cp} .${defCon.class.cprbp}::after,.${defCon.class.cp} .${defCon.class.cprbp}::before{content:"";width:10px;height:7px;position:absolute;background:0 0;border:solid transparent 5px;border-width:3.5px 5px;top:-3px}.${defCon.class.cp} .${defCon.class.cprbp}::before{border-left:solid #404040 5px;left:-6px}.${defCon.class.cp} .${defCon.class.cprbp}::after{border-right:solid #404040 5px;right:-6px}.${defCon.class.cp}>.${defCon.class.cpg}{position:absolute;width:calc(100% - 50px);height:calc(100% - 26px);border:solid #000 1px;left:12px;top:12px}.${defCon.class.cp}>.${defCon.class.cpg},.${defCon.class.cp}>.${defCon.class.cpg} *{cursor:crosshair;box-sizing:content-box}.${defCon.class.cp}>.${defCon.class.cpgb}{background:linear-gradient(rgba(0,0,0,0),#000)}.${defCon.class.cp}>.${defCon.class.cp}-color-block{position:absolute;border:solid #000 1px;background:#fff;width:calc(100% - 104px);max-width:72px;height:18px;left:12px;bottom:8px}.${defCon.class.cp} .${defCon.class.cpc}{background-color:transparent;position:absolute}.${defCon.class.cp} .${defCon.class.cpc}::before{border-radius:50%;width:11px;height:11px;border:solid #000 1px;background-color:transparent;position:relative;left:-6px;top:-6px;display:block;content:""}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcb}::before{border-color:#000}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcw}::before{border-color:#fff}`
     );
     const fontStyle_tooltip = String(
-      `.${defCon.class.tooltip}{position:relative;cursor:help;user-select:none}.${defCon.class.tooltip}:active .${defCon.class.tooltip}{display:block}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;box-sizing:content-box;position:absolute;z-index:999999;border:2px solid #b8c4ce;border-radius:6px;padding:10px;width:242px;max-width:242px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:14px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} em{font-style:normal!important}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:140%;text-indent:0!important}.${defCon.class.ps1}{position:relative;top:-33px;height:0;width:24px;margin:0;padding:0;right:5px;float:right}.${defCon.class.ps2}{top:35px;right:-7px}.${defCon.class.ps3}{top:-197px;margin-left:-1px}.${defCon.class.ps4}{top:-175px;margin-left:-1px}`
+      `.${defCon.class.tooltip}{position:relative;cursor:help;user-select:none}.${defCon.class.tooltip} span.${defCon.class.emoji}{font-weight:400!important}.${defCon.class.tooltip}:active .${defCon.class.tooltip}{display:block}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;box-sizing:content-box;position:absolute;z-index:999999;border:2px solid #b8c4ce;border-radius:6px;padding:10px;width:242px;max-width:242px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:14px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} em{font-style:normal!important}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:140%;text-indent:0!important}.${defCon.class.ps1}{position:relative;top:-33px;height:0;width:24px;margin:0;padding:0;right:5px;float:right}.${defCon.class.ps2}{top:35px;right:-7px}.${defCon.class.ps3}{top:-197px;margin-left:-1px}.${defCon.class.ps4}{top:-175px;margin-left:-1px}`
     );
     const fontStyle_Progress = String(
       `.${defCon.class.range}{--primary-color:#67a5df;--value-offset-y:var(--ticks-gap);--value-active-color:white;--value-background:transparent;--value-background-hover:var(--primary-color);--value-font:italic bold 14px/14px monospace,arial;--fill-color:var(--primary-color);--progress-background:rgb(223, 223, 223);--progress-radius:20px;--show-min-max:none;--track-height:calc(var(--thumb-size) / 2);--min-max-font:12px arial;--min-max-opacity:0.5;--min-max-x-offset:10%;--thumb-size:22px;--thumb-color:white;--thumb-shadow:0 0 3px rgba(0, 0, 0, 0.4),0 0 1px rgba(0, 0, 0, 0.5) inset,0 0 0 99px var(--thumb-color) inset;--thumb-shadow-active:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px var(--primary-color) inset,0 0 3px rgba(0, 0, 0, 0.4);--thumb-shadow-hover:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px darkorange inset,0 0 3px rgba(0, 0, 0, 0.4);--ticks-thickness:1px;--ticks-height:5px;--ticks-gap:var(--ticks-height, 0);--ticks-color:transparent;--step:1;--ticks-count:(var(--max) - var(--min))/var(--step);--maxTicksAllowed:1000;--too-many-ticks:Min(1, Max(var(--ticks-count) - var(--maxTicksAllowed), 0));--x-step:Max(var(--step), var(--too-many-ticks) * (var(--max) - var(--min)));--tickIntervalPerc_1:Calc((var(--max) - var(--min)) / var(--x-step));--tickIntervalPerc:calc((100% - var(--thumb-size)) / var(--tickIntervalPerc_1) * var(--tickEvery, 1));--value-a:Clamp(var(--min), var(--value, 0), var(--max));--value-b:var(--value, 0);--text-value-a:var(--text-value, "");--completed-a:calc((var(--value-a) - var(--min)) / (var(--max) - var(--min)) * 100);--completed-b:calc((var(--value-b) - var(--min)) / (var(--max) - var(--min)) * 100);--ca:Min(var(--completed-a), var(--completed-b));--cb:Max(var(--completed-a), var(--completed-b));--thumbs-too-close:Clamp(-1, 1000 * (Min(1, Max(var(--cb) - var(--ca) - 5, -1)) + 0.001), 1);--thumb-close-to-min:Min(1, Max(var(--ca) - 5, 0));--thumb-close-to-max:Min(1, Max(95 - var(--cb), 0))}` +
@@ -2016,7 +2029,6 @@
         `.${defCon.class.range}>input{-webkit-appearance:none;width:100%;height:var(--thumb-size)!important;margin:0!important;padding:0!important;position:absolute!important;left:0;top:calc(50% - Max(var(--track-height),var(--thumb-size))/ 2 + calc(var(--ticks-gap)/ 2 * var(--flip-y,-1)))!important;border:0!important;cursor:grab;outline:0!important;background:0 0!important;--thumb-shadow:var(--thumb-shadow-active)}.${defCon.class.range}>input:not(:only-of-type){pointer-events:none}.${defCon.class.range}>input::-webkit-slider-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${defCon.class.range}>input::-moz-range-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${defCon.class.range}>input::-ms-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}` +
         `.${defCon.class.range}>input:hover{--thumb-shadow:var(--thumb-shadow-active)}.${defCon.class.range}>input:hover+output{--value-background:var(--value-background-hover);--y-offset:-1px;color:var(--value-active-color);box-shadow:0 0 0 3px var(--value-background)}.${defCon.class.range}>input:active{--thumb-shadow:var(--thumb-shadow-hover);cursor:grabbing;z-index:2}.${defCon.class.range}>input:active+output{transition:0s;opacity:0.9;display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;-moz-box-orient:horizontal;-moz-box-pack:center;-moz-box-align:center}.${defCon.class.range}>input:nth-of-type(1){--is-left-most:Clamp(0, (var(--value-a) - var(--value-b)) * 99999, 1)}.${defCon.class.range}>input:nth-of-type(1)+output{--value:var(--value-a);--x-offset:calc(var(--completed-a) * -1%)}.${defCon.class.range}>input:nth-of-type(1)+output:not(:only-of-type){--flip:calc(var(--thumbs-too-close) * -1)}.${defCon.class.range}>input:nth-of-type(1)+output::after{content:var(--prefix, "") var(--text-value-a) var(--suffix, "")}.${defCon.class.range}>input:nth-of-type(2){--is-left-most:Clamp(0, (var(--value-b) - var(--value-a)) * 99999, 1)}.${defCon.class.range}>input:nth-of-type(2)+output{--value:var(--value-b)}.${defCon.class.range}>input+output{--flip:-1;--x-offset:calc(var(--completed-b) * -1%);--pos:calc(((var(--value) - var(--min)) / (var(--max) - var(--min))) * 100%);pointer-events:none;width:auto;min-width:40px;height:24px;min-height:24px;text-align:center;position:absolute;z-index:5;background:var(--value-background);border-radius:4px;padding:0 6px;left:var(--pos);transform:translate(var(--x-offset),calc(150% * var(--flip) - (var(--y-offset,0) + var(--value-offset-y)) * var(--flip)));transition:all .12s ease-out,left 0s;opacity:0;box-sizing:content-box}.${defCon.class.range}>input+output::after{content:var(--prefix, "") var(--text-value-b) var(--suffix, "");font:var(--value-font)}`
     );
-
     const fontStyle = fontStyle_db + fontStyle_container + fontStyle_cp + fontStyle_tooltip + fontStyle_Progress;
     const tFontSize = isFontsize
       ? String(
@@ -2040,12 +2052,12 @@
           <legend class="${defCon.class.title}">
             <span style="display:inline-block;color:#8b0000!important">${defCon.scriptName}</span>
             <span class="${defCon.class.guide}">
-              <div class="${defCon.class.rotation}" title="打开帮助文件" height="24" width="24"/>
+              <div class="${defCon.class.rotation}" title="打开脚本使用帮助文档" height="24" width="24"/>
                 <svg class="${defCon.class.help}" viewBox="0 0 1053 1024" version="1.1" xmlns="https://www.w3.org/2000/svg">
-                <path d="M526.628571 1024C245.76 1024 14.628571 795.794286 14.628571 512S242.834286 0 526.628571 0c280.868571 0 512 228.205714 512 512S807.497143 1024 526.628571 1024z m-40.96-266.24c11.702857 8.777143 23.405714 14.628571 35.108572 14.628571 14.628571 0 26.331429-5.851429 35.108571-14.628571 11.702857-8.777143 14.628571-20.48 14.628572-38.034286 0-14.628571-5.851429-26.331429-14.628572-35.108571-8.777143-8.777143-20.48-14.628571-35.108571-14.628572s-26.331429 5.851429-38.034286 14.628572-14.628571 20.48-14.628571 35.108571c2.925714 17.554286 8.777143 29.257143 17.554285 38.034286zM675.84 321.828571c-14.628571-20.48-32.182857-38.034286-58.514286-49.737142-26.331429-11.702857-55.588571-17.554286-87.771428-17.554286-35.108571 0-67.291429 5.851429-93.622857 20.48-26.331429 14.628571-46.811429 32.182857-61.44 55.588571-14.628571 23.405714-20.48 43.885714-20.48 64.365715 0 11.702857 2.925714 20.48 11.702857 29.257142 8.777143 8.777143 20.48 14.628571 32.182857 14.628572 20.48 0 35.108571-11.702857 43.885714-38.034286 8.777143-23.405714 17.554286-43.885714 29.257143-55.588571 11.702857-11.702857 29.257143-17.554286 55.588571-17.554286 20.48 0 38.034286 5.851429 52.662858 17.554286 14.628571 11.702857 20.48 29.257143 20.48 46.811428 0 8.777143-2.925714 17.554286-5.851429 26.331429-5.851429 8.777143-8.777143 14.628571-17.554286 20.48-5.851429 5.851429-17.554286 17.554286-32.182857 29.257143-17.554286 14.628571-29.257143 26.331429-40.96 38.034285-8.777143 11.702857-17.554286 23.405714-23.405714 38.034286-5.851429 14.628571-8.777143 29.257143-8.777143 49.737143 0 14.628571 2.925714 26.331429 11.702857 35.108571 8.777143 8.777143 17.554286 11.702857 29.257143 11.702858 23.405714 0 35.108571-11.702857 40.96-35.108572 2.925714-11.702857 2.925714-17.554286 5.851429-23.405714 0-5.851429 2.925714-8.777143 5.851428-14.628572s5.851429-8.777143 11.702857-14.628571l17.554286-17.554286c29.257143-26.331429 46.811429-43.885714 58.514286-52.662857 11.702857-11.702857 20.48-23.405714 29.257143-38.034286 8.777143-14.628571 11.702857-32.182857 11.702857-49.737142 2.925714-29.257143-2.925714-52.662857-17.554286-73.142858z" fill="#67a5df" stroke="white" stroke-width="30"></path>
+                  <path d="M526.628571 1024C245.76 1024 14.628571 795.794286 14.628571 512S242.834286 0 526.628571 0c280.868571 0 512 228.205714 512 512S807.497143 1024 526.628571 1024z m-40.96-266.24c11.702857 8.777143 23.405714 14.628571 35.108572 14.628571 14.628571 0 26.331429-5.851429 35.108571-14.628571 11.702857-8.777143 14.628571-20.48 14.628572-38.034286 0-14.628571-5.851429-26.331429-14.628572-35.108571-8.777143-8.777143-20.48-14.628571-35.108571-14.628572s-26.331429 5.851429-38.034286 14.628572-14.628571 20.48-14.628571 35.108571c2.925714 17.554286 8.777143 29.257143 17.554285 38.034286zM675.84 321.828571c-14.628571-20.48-32.182857-38.034286-58.514286-49.737142-26.331429-11.702857-55.588571-17.554286-87.771428-17.554286-35.108571 0-67.291429 5.851429-93.622857 20.48-26.331429 14.628571-46.811429 32.182857-61.44 55.588571-14.628571 23.405714-20.48 43.885714-20.48 64.365715 0 11.702857 2.925714 20.48 11.702857 29.257142 8.777143 8.777143 20.48 14.628571 32.182857 14.628572 20.48 0 35.108571-11.702857 43.885714-38.034286 8.777143-23.405714 17.554286-43.885714 29.257143-55.588571 11.702857-11.702857 29.257143-17.554286 55.588571-17.554286 20.48 0 38.034286 5.851429 52.662858 17.554286 14.628571 11.702857 20.48 29.257143 20.48 46.811428 0 8.777143-2.925714 17.554286-5.851429 26.331429-5.851429 8.777143-8.777143 14.628571-17.554286 20.48-5.851429 5.851429-17.554286 17.554286-32.182857 29.257143-17.554286 14.628571-29.257143 26.331429-40.96 38.034285-8.777143 11.702857-17.554286 23.405714-23.405714 38.034286-5.851429 14.628571-8.777143 29.257143-8.777143 49.737143 0 14.628571 2.925714 26.331429 11.702857 35.108571 8.777143 8.777143 17.554286 11.702857 29.257143 11.702858 23.405714 0 35.108571-11.702857 40.96-35.108572 2.925714-11.702857 2.925714-17.554286 5.851429-23.405714 0-5.851429 2.925714-8.777143 5.851428-14.628572s5.851429-8.777143 11.702857-14.628571l17.554286-17.554286c29.257143-26.331429 46.811429-43.885714 58.514286-52.662857 11.702857-11.702857 20.48-23.405714 29.257143-38.034286 8.777143-14.628571 11.702857-32.182857 11.702857-49.737142 2.925714-29.257143-2.925714-52.662857-17.554286-73.142858z" fill="#67a5df" stroke="white" stroke-width="30"></path>
                 </svg>
               </div>
-            <span>
+            </span>
           </legend>
           <ul class="${defCon.class.main}">
             <li id="${defCon.id.fontList}">
@@ -2094,7 +2106,7 @@
               <div style="margin:0px 5px 0 0">
                 <span style="margin:0;padding:0">阴影颜色</span>
                 <span class="${defCon.class.tooltip}">
-                  <span title="单击查看帮助">\ud83d\udd14</span>
+                  <span class="${defCon.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
                   <span class="${defCon.class.tooltip} ${defCon.class.ps3}">
                     <p>阴影颜色可通过点击色块激活拾色器选择，也可自定义填写，格式支持: <em style="color:#cecece">RGB, RGBA, HEX{3}, HEX{6}</em>。纯白色的所有格式表示自身颜色 <em style="color:#cecece">currentcolor</em></p>
                     <p><em style="color:darkred">注意：输入数值会自动转化为HEX，但数值保持一致性。错误格式会被替换为上次保存的数据。</em></p>
@@ -2108,7 +2120,7 @@
             <li id="${defCon.id.fontCSS}" style="min-width:${getBrowser.type("core").Gecko ? 264 : 254}px">
               <div style="margin: 0 0 6px 0">需要渲染的网页元素：
                 <span class="${defCon.class.tooltip}">
-                  <span title="单击查看帮助">\ud83d\udd14</span>
+                  <span class="${defCon.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
                   <span class="${defCon.class.tooltip} ${defCon.class.ps4}">
                     <p>默认为排除大多数网站常用的特殊CSS样式后需要渲染的页面元素。填写格式：<em style="color:#cecece">:not(.fa)</em> 或 <em style="color:#cecece">:not([class*="fa"])</em></p>
                     <p><em style="color:darkred">该选项为重要参数，默认只读，双击解锁。请尽量不要修改，避免造成样式失效。若失效请重置。</em></p>
@@ -2122,7 +2134,7 @@
             <li id="${defCon.id.fontEx}" style="min-width:${getBrowser.type("core").Gecko ? 264 : 254}px">
               <div style="margin: 0 0 6px 0">排除渲染的HTML标签：
                 <span class="${defCon.class.tooltip}">
-                  <span title="单击查看帮助">\ud83d\udd14</span>
+                  <span class="${defCon.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
                   <span class="${defCon.class.tooltip} ${defCon.class.ps3}">
                     <p>该选项排除渲染字体描边、字体阴影效果，请将排除渲染的HTML标签用逗号分隔。具体规则请点击顶部旋转的帮助文件图标。</p>
                     <p><em style="color:darkred">编辑该选项需要CSS知识，如需要排除复杂的样式或标签可通过这里进行添加，样式若混乱请重置。</em></p>
@@ -2201,6 +2213,23 @@
     try {
       startRAFInterval();
       const callback = mutations => {
+        // Fixed incorrect rendering of bold styles by font strokes in Chrome >= 96.0.4664.45, Ｆ９ｙ４ｎｇ, 20211120.
+        if (
+          CONST.fontStroke &&
+          document.body &&
+          Number(
+            getBrowser
+              .type()
+              .match(/chrome\/([\d.]+)/)[1]
+              .slice(0, 2)
+          ) >= 96
+        ) {
+          document.body.querySelectorAll(`:not(img):not(svg):not([id="${defCon.id.rndId}"] *):not([id="${defCon.id.dialogbox}"] *)`).forEach(item => {
+            if (window.getComputedStyle(item, null).getPropertyValue("font-weight") > 500 && !item.style.cssText.includes("-webkit-text-stroke")) {
+              item.style.cssText += "-webkit-text-stroke:initial!important;";
+            }
+          });
+        }
         mutations.forEach(mutation => {
           if (!((!curWindowtop || qS(`.${defCon.class.rndClass}`)) && qS(`.${defCon.class.rndStyle}`))) {
             debug(`\u27A4 %cMutationObserver: %c%s %c%s`, "font-weight:bold;color:teal", "color:olive", mutation.type, "font-weight:bold;color:red", !startRAFInterval());
@@ -2229,64 +2258,58 @@
 
     /* Menus Insert */
 
-    setTimeout((Font_Set, Feed_Back, Exclude_site, Parameter_Set) => {
-      if (curWindowtop) {
-        loading ? GMunregisterMenuCommand(loading) : debug("\u27A4 No Loading_Menu");
-        if (defCon.siteIndex === undefined) {
-          Font_Set ? GMunregisterMenuCommand(Font_Set) : debug("\u27A4 No Font_Set_Menu");
-          Font_Set = GMregisterMenuCommand("\ufff2\ud83c\udf13 字体渲染设置", () => {
-            if (!qS(`#${defCon.id.rndId}`)) {
-              insertHTML();
-              operationConfigure();
-              autoZoomFontSize(`#${defCon.id.rndId}`, defCon.tZoom);
-              setTimeout(() => {
-                qS(`#${defCon.id.container}`).style.opacity = 1;
-                debug("\u27A4 errorCount:", defCon.errors.length);
-                if (defCon.errors.length) {
-                  reportErrortoAuthor(defCon.errors, true);
-                }
-              }, 100);
-              qS(`.${defCon.class.title} .${defCon.class.guide}`).addEventListener("click", () => {
-                GMopenInTab(guideURI, defCon.options);
-              });
-            } else {
-              closeAllDialog(`#${defCon.id.dialogbox}`);
-              closeConfigurePage(false);
+    const addAction = {
+      Configure: async () => {
+        if (!qS(`#${defCon.id.rndId}`)) {
+          insertHTML();
+          operationConfigure();
+          autoZoomFontSize(`#${defCon.id.rndId}`, defCon.tZoom);
+          setTimeout(() => {
+            qS(`#${defCon.id.container}`).style.opacity = 1;
+            debug("\u27A4 errorCount:", defCon.errors.length);
+            if (defCon.errors.length) {
+              reportErrortoAuthor(defCon.errors, true);
             }
+          }, 100);
+          qS(`.${defCon.class.title} .${defCon.class.guide}`).addEventListener("click", () => {
+            GMopenInTab(`${hostURI}#guide`, defCon.options);
           });
-          Exclude_site ? GMunregisterMenuCommand(Exclude_site) : debug("\u27A4 No Exclude_site_Menu");
-          Exclude_site = GMregisterMenuCommand(`\ufff3\u26d4 排除渲染 ${curHostname}`, async () => {
-            closeAllDialog(`#${defCon.id.dialogbox}`);
-            let frDialog = new frDialogBox({
-              trueButtonText: "确 定",
-              neutralButtonText: "取 消",
-              messageText: `<p style="font:bold italic 24px/1.4 Candara,Serif!important">${curHostname}</p><p style="color:darkred">该域名下所有页面将被禁止字体渲染！</p><p>确定后页面将自动刷新，请确认是否排除？</p>`,
-              titleText: "禁止字体渲染",
-            });
-            if (await frDialog.respond()) {
-              exSite = await GMgetValue("_Exclude_site_");
-              exSite = JSON.parse(defCon.decrypt(exSite));
-              exSite.push(curHostname);
-              GMsetValue("_Exclude_site_", defCon.encrypt(JSON.stringify(exSite)));
-              location.reload();
-            }
-            frDialog = null;
-          });
-          Parameter_Set ? GMunregisterMenuCommand(Parameter_Set) : debug("\u27A4 No Parameter_Set_Menu");
-          Parameter_Set = GMregisterMenuCommand("\ufff7\ud83d\udc8e VIP 高级功能开关", async () => {
-            configure = await GMgetValue("_configure_");
-            _config_data_ = JSON.parse(defCon.decrypt(configure));
-            isBackupFunction = Boolean(_config_data_.isBackupFunction);
-            isPreview = Boolean(_config_data_.isPreview);
-            isFontsize = Boolean(_config_data_.isFontsize);
-            maxPersonalSites = Number(_config_data_.maxPersonalSites);
-            closeAllDialog(`#${defCon.id.dialogbox}`);
-            let frDialog = new frDialogBox({
-              trueButtonText: "保存数据",
-              falseButtonText: "帮助文件",
-              neutralButtonText: "取 消",
-              messageText: String(
-                `<ul class="${defCon.class.main}" style="margin:0;padding:0;list-style:none">
+        } else {
+          closeAllDialog(`#${defCon.id.dialogbox}`);
+          closeConfigurePage(false);
+        }
+      },
+      Excludesites: async () => {
+        closeAllDialog(`#${defCon.id.dialogbox}`);
+        let frDialog = new frDialogBox({
+          trueButtonText: "确 定",
+          neutralButtonText: "取 消",
+          messageText: `<p style="font:bold italic 24px/1.4 Candara,Serif!important">${curHostname}</p><p style="color:darkred">该域名下所有页面将被禁止字体渲染！</p><p>确定后页面将自动刷新，请确认是否排除？</p>`,
+          titleText: "禁止字体渲染",
+        });
+        if (await frDialog.respond()) {
+          exSite = await GMgetValue("_Exclude_site_");
+          exSite = JSON.parse(defCon.decrypt(exSite));
+          exSite.push(curHostname);
+          GMsetValue("_Exclude_site_", defCon.encrypt(JSON.stringify(exSite)));
+          location.reload();
+        }
+        frDialog = null;
+      },
+      VIPConfigure: async () => {
+        configure = await GMgetValue("_configure_");
+        _config_data_ = JSON.parse(defCon.decrypt(configure));
+        isBackupFunction = Boolean(_config_data_.isBackupFunction);
+        isPreview = Boolean(_config_data_.isPreview);
+        isFontsize = Boolean(_config_data_.isFontsize);
+        maxPersonalSites = Number(_config_data_.maxPersonalSites);
+        closeAllDialog(`#${defCon.id.dialogbox}`);
+        let frDialog = new frDialogBox({
+          trueButtonText: "保存数据",
+          falseButtonText: "帮助文件",
+          neutralButtonText: "取 消",
+          messageText: String(
+            `<ul class="${defCon.class.main}" style="margin:0;padding:0;list-style:none">
                   <li id="${defCon.id.bk}">
                     <div class="${defCon.id.seed}_VIP">\u2460 本地备份功能（默认：开启）</div>
                     <div style="margin:0;padding:0">
@@ -2324,103 +2347,163 @@
                   </li>
                 </ul>
                 <div id="${defCon.id.feedback}" title="遇到问题，建议先看看脚本帮助文件。"
-                  style="box-sizing:content-box;height:auto;margin:0 0 0 15px;padding:2px 0 6px 0;font-size:16px;font-style:normal;color:#333;font-weight:600;cursor:help">
-                    \ud83e\udde1\u0020如果您遇到问题，请向我反馈\u0020\ud83e\udde1
+                  style="box-sizing:content-box;height:auto;margin:0 0 0 15px;padding:2px 0 6px 0;font-size:16px;font-style:normal;color:#333;cursor:help">
+                    \ud83e\udde1<span style="font-weight:700">\u0020如果您遇到问题，请向我反馈\u0020</span>\ud83e\udde1
                 </div>`
-              ).trim(),
-              titleText: "参数设置 - VIP 高级功能",
-            });
-            let _bk, _pv, _fs, _mps;
+          ).trim(),
+          titleText: "参数设置 - VIP 高级功能",
+        });
+        let _bk, _pv, _fs, _mps;
+        _bk = Boolean(qS(`#${defCon.id.isbackup}`).checked);
+        _pv = Boolean(qS(`#${defCon.id.ispreview}`).checked);
+        _fs = Boolean(qS(`#${defCon.id.isfontsize}`).checked);
+        _mps = Number(qS(`#${defCon.id.maxps}`).value);
+        qS(`#${defCon.id.maxps}`).addEventListener("input", function () {
+          this.value = this.value.replace(/[^0-9]/g, "");
+        });
+        if (getBrowser.type("core").Gecko) {
+          qS(`#${defCon.id.isfontsize}`).addEventListener("click", function () {
+            if (this.checked) {
+              const cF = confirm(
+                "由于 Firefox(Gecko内核) 对部分 CSS 及 Javascript 的兼容性原因，会造成某些站点样式异常、坐标漂移等问题，我们建议您在 Firefox 浏览器中谨慎使用脚本级字体缩放功能。\n\n如有必要需求，请使用 Firefox 自身的缩放功能来放大 (Ctrl+) 或缩小 (Ctrl-) 页面。注意：清除 历史记录\u2192数据\u2192网站设置 会重置缩放。\n\n请确认是否开启字体缩放功能？"
+              );
+              this.checked = !!cF;
+            }
+          });
+        }
+        qS(`#${defCon.id.flcid}`).addEventListener("click", async () => {
+          closeAllDialog(`#${defCon.id.dialogbox}`);
+          cache.remove("_fontlist_");
+          let frDialog = new frDialogBox({
+            trueButtonText: "确 定",
+            messageText: `<p style="font-size:18px!important;text-align:center;padding-bottom:6px;color:darkgoldenrod">字体列表缓存已重建，页面即将刷新！</p><p style="text-align:center"><a style="display:inline-block;border:2px solid darkgoldenrod;border-radius:8px;width:302px;height:237px;background:url('${loadingIMG}') 50% 50% no-repeat;overflow:hidden"><img src='${fontlistIMG}' alt="当前网站的字体列表缓存重建"/></a></p>`,
+            titleText: "当前网站字体列表缓存重建",
+          });
+          if (await frDialog.respond()) {
+            frDialog = null;
+            location.reload();
+          }
+        });
+        qS(`#${defCon.id.feedback}`).addEventListener("click", () => {
+          GMopenInTab(feedback, defCon.options);
+        });
+        document.querySelectorAll(`#${defCon.id.isbackup}, #${defCon.id.ispreview}, #${defCon.id.isfontsize}, #${defCon.id.maxps}`).forEach(items => {
+          items.addEventListener("change", () => {
             _bk = Boolean(qS(`#${defCon.id.isbackup}`).checked);
             _pv = Boolean(qS(`#${defCon.id.ispreview}`).checked);
             _fs = Boolean(qS(`#${defCon.id.isfontsize}`).checked);
             _mps = Number(qS(`#${defCon.id.maxps}`).value);
-            qS(`#${defCon.id.maxps}`).addEventListener("input", function () {
-              this.value = this.value.replace(/[^0-9]/g, "");
-            });
-            if (getBrowser.type("core").Gecko) {
-              qS(`#${defCon.id.isfontsize}`).addEventListener("click", function () {
-                if (this.checked) {
-                  const cF = confirm(
-                    "由于 Firefox(Gecko内核) 对部分 CSS 及 Javascript 的兼容性原因，会造成某些站点样式异常、坐标漂移等问题，我们建议您在 Firefox 浏览器中谨慎使用脚本级字体缩放功能。\n\n如有必要需求，请使用 Firefox 自身的缩放功能来放大 (Ctrl+) 或缩小 (Ctrl-) 页面。注意：清除 历史记录\u2192数据\u2192网站设置 会重置缩放。\n\n请确认是否开启字体缩放功能？"
-                  );
-                  this.checked = !!cF;
-                }
-              });
-            }
-            qS(`#${defCon.id.flcid}`).addEventListener("click", async () => {
-              closeAllDialog(`#${defCon.id.dialogbox}`);
-              cache.remove("_fontlist_");
-              let frDialog = new frDialogBox({
-                trueButtonText: "确 定",
-                messageText: `<p style="font-size:18px!important;text-align:center;padding-bottom:6px;color:darkgoldenrod">字体列表缓存已重建，页面即将刷新！</p><p style="text-align:center"><a style="display:inline-block;border:2px solid darkgoldenrod;border-radius:8px;width:302px;height:237px;background:url('${loadingIMG}') 50% 50% no-repeat;overflow:hidden"><img src='${fontlistIMG}' alt="当前网站的字体列表缓存重建"/></a></p>`,
-                titleText: "当前网站字体列表缓存重建",
-              });
-              if (await frDialog.respond()) {
-                frDialog = null;
-                location.reload();
-              }
-            });
-            qS(`#${defCon.id.feedback}`).addEventListener("click", () => {
-              GMopenInTab(feedback, defCon.options);
-            });
-            document.querySelectorAll(`#${defCon.id.isbackup}, #${defCon.id.ispreview}, #${defCon.id.isfontsize}, #${defCon.id.maxps}`).forEach(items => {
-              items.addEventListener("change", () => {
-                _bk = Boolean(qS(`#${defCon.id.isbackup}`).checked);
-                _pv = Boolean(qS(`#${defCon.id.ispreview}`).checked);
-                _fs = Boolean(qS(`#${defCon.id.isfontsize}`).checked);
-                _mps = Number(qS(`#${defCon.id.maxps}`).value);
-              });
-            });
-            if (await frDialog.respond()) {
-              _mps = !_mps ? 100 : _mps;
-              _config_data_.isBackupFunction = _bk;
-              _config_data_.isPreview = _pv;
-              _config_data_.isFontsize = _fs;
-              _config_data_.maxPersonalSites = _mps;
-              GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
-              let frDialog = new frDialogBox({
-                trueButtonText: "确 定",
-                messageText: `<p style="color:darkgoldenrod">VIP 高级功能参数已成功保存，页面即将刷新！</p>`,
-                titleText: "VIP 高级功能设置保存",
-              });
-              closeConfigurePage(true);
-              if (await frDialog.respond()) {
-                frDialog = null;
-                location.reload();
-              }
-            } else {
-              GMopenInTab(guideURI, defCon.options);
-            }
+          });
+        });
+        if (await frDialog.respond()) {
+          _mps = !_mps ? 100 : _mps;
+          _config_data_.isBackupFunction = _bk;
+          _config_data_.isPreview = _pv;
+          _config_data_.isFontsize = _fs;
+          _config_data_.maxPersonalSites = _mps;
+          GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
+          let frDialog = new frDialogBox({
+            trueButtonText: "确 定",
+            messageText: `<p style="color:darkgoldenrod">VIP 高级功能参数已成功保存，页面即将刷新！</p>`,
+            titleText: "VIP 高级功能设置保存",
+          });
+          closeConfigurePage(true);
+          if (await frDialog.respond()) {
             frDialog = null;
+            location.reload();
+          }
+        } else {
+          GMopenInTab(`${hostURI}#warning`, defCon.options);
+        }
+        frDialog = null;
+      },
+      Includesites: async () => {
+        closeAllDialog(`#${defCon.id.dialogbox}`);
+        let frDialog = new frDialogBox({
+          trueButtonText: "确 定",
+          neutralButtonText: "取 消",
+          messageText: `<p style="font:italic bold 22px/1.4 Candara,serif!important">${curHostname}</p><p style="color:darkgreen">该域名下所有页面将重新进行字体渲染！</p><p>确定后页面将自动刷新，请确认是否恢复？</p>`,
+          titleText: "恢复字体渲染",
+        });
+        if (await frDialog.respond()) {
+          exSite = await GMgetValue("_Exclude_site_");
+          exSite = JSON.parse(defCon.decrypt(exSite));
+          defCon.siteIndex = real_Time_Update(exSite);
+          exSite.splice(defCon.siteIndex, 1);
+          GMsetValue("_Exclude_site_", defCon.encrypt(JSON.stringify(exSite)));
+          location.reload();
+        }
+        frDialog = null;
+      },
+    };
+
+    setTimeout((Font_Set, Feed_Back, Exclude_site, Parameter_Set) => {
+      if (curWindowtop) {
+        loading ? GMunregisterMenuCommand(loading) : debug("\u27A4 No Loading_Menu");
+        if (defCon.siteIndex === undefined) {
+          Font_Set ? GMunregisterMenuCommand(Font_Set) : debug("\u27A4 No Font_Set_Menu");
+          Font_Set = GMregisterMenuCommand("\ufff2\ud83c\udf13 字体渲染设置(P)", () => {
+            addAction.Configure();
+          });
+          Exclude_site ? GMunregisterMenuCommand(Exclude_site) : debug("\u27A4 No Exclude_site_Menu");
+          Exclude_site = GMregisterMenuCommand(`\ufff3\u26d4 排除渲染 ${curHostname} (X)`, () => {
+            addAction.Excludesites();
+          });
+          Parameter_Set ? GMunregisterMenuCommand(Parameter_Set) : debug("\u27A4 No Parameter_Set_Menu");
+          Parameter_Set = GMregisterMenuCommand("\ufff7\ud83d\udc8e VIP 高级功能开关(G)", () => {
+            addAction.VIPConfigure();
           });
         } else {
           Exclude_site ? GMunregisterMenuCommand(Exclude_site) : debug("\u27A4 No Exclude_site_Menu");
-          Exclude_site = GMregisterMenuCommand(`\ufff2\ud83c\udf40 重新渲染 ${curHostname}`, async () => {
-            closeAllDialog(`#${defCon.id.dialogbox}`);
-            let frDialog = new frDialogBox({
-              trueButtonText: "确 定",
-              neutralButtonText: "取 消",
-              messageText: `<p style="font:italic bold 22px/1.4 Candara,serif!important">${curHostname}</p><p style="color:darkgreen">该域名下所有页面将重新进行字体渲染！</p><p>确定后页面将自动刷新，请确认是否恢复？</p>`,
-              titleText: "恢复字体渲染",
-            });
-            if (await frDialog.respond()) {
-              exSite = await GMgetValue("_Exclude_site_");
-              exSite = JSON.parse(defCon.decrypt(exSite));
-              defCon.siteIndex = real_Time_Update(exSite);
-              exSite.splice(defCon.siteIndex, 1);
-              GMsetValue("_Exclude_site_", defCon.encrypt(JSON.stringify(exSite)));
-              location.reload();
-            }
-            frDialog = null;
+          Exclude_site = GMregisterMenuCommand(`\ufff2\ud83c\udf40 重新渲染 ${curHostname} (X)`, () => {
+            addAction.Includesites();
           });
           Feed_Back ? GMunregisterMenuCommand(Feed_Back) : debug("\u27A4 No Feed_Back_Menu");
-          Feed_Back = GMregisterMenuCommand("\ufff9\ud83e\udde1 向作者反馈问题或建议", () => {
+          Feed_Back = GMregisterMenuCommand("\ufff9\ud83e\udde1 向作者反馈问题或建议(T)", () => {
             GMopenInTab(feedback, defCon.options);
           });
         }
       }
     }, 2e3);
+
+    /* hotkey setting */
+
+    document.addEventListener("keydown", event => {
+      const e = event || window.Event;
+      const ekey = (getBrowser.type("system") === "MacOS" ? e.metaKey : e.altKey) && !e.ctrlKey && !e.shiftKey;
+      if (e.keyCode === 80 && ekey) {
+        e.preventDefault();
+        if (Date.now() - defCon.timer > 1e3) {
+          defCon.timer = Date.now();
+          addAction.Configure();
+        }
+      }
+      if (e.keyCode === 88 && ekey) {
+        e.preventDefault();
+        if (Date.now() - defCon.timer > 1e3) {
+          defCon.timer = Date.now();
+          if (defCon.siteIndex === undefined) {
+            addAction.Excludesites();
+          } else {
+            addAction.Includesites();
+          }
+        }
+      }
+      if (e.keyCode === 71 && ekey) {
+        e.preventDefault();
+        if (Date.now() - defCon.timer > 1e3) {
+          defCon.timer = Date.now();
+          addAction.VIPConfigure();
+        }
+      }
+      if (e.keyCode === 84 && ekey) {
+        e.preventDefault();
+        if (Date.now() - defCon.timer > 10e3) {
+          defCon.timer = Date.now();
+          GMopenInTab(feedback, defCon.options);
+        }
+      }
+    });
 
     /* important Functions */
 
@@ -2661,7 +2744,7 @@
                     }
                   }
                 } else {
-                  GMopenInTab(defCon.decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkY0MTY2ODglMjNjdXN0b20="), defCon.options);
+                  GMopenInTab(`${hostURI}#custom`, defCon.options);
                 }
                 frDialog = null;
               });
@@ -2920,9 +3003,9 @@
                   : ``;
                 const _shadow =
                   fshadow > 0 && fshadow <= 8
-                    ? `text-shadow:0 0 ${fshadow * 1.25}px ${toColordepth(fscolor, 1.5)},0 0 ${fshadow}px ${fscolor},0 0 ${fshadow / 4}px ${toColordepth(fscolor, 0.975, "dark")};`
+                    ? `text-shadow:0 0 ${fshadow * 1.25}px ${toColordepth(fscolor, 1.5)},0 0 ${fshadow}px ${fscolor},0 0 ${fshadow / 4}px ${toColordepth(fscolor, 0.985, "dark")};`
                     : ``;
-                const _stroke = fstrock > 0 && fstrock <= 1.0 ? `-webkit-text-stroke:${fstrock}px currentcolor;paint-order:stroke fill;` : ``;
+                const _stroke = fstrock > 0 && fstrock <= 1.0 ? `-webkit-text-stroke:${fstrock}px currentcolor;` : ``;
                 const _selection = stroke ? `::selection{color:#ffffff!important;background:#338fff!important}` : ``;
                 const kernel_define = getBrowser.type("core").WebKit
                   ? "-webkit-font-smoothing:antialiased!important;-webkit-text-size-adjust:none;"
@@ -2971,7 +3054,7 @@
                   trueButtonText: "保存到全局数据",
                   falseButtonText: "保存到网站数据",
                   neutralButtonText: "取 消",
-                  messageText: `<p style="color:darkgreen;font-weight:900">保存到全局数据：</p><p>将当前设置保存为全局设置，默认使用全局参数。</p><p style="color:darkred;font-weight:900">保存到当前网站数据：<span id="${defCon.id.seed}_a_w_d_l_">[<span style="font-size:12px!important;font-weight:normal;padding:0 2px;margin:0;cursor:pointer;color:#3e3e3e">全部数据列表</span>]</span></p><p style="height:22px"><span title="保存到网站数据会自动覆盖之前的数据" style="cursor:help;color:indigo" id="${defCon.id.seed}_c_w_d_">为 ${curHostname} 保存独立的设置数据。</span>`,
+                  messageText: `<p style="color:darkgreen;font-weight:900">保存到全局数据：</p><p>将当前设置保存为全局设置，默认使用全局参数。</p><p style="color:darkred;font-weight:900">保存到当前网站数据：<span id="${defCon.id.seed}_a_w_d_l_">[<span style="font-size:12px!important;font-weight:normal;padding:0 2px;margin:0;cursor:pointer;color:#3e3e3e">全部数据列表</span>]</span></p><p style="min-height:22px"><span title="保存到网站数据会自动覆盖之前的数据" style="cursor:help;color:indigo" id="${defCon.id.seed}_c_w_d_">为 ${curHostname} 保存独立的设置数据。</span>`,
                   titleText: "保存设置数据",
                 });
                 domains = await GMgetValue("_domains_fonts_set_");
@@ -3408,7 +3491,7 @@
             `<li id="${defCon.id.seed}_d_d_l_${i}"
               style="margin:0;padding:5px;list-style:none;user-select:text!important;font:normal 400 14px/140% 'Microsoft YaHei',system-ui,-apple-system!important;color:#555;display:flex;justify-content:space-between;white-space:nowrap">
               <span>
-                [<a id="${defCon.id.seed}_d_d_l_s_${i}" style="display:inline;padding:2px;cursor:pointer;color:crimson;font-size:14px!important">删除</a>]
+                [<a id="${defCon.id.seed}_d_d_l_s_${i}" style="display:inline;padding:2px;cursor:pointer;color:crimson;background:transparent;font-size:14px!important">删除</a>]
                 <span>${i + 1 > 9 ? i + 1 : "0".concat(i + 1)}.</span>
               </span>
               <span style="font-weight:900;margin-left:5px">${filterHtml(domainValue[i].domain)}</span>
