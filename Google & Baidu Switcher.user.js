@@ -5,7 +5,7 @@
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:ja         Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version         4.0.20211123.1
+// @version         4.0.20211123.2
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:zh  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
@@ -31,7 +31,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            修正MacOS下Command+字母与浏览器快捷键冲突的问题。
+// @note            新增键盘快捷键功能开关（默认：开启）\n修正MacOS下Command+字母与浏览器快捷键冲突的问题。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -171,6 +171,8 @@
     fc: defCon.randString(8, true),
     fcSave: defCon.randString(5, true),
     fcClose: defCon.randString(5, true),
+    fchk: defCon.randString(6, true),
+    hotkey: defCon.randString(5, true),
     fcGoogle: defCon.randString(6, true),
     google: defCon.randString(5, true),
     fcKwhl: defCon.randString(6, true),
@@ -779,7 +781,7 @@
   }
 
   async function checkVersion(s = false) {
-    let t, setResult, useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit, GoogleJump, keywordHighlight, localWindow, _data;
+    let t, setResult, useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit, GoogleJump, Hotkey, keywordHighlight, localWindow, _data;
     const _configuration = await GMgetValue("_configuration_");
     if (!_configuration) {
       useBing = 0;
@@ -788,6 +790,7 @@
       timeNumber = 24;
       timeUnit = "h";
       GoogleJump = false;
+      Hotkey = true;
       keywordHighlight = false;
       localWindow = false;
       _data = {
@@ -797,6 +800,7 @@
         timeNumber,
         timeUnit,
         GoogleJump,
+        Hotkey,
         keywordHighlight,
         localWindow,
       };
@@ -814,6 +818,7 @@
       timeNumber = _data.timeNumber;
       timeUnit = _data.timeUnit;
       GoogleJump = _data.GoogleJump;
+      Hotkey = _data.Hotkey !== undefined ? _data.Hotkey : true;
       keywordHighlight = _data.keywordHighlight;
       localWindow = _data.localWindow;
     }
@@ -1024,7 +1029,7 @@
   /* Menus & Button insert  */
 
   !(async function () {
-    let useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit, GoogleJump, keywordHighlight, localWindow, _data;
+    let useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit, GoogleJump, Hotkey, keywordHighlight, localWindow, _data;
 
     /* Set Default Value & initialize */
 
@@ -1036,6 +1041,7 @@
       timeNumber = 24;
       timeUnit = "h";
       GoogleJump = false;
+      Hotkey = true;
       keywordHighlight = false;
       localWindow = false;
       _data = {
@@ -1045,6 +1051,7 @@
         timeNumber,
         timeUnit,
         GoogleJump,
+        Hotkey,
         keywordHighlight,
         localWindow,
       };
@@ -1057,6 +1064,7 @@
       timeNumber = _data.timeNumber;
       timeUnit = _data.timeUnit;
       GoogleJump = _data.GoogleJump;
+      Hotkey = _data.Hotkey !== undefined ? _data.Hotkey : true;
       keywordHighlight = _data.keywordHighlight;
       localWindow = _data.localWindow;
     }
@@ -1081,7 +1089,7 @@
         `.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-content{visibility:visible}.${Notice.configuration} input[disabled],.${Notice.configuration} select[disabled]{color:#bbb;background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:20px 20px!important;background-color:#fff7f7!important}.${Notice.noticejs} .${Notice.configuration}{background-color:linear-gradient(to right,#fcfcfc,#f2f2f7);background:-webkit-gradient(linear,0 0,0 100%,from(#fcfcfc),to(#f2f2f7));box-shadow:0 0 5px #888}.${Notice.noticejs} .${Notice.configuration} .${Notice.close}{float:right;font-size:18px!important;font-weight:700;line-height:1;color:#000;text-shadow:0 1px 0 #aaa;opacity:1;margin-right:7px}.${Notice.noticejs} .${Notice.configuration} .${Notice.close}:hover{opacity:.5;color:#555;cursor:pointer}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-heading{background-color:#F2F2F7;color:#333;padding:10px!important}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-body{color:#333;padding:10px}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-body ul{color:#333!important;list-style:none;margin:5px;padding:2px;font:italic 14px/140% "Microsoft YaHei",sans-serif}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-body ul ol{list-style:none;font-style:normal;margin:5px 0;cursor:default}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-progressbar{width:100%;background-color:#64ce83;margin-top:-1px}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#3da95c}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-progressbar{width:100%;background-color:#3ea2ff;margin-top:-1px}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#067cea}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-progressbar{width:100%;background-color:#ff7f48;margin-top:-1px}` +
         `.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#f44e06}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-progressbar{width:100%;background-color:#e74c3c;margin-top:-1px}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#ba2c1d}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-progressbar{width:100%;background-color:#efefef;margin-top:-1px}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{background:#ccc;width:100%;height:5px}@keyframes ${Notice.noticejs}-fadeOut{0%{opacity:1}to{opacity:0}}.${Notice.noticejs}-fadeOut{animation-name:${Notice.noticejs}-fadeOut}@keyframes ${Notice.noticejs}-modal-in{to{opacity:.3}}@keyframes ${Notice.noticejs}-modal-out{to{opacity:0}}.${Notice.noticejs}{position:fixed;z-index:10050}.${Notice.noticejs} ::-webkit-scrollbar{width:8px}.${Notice.noticejs} ::-webkit-scrollbar-button{width:8px;height:5px}.${Notice.noticejs} ::-webkit-scrollbar-track{border-radius:10px}.${Notice.noticejs} ::-webkit-scrollbar-thumb{background:hsla(0,0%,100%,.5);border-radius:10px}.${Notice.noticejs} ::-webkit-scrollbar-thumb:hover{background:#fff}.${Notice.noticejs}-modal{position:fixed;width:100%;height:100%;background-color:#000;z-index:999999;opacity:.3;left:0;top:0}.${Notice.noticejs}-modal-open{opacity:0;animation:${Notice.noticejs}-modal-in .3s ease-out}.${Notice.noticejs}-modal-close{animation:${Notice.noticejs}-modal-out .3s ease-out;animation-fill-mode:forwards}.${defCon.rName}{padding:2px!important}.${defCon.rName} dl{margin:0!important;padding:1px!important}.${defCon.rName} dl dt{margin:2px 0 6px 0!important;font-size:16px!important;font-weight:900!important}.${defCon.rName} dl dd{margin:2px 2px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${defCon.rName} .${Notice.center}{width:100%;text-align:center!important}.${defCon.rName} dl dd em{color:#fff;font-family:Candara,sans-serif!important;font-size:24px!important;padding:0 5px}.${defCon.rName} dl dd span{font-weight:700;font-size:15px!important;margin-right:8px}` +
         `.${defCon.rName} dl dd i{font-family:Candara,sans-serif!important;font-size:20px!important}.${defCon.rName} dl dd .im{color:gold;font-size:16px!important;font-weight:900;padding:0 3px}.${defCon.rName} ul{width:90%;display:inline-block;text-align:left;vertical-align:top;color:rgba(255, 255, 255, 0.8);padding:0.2em;margin:0 0 0 1em;counter-reset:xxx 0}.${defCon.rName} li{list-style:none;font-style:italic!important;position:relative;padding:0 0 0 0.1em;margin:0 0 0 2px;-webkit-transition:.12s;transition:.12s}.${defCon.rName} li::before{content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-family:Candara,sans-serif;font-size:1em;display:inline-block;width:1.5em;margin-left:-1.5em;-webkit-transition:.5s;transition:.5s}.${defCon.rName} .disappear{display:none}/* checkbox */.${Notice.checkbox}{display:none!important}.${Notice.checkbox}+label{cursor:pointer;padding:11px 9px;margin:0 0 0 25px;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:58px;height:10px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);-webkit-box-sizing:content-box;box-sizing:content-box;word-wrap:normal!important}.${Notice.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;-webkit-border-radius:7px;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${Notice.checkbox}+label::after{position:absolute;top:0;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;-webkit-border-radius:100px;border-radius:100px;padding:5px;font-size:1em;font-weight:700;color:#fff;content:"OFF"}.${Notice.checkbox}:checked+label{cursor:pointer;margin:0 0 0 25px;-webkit-box-sizing:content-box;box-sizing:content-box;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}` +
-        `.${Notice.checkbox}:checked+label::after{content:"ON";left:10px}.${Notice.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px}#${Notice.fcUpdate},#${Notice.fcExpire},#${Notice.fcGoogle},#${Notice.fcFeedback},#${Notice.fcKwhl},#${Notice.localWindow}{padding:2px 10px;height:36px;width:100%;font:bold 16px/140% "Microsoft YaHei",sans-serif}#${Notice.Expire}{-webkit-box-sizing:border-box;box-sizing:border-box;-webkit-border-radius:4px;border-radius:4px;width:46px;padding:2px;height:30px;border:2px solid #777;background:#fff;font-size:15px!important;font-weight:normal;font-family:Impact,sans-serif!important;text-align:center}#${Notice.timeUnit}{-webkit-box-sizing:border-box;box-sizing:border-box;-webkit-border-radius:4px;border-radius:4px;width:60px;height:30px;padding:2px;background:#fff;font-size:15px!important;font-weight:normal;font-family:"Microsoft YaHei",sans-serif!important;border:2px solid #777}#${Notice.fcFeedback} .${Notice.feedback}{cursor:help;font-weight:normal;font-size:16px!important;margin:0}#${Notice.fcFeedback} .${Notice.feedback}>span{font-size:16px!important;font-weight:700!important}#${Notice.fcFeedback} .${Notice.feedback}:hover{color:crimson}#${Notice.fcSubmit}{padding:2px 10px;height:30px;width:100%}#${Notice.fcSubmit} button{color:#333;font-weight:600;border:1px solid #777;font-size:16px!important;padding:5px 15px;margin-left:10px;border-radius:4px}#${Notice.fcSubmit} .${Notice.fcSave}{cursor:pointer;background-color:linear-gradient(to bottom,#fff7f7,#ffe9e9);background:-webkit-gradient(linear,0 0,0 100%,from(#fff7f7),to(#ffe9e9))}#${Notice.fcSubmit} .${Notice.fcClose}{cursor:pointer}`
+        `.${Notice.checkbox}:checked+label::after{content:"ON";left:10px}.${Notice.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px}#${Notice.fcUpdate},#${Notice.fcExpire},#${Notice.fcGoogle},#${Notice.fchk},#${Notice.fcFeedback},#${Notice.fcKwhl},#${Notice.localWindow}{padding:2px 10px;height:36px;width:100%;font:bold 16px/140% "Microsoft YaHei",sans-serif}#${Notice.Expire}{-webkit-box-sizing:border-box;box-sizing:border-box;-webkit-border-radius:4px;border-radius:4px;width:46px;padding:2px;height:30px;border:2px solid #777;background:#fff;font-size:15px!important;font-weight:normal;font-family:Impact,sans-serif!important;text-align:center}#${Notice.timeUnit}{-webkit-box-sizing:border-box;box-sizing:border-box;-webkit-border-radius:4px;border-radius:4px;width:60px;height:30px;padding:2px;background:#fff;font-size:15px!important;font-weight:normal;font-family:"Microsoft YaHei",sans-serif!important;border:2px solid #777}#${Notice.fcFeedback} .${Notice.feedback}{cursor:help;font-weight:normal;font-size:16px!important;margin:0}#${Notice.fcFeedback} .${Notice.feedback}>span{font-size:16px!important;font-weight:700!important}#${Notice.fcFeedback} .${Notice.feedback}:hover{color:crimson}#${Notice.fcSubmit}{padding:2px 10px;height:30px;width:100%}#${Notice.fcSubmit} button{color:#333;font-weight:600;border:1px solid #777;font-size:16px!important;padding:5px 15px;margin-left:10px;border-radius:4px}#${Notice.fcSubmit} .${Notice.fcSave}{cursor:pointer;background-color:linear-gradient(to bottom,#fff7f7,#ffe9e9);background:-webkit-gradient(linear,0 0,0 100%,from(#fff7f7),to(#ffe9e9))}#${Notice.fcSubmit} .${Notice.fcClose}{cursor:pointer}`
     );
 
     let curretSite = {
@@ -1215,6 +1223,13 @@
               </dt>
               <dd>
                 <ul id="${Notice.fc}">
+                  <ol id="${Notice.fchk}">
+                    <div style="float:left">键盘快捷键功能开关</div>
+                    <div style="float:right;margin:-2px 2px 0 10px">
+                      <input type="checkbox" id="${Notice.hotkey}" class="${Notice.checkbox}" ${Hotkey ? "checked" : ""} />
+                      <label for="${Notice.hotkey}"></label>
+                    </div>
+                  </ol>
                   <ol id="${Notice.fcGoogle}">
                     <div style="float:left">Google 国际站跳转</div>
                     <div style="float:right;margin:-2px 2px 0 10px">
@@ -1295,6 +1310,7 @@
         qS(`#${Notice.fcSubmit} .${Notice.fcSave}`).addEventListener("click", () => {
           try {
             const GoogleJump = qS(`#${Notice.google}`).checked;
+            const isHotkey = qS(`#${Notice.hotkey}`).checked;
             const keywordHighlight = qS(`#${Notice.kwhl}`).checked;
             const checkUpdate = qS(`#${Notice.isUpdate}`).checked;
             const localWindow = qS(`#${Notice.lw}`).checked;
@@ -1304,6 +1320,7 @@
             _data.timeNumber = timeNumber.length ? Number(timeNumber) : 24;
             _data.timeUnit = timeUnit.length ? timeUnit : "h";
             _data.GoogleJump = GoogleJump;
+            _data.Hotkey = isHotkey;
             _data.keywordHighlight = keywordHighlight;
             _data.localWindow = localWindow;
             if (!checkUpdate) {
@@ -1421,50 +1438,52 @@
 
     /* hotkey setting */
 
-    document.addEventListener("keydown", async event => {
-      const e = event || window.Event;
-      const ekey = (isMac ? e.metaKey : e.altKey) && !e.ctrlKey && !e.shiftKey;
-      if (e.keyCode === (isMac ? 89 : 69) && ekey) {
-        e.preventDefault();
-        if (Date.now() - defCon.timer > 1e3) {
-          defCon.timer = Date.now();
-          addAction_Configure();
-        }
-      }
-      if (e.keyCode === 66 && ekey) {
-        e.preventDefault();
-        if (Date.now() - defCon.timer > 4e3) {
-          defCon.timer = Date.now();
-          menuManager.inUse_switch(CONST.isUseBing, _data, "Bing 按钮");
-        }
-      }
-      if (e.keyCode === (isMac ? 76 : 86) && ekey && checkUpdate) {
-        e.preventDefault();
-        if (Date.now() - defCon.timer > 30e3) {
-          defCon.timer = Date.now();
-          if (CONST.isVDResult) {
-            GMdeleteValue("_Check_Version_Expire_");
-            debug("//-> up-to-date? ", Boolean(await checkVersion(checkUpdate)));
-          } else {
-            _data.VerDetAuto = true;
-            GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
-            GMdeleteValue("_Check_Version_Expire_");
-            GMdeleteValue("_nCount_");
-            debug("//-> Destroy cache & session when restart detection.");
-            GMnotification(
-              Notice.noticeHTML(`<dd class="${Notice.center}">更新检测已<kbd class="im">开启</kbd>，网页在<em>3</em>秒后刷新！</dd>`),
-              `${Notice.info}`,
-              true,
-              30,
-              callback_Countdown
-            );
+    if (Hotkey) {
+      document.addEventListener("keydown", async event => {
+        const e = event || window.Event;
+        const ekey = (isMac ? e.metaKey : e.altKey) && !e.ctrlKey && !e.shiftKey;
+        if (e.keyCode === (isMac ? 89 : 69) && ekey) {
+          e.preventDefault();
+          if (Date.now() - defCon.timer > 1e3) {
+            defCon.timer = Date.now();
+            addAction_Configure();
           }
-        } else {
-          const remainTimer = 30 - Math.floor((Date.now() - defCon.timer) / 1e3);
-          GMnotification(Notice.noticeHTML(`<dd>你的快捷键按得太快了，我受不鸟啦……请慢点儿！(${remainTimer})</dd>`), `${Notice.info}`, false, 20);
         }
-      }
-    });
+        if (e.keyCode === 66 && ekey) {
+          e.preventDefault();
+          if (Date.now() - defCon.timer > 4e3) {
+            defCon.timer = Date.now();
+            menuManager.inUse_switch(CONST.isUseBing, _data, "Bing 按钮");
+          }
+        }
+        if (e.keyCode === (isMac ? 76 : 86) && ekey && checkUpdate) {
+          e.preventDefault();
+          if (Date.now() - defCon.timer > 30e3) {
+            defCon.timer = Date.now();
+            if (CONST.isVDResult) {
+              GMdeleteValue("_Check_Version_Expire_");
+              debug("//-> up-to-date? ", Boolean(await checkVersion(checkUpdate)));
+            } else {
+              _data.VerDetAuto = true;
+              GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
+              GMdeleteValue("_Check_Version_Expire_");
+              GMdeleteValue("_nCount_");
+              debug("//-> Destroy cache & session when restart detection.");
+              GMnotification(
+                Notice.noticeHTML(`<dd class="${Notice.center}">更新检测已<kbd class="im">开启</kbd>，网页在<em>3</em>秒后刷新！</dd>`),
+                `${Notice.info}`,
+                true,
+                30,
+                callback_Countdown
+              );
+            }
+          } else {
+            const remainTimer = 30 - Math.floor((Date.now() - defCon.timer) / 1e3);
+            GMnotification(Notice.noticeHTML(`<dd>你的快捷键按得太快了，我受不鸟啦……请慢点儿！(${remainTimer})</dd>`), `${Notice.info}`, false, 20);
+          }
+        }
+      });
+    }
 
     /* Insert search Button */
 

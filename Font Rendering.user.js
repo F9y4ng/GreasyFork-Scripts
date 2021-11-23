@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.11.23.1
+// @version           2021.11.23.2
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -221,6 +221,8 @@
     ispreview: defCon.randString(6, false),
     fs: defCon.randString(7, true),
     isfontsize: defCon.randString(6, false),
+    hk: defCon.randString(7, true),
+    ishotkey: defCon.randString(6, false),
     mps: defCon.randString(7, true),
     maxps: defCon.randString(6, true),
     feedback: defCon.randString(6, true),
@@ -1765,16 +1767,17 @@
 
     /* get promise value */
 
-    let maxPersonalSites, isBackupFunction, isPreview, isFontsize, rebuild, curVersion, _config_data_;
+    let maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, rebuild, curVersion, _config_data_;
     let configure = await GMgetValue("_configure_");
     if (!configure) {
       maxPersonalSites = 100;
       isBackupFunction = true;
       isPreview = false;
       isFontsize = false;
+      isHotkey = true;
       rebuild = undefined;
       curVersion = undefined;
-      _config_data_ = { maxPersonalSites, isBackupFunction, isPreview, rebuild, curVersion };
+      _config_data_ = { maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, rebuild, curVersion };
       GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
     } else {
       _config_data_ = JSON.parse(defCon.decrypt(configure));
@@ -1782,6 +1785,7 @@
       isBackupFunction = Boolean(_config_data_.isBackupFunction);
       isPreview = Boolean(_config_data_.isPreview);
       isFontsize = Boolean(_config_data_.isFontsize);
+      isHotkey = Boolean(_config_data_.isHotkey !== undefined ? _config_data_.isHotkey : true);
       rebuild = _config_data_.rebuild;
       curVersion = _config_data_.curVersion;
     }
@@ -1821,7 +1825,8 @@
             `<p><span style="font-style:italic;font-weight:bold;font-size:20px;color:tomato">您好！</span>这是您首次运行<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="margin-left:3px;color:tomato;font:italic 900 22px/1.5 Candara,monospace!important">V${defCon.curVersion}</span>，以下为更新内容：</p>
             <p><ul id="${defCon.id.seed}_update">
               <li class="${defCon.id.seed}_wng">请反馈问题至<a href="${defCon.feedback}" style="color:goldenrod">Github</a>，不再处理非Github提交的Issues.</li>
-              <li class="${defCon.id.seed}_fix">修正MacOS下Command+字母与浏览器快捷键冲突的问题。</li>
+              <li class="${defCon.id.seed}_new">新增键盘快捷键功能开关。（默认：开启）</li>
+              <li class="${defCon.id.seed}_fix">修正MacOS下Command+字母与快捷键冲突的问题。</li>
               <li class="${defCon.id.seed}_fix">修正字体描边对粗体样式的延时渲染，优化执行效率。</li>
               <li class="${defCon.id.seed}_fix">优化字体阴影部分的渲染效果。</li>
               <li class="${defCon.id.seed}_fix">修正其他小bugs，优化代码。</li>
@@ -1940,7 +1945,7 @@
       if (c !== "currentcolor") {
         return `text-shadow:0 0 ${(r * 1.25).toFixed(4)}px ${toColordepth(c, 1.5)},0 0 ${r}px ${c},0 0 ${(r / 5).toFixed(4)}px ${toColordepth(c, 0.985, "dark")};`;
       } else {
-        return `text-shadow:0 0 ${(r * 1.25).toFixed(4)}px ${toColordepth(c, 0.75, "dark")},0 0 ${r}px ${toColordepth(c, 0.45, "dark")},0 0 ${(r / 5).toFixed(4)}px ${c};`;
+        return `text-shadow:0 0 ${(r * 1.25).toFixed(4)}px ${toColordepth(c, 0.85, "dark")},0 0 ${r}px ${toColordepth(c, 0.55, "dark")},0 0 ${(r / 5).toFixed(4)}px ${c};`;
       }
     };
     if (!isNaN(shadow_r) && shadow_r > 0 && shadow_r <= 8) {
@@ -2027,7 +2032,7 @@
     }
     const fontStyle_db = String(
       `#${defCon.id.dialogbox}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999992}#${defCon.id.dialogbox} .${defCon.class.db}{box-sizing:content-box;max-width:420px;color:#444;border:2px solid #efefef}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:200px;right:15px;border-radius:6px;width:100%;background:#fff;box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #7b7b7b!important}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:100%}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:500;text-align:left}.${defCon.class.dbb}{display:inline-block;margin:0 1%;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;cursor:pointer;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important;box-sizing:content-box}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important;user-select:none}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223!important;color:#fff!important;border:1px solid #d93223!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a!important;color:#fff!important;border:1px solid #038c5a!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777!important;color:#fff!important;border:1px solid #777!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}` +
-        `.${defCon.class.dbm} button:hover{cursor:pointer;background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important}.${defCon.class.dbm} p{line-height:1.5!important;margin:5px 0!important;text-indent:0!important;font-size:16px!important;font-weight:400;text-align:left;user-select:none}.${defCon.class.dbm} ul{list-style:none;margin:5px 0 0 15px!important;padding:2px;font:italic 14px/140% "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;color:grey}.${defCon.class.dbm} ul li{display:list-item;list-style-type:none;user-select:none}.${defCon.class.dbm} li:before{display:none}.${defCon.class.dbm} #${defCon.id.bk},.${defCon.class.dbm} #${defCon.id.pv},.${defCon.class.dbm} #${defCon.id.fs},.${defCon.class.dbm} #${defCon.id.mps},.${defCon.class.dbm} #${defCon.id.flc}{box-sizing:content-box;list-style:none;font-style:normal;display:flex;justify-content:space-between;align-items:flex-start;margin:0;padding:2px 4px!important;width:calc(95% - 10px);min-width:auto;height:40px;min-height:40px}.${defCon.class.dbm} #${defCon.id.bk} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.pv} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.fs} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.mps} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.flc} .${defCon.id.seed}_VIP{margin:2px 0 0 0;color:darkgoldenrod!important;font:normal 16px/140% "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${defCon.class.dbm} #${defCon.id.flc} button{background-color:#eee;color:#444!important;font-weight:normal;border:1px solid #999;font-size:14px!important;border-radius:4px}.${defCon.class.dbm} #${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}.${defCon.class.dbm} #${defCon.id.files}{display:none}.${defCon.class.dbm} #${defCon.id.feedback}:hover{color:crimson!important}.${defCon.class.dbm} #${defCon.id.feedback}:after{width:0;height:0;content:"";background:url('${loadingIMG}') no-repeat -400px -300px}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#555!important}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#aaa!important}` +
+        `.${defCon.class.dbm} button:hover{cursor:pointer;background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important}.${defCon.class.dbm} p{line-height:1.5!important;margin:5px 0!important;text-indent:0!important;font-size:16px!important;font-weight:400;text-align:left;user-select:none}.${defCon.class.dbm} ul{list-style:none;margin:5px 0 0 15px!important;padding:2px;font:italic 14px/140% "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;color:grey}.${defCon.class.dbm} ul li{display:list-item;list-style-type:none;user-select:none}.${defCon.class.dbm} li:before{display:none}.${defCon.class.dbm} #${defCon.id.bk},.${defCon.class.dbm} #${defCon.id.pv},.${defCon.class.dbm} #${defCon.id.fs},.${defCon.class.dbm} #${defCon.id.hk},.${defCon.class.dbm} #${defCon.id.mps},.${defCon.class.dbm} #${defCon.id.flc}{box-sizing:content-box;list-style:none;font-style:normal;display:flex;justify-content:space-between;align-items:flex-start;margin:0;padding:2px 4px!important;width:calc(95% - 10px);min-width:auto;height:40px;min-height:40px}.${defCon.class.dbm} #${defCon.id.bk} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.pv} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.fs} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.hk} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.mps} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.flc} .${defCon.id.seed}_VIP{margin:2px 0 0 0;color:darkgoldenrod!important;font:normal 16px/140% "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${defCon.class.dbm} #${defCon.id.flc} button{background-color:#eee;color:#444!important;font-weight:normal;border:1px solid #999;font-size:14px!important;border-radius:4px}.${defCon.class.dbm} #${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}.${defCon.class.dbm} #${defCon.id.files}{display:none}.${defCon.class.dbm} #${defCon.id.feedback}:hover{color:crimson!important}.${defCon.class.dbm} #${defCon.id.feedback}:after{width:0;height:0;content:"";background:url('${loadingIMG}') no-repeat -400px -300px}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#555!important}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#aaa!important}` +
         `.${defCon.class.dbm} #${defCon.id.seed}_update li{font-style:italic!important;font-family:Consolas,'Microsoft YaHei'!important}.${defCon.class.dbm} .${defCon.id.seed}_new:before{content:"+";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_del:before{content:"-";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_fix:before{content:"@";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_wng{color:#bdb59b}.${defCon.class.dbm} .${defCon.id.seed}_wng:before{content:"!";display:inline;margin:0 4px 0 -10px}`
     );
     const fontStyle_container = String(
@@ -2312,6 +2317,7 @@
         isBackupFunction = Boolean(_config_data_.isBackupFunction);
         isPreview = Boolean(_config_data_.isPreview);
         isFontsize = Boolean(_config_data_.isFontsize);
+        isHotkey = Boolean(_config_data_.isHotkey !== undefined ? _config_data_.isHotkey : true);
         maxPersonalSites = Number(_config_data_.maxPersonalSites);
         closeAllDialog(`#${defCon.id.dialogbox}`);
         let frDialog = new frDialogBox({
@@ -2341,15 +2347,22 @@
                   <label for="${defCon.id.isfontsize}"></label>
                 </div>
               </li>
+              <li id="${defCon.id.hk}">
+                <div class="${defCon.id.seed}_VIP">\u2463 键盘快捷键功能（默认：开启）</div>
+                <div style="margin:0;padding:0">
+                  <input type="checkbox" id="${defCon.id.ishotkey}" class="${defCon.class.checkbox}" ${isHotkey ? "checked" : ""} />
+                  <label for="${defCon.id.ishotkey}"></label>
+                </div>
+              </li>
               <li id="${defCon.id.mps}">
-                <div class="${defCon.id.seed}_VIP">\u2463 个性化设置总数（默认：100）</div>
+                <div class="${defCon.id.seed}_VIP">\u2464 个性化设置总数（默认：100）</div>
                 <div style="margin:0 5px 0 0;padding:0">
                   <input maxlength="4" id="${defCon.id.maxps}" placeholder="100" value="${maxPersonalSites}"
                     style="box-sizing:border-box;font:normal 500 16px/140% Impact,Times,serif!important;border:2px solid darkgoldenrod;border-radius:4px;width:70px;min-width:70px;text-align:center;padding:4px 5px;color:#333" />
                 </div>
               </li>
               <li id="${defCon.id.flc}">
-                <div class="${defCon.id.seed}_VIP">\u2464 字体列表缓存（时效：24小时）</div>
+                <div class="${defCon.id.seed}_VIP">\u2465 字体列表缓存（时效：24小时）</div>
                 <button id="${defCon.id.flcid}" title="重建当前网站字体列表缓存（如果你已安装新字体，但字体列表未及时更新）"
                   style="box-sizing:border-box;margin:0 5px 0 0;padding:2px 5px;width:max-content;height:max-content;min-width:70px;min-height:32px;background:#eee;letter-spacing:normal">
                   重建缓存
@@ -2363,10 +2376,11 @@
           ).trim(),
           titleText: "参数设置 - VIP 高级功能",
         });
-        let _bk, _pv, _fs, _mps;
+        let _bk, _pv, _fs, _hk, _mps;
         _bk = Boolean(qS(`#${defCon.id.isbackup}`).checked);
         _pv = Boolean(qS(`#${defCon.id.ispreview}`).checked);
         _fs = Boolean(qS(`#${defCon.id.isfontsize}`).checked);
+        _hk = Boolean(qS(`#${defCon.id.ishotkey}`).checked);
         _mps = Number(qS(`#${defCon.id.maxps}`).value);
         qS(`#${defCon.id.maxps}`).addEventListener("input", function () {
           this.value = this.value.replace(/[^0-9]/g, "");
@@ -2397,19 +2411,22 @@
         qS(`#${defCon.id.feedback}`).addEventListener("click", () => {
           GMopenInTab(defCon.feedback, defCon.options);
         });
-        document.querySelectorAll(`#${defCon.id.isbackup}, #${defCon.id.ispreview}, #${defCon.id.isfontsize}, #${defCon.id.maxps}`).forEach(items => {
+        document.querySelectorAll(`#${defCon.id.isbackup}, #${defCon.id.ispreview}, #${defCon.id.isfontsize}, #${defCon.id.ishotkey}, #${defCon.id.maxps}`).forEach(items => {
           items.addEventListener("change", () => {
             _bk = Boolean(qS(`#${defCon.id.isbackup}`).checked);
             _pv = Boolean(qS(`#${defCon.id.ispreview}`).checked);
             _fs = Boolean(qS(`#${defCon.id.isfontsize}`).checked);
+            _hk = Boolean(qS(`#${defCon.id.ishotkey}`).checked);
             _mps = Number(qS(`#${defCon.id.maxps}`).value);
           });
         });
         if (await frDialog.respond()) {
           _mps = !_mps ? 100 : _mps;
+          console.log(_hk);
           _config_data_.isBackupFunction = _bk;
           _config_data_.isPreview = _pv;
           _config_data_.isFontsize = _fs;
+          _config_data_.isHotkey = _hk;
           _config_data_.maxPersonalSites = _mps;
           GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
           let frDialog = new frDialogBox({
@@ -2480,50 +2497,52 @@
 
     /* hotkey setting */
 
-    document.addEventListener("keydown", event => {
-      const e = event || window.Event;
-      const ekey = (isMac ? e.metaKey : e.altKey) && !e.ctrlKey && !e.shiftKey;
-      if (e.keyCode === (isMac ? 81 : 80) && ekey) {
-        e.preventDefault();
-        if (Date.now() - defCon.clickTimer > 1e3) {
-          defCon.clickTimer = Date.now();
-          if (defCon.siteIndex === undefined) {
-            addAction.Configure();
-          } else {
-            addAction.Includesites();
+    if (isHotkey) {
+      document.addEventListener("keydown", event => {
+        const e = event || window.Event;
+        const ekey = (isMac ? e.metaKey : e.altKey) && !e.ctrlKey && !e.shiftKey;
+        if (e.keyCode === (isMac ? 81 : 80) && ekey) {
+          e.preventDefault();
+          if (Date.now() - defCon.clickTimer > 1e3) {
+            defCon.clickTimer = Date.now();
+            if (defCon.siteIndex === undefined) {
+              addAction.Configure();
+            } else {
+              addAction.Includesites();
+            }
           }
         }
-      }
-      if (e.keyCode === (isMac ? 71 : 88) && ekey) {
-        e.preventDefault();
-        if (Date.now() - defCon.clickTimer > 1e3) {
-          defCon.clickTimer = Date.now();
-          if (defCon.siteIndex === undefined) {
-            addAction.Excludesites();
-          } else {
-            addAction.Includesites();
+        if (e.keyCode === (isMac ? 71 : 88) && ekey) {
+          e.preventDefault();
+          if (Date.now() - defCon.clickTimer > 1e3) {
+            defCon.clickTimer = Date.now();
+            if (defCon.siteIndex === undefined) {
+              addAction.Excludesites();
+            } else {
+              addAction.Includesites();
+            }
           }
         }
-      }
-      if (e.keyCode === (isMac ? 77 : 71) && ekey) {
-        e.preventDefault();
-        if (Date.now() - defCon.clickTimer > 1e3) {
-          defCon.clickTimer = Date.now();
-          if (defCon.siteIndex === undefined) {
-            addAction.VIPConfigure();
-          } else {
-            addAction.Includesites();
+        if (e.keyCode === (isMac ? 77 : 71) && ekey) {
+          e.preventDefault();
+          if (Date.now() - defCon.clickTimer > 1e3) {
+            defCon.clickTimer = Date.now();
+            if (defCon.siteIndex === undefined) {
+              addAction.VIPConfigure();
+            } else {
+              addAction.Includesites();
+            }
           }
         }
-      }
-      if (e.keyCode === (isMac ? 85 : 84) && ekey) {
-        e.preventDefault();
-        if (Date.now() - defCon.clickTimer > 10e3) {
-          defCon.clickTimer = Date.now();
-          GMopenInTab(defCon.feedback, defCon.options);
+        if (e.keyCode === (isMac ? 85 : 84) && ekey) {
+          e.preventDefault();
+          if (Date.now() - defCon.clickTimer > 10e3) {
+            defCon.clickTimer = Date.now();
+            GMopenInTab(defCon.feedback, defCon.options);
+          }
         }
-      }
-    });
+      });
+    }
 
     /* important Functions */
 
