@@ -5,7 +5,7 @@
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:ja         Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version         4.0.20211120.2
+// @version         4.0.20211123.1
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:zh  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
@@ -31,7 +31,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            新增键盘快捷键(Alt+字母)操作脚本菜单的配置项。\n修正更新检测的升级源过期问题，优化脚本升级流程。\n修正一些Css样式问题。
+// @note            修正MacOS下Command+字母与浏览器快捷键冲突的问题。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -1325,6 +1325,8 @@
       }
     }
 
+    const isMac = getBrowser.type("system") === "MacOS";
+
     const menuManager = {
       inUse_switch: (_status, _data, Tips) => {
         const info = x => {
@@ -1352,11 +1354,11 @@
         this.menuRemove(in_Use_Configure);
         this.menuRemove(in_UpdateCheck_ID);
 
-        in_Use_Configure = GMregisterMenuCommand("\ufff0\ud83c\udfaf【脚本参数】功能设置开关(E)", () => {
+        in_Use_Configure = GMregisterMenuCommand(`\ufff0\ud83c\udfaf【脚本参数】功能设置开关(${isMac ? "F" : "E"})`, () => {
           addAction_Configure();
         });
-        _Use_Bing__ = e ? "\ufff2\ud83d\udfe2【已开启】" : "\ufff2\u274c【已关闭】";
-        _use_Bing_ID = GMregisterMenuCommand(`${_Use_Bing__}Bing 搜索跳转(B)`, () => {
+        _Use_Bing__ = e ? "\ufff2\u2714\ufe0f【已开启】" : "\ufff2\u274c【已关闭】";
+        _use_Bing_ID = GMregisterMenuCommand(`${_Use_Bing__}Bing 搜索跳转(${isMac ? "Q" : "B"})`, () => {
           if (Date.now() - defCon.timer > 4e3) {
             this.inUse_switch(e, _data, "Bing 按钮");
             defCon.timer = Date.now();
@@ -1365,7 +1367,7 @@
 
         if (checkUpdate) {
           if (CONST.isVDResult) {
-            in_UpdateCheck_ID = GMregisterMenuCommand(`\ufff5\ud83e\udded【版本更新】从服务器实时检查(V)`, async () => {
+            in_UpdateCheck_ID = GMregisterMenuCommand(`\ufff5\ud83e\udded【版本更新】从服务器实时检查(${isMac ? "J" : "V"})`, async () => {
               if (Date.now() - defCon.timer > 30e3) {
                 GMdeleteValue("_Check_Version_Expire_");
                 debug("//-> up-to-date? ", Boolean(await checkVersion(checkUpdate)));
@@ -1421,22 +1423,22 @@
 
     document.addEventListener("keydown", async event => {
       const e = event || window.Event;
-      const ekey = (getBrowser.type("system") === "MacOS" ? e.metaKey : e.altKey) && !e.ctrlKey && !e.shiftKey;
-      if (e.keyCode === 69 && ekey) {
+      const ekey = (isMac ? e.metaKey : e.altKey) && !e.ctrlKey && !e.shiftKey;
+      if (e.keyCode === (isMac ? 70 : 69) && ekey) {
         e.preventDefault();
         if (Date.now() - defCon.timer > 1e3) {
           defCon.timer = Date.now();
           addAction_Configure();
         }
       }
-      if (e.keyCode === 66 && ekey) {
+      if (e.keyCode === (isMac ? 81 : 66) && ekey) {
         e.preventDefault();
         if (Date.now() - defCon.timer > 4e3) {
           defCon.timer = Date.now();
           menuManager.inUse_switch(CONST.isUseBing, _data, "Bing 按钮");
         }
       }
-      if (e.keyCode === 86 && ekey && checkUpdate) {
+      if (e.keyCode === (isMac ? 74 : 86) && ekey && checkUpdate) {
         e.preventDefault();
         if (Date.now() - defCon.timer > 30e3) {
           defCon.timer = Date.now();

@@ -4,8 +4,8 @@
 // @name:zh-TW    谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en       Google & baidu & Bing Switcher (ALL in One)
 // @name:ja       Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version       4.0.20211120.2
+// @version       4.0.20211123.1
 // @author        F9y4ng
 // @namespace     https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
-// @note          新增键盘快捷键(Alt+字母)操作脚本菜单的配置项。\n修正更新检测的升级源过期问题，优化脚本升级流程。\n修正一些Css样式问题。
+// @note          修正MacOS下Command+字母与浏览器快捷键冲突的问题。
 // ==/UserScript==
