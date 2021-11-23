@@ -2454,24 +2454,24 @@
         loading ? GMunregisterMenuCommand(loading) : debug("\u27A4 No Loading_Menu");
         if (defCon.siteIndex === undefined) {
           Font_Set ? GMunregisterMenuCommand(Font_Set) : debug("\u27A4 No Font_Set_Menu");
-          Font_Set = GMregisterMenuCommand(`\ufff2\ud83c\udf13 字体渲染设置(${isMac ? "U" : "P"})`, () => {
+          Font_Set = GMregisterMenuCommand(`\ufff2\ud83c\udf13 字体渲染设置(${isMac ? "Q" : "P"})`, () => {
             addAction.Configure();
           });
           Exclude_site ? GMunregisterMenuCommand(Exclude_site) : debug("\u27A4 No Exclude_site_Menu");
-          Exclude_site = GMregisterMenuCommand(`\ufff3\u26d4 排除渲染 ${curHostname} (${isMac ? "D" : "X"})`, () => {
+          Exclude_site = GMregisterMenuCommand(`\ufff3\u26d4 排除渲染 ${curHostname} (${isMac ? "G" : "X"})`, () => {
             addAction.Excludesites();
           });
           Parameter_Set ? GMunregisterMenuCommand(Parameter_Set) : debug("\u27A4 No Parameter_Set_Menu");
-          Parameter_Set = GMregisterMenuCommand(`\ufff7\ud83d\udc8e VIP 高级功能开关(${isMac ? "E" : "G"})`, () => {
+          Parameter_Set = GMregisterMenuCommand(`\ufff7\ud83d\udc8e VIP 高级功能开关(${isMac ? "M" : "G"})`, () => {
             addAction.VIPConfigure();
           });
         } else {
           Exclude_site ? GMunregisterMenuCommand(Exclude_site) : debug("\u27A4 No Exclude_site_Menu");
-          Exclude_site = GMregisterMenuCommand(`\ufff2\ud83c\udf40 重新渲染 ${curHostname} (${isMac ? "D" : "X"})`, () => {
+          Exclude_site = GMregisterMenuCommand(`\ufff2\ud83c\udf40 重新渲染 ${curHostname} (${isMac ? "G" : "X"})`, () => {
             addAction.Includesites();
           });
           Feed_Back ? GMunregisterMenuCommand(Feed_Back) : debug("\u27A4 No Feed_Back_Menu");
-          Feed_Back = GMregisterMenuCommand("\ufff9\ud83e\udde1 向作者反馈问题或建议(T)", () => {
+          Feed_Back = GMregisterMenuCommand(`\ufff9\ud83e\udde1 向作者反馈问题或建议(${isMac ? "U" : "T"})`, () => {
             GMopenInTab(defCon.feedback, defCon.options);
           });
         }
@@ -2483,7 +2483,7 @@
     document.addEventListener("keydown", event => {
       const e = event || window.Event;
       const ekey = (isMac ? e.metaKey : e.altKey) && !e.ctrlKey && !e.shiftKey;
-      if (e.keyCode === (isMac ? 85 : 80) && ekey) {
+      if (e.keyCode === (isMac ? 81 : 80) && ekey) {
         e.preventDefault();
         if (Date.now() - defCon.clickTimer > 1e3) {
           defCon.clickTimer = Date.now();
@@ -2494,7 +2494,7 @@
           }
         }
       }
-      if (e.keyCode === (isMac ? 68 : 88) && ekey) {
+      if (e.keyCode === (isMac ? 71 : 88) && ekey) {
         e.preventDefault();
         if (Date.now() - defCon.clickTimer > 1e3) {
           defCon.clickTimer = Date.now();
@@ -2505,7 +2505,7 @@
           }
         }
       }
-      if (e.keyCode === (isMac ? 69 : 71) && ekey) {
+      if (e.keyCode === (isMac ? 77 : 71) && ekey) {
         e.preventDefault();
         if (Date.now() - defCon.clickTimer > 1e3) {
           defCon.clickTimer = Date.now();
@@ -2516,7 +2516,7 @@
           }
         }
       }
-      if (e.keyCode === 84 && ekey) {
+      if (e.keyCode === (isMac ? 85 : 84) && ekey) {
         e.preventDefault();
         if (Date.now() - defCon.clickTimer > 10e3) {
           defCon.clickTimer = Date.now();

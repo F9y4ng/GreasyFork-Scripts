@@ -1354,11 +1354,11 @@
         this.menuRemove(in_Use_Configure);
         this.menuRemove(in_UpdateCheck_ID);
 
-        in_Use_Configure = GMregisterMenuCommand(`\ufff0\ud83c\udfaf【脚本参数】功能设置开关(${isMac ? "F" : "E"})`, () => {
+        in_Use_Configure = GMregisterMenuCommand(`\ufff0\ud83c\udfaf【脚本参数】功能设置开关(${isMac ? "Y" : "E"})`, () => {
           addAction_Configure();
         });
         _Use_Bing__ = e ? "\ufff2\u2714\ufe0f【已开启】" : "\ufff2\u274c【已关闭】";
-        _use_Bing_ID = GMregisterMenuCommand(`${_Use_Bing__}Bing 搜索跳转(${isMac ? "Q" : "B"})`, () => {
+        _use_Bing_ID = GMregisterMenuCommand(`${_Use_Bing__}Bing 搜索跳转(B)`, () => {
           if (Date.now() - defCon.timer > 4e3) {
             this.inUse_switch(e, _data, "Bing 按钮");
             defCon.timer = Date.now();
@@ -1367,7 +1367,7 @@
 
         if (checkUpdate) {
           if (CONST.isVDResult) {
-            in_UpdateCheck_ID = GMregisterMenuCommand(`\ufff5\ud83e\udded【版本更新】从服务器实时检查(${isMac ? "J" : "V"})`, async () => {
+            in_UpdateCheck_ID = GMregisterMenuCommand(`\ufff5\ud83e\udded【版本更新】从服务器实时检查(${isMac ? "L" : "V"})`, async () => {
               if (Date.now() - defCon.timer > 30e3) {
                 GMdeleteValue("_Check_Version_Expire_");
                 debug("//-> up-to-date? ", Boolean(await checkVersion(checkUpdate)));
@@ -1378,7 +1378,7 @@
               }
             });
           } else {
-            in_UpdateCheck_ID = GMregisterMenuCommand("\ufff5\ud83d\udcdb【版本更新】已关闭 \u267b 重新开启(V)", () => {
+            in_UpdateCheck_ID = GMregisterMenuCommand(`\ufff5\ud83d\udcdb【版本更新】已关闭 \u267b 重新开启(${isMac ? "L" : "V"})`, () => {
               if (Date.now() - defCon.timer > 4e3) {
                 _data.VerDetAuto = true;
                 GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
@@ -1424,21 +1424,21 @@
     document.addEventListener("keydown", async event => {
       const e = event || window.Event;
       const ekey = (isMac ? e.metaKey : e.altKey) && !e.ctrlKey && !e.shiftKey;
-      if (e.keyCode === (isMac ? 70 : 69) && ekey) {
+      if (e.keyCode === (isMac ? 89 : 69) && ekey) {
         e.preventDefault();
         if (Date.now() - defCon.timer > 1e3) {
           defCon.timer = Date.now();
           addAction_Configure();
         }
       }
-      if (e.keyCode === (isMac ? 81 : 66) && ekey) {
+      if (e.keyCode === 66 && ekey) {
         e.preventDefault();
         if (Date.now() - defCon.timer > 4e3) {
           defCon.timer = Date.now();
           menuManager.inUse_switch(CONST.isUseBing, _data, "Bing 按钮");
         }
       }
-      if (e.keyCode === (isMac ? 74 : 86) && ekey && checkUpdate) {
+      if (e.keyCode === (isMac ? 76 : 86) && ekey && checkUpdate) {
         e.preventDefault();
         if (Date.now() - defCon.timer > 30e3) {
           defCon.timer = Date.now();
