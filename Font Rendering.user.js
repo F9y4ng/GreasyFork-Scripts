@@ -1933,7 +1933,7 @@
         CONST.fontFace = Boolean(fontValue.fontFace);
         CONST.fontStroke = Number(fontValue.fontStroke) || 0;
         CONST.fontShadow = Number(fontValue.fontShadow) || 0;
-        CONST.fontSize = Number(isFontsize) || 1;
+        CONST.fontSize = Number(fontValue.fontSize) || 1;
         CONST.shadowColor = filterHtmlToText(fontValue.shadowColor);
         CONST.fontSmooth = Boolean(fontValue.fontSmooth);
         CONST.fontCSS = filterHtmlToText(fontValue.fontCSS);
