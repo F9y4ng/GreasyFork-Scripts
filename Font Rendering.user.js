@@ -1,11 +1,11 @@
-/* jshint esversion: 10 */
+/* jshint esversion: 9 */
 // ==UserScript==
 // @name              字体渲染（自用脚本）
 // @name:zh           字体渲染（自用脚本）
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.12.02.2
+// @version           2021.12.10.1
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -215,6 +215,8 @@
     files: defCon.randString(5, false),
     tfiles: defCon.randString(5, false),
     db: defCon.randString(12, true),
+    ct: defCon.randString(7, true),
+    isclosetip: defCon.randString(6, false),
     bk: defCon.randString(7, true),
     isbackup: defCon.randString(6, false),
     pv: defCon.randString(7, true),
@@ -592,6 +594,21 @@
           return 0 - s.getBoundingClientRect()[g] / t;
       }
     };
+    // window
+    Object.defineProperties(unsafeWindow, {
+      pageXOffset: {
+        get: function () {
+          return this.scrollX / t;
+        },
+        configurable: false,
+      },
+      pageYOffset: {
+        get: function () {
+          return this.scrollY / t;
+        },
+        configurable: false,
+      },
+    });
     // HTMLelements
     Object.defineProperties(document.documentElement, {
       scrollLeft: {
@@ -629,13 +646,13 @@
       },
       pageX: {
         get: function () {
-          return this.x / t + (window.scrollX || window.pageXOffset);
+          return this.x / t + window.scrollX;
         },
         configurable: false,
       },
       pageY: {
         get: function () {
-          return this.y / t + (window.scrollY || window.pageYOffset);
+          return this.y / t + window.scrollY;
         },
         configurable: false,
       },
@@ -1772,7 +1789,7 @@
 
     /* get promise value */
 
-    let maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, rebuild, curVersion, _config_data_;
+    let maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, isCloseTip, rebuild, curVersion, _config_data_;
     let configure = await GMgetValue("_configure_");
     if (!configure) {
       maxPersonalSites = 100;
@@ -1780,6 +1797,7 @@
       isPreview = false;
       isFontsize = false;
       isHotkey = true;
+      isCloseTip = false;
       rebuild = undefined;
       curVersion = undefined;
       _config_data_ = { maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, rebuild, curVersion };
@@ -1791,6 +1809,7 @@
       isPreview = Boolean(_config_data_.isPreview);
       isFontsize = Boolean(_config_data_.isFontsize);
       isHotkey = Boolean(_config_data_.isHotkey !== undefined ? _config_data_.isHotkey : true);
+      isCloseTip = Boolean(_config_data_.isCloseTip);
       rebuild = _config_data_.rebuild;
       curVersion = _config_data_.curVersion;
     }
@@ -1824,29 +1843,31 @@
 
     addLoadEvents(async (curVersion = _config_data_.curVersion) => {
       if (curVersion !== defCon.curVersion && curWindowTop) {
-        let frDialog = new FrDialogBox({
-          trueButtonText: "好，去看看",
-          falseButtonText: "不，算了吧",
-          messageText: String(
-            `<p><span style="font-style:italic;font-weight:bold;font-size:20px;color:tomato">您好！</span>这是您首次运行<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="margin-left:3px;color:tomato;font:italic 900 22px/1.5 Candara,monospace!important">V${defCon.curVersion}</span>, 以下为更新内容：</p>
+        if (!isCloseTip) {
+          let frDialog = new FrDialogBox({
+            trueButtonText: "好，去看看",
+            falseButtonText: "不，算了吧",
+            messageText: String(
+              `<p><span style="font-style:italic;font-weight:bold;font-size:20px;color:tomato">您好！</span>这是您首次运行<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="font:italic 900 22px/1.5 Candara,'Times New Roman'!important;color:tomato;margin-left:3px">V${defCon.curVersion}</span>, 以下为更新内容：</p>
             <p><ul id="${defCon.id.seed}_update">
-              <li class="${defCon.id.seed}_wng">请反馈问题至<a href="${defCon.feedback}" target="_blank" style="color:goldenrod">Github</a>，不再受理其他途径的问题反馈。</li>
-              <li class="${defCon.id.seed}_fix">修正配置页面的样式问题，优化字体表默认字体。<span style="color:red">New!</span></li>
-              <li class="${defCon.id.seed}_fix">修正字体搜索时某些保留关键词搜索报错的bug.</li>
-              <li class="${defCon.id.seed}_fix">优化默认的字体渲染参数，优化代码命名。</li>
-              <li class="${defCon.id.seed}_fix">优化性能，修正bugs，优化代码。</li>
+              <li class="${defCon.id.seed}_info">请反馈问题至<a href="${defCon.feedback}" target="_blank" style="color:goldenrod">Github</a>，不再受理其他途径的问题反馈。</li>
+              <li class="${defCon.id.seed}_warn">由于数据变更，建议您在新功能设置后重新备份本地数据。</li>
+              <li class="${defCon.id.seed}_add">新增关闭更新提示功能。(关闭提示会让您错过重要通知)</li>
+              <li class="${defCon.id.seed}_fix">修正字体缩放初始值bug，以及新的坐标偏移问题。</li>
+              <li class="${defCon.id.seed}_fix">修正一些bugs，优化代码。</li>
             </ul></p>
             <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
-          ),
-          titleText: "脚本更新 - 温馨提示",
-        });
+            ),
+            titleText: "脚本更新 - 温馨提示",
+          });
+          if (await frDialog.respond()) {
+            GMopenInTab(`${hostURI}#update`, defCon.options);
+          }
+          frDialog = null;
+        }
         _config_data_.curVersion = defCon.curVersion;
         GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
         debug("\u27A4 %cThe script has been upgraded to V%s", "font-style:italic;background-color:yellow;color:crimson", defCon.curVersion);
-        if (await frDialog.respond()) {
-          GMopenInTab(`${hostURI}#update`, defCon.options);
-        }
-        frDialog = null;
       }
       return true;
     });
@@ -1923,7 +1944,7 @@
         CONST.fontFace = Boolean(domainValue[domainValueIndex].fontFace);
         CONST.fontStroke = Number(domainValue[domainValueIndex].fontStroke) || 0;
         CONST.fontShadow = Number(domainValue[domainValueIndex].fontShadow) || 0;
-        CONST.fontSize = Number(domainValue[domainValueIndex].fontSize) || 1;
+        CONST.fontSize = isFontsize ? Number(domainValue[domainValueIndex].fontSize) || 1 : 1;
         CONST.shadowColor = filterHtmlToText(domainValue[domainValueIndex].shadowColor);
         CONST.fontSmooth = Boolean(domainValue[domainValueIndex].fontSmooth);
         CONST.fontCSS = filterHtmlToText(domainValue[domainValueIndex].fontCSS);
@@ -1933,7 +1954,7 @@
         CONST.fontFace = Boolean(fontValue.fontFace);
         CONST.fontStroke = Number(fontValue.fontStroke) || 0;
         CONST.fontShadow = Number(fontValue.fontShadow) || 0;
-        CONST.fontSize = Number(fontValue.fontSize) || 1;
+        CONST.fontSize = isFontsize ? Number(fontValue.fontSize) || 1 : 1;
         CONST.shadowColor = filterHtmlToText(fontValue.shadowColor);
         CONST.fontSmooth = Boolean(fontValue.fontSmooth);
         CONST.fontCSS = filterHtmlToText(fontValue.fontCSS);
@@ -1949,9 +1970,9 @@
     const shadow_c = CONST.shadowColor;
     const overlayColor = (r, c) => {
       if (c !== "currentcolor") {
-        return `text-shadow:0 0 ${(r * 1.25).toFixed(4)}px ${toColordepth(c, 1.5)},0 0 ${r}px ${c},0 0 ${(r / 5).toFixed(4)}px ${toColordepth(c, 0.985, "dark")};`;
+        return `text-shadow:0 0 ${(r * 1.25).toFixed(4)}px ${toColordepth(c, 1.5)},0 0 ${r}px ${c},0 0 ${(r / 4).toFixed(4)}px ${toColordepth(c, 0.985, "dark")};`;
       } else {
-        return `text-shadow:0 0 ${(r * 1.25).toFixed(4)}px ${toColordepth(c, 0.85, "dark")},0 0 ${r}px ${toColordepth(c, 0.55, "dark")},0 0 ${(r / 5).toFixed(4)}px ${c};`;
+        return `text-shadow:0 0 ${(r * 1.25).toFixed(4)}px ${toColordepth(c, 0.85, "dark")},0 0 ${r}px ${toColordepth(c, 0.55, "dark")},0 0 ${(r / 4).toFixed(4)}px ${c};`;
       }
     };
     if (!isNaN(shadow_r) && shadow_r > 0 && shadow_r <= 8) {
@@ -2035,9 +2056,9 @@
       tshadow = `${bodyZoom}${codeFont}${selection}${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontfaces}${exclude}${fontTest}`;
     }
     const fontStyle_db = String(
-      `#${defCon.id.dialogbox}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999992}#${defCon.id.dialogbox} .${defCon.class.db}{box-sizing:content-box;max-width:420px;color:#444;border:2px solid #efefef}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:200px;right:15px;border-radius:6px;width:100%;background:#fff;box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #7b7b7b!important}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:100%;font-family:Candara,Times New Roman,system-ui,-apple-system,BlinkMacSystemFont!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:500;text-align:left}.${defCon.class.dbb}{display:inline-block;margin:0 1%;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;cursor:pointer;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important;box-sizing:content-box}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important;user-select:none}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223!important;color:#fff!important;border:1px solid #d93223!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a!important;color:#fff!important;border:1px solid #038c5a!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777!important;color:#fff!important;border:1px solid #777!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}` +
-        `.${defCon.class.dbm} button:hover{cursor:pointer;background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important}.${defCon.class.dbm} p{line-height:1.5!important;margin:5px 0!important;text-indent:0!important;font-size:16px!important;font-weight:400;text-align:left;user-select:none}.${defCon.class.dbm} ul{list-style:none;margin:0 0 0 10px!important;padding:2px;font:italic 14px/140% "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;color:gray;scrollbar-width:thin}.${defCon.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${defCon.class.dbm} ul::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #999;background:#cfcfcf;border-radius:10px}.${defCon.class.dbm} ul::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:10px}.${defCon.class.dbm} ul::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:6px}.${defCon.class.dbm} ul li{display:list-item;list-style-type:none;user-select:none}.${defCon.class.dbm} li:before{display:none}.${defCon.class.dbm} #${defCon.id.bk},.${defCon.class.dbm} #${defCon.id.pv},.${defCon.class.dbm} #${defCon.id.fs},.${defCon.class.dbm} #${defCon.id.hk},.${defCon.class.dbm} #${defCon.id.mps},.${defCon.class.dbm} #${defCon.id.flc}{box-sizing:content-box;list-style:none;font-style:normal;display:flex;justify-content:space-between;align-items:flex-start;margin:0;padding:2px 4px!important;width:calc(96% - 10px);min-width:auto;height:40px;min-height:40px}.${defCon.class.dbm} #${defCon.id.bk} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.pv} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.fs} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.hk} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.mps} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.flc} .${defCon.id.seed}_VIP{margin:2px 0 0 0;color:darkgoldenrod!important;font:normal 16px/140% "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${defCon.class.dbm} #${defCon.id.flc} button{background-color:#eee;color:#444!important;font-weight:normal;border:1px solid #999;font-size:14px!important;border-radius:4px}` +
-        `.${defCon.class.dbm} #${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}.${defCon.class.dbm} #${defCon.id.files}{display:none}.${defCon.class.dbm} #${defCon.id.feedback}:hover{color:crimson!important}.${defCon.class.dbm} #${defCon.id.feedback}:after{width:0;height:0;content:"";background:url('${loadingIMG}') no-repeat -400px -300px}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#555!important}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#aaa!important}.${defCon.class.dbm} #${defCon.id.seed}_update li{font:italic 400 14px/1.5 Consolas,'Microsoft YaHei',system-ui,-apple-system,BlinkMacSystemFont!important;color:gray}.${defCon.class.dbm} .${defCon.id.seed}_new:before{content:"+";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_del:before{content:"-";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_fix:before{content:"@";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_wng{color:#bdb59b!important}.${defCon.class.dbm} .${defCon.id.seed}_wng:before{content:"!";display:inline;margin:0 4px 0 -10px}`
+      `#${defCon.id.dialogbox}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999992}#${defCon.id.dialogbox} .${defCon.class.db}{box-sizing:content-box;max-width:420px;color:#444;border:2px solid #efefef}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:200px;right:15px;border-radius:6px;width:100%;background:#fff;box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #7b7b7b!important}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:100%;font-family:Candara,"Times New Roman",system-ui,-apple-system,BlinkMacSystemFont!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:500;text-align:left}.${defCon.class.dbb}{display:inline-block;margin:0 1%;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;cursor:pointer;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important;box-sizing:content-box}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important;user-select:none}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223!important;color:#fff!important;border:1px solid #d93223!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a!important;color:#fff!important;border:1px solid #038c5a!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777!important;color:#fff!important;border:1px solid #777!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}` +
+        `.${defCon.class.dbm} button:hover{cursor:pointer;background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important}.${defCon.class.dbm} p{line-height:1.5!important;margin:5px 0!important;text-indent:0!important;font-size:16px!important;font-weight:400;text-align:left;user-select:none}.${defCon.class.dbm} ul{list-style:none;margin:0 0 0 10px!important;padding:2px;font:italic 14px/140% "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;color:gray;scrollbar-width:thin}.${defCon.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${defCon.class.dbm} ul::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #999;background:#cfcfcf;border-radius:10px}.${defCon.class.dbm} ul::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:10px}.${defCon.class.dbm} ul::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:6px}.${defCon.class.dbm} ul li{display:list-item;list-style-type:none;user-select:none}.${defCon.class.dbm} li:before{display:none}.${defCon.class.dbm} #${defCon.id.bk},.${defCon.class.dbm} #${defCon.id.pv},.${defCon.class.dbm} #${defCon.id.fs},.${defCon.class.dbm} #${defCon.id.hk},.${defCon.class.dbm} #${defCon.id.ct},.${defCon.class.dbm} #${defCon.id.mps},.${defCon.class.dbm} #${defCon.id.flc}{box-sizing:content-box;list-style:none;font-style:normal;display:flex;justify-content:space-between;align-items:flex-start;margin:0;padding:2px 4px!important;width:calc(96% - 10px);min-width:auto;height:40px;min-height:40px}.${defCon.class.dbm} #${defCon.id.bk} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.pv} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.fs} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.hk} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.ct} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.mps} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.flc} .${defCon.id.seed}_VIP{margin:2px 0 0 0;color:darkgoldenrod!important;font:normal 16px/140% "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${defCon.class.dbm} #${defCon.id.flc} button{background-color:#eee;color:#444!important;font-weight:normal;border:1px solid #999;font-size:14px!important;border-radius:4px}` +
+        `.${defCon.class.dbm} #${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}.${defCon.class.dbm} #${defCon.id.files}{display:none}.${defCon.class.dbm} #${defCon.id.feedback}:hover{color:crimson!important}.${defCon.class.dbm} #${defCon.id.feedback}:after{width:0;height:0;content:"";background:url('${loadingIMG}') no-repeat -400px -300px}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#555!important}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#aaa!important}.${defCon.class.dbm} #${defCon.id.seed}_update li{font:italic 400 14px/1.5 Consolas,'Microsoft YaHei',system-ui,-apple-system,BlinkMacSystemFont!important;color:gray}.${defCon.class.dbm} .${defCon.id.seed}_add:before{content:"+";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_del:before{content:"-";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_fix:before{content:"@";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_info{color:darkgoldenrod!important}.${defCon.class.dbm} .${defCon.id.seed}_info:before{content:"#";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_warn{color:darkred!important}.${defCon.class.dbm} .${defCon.id.seed}_warn:before{content:"!";display:inline;margin:0 4px 0 -10px}`
     );
     const fontStyle_container = String(
       `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;border-radius:12px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 20px);z-index:999999;padding:4px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container} *{line-height:1.5!important;font-size:16px;font-weight:700;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Android Emoji",EmojiSymbols!important;text-shadow:initial!important;-webkit-text-stroke:initial!important}` +
@@ -2211,7 +2232,7 @@
           "font:normal 700 16px/120% system-ui,-apple-system,BlinkMacSystemFont;color:crimson",
           "line-height:180%;font-size:10px;color:#777;font-style:italic",
           "line-height:180%;font-size:12px;color:slategray",
-          "color:slategrey;font:italic 16px Candara,monospace;",
+          "color:slategrey;font:italic 16px Candara,'Times New Roman'",
           defCon.curVersion,
           "line-height:180%;font-size:12px;color:steelblue",
           defCon.domainCount > maxPersonalSites ? "color:crimson" : "color:steelblue",
@@ -2273,7 +2294,7 @@
       const observer = new MutationObserver(callback);
       observer.observe(document, opts);
     } catch (e) {
-      error("\u27A4 createHTML:", e);
+      error("\u27A4 insertCSS:", e);
     }
 
     /* Menus Insert */
@@ -2304,7 +2325,7 @@
         let frDialog = new FrDialogBox({
           trueButtonText: "确 定",
           neutralButtonText: "取 消",
-          messageText: `<p style="font:bold italic 24px/1.4 Candara,Serif!important">${curHostName}</p><p style="color:darkred">该域名下所有页面将被禁止字体渲染！</p><p>确定后页面将自动刷新，请确认是否排除？</p>`,
+          messageText: `<p style="font:bold italic 24px/1.4 Candara,'Times New Roman'!important">${curHostName}</p><p style="color:darkred">该域名下所有页面将被禁止字体渲染！</p><p>确定后页面将自动刷新，请确认是否排除？</p>`,
           titleText: "禁止字体渲染",
         });
         if (await frDialog.respond()) {
@@ -2323,6 +2344,7 @@
         isPreview = Boolean(_config_data_.isPreview);
         isFontsize = Boolean(_config_data_.isFontsize);
         isHotkey = Boolean(_config_data_.isHotkey !== undefined ? _config_data_.isHotkey : true);
+        isCloseTip = Boolean(_config_data_.isCloseTip);
         maxPersonalSites = Number(_config_data_.maxPersonalSites) || 100;
         closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
         let frDialog = new FrDialogBox({
@@ -2332,43 +2354,50 @@
           messageText: String(
             `<ul class="${defCon.class.main}" style="box-sizing:content-box;max-height:215px;overflow-x:hidden;margin:0;padding:5px 0">
               <li id="${defCon.id.bk}">
-                <div class="${defCon.id.seed}_VIP">\u2460 本地备份功能（默认：开启）</div>
+                <div class="${defCon.id.seed}_VIP" title="养成定期备份的好习惯，保护自己的数据安全！">\u2460 本地备份功能（默认：开启）</div>
                 <div style="margin:0;padding:0">
                   <input type="checkbox" id="${defCon.id.isbackup}" class="${defCon.class.checkbox}" ${isBackupFunction ? "checked" : ""} />
                   <label for="${defCon.id.isbackup}"></label>
                 </div>
               </li>
               <li id="${defCon.id.pv}">
-                <div class="${defCon.id.seed}_VIP">\u2461 保存预览功能（默认：关闭）</div>
+                <div class="${defCon.id.seed}_VIP" title="无需保存刷新页面，直接预览渲染效果！">\u2461 保存预览功能（默认：关闭）</div>
                 <div style="margin:0;padding:0">
                   <input type="checkbox" id="${defCon.id.ispreview}" class="${defCon.class.checkbox}" ${isPreview ? "checked" : ""} />
                   <label for="${defCon.id.ispreview}"></label>
                 </div>
               </li>
               <li id="${defCon.id.fs}">
-                <div class="${defCon.id.seed}_VIP">\u2462 字体缩放功能（默认：关闭）</div>
+                <div class="${defCon.id.seed}_VIP" title="实验性功能：不推荐Firefox浏览器开启字体缩放！">\u2462 字体缩放功能（默认：关闭）</div>
                 <div style="margin:0;padding:0">
                   <input type="checkbox" id="${defCon.id.isfontsize}" class="${defCon.class.checkbox}" ${isFontsize ? "checked" : ""} />
                   <label for="${defCon.id.isfontsize}"></label>
                 </div>
               </li>
               <li id="${defCon.id.hk}">
-                <div class="${defCon.id.seed}_VIP">\u2463 键盘快捷键功能（默认：开启）</div>
+                <div class="${defCon.id.seed}_VIP" title="如快捷键有冲突，请在此关闭它！">\u2463 键盘快捷键功能（默认：开启）</div>
                 <div style="margin:0;padding:0">
                   <input type="checkbox" id="${defCon.id.ishotkey}" class="${defCon.class.checkbox}" ${isHotkey ? "checked" : ""} />
                   <label for="${defCon.id.ishotkey}"></label>
                 </div>
               </li>
+              <li id="${defCon.id.ct}">
+                <div class="${defCon.id.seed}_VIP" title="您将无法第一时间获得更新内容，错过重要提示！">\u2464 关闭更新提示功能（不推荐）</div>
+                <div style="margin:0;padding:0">
+                  <input type="checkbox" id="${defCon.id.isclosetip}" class="${defCon.class.checkbox}" ${isCloseTip ? "checked" : ""} />
+                  <label for="${defCon.id.isclosetip}"></label>
+                </div>
+              </li>
               <li id="${defCon.id.mps}">
-                <div class="${defCon.id.seed}_VIP">\u2464 个性化设置总数（默认：100）</div>
+                <div class="${defCon.id.seed}_VIP" title="防止页面加载缓慢，不建议设置过高的数值！">\u2465 个性化设置总数（默认：100）</div>
                 <div style="margin:0 5px 0 0;padding:0">
                   <input maxlength="4" id="${defCon.id.maxps}" placeholder="100" value="${maxPersonalSites}"
                     style="box-sizing:border-box;font:normal 500 16px/140% Impact,Times,serif!important;border:2px solid darkgoldenrod;border-radius:4px;width:70px;min-width:70px;text-align:center;padding:4px 5px;color:#333" />
                 </div>
               </li>
               <li id="${defCon.id.flc}">
-                <div class="${defCon.id.seed}_VIP">\u2465 字体列表缓存（时效：24小时）</div>
-                <button id="${defCon.id.flcid}" title="重建当前网站字体列表缓存（如果你已安装新字体，但字体列表未及时更新）"
+                <div class="${defCon.id.seed}_VIP" title="安装新字体后，请先重启浏览器再重建缓存！">\u2466 字体列表缓存（时效：24小时）</div>
+                <button id="${defCon.id.flcid}" title="重建当前网站字体列表缓存"
                   style="box-sizing:border-box;margin:0 5px 0 0;padding:2px 5px;width:max-content;height:max-content;min-width:70px;min-height:32px;background:#eee;letter-spacing:normal">
                   重建缓存
                 </button>
@@ -2381,25 +2410,26 @@
           ),
           titleText: `VIP高级功能设置\u3000-\u0020Version\u0020${defCon.curVersion}\u0020-`,
         });
-        let _bk, _pv, _fs, _hk, _mps;
+        let _bk, _pv, _fs, _hk, _ct, _mps;
         _bk = Boolean(qS(`#${defCon.id.isbackup}`).checked);
         _pv = Boolean(qS(`#${defCon.id.ispreview}`).checked);
         _fs = Boolean(qS(`#${defCon.id.isfontsize}`).checked);
         _hk = Boolean(qS(`#${defCon.id.ishotkey}`).checked);
+        _ct = Boolean(qS(`#${defCon.id.isclosetip}`).checked);
         _mps = Number(qS(`#${defCon.id.maxps}`).value) || 100;
         qS(`#${defCon.id.maxps}`).addEventListener("input", function () {
           this.value = this.value.replace(/[^0-9]/g, "");
         });
         if (getNavigator.type("core").Gecko) {
-          qS(`#${defCon.id.isfontsize}`).addEventListener("click", function () {
-            if (this.checked) {
-              const cF = confirm(
-                "由于 Firefox(Gecko内核) 对部分 CSS 及 Javascript 的兼容性原因，会造成某些站点样式异常、坐标漂移等问题，我们建议您在 Firefox 浏览器中谨慎使用脚本级字体缩放功能。\n\n如有必要需求，请使用 Firefox 自身的缩放功能来放大 (Ctrl+) 或缩小 (Ctrl-) 页面。注意：清除 历史记录\u2192数据\u2192网站设置 会重置缩放。\n\n请确认是否开启字体缩放功能？"
-              );
-              this.checked = !!cF;
-            }
-          });
+          confirmIfValueChange(
+            qS(`#${defCon.id.isfontsize}`),
+            "由于 Firefox(Gecko内核) 对部分 CSS 及 Javascript 的兼容性原因，会造成某些站点样式异常、坐标漂移等问题，我们建议您在 Firefox 浏览器中谨慎使用脚本级字体缩放功能。\n\n如有必要需求，请使用 Firefox 自身的缩放功能来放大 (Ctrl+) 或缩小 (Ctrl-) 页面。注意：清除 历史记录\u2192数据\u2192网站设置 会重置缩放。\n\n请确认是否开启字体缩放功能？"
+          );
         }
+        confirmIfValueChange(
+          qS(`#${defCon.id.isclosetip}`),
+          "关闭更新提示，您将不能在第一时间获取更新内容，或错过重要的使用提示和警示通告。如遇重大功能升级，忽略更新提示有几率影响正常使用。\n\n请确认是否关闭更新提示功能？"
+        );
         qS(`#${defCon.id.flcid}`).addEventListener("click", async () => {
           closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
           cache.remove("_fontlist_");
@@ -2416,12 +2446,13 @@
         qS(`#${defCon.id.feedback}`).addEventListener("click", () => {
           GMopenInTab(defCon.feedback, defCon.options);
         });
-        qA(`#${defCon.id.isbackup}, #${defCon.id.ispreview}, #${defCon.id.isfontsize}, #${defCon.id.ishotkey}, #${defCon.id.maxps}`).forEach(items => {
+        qA(`#${defCon.id.isbackup}, #${defCon.id.ispreview}, #${defCon.id.isfontsize}, #${defCon.id.ishotkey}, #${defCon.id.isclosetip}, #${defCon.id.maxps}`).forEach(items => {
           items.addEventListener("change", () => {
             _bk = Boolean(qS(`#${defCon.id.isbackup}`).checked);
             _pv = Boolean(qS(`#${defCon.id.ispreview}`).checked);
             _fs = Boolean(qS(`#${defCon.id.isfontsize}`).checked);
             _hk = Boolean(qS(`#${defCon.id.ishotkey}`).checked);
+            _ct = Boolean(qS(`#${defCon.id.isclosetip}`).checked);
             _mps = Number(qS(`#${defCon.id.maxps}`).value) || 100;
           });
         });
@@ -2430,6 +2461,7 @@
           _config_data_.isPreview = _pv;
           _config_data_.isFontsize = _fs;
           _config_data_.isHotkey = _hk;
+          _config_data_.isCloseTip = _ct;
           _config_data_.maxPersonalSites = _mps;
           GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
           let frDialog = new FrDialogBox({
@@ -2452,7 +2484,7 @@
         let frDialog = new FrDialogBox({
           trueButtonText: "确 定",
           neutralButtonText: "取 消",
-          messageText: `<p style="font:italic bold 22px/1.4 Candara,serif!important">${curHostName}</p><p style="color:darkgreen">该域名下所有页面将重新进行字体渲染！</p><p>确定后页面将自动刷新，请确认是否恢复？</p>`,
+          messageText: `<p style="font:italic bold 22px/1.4 Candara,'Times New Roman'!important">${curHostName}</p><p style="color:darkgreen">该域名下所有页面将重新进行字体渲染！</p><p>确定后页面将自动刷新，请确认是否恢复？</p>`,
           titleText: "恢复字体渲染",
         });
         if (await frDialog.respond()) {
@@ -2591,7 +2623,7 @@
               console.error("\u27A4 ", info);
             }
             return false;
-          } else if (document.head.querySelectorAll("style[id^='TS']").length >= 1) {
+          } else if (document.head.querySelectorAll("style[id^='TS']").length) {
             insertStyle(true);
             debug("\u27A4 [:After]", document.head.lastChild.className);
           }
@@ -2750,7 +2782,7 @@
                       location.reload();
                       frDialog = null;
                     }
-                  } else if (fontListArray) {
+                  } else if (fontListArray.length && Array.isArray(fontListArray)) {
                     fontListArray.forEach(item => {
                       save_Fontlist.push(JSON.parse(item));
                     });
@@ -3071,8 +3103,6 @@
                     manageDomainsList();
                   });
                 }
-                domains = await GMgetValue("_domains_fonts_set_");
-                domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : DEFAULT_ARRAY;
                 domainValueIndex = updateDomainsIndex(domainValue);
                 if (domainValueIndex !== undefined && qS(`#${defCon.id.seed}_c_w_d_`)) {
                   const fontDate = setDateFormat("YYYY-mm-dd HH:MM:SS", new Date(domainValue[domainValueIndex].fontDate));
@@ -3708,8 +3738,17 @@
       }
     }
 
+    function confirmIfValueChange(target, info) {
+      target.addEventListener("change", function () {
+        if (this.checked) {
+          const rs = confirm(info);
+          this.checked = !!rs;
+        }
+      });
+    }
+
     function correctBoldErrorByStroke(s) {
-      // Fixed incorrect rendering of bold styles by font strokes in Chrome >= 96, Ｆ９ｙ４ｎｇ, 20211120.
+      // Fixed incorrect rendering of bold styles by font strokes in Chrome >= 96.0.4664.45, Ｆ９ｙ４ｎｇ, 20211120.
       const version = getNavigator.type().match(/chrome\/([\d]+)/);
       if (s && document.body && parseInt(version ? version[1] : 0) >= 96) {
         qA(`:not(img):not(svg):not(path):not([id="${defCon.id.rndId}"] *):not([id="${defCon.id.dialogbox}"] *)`).forEach(item => {
