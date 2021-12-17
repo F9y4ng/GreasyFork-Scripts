@@ -1756,7 +1756,7 @@
     fontStroke: getNavigator.type("core").Gecko ? 0.08 : 0.02,
     fontShadow: getNavigator.type("core").Gecko ? 0.5 : 1.0,
     shadowColor: getNavigator.type("core").Gecko ? "#7F7F7F" : "#7B7B7B",
-    fontCSS: `:not(i):not(.fa,[class*='icon'],[class*="mu-"],[class*="vjs-"],[class*='font'])`,
+    fontCSS: `:not(i):not(.fa):not([class*='ico']):not([class*='vjs-']):not([class*='mu-'])`,
     fontEx: `input,select,button,textarea,kbd,pre,pre *,code,code *`,
   };
   defCon.scriptAuthor = GMinfo.scriptMetaStr.match(/(\u0040\u0061\u0075\u0074\u0068\u006f\u0072\s+)(\S+)/)[2];
