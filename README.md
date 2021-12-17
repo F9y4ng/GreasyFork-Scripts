@@ -15,9 +15,9 @@
 
 简介：无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的 Greasemonkey 脚本和浏览器插件。
 
-> `version 2021.12.10.1`
+> `version 2021.12.17.1`
 
-`!!! 重大版本更新，请使用前仔细查看 !!!` [[**脚本使用说明**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering)] [[键盘快捷键](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering#%E8%84%9A%E6%9C%AC%E8%8F%9C%E5%8D%95%E5%9B%BE)] `New`
+`!!! 重大版本更新，请使用前仔细查看 !!!` [[键盘快捷键](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering#%E8%84%9A%E6%9C%AC%E8%8F%9C%E5%8D%95%E5%9B%BE)] `New`
 
 `!!! 首次使用前请仔细阅读使用说明！仔细阅读使用说明！阅读使用说明 !!!`
 
@@ -25,10 +25,10 @@
 
 ```text
 # 请反馈问题至Github，不再受理其他途径的问题反馈。
-! 由于数据变更，建议您在新功能设置后重新备份本地数据。
-+ 新增关闭更新提示功能。(关闭提示会让您错过重要通知)
-@ 修正字体缩放初始值bug，以及新的坐标偏移问题。
-@ 修正一些bugs，优化代码。
++ 新增更新历史查看，双击设置页面顶部脚本名查看。
+@ 修正<pre>,<code>代码片段中文字体未渲染问题。#45
+@ 修正字体缩放开启后在某些站点的坐标偏移问题。
+@ 优化样式，修正bugs，优化代码。
 ```
 
 ### **关于问题反馈**
@@ -36,6 +36,8 @@
 > 请反馈问题的朋友注意：反馈脚本错误或样式显示问题，请把发生问题的**具体访问网址**、使用的**浏览器版本**、**脚本运行器版**、**相关错误的截图**（仅开此脚本的情况下的）、以及**具体操作流程**或**错误提示**（如果有的话）发出来，你遇到的问题不一定能在其他地方复现。
 
 * [关于个别网站样式错误修正的设置分享，不定期更新，自取自用。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42)
+
+* 字体表字体及其他中文字体分享：[点这里下载字体包](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/46)
 
 ### **关于字体的添加**
 
@@ -67,14 +69,15 @@
 
 简介：最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 
-> `version 4.0.20211201.1`
+> `version 4.0.20211217.1`
 
-`!!! 重大版本更新，请使用前仔细查看 !!!` [[**脚本使用说明**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Google_Baidu_Switcher)] [[键盘快捷键](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Google_Baidu_Switcher#%E8%84%9A%E6%9C%AC%E8%8F%9C%E5%8D%95%E6%A0%8F)] `New`
+`!!! 重大版本更新，请使用前仔细查看 !!!` [[键盘快捷键](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Google_Baidu_Switcher#%E8%84%9A%E6%9C%AC%E8%8F%9C%E5%8D%95%E6%A0%8F)] `New`
 
 `!!! 自动更新检测默认开启 !!!`
 
 ```text
-@ 优化代码命名，修正bugs，优化代码。
+@ 修正Bing搜索无法访问的问题。
+@ 修正bugs，优化代码。
 ```
 
 ### **重要说明**

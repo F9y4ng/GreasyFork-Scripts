@@ -1,11 +1,11 @@
-/* jshint esversion: 10 */
+/* jshint esversion: 9 */
 // ==UserScript==
 // @name            Google & baidu Switcher (ALL in One)
 // @name:zh         谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:ja         Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version         4.0.20211201.1
+// @version         4.0.20211217.1
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:zh  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
@@ -30,7 +30,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            优化代码命名，修正bugs，优化代码。
+// @note            修正Bing搜索无法访问的问题。\n修正bugs，优化代码。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -88,6 +88,7 @@
   const defCon = {
     scriptName: GMinfo.script.name,
     curVersion: GMinfo.script.version,
+    elCompat: (document.compatMode || "") === "CSS1Compat" ? document.documentElement : document.body,
     support: GMinfo.scriptMetaStr.match(/(\u0040\u0073\u0075\u0070\u0070\u006f\u0072\u0074\u0055\u0052\u004c\s+)(\S+)/)[2],
     encrypt: n => {
       return window.btoa(encodeURIComponent(n));
@@ -127,20 +128,38 @@
     showDate: s => {
       return s.replace(/w/i, " 周 ").replace(/d/i, " 天 ").replace(/h/i, " 小时 ").replace(/m/i, " 分钟 ").replace(/s/i, " 秒 ");
     },
-    randString: (n, v, s = "") => {
+    randString: (n, v) => {
       const a = "0123456789";
       const b = "abcdefghijklmnopqrstuvwxyz";
       const c = b.toUpperCase();
-      const x = b + c;
-      const y = c + a + b;
-      const r = v ? x : y;
-      n = Number(n) ? n : 10;
-      for (; n > 0; --n) {
+      let r, m;
+      let s = "";
+      let z = true;
+      switch (v) {
+        case "mix":
+          m = Number(n - 1) || 8;
+          r = b + a + c;
+          z = false;
+          break;
+        case "char":
+          m = Number(n) || 8;
+          r = b + c;
+          break;
+        case "digit":
+          m = Number(n) || 8;
+          r = a;
+          break;
+        default:
+          m = Number(n) || 8;
+          r = c;
+          break;
+      }
+      for (; m > 0; --m) {
         s += r[Math.floor(Math.random() * r.length)];
       }
-      return v ? s : x[Math.floor(Math.random() * x.length)].concat(s);
+      return z ? s : c[Math.floor(Math.random() * c.length)].concat(s);
     },
-    isUpgrade: Boolean(getUrlParam("Zn")),
+    isUpgrade: Boolean(getUrlParam("f9y4ng")),
     lastRuntime: () => {
       return new Date().toLocaleString("en-US", {
         timeZoneName: "short",
@@ -148,7 +167,7 @@
       });
     },
   };
-  defCon.rName = defCon.randString(7, true);
+  defCon.rName = defCon.randString(7, "char");
   const qA = str => {
     return Array.prototype.slice.call(document.querySelectorAll(str), 0);
   };
@@ -162,36 +181,36 @@
   /* Define random aliases */
 
   const Notice = {
-    noticejs: defCon.randString(7, true),
-    item: defCon.randString(5, false),
-    close: defCon.randString(5, false),
-    center: defCon.randString(5, false),
-    success: defCon.randString(7, true),
-    warning: defCon.randString(7, true),
-    info: defCon.randString(7, true),
-    error: defCon.randString(7, true),
-    checkbox: defCon.randString(6, true),
-    configuration: defCon.randString(7, true),
-    fc: defCon.randString(8, true),
-    fcSave: defCon.randString(5, false),
-    fcClose: defCon.randString(5, false),
-    fchk: defCon.randString(6, true),
-    hotkey: defCon.randString(5, false),
-    fcGoogle: defCon.randString(6, true),
-    google: defCon.randString(5, false),
-    fcKwhl: defCon.randString(6, true),
-    kwhl: defCon.randString(5, false),
-    localWindow: defCon.randString(6, true),
-    lw: defCon.randString(5, false),
-    fcUpdate: defCon.randString(6, true),
-    isUpdate: defCon.randString(5, false),
-    fcExpire: defCon.randString(6, true),
-    Expire: defCon.randString(6, false),
-    timeUnit: defCon.randString(6, true),
-    fcFeedback: defCon.randString(6, false),
-    fcSubmit: defCon.randString(6, true),
-    feedback: defCon.randString(5, false),
-    animated: defCon.randString(7, true),
+    noticejs: defCon.randString(7, "char"),
+    item: defCon.randString(5, "mix"),
+    close: defCon.randString(5, "mix"),
+    center: defCon.randString(5, "mix"),
+    success: defCon.randString(7, "char"),
+    warning: defCon.randString(7, "char"),
+    info: defCon.randString(7, "char"),
+    error: defCon.randString(7, "char"),
+    checkbox: defCon.randString(6, "char"),
+    configuration: defCon.randString(7, "char"),
+    fc: defCon.randString(8, "char"),
+    fcSave: defCon.randString(5, "mix"),
+    fcClose: defCon.randString(5, "mix"),
+    fchk: defCon.randString(6, "char"),
+    hotkey: defCon.randString(5, "mix"),
+    fcGoogle: defCon.randString(6, "char"),
+    google: defCon.randString(5, "mix"),
+    fcKwhl: defCon.randString(6, "char"),
+    kwhl: defCon.randString(5, "mix"),
+    localWindow: defCon.randString(6, "char"),
+    lw: defCon.randString(5, "mix"),
+    fcUpdate: defCon.randString(6, "char"),
+    isUpdate: defCon.randString(5, "mix"),
+    fcExpire: defCon.randString(6, "char"),
+    Expire: defCon.randString(6, "mix"),
+    timeUnit: defCon.randString(6, "char"),
+    fcFeedback: defCon.randString(6, "mix"),
+    fcSubmit: defCon.randString(6, "char"),
+    feedback: defCon.randString(5, "mix"),
+    animated: defCon.randString(7, "char"),
     noticeHTML: str => {
       return String(`<div class="${defCon.rName}"><dl>${str}<dl></div>`);
     },
@@ -571,12 +590,12 @@
       const transform = window.getComputedStyle(document.body, null).getPropertyValue("transform");
       const thatNotice = qS(`#${Notice.noticejs}-${position}`);
       const rePosition = (item, ratio, _top, distTop) => {
-        let sT = 0 - (document.body.getBoundingClientRect().top || document.documentElement.getBoundingClientRect().top || 0);
+        let sT = 0 - (defCon.elCompat.getBoundingClientRect().top || 0);
         item.style.top = `${(_top + sT) / ratio}px`;
         window.scrollTo(0, sT - 1e-5);
         if (item.childNodes.length === 1) {
           defCon[distTop] = () => {
-            sT = 0 - (document.body.getBoundingClientRect().top || document.documentElement.getBoundingClientRect().top || 0);
+            sT = 0 - (defCon.elCompat.getBoundingClientRect().top || 0);
             item.style.top = `${(_top + sT) / ratio}px`;
           };
           document.addEventListener("scroll", defCon[distTop]);
@@ -589,7 +608,7 @@
         const ratio = Number(transform.split(",")[3]) || 1;
         if (ratio && ratio !== 1) {
           if (thatNotice) {
-            thatNotice.style.cssText += `width:${document.documentElement.clientWidth / ratio}px;height:${document.documentElement.clientHeight / ratio}px;top:0;left:0`;
+            thatNotice.style.cssText += `width:${defCon.elCompat.clientWidth / ratio}px;height:${defCon.elCompat.clientHeight / ratio}px;top:0;left:0`;
             thatNotice.childNodes.forEach((item, index, array, curItem = 0) => {
               switch (position) {
                 case "topRight":
@@ -834,7 +853,7 @@
         const cache = await GMgetExpire("_Check_Version_Expire_", _expire_time_);
         if (!cache) {
           // first: greasyfork
-          t = await getFetchVersion(`https://greasyfork.org/scripts/12909/code/${defCon.randString(32)}.meta.js`).catch(async () => {
+          t = await getFetchVersion(`https://greasyfork.org/scripts/12909/code/${defCon.randString(32, "mix")}.meta.js`).catch(async () => {
             defCon.fetchResult = "GreasyFork - Failed to fetch";
             error(defCon.fetchResult);
           });
@@ -961,31 +980,9 @@
                     60,
                     {
                       onClick: [
-                        (n = 3) => {
-                          const w = window.open(updateUrl, "Update.Scripts");
-                          const t = setTimeout(() => {
-                            if (isGM) {
-                              window.opener = null;
-                            }
-                            w.close();
-                          }, n * 1e3);
-                          let p = n;
-                          const m = setInterval(() => {
-                            if (w.closed) {
-                              GMdeleteValue("_Check_Version_Expire_");
-                              GMnotification(
-                                Notice.noticeHTML(
-                                  `<dd class="${Notice.center}">如果您已更新了脚本，请点击<a href="javascript:void(0)" onclick="location.replace(location.href.replace(/&zn=[^&]*/gi,'')+'&Zn=1')" class="im">这里</a>刷新使其生效。</a></dd>`
-                                ),
-                                `${Notice.info}`,
-                                true,
-                                80
-                              );
-                              clearInterval(m);
-                              clearTimeout(t);
-                            }
-                            p ? --p : clearInterval(m);
-                          }, 1e3);
+                        () => {
+                          GMopenInTab(updateUrl, defCon.options);
+                          GMdeleteValue("_Check_Version_Expire_");
                         },
                       ],
                     }
@@ -1075,15 +1072,15 @@
 
     const CONST = {
       isSecurityPolicy: false,
-      rndidName: defCon.randString(9, true),
-      rndclassName: defCon.randString(12, true),
-      bdyx: defCon.randString(5, true),
-      ggyx: defCon.randString(5, true),
-      bbyx: defCon.randString(5, true),
-      scrollspan: defCon.randString(8, true),
-      scrollspan2: defCon.randString(8, true),
-      scrollbars: defCon.randString(8, true),
-      scrollbars2: defCon.randString(8, true),
+      rndidName: defCon.randString(9, "char"),
+      rndclassName: defCon.randString(12, "char"),
+      bdyx: defCon.randString(5, "mix"),
+      ggyx: defCon.randString(5, "mix"),
+      bbyx: defCon.randString(5, "mix"),
+      scrollspan: defCon.randString(8, "char"),
+      scrollspan2: defCon.randString(8, "char"),
+      scrollbars: defCon.randString(8, "char"),
+      scrollbars2: defCon.randString(8, "char"),
       isUseBing: Boolean(useBing),
       isVDResult: checkUpdate ? Boolean(VerDetAuto) : false,
     };
@@ -1129,7 +1126,7 @@
         StyleCode: CONST.isUseBing
           ? `#form{white-space:nowrap}#u{z-index:1!important}#${CONST.rndidName}{position:relative;z-index:999999}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-1.5px}#${CONST.rndidName} #${CONST.ggyx}{margin-left:2px}#${CONST.bbyx} input{background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px!important;font-weight:bold}#${CONST.ggyx} input{background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px!important;font-weight:bold}#${CONST.ggyx} input:hover,#${CONST.bbyx} input:hover{background: #4662D9;border:1px solid #3476d2}`
           : `#form{white-space:nowrap}#u{z-index:1!important}#${CONST.rndidName}{position:relative;margin-left:2px;z-index:999999999}#${CONST.ggyx} input{background:#4e6ef2;border-radius:10px;cursor:pointer;height:40px;color:#fff;width:112px;border:1px solid #3476d2;text-shadow:0 0 2px #ffffff!important;font-size:16px!important}#${CONST.ggyx} input:hover{background:#4662D9;border:1px solid #3476d2;}`,
-        keyStyle: keywordHighlight ? "#wrapper_wrapper em{color:#f73131!important;background-color:yellow!important;font-weight:900!important}" : "",
+        keyStyle: keywordHighlight ? "#wrapper_wrapper em{color:#f1675bad!important;background-color:#ffff003d!important;font-weight:900!important}" : "",
       },
       google: {
         SiteTypeID: 2,
@@ -1154,7 +1151,7 @@
           ? `#${CONST.rndidName}{position:relative;margin:3px 4px 0 -5px;z-index:100}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd;}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-2px}.${CONST.scrollspan}{display:inline-block;margin:0;min-height:26px}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}.${CONST.scrollbars2}{display:inline-block;margin-top:-4px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}#${CONST.bdyx} input{cursor:pointer;padding:1px 1px 1px 6px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;width:90px;height:38px;font-size:15px!important;font-weight:600;color:#fff;}#${CONST.bbyx} input{cursor:pointer;padding:1px 6px 1px 1px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;width:90px;height:38px;font-size:15px!important;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover,#${CONST.bbyx} input:hover{background:#2b7de9;}`
           : `#${CONST.rndidName}{position:relative;margin:3px 4px 0 -5px;z-index:100}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd}.${CONST.scrollspan}{display:inline-block;margin:0;min-height:26px}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-size:13px!important;font-weight:normal!important; text-shadow:0 0 1px #fff!important}.${CONST.scrollbars2}{display:inline-block;margin-top:-4px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #fff!important}#${CONST.bdyx} input{cursor:pointer;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-radius:24px;width:90px;height:38px;font-size:14px!important;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover{background:#2b7de9;}`,
         keyStyle: keywordHighlight
-          ? ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe{color:#ea4335!important;background-color:yellow!important;font-weight:900!important}"
+          ? ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe{color:#f1675bad!important;background-color:#ffff003d!important;font-weight:900!important}"
           : "",
       },
       bing: {
@@ -1180,7 +1177,7 @@
               Number(getUrlParam("ensearch")) || Number(getCookie("ENSEARCH"))
                 ? ".b_caption p strong, .b_caption .b_factrow strong, .b_secondaryText strong,th, h2 strong, h3 strong"
                 : "#sp_requery strong, #sp_recourse strong, #tile_link_cn strong, .b_ad .ad_esltitle~div strong, h2 strong, .b_caption p strong, .b_snippetBigText strong, .recommendationsTableTitle+.b_slideexp strong, .recommendationsTableTitle+table strong, .recommendationsTableTitle+ul strong, .pageRecoContainer .b_module_expansion_control strong, .b_rs strong, .b_rrsr strong, #dict_ans strong, .b_listnav>.b_ans_stamp>strong, .adltwrnmsg strong"
-            ) + "{font-weight:900!important;color:#c00!important;background-color:yellow!important}"
+            ) + "{font-weight:900!important;color:#f1675bad!important;background-color:#ffff003d!important}"
           : "",
       },
       other: { SiteTypeID: 0 },
@@ -1569,9 +1566,9 @@
                       break;
                     case `${CONST.bbyx}`:
                       if (/^(isch|baiduimage)$/.test(CONST.vim.trim())) {
-                        gotoUrl = "https://cn.bing.com/images/search?first=1&tsc=ImageBasicHover&q=";
+                        gotoUrl = "https://www4.bing.com/images/search?first=1&tsc=ImageBasicHover&q=";
                       } else {
-                        gotoUrl = "https://cn.bing.com/search?q=";
+                        gotoUrl = "https://www4.bing.com/search?q=";
                       }
                       break;
                     case `${CONST.bdyx}`:
@@ -1754,7 +1751,7 @@
           Y = Y.offsetParent;
         }
         document.addEventListener("scroll", () => {
-          const s = document.body.scrollTop || document.documentElement.scrollTop;
+          const s = defCon.elCompat.scrollTop;
           debug(`//-> H=${H} S=${s} (${s - H})`);
           if (s > H + scrollSize) {
             oDiv.setAttribute("class", classNameIn);

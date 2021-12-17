@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.12.10.1
+// @version           2021.12.17.1
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -88,26 +88,48 @@
     curVersion: GMinfo.script.version,
     scriptName: getScriptNameViaLanguage(),
     options: isGM ? false : { active: true, insert: true, setParent: true },
+    elCompat: (document.compatMode || "") === "CSS1Compat" ? document.documentElement : document.body,
     encrypt: n => {
       return window.btoa(encodeURIComponent(n));
     },
     decrypt: n => {
       return decodeURIComponent(window.atob(n));
     },
-    randString: (n, v, s = "") => {
+    randString: (n, v) => {
       const a = "0123456789";
       const b = "abcdefghijklmnopqrstuvwxyz";
       const c = b.toUpperCase();
-      const x = b + c;
-      const y = c + a + b;
-      const r = v ? x : y;
-      n = Number(n) ? n : 10;
-      for (; n > 0; --n) {
+      let r, m;
+      let s = "";
+      let z = true;
+      switch (v) {
+        case "mix":
+          m = Number(n - 1) || 8;
+          r = b + a + c;
+          z = false;
+          break;
+        case "char":
+          m = Number(n) || 8;
+          r = b + c;
+          break;
+        case "digit":
+          m = Number(n) || 8;
+          r = a;
+          break;
+        default:
+          m = Number(n) || 8;
+          r = c;
+          break;
+      }
+      for (; m > 0; --m) {
         s += r[Math.floor(Math.random() * r.length)];
       }
-      return v ? s : x[Math.floor(Math.random() * x.length)].concat(s);
+      return z ? s : c[Math.floor(Math.random() * c.length)].concat(s);
     },
-    sqliteDB: (e, t, p, g = 0, d = "", o = "") => {
+    sqliteDB: (e, t, p) => {
+      let g = 0;
+      let d = "";
+      let o = "";
       for (let i = 0; i < p.length; i += 1) {
         d += p.charCodeAt(i).toString();
       }
@@ -178,114 +200,114 @@
   /* Define random aliases */
 
   defCon.id = {
-    rndId: defCon.randString(12, true),
-    dialogbox: defCon.randString(12, true),
-    container: defCon.randString(10, true),
-    field: defCon.randString(9, true),
-    fontList: defCon.randString(8, true),
-    fontFace: defCon.randString(8, true),
-    fontSmooth: defCon.randString(8, true),
-    fontStroke: defCon.randString(8, true),
-    fontShadow: defCon.randString(8, true),
-    shadowColor: defCon.randString(8, true),
-    fontCSS: defCon.randString(8, true),
-    fontEx: defCon.randString(8, true),
-    submit: defCon.randString(8, true),
-    fface: defCon.randString(6, true),
-    smooth: defCon.randString(6, true),
-    fontSize: defCon.randString(8, true),
-    fontZoom: defCon.randString(6, true),
-    zoomSize: defCon.randString(7, true),
-    strokeSize: defCon.randString(6, false),
-    stroke: defCon.randString(7, true),
-    shadowSize: defCon.randString(6, false),
-    shadow: defCon.randString(7, true),
-    cps: defCon.randString(9, true),
-    cpm: defCon.randString(9, true),
-    color: defCon.randString(7, true),
-    cssfun: defCon.randString(7, true),
-    exclude: defCon.randString(7, true),
-    selector: defCon.randString(9, true),
-    cleaner: defCon.randString(7, true),
-    fonttooltip: defCon.randString(7, true),
-    fontName: defCon.randString(6, true),
-    cSwitch: defCon.randString(5, false),
-    eSwitch: defCon.randString(5, false),
-    backup: defCon.randString(6, true),
-    files: defCon.randString(5, false),
-    tfiles: defCon.randString(5, false),
-    db: defCon.randString(12, true),
-    ct: defCon.randString(7, true),
-    isclosetip: defCon.randString(6, false),
-    bk: defCon.randString(7, true),
-    isbackup: defCon.randString(6, false),
-    pv: defCon.randString(7, true),
-    ispreview: defCon.randString(6, false),
-    fs: defCon.randString(7, true),
-    isfontsize: defCon.randString(6, false),
-    hk: defCon.randString(7, true),
-    ishotkey: defCon.randString(6, false),
-    mps: defCon.randString(7, true),
-    maxps: defCon.randString(6, true),
-    feedback: defCon.randString(6, true),
-    seed: defCon.randString(4, false),
-    fontTest: defCon.randString(16, true),
-    flc: defCon.randString(6, true),
-    flcid: defCon.randString(5, false),
+    rndId: defCon.randString(12, "char"),
+    dialogbox: defCon.randString(11, "char"),
+    container: defCon.randString(10, "char"),
+    field: defCon.randString(9, "char"),
+    fontList: defCon.randString(8, "char"),
+    fontFace: defCon.randString(8, "char"),
+    fontSmooth: defCon.randString(8, "char"),
+    fontStroke: defCon.randString(8, "char"),
+    fontShadow: defCon.randString(8, "char"),
+    shadowColor: defCon.randString(8, "char"),
+    fontCSS: defCon.randString(8, "char"),
+    fontEx: defCon.randString(8, "char"),
+    submit: defCon.randString(8, "char"),
+    fface: defCon.randString(6, "char"),
+    smooth: defCon.randString(6, "char"),
+    fontSize: defCon.randString(8, "char"),
+    fontZoom: defCon.randString(6, "char"),
+    zoomSize: defCon.randString(7, "char"),
+    strokeSize: defCon.randString(6, "mix"),
+    stroke: defCon.randString(7, "char"),
+    shadowSize: defCon.randString(6, "mix"),
+    shadow: defCon.randString(7, "char"),
+    cps: defCon.randString(9, "char"),
+    cpm: defCon.randString(9, "char"),
+    color: defCon.randString(7, "char"),
+    cssfun: defCon.randString(7, "char"),
+    exclude: defCon.randString(7, "char"),
+    selector: defCon.randString(9, "char"),
+    cleaner: defCon.randString(7, "char"),
+    fonttooltip: defCon.randString(7, "char"),
+    fontName: defCon.randString(6, "char"),
+    cSwitch: defCon.randString(5, "mix"),
+    eSwitch: defCon.randString(5, "mix"),
+    backup: defCon.randString(6, "char"),
+    files: defCon.randString(5, "mix"),
+    tfiles: defCon.randString(5, "mix"),
+    db: defCon.randString(9, "char"),
+    ct: defCon.randString(7, "char"),
+    isclosetip: defCon.randString(6, "mix"),
+    bk: defCon.randString(7, "char"),
+    isbackup: defCon.randString(6, "mix"),
+    pv: defCon.randString(7, "char"),
+    ispreview: defCon.randString(6, "mix"),
+    fs: defCon.randString(7, "char"),
+    isfontsize: defCon.randString(6, "mix"),
+    hk: defCon.randString(7, "char"),
+    ishotkey: defCon.randString(6, "mix"),
+    mps: defCon.randString(7, "char"),
+    maxps: defCon.randString(6, "char"),
+    feedback: defCon.randString(6, "char"),
+    seed: defCon.randString(4, "mix"),
+    fontTest: defCon.randString(16, "char"),
+    flc: defCon.randString(6, "char"),
+    flcid: defCon.randString(5, "mix"),
   };
   defCon.class = {
-    rndClass: defCon.randString(10, true),
-    rndStyle: defCon.randString(10, true),
-    guide: defCon.randString(5, false),
-    title: defCon.randString(7, true),
-    help: defCon.randString(5, false),
-    rotation: defCon.randString(6, true),
-    emoji: defCon.randString(4, false),
-    main: defCon.randString(7, true),
-    fontList: defCon.randString(7, true),
-    spanlabel: defCon.randString(5, false),
-    label: defCon.randString(5, false),
-    placeholder: defCon.randString(5, false),
-    checkbox: defCon.randString(7, true),
-    flex: defCon.randString(9, true),
-    tooltip: defCon.randString(8, true),
-    tooltiptext: defCon.randString(9, true),
-    ps1: defCon.randString(4, false),
-    ps2: defCon.randString(4, false),
-    ps3: defCon.randString(4, false),
-    ps4: defCon.randString(4, false),
-    slider: defCon.randString(7, true),
-    colorPicker: defCon.randString(8, true),
-    colorPicker2: defCon.randString(8, true),
-    readonly: defCon.randString(7, true),
-    notreadonly: defCon.randString(7, true),
-    reset: defCon.randString(6, false),
-    cancel: defCon.randString(6, false),
-    submit: defCon.randString(6, false),
-    selector: defCon.randString(9, true),
-    selectFontId: defCon.randString(8, true),
-    close: defCon.randString(6, true),
-    cp: defCon.randString(10, true),
-    cpcb: defCon.randString(6, true),
-    cpcw: defCon.randString(6, false),
-    cprbp: defCon.randString(7, true),
-    cpg: defCon.randString(7, true),
-    cpgc: defCon.randString(6, true),
-    cpgb: defCon.randString(6, false),
-    cpc: defCon.randString(7, true),
-    cprb: defCon.randString(7, true),
-    db: defCon.randString(10, true),
-    dbbc: defCon.randString(8, true),
-    dbb: defCon.randString(7, true),
-    dbm: defCon.randString(7, true),
-    dbt: defCon.randString(7, true),
-    dbbt: defCon.randString(6, false),
-    dbbf: defCon.randString(6, false),
-    dbbn: defCon.randString(6, false),
-    switch: defCon.randString(5, false),
-    anim: defCon.randString(5, false),
-    range: defCon.randString(11, true),
-    rangeProgress: defCon.randString(10, false),
+    rndClass: defCon.randString(10, "char"),
+    rndStyle: defCon.randString(10, "char"),
+    guide: defCon.randString(5, "mix"),
+    title: defCon.randString(7, "char"),
+    help: defCon.randString(5, "mix"),
+    rotation: defCon.randString(6, "char"),
+    emoji: defCon.randString(4, "mix"),
+    main: defCon.randString(7, "char"),
+    fontList: defCon.randString(7, "char"),
+    spanlabel: defCon.randString(5, "mix"),
+    label: defCon.randString(5, "mix"),
+    placeholder: defCon.randString(5, "mix"),
+    checkbox: defCon.randString(7, "char"),
+    flex: defCon.randString(9, "char"),
+    tooltip: defCon.randString(8, "char"),
+    tooltiptext: defCon.randString(9, "char"),
+    ps1: defCon.randString(4, "mix"),
+    ps2: defCon.randString(4, "mix"),
+    ps3: defCon.randString(4, "mix"),
+    ps4: defCon.randString(4, "mix"),
+    slider: defCon.randString(7, "char"),
+    colorPicker: defCon.randString(8, "char"),
+    colorPicker2: defCon.randString(8, "char"),
+    readonly: defCon.randString(7, "char"),
+    notreadonly: defCon.randString(7, "char"),
+    reset: defCon.randString(6, "mix"),
+    cancel: defCon.randString(6, "mix"),
+    submit: defCon.randString(6, "mix"),
+    selector: defCon.randString(9, "char"),
+    selectFontId: defCon.randString(8, "char"),
+    close: defCon.randString(6, "char"),
+    cp: defCon.randString(10, "char"),
+    cpcb: defCon.randString(6, "char"),
+    cpcw: defCon.randString(6, "mix"),
+    cprbp: defCon.randString(7, "char"),
+    cpg: defCon.randString(7, "char"),
+    cpgc: defCon.randString(6, "char"),
+    cpgb: defCon.randString(6, "mix"),
+    cpc: defCon.randString(7, "char"),
+    cprb: defCon.randString(7, "char"),
+    db: defCon.randString(10, "char"),
+    dbbc: defCon.randString(8, "char"),
+    dbb: defCon.randString(7, "char"),
+    dbm: defCon.randString(7, "char"),
+    dbt: defCon.randString(7, "char"),
+    dbbt: defCon.randString(6, "mix"),
+    dbbf: defCon.randString(6, "mix"),
+    dbbn: defCon.randString(6, "mix"),
+    switch: defCon.randString(5, "mix"),
+    anim: defCon.randString(5, "mix"),
+    range: defCon.randString(11, "char"),
+    rangeProgress: defCon.randString(8, "mix"),
   };
 
   const DEFAULT_ARRAY = [];
@@ -402,11 +424,11 @@
   }
 
   function scrollInsteadFixed(target, size, distTop) {
-    let sT = 0 - (document.body.getBoundingClientRect().top || document.documentElement.getBoundingClientRect().top || 0);
+    let sT = 0 - (defCon.elCompat.getBoundingClientRect().top || 0);
     target.style.top = `${sT / size}px`;
     window.scrollTo(0, sT - 1e-5);
     defCon[distTop] = () => {
-      sT = 0 - (document.body.getBoundingClientRect().top || document.documentElement.getBoundingClientRect().top || 0);
+      sT = 0 - (defCon.elCompat.getBoundingClientRect().top || 0);
       target.style.top = `${sT / size}px`;
     };
     document.addEventListener("scroll", defCon[distTop]);
@@ -582,7 +604,7 @@
 
   /* Redefine Propertise */
 
-  const definePropertiesForZoom = function (t) {
+  const definePropertiesForZoom = function (t, d) {
     const setValue = (s, g, mod, z = 0) => {
       switch (mod) {
         case 1:
@@ -598,25 +620,37 @@
     Object.defineProperties(unsafeWindow, {
       pageXOffset: {
         get: function () {
-          return this.scrollX / t;
+          return setValue(d, "left", 2);
         },
         configurable: false,
       },
       pageYOffset: {
         get: function () {
-          return this.scrollY / t;
+          return setValue(d, "top", 2);
+        },
+        configurable: false,
+      },
+      scrollX: {
+        get: function () {
+          return setValue(d, "left", 2);
+        },
+        configurable: false,
+      },
+      scrollY: {
+        get: function () {
+          return setValue(d, "top", 2);
         },
         configurable: false,
       },
     });
     // HTMLelements
-    Object.defineProperties(document.documentElement, {
+    Object.defineProperties(d, {
       scrollLeft: {
         get: function () {
           return setValue(this, "left", 2);
         },
         set: Value => {
-          document.documentElement.scrollTo(Value * t, 0);
+          d.scrollTo(Value * t, 0);
         },
         configurable: true,
       },
@@ -625,7 +659,7 @@
           return setValue(this, "top", 2);
         },
         set: Value => {
-          document.documentElement.scrollTo(0, Value * t);
+          d.scrollTo(0, Value * t);
         },
         configurable: true,
       },
@@ -646,13 +680,13 @@
       },
       pageX: {
         get: function () {
-          return this.x / t + window.scrollX;
+          return this.x / t + setValue(d, "left", 2);
         },
         configurable: false,
       },
       pageY: {
         get: function () {
-          return this.y / t + window.scrollY;
+          return this.y / t + setValue(d, "top", 2);
         },
         configurable: false,
       },
@@ -1262,8 +1296,8 @@
           this.zoomText = String(
             `transform-origin:left top 0px;
             transform:scale(${1 / zoom});
-            width:${document.documentElement.clientWidth}px;
-            height:${document.documentElement.clientHeight}px;
+            width:${defCon.elCompat.clientWidth}px;
+            height:${defCon.elCompat.clientHeight}px;
             top:${topnum}px`
           );
           this.container.style.cssText += this.zoomText;
@@ -1426,7 +1460,7 @@
   const ddRemove = item => {
     const temp = item.nextElementSibling;
     item.remove();
-    if (temp !== null && temp.nodeName === "DD") {
+    if (temp && temp.nodeName === "DD") {
       ddRemove(temp);
     }
   };
@@ -1715,14 +1749,14 @@
   /* define default value */
 
   const defValue = {
-    fontSelect: `'Microsoft YaHei',system-ui,-apple-system,BlinkMacSystemFont,Helvetica,sans-serif,'iconfont','icomoon','FontAwesome','Material Icons Extended','Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji','Android Emoji',EmojiSymbols,'emojione mozilla','twemoji mozilla'`,
+    fontSelect: `'Microsoft YaHei',system-ui,-apple-system,BlinkMacSystemFont,sans-serif,'iconfont','icomoon','FontAwesome','IcoFont','Material Icons Extended','Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji','Android Emoji',EmojiSymbols,'emojione mozilla','twemoji mozilla'`,
     fontFace: true,
     fontSmooth: true,
     fontSize: 1.0,
     fontStroke: getNavigator.type("core").Gecko ? 0.08 : 0.02,
-    fontShadow: getNavigator.type("core").Gecko ? 0.5 : 1.2,
+    fontShadow: getNavigator.type("core").Gecko ? 0.5 : 1.0,
     shadowColor: getNavigator.type("core").Gecko ? "#7F7F7F" : "#7B7B7B",
-    fontCSS: `:not(i):not(.fa):not([class*='icon']):not([class*='logo']):not([class*='code'])`,
+    fontCSS: `:not(i):not(.fa,[class*='icon'],[class*="mu-"],[class*="vjs-"],[class*='font'])`,
     fontEx: `input,select,button,textarea,kbd,pre,pre *,code,code *`,
   };
   defCon.scriptAuthor = GMinfo.scriptMetaStr.match(/(\u0040\u0061\u0075\u0074\u0068\u006f\u0072\s+)(\S+)/)[2];
@@ -1841,29 +1875,33 @@
 
     /* DialogBox for the first visit after upgrading */
 
-    addLoadEvents(async (curVersion = _config_data_.curVersion) => {
-      if (curVersion !== defCon.curVersion && curWindowTop) {
-        if (!isCloseTip) {
-          let frDialog = new FrDialogBox({
-            trueButtonText: "好，去看看",
-            falseButtonText: "不，算了吧",
-            messageText: String(
-              `<p><span style="font-style:italic;font-weight:bold;font-size:20px;color:tomato">您好！</span>这是您首次运行<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="font:italic 900 22px/1.5 Candara,'Times New Roman'!important;color:tomato;margin-left:3px">V${defCon.curVersion}</span>, 以下为更新内容：</p>
+    const hintUpdateInfo = async (url, curVersion) => {
+      const s = curVersion === undefined ? "新安装首次运行" : curVersion !== defCon.curVersion ? "更新后首次运行" : "您通过历史查询";
+      let frDialog = new FrDialogBox({
+        trueButtonText: "好，去看看",
+        falseButtonText: "不，算了吧",
+        messageText: String(
+          `<p><span style="font-style:italic;font-weight:700;font-size:20px;color:tomato">您好！</span>这是${s}<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="font:italic 900 22px/150% Candara,'Times New Roman'!important;color:tomato;margin-left:3px">V${defCon.curVersion}</span>, 以下为更新内容：</p>
             <p><ul id="${defCon.id.seed}_update">
-              <li class="${defCon.id.seed}_info">请反馈问题至<a href="${defCon.feedback}" target="_blank" style="color:goldenrod">Github</a>，不再受理其他途径的问题反馈。</li>
-              <li class="${defCon.id.seed}_warn">由于数据变更，建议您在新功能设置后重新备份本地数据。</li>
-              <li class="${defCon.id.seed}_add">新增关闭更新提示功能。(关闭提示会让您错过重要通知)</li>
-              <li class="${defCon.id.seed}_fix">修正字体缩放初始值bug，以及新的坐标偏移问题。</li>
-              <li class="${defCon.id.seed}_fix">修正一些bugs，优化代码。</li>
+              <li class="${defCon.id.seed}_add">新增更新历史查看，双击设置页面顶部脚本名查看。</li>
+              <li class="${defCon.id.seed}_fix">修正&lt;pre&gt;,&lt;code&gt;代码片段中文字体未渲染问题。#45</li>
+              <li class="${defCon.id.seed}_fix">修正字体缩放开启后在某些站点的坐标偏移问题。</li>
+              <li class="${defCon.id.seed}_fix">优化样式，修正bugs，优化代码。</li>
             </ul></p>
             <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
-            ),
-            titleText: "脚本更新 - 温馨提示",
-          });
-          if (await frDialog.respond()) {
-            GMopenInTab(`${hostURI}#update`, defCon.options);
-          }
-          frDialog = null;
+        ),
+        titleText: "脚本更新 - 温馨提示",
+      });
+      if (await frDialog.respond()) {
+        GMopenInTab(url, defCon.options);
+      }
+      frDialog = null;
+    };
+
+    addLoadEvents((curVersion = _config_data_.curVersion) => {
+      if (curVersion !== defCon.curVersion && curWindowTop) {
+        if (!isCloseTip) {
+          hintUpdateInfo(`${hostURI}#update`, curVersion);
         }
         _config_data_.curVersion = defCon.curVersion;
         GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
@@ -1968,12 +2006,13 @@
     let shadow = "";
     const shadow_r = parseFloat(CONST.fontShadow);
     const shadow_c = CONST.shadowColor;
-    const overlayColor = (r, c) => {
+    const overlayColor = (r, c, rs) => {
       if (c !== "currentcolor") {
-        return `text-shadow:0 0 ${(r * 1.25).toFixed(4)}px ${toColordepth(c, 1.5)},0 0 ${r}px ${c},0 0 ${(r / 4).toFixed(4)}px ${toColordepth(c, 0.985, "dark")};`;
+        rs = `text-shadow:0 0 ${(r * 1.25).toFixed(4)}px ${toColordepth(c, 1.5)},0 0 ${r}px ${c},0 0 ${(r / 4).toFixed(4)}px ${toColordepth(c, 0.985, "dark")}`;
       } else {
-        return `text-shadow:0 0 ${(r * 1.25).toFixed(4)}px ${toColordepth(c, 0.85, "dark")},0 0 ${r}px ${toColordepth(c, 0.55, "dark")},0 0 ${(r / 4).toFixed(4)}px ${c};`;
+        rs = `text-shadow:0 0 ${(r * 1.25).toFixed(4)}px ${toColordepth(c, 0.85, "dark")},0 0 ${r}px ${toColordepth(c, 0.55, "dark")},0 0 ${(r / 4).toFixed(4)}px ${c}`;
       }
+      return rs.concat(";");
     };
     if (!isNaN(shadow_r) && shadow_r > 0 && shadow_r <= 8) {
       shadow = overlayColor(shadow_r, shadow_c);
@@ -1995,9 +2034,7 @@
         : getNavigator.type("core").Gecko
         ? "-moz-osx-font-smoothing:grayscale!important;"
         : "";
-      return String(
-        `font-feature-settings:"liga" 0;font-variant:no-common-ligatures proportional-nums;font-optical-sizing:auto;font-stretch:normal;font-kerning:auto;${kernel_Define}text-rendering:optimizeLegibility!important;`
-      );
+      return String(`font-feature-settings:"liga" 0;font-variant:no-common-ligatures proportional-nums;font-optical-sizing:auto;font-kerning:auto;${kernel_Define}`);
     };
     if (smooth_i) {
       smoothing = funcSmooth();
@@ -2009,7 +2046,7 @@
     if (CONST.fontSize >= 0.8 && CONST.fontSize <= 1.5 && isFontsize && CONST.fontSize !== 1) {
       if (defCon.siteIndex === undefined) {
         try {
-          definePropertiesForZoom(CONST.fontSize);
+          definePropertiesForZoom(CONST.fontSize, defCon.elCompat);
         } catch (e) {
           error("\u27A4 definePropertiesForZoom error:", e);
         }
@@ -2021,10 +2058,38 @@
     let fontfamily = "";
     let fontfaces = "";
     const fontface_i = CONST.fontFace;
-    const funcFontface = t => {
-      return String(
-        `@font-face{font-family:"宋体";src:local("${t}")}@font-face{font-family:"SimSun";src:local("${t}")}@font-face{font-family:"新宋体";src:local("${t}")}@font-face{font-family:"NSimSun";src:local("${t}")}@font-face{font-family:"黑体";src:local("${t}")}@font-face{font-family:"SimHei";src:local("${t}")}@font-face{font-family:"Microsoft YaHei UI";src:local("${t}")}@font-face{font-family:"Microsoft JhengHei UI";src:local("${t}")}@font-face{font-family:"MingLiU";src:local("${t}")}@font-face{font-family:"MingLiU-ExtB";src:local("${t}")}@font-face{font-family:"PMingLiU";src:local("${t}")}@font-face{font-family:"PMingLiU-ExtB";src:local("${t}")}@font-face{font-family:Arial;src:local("${t}")}@font-face{font-family:"Georgia";src:local("${t}")}@font-face{font-family:"MS Gothic";src:local("${t}")}@font-face{font-family:"MS PGothic";src:local("${t}")}@font-face{font-family:"MS UI Gothic";src:local("${t}")}@font-face{font-family:"Yu Gothic";src:local("${t}")}@font-face{font-family:"Yu Gothic UI";src:local("${t}")}@font-face{font-family:"Malgun Gothic";src:local("${t}")}`
-      );
+    const funcFontface = (t, rs = "") => {
+      [
+        convertToUnicode("宋体"),
+        convertToUnicode("新宋体"),
+        convertToUnicode("黑体"),
+        convertToUnicode("微软雅黑"),
+        convertToUnicode("微軟正黑體"),
+        "SimSun",
+        "NSimSun",
+        "SimHei",
+        "Heiti SC",
+        "HanHei SC",
+        "MingLiU",
+        "MingLiU-ExtB",
+        "PMingLiU",
+        "PMingLiU-ExtB",
+        "Roboto",
+        "RobotoDraft",
+        "Noto Sans",
+        "Helvetica",
+        "Helvetica Neue",
+        "Arial",
+        "Verdana",
+        "Ubuntu",
+        "Segoe UI",
+        "Open Sans",
+      ].forEach(item => {
+        if (item !== t) {
+          rs += `@font-face{font-family:"${item}";src:local("${t}")}`;
+        }
+      });
+      return rs;
     };
     if (fontface_i) {
       fontfamily = `font-family:${CONST.fontSelect};`;
@@ -2033,60 +2098,64 @@
     let exclude = "";
     let codeFont = "";
     const cssexlude = CONST.fontEx;
-    const funcCodefont = t => {
+    const funcCodefont = (t, s, ch) => {
       if (t.search(/\bpre\b|\bcode\b/gi) !== -1) {
         const pre = t.search(/\bpre\b/gi) > -1 ? ["pre", "pre *"] : [];
         const code = t.search(/\bcode\b/gi) > -1 ? ["code", "code *"] : [];
         const precode = pre.concat(code);
-        return `${precode.toString()}{font:normal 400 14px/150% 'Operator Mono Lig','Fira Code','Roboto Mono',Monaco,monospace,Consolas!important;font-feature-settings:"liga" 0,"zero"!important;}`;
+        ch = (s ? ch : "'Microsoft YaHei UI'").concat(",system-ui,-apple-system,BlinkMacSystemFont");
+        return String(
+          `${precode.toString()}{font-size:14px!important;line-height:150%!important;font-family:'Operator Mono Lig','Fira Code','Source Code Pro','Roboto Mono',Monaco,monospace,Consolas,${ch},serif!important;font-feature-settings:"liga" 0,"zero"!important}`
+        );
       } else {
         return ``;
       }
     };
     if (cssexlude) {
-      exclude = `${cssexlude}{-webkit-text-stroke:initial!important;text-shadow:initial!important}`;
-      codeFont = funcCodefont(cssexlude);
+      exclude = `${cssexlude}{font-family:inherit;-webkit-text-stroke:initial!important;text-shadow:none!important}`;
+      codeFont = funcCodefont(cssexlude, fontface_i, prefont);
     }
-    const fontTest = String(
-      `body .${defCon.id.seed}_fontTest{font-stretch:normal!important;font-weight:normal!important;line-height:initial!important;text-align:left!important;font-style:normal!important;text-decoration:none!important;letter-spacing:normal!important;word-wrap:normal!important;text-indent:initial!important}body #${defCon.id.fontTest}{margin:0!important;padding:0!important;width:max-content!important;height:max-content!important;text-shadow:none!important;-webkit-text-stroke:initial!important;-webkit-text-size-adjust:none!important;-moz-text-size-adjust:none!important;white-space:nowrap!important}`
-    );
     const cssfun = CONST.fontCSS;
     let tshadow = "";
     if (defCon.siteIndex === undefined) {
-      tshadow = `${bodyZoom}${codeFont}${selection}${cssfun}{${shadow}${stroke}${smoothing}${fontfamily}}${fontfaces}${exclude}${fontTest}`;
+      const textrender = `text-rendering:optimizeLegibility!important`;
+      tshadow = `${fontfaces}${bodyZoom}${codeFont}${selection}${exclude}${cssfun}{${fontfamily}${shadow}${stroke}${smoothing}${textrender}}`;
     }
+    const fontTest = String(
+      `.${defCon.id.seed}_fontTest{font-weight:normal!important;line-height:initial!important;text-align:left!important;font-style:normal!important;text-decoration:none!important;letter-spacing:normal!important;word-wrap:normal!important;text-indent:initial!important}#${defCon.id.fontTest}{margin:0!important;padding:0!important;width:max-content!important;height:max-content!important;text-shadow:none!important;-webkit-text-stroke:initial!important;-webkit-text-size-adjust:none!important;-moz-text-size-adjust:none!important;white-space:nowrap!important}`
+    );
     const fontStyle_db = String(
-      `#${defCon.id.dialogbox}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999992}#${defCon.id.dialogbox} .${defCon.class.db}{box-sizing:content-box;max-width:420px;color:#444;border:2px solid #efefef}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:200px;right:15px;border-radius:6px;width:100%;background:#fff;box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #7b7b7b!important}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:100%;font-family:Candara,"Times New Roman",system-ui,-apple-system,BlinkMacSystemFont!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:500;text-align:left}.${defCon.class.dbb}{display:inline-block;margin:0 1%;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;cursor:pointer;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important;box-sizing:content-box}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:initial!important;-webkit-text-stroke:initial!important;user-select:none}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223!important;color:#fff!important;border:1px solid #d93223!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a!important;color:#fff!important;border:1px solid #038c5a!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777!important;color:#fff!important;border:1px solid #777!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}` +
-        `.${defCon.class.dbm} button:hover{cursor:pointer;background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important}.${defCon.class.dbm} p{line-height:1.5!important;margin:5px 0!important;text-indent:0!important;font-size:16px!important;font-weight:400;text-align:left;user-select:none}.${defCon.class.dbm} ul{list-style:none;margin:0 0 0 10px!important;padding:2px;font:italic 14px/140% "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;color:gray;scrollbar-width:thin}.${defCon.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${defCon.class.dbm} ul::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #999;background:#cfcfcf;border-radius:10px}.${defCon.class.dbm} ul::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:10px}.${defCon.class.dbm} ul::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:6px}.${defCon.class.dbm} ul li{display:list-item;list-style-type:none;user-select:none}.${defCon.class.dbm} li:before{display:none}.${defCon.class.dbm} #${defCon.id.bk},.${defCon.class.dbm} #${defCon.id.pv},.${defCon.class.dbm} #${defCon.id.fs},.${defCon.class.dbm} #${defCon.id.hk},.${defCon.class.dbm} #${defCon.id.ct},.${defCon.class.dbm} #${defCon.id.mps},.${defCon.class.dbm} #${defCon.id.flc}{box-sizing:content-box;list-style:none;font-style:normal;display:flex;justify-content:space-between;align-items:flex-start;margin:0;padding:2px 4px!important;width:calc(96% - 10px);min-width:auto;height:40px;min-height:40px}.${defCon.class.dbm} #${defCon.id.bk} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.pv} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.fs} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.hk} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.ct} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.mps} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.flc} .${defCon.id.seed}_VIP{margin:2px 0 0 0;color:darkgoldenrod!important;font:normal 16px/140% "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${defCon.class.dbm} #${defCon.id.flc} button{background-color:#eee;color:#444!important;font-weight:normal;border:1px solid #999;font-size:14px!important;border-radius:4px}` +
-        `.${defCon.class.dbm} #${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}.${defCon.class.dbm} #${defCon.id.files}{display:none}.${defCon.class.dbm} #${defCon.id.feedback}:hover{color:crimson!important}.${defCon.class.dbm} #${defCon.id.feedback}:after{width:0;height:0;content:"";background:url('${loadingIMG}') no-repeat -400px -300px}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#555!important}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/140% monospace,Consolas!important;color:#aaa!important}.${defCon.class.dbm} #${defCon.id.seed}_update li{font:italic 400 14px/1.5 Consolas,'Microsoft YaHei',system-ui,-apple-system,BlinkMacSystemFont!important;color:gray}.${defCon.class.dbm} .${defCon.id.seed}_add:before{content:"+";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_del:before{content:"-";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_fix:before{content:"@";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_info{color:darkgoldenrod!important}.${defCon.class.dbm} .${defCon.id.seed}_info:before{content:"#";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_warn{color:darkred!important}.${defCon.class.dbm} .${defCon.id.seed}_warn:before{content:"!";display:inline;margin:0 4px 0 -10px}`
+      `#${defCon.id.dialogbox}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999992}#${defCon.id.dialogbox} .${defCon.class.db}{box-sizing:content-box;max-width:420px;color:#444;border:2px solid #efefef}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:200px;right:15px;border-radius:6px;width:100%;background:#fff;box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #777!important}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:100%;font-family:Candara,"Times New Roman",system-ui,-apple-system,BlinkMacSystemFont!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:500;text-align:left}.${defCon.class.dbb}{display:inline-block;margin:0 1%;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;cursor:pointer;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important;box-sizing:content-box}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:none!important;-webkit-text-stroke:initial!important;user-select:none}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223!important;color:#fff!important;border:1px solid #d93223!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a!important;color:#fff!important;border:1px solid #038c5a!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777!important;color:#fff!important;border:1px solid #777!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}` +
+        `.${defCon.class.dbm} button:hover{cursor:pointer;background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important}.${defCon.class.dbm} p{line-height:1.5!important;margin:5px 0!important;text-indent:0!important;font-size:16px!important;font-weight:400;text-align:left;user-select:none}.${defCon.class.dbm} ul{list-style:none;margin:0 0 0 10px!important;padding:2px;font:italic 14px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;color:gray;scrollbar-width:thin}.${defCon.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${defCon.class.dbm} ul::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #999;background:#cfcfcf;border-radius:10px}.${defCon.class.dbm} ul::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:10px}.${defCon.class.dbm} ul::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:6px}.${defCon.class.dbm} ul li{display:list-item;list-style-type:none;user-select:none}.${defCon.class.dbm} li:before{display:none}.${defCon.class.dbm} #${defCon.id.bk},.${defCon.class.dbm} #${defCon.id.pv},.${defCon.class.dbm} #${defCon.id.fs},.${defCon.class.dbm} #${defCon.id.hk},.${defCon.class.dbm} #${defCon.id.ct},.${defCon.class.dbm} #${defCon.id.mps},.${defCon.class.dbm} #${defCon.id.flc}{box-sizing:content-box;list-style:none;font-style:normal;display:flex;justify-content:space-between;align-items:flex-start;margin:0;padding:2px 4px!important;width:calc(96% - 10px);min-width:auto;height:40px;min-height:40px}.${defCon.class.dbm} #${defCon.id.bk} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.pv} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.fs} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.hk} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.ct} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.mps} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.flc} .${defCon.id.seed}_VIP{margin:2px 0 0 0;color:darkgoldenrod!important;font:normal 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${defCon.class.dbm} #${defCon.id.flc} button{background-color:#eee;color:#444!important;font-weight:normal;border:1px solid #999;font-size:14px!important;border-radius:4px}` +
+        `.${defCon.class.dbm} #${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}.${defCon.class.dbm} #${defCon.id.files}{display:none}.${defCon.class.dbm} #${defCon.id.feedback}:hover{color:crimson!important}.${defCon.class.dbm} #${defCon.id.feedback}:after{width:0;height:0;content:"";background:url('${loadingIMG}') no-repeat -400px -300px}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#555!important}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#aaa!important}.${defCon.class.dbm} #${defCon.id.seed}_update li{font:italic 400 14px/150% Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:gray}.${defCon.class.dbm} .${defCon.id.seed}_add:before{content:"+";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_del:before{content:"-";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_fix:before{content:"@";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_info{color:#daa5207a!important}.${defCon.class.dbm} .${defCon.id.seed}_info:before{content:"#";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_warn{color:#e900007a!important}.${defCon.class.dbm} .${defCon.id.seed}_warn:before{content:"!";display:inline;margin:0 4px 0 -10px}`
     );
     const fontStyle_container = String(
-      `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;border-radius:12px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 20px);z-index:999999;padding:4px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container} *{line-height:1.5!important;font-size:16px;font-weight:700;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Android Emoji",EmojiSymbols!important;text-shadow:initial!important;-webkit-text-stroke:initial!important}` +
-        `#${defCon.id.container} fieldset{border:2px groove #67a5df!important;border-radius:10px;padding:4px 6px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:475px}#${defCon.id.container} legend{line-height:20px;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;background:#f0f6ff!important;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{display:inherit;list-style:none;margin:3px 0;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default;min-width:-moz-available;min-width:-webkit-fill-available;user-select:none}#${defCon.id.container} ul li:before{display:none}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden;}#${defCon.id.container} .${defCon.class.help}:hover{cursor:help}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{padding:0;margin:0;width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50%;-webkit-transform:rotate(360deg);animation:rotation 5s linear infinite}` +
+      `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;border-radius:12px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 20px);z-index:999999;padding:4px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container} *{line-height:1.5!important;text-shadow:none!important;-webkit-text-stroke:initial!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Android Emoji",EmojiSymbols!important;font-size:16px;font-weight:700}` +
+        `#${defCon.id.container} fieldset{border:2px groove #67a5df!important;border-radius:10px;padding:4px 6px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:475px}#${defCon.id.container} legend{line-height:inherit;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;background:#f0f6ff!important;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{display:inherit;list-style:none;margin:3px 0;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default;min-width:-moz-available;min-width:-webkit-fill-available;user-select:none}#${defCon.id.container} ul li:before{display:none}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden}#${defCon.id.container} .${defCon.class.help}:hover{cursor:help}#${defCon.id.seed}_scriptname{font-weight:900!important;user-select:all;display:inline-block}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{padding:0;margin:0;width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50%;-webkit-transform:rotate(360deg);animation:rotation 5s linear infinite}` +
         `#${defCon.id.fontList}{padding:2px 10px 0 10px;min-height:73px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex!important;align-items:center;justify-content:space-between}#${defCon.id.fontSize}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.shadowColor}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;padding:2px 10px;min-height:45px;margin:4px;width:auto}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${defCon.id.submit}{padding:2px 10px;height:40px}` +
         `#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${defCon.id.fontList} .${defCon.class.label} span{box-sizing:border-box;color:#fff;font-size:16px!important;font-weight:400;height:max-content;width:max-content;min-width:12px;max-width:210px;padding:5px;background:#67a5df;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap}#${defCon.id.fontList} .${defCon.class.close}{width:12px}#${defCon.id.fontList} .${defCon.class.close}:hover{color:tomato;background-color:#2D7DCA;border-radius:2px}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-x:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;padding:6px 6px 0 6px;margin:0 0 6px 0;width:100%;min-width:100%;max-width:fit-content;max-width:-moz-min-content;max-height:90px;min-height:45px;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} span.${defCon.class.spanlabel},#${defCon.id.selector} span.${defCon.class.spanlabel}{margin:0!important;width:auto;display:block!important;padding:0 0 4px 0;color:#333;border:0;text-align:left!important;background-color:transparent!important}` +
-        `#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} input{text-overflow:ellipsis;overflow:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;padding:1px 32px 1px 2px;margin:0;width:100%;max-width:100%;min-width:100%;height:42px!important;font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:16px!important;font-weight:700;text-indent:8px;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font:normal 700 16px/1.5 "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font:normal 700 16px/1.5 "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:4px 0 0 0;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:4px 8px;width:auto;min-width:calc(60%);max-width:calc(100% - 68px);max-height:298px;font-size:18px!important;white-space:nowrap;background-color:#fff;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}` +
+        `#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} input{text-overflow:ellipsis;overflow:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;padding:1px 32px 1px 2px;margin:0;width:100%;max-width:100%;min-width:100%;height:42px!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:16px!important;font-weight:700;text-indent:8px;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font:normal 700 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font:normal 700 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:4px 0 0 0;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:4px 8px;width:auto;min-width:60%;max-width:calc(100% - 68px);max-height:298px;font-size:18px!important;white-space:nowrap;background-color:#fff;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}` +
         `#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;margin:1px 8px;padding:5px 0;font-weight:400;font-size:21px!important;min-width:100%;max-width:100%;width:-moz-available;width:-webkit-fill-available;}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff}` +
         `.${defCon.class.checkbox}{display:none!important}.${defCon.class.checkbox}+label{cursor:pointer;padding:0;margin:0 2px 0 0;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:76px;height:32px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;box-sizing:content-box}.${defCon.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${defCon.class.checkbox}+label::after{position:absolute;top:0;left:28px;border-radius:100px;padding:5px;font-size:16px;font-weight:700;font-style:normal;color:#fff;content:"OFF"}.${defCon.class.checkbox}:checked+label{cursor:pointer;margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.${defCon.class.checkbox}:checked+label::after{content:"ON";left:10px}.${defCon.class.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px}#${defCon.id.fface} label,#${defCon.id.fface}+label::after,#${defCon.id.fface}+label::before,#${defCon.id.smooth} label,#${defCon.id.smooth}+label::after,#${defCon.id.smooth}+label::before{-webkit-transition:all .3s ease-in;transition:all .3s ease-in}` +
         `#${defCon.id.fontShadow} div.${defCon.class.flex}:before,#${defCon.id.fontShadow} div.${defCon.class.flex}:after,#${defCon.id.fontStroke} div.${defCon.class.flex}:before,#${defCon.id.fontStroke} div.${defCon.class.flex}:after,#${defCon.id.fontSize} div.${defCon.class.flex}:before,#${defCon.id.fontSize} div.${defCon.class.flex}:after{display:none}#${defCon.id.fontShadow} #${defCon.id.shadowSize},#${defCon.id.fontStroke} #${defCon.id.strokeSize},#${defCon.id.fontSize} #${defCon.id.fontZoom}{color:#111!important;width:56px!important;text-indent:0;margin:0 10px 0 0!important;height:32px!important;font-size:17px!important;font-weight:400!important;font-family:Impact,Times,serif!important;border:#67a5df 2px solid!important;border-radius:4px;text-align:center;box-sizing:content-box;padding:0;background:#fafafa!important}.${defCon.class.flex}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;width:auto;min-width:100%}.${defCon.class.slider} input{visibility:hidden}` +
-        `#${defCon.id.shadowColor} *{box-sizing:content-box}#${defCon.id.cps}{margin:0}#${defCon.id.shadowColor} .${defCon.class.colorPicker}{width:32px;height:30px;cursor:pointer;position:relative;border:2px solid #181a25;border-radius:4px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2}{width:auto;margin:0 0 0 5px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2} #${defCon.id.color}{width:125px!important;min-width:125px;height:36px!important;text-indent:0;font-size:18px!important;font-weight:400!important;background:#fafafa;box-sizing:border-box;font-family:Impact,Times,serif!important;color:#333!important;border:#67a5df 2px solid!important;border-radius:4px;padding:0;margin:0;text-align:center}` +
-        `#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{font:bold 14px/140% "Roboto Mono",Monaco,"Courier New",sans-serif!important;min-width:249px;max-width:calc(100% - 15px);width:calc(100% - 15px)!important;height:60px;min-height:60px;max-height:60px;resize:none;border:2px solid #67a5df!important;border-radius:6px;box-sizing:content-box;padding:5px;margin:0;color:#0b5b9c!important;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px rgba(0,0,0,.2);background:#efefef;border-radius:10px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontEx} textarea{background:#fafafa!important}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}.${defCon.class.switch}{box-sizing:content-box;display:inline-block;float:right;margin-right:4px;padding:0 6px;border:2px double #67a5df;color:#0a68c1;border-radius:4px}#${defCon.id.cSwitch}:hover,#${defCon.id.eSwitch}:hover{cursor:pointer;user-select:none}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent)!important;background-size:50px 50px;background-color:#f7fff7!important}` +
-        `#${defCon.id.submit} button{box-sizing:border-box;background-image:initial;background-color:#67a5df;color:#fff!important;margin:0;padding:5px 10px;cursor:pointer;border:2px solid #6ba7e0;border-radius:6px;width:auto;min-width:min-content;min-height:35px;height:35px;font:normal 600 14px/1.5 "Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${defCon.id.submit} button:hover{box-shadow:0 0 5px rgba(0,0,0,.4)!important}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.submit} #${defCon.id.backup}{margin:0 10px 0 0;display:none}.${defCon.class.anim}{animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}`
+        `#${defCon.id.shadowColor} *{box-sizing:content-box}#${defCon.id.cps}{margin:0}#${defCon.id.shadowColor} .${defCon.class.colorPicker}{width:32px;height:30px;cursor:pointer;position:relative;border:2px solid #666d8e;border-radius:4px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2}{width:auto;margin:1px 0 0 5px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2} #${defCon.id.color}{width:119px!important;min-width:119px;height:35px!important;text-indent:0;font-size:18px!important;font-weight:400!important;background:#fafafa;box-sizing:border-box;font-family:Impact,Times,serif!important;color:#333!important;border:#67a5df 2px solid!important;border-radius:4px;padding:0;margin:0 5px 0 0;text-align:center}` +
+        `#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{font:bold 14px/150% "Roboto Mono",Monaco,"Courier New",Consolas,monospace,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;min-width:calc(100% - 2px);max-width:calc(100% - 2px);width:calc(100% - 2px)!important;height:78px;min-height:78px;max-height:78px;resize:none;border:2px solid #67a5df!important;border-radius:6px;box-sizing:border-box;padding:5px;margin:0;color:#0b5b9c!important;word-break:break-all;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px rgba(0,0,0,.2);background:#efefef;border-radius:10px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontEx} textarea{background:#fafafa!important}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}.${defCon.class.switch}{box-sizing:border-box;float:right;margin:-2px 4px 0 0;padding:0 6px;border:2px double #67a5df;color:#0a68c1;border-radius:4px}#${defCon.id.cSwitch}:hover,#${defCon.id.eSwitch}:hover{cursor:pointer;user-select:none}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent)!important;background-size:50px 50px;background-color:#f7fff7!important}` +
+        `#${defCon.id.submit} button{box-sizing:border-box;background-image:initial;background-color:#67a5df;color:#fff!important;margin:0;padding:5px 10px;cursor:pointer;border:2px solid #6ba7e0;border-radius:6px;width:auto;min-width:min-content;min-height:35px;height:35px;font:normal 600 14px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${defCon.id.submit} button:hover{box-shadow:0 0 5px rgba(0,0,0,.4)!important}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.submit} #${defCon.id.backup}{margin:0 10px 0 0;display:none}.${defCon.class.anim}{animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}`
     );
     const fontStyle_cp = String(
       `#${defCon.id.cpm}{width:240px;height:216px;margin:calc(-90%) 0 0 2px;z-index:999;position:fixed;display:none;box-sizing:content-box;background-color:#d1f2fb;padding:10px;box-shadow:0 0 10px #000;border-radius:6px}.${defCon.class.cp},.${defCon.class.cp} *,.${defCon.class.cp} ::after,.${defCon.class.cp} ::before{border:0;margin:0;padding:0;display:block;box-sizing:border-box}.${defCon.class.cp}{background-color:#fff;display:block;min-width:128px;min-height:128px;position:relative}.${defCon.class.cp}>.${defCon.class.cprb}{border:solid #000 1px;background:linear-gradient(red,#f0f,#00f,#0ff,#0f0,#ff0,red);width:16px;height:calc(100% - 26px);position:absolute;right:12px;top:12px}.${defCon.class.cp} .${defCon.class.cprbp}{position:absolute;width:100%;height:1px}.${defCon.class.cp} .${defCon.class.cprbp}::after,.${defCon.class.cp} .${defCon.class.cprbp}::before{content:"";width:10px;height:7px;position:absolute;background:0 0;border:solid transparent 5px;border-width:3.5px 5px;top:-3px}.${defCon.class.cp} .${defCon.class.cprbp}::before{border-left:solid #404040 5px;left:-6px}.${defCon.class.cp} .${defCon.class.cprbp}::after{border-right:solid #404040 5px;right:-6px}.${defCon.class.cp}>.${defCon.class.cpg}{position:absolute;width:calc(100% - 50px);height:calc(100% - 26px);border:solid #000 1px;left:12px;top:12px}.${defCon.class.cp}>.${defCon.class.cpg},.${defCon.class.cp}>.${defCon.class.cpg} *{cursor:crosshair;box-sizing:content-box}.${defCon.class.cp}>.${defCon.class.cpgb}{background:linear-gradient(rgba(0,0,0,0),#000)}.${defCon.class.cp}>.${defCon.class.cp}-color-block{position:absolute;border:solid #000 1px;background:#fff;width:calc(100% - 104px);max-width:72px;height:18px;left:12px;bottom:8px}.${defCon.class.cp} .${defCon.class.cpc}{background-color:transparent;position:absolute}.${defCon.class.cp} .${defCon.class.cpc}::before{border-radius:50%;width:11px;height:11px;border:solid #000 1px;background-color:transparent;position:relative;left:-6px;top:-6px;display:block;content:""}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcb}::before{border-color:#000}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcw}::before{border-color:#fff}`
     );
     const fontStyle_tooltip = String(
-      `.${defCon.class.tooltip}{position:relative;cursor:help;user-select:none}.${defCon.class.tooltip} span.${defCon.class.emoji}{font-weight:400!important}.${defCon.class.tooltip}:active .${defCon.class.tooltip}{display:block}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;box-sizing:content-box;position:absolute;z-index:999999;border:2px solid #b8c4ce;border-radius:6px;padding:10px;width:242px;max-width:242px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:14px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} em{font-style:normal!important}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:140%;text-indent:0!important}.${defCon.class.ps1}{position:relative;top:-33px;height:0;width:24px;margin:0;padding:0;right:5px;float:right}.${defCon.class.ps2}{top:35px;right:-7px}.${defCon.class.ps3}{top:-197px;margin-left:-1px}.${defCon.class.ps4}{top:-175px;margin-left:-1px}`
+      `.${defCon.class.tooltip}{position:relative;cursor:help;user-select:none}.${defCon.class.tooltip} span.${defCon.class.emoji}{font-weight:400!important}.${defCon.class.tooltip}:active .${defCon.class.tooltip}{display:block}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;box-sizing:content-box;position:absolute;z-index:999999;border:2px solid #b8c4ce;border-radius:6px;padding:10px;width:242px;max-width:242px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:14px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} em{font-style:normal!important}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:150%;text-indent:0!important}.${defCon.class.ps1}{position:relative;top:-33px;height:0;width:24px;margin:0;padding:0;right:5px;float:right}.${defCon.class.ps2}{top:35px;right:-7px}.${defCon.class.ps3}{top:-197px;margin-left:-1px}.${defCon.class.ps4}{top:-175px;margin-left:-1px}`
     );
     const fontStyle_Progress = String(
-      `.${defCon.class.range}{--primary-color:#67a5df;--value-offset-y:var(--ticks-gap);--value-active-color:white;--value-background:transparent;--value-background-hover:var(--primary-color);--value-font:italic bold 14px/14px monospace,arial;--fill-color:var(--primary-color);--progress-background:rgb(223, 223, 223);--progress-radius:20px;--show-min-max:none;--track-height:calc(var(--thumb-size) / 2);--min-max-font:12px arial;--min-max-opacity:0.5;--min-max-x-offset:10%;--thumb-size:22px;--thumb-color:white;--thumb-shadow:0 0 3px rgba(0, 0, 0, 0.4),0 0 1px rgba(0, 0, 0, 0.5) inset,0 0 0 99px var(--thumb-color) inset;--thumb-shadow-active:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px var(--primary-color) inset,0 0 3px rgba(0, 0, 0, 0.4);--thumb-shadow-hover:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px darkorange inset,0 0 3px rgba(0, 0, 0, 0.4);--ticks-thickness:1px;--ticks-height:5px;--ticks-gap:var(--ticks-height, 0);--ticks-color:transparent;--step:1;--ticks-count:(var(--max) - var(--min))/var(--step);--maxTicksAllowed:1000;--too-many-ticks:Min(1, Max(var(--ticks-count) - var(--maxTicksAllowed), 0));--x-step:Max(var(--step), var(--too-many-ticks) * (var(--max) - var(--min)));--tickIntervalPerc_1:Calc((var(--max) - var(--min)) / var(--x-step));--tickIntervalPerc:calc((100% - var(--thumb-size)) / var(--tickIntervalPerc_1) * var(--tickEvery, 1));--value-a:Clamp(var(--min), var(--value, 0), var(--max));--value-b:var(--value, 0);--text-value-a:var(--text-value, "");--completed-a:calc((var(--value-a) - var(--min)) / (var(--max) - var(--min)) * 100);--completed-b:calc((var(--value-b) - var(--min)) / (var(--max) - var(--min)) * 100);--ca:Min(var(--completed-a), var(--completed-b));--cb:Max(var(--completed-a), var(--completed-b));--thumbs-too-close:Clamp(-1, 1000 * (Min(1, Max(var(--cb) - var(--ca) - 5, -1)) + 0.001), 1);--thumb-close-to-min:Min(1, Max(var(--ca) - 5, 0));--thumb-close-to-max:Min(1, Max(95 - var(--cb), 0))}` +
+      `.${defCon.class.range}{--primary-color:#67a5df;--value-offset-y:var(--ticks-gap);--value-active-color:white;--value-background:transparent;--value-background-hover:var(--primary-color);--value-font:italic bold 14px/14px monospace,serif;--fill-color:var(--primary-color);--progress-background:rgb(223, 223, 223);--progress-radius:20px;--show-min-max:none;--track-height:calc(var(--thumb-size) / 2);--min-max-font:12px serif;--min-max-opacity:0.5;--min-max-x-offset:10%;--thumb-size:22px;--thumb-color:white;--thumb-shadow:0 0 3px rgba(0, 0, 0, 0.4),0 0 1px rgba(0, 0, 0, 0.5) inset,0 0 0 99px var(--thumb-color) inset;--thumb-shadow-active:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px var(--primary-color) inset,0 0 3px rgba(0, 0, 0, 0.4);--thumb-shadow-hover:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px darkorange inset,0 0 3px rgba(0, 0, 0, 0.4);--ticks-thickness:1px;--ticks-height:5px;--ticks-gap:var(--ticks-height, 0);--ticks-color:transparent;--step:1;--ticks-count:(var(--max) - var(--min))/var(--step);--maxTicksAllowed:1000;--too-many-ticks:Min(1, Max(var(--ticks-count) - var(--maxTicksAllowed), 0));--x-step:Max(var(--step), var(--too-many-ticks) * (var(--max) - var(--min)));--tickIntervalPerc_1:Calc((var(--max) - var(--min)) / var(--x-step));--tickIntervalPerc:calc((100% - var(--thumb-size)) / var(--tickIntervalPerc_1) * var(--tickEvery, 1));--value-a:Clamp(var(--min), var(--value, 0), var(--max));--value-b:var(--value, 0);--text-value-a:var(--text-value, "");--completed-a:calc((var(--value-a) - var(--min)) / (var(--max) - var(--min)) * 100);--completed-b:calc((var(--value-b) - var(--min)) / (var(--max) - var(--min)) * 100);--ca:Min(var(--completed-a), var(--completed-b));--cb:Max(var(--completed-a), var(--completed-b));--thumbs-too-close:Clamp(-1, 1000 * (Min(1, Max(var(--cb) - var(--ca) - 5, -1)) + 0.001), 1);--thumb-close-to-min:Min(1, Max(var(--ca) - 5, 0));--thumb-close-to-max:Min(1, Max(95 - var(--cb), 0))}` +
         `.${defCon.class.range}{width:auto;min-width:105%!important;margin:-3px 0 0 -7px;box-sizing:content-box;display:inline-block;height:Max(var(--track-height),var(--thumb-size));background:linear-gradient(to right,var(--ticks-color) var(--ticks-thickness),transparent 1px) repeat-x;background-size:var(--tickIntervalPerc) var(--ticks-height);background-position-x:calc(var(--thumb-size)/ 2 - var(--ticks-thickness)/ 2);background-position-y:var(--flip-y,bottom);padding-bottom:var(--flip-y,var(--ticks-gap));padding-top:calc(var(--flip-y) * var(--ticks-gap));position:relative;z-index:1}.${defCon.class.range}[data-ticks-position=top]{--flip-y:1}.${defCon.class.range}::after,.${defCon.class.range}::before{--offset:calc(var(--thumb-size) / 2);content:counter(x);display:var(--show-min-max,block);font:var(--min-max-font);position:absolute;bottom:var(--flip-y,-2.5ch);top:calc(-2.5ch * var(--flip-y));opacity:Clamp(0,var(--at-edge),var(--min-max-opacity));transform:translateX(calc(var(--min-max-x-offset) * var(--before,-1) * -1)) scale(var(--at-edge));pointer-events:none}.${defCon.class.range}::before{--before:1;--at-edge:var(--thumb-close-to-min);counter-reset:x var(--min);left:var(--offset)}.${defCon.class.range}::after{--at-edge:var(--thumb-close-to-max);counter-reset:x var(--max);right:var(--offset)}` +
         `.${defCon.class.rangeProgress}{--start-end:calc(var(--thumb-size) / 2);--clip-end:calc(100% - (var(--cb)) * 1%);--clip-start:calc(var(--ca) * 1%);--clip:inset(-20px var(--clip-end) -20px var(--clip-start));position:absolute;left:var(--start-end);right:var(--start-end);top:calc(var(--ticks-gap) * var(--flip-y,0) + var(--thumb-size)/ 2 - var(--track-height)/ 2);height:calc(var(--track-height));background:var(--progress-background,#eee);pointer-events:none;z-index:-1;border-radius:var(--progress-radius)}.${defCon.class.rangeProgress}::before{content:"";position:absolute;left:0;right:0;clip-path:var(--clip);top:0;bottom:0;background:var(--fill-color,#000);box-shadow:var(--progress-flll-shadow);z-index:1;border-radius:inherit}.${defCon.class.rangeProgress}::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;box-shadow:var(--progress-shadow);pointer-events:none;border-radius:inherit}.${defCon.class.range}>input:only-of-type~.${defCon.class.rangeProgress}{--clip-start:0}` +
         `.${defCon.class.range}>input{-webkit-appearance:none;box-shadow:initial!important;width:100%;height:var(--thumb-size)!important;margin:0!important;padding:0!important;position:absolute!important;left:0;top:calc(50% - Max(var(--track-height),var(--thumb-size))/ 2 + calc(var(--ticks-gap)/ 2 * var(--flip-y,-1)))!important;border:0!important;cursor:grab;outline:0!important;background:0 0!important;--thumb-shadow:var(--thumb-shadow-active)}.${defCon.class.range}>input:not(:only-of-type){pointer-events:none}.${defCon.class.range}>input::-webkit-slider-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${defCon.class.range}>input::-moz-range-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${defCon.class.range}>input::-ms-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}` +
         `.${defCon.class.range}>input:hover{--thumb-shadow:var(--thumb-shadow-active)}.${defCon.class.range}>input:hover+output{--value-background:var(--value-background-hover);--y-offset:-1px;color:var(--value-active-color);box-shadow:0 0 0 3px var(--value-background)}.${defCon.class.range}>input:active{--thumb-shadow:var(--thumb-shadow-hover);cursor:grabbing;z-index:2}.${defCon.class.range}>input:active+output{transition:0s;opacity:0.9;display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;-moz-box-orient:horizontal;-moz-box-pack:center;-moz-box-align:center}.${defCon.class.range}>input:nth-of-type(1){--is-left-most:Clamp(0, (var(--value-a) - var(--value-b)) * 99999, 1)}.${defCon.class.range}>input:nth-of-type(1)+output{--value:var(--value-a);--x-offset:calc(var(--completed-a) * -1%)}.${defCon.class.range}>input:nth-of-type(1)+output:not(:only-of-type){--flip:calc(var(--thumbs-too-close) * -1)}.${defCon.class.range}>input:nth-of-type(1)+output::after{content:var(--prefix, "") var(--text-value-a) var(--suffix, "")}.${defCon.class.range}>input:nth-of-type(2){--is-left-most:Clamp(0, (var(--value-b) - var(--value-a)) * 99999, 1)}.${defCon.class.range}>input:nth-of-type(2)+output{--value:var(--value-b)}.${defCon.class.range}>input+output{--flip:-1;--x-offset:calc(var(--completed-b) * -1%);--pos:calc(((var(--value) - var(--min)) / (var(--max) - var(--min))) * 100%);pointer-events:none;width:auto;min-width:40px;height:24px;min-height:24px;text-align:center;position:absolute;z-index:5;background:var(--value-background);border-radius:4px;padding:0 6px;left:var(--pos);transform:translate(var(--x-offset),calc(150% * var(--flip) - (var(--y-offset,0) + var(--value-offset-y)) * var(--flip)));transition:all .12s ease-out,left 0s;opacity:0;box-sizing:content-box}.${defCon.class.range}>input+output::after{content:var(--prefix, "") var(--text-value-b) var(--suffix, "");font:var(--value-font)}`
     );
-    const fontStyle = fontStyle_db + fontStyle_container + fontStyle_cp + fontStyle_tooltip + fontStyle_Progress;
+    const fontStyle = fontTest + fontStyle_db + fontStyle_container + fontStyle_cp + fontStyle_tooltip + fontStyle_Progress;
     const tFontSize = isFontsize
       ? String(
           `<li id="${defCon.id.fontSize}">
@@ -2107,7 +2176,7 @@
       `<div id="${defCon.id.container}">
         <fieldset id="${defCon.id.field}" style="display:block">
           <legend class="${defCon.class.title}">
-            <span style="display:inline-block;color:#8b0000!important">${defCon.scriptName}</span>
+            <span id="${defCon.id.seed}_scriptname" title="Version ${curVersion}" style="color:#8b0000!important">${defCon.scriptName}</span>
             <span class="${defCon.class.guide}">
               <div class="${defCon.class.rotation}" title="打开脚本使用帮助文档" height="24" width="24"/>
                 <svg class="${defCon.class.help}" viewBox="0 0 1053 1024" version="1.1" xmlns="https://www.w3.org/2000/svg">
@@ -2174,7 +2243,7 @@
               <div class="${defCon.class.colorPicker2}"><input title="输入颜色代码" type="text" id="${defCon.id.color}" /></div>
               <div id="${defCon.id.cpm}"></div>
             </li>
-            <li id="${defCon.id.fontCSS}" style="min-width:${getNavigator.type("core").Gecko ? 264 : 254}px">
+            <li id="${defCon.id.fontCSS}" style="min-width:254px">
               <div style="margin: 0 0 6px 0">需要渲染的网页元素：
                 <span class="${defCon.class.tooltip}">
                   <span class="${defCon.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
@@ -2188,7 +2257,7 @@
               <textarea placeholder="请谨慎修改默认值，避免渲染失效。" id="${defCon.id.cssfun}" class="${defCon.class.readonly}"
                 title="重要参数，默认只读，双击解锁。" readonly="readonly">${CONST.fontCSS ? CONST.fontCSS : defValue.fontCSS}</textarea>
             </li>
-            <li id="${defCon.id.fontEx}" style="min-width:${getNavigator.type("core").Gecko ? 264 : 254}px">
+            <li id="${defCon.id.fontEx}" style="min-width:254px">
               <div style="margin: 0 0 6px 0">排除渲染的HTML标签：
                 <span class="${defCon.class.tooltip}">
                   <span class="${defCon.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
@@ -2229,10 +2298,10 @@
       if (defCon.siteIndex === undefined) {
         console.info(
           `%c${defCon.scriptName}\n%cINTRO.URL:\u0020https://f9y4ng.likes.fans/FontRendering\n%c\u259e\u0020脚本版本：%cV%s%c\n\u259e\u0020个性化设置：%c%s%c/%s%s\n%c\u259e\u0020字体缩放：%s%s\n\u259e\u0020本地备份：%s\u3000\u259a\u0020保存预览：%s\n%c\u259e\u0020渲染字体：%s\n\u259e\u0020字体平滑：%s\u3000\u259a\u0020字体重写：%s\n\u259e\u0020字体描边：%s\u3000\u259a\u0020字体阴影：%s`,
-          "font:normal 700 16px/120% system-ui,-apple-system,BlinkMacSystemFont;color:crimson",
+          "font:normal 700 16px/150% system-ui,-apple-system,BlinkMacSystemFont,sans-serif;color:crimson",
           "line-height:180%;font-size:10px;color:#777;font-style:italic",
           "line-height:180%;font-size:12px;color:slategray",
-          "color:slategrey;font:italic 16px Candara,'Times New Roman'",
+          "color:slategrey;font:italic 16px/150% Candara,'Times New Roman'",
           defCon.curVersion,
           "line-height:180%;font-size:12px;color:steelblue",
           defCon.domainCount > maxPersonalSites ? "color:crimson" : "color:steelblue",
@@ -2258,8 +2327,8 @@
         );
       } else {
         console.info(
-          `%c${defCon.scriptName}\n%c${location.hostname.toUpperCase()} 已在排除渲染列表内，若要重新渲染，请在脚本菜单中打开重新渲染。`,
-          "line-height:160%;font-weight:bold;font-size:14px;color:red",
+          `%c${defCon.scriptName}\n%c${curHostName.toUpperCase()} 已在排除渲染列表内，若要重新渲染，请在脚本菜单中打开重新渲染。`,
+          "font:normal 700 16px/150% system-ui,-apple-system,BlinkMacSystemFont,sans-serif;color:crimson",
           "line-height:180%;font-size:12px;color:darkred"
         );
       }
@@ -2312,8 +2381,12 @@
               reportErrorToAuthor(defCon.errors, true);
             }
           });
-          qS(`.${defCon.class.title} .${defCon.class.guide}`).addEventListener("click", () => {
+          qS(`.${defCon.class.title} span.${defCon.class.guide}`).addEventListener("click", () => {
             GMopenInTab(`${hostURI}#guide`, defCon.options);
+          });
+          qS(`#${defCon.id.field} span#${defCon.id.seed}_scriptname`).addEventListener("dblclick", function () {
+            hintUpdateInfo(`${hostURI}#update`, _config_data_.curVersion);
+            this.style.userSelect = "none";
           });
         } else {
           closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
@@ -2325,7 +2398,7 @@
         let frDialog = new FrDialogBox({
           trueButtonText: "确 定",
           neutralButtonText: "取 消",
-          messageText: `<p style="font:bold italic 24px/1.4 Candara,'Times New Roman'!important">${curHostName}</p><p style="color:darkred">该域名下所有页面将被禁止字体渲染！</p><p>确定后页面将自动刷新，请确认是否排除？</p>`,
+          messageText: `<p style="word-break:break-all;font:bold italic 24px/150% Candara,'Times New Roman'!important">${curHostName}</p><p style="color:darkred">该域名下所有页面将被禁止字体渲染！</p><p>确定后页面将自动刷新，请确认是否排除？</p>`,
           titleText: "禁止字体渲染",
         });
         if (await frDialog.respond()) {
@@ -2392,7 +2465,7 @@
                 <div class="${defCon.id.seed}_VIP" title="防止页面加载缓慢，不建议设置过高的数值！">\u2465 个性化设置总数（默认：100）</div>
                 <div style="margin:0 5px 0 0;padding:0">
                   <input maxlength="4" id="${defCon.id.maxps}" placeholder="100" value="${maxPersonalSites}"
-                    style="box-sizing:border-box;font:normal 500 16px/140% Impact,Times,serif!important;border:2px solid darkgoldenrod;border-radius:4px;width:70px;min-width:70px;text-align:center;padding:4px 5px;color:#333" />
+                    style="box-sizing:border-box;font:normal 500 16px/150% Impact,Times,serif!important;border:2px solid darkgoldenrod;border-radius:4px;width:70px;min-width:70px;text-align:center;padding:4px 5px;color:#333" />
                 </div>
               </li>
               <li id="${defCon.id.flc}">
@@ -2408,7 +2481,7 @@
                 \ud83e\udde1<span style="font-weight:700">\u0020如果您遇到问题，请向我反馈\u0020</span>\ud83e\udde1
             </div>`
           ),
-          titleText: `VIP高级功能设置\u3000-\u0020Version\u0020${defCon.curVersion}\u0020-`,
+          titleText: `高级核心功能设置\u3000-\u0020Version\u0020${defCon.curVersion}\u0020-`,
         });
         let _bk, _pv, _fs, _hk, _ct, _mps;
         _bk = Boolean(qS(`#${defCon.id.isbackup}`).checked);
@@ -2428,7 +2501,7 @@
         }
         confirmIfValueChange(
           qS(`#${defCon.id.isclosetip}`),
-          "关闭更新提示，您将不能在第一时间获取更新内容，或错过重要的使用提示和警示通告。如遇重大功能升级，忽略更新提示有几率影响正常使用。\n\n请确认是否关闭更新提示功能？"
+          "关闭更新提示，您将不能在第一时间获取更新内容，或错过重要的使用提示和警示通告。如遇重大功能升级，忽略更新提示有几率影响正常使用。双击字体渲染设置窗口顶部的脚本名称，可查看历史更新提示。\n\n请确认是否关闭更新提示功能？"
         );
         qS(`#${defCon.id.flcid}`).addEventListener("click", async () => {
           closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
@@ -2466,8 +2539,8 @@
           GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
           let frDialog = new FrDialogBox({
             trueButtonText: "确 定",
-            messageText: `<p style="color:darkgoldenrod">VIP 高级功能参数已成功保存，页面即将刷新！</p>`,
-            titleText: "VIP 高级功能设置保存",
+            messageText: `<p style="color:darkgoldenrod">高级核心功能参数已成功保存，页面即将刷新！</p>`,
+            titleText: "高级核心功能设置保存",
           });
           closeConfigurePage(true);
           if (await frDialog.respond()) {
@@ -2484,7 +2557,7 @@
         let frDialog = new FrDialogBox({
           trueButtonText: "确 定",
           neutralButtonText: "取 消",
-          messageText: `<p style="font:italic bold 22px/1.4 Candara,'Times New Roman'!important">${curHostName}</p><p style="color:darkgreen">该域名下所有页面将重新进行字体渲染！</p><p>确定后页面将自动刷新，请确认是否恢复？</p>`,
+          messageText: `<p style="font:italic bold 22px/150% Candara,'Times New Roman'!important">${curHostName}</p><p style="color:darkgreen">该域名下所有页面将重新进行字体渲染！</p><p>确定后页面将自动刷新，请确认是否恢复？</p>`,
           titleText: "恢复字体渲染",
         });
         if (await frDialog.respond()) {
@@ -2514,7 +2587,7 @@
             addAction.excludeSites();
           });
           Parameter_Set ? GMunregisterMenuCommand(Parameter_Set) : debug("\u27A4 No Parameter_Set_Menu");
-          Parameter_Set = GMregisterMenuCommand(`\ufff7\ud83d\udc8e VIP 高级功能开关${isHotkey ? "(" + (isMac ? "M" : "G") + ")" : ""}`, () => {
+          Parameter_Set = GMregisterMenuCommand(`\ufff7\ud83d\udc8e 高级核心功能设置${isHotkey ? "(" + (isMac ? "M" : "G") + ")" : ""}`, () => {
             addAction.vipConfigure();
           });
         } else {
@@ -2587,7 +2660,7 @@
           const section = cE("fr-configure");
           section.id = defCon.id.rndId;
           section.innerHTML = tHTML;
-          qS("body").appendChild(section);
+          document.body.appendChild(section);
         } catch (e) {
           error("\u27A4 insertHTML:", e);
         }
@@ -2622,14 +2695,13 @@
               reportErrorToAuthor(defCon.errors, true);
               console.error("\u27A4 ", info);
             }
-            return false;
+            return;
           } else if (document.head.querySelectorAll("style[id^='TS']").length) {
             insertStyle(true);
             debug("\u27A4 [:After]", document.head.lastChild.className);
           }
         } else {
-          addLoadEvents(() => {
-            const startTime = Date.now();
+          addLoadEvents((startTime = Date.now()) => {
             const isLast = document.head.lastChild.className === defCon.class.rndStyle;
             const isPrevious = document.head.lastChild.previousSibling.className === defCon.class.rndStyle;
             const isLastChild = isLast || isPrevious;
@@ -2678,11 +2750,9 @@
         fontCheck = getUniqueValues([...fontCheck, ...cusFontCheck]);
         for (const font of fontCheck.values()) {
           if (checkFont.detect(font.en)) {
-            if (font.en !== refont) {
-              font.sort = ii;
-              fontAvailable.add(font);
-            }
-          } else if (checkFont.detect(convertToUnicode(font.ch)) && convertToUnicode(font.ch) !== refont) {
+            font.sort = ii;
+            fontAvailable.add(font);
+          } else if (checkFont.detect(convertToUnicode(font.ch))) {
             font.en = convertToUnicode(font.ch);
             font.sort = ii;
             fontAvailable.add(font);
@@ -2735,7 +2805,7 @@
                   trueButtonText: "保 存",
                   falseButtonText: "帮助文档",
                   neutralButtonText: "取 消",
-                  messageText: `<p style="color:#666;font-size:14px!important">以下文本域可按预定格式增加您自定义的字体。请按照格式样例填写，输入格式有误将被自动过滤。重复添加字体将在字体表合并时被自动忽略。【功能小贴士：<span id="${defCon.id.seed}_addTools" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${defCon.id.seed}_custom_Fontlist" style="min-height:160px!important;min-width:377px!important;resize:vertical;padding:5px;border:1px solid #999;border-radius:6px;font:normal 14px monospace,Consolas!important;white-space:pre!important;cursor:text" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下：\n\n{ "ch": "中文字体名一", "en": "EN Fontname 1" }\u21b2\n{ "ch": "中文字体名二", "en": "EN Fontname 2" }\u21b2\n{ "ch": "中文字体名三", "en": "EN Fontname 3" }\u21b2\n\n（注意：\u21b2为换行符号，输入(Enter)回车即可）'>${customFontlist}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:crimson;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`,
+                  messageText: `<p style="color:#666;font-size:14px!important">以下文本域可按预定格式增加您自定义的字体。请按照格式样例填写，输入格式有误将被自动过滤。重复添加字体将在字体表合并时被自动忽略。【功能小贴士：<span id="${defCon.id.seed}_addTools" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${defCon.id.seed}_custom_Fontlist" style="box-sizing:border-box;min-height:160px!important;min-width:388px!important;max-width:388px!important;resize:vertical;padding:5px;border:1px solid #999;border-radius:6px;font:normal 400 14px/150% monospace,'Courier New','Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;white-space:pre!important;cursor:text" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下：\n\n{ "ch": "中文字体名一", "en": "EN Fontname 1" }\u21b2\n{ "ch": "中文字体名二", "en": "EN Fontname 2" }\u21b2\n{ "ch": "中文字体名三", "en": "EN Fontname 3" }\u21b2\n\n（注意：\u21b2为换行符号，输入(Enter)回车即可）'>${customFontlist}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:crimson;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`,
                   titleText: "自定义字体表",
                 });
                 qS(`#${defCon.id.seed}_addTools`).addEventListener("click", () => {
@@ -3058,20 +3128,22 @@
                 const _stroke = fstroke > 0 && fstroke <= 1.0 ? `-webkit-text-stroke:${fstroke}px currentcolor;` : ``;
                 const _smoothing = smooth ? funcSmooth() : ``;
                 const _fontfamily = fontface ? `font-family:${fontselect};` : ``;
-                const _refont = fontselect.split(",")[0].replace(/"|'/g, "");
+                const _prefont = fontselect.split(",")[0];
+                const _refont = _prefont.replace(/"|'/g, "");
                 const _fontfaces = fontface ? (_refont.length ? funcFontface(_refont) : ``) : ``;
                 let _codeFont = "";
-                const _exclude = fontex ? `${filterHtmlToText(fontex)}{-webkit-text-stroke:initial!important;text-shadow:initial!important}` : ``;
+                const _exclude = fontex ? `${filterHtmlToText(fontex)}{font-family:inherit;-webkit-text-stroke:initial!important;text-shadow:none!important}` : ``;
                 if (fontex) {
-                  _codeFont = funcCodefont(fontex);
+                  _codeFont = funcCodefont(fontex, fontface, _prefont);
                 }
-                const tshadow = `${_bodyZoom}${_codeFont}${filterHtmlToText(cssfun)}{${_shadow}${_stroke}${_smoothing}${_fontfamily}}${_fontfaces}${_exclude}`;
-                const _tshadow = `@charset "UTF-8";${tshadow}`;
+                const _textrender = `text-rendering:optimizeLegibility!important`;
+                const _tshadow = `${_fontfaces}${_bodyZoom}${_codeFont}${_exclude}${filterHtmlToText(cssfun)}{${_fontfamily}${_shadow}${_stroke}${_smoothing}${_textrender}}`;
+                const __tshadow = `@charset "UTF-8";${_tshadow}`;
                 defCon.tZoom = fzoom;
                 this.innerText = "\u4fdd\u5b58";
                 this.removeAttribute("style");
                 this.removeAttribute("v-Preview");
-                loadPreview(defCon.isPreview, _tshadow, false);
+                loadPreview(defCon.isPreview, __tshadow, false);
                 await getCurrentFontName(fontface, _refont, defautlFont);
                 setAutoZoomFontSize(`#${defCon.id.rndId}`, fzoom);
                 correctBoldErrorByStroke(fstroke);
@@ -3086,7 +3158,7 @@
                   trueButtonText: "保存到全局数据",
                   falseButtonText: "保存到网站数据",
                   neutralButtonText: "取 消",
-                  messageText: `<p style="color:darkgreen;font-weight:900">保存到全局数据：</p><p>将当前设置保存为全局设置，默认使用全局参数。</p><p style="color:darkred;font-weight:900">保存到当前网站数据：<span id="${defCon.id.seed}_a_w_d_l_">[<span style="font-size:12px!important;font-weight:normal;padding:0 2px;margin:0;cursor:pointer;color:#3e3e3e">全部数据列表</span>]</span></p><p style="min-height:22px"><span title="保存到网站数据会自动覆盖之前的数据" style="cursor:help;color:indigo" id="${defCon.id.seed}_c_w_d_">为 ${curHostName} 保存独立的设置数据。</span>`,
+                  messageText: `<p style="color:darkgreen;font-weight:900">保存到全局数据：</p><p>将当前设置保存为全局设置，默认使用全局参数。</p><p style="color:darkred;font-weight:900">保存到当前网站数据：<span id="${defCon.id.seed}_a_w_d_l_">[<span style="font-size:12px!important;font-weight:normal;padding:0 2px;margin:0;cursor:pointer;color:#3e3e3e">全部数据列表</span>]</span></p><p style="min-height:22px"><span title="保存到网站数据会自动覆盖之前的数据" style="word-break:break-all;cursor:help;color:indigo" id="${defCon.id.seed}_c_w_d_">为 ${curHostName} 保存独立的设置数据。</span>`,
                   titleText: "保存设置数据",
                 });
                 domains = await GMgetValue("_domains_fonts_set_");
@@ -3105,9 +3177,9 @@
                 }
                 domainValueIndex = updateDomainsIndex(domainValue);
                 if (domainValueIndex !== undefined && qS(`#${defCon.id.seed}_c_w_d_`)) {
-                  const fontDate = setDateFormat("YYYY-mm-dd HH:MM:SS", new Date(domainValue[domainValueIndex].fontDate));
+                  const fontDate = setDateFormat("yyyy-MM-dd HH:mm:ss", new Date(domainValue[domainValueIndex].fontDate));
                   qS(`#${defCon.id.seed}_c_w_d_`).innerHTML = String(
-                    `<p style="color:indigo;height:22px">上次保存：${fontDate} <button id="${defCon.id.seed}_c_w_d_d_" style="box-sizing:border-box;padding:3px 5px;margin-left:15px;cursor:pointer;color:#333;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;height:max-contant;min-height:30px;background-color:#eee;letter-spacing:normal" title="删除数据后将刷新页面">删除当前网站数据</button></p>`
+                    `<p style="height:30px;display:flex;align-items:center"><span style="color:indigo"><strong>上次保存：</strong>${fontDate} </span><button id="${defCon.id.seed}_c_w_d_d_" style="box-sizing:border-box;padding:3px 5px;margin-left:15px;cursor:pointer;color:#333;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-height:30px;background-color:#eee;letter-spacing:normal" title="删除数据后将刷新页面">删除当前网站数据</button></p>`
                   );
                   qS(`#${defCon.id.seed}_c_w_d_d_`).addEventListener("click", async () => {
                     domainValue.splice(domainValueIndex, 1);
@@ -3116,7 +3188,7 @@
                     closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
                     let frDialog = new FrDialogBox({
                       trueButtonText: "感谢使用",
-                      messageText: `<p style="color:darkred">时间戳${fontDate}的数据已成功删除！</p><p>当前页面将在您确认后自动刷新。</p>`,
+                      messageText: `<p style="color:darkred">时间戳 ${fontDate} 的数据已成功删除！</p><p>当前页面将在您确认后自动刷新。</p>`,
                       titleText: "个性化数据删除",
                     });
                     closeConfigurePage(true);
@@ -3291,7 +3363,7 @@
                 fs.click();
               });
               fs.addEventListener("change", () => {
-                tfs.innerHTML = `<em style="color:indigo;font-size:12px!important">${fs.files[0].name}</em>\u0020\ud83d\udc49<span style="color:crimson">[重新选择]</span>`;
+                tfs.innerHTML = `<em style="word-break:break-all;color:indigo;font-size:12px!important">${fs.files[0].name}</em><span style="color:crimson">\u0020\ud83d\udc49\u0020[重新选择]</span>`;
               });
             }
             if (await frDialog.respond()) {
@@ -3310,12 +3382,12 @@
               const db_4 = _Custom_fontlist__;
               const db_5 = _configure_;
               const db = { db_R, db_0, db_1, db_2, db_3, db_4, db_5 };
-              const timeStamp = setDateFormat("YYYYmmddHHMMSS", new Date());
-              const via = `.${getNavigator.type("browser").toLowerCase()}`;
-              dataDownload(`backup.${timeStamp}${via}.sqlitedb`, defCon.sqliteDB(JSON.stringify(db), true, ROOT_SECRET_KEY));
+              const timeStamp = setDateFormat("yyyy-MM-ddTHH-mm-ssZ", new Date());
+              const via = `${getNavigator.type("browser").toLowerCase()}`;
+              dataDownload(`FontRendering-backup-${via}-${timeStamp}.sqlitedb`, defCon.sqliteDB(JSON.stringify(db), 22, ROOT_SECRET_KEY));
               let frDialog = new FrDialogBox({
                 trueButtonText: "确 定",
-                messageText: `<p style="color:darkgreen">备份数据已归档，备份文件导出下载中……</p><p>文件名：<span style="color:darkred;font-size:12px!important">backup.${timeStamp}${via}.sqlitedb</span></p>`,
+                messageText: `<p style="color:darkgreen">备份数据已归档，备份文件导出下载中……</p><p style="word-break:break-all;color:darkred;font-style:italic;font-size:12px!important">FontRendering-backup-${via}-${timeStamp}.sqlitedb</p>`,
                 titleText: "数据备份",
               });
               if (await frDialog.respond()) {
@@ -3329,8 +3401,8 @@
                 reader.readAsText(thatFile);
                 reader.onload = async function () {
                   try {
-                    const _file_ = defCon.decrypt(this.result);
-                    const _rs = JSON.parse(defCon.sqliteDB(_file_, false, ROOT_SECRET_KEY));
+                    const _file = defCon.decrypt(this.result);
+                    const _rs = JSON.parse(defCon.sqliteDB(_file, null, ROOT_SECRET_KEY));
                     const _data_R = defCon.decrypt(_rs.db_R);
                     const _data_0 = defCon.decrypt(_rs.db_0);
                     const _data_1 = JSON.parse(defCon.decrypt(_rs.db_1));
@@ -3521,25 +3593,25 @@
         domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : DEFAULT_ARRAY;
         const _data_search_ =
           domainValue.length > 6
-            ? `<p style="display:flex;justify-content:left;align-items:center"><input id="${defCon.id.seed}_d_s_" style="box-sizing:content-box;width:50%;height:22px;font:normal 16px/1.5 monospace,sans-serif!important;border:2px solid #777;border-radius:4px;margin:4px 6px;padding:2px 15px"><button id="${defCon.id.seed}_d_s_s_" style="box-sizing:border-box;background:#eee;color:#333!important;vertical-align:initial;padding:3px 10px;margin:0;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;min-width:60px;min-height:30px;letter-spacing:normal;text-align:center">查 询</button><button id="${defCon.id.seed}_d_s_c_" style="box-sizing:border-box;background:#eee;color:#333!important;vertical-align:initial;margin:0 0 0 4px;padding:3px 10px;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;min-width:60px;min-height:30px;letter-spacing:normal;text-align:center">清 除</button></p>`
+            ? `<p style="display:flex;justify-content:left;align-items:center"><input id="${defCon.id.seed}_d_s_" style="box-sizing:content-box;width:57%;height:22px;font:normal 16px/150% monospace,Consolas,system-ui,-apple-system,BlinkMacSystemFont,serif!important;border:2px solid #777;border-radius:4px;margin:4px 6px;padding:2px 6px"><button id="${defCon.id.seed}_d_s_s_" style="box-sizing:border-box;background:#eee;color:#333;vertical-align:initial;padding:3px 10px;margin:0;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-width:60px;min-height:30px;letter-spacing:normal;text-align:center">查 询</button><button id="${defCon.id.seed}_d_s_c_" style="box-sizing:border-box;background:#eee;color:#333;vertical-align:initial;margin:0 0 0 4px;padding:3px 10px;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-width:60px;min-height:30px;letter-spacing:normal;text-align:center">清 除</button></p>`
             : ``;
         for (let i = 0; i < domainValue.length; i++) {
           Contents += String(
             `<li id="${defCon.id.seed}_d_d_l_${i}"
-              style="margin:0;padding:5px;list-style:none;user-select:text!important;font:normal 400 14px/140% 'Microsoft YaHei',system-ui,-apple-system!important;color:#555;display:flex;justify-content:space-between;white-space:nowrap">
+              style="margin:0;padding:5px;list-style:none;user-select:text!important;font:normal 400 14px/150% 'Microsoft YaHei UI',system-ui,-apple-system,sans-serif!important;color:#555;display:flex;justify-content:space-between;white-space:nowrap;max-width:364px;overflow:hidden">
               <span>
-                [<a id="${defCon.id.seed}_d_d_l_s_${i}" style="display:inline;padding:2px;cursor:pointer;color:crimson;background:transparent;font-size:14px!important">删除</a>]
+                [<a id="${defCon.id.seed}_d_d_l_s_${i}" style="display:inline;padding:2px;cursor:pointer;color:darkred;background:transparent;font-size:14px!important">删除</a>]
                 <span>${i + 1 > 9 ? i + 1 : "0".concat(i + 1)}.</span>
               </span>
               <span style="font-weight:900;margin-left:5px">${filterHtmlToText(domainValue[i].domain)}</span>
-              <span style="margin:0 5px">${setDateFormat("YYYY/mm/dd HH:MM:SS", new Date(domainValue[i].fontDate))}</span>
+              <span style="margin:0 5px">${setDateFormat("yyyy/MM/dd HH:mm:ss", new Date(domainValue[i].fontDate))}</span>
             </li>`
           );
         }
         let frDialog = new FrDialogBox({
           trueButtonText: "确认操作，保存数据",
           neutralButtonText: "取 消",
-          messageText: `<p style="font-size:14px!important;color:darkred">请谨慎操作，保存后生效，已删除的数据将不可恢复！</p>${_data_search_}<ul id="${defCon.id.seed}_d_d_" style="margin:0!important;padding:0!important;list-style:none!important;max-height:190px;overflow-x:hidden">${Contents}</ul>`,
+          messageText: `<p style="font-size:14px!important;text-indent:6px!important;color:darkred">请谨慎操作，保存后生效，已删除的数据将不可恢复！</p>${_data_search_}<ul id="${defCon.id.seed}_d_d_" style="margin:0!important;padding:0!important;list-style:none!important;max-height:190px;overflow-x:hidden">${Contents}</ul>`,
           titleText: "网站个性化设置数据列表：",
         });
         if (qS(`#${defCon.id.seed}_d_s_`) && qS(`#${defCon.id.seed}_d_s_c_`) && qS(`#${defCon.id.seed}_d_s_s_`)) {
@@ -3585,14 +3657,14 @@
                 a.push(b[_list_Id_].domain);
                 this.setAttribute("data-del", b[_list_Id_].domain);
                 this.innerHTML = "恢复";
-                this.style.cssText += "color:green";
+                this.style.cssText += "color:darkgreen";
                 this.parentNode.nextElementSibling.style.cssText += "text-decoration:line-through;font-style:italic";
                 this.parentNode.nextElementSibling.nextElementSibling.style.cssText += "text-decoration:line-through;font-style:italic";
               } else {
                 a.splice(a.indexOf(this.getAttribute("data-del")), 1);
                 this.removeAttribute("data-del");
                 this.innerHTML = "删除";
-                this.style.cssText += "color:crimson";
+                this.style.cssText += "color:darkred";
                 this.parentNode.nextElementSibling.style.cssText += "text-decoration:none;font-style:normal";
                 this.parentNode.nextElementSibling.nextElementSibling.style.cssText += "text-decoration:none;font-style:normal";
               }
@@ -3680,12 +3752,13 @@
     function setDateFormat(fmt, date) {
       let ret;
       const opt = {
-        "Y+": date.getFullYear().toString(),
-        "m+": (date.getMonth() + 1).toString(),
+        "y+": date.getFullYear().toString(),
+        "M+": (date.getMonth() + 1).toString(),
         "d+": date.getDate().toString(),
         "H+": date.getHours().toString(),
-        "M+": date.getMinutes().toString(),
-        "S+": date.getSeconds().toString(),
+        "m+": date.getMinutes().toString(),
+        "s+": date.getSeconds().toString(),
+        "S+": date.getMilliseconds().toString(),
       };
       for (let k in opt) {
         ret = new RegExp("(" + k + ")").exec(fmt);
@@ -3703,8 +3776,8 @@
           if (curZoom !== 1) {
             qS(target).style.transformOrigin = "left top";
             qS(target).style.transform = "scale(" + 1 / curZoom + ")";
-            qS(target).style.width = document.documentElement.clientWidth + "px";
-            qS(target).style.height = document.documentElement.clientHeight + "px";
+            qS(target).style.width = defCon.elCompat.clientWidth + "px";
+            qS(target).style.height = defCon.elCompat.clientHeight + "px";
             scrollInsteadFixed(qS(target), curZoom, "configurePage");
           } else {
             if (defCon.configurePage) {
@@ -3751,7 +3824,7 @@
       // Fixed incorrect rendering of bold styles by font strokes in Chrome >= 96.0.4664.45, Ｆ９ｙ４ｎｇ, 20211120.
       const version = getNavigator.type().match(/chrome\/([\d]+)/);
       if (s && document.body && parseInt(version ? version[1] : 0) >= 96) {
-        qA(`:not(img):not(svg):not(path):not([id="${defCon.id.rndId}"] *):not([id="${defCon.id.dialogbox}"] *)`).forEach(item => {
+        qA(`:not(script):not(style):not(img):not(svg):not(path):not(fr-configure *):not(fr-dialogbox *):not(gb-notice *)`).forEach(item => {
           if (window.getComputedStyle(item, null).getPropertyValue("font-weight") >= 600 && item.style["-webkit-text-stroke"] !== "initial") {
             item.style.cssText += "-webkit-text-stroke:initial!important;";
           }

@@ -4,8 +4,8 @@
 // @name:zh-TW    谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en       Google & baidu & Bing Switcher (ALL in One)
 // @name:ja       Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version       4.0.20211201.1
+// @version       4.0.20211217.1
 // @author        F9y4ng
 // @namespace     https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
-// @note          优化代码命名，修正bugs，优化代码。
+// @note          修正Bing搜索无法访问的问题。\n修正bugs，优化代码。
 // ==/UserScript==
