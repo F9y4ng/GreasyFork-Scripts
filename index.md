@@ -5,9 +5,9 @@
 [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues)
 [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/login?return_to=%2FF9y4ng%2FGreasyFork-Scripts)
 
-请先根据你的浏览器安装一个 **用户脚本管理器**（如TamperMonkey, ViolentMonkey），然后再 **安装脚本**。
+请先根据你的浏览器安装一个**用户脚本管理器**（如TamperMonkey, ViolentMonkey）然后再**安装脚本**。
 
-(不建议用AdGuard安装脚本，因为脚本设置功能将无法查看。如有配置需要，请使用“键盘快捷键”。)
+(不建议用AdGuard安装脚本，因为脚本设置功能将无法查看。如有配置需要，请使用“[键盘快捷键](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering#%E8%84%9A%E6%9C%AC%E8%8F%9C%E5%8D%95%E9%A1%B9---%E7%82%B9%E5%87%BB%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%E8%AE%BE%E7%BD%AE%E8%BF%9B%E5%85%A5%E8%AE%BE%E7%BD%AE%E7%95%8C%E9%9D%A2)”。)
 
 ***
 
