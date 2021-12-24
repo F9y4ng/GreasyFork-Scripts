@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.12.17.1
+// @version           2021.12.24.1
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -18,6 +18,7 @@
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL       https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.meta.js
 // @downloadURL     https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
+// @require         https://greasyfork.org/scripts/437214-frcolorpicker/code/frColorPicker.js?version=1001053
 // @include         *
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
@@ -88,7 +89,7 @@
     curVersion: GMinfo.script.version,
     scriptName: getScriptNameViaLanguage(),
     options: isGM ? false : { active: true, insert: true, setParent: true },
-    elCompat: (document.compatMode || "") === "CSS1Compat" ? document.documentElement : document.body,
+    elCompat: ((document.compatMode || "") === "CSS1Compat" ? document.documentElement : document.body) || document.documentElement || document.body,
     encrypt: n => {
       return window.btoa(encodeURIComponent(n));
     },
@@ -222,8 +223,6 @@
     stroke: defCon.randString(7, "char"),
     shadowSize: defCon.randString(6, "mix"),
     shadow: defCon.randString(7, "char"),
-    cps: defCon.randString(9, "char"),
-    cpm: defCon.randString(9, "char"),
     color: defCon.randString(7, "char"),
     cssfun: defCon.randString(7, "char"),
     exclude: defCon.randString(7, "char"),
@@ -275,10 +274,8 @@
     ps1: defCon.randString(4, "mix"),
     ps2: defCon.randString(4, "mix"),
     ps3: defCon.randString(4, "mix"),
-    ps4: defCon.randString(4, "mix"),
     slider: defCon.randString(7, "char"),
-    colorPicker: defCon.randString(8, "char"),
-    colorPicker2: defCon.randString(8, "char"),
+    frColorPicker: defCon.randString(9, "char"),
     readonly: defCon.randString(7, "char"),
     notreadonly: defCon.randString(7, "char"),
     reset: defCon.randString(6, "mix"),
@@ -287,15 +284,6 @@
     selector: defCon.randString(9, "char"),
     selectFontId: defCon.randString(8, "char"),
     close: defCon.randString(6, "char"),
-    cp: defCon.randString(10, "char"),
-    cpcb: defCon.randString(6, "char"),
-    cpcw: defCon.randString(6, "mix"),
-    cprbp: defCon.randString(7, "char"),
-    cpg: defCon.randString(7, "char"),
-    cpgc: defCon.randString(6, "char"),
-    cpgb: defCon.randString(6, "mix"),
-    cpc: defCon.randString(7, "char"),
-    cprb: defCon.randString(7, "char"),
     db: defCon.randString(10, "char"),
     dbbc: defCon.randString(8, "char"),
     dbb: defCon.randString(7, "char"),
@@ -472,22 +460,6 @@
     }
   }
 
-  /* Passive event listeners */
-
-  let supportsPassive = false;
-  try {
-    const opts = Object.defineProperty({}, "passive", {
-      get: () => {
-        supportsPassive = true;
-        return supportsPassive;
-      },
-    });
-    window.addEventListener("testPassive", null, opts);
-    window.removeEventListener("testPassive", null, opts);
-  } catch (e) {
-    error("\u27A4 supportsPassive:", e.name);
-  }
-
   /* expire for fontlist cache */
 
   const cache = {
@@ -602,122 +574,138 @@
     },
   };
 
-  /* Redefine Propertise */
+  /* New DefinePropertise */
 
   const definePropertiesForZoom = function (t, d) {
-    const setValue = (s, g, mod, z = 0) => {
-      switch (mod) {
-        case 1:
-          if (s.target.parentNode && s.target.parentNode !== document) {
-            z = s.target.parentNode.getBoundingClientRect()[g] / (getNavigator.type("core").Gecko ? t : 1);
-          }
-          return z;
-        case 2:
-          return 0 - s.getBoundingClientRect()[g] / t;
-      }
-    };
-    // window
-    Object.defineProperties(unsafeWindow, {
-      pageXOffset: {
-        get: function () {
-          return setValue(d, "left", 2);
+    try {
+      const setValue = (s, g, mod, z = 0) => {
+        switch (mod) {
+          case 1:
+            if (s.target.parentNode && s.target.parentNode !== document) {
+              z = s.target.parentNode.getBoundingClientRect()[g] / (getNavigator.type("core").Gecko ? t : 1);
+            }
+            return z;
+          case 2:
+            return 0 - s.getBoundingClientRect()[g] / t;
+        }
+      };
+      // window
+      Object.defineProperties(unsafeWindow, {
+        pageXOffset: {
+          get: function () {
+            return setValue(d, "left", 2);
+          },
+          configurable: false,
         },
-        configurable: false,
-      },
-      pageYOffset: {
-        get: function () {
-          return setValue(d, "top", 2);
+        pageYOffset: {
+          get: function () {
+            return setValue(d, "top", 2);
+          },
+          configurable: false,
         },
-        configurable: false,
-      },
-      scrollX: {
-        get: function () {
-          return setValue(d, "left", 2);
+        scrollX: {
+          get: function () {
+            return setValue(d, "left", 2);
+          },
+          configurable: false,
         },
-        configurable: false,
-      },
-      scrollY: {
-        get: function () {
-          return setValue(d, "top", 2);
+        scrollY: {
+          get: function () {
+            return setValue(d, "top", 2);
+          },
+          configurable: false,
         },
-        configurable: false,
-      },
-    });
-    // HTMLelements
-    Object.defineProperties(d, {
-      scrollLeft: {
-        get: function () {
-          return setValue(this, "left", 2);
+      });
+      // HTMLelements
+      Object.defineProperties(d, {
+        scrollLeft: {
+          get: function () {
+            return setValue(this, "left", 2);
+          },
+          set: Value => {
+            d.scrollTo(Value * t, 0);
+          },
+          configurable: true,
         },
-        set: Value => {
-          d.scrollTo(Value * t, 0);
+        scrollTop: {
+          get: function () {
+            return setValue(this, "top", 2);
+          },
+          set: Value => {
+            d.scrollTo(0, Value * t);
+          },
+          configurable: true,
         },
-        configurable: true,
-      },
-      scrollTop: {
-        get: function () {
-          return setValue(this, "top", 2);
+      });
+      // MouseEvents
+      Object.defineProperties(MouseEvent.prototype, {
+        clientX: {
+          get: function () {
+            return this.x / t;
+          },
+          configurable: false,
         },
-        set: Value => {
-          d.scrollTo(0, Value * t);
+        clientY: {
+          get: function () {
+            return this.y / t;
+          },
+          configurable: false,
         },
-        configurable: true,
-      },
-    });
-    // MouseEvents
-    Object.defineProperties(MouseEvent.prototype, {
-      clientX: {
-        get: function () {
-          return this.x / t;
+        pageX: {
+          get: function () {
+            return this.x / t + setValue(d, "left", 2);
+          },
+          configurable: false,
         },
-        configurable: false,
-      },
-      clientY: {
-        get: function () {
-          return this.y / t;
+        pageY: {
+          get: function () {
+            return this.y / t + setValue(d, "top", 2);
+          },
+          configurable: false,
         },
-        configurable: false,
-      },
-      pageX: {
-        get: function () {
-          return this.x / t + setValue(d, "left", 2);
+        layerX: {
+          get: function () {
+            return this.x / t - setValue(this, "left", 1);
+          },
+          configurable: false,
         },
-        configurable: false,
-      },
-      pageY: {
-        get: function () {
-          return this.y / t + setValue(d, "top", 2);
+        layerY: {
+          get: function () {
+            return this.y / t - setValue(this, "top", 1);
+          },
+          configurable: false,
         },
-        configurable: false,
-      },
-      layerX: {
-        get: function () {
-          return this.x / t - setValue(this, "left", 1);
+        offsetX: {
+          get: function () {
+            return this.x / t - setValue(this, "left", 1);
+          },
+          configurable: false,
         },
-        configurable: false,
-      },
-      layerY: {
-        get: function () {
-          return this.y / t - setValue(this, "top", 1);
+        offsetY: {
+          get: function () {
+            return this.y / t - setValue(this, "top", 1);
+          },
+          configurable: false,
         },
-        configurable: false,
-      },
-      offsetX: {
-        get: function () {
-          return this.x / t - setValue(this, "left", 1);
+        screenX: {
+          get: function () {
+            return this.x / t + window.screenLeft;
+          },
+          configurable: false,
         },
-        configurable: false,
-      },
-      offsetY: {
-        get: function () {
-          return this.y / t - setValue(this, "top", 1);
+        screenY: {
+          get: function () {
+            return this.y / t + window.screenTop;
+          },
+          configurable: false,
         },
-        configurable: false,
-      },
-    });
+      });
+    } catch (e) {
+      error("\u27A4 definePropertiesForZoom:", e);
+    }
   };
 
-  /* Slider Movements init */
+  /* New SliderChecker */
 
   function setSliderProperty(a, b, c) {
     a.value = Number(b).toFixed(c);
@@ -745,153 +733,29 @@
     });
   }
 
-  /* Color Picker initialized */
+  /* new ColorDepth */
 
-  const addClassName = (node, str) => {
-    if (
-      node.className.split(" ").filter(s => {
-        return s === str;
-      }).length === 0
-    ) {
-      node.className += ` ${str}`;
-    }
-  };
-
-  const removeClassName = (node, str) => {
-    node.className = node.className
-      .split(" ")
-      .filter(s => {
-        return s !== str;
-      })
-      .join(" ");
-  };
-
-  const numberBorder = (num, max, min) => {
-    return Math.max(Math.min(num, max), min);
-  };
-
-  const rgbToHsb = hex => {
-    const hsb = { h: 0, s: 0, b: 0 };
-    if (hex.indexOf("#") === 0) {
-      hex = hex.substring(1);
-    }
-    if (hex.length === 3) {
-      hex = hex
-        .split("")
-        .map(s => {
-          return s + s;
-        })
-        .join("");
-    }
-    if (hex.length !== 6) {
-      return false;
-    }
-    hex = [hex.substr(0, 2), hex.substr(2, 2), hex.substr(4, 2)].map(s => {
-      return parseInt(s, 16);
-    });
-    const rgb = {
-      r: hex[0],
-      g: hex[1],
-      b: hex[2],
+  const toColordepth = (hexa, s, t = "light") => {
+    const rgbaToHexa = rgba => {
+      const { r, g, b, a } = rgba;
+      return (
+        Math.floor(r).toString(16).padStart(2, "0") +
+        Math.floor(g).toString(16).padStart(2, "0") +
+        Math.floor(b).toString(16).padStart(2, "0") +
+        Math.floor(a).toString(16).padStart(2, "0")
+      );
     };
-    const MAX = Math.max(...hex);
-    const MIN = Math.min(...hex);
-    if (MAX === MIN) {
-      hsb.h = 0;
-    } else if (MAX === rgb.r && rgb.g >= rgb.b) {
-      hsb.h = (60 * (rgb.g - rgb.b)) / (MAX - MIN) + 0;
-    } else if (MAX === rgb.r && rgb.g < rgb.b) {
-      hsb.h = (60 * (rgb.g - rgb.b)) / (MAX - MIN) + 360;
-    } else if (MAX === rgb.g) {
-      hsb.h = (60 * (rgb.b - rgb.r)) / (MAX - MIN) + 120;
-    } else if (MAX === rgb.b) {
-      hsb.h = (60 * (rgb.r - rgb.g)) / (MAX - MIN) + 240;
-    }
-    if (MAX === 0) {
-      hsb.s = 0;
-    } else {
-      hsb.s = 1 - MIN / MAX;
-    }
-    hsb.b = MAX / 255;
-    return hsb;
-  };
 
-  const heightToRgb = heightPercent => {
-    heightPercent = 1 - heightPercent;
-    let rgb = { r: undefined, g: undefined, b: undefined };
-    const percentInEach = heightPercent * 6;
-    return Object.entries(rgb).reduce((lastObj, nowArr, index) => {
-      return Object.assign(lastObj, {
-        [nowArr[0]]: Math.floor(
-          (() => {
-            const left = ((index + 1) % 3) * 2;
-            const right = left + 2;
-            const differenceL = percentInEach - left;
-            const differenceR = right - percentInEach;
-            if (differenceL >= 0 && differenceR >= 0) {
-              return 0;
-            }
-            const distance = Math.min(Math.abs(differenceL), Math.abs(differenceR), Math.abs(6 - differenceL), Math.abs(6 - differenceR));
-            return Math.min(255, 255 * distance);
-          })()
-        ),
-      });
-    }, {});
-  };
-
-  const heightAddLAndT_ToRGB = (height, left, top) => {
-    const rgb = heightToRgb(height);
-    for (const key in rgb) {
-      rgb[key] = (255 - rgb[key]) * (1 - left) + rgb[key];
-      rgb[key] = rgb[key] * (1 - top);
-    }
-    return rgb;
-  };
-
-  const rgbAToHex = (rgba, err) => {
-    rgba = rgba.replace(/\s+/g, "");
-    const pattern = /^rgba?\((\d+),(\d+),(\d+),?(\d*(\.\d+)?)?\)$/;
-    const result = pattern.exec(rgba);
-    if (!result) {
-      return err;
-    }
-    const colors = DEFAULT_ARRAY;
-    let alpha, r, g, b;
-    if (/^rgba/.test(result[0])) {
-      alpha = result[4];
-      r = Math.floor(alpha * parseInt(result[1]) + (1 - alpha) * 255);
-      g = Math.floor(alpha * parseInt(result[2]) + (1 - alpha) * 255);
-      b = Math.floor(alpha * parseInt(result[3]) + (1 - alpha) * 255);
-      return String(("0" + r.toString(16)).slice(-2) + ("0" + g.toString(16)).slice(-2) + ("0" + b.toString(16)).slice(-2));
-    } else {
-      for (let i = 1, len = 3; i <= len; ++i) {
-        let str = Number(result[i]).toString(16);
-        if (str.length === 1) {
-          str = 0 + str;
-        }
-        colors.push(str);
-      }
-      rgba = colors.join("");
-      return rgba;
-    }
-  };
-
-  const rgbToHex = rgb => {
-    const { r, g, b } = rgb;
-    return Math.floor(r).toString(16).padStart(2, "0") + Math.floor(g).toString(16).padStart(2, "0") + Math.floor(b).toString(16).padStart(2, "0");
-  };
-
-  const hexToRgb = hex => {
-    return {
-      r: parseInt(hex.substr(0, 2), 16),
-      g: parseInt(hex.substr(2, 2), 16),
-      b: parseInt(hex.substr(4, 2), 16),
+    const hexaToRgba = hex => {
+      return {
+        r: parseInt(hex.substr(0, 2), 16),
+        g: parseInt(hex.substr(2, 2), 16),
+        b: parseInt(hex.substr(4, 2), 16),
+        a: parseInt(hex.substr(6, 2) || "FF", 16),
+      };
     };
-  };
-
-  const toColordepth = (hex, s, t = "light") => {
-    hex = hex.toLowerCase() === "currentcolor" ? "FFFFFF" : hex.substring(1);
-    const { r, g, b } = hexToRgb(hex);
+    hexa = hexa.substring(1);
+    const { r, g, b, a } = hexaToRgba(hexa);
     const tl = x => {
       switch (t) {
         case "dark":
@@ -900,298 +764,8 @@
           return x * s > 255 ? 255 : Math.floor(x * s);
       }
     };
-    return `#${rgbToHex({ r: tl(r), g: tl(g), b: tl(b) })}`;
+    return `#${rgbaToHexa({ r: tl(r), g: tl(g), b: tl(b), a: a })}`;
   };
-
-  class ColorPicker {
-    constructor({ dom = cE("div"), value = "FFF", def = "FFF" } = {}) {
-      this.dom = dom;
-      this.def = def;
-      const thisClass = this;
-      Array.prototype.forEach.call(this.getDOM().children, node => {
-        node.remove();
-      });
-      addClassName(dom, `${defCon.class.cp}`);
-
-      const rightBar = cE("div");
-      rightBar.className = `${defCon.class.cprb}`;
-      const rightBarPicker = cE("div");
-      rightBarPicker.className = `${defCon.class.cprbp}`;
-      rightBar.appendChild(rightBarPicker);
-      const gradientColor = cE("div");
-      gradientColor.className = `${defCon.class.cpg} ${defCon.class.cpgc}`;
-      const gradientBlack = cE("div");
-      gradientBlack.className = `${defCon.class.cpg} ${defCon.class.cpgb}`;
-      gradientColor.style.background = "linear-gradient(to right,#FFFFFF,#FF0000)";
-      const gradientCircle = cE("div");
-      gradientCircle.className = `${defCon.class.cpc}`;
-
-      gradientBlack.appendChild(gradientCircle);
-      this.getDOM().appendChild(rightBar);
-      this.getDOM().appendChild(gradientColor);
-      this.getDOM().appendChild(gradientBlack);
-
-      qS(`.${defCon.class.colorPicker2} #${defCon.id.color}`).addEventListener("change", () => {
-        let color = qS(`.${defCon.class.colorPicker2} #${defCon.id.color}`).value.trim();
-        this.setValue(color, true);
-        this.onchange();
-        this.updatePicker();
-      });
-
-      this.textInput = qS(`.${defCon.class.colorPicker2} #${defCon.id.color}`);
-      this._gradientBlack = gradientBlack;
-      this._gradientColor = gradientColor;
-      this._rightBar = rightBar;
-      this._rightBarPicker = rightBarPicker;
-      this._colorBlock = qS(`#${defCon.id.cps}`);
-      this._gradientCircle = gradientCircle;
-
-      this._height = 0;
-      this._mouseX = 0;
-      this._mouseY = 0;
-
-      this.setValue(value, true);
-      this._lastValue = this.value;
-      this._def = this.def.substring(1);
-      this.updatePicker();
-
-      const mouseMoveFun = e => {
-        window.addEventListener("mouseup", function mouseUpFun() {
-          thisClass.getDOM().style.userSelect = "text";
-          window.removeEventListener("mousemove", mouseMoveFun);
-          window.removeEventListener("mouseup", mouseUpFun);
-        });
-        const bbox = thisClass._gradientBlack.getBoundingClientRect();
-        this._mouseX = e.x - bbox.left;
-        this._mouseY = e.y - bbox.top;
-        this.mouseBorder();
-        this.setValue(heightAddLAndT_ToRGB(this.height, this.position.x, this.position.y));
-        this.updatePicker();
-      };
-
-      const mouseMoveFunBar = e => {
-        window.addEventListener("mouseup", function mouseUpFunBar() {
-          thisClass.getDOM().style.userSelect = "text";
-          window.removeEventListener("mousemove", mouseMoveFunBar);
-          window.removeEventListener("mouseup", mouseUpFunBar);
-        });
-        const bbox = thisClass._rightBar.getBoundingClientRect();
-        this._height = e.y - bbox.top;
-        this.mouseBorderBar();
-        this.setValue(heightAddLAndT_ToRGB(this.height, this.position.x, this.position.y));
-        this.updatePicker();
-      };
-
-      this._gradientBlack.addEventListener("mousedown", e => {
-        this.getDOM().style.userSelect = "none";
-        mouseMoveFun(e);
-        window.addEventListener("mousemove", mouseMoveFun);
-      });
-      this._rightBar.addEventListener("mousedown", e => {
-        this.getDOM().style.userSelect = "none";
-        mouseMoveFunBar(e);
-        window.addEventListener("mousemove", mouseMoveFunBar);
-      });
-
-      if ("ontouchstart" in window) {
-        const touchFun = e => {
-          e.preventDefault();
-          e = e.touches[0];
-          const bbox = thisClass._gradientBlack.getBoundingClientRect();
-          this._mouseX = e.x - bbox.left;
-          this._mouseY = e.y - bbox.top;
-          this.mouseBorder();
-          this.setValue(heightAddLAndT_ToRGB(this.height, this.position.x, this.position.y));
-          this.updatePicker();
-        };
-        const touchFunBar = e => {
-          e.preventDefault();
-          e = e.touches[0];
-          const bbox = this._rightBar.getBoundingClientRect();
-          this._height = e.y - bbox.top;
-          this.mouseBorderBar();
-          this.setValue(heightAddLAndT_ToRGB(this.height, this.position.x, this.position.y));
-          this.updatePicker();
-        };
-        this._gradientBlack.addEventListener("touchmove", touchFun, supportsPassive ? { passive: true } : false);
-        this._gradientBlack.addEventListener("touchstart", touchFun, supportsPassive ? { passive: true } : false);
-        this._rightBar.addEventListener("touchmove", touchFunBar, supportsPassive ? { passive: true } : false);
-        this._rightBar.addEventListener("touchstart", touchFunBar, supportsPassive ? { passive: true } : false);
-      }
-      this._changeFunctions = DEFAULT_ARRAY;
-    }
-
-    onchange() {
-      this._changeFunctions.forEach(fun => {
-        return fun({
-          target: this,
-          type: "change",
-          timeStamp: performance.now(),
-        });
-      });
-    }
-
-    addEventListener(type, fun) {
-      if (typeof fun !== "function") {
-        return;
-      }
-      switch (type) {
-        case "change": {
-          this._changeFunctions.push(fun);
-          break;
-        }
-      }
-    }
-
-    getValue(mode = "value") {
-      switch (mode) {
-        case "hex": {
-          return this._value;
-        }
-        case "rgb": {
-          return hexToRgb(this.getValue("hex"));
-        }
-        case "hsb": {
-          return rgbToHsb(this.getValue("hex"));
-        }
-        case "value":
-        default: {
-          return "#" + this._value;
-        }
-      }
-    }
-
-    getBrightness() {
-      const { r, g, b } = this.getValue("rgb");
-      return 0.299 * r + 0.587 * g + 0.114 * b;
-    }
-
-    setValue(value, resetPosition = false, hex = "") {
-      const Hex6Reg = /^#([A-F0-9]{6}|[a-f0-9]{6})$/;
-      const Hex3Reg = /^#([A-F0-9]{3}|[a-f0-9]{3})$/;
-      const rgbaReg = new RegExp(
-        String(
-          "^rgba\\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))" +
-            ",\\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))" +
-            ",\\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))" +
-            ",\\s*((?!1\\.[0-9]+)[0-1]?(\\.[0-9]{1,5})?)\\)$"
-        )
-      );
-      const rgbReg = new RegExp(
-        String(
-          "^rgb\\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))" +
-            ",\\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))" +
-            ",\\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))\\)$"
-        )
-      );
-      switch (typeof value) {
-        case "string": {
-          if (Hex6Reg.test(value)) {
-            value = value.substring(1);
-          } else if (Hex3Reg.test(value)) {
-            value = value
-              .substring(1)
-              .split("")
-              .map(s => {
-                return s + s;
-              })
-              .join("");
-          } else if (rgbaReg.test(value)) {
-            value = rgbAToHex(value, this._def);
-          } else if (rgbReg.test(value)) {
-            value = rgbAToHex(value, this._def);
-          } else if (value === "currentcolor") {
-            value = "FFFFFF";
-          } else {
-            value = this._def;
-          }
-          hex = value;
-          break;
-        }
-        case "object": {
-          hex = rgbToHex(value);
-        }
-      }
-      let rgb;
-      try {
-        rgb = hexToRgb(hex);
-      } catch (error) {
-        rgb = {
-          r: 255,
-          g: 255,
-          b: 255,
-        };
-      }
-      const { r, g, b } = rgb;
-      this._value = rgbToHex({ r, g, b }).toUpperCase();
-      this.textInput.value = this._value === "FFFFFF" ? "currentcolor" : "#" + this._value;
-      this.textInput._value_ = this.textInput.value;
-      this._colorBlock.style.backgroundColor = this.getValue();
-      if (resetPosition) {
-        const { h, s, b } = rgbToHsb(hex);
-        this._height = 1 - h / 360;
-        if (h === 0) {
-          this._height = 0;
-        }
-        this._mouseX = s;
-        this._mouseY = 1 - b;
-      } else {
-        if (this._lastValue !== this.value) {
-          this.onchange();
-        }
-      }
-      this._lastValue = this.value;
-    }
-
-    getDOM() {
-      return this.dom;
-    }
-
-    mouseBorder() {
-      this._mouseX = numberBorder(this._mouseX / (this._gradientBlack.getBoundingClientRect().width - 2), 1, 0);
-      this._mouseY = numberBorder(this._mouseY / (this._gradientBlack.getBoundingClientRect().height - 2), 1, 0);
-    }
-
-    mouseBorderBar() {
-      this._height = numberBorder(this._height / (this._rightBar.getBoundingClientRect().height - 2), 1, 0);
-    }
-
-    updatePicker() {
-      const position = this.position;
-      const target = this._gradientCircle;
-      target.style.left = `${position.x * 100}%`;
-      target.style.top = `${position.y * 100}%`;
-      this._rightBarPicker.style.top = `${this.height * 100}%`;
-      this._gradientColor.style.background = `linear-gradient(to right,#FFFFFF,#${rgbToHex(heightToRgb(this.height))})`;
-      if (this.getBrightness() > 152) {
-        addClassName(target, `${defCon.class.cpcb}`);
-        removeClassName(target, `${defCon.class.cpcw}`);
-      } else {
-        removeClassName(target, `${defCon.class.cpcb}`);
-        addClassName(target, `${defCon.class.cpcw}`);
-      }
-    }
-
-    get position() {
-      return {
-        x: this._mouseX,
-        y: this._mouseY,
-      };
-    }
-
-    get height() {
-      return this._height;
-    }
-
-    get value() {
-      return this.getValue();
-    }
-
-    set value(value) {
-      this.setValue(value, true);
-      this.updatePicker();
-    }
-  }
 
   /* new FrDialogBox */
 
@@ -1281,7 +855,7 @@
     _appendfrDialog() {
       const container = this.container;
       const diag = this.frDialog;
-      if (container && !qS(`#${defCon.id.dialogbox}`)) {
+      if (curWindowTop && container && !qS(`#${defCon.id.dialogbox}`)) {
         this.parent.appendChild(container);
         sleep(100).then(() => {
           diag.style.opacity = 1;
@@ -1755,7 +1329,7 @@
     fontSize: 1.0,
     fontStroke: getNavigator.type("core").Gecko ? 0.08 : 0.02,
     fontShadow: getNavigator.type("core").Gecko ? 0.5 : 1.0,
-    shadowColor: getNavigator.type("core").Gecko ? "#7F7F7F" : "#7B7B7B",
+    shadowColor: getNavigator.type("core").Gecko ? "#7F7F7FFF" : "#7B7B7BFF",
     fontCSS: `:not(i):not(.fa):not([class*='icon']):not([class*='vjs-']):not([class*='mu-'])`,
     fontEx: `input,select,button,textarea,kbd,pre,pre *,code,code *`,
   };
@@ -1883,10 +1457,11 @@
         messageText: String(
           `<p><span style="font-style:italic;font-weight:700;font-size:20px;color:tomato">您好！</span>这是${s}<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="font:italic 900 22px/150% Candara,'Times New Roman'!important;color:tomato;margin-left:3px">V${defCon.curVersion}</span>, 以下为更新内容：</p>
             <p><ul id="${defCon.id.seed}_update">
-              <li class="${defCon.id.seed}_add">新增更新历史查看，双击设置页面顶部脚本名查看。</li>
-              <li class="${defCon.id.seed}_fix">修正&lt;pre&gt;,&lt;code&gt;代码片段中文字体未渲染问题。#45</li>
-              <li class="${defCon.id.seed}_fix">修正字体缩放开启后在某些站点的坐标偏移问题。</li>
-              <li class="${defCon.id.seed}_fix">优化样式，修正bugs，优化代码。</li>
+              <li class="${defCon.id.seed}_del">删除原有HEX拾色器及相关代码。</li>
+              <li class="${defCon.id.seed}_add">新增HEXA/RGBA拾色器，修正Alpha值的兼容问题。</li>
+              <li class="${defCon.id.seed}_fix">修正字体缩放在某些网站造成坐标偏移的问题。</li>
+              <li class="${defCon.id.seed}_fix">修正快捷键操作在框架页面引发样式错误的问题。</li>
+              <li class="${defCon.id.seed}_fix">优化UI样式，修正bugs，优化代码。</li>
             </ul></p>
             <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
         ),
@@ -2005,12 +1580,12 @@
 
     let shadow = "";
     const shadow_r = parseFloat(CONST.fontShadow);
-    const shadow_c = CONST.shadowColor;
+    const shadow_c = CONST.shadowColor.toLowerCase() === "currentcolor" ? "#FFFFFFFF" : CONST.shadowColor; // Version compatible.
     const overlayColor = (r, c, rs) => {
-      if (c !== "currentcolor") {
+      if (c.substring(1) !== "FFFFFFFF") {
         rs = `text-shadow:0 0 ${(r * 1.25).toFixed(4)}px ${toColordepth(c, 1.5)},0 0 ${r}px ${c},0 0 ${(r / 4).toFixed(4)}px ${toColordepth(c, 0.985, "dark")}`;
       } else {
-        rs = `text-shadow:0 0 ${(r * 1.25).toFixed(4)}px ${toColordepth(c, 0.85, "dark")},0 0 ${r}px ${toColordepth(c, 0.55, "dark")},0 0 ${(r / 4).toFixed(4)}px ${c}`;
+        rs = `text-shadow:0 0 ${(r * 1.25).toFixed(4)}px ${toColordepth(c, 0.85, "dark")},0 0 ${r}px ${toColordepth(c, 0.55, "dark")},0 0 ${(r / 4).toFixed(4)}px currentcolor`;
       }
       return rs.concat(";");
     };
@@ -2040,18 +1615,15 @@
       smoothing = funcSmooth();
     }
     let bodyZoom = "";
+    const fontsize_r = parseFloat(CONST.fontSize);
     const funcFontsize = t => {
       return `body{${getNavigator.type("core").Gecko ? `transform:scale(${t});transform-origin:left top 0px;width:${100 / t}%;height:${100 / t}%;` : `zoom:${t}!important;`}}`;
     };
-    if (CONST.fontSize >= 0.8 && CONST.fontSize <= 1.5 && isFontsize && CONST.fontSize !== 1) {
+    if (!isNaN(fontsize_r) && fontsize_r >= 0.8 && fontsize_r <= 1.5 && isFontsize && fontsize_r !== 1) {
       if (defCon.siteIndex === undefined) {
-        try {
-          definePropertiesForZoom(CONST.fontSize, defCon.elCompat);
-        } catch (e) {
-          error("\u27A4 definePropertiesForZoom error:", e);
-        }
+        definePropertiesForZoom(fontsize_r, defCon.elCompat);
       }
-      bodyZoom = funcFontsize(CONST.fontSize);
+      bodyZoom = funcFontsize(fontsize_r);
     }
     const prefont = CONST.fontSelect.split(",")[0];
     const refont = prefont ? prefont.replace(/"|'/g, "") : "";
@@ -2125,28 +1697,24 @@
       `.${defCon.id.seed}_fontTest{font-weight:normal!important;line-height:initial!important;text-align:left!important;font-style:normal!important;text-decoration:none!important;letter-spacing:normal!important;word-wrap:normal!important;text-indent:initial!important}#${defCon.id.fontTest}{margin:0!important;padding:0!important;width:max-content!important;height:max-content!important;text-shadow:none!important;-webkit-text-stroke:initial!important;-webkit-text-size-adjust:none!important;-moz-text-size-adjust:none!important;white-space:nowrap!important}`
     );
     const fontStyle_db = String(
-      `#${defCon.id.dialogbox}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999992}#${defCon.id.dialogbox} .${defCon.class.db}{box-sizing:content-box;max-width:420px;color:#444;border:2px solid #efefef}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:200px;right:15px;border-radius:6px;width:100%;background:#fff;box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #777!important}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:100%;font-family:Candara,"Times New Roman",system-ui,-apple-system,BlinkMacSystemFont!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:500;text-align:left}.${defCon.class.dbb}{display:inline-block;margin:0 1%;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;cursor:pointer;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important;box-sizing:content-box}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:none!important;-webkit-text-stroke:initial!important;user-select:none}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223!important;color:#fff!important;border:1px solid #d93223!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a!important;color:#fff!important;border:1px solid #038c5a!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777!important;color:#fff!important;border:1px solid #777!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}` +
+      `#${defCon.id.dialogbox}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999995}#${defCon.id.dialogbox} .${defCon.class.db}{box-sizing:content-box;max-width:420px;color:#444;border:2px solid #efefef}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:200px;right:15px;border-radius:6px;width:100%;background:#fff;box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #777!important}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:100%;font-family:Candara,"Times New Roman",system-ui,-apple-system,BlinkMacSystemFont!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:500;text-align:left}.${defCon.class.dbb}{display:inline-block;margin:0 1%;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;cursor:pointer;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important;box-sizing:content-box}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:none!important;-webkit-text-stroke:initial!important;user-select:none}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223!important;color:#fff!important;border:1px solid #d93223!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a!important;color:#fff!important;border:1px solid #038c5a!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777!important;color:#fff!important;border:1px solid #777!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}` +
         `.${defCon.class.dbm} button:hover{cursor:pointer;background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important}.${defCon.class.dbm} p{line-height:1.5!important;margin:5px 0!important;text-indent:0!important;font-size:16px!important;font-weight:400;text-align:left;user-select:none}.${defCon.class.dbm} ul{list-style:none;margin:0 0 0 10px!important;padding:2px;font:italic 14px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;color:gray;scrollbar-width:thin}.${defCon.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${defCon.class.dbm} ul::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #999;background:#cfcfcf;border-radius:10px}.${defCon.class.dbm} ul::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:10px}.${defCon.class.dbm} ul::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:6px}.${defCon.class.dbm} ul li{display:list-item;list-style-type:none;user-select:none}.${defCon.class.dbm} li:before{display:none}.${defCon.class.dbm} #${defCon.id.bk},.${defCon.class.dbm} #${defCon.id.pv},.${defCon.class.dbm} #${defCon.id.fs},.${defCon.class.dbm} #${defCon.id.hk},.${defCon.class.dbm} #${defCon.id.ct},.${defCon.class.dbm} #${defCon.id.mps},.${defCon.class.dbm} #${defCon.id.flc}{box-sizing:content-box;list-style:none;font-style:normal;display:flex;justify-content:space-between;align-items:flex-start;margin:0;padding:2px 4px!important;width:calc(96% - 10px);min-width:auto;height:40px;min-height:40px}.${defCon.class.dbm} #${defCon.id.bk} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.pv} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.fs} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.hk} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.ct} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.mps} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.flc} .${defCon.id.seed}_VIP{margin:2px 0 0 0;color:darkgoldenrod!important;font:normal 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${defCon.class.dbm} #${defCon.id.flc} button{background-color:#eee;color:#444!important;font-weight:normal;border:1px solid #999;font-size:14px!important;border-radius:4px}` +
-        `.${defCon.class.dbm} #${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}.${defCon.class.dbm} #${defCon.id.files}{display:none}.${defCon.class.dbm} #${defCon.id.feedback}:hover{color:crimson!important}.${defCon.class.dbm} #${defCon.id.feedback}:after{width:0;height:0;content:"";background:url('${loadingIMG}') no-repeat -400px -300px}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#555!important}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#aaa!important}.${defCon.class.dbm} #${defCon.id.seed}_update li{font:italic 400 14px/150% Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:gray}.${defCon.class.dbm} .${defCon.id.seed}_add:before{content:"+";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_del:before{content:"-";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_fix:before{content:"@";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_info{color:#daa5207a!important}.${defCon.class.dbm} .${defCon.id.seed}_info:before{content:"#";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_warn{color:#e900007a!important}.${defCon.class.dbm} .${defCon.id.seed}_warn:before{content:"!";display:inline;margin:0 4px 0 -10px}`
+        `.${defCon.class.dbm} #${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}.${defCon.class.dbm} #${defCon.id.files}{display:none}.${defCon.class.dbm} #${defCon.id.feedback}:hover{color:crimson!important}.${defCon.class.dbm} #${defCon.id.feedback}:after{width:0;height:0;content:"";background:url('${loadingIMG}') no-repeat -400px -300px}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#555!important}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#aaa!important}.${defCon.class.dbm} #${defCon.id.seed}_update li{margin:0;padding:0;font:italic 400 14px/150% Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:gray}.${defCon.class.dbm} .${defCon.id.seed}_add:before{content:"+";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_del:before{content:"-";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_fix:before{content:"@";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_info{color:#daa5207a!important}.${defCon.class.dbm} .${defCon.id.seed}_info:before{content:"#";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_warn{color:#e900007a!important}.${defCon.class.dbm} .${defCon.id.seed}_warn:before{content:"!";display:inline;margin:0 4px 0 -10px}`
     );
     const fontStyle_container = String(
       `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;border-radius:12px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 20px);z-index:999999;padding:4px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container} *{line-height:1.5!important;text-shadow:none!important;-webkit-text-stroke:initial!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Android Emoji",EmojiSymbols!important;font-size:16px;font-weight:700}` +
         `#${defCon.id.container} fieldset{border:2px groove #67a5df!important;border-radius:10px;padding:4px 6px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:475px}#${defCon.id.container} legend{line-height:inherit;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;background:#f0f6ff!important;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{display:inherit;list-style:none;margin:3px 0;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default;min-width:-moz-available;min-width:-webkit-fill-available;user-select:none}#${defCon.id.container} ul li:before{display:none}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden}#${defCon.id.container} .${defCon.class.help}:hover{cursor:help}#${defCon.id.seed}_scriptname{font-weight:900!important;user-select:all;display:inline-block}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{padding:0;margin:0;width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50%;-webkit-transform:rotate(360deg);animation:rotation 5s linear infinite}` +
         `#${defCon.id.fontList}{padding:2px 10px 0 10px;min-height:73px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex!important;align-items:center;justify-content:space-between}#${defCon.id.fontSize}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.shadowColor}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;padding:2px 10px;min-height:45px;margin:4px;width:auto}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${defCon.id.submit}{padding:2px 10px;height:40px}` +
-        `#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${defCon.id.fontList} .${defCon.class.label} span{box-sizing:border-box;color:#fff;font-size:16px!important;font-weight:400;height:max-content;width:max-content;min-width:12px;max-width:210px;padding:5px;background:#67a5df;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap}#${defCon.id.fontList} .${defCon.class.close}{width:12px}#${defCon.id.fontList} .${defCon.class.close}:hover{color:tomato;background-color:#2D7DCA;border-radius:2px}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-x:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;padding:6px 6px 0 6px;margin:0 0 6px 0;width:100%;min-width:100%;max-width:fit-content;max-width:-moz-min-content;max-height:90px;min-height:45px;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} span.${defCon.class.spanlabel},#${defCon.id.selector} span.${defCon.class.spanlabel}{margin:0!important;width:auto;display:block!important;padding:0 0 4px 0;color:#333;border:0;text-align:left!important;background-color:transparent!important}` +
+        `#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${defCon.id.fontList} .${defCon.class.label} span{box-sizing:border-box;color:#fff;font-size:16px!important;font-weight:400;height:max-content;width:max-content;min-width:12px;max-width:210px;padding:5px;background:#67a5df;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap}#${defCon.id.fontList} .${defCon.class.close}{width:12px}#${defCon.id.fontList} .${defCon.class.close}:hover{color:tomato;background-color:#2d7dca;border-radius:2px}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-x:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;padding:6px 6px 0 6px;margin:0 0 6px 0;width:100%;min-width:100%;max-width:fit-content;max-width:-moz-min-content;max-height:90px;min-height:45px;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} span.${defCon.class.spanlabel},#${defCon.id.selector} span.${defCon.class.spanlabel}{margin:0!important;width:auto;display:block!important;padding:0 0 4px 0;color:#333;border:0;text-align:left!important;background-color:transparent!important}` +
         `#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} input{text-overflow:ellipsis;overflow:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;padding:1px 32px 1px 2px;margin:0;width:100%;max-width:100%;min-width:100%;height:42px!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:16px!important;font-weight:700;text-indent:8px;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font:normal 700 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font:normal 700 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:4px 0 0 0;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:4px 8px;width:auto;min-width:60%;max-width:calc(100% - 68px);max-height:298px;font-size:18px!important;white-space:nowrap;background-color:#fff;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}` +
         `#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;margin:1px 8px;padding:5px 0;font-weight:400;font-size:21px!important;min-width:100%;max-width:100%;width:-moz-available;width:-webkit-fill-available;}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff}` +
         `.${defCon.class.checkbox}{display:none!important}.${defCon.class.checkbox}+label{cursor:pointer;padding:0;margin:0 2px 0 0;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:76px;height:32px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;box-sizing:content-box}.${defCon.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${defCon.class.checkbox}+label::after{position:absolute;top:0;left:28px;border-radius:100px;padding:5px;font-size:16px;font-weight:700;font-style:normal;color:#fff;content:"OFF"}.${defCon.class.checkbox}:checked+label{cursor:pointer;margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.${defCon.class.checkbox}:checked+label::after{content:"ON";left:10px}.${defCon.class.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px}#${defCon.id.fface} label,#${defCon.id.fface}+label::after,#${defCon.id.fface}+label::before,#${defCon.id.smooth} label,#${defCon.id.smooth}+label::after,#${defCon.id.smooth}+label::before{-webkit-transition:all .3s ease-in;transition:all .3s ease-in}` +
-        `#${defCon.id.fontShadow} div.${defCon.class.flex}:before,#${defCon.id.fontShadow} div.${defCon.class.flex}:after,#${defCon.id.fontStroke} div.${defCon.class.flex}:before,#${defCon.id.fontStroke} div.${defCon.class.flex}:after,#${defCon.id.fontSize} div.${defCon.class.flex}:before,#${defCon.id.fontSize} div.${defCon.class.flex}:after{display:none}#${defCon.id.fontShadow} #${defCon.id.shadowSize},#${defCon.id.fontStroke} #${defCon.id.strokeSize},#${defCon.id.fontSize} #${defCon.id.fontZoom}{color:#111!important;width:56px!important;text-indent:0;margin:0 10px 0 0!important;height:32px!important;font-size:17px!important;font-weight:400!important;font-family:Impact,Times,serif!important;border:#67a5df 2px solid!important;border-radius:4px;text-align:center;box-sizing:content-box;padding:0;background:#fafafa!important}.${defCon.class.flex}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;width:auto;min-width:100%}.${defCon.class.slider} input{visibility:hidden}` +
-        `#${defCon.id.shadowColor} *{box-sizing:content-box}#${defCon.id.cps}{margin:0}#${defCon.id.shadowColor} .${defCon.class.colorPicker}{width:32px;height:30px;cursor:pointer;position:relative;border:2px solid #666d8e;border-radius:4px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2}{width:auto;margin:1px 0 0 5px}#${defCon.id.shadowColor} .${defCon.class.colorPicker2} #${defCon.id.color}{width:119px!important;min-width:119px;height:35px!important;text-indent:0;font-size:18px!important;font-weight:400!important;background:#fafafa;box-sizing:border-box;font-family:Impact,Times,serif!important;color:#333!important;border:#67a5df 2px solid!important;border-radius:4px;padding:0;margin:0 5px 0 0;text-align:center}` +
+        `#${defCon.id.fontShadow} div.${defCon.class.flex}:before,#${defCon.id.fontShadow} div.${defCon.class.flex}:after,#${defCon.id.fontStroke} div.${defCon.class.flex}:before,#${defCon.id.fontStroke} div.${defCon.class.flex}:after,#${defCon.id.fontSize} div.${defCon.class.flex}:before,#${defCon.id.fontSize} div.${defCon.class.flex}:after{display:none}#${defCon.id.fontShadow} #${defCon.id.shadowSize},#${defCon.id.fontStroke} #${defCon.id.strokeSize},#${defCon.id.fontSize} #${defCon.id.fontZoom}{color:#111!important;width:56px!important;text-indent:0;margin:0 10px 0 0!important;height:32px!important;font-size:17px!important;font-weight:400!important;font-family:Impact,Times,serif!important;border:#67a5df 2px solid!important;border-radius:4px;text-align:center;box-sizing:content-box;padding:0;background:#fafafa!important}.${defCon.class.flex}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;width:auto;min-width:100%}.${defCon.class.slider} input{visibility:hidden}#${defCon.id.shadowColor} *{box-sizing:content-box}#${defCon.id.shadowColor} .${defCon.class.frColorPicker}{width:auto;margin:0;padding:0}#${defCon.id.shadowColor} .${defCon.class.frColorPicker} #${defCon.id.color}{width:164px!important;min-width:164px;height:35px!important;text-indent:0;font-size:18px!important;font-weight:400!important;background:#fdfdffb0;box-sizing:border-box;font-family:Impact,Times,serif!important;color:#333!important;border:#67a5df 2px solid!important;border-radius:4px;padding: 0 8px 0 0;margin:0;text-align:center;cursor:pointer}` +
         `#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{font:bold 14px/150% "Roboto Mono",Monaco,"Courier New",Consolas,monospace,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;min-width:calc(100% - 2px);max-width:calc(100% - 2px);width:calc(100% - 2px)!important;height:78px;min-height:78px;max-height:78px;resize:none;border:2px solid #67a5df!important;border-radius:6px;box-sizing:border-box;padding:5px;margin:0;color:#0b5b9c!important;word-break:break-all;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px rgba(0,0,0,.2);background:#efefef;border-radius:10px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontEx} textarea{background:#fafafa!important}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}.${defCon.class.switch}{box-sizing:border-box;float:right;margin:-2px 4px 0 0;padding:0 6px;border:2px double #67a5df;color:#0a68c1;border-radius:4px}#${defCon.id.cSwitch}:hover,#${defCon.id.eSwitch}:hover{cursor:pointer;user-select:none}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent)!important;background-size:50px 50px;background-color:#f7fff7!important}` +
         `#${defCon.id.submit} button{box-sizing:border-box;background-image:initial;background-color:#67a5df;color:#fff!important;margin:0;padding:5px 10px;cursor:pointer;border:2px solid #6ba7e0;border-radius:6px;width:auto;min-width:min-content;min-height:35px;height:35px;font:normal 600 14px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${defCon.id.submit} button:hover{box-shadow:0 0 5px rgba(0,0,0,.4)!important}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.submit} #${defCon.id.backup}{margin:0 10px 0 0;display:none}.${defCon.class.anim}{animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}`
     );
-    const fontStyle_cp = String(
-      `#${defCon.id.cpm}{width:240px;height:216px;margin:calc(-90%) 0 0 2px;z-index:999;position:fixed;display:none;box-sizing:content-box;background-color:#d1f2fb;padding:10px;box-shadow:0 0 10px #000;border-radius:6px}.${defCon.class.cp},.${defCon.class.cp} *,.${defCon.class.cp} ::after,.${defCon.class.cp} ::before{border:0;margin:0;padding:0;display:block;box-sizing:border-box}.${defCon.class.cp}{background-color:#fff;display:block;min-width:128px;min-height:128px;position:relative}.${defCon.class.cp}>.${defCon.class.cprb}{border:solid #000 1px;background:linear-gradient(red,#f0f,#00f,#0ff,#0f0,#ff0,red);width:16px;height:calc(100% - 26px);position:absolute;right:12px;top:12px}.${defCon.class.cp} .${defCon.class.cprbp}{position:absolute;width:100%;height:1px}.${defCon.class.cp} .${defCon.class.cprbp}::after,.${defCon.class.cp} .${defCon.class.cprbp}::before{content:"";width:10px;height:7px;position:absolute;background:0 0;border:solid transparent 5px;border-width:3.5px 5px;top:-3px}.${defCon.class.cp} .${defCon.class.cprbp}::before{border-left:solid #404040 5px;left:-6px}.${defCon.class.cp} .${defCon.class.cprbp}::after{border-right:solid #404040 5px;right:-6px}.${defCon.class.cp}>.${defCon.class.cpg}{position:absolute;width:calc(100% - 50px);height:calc(100% - 26px);border:solid #000 1px;left:12px;top:12px}.${defCon.class.cp}>.${defCon.class.cpg},.${defCon.class.cp}>.${defCon.class.cpg} *{cursor:crosshair;box-sizing:content-box}.${defCon.class.cp}>.${defCon.class.cpgb}{background:linear-gradient(rgba(0,0,0,0),#000)}.${defCon.class.cp}>.${defCon.class.cp}-color-block{position:absolute;border:solid #000 1px;background:#fff;width:calc(100% - 104px);max-width:72px;height:18px;left:12px;bottom:8px}.${defCon.class.cp} .${defCon.class.cpc}{background-color:transparent;position:absolute}.${defCon.class.cp} .${defCon.class.cpc}::before{border-radius:50%;width:11px;height:11px;border:solid #000 1px;background-color:transparent;position:relative;left:-6px;top:-6px;display:block;content:""}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcb}::before{border-color:#000}.${defCon.class.cp} .${defCon.class.cpc}.${defCon.class.cpcw}::before{border-color:#fff}`
-    );
     const fontStyle_tooltip = String(
-      `.${defCon.class.tooltip}{position:relative;cursor:help;user-select:none}.${defCon.class.tooltip} span.${defCon.class.emoji}{font-weight:400!important}.${defCon.class.tooltip}:active .${defCon.class.tooltip}{display:block}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;box-sizing:content-box;position:absolute;z-index:999999;border:2px solid #b8c4ce;border-radius:6px;padding:10px;width:242px;max-width:242px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:14px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} em{font-style:normal!important}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:150%;text-indent:0!important}.${defCon.class.ps1}{position:relative;top:-33px;height:0;width:24px;margin:0;padding:0;right:5px;float:right}.${defCon.class.ps2}{top:35px;right:-7px}.${defCon.class.ps3}{top:-197px;margin-left:-1px}.${defCon.class.ps4}{top:-175px;margin-left:-1px}`
+      `.${defCon.class.tooltip}{position:relative;cursor:help;user-select:none}.${defCon.class.tooltip} span.${defCon.class.emoji}{font-weight:400!important}.${defCon.class.tooltip}:active .${defCon.class.tooltip}{display:block}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;box-sizing:content-box;position:absolute;z-index:999999;border:2px solid #b8c4ce;border-radius:6px;padding:10px;width:242px;max-width:242px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:14px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} em{font-style:normal!important}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:150%;text-indent:0!important}.${defCon.class.ps1}{position:relative;top:-33px;height:0;width:24px;margin:0;padding:0;right:5px;float:right}.${defCon.class.ps2}{top:35px;right:-7px}.${defCon.class.ps3}{top:-197px;margin-left:-1px}`
     );
     const fontStyle_Progress = String(
       `.${defCon.class.range}{--primary-color:#67a5df;--value-offset-y:var(--ticks-gap);--value-active-color:white;--value-background:transparent;--value-background-hover:var(--primary-color);--value-font:italic bold 14px/14px monospace,serif;--fill-color:var(--primary-color);--progress-background:rgb(223, 223, 223);--progress-radius:20px;--show-min-max:none;--track-height:calc(var(--thumb-size) / 2);--min-max-font:12px serif;--min-max-opacity:0.5;--min-max-x-offset:10%;--thumb-size:22px;--thumb-color:white;--thumb-shadow:0 0 3px rgba(0, 0, 0, 0.4),0 0 1px rgba(0, 0, 0, 0.5) inset,0 0 0 99px var(--thumb-color) inset;--thumb-shadow-active:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px var(--primary-color) inset,0 0 3px rgba(0, 0, 0, 0.4);--thumb-shadow-hover:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px darkorange inset,0 0 3px rgba(0, 0, 0, 0.4);--ticks-thickness:1px;--ticks-height:5px;--ticks-gap:var(--ticks-height, 0);--ticks-color:transparent;--step:1;--ticks-count:(var(--max) - var(--min))/var(--step);--maxTicksAllowed:1000;--too-many-ticks:Min(1, Max(var(--ticks-count) - var(--maxTicksAllowed), 0));--x-step:Max(var(--step), var(--too-many-ticks) * (var(--max) - var(--min)));--tickIntervalPerc_1:Calc((var(--max) - var(--min)) / var(--x-step));--tickIntervalPerc:calc((100% - var(--thumb-size)) / var(--tickIntervalPerc_1) * var(--tickEvery, 1));--value-a:Clamp(var(--min), var(--value, 0), var(--max));--value-b:var(--value, 0);--text-value-a:var(--text-value, "");--completed-a:calc((var(--value-a) - var(--min)) / (var(--max) - var(--min)) * 100);--completed-b:calc((var(--value-b) - var(--min)) / (var(--max) - var(--min)) * 100);--ca:Min(var(--completed-a), var(--completed-b));--cb:Max(var(--completed-a), var(--completed-b));--thumbs-too-close:Clamp(-1, 1000 * (Min(1, Max(var(--cb) - var(--ca) - 5, -1)) + 0.001), 1);--thumb-close-to-min:Min(1, Max(var(--ca) - 5, 0));--thumb-close-to-max:Min(1, Max(95 - var(--cb), 0))}` +
@@ -2155,7 +1723,7 @@
         `.${defCon.class.range}>input{-webkit-appearance:none;box-shadow:initial!important;width:100%;height:var(--thumb-size)!important;margin:0!important;padding:0!important;position:absolute!important;left:0;top:calc(50% - Max(var(--track-height),var(--thumb-size))/ 2 + calc(var(--ticks-gap)/ 2 * var(--flip-y,-1)))!important;border:0!important;cursor:grab;outline:0!important;background:0 0!important;--thumb-shadow:var(--thumb-shadow-active)}.${defCon.class.range}>input:not(:only-of-type){pointer-events:none}.${defCon.class.range}>input::-webkit-slider-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${defCon.class.range}>input::-moz-range-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${defCon.class.range}>input::-ms-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}` +
         `.${defCon.class.range}>input:hover{--thumb-shadow:var(--thumb-shadow-active)}.${defCon.class.range}>input:hover+output{--value-background:var(--value-background-hover);--y-offset:-1px;color:var(--value-active-color);box-shadow:0 0 0 3px var(--value-background)}.${defCon.class.range}>input:active{--thumb-shadow:var(--thumb-shadow-hover);cursor:grabbing;z-index:2}.${defCon.class.range}>input:active+output{transition:0s;opacity:0.9;display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;-moz-box-orient:horizontal;-moz-box-pack:center;-moz-box-align:center}.${defCon.class.range}>input:nth-of-type(1){--is-left-most:Clamp(0, (var(--value-a) - var(--value-b)) * 99999, 1)}.${defCon.class.range}>input:nth-of-type(1)+output{--value:var(--value-a);--x-offset:calc(var(--completed-a) * -1%)}.${defCon.class.range}>input:nth-of-type(1)+output:not(:only-of-type){--flip:calc(var(--thumbs-too-close) * -1)}.${defCon.class.range}>input:nth-of-type(1)+output::after{content:var(--prefix, "") var(--text-value-a) var(--suffix, "")}.${defCon.class.range}>input:nth-of-type(2){--is-left-most:Clamp(0, (var(--value-b) - var(--value-a)) * 99999, 1)}.${defCon.class.range}>input:nth-of-type(2)+output{--value:var(--value-b)}.${defCon.class.range}>input+output{--flip:-1;--x-offset:calc(var(--completed-b) * -1%);--pos:calc(((var(--value) - var(--min)) / (var(--max) - var(--min))) * 100%);pointer-events:none;width:auto;min-width:40px;height:24px;min-height:24px;text-align:center;position:absolute;z-index:5;background:var(--value-background);border-radius:4px;padding:0 6px;left:var(--pos);transform:translate(var(--x-offset),calc(150% * var(--flip) - (var(--y-offset,0) + var(--value-offset-y)) * var(--flip)));transition:all .12s ease-out,left 0s;opacity:0;box-sizing:content-box}.${defCon.class.range}>input+output::after{content:var(--prefix, "") var(--text-value-b) var(--suffix, "");font:var(--value-font)}`
     );
-    const fontStyle = fontTest + fontStyle_db + fontStyle_container + fontStyle_cp + fontStyle_tooltip + fontStyle_Progress;
+    const fontStyle = fontTest + fontStyle_db + fontStyle_container + fontStyle_tooltip + fontStyle_Progress;
     const tFontSize = isFontsize
       ? String(
           `<li id="${defCon.id.fontSize}">
@@ -2229,26 +1797,26 @@
               </div>
             </li>
             <li id="${defCon.id.shadowColor}">
-              <div style="margin:0px 5px 0 0">
+              <div style="margin:0;padding:0">
                 <span style="margin:0;padding:0">阴影颜色</span>
                 <span class="${defCon.class.tooltip}">
                   <span class="${defCon.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
                   <span class="${defCon.class.tooltip} ${defCon.class.ps3}">
-                    <p>阴影颜色可通过点击色块激活拾色器选择，也可自定义填写，格式支持: <em style="color:#cecece">RGB, RGBA, HEX{3}, HEX{6}</em>。纯白色的所有格式表示自身颜色 <em style="color:#cecece">currentcolor</em></p>
-                    <p><em style="color:darkred">注意：输入数值会自动转化为HEX，但数值保持一致性。错误格式会被替换为上次保存的数据。</em></p>
+                    <p>阴影颜色可通过点击色块激活拾色器选择，也可自定义填写，格式支持: <em style="color:#cecece">RGB, RGBA, HEX, HEXA.</em> 纯白色的所有格式表示自身颜色 <em style="color:#cecece">currentcolor.</em></p>
+                    <p><em style="color:darkred">注意：输入数值会自动转化为HEXA格式，但数值保持一致性。错误格式会被替换为刚刚正确显示的数值。</em></p>
                   </span>
                 </span>
               </div>
-              <div title="选取颜色" class="${defCon.class.colorPicker}" id="${defCon.id.cps}"></div>
-              <div class="${defCon.class.colorPicker2}"><input title="输入颜色代码" type="text" id="${defCon.id.color}" /></div>
-              <div id="${defCon.id.cpm}"></div>
+              <div class="${defCon.class.frColorPicker}">
+                <input title="输入颜色代码" type="text" id="${defCon.id.color}" />
+              </div>
             </li>
             <li id="${defCon.id.fontCSS}" style="min-width:254px">
               <div style="margin: 0 0 6px 0">需要渲染的网页元素：
                 <span class="${defCon.class.tooltip}">
                   <span class="${defCon.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
-                  <span class="${defCon.class.tooltip} ${defCon.class.ps4}">
-                    <p>默认为排除大多数网站常用的特殊CSS样式后需要渲染的页面元素。填写格式：<em style="color:#cecece">:not(.fa)</em> 或 <em style="color:#cecece">:not([class*="fa"])</em></p>
+                  <span class="${defCon.class.tooltip} ${defCon.class.ps3}">
+                    <p>默认为排除大多数网站常用的特殊CSS样式后需要渲染的页面元素。填写格式：<em style="color:#cecece">:not(.fa)</em> 或 <em style="color:#cecece">:not([class*="fa"])</em> 或 <em style="color:#cecece">,#idname .classname</em></p>
                     <p><em style="color:darkred">该选项为重要参数，默认只读，双击解锁。请尽量不要修改，避免造成样式失效。若失效请重置。</em></p>
                   </span>
                 </span>
@@ -2496,7 +2064,7 @@
         if (getNavigator.type("core").Gecko) {
           confirmIfValueChange(
             qS(`#${defCon.id.isfontsize}`),
-            "由于 Firefox(Gecko内核) 对部分 CSS 及 Javascript 的兼容性原因，会造成某些站点样式异常、坐标漂移等问题，我们建议您在 Firefox 浏览器中谨慎使用脚本级字体缩放功能。\n\n如有必要需求，请使用 Firefox 自身的缩放功能来放大 (Ctrl+) 或缩小 (Ctrl-) 页面。注意：清除 历史记录\u2192数据\u2192网站设置 会重置缩放。\n\n请确认是否开启字体缩放功能？"
+            "由于 Firefox(Gecko内核) 对部分 CSS 及 Javascript 的兼容性原因，会造成某些站点样式异常、坐标漂移等问题，我们建议您在 Firefox 浏览器中谨慎使用脚本级字体缩放功能。\n\n如有必要需求，请使用 Firefox 自身的缩放功能来放大(Ctrl+)或缩小(Ctrl-)当前网站页面（注意：清除 历史记录\u2192数据\u2192网站设置 会重置所有网站的缩放设置），或在 设置\u2192全局缩放 中配置缩放比例。\n\n请确认是否开启字体缩放功能？"
           );
         }
         confirmIfValueChange(
@@ -2605,7 +2173,7 @@
 
     /* hotkey setting */
 
-    if (isHotkey) {
+    if (isHotkey && curWindowTop) {
       document.addEventListener("keydown", event => {
         const e = event || window.Event;
         const ekey = (isMac ? e.metaKey : e.altKey) && !e.ctrlKey && !e.shiftKey;
@@ -2974,36 +2542,34 @@
 
           /* Fonts shadow color selection */
 
-          let picker;
-          const cpshow = qS(`#${defCon.id.cps}`);
-          const cp = qS(`#${defCon.id.cpm}`);
+          let colorPicker;
           const colorshow = qS(`#${defCon.id.color}`);
-          const colorReg = /^currentcolor$|^#([A-F0-9]{6})$/;
+          const colorReg = /^#[0-9A-F]{8}$|^currentcolor$/i;
           try {
-            picker = new ColorPicker({
-              dom: cp,
+            colorPicker = new window.frColorPicker(`#${defCon.id.color}`, {
               value: CONST.shadowColor,
-              def: CONST.shadowColor,
-            });
-            debug("\u27A4 ColorPicker:", picker._lastValue);
-            cpshow.addEventListener("click", e => {
-              if (cp.style.display === "block") {
-                cp.style.display = "none";
-              } else {
-                e.stopPropagation();
-                cp.style.display = "block";
-              }
-            });
-            cp.addEventListener(
-              "click",
-              e => {
-                e.stopPropagation();
+              alpha: 1.0,
+              format: "hexa",
+              previewSize: 35,
+              position: "top",
+              zIndex: 1999999993,
+              backgroundColor: "rgba(206,226,237,0.91)",
+              controlBorderColor: "rgba(187,187,187,0.7)",
+              pointerBorderColor: "rgba(255,255,255,0.6)",
+              borderRadius: 4,
+              padding: 9,
+              width: 190,
+              height: 210,
+              sliderSize: 14,
+              shadow: 0,
+              onChange: function () {
+                colorshow.value = this.toHEXAString() === "#FFFFFFFF" ? "currentcolor" : this.toHEXAString();
+                colorshow._value_ = colorshow.value;
               },
-              false
-            );
-            document.addEventListener("click", () => {
-              cp.style.display = "none";
             });
+            colorPicker.fromString(CONST.shadowColor);
+            colorshow.value = colorPicker.toHEXAString() === "#FFFFFFFF" ? "currentcolor" : colorPicker.toHEXAString();
+            debug("\u27A4 FRColorPicker:", colorPicker.toHEXAString());
           } catch (e) {
             defCon.errors.push(`[Fonts shadowColor]: ${e}`);
             error("\u27A4 Fonts shadowColor:", e);
@@ -3015,8 +2581,8 @@
 
           qA(`#${defCon.id.fontZoom},#${defCon.id.strokeSize},#${defCon.id.shadowSize},#${defCon.id.color}`).forEach(item => {
             item.addEventListener("click", function () {
-              this.setSelectionRange(0, this.value.length);
               this.focus();
+              this.setSelectionRange(0, this.value.length);
             });
           });
 
@@ -3068,8 +2634,9 @@
               shadows._value_ = defValue.fontShadow;
               setSliderProperty(drawShadow, defValue.fontShadow, 2);
               qS(`#${defCon.id.shadowColor}`).style.display = shadows.value === "OFF" ? "none" : "flex";
-              picker.value = defValue.shadowColor;
-              picker._value_ = picker.value;
+              colorPicker.fromString(defValue.shadowColor);
+              colorshow.value = defValue.shadowColor;
+              colorshow._value_ = defValue.shadowColor;
               fontCssT.value = defValue.fontCSS;
               setEffectIntoSubmit(fontCssT.value, CONST.fontCSS, defCon.values, fontCssT, submitButton);
               fontExT.value = defValue.fontEx;
@@ -3094,8 +2661,9 @@
               shadows._value_ = CONST.fontShadow;
               setSliderProperty(drawShadow, CONST.fontShadow, 2);
               qS(`#${defCon.id.shadowColor}`).style.display = shadows.value === "OFF" ? "none" : "flex";
-              picker.value = CONST.shadowColor;
-              picker._value_ = picker.value;
+              colorPicker.fromString(CONST.shadowColor);
+              colorshow.value = CONST.shadowColor === "#FFFFFFFF" ? "currentcolor" : colorPicker.toHEXAString();
+              colorshow._value_ = colorshow.value;
               fontCssT.value = CONST.fontCSS;
               setEffectIntoSubmit(fontCssT.value, CONST.fontCSS, defCon.values, fontCssT, submitButton);
               fontExT.value = CONST.fontEx;
@@ -3116,7 +2684,7 @@
             const fstroke = /^[0-1](\.[0-9]{1,3})?$/.test(stroke.value) ? stroke.value : stroke.value === "OFF" ? 0 : defValue.fontStroke;
             const fshadow = /^[0-8](\.[0-9]{1,2})?$/.test(shadows.value) ? shadows.value : shadows.value === "OFF" ? 0 : defValue.fontShadow;
             const pickedcolor = colorshow.value;
-            const fscolor = colorReg.test(pickedcolor) ? pickedcolor : defValue.shadowColor;
+            const fscolor = colorReg.test(pickedcolor) ? (pickedcolor.toLowerCase() === "currentcolor" ? "#FFFFFFFF" : pickedcolor) : defValue.shadowColor;
             const fcss = fontCssT.value;
             const cssfun = fcss ? fcss.replace(/"|`/g, "'") : defValue.fontCSS;
             const fex = fontExT.value;
@@ -3296,11 +2864,12 @@
     }
 
     function closeConfigurePage(isReload) {
-      if (qS(`#${defCon.id.rndId}`)) {
+      if (qS(`#${defCon.id.container}`)) {
         qS(`#${defCon.id.container}`).style.opacity = 0;
         sleep(500).then(() => {
-          qS(`#${defCon.id.rndId}`).remove();
+          qS(`#${defCon.id.rndId}`) && qS(`#${defCon.id.rndId}`).remove();
         });
+        qS("fr-colorpicker") && qS("fr-colorpicker").remove();
         if (getNavigator.type("core").Gecko && defCon.configurePage) {
           document.removeEventListener("scroll", defCon.configurePage);
           delete defCon.configurePage;
@@ -3525,7 +3094,7 @@
               enumerable: true,
               configurable: true,
               get: function () {
-                return this._value_;
+                return this.value;
               },
               set: newVal => {
                 setEffectIntoSubmit(newVal, e, v, t, d, g);
@@ -3541,7 +3110,15 @@
 
     function setEffectIntoSubmit(value, e, v, t, d, h = false) {
       try {
-        const _value = t.attributes.v !== undefined ? (value === "OFF" ? (h ? 1 : 0) : Number(value)) : value;
+        const _thatOffValue = h ? 1 : 0;
+        const _value =
+          t.attributes.v !== undefined
+            ? value === "OFF"
+              ? _thatOffValue
+              : Number(value)
+            : typeof value === "string" && value.toLowerCase() === "currentcolor"
+            ? "#FFFFFFFF"
+            : value;
         if (_value !== e) {
           !v.includes(t.id) ? v.push(t.id) : debug(`\u27A4 ID["${t.id}"] already exists`);
           if (defCon.isPreview) {
@@ -3558,8 +3135,8 @@
           }
         }
         defCon.values = v;
-        debug("\u27A4 Changed Elements", defCon.values);
         if (defCon.values.length > 0) {
+          debug("\u27A4 Changed Elements", defCon.values);
           if (!d.classList.contains(`${defCon.class.anim}`)) {
             d.classList.add(`${defCon.class.anim}`);
           }

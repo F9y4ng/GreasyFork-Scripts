@@ -5,7 +5,7 @@
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:ja         Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version         4.0.20211217.1
+// @version         4.0.20211224.1
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:zh  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
@@ -30,7 +30,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            修正Bing搜索无法访问的问题。\n修正bugs，优化代码。
+// @note            更新Bing搜索的中文版官方链接。\n优化样式，修正bugs，优化代码。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -1126,7 +1126,7 @@
         StyleCode: CONST.isUseBing
           ? `#form{white-space:nowrap}#u{z-index:1!important}#${CONST.rndidName}{position:relative;z-index:999999}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-1.5px}#${CONST.rndidName} #${CONST.ggyx}{margin-left:2px}#${CONST.bbyx} input{background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px!important;font-weight:bold}#${CONST.ggyx} input{background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px!important;font-weight:bold}#${CONST.ggyx} input:hover,#${CONST.bbyx} input:hover{background: #4662D9;border:1px solid #3476d2}`
           : `#form{white-space:nowrap}#u{z-index:1!important}#${CONST.rndidName}{position:relative;margin-left:2px;z-index:999999999}#${CONST.ggyx} input{background:#4e6ef2;border-radius:10px;cursor:pointer;height:40px;color:#fff;width:112px;border:1px solid #3476d2;text-shadow:0 0 2px #ffffff!important;font-size:16px!important}#${CONST.ggyx} input:hover{background:#4662D9;border:1px solid #3476d2;}`,
-        keyStyle: keywordHighlight ? "#wrapper_wrapper em{color:#f1675bad!important;background-color:#ffff003d!important;font-weight:900!important}" : "",
+        keyStyle: keywordHighlight ? "#wrapper_wrapper em{color:#f73131cd!important;background-color:#ffff80ad!important;font-weight:700!important}" : "",
       },
       google: {
         SiteTypeID: 2,
@@ -1151,7 +1151,7 @@
           ? `#${CONST.rndidName}{position:relative;margin:3px 4px 0 -5px;z-index:100}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd;}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-2px}.${CONST.scrollspan}{display:inline-block;margin:0;min-height:26px}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}.${CONST.scrollbars2}{display:inline-block;margin-top:-4px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}#${CONST.bdyx} input{cursor:pointer;padding:1px 1px 1px 6px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;width:90px;height:38px;font-size:15px!important;font-weight:600;color:#fff;}#${CONST.bbyx} input{cursor:pointer;padding:1px 6px 1px 1px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;width:90px;height:38px;font-size:15px!important;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover,#${CONST.bbyx} input:hover{background:#2b7de9;}`
           : `#${CONST.rndidName}{position:relative;margin:3px 4px 0 -5px;z-index:100}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd}.${CONST.scrollspan}{display:inline-block;margin:0;min-height:26px}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-size:13px!important;font-weight:normal!important; text-shadow:0 0 1px #fff!important}.${CONST.scrollbars2}{display:inline-block;margin-top:-4px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #fff!important}#${CONST.bdyx} input{cursor:pointer;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-radius:24px;width:90px;height:38px;font-size:14px!important;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover{background:#2b7de9;}`,
         keyStyle: keywordHighlight
-          ? ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe{color:#f1675bad!important;background-color:#ffff003d!important;font-weight:900!important}"
+          ? ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe{color:#f73131cd!important;background-color:#ffff80ad!important;font-weight:700!important}"
           : "",
       },
       bing: {
@@ -1177,7 +1177,7 @@
               Number(getUrlParam("ensearch")) || Number(getCookie("ENSEARCH"))
                 ? ".b_caption p strong, .b_caption .b_factrow strong, .b_secondaryText strong,th, h2 strong, h3 strong"
                 : "#sp_requery strong, #sp_recourse strong, #tile_link_cn strong, .b_ad .ad_esltitle~div strong, h2 strong, .b_caption p strong, .b_snippetBigText strong, .recommendationsTableTitle+.b_slideexp strong, .recommendationsTableTitle+table strong, .recommendationsTableTitle+ul strong, .pageRecoContainer .b_module_expansion_control strong, .b_rs strong, .b_rrsr strong, #dict_ans strong, .b_listnav>.b_ans_stamp>strong, .adltwrnmsg strong"
-            ) + "{font-weight:900!important;color:#f1675bad!important;background-color:#ffff003d!important}"
+            ) + "{font-weight:700!important;color:#f73131cd!important;background-color:#ffff80ad!important}"
           : "",
       },
       other: { SiteTypeID: 0 },
@@ -1566,9 +1566,9 @@
                       break;
                     case `${CONST.bbyx}`:
                       if (/^(isch|baiduimage)$/.test(CONST.vim.trim())) {
-                        gotoUrl = "https://www4.bing.com/images/search?first=1&tsc=ImageBasicHover&q=";
+                        gotoUrl = "https://cn.bing.com/images/search?first=1&tsc=ImageBasicHover&q=";
                       } else {
-                        gotoUrl = "https://www4.bing.com/search?q=";
+                        gotoUrl = "https://cn.bing.com/search?q=";
                       }
                       break;
                     case `${CONST.bdyx}`:
