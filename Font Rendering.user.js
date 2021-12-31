@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2021.12.24.1
+// @version           2022.01.01.1
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -39,7 +39,7 @@
 // @compatible      Safari 兼容Tampermonkey • Safari
 // @license         GPL-3.0-only
 // @create          2020-11-24
-// @copyright       2020-2021, F9y4ng
+// @copyright       2020-2022, F9y4ng
 // @run-at          document-start
 // ==/UserScript==
 
@@ -86,10 +86,11 @@
     clickTimer: 0,
     domainCount: 0,
     successId: false,
+    siteIndex: undefined,
     curVersion: GMinfo.script.version,
     scriptName: getScriptNameViaLanguage(),
     options: isGM ? false : { active: true, insert: true, setParent: true },
-    elCompat: ((document.compatMode || "") === "CSS1Compat" ? document.documentElement : document.body) || document.documentElement || document.body,
+    elCompat: (document.compatMode || "") === "CSS1Compat" ? document.documentElement : document.body,
     encrypt: n => {
       return window.btoa(encodeURIComponent(n));
     },
@@ -319,6 +320,61 @@
     return document.createElement(str);
   };
 
+  /* Get browser core & system parameters */
+
+  const getNavigator = {
+    type: (info, system = "other", browserArray = {}, browserInfo = "unknow") => {
+      const u = navigator.userAgent.toLowerCase();
+      switch (info) {
+        case "core":
+          return {
+            Trident: u.includes("trident") || u.includes("compatible"),
+            Presto: u.includes("presto"),
+            WebKit: u.includes("applewebkit"),
+            Gecko: u.includes("gecko") && !u.includes("khtml"),
+            EdgeHTML: u.includes("edge"),
+          };
+        case "system":
+          if (/windows|win32|win64|wow32|wow64/gi.test(u)) {
+            system = "Windows";
+          } else if (/macintosh|macintel|mac os x/gi.test(u) || u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/i)) {
+            system = "MacOS";
+          } else if (/x11/gi.test(u)) {
+            system = "Linux";
+          } else if (/android|adr/gi.test(u)) {
+            system = "Android";
+          } else if (/ios|iphone|ipad|ipod|iwatch/gi.test(u)) {
+            system = "iOS";
+          }
+          return system;
+        case "browser":
+          browserArray = {
+            IE: window.ActiveXObject || "ActiveXObject" in window,
+            Chromium: u.includes("chromium"),
+            Chrome: u.includes("chrome") && !u.includes("edg") && !u.includes("chromium"),
+            Firefox: u.includes("firefox") && u.includes("gecko"),
+            Opera: u.includes("presto") || u.includes("opr") || u.includes("opera"),
+            Safari: u.includes("safari") && !u.includes("chrome"),
+            Edge: u.includes("edg"),
+            QQBrowser: /qqbrowser/g.test(u),
+            Wechat: /micromessenger/g.test(u),
+            UCBrowser: /ucbrowser/g.test(u),
+            Sougou: /metasr|sogou/g.test(u),
+            Maxthon: /maxthon/g.test(u),
+            CentBrowser: /cent/g.test(u),
+          };
+          for (let i in browserArray) {
+            if (browserArray[i]) {
+              browserInfo = i;
+            }
+          }
+          return browserInfo;
+        default:
+          return u;
+      }
+    },
+  };
+
   /* Initialized important functions */
 
   function getScriptNameViaLanguage() {
@@ -353,18 +409,30 @@
     requestAnimationFrame(step);
   }
 
-  function deBounce(fn, delay) {
-    let timer;
+  function deBounce(fn, delay, timer) {
     return function () {
       const _this = this;
       const args = arguments;
-      if (timer) {
-        clearTimeout(timer);
+      if (defCon[timer]) {
+        clearTimeout(defCon[timer]);
+        delete defCon[timer];
       }
-      timer = setTimeout(function () {
+      defCon[timer] = setTimeout(function () {
         fn.apply(_this, args);
+        delete defCon[timer];
       }, delay);
     };
+  }
+
+  function safeRemove(s, t) {
+    try {
+      const removeNodes = t.querySelectorAll(s);
+      for (let i = 0; i < removeNodes.length; i++) {
+        removeNodes[i].parentNode.removeChild(removeNodes[i]);
+      }
+    } catch (e) {
+      error("\u27A4 safeRemove:", e);
+    }
   }
 
   function addStyle(css, className, addToTarget, T = "T", isReload = false, initType = "text/css", reNew = false) {
@@ -422,17 +490,6 @@
     document.addEventListener("scroll", defCon[distTop]);
   }
 
-  function safeRemove(s, t) {
-    try {
-      const removeNodes = t.querySelectorAll(s);
-      for (let i = 0; i < removeNodes.length; i++) {
-        removeNodes[i].parentNode.removeChild(removeNodes[i]);
-      }
-    } catch (e) {
-      error("\u27A4 safeRemove:", e);
-    }
-  }
-
   function loadPreview(_preview_, ts = defCon.tStyle, s = true) {
     try {
       if (_preview_) {
@@ -458,6 +515,33 @@
     } catch (e) {
       error("\u27A4 loadPreview:", e);
     }
+  }
+
+  function correctBoldErrorByStroke(s) {
+    return new Promise(resolve => {
+      const version = getNavigator.type().match(/chrome\/([\d]+)/);
+      if (s && parseInt(version ? version[1] : 0) >= 96) {
+        const attrib = "fr-fix-stroke";
+        qA(
+          `:not(html,head,head *,base,style,link,script,noscript,iframe,br,hr,canvas,form,applet,source,embed,audio,video,track,figure,progress,img,svg,path,fr-configure *,fr-dialogbox *,fr-colorpicker *,gb-notice *):not([${attrib}])`
+        ).forEach(item => {
+          if (window.getComputedStyle(item, null).getPropertyValue("font-weight") >= 600) {
+            item.setAttribute(attrib, "true");
+          }
+        });
+        resolve(attrib);
+      }
+    })
+      .then(result => {
+        qA(`[${result}]`).forEach(item => {
+          if (window.getComputedStyle(item, null).getPropertyValue("font-weight") < 600) {
+            item.removeAttribute(result);
+          }
+        });
+      })
+      .catch(error => {
+        error("\u27A4 <font-fix-stroke>", error);
+      });
   }
 
   /* expire for fontlist cache */
@@ -519,61 +603,6 @@
     document.body.removeChild(e);
   }
 
-  /* Get browser core & system parameters */
-
-  const getNavigator = {
-    type: (info, system = "other", browserArray = {}, browserInfo = "unknow") => {
-      const u = navigator.userAgent.toLowerCase();
-      switch (info) {
-        case "core":
-          return {
-            Trident: u.includes("trident") || u.includes("compatible"),
-            Presto: u.includes("presto"),
-            WebKit: u.includes("applewebkit"),
-            Gecko: u.includes("gecko") && !u.includes("khtml"),
-            EdgeHTML: u.includes("edge"),
-          };
-        case "system":
-          if (/windows|win32|win64|wow32|wow64/gi.test(u)) {
-            system = "Windows";
-          } else if (/macintosh|macintel|mac os x/gi.test(u) || u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/i)) {
-            system = "MacOS";
-          } else if (/x11/gi.test(u)) {
-            system = "Linux";
-          } else if (/android|adr/gi.test(u)) {
-            system = "Android";
-          } else if (/ios|iphone|ipad|ipod|iwatch/gi.test(u)) {
-            system = "iOS";
-          }
-          return system;
-        case "browser":
-          browserArray = {
-            IE: window.ActiveXObject || "ActiveXObject" in window,
-            Chromium: u.includes("chromium"),
-            Chrome: u.includes("chrome") && !u.includes("edg") && !u.includes("chromium"),
-            Firefox: u.includes("firefox") && u.includes("gecko"),
-            Opera: u.includes("presto") || u.includes("opr") || u.includes("opera"),
-            Safari: u.includes("safari") && !u.includes("chrome"),
-            Edge: u.includes("edg"),
-            QQBrowser: /qqbrowser/g.test(u),
-            Wechat: /micromessenger/g.test(u),
-            UCBrowser: /ucbrowser/g.test(u),
-            Sougou: /metasr|sogou/g.test(u),
-            Maxthon: /maxthon/g.test(u),
-            CentBrowser: /cent/g.test(u),
-          };
-          for (let i in browserArray) {
-            if (browserArray[i]) {
-              browserInfo = i;
-            }
-          }
-          return browserInfo;
-        default:
-          return u;
-      }
-    },
-  };
-
   /* New DefinePropertise */
 
   const definePropertiesForZoom = function (t, d) {
@@ -584,11 +613,16 @@
             if (s.target.parentNode && s.target.parentNode !== document) {
               z = s.target.parentNode.getBoundingClientRect()[g] / (getNavigator.type("core").Gecko ? t : 1);
             }
-            return z;
+            break;
           case 2:
-            return 0 - s.getBoundingClientRect()[g] / t;
+            if (s && s instanceof Element) {
+              z = 0 - s.getBoundingClientRect()[g] / t;
+            }
+            break;
         }
+        return z;
       };
+      d = d || document.documentElement || document.body;
       // window
       Object.defineProperties(unsafeWindow, {
         pageXOffset: {
@@ -1341,7 +1375,7 @@
   /* Determine whether the DOM is loaded */
 
   function addLoadEvents(fn, rs = false) {
-    document.addEventListener("readystatechange", () => {
+    document.addEventListener("readystatechange", async () => {
       if (document.readyState !== "loading" && document.body) {
         if (!rs) {
           rs = fn();
@@ -1363,6 +1397,7 @@
         });
       }
       if (document.readyState === "complete" && rs) {
+        await correctBoldErrorByStroke(CONST.fontStroke);
         debug(
           "\u27A4 %c[DOM]: Load complete!\n%c\u3000 \u27A6 %s %c%s",
           "background-color:green;color:snow;line-height:180%",
@@ -1457,11 +1492,10 @@
         messageText: String(
           `<p><span style="font-style:italic;font-weight:700;font-size:20px;color:tomato">您好！</span>这是${s}<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="font:italic 900 22px/150% Candara,'Times New Roman'!important;color:tomato;margin-left:3px">V${defCon.curVersion}</span>, 以下为更新内容：</p>
             <p><ul id="${defCon.id.seed}_update">
-              <li class="${defCon.id.seed}_del">删除原有HEX拾色器及相关代码。</li>
-              <li class="${defCon.id.seed}_add">新增HEXA/RGBA拾色器，修正Alpha值的兼容问题。</li>
-              <li class="${defCon.id.seed}_fix">修正字体缩放在某些网站造成坐标偏移的问题。</li>
-              <li class="${defCon.id.seed}_fix">修正快捷键操作在框架页面引发样式错误的问题。</li>
-              <li class="${defCon.id.seed}_fix">优化UI样式，修正bugs，优化代码。</li>
+              <li class="${defCon.id.seed}_info">恭祝各位用户2022新年快乐，大展宏图，万事如意。</li>
+              <li class="${defCon.id.seed}_fix">修正字体缩放函数的在特殊情况下出现的bug。</li>
+              <li class="${defCon.id.seed}_fix">优化粗体描边的修正效率，减少CPU和内存占用。</li>
+              <li class="${defCon.id.seed}_fix">优化样式，修正bugs，优化代码。</li>
             </ul></p>
             <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
         ),
@@ -1473,17 +1507,17 @@
       frDialog = null;
     };
 
-    addLoadEvents((curVersion = _config_data_.curVersion) => {
-      if (curVersion !== defCon.curVersion && curWindowTop) {
+    if (curVersion !== defCon.curVersion && curWindowTop) {
+      addLoadEvents(() => {
         if (!isCloseTip) {
           hintUpdateInfo(`${hostURI}#update`, curVersion);
         }
         _config_data_.curVersion = defCon.curVersion;
         GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
         debug("\u27A4 %cThe script has been upgraded to V%s", "font-style:italic;background-color:yellow;color:crimson", defCon.curVersion);
-      }
-      return true;
-    });
+        return true;
+      });
+    }
 
     /* initialize Exclude site */
 
@@ -1687,11 +1721,12 @@
       exclude = `${cssexlude}{font-family:inherit;-webkit-text-stroke:initial!important;text-shadow:none!important}`;
       codeFont = funcCodefont(cssexlude, fontface_i, prefont);
     }
-    const cssfun = CONST.fontCSS;
     let tshadow = "";
+    const cssfun = CONST.fontCSS;
+    const textrender = `text-rendering:optimizeLegibility!important`;
+    const fixStroke = `[fr-fix-stroke]{-webkit-text-stroke:initial!important}`;
     if (defCon.siteIndex === undefined) {
-      const textrender = `text-rendering:optimizeLegibility!important`;
-      tshadow = `${fontfaces}${bodyZoom}${codeFont}${selection}${exclude}${cssfun}{${fontfamily}${shadow}${stroke}${smoothing}${textrender}}`;
+      tshadow = `${fontfaces}${bodyZoom}${cssfun}{${fontfamily}${shadow}${stroke}${smoothing}${textrender}}${codeFont}${selection}${exclude}${fixStroke}`;
     }
     const fontTest = String(
       `.${defCon.id.seed}_fontTest{font-weight:normal!important;line-height:initial!important;text-align:left!important;font-style:normal!important;text-decoration:none!important;letter-spacing:normal!important;word-wrap:normal!important;text-indent:initial!important}#${defCon.id.fontTest}{margin:0!important;padding:0!important;width:max-content!important;height:max-content!important;text-shadow:none!important;-webkit-text-stroke:initial!important;-webkit-text-size-adjust:none!important;-moz-text-size-adjust:none!important;white-space:nowrap!important}`
@@ -1907,9 +1942,9 @@
     try {
       preInsertContentToHead();
       const callback = mutations => {
-        deBounce(correctBoldErrorByStroke, 50)(CONST.fontStroke);
+        defCon.siteIndex === undefined && deBounce(correctBoldErrorByStroke, 60, "fixstroke")(CONST.fontStroke);
         mutations.forEach(mutation => {
-          if (!((!curWindowTop || qS(`.${defCon.class.rndClass}`)) && qS(`.${defCon.class.rndStyle}`))) {
+          if (!((!curWindowTop || qS(`.${defCon.class.rndClass}`)) && (defCon.siteIndex !== undefined || qS(`.${defCon.class.rndStyle}`)))) {
             debug(`\u27A4 %cMutationObserver: %c%s %c%s`, "color:teal", "color:olive", mutation.type, "color:red", !preInsertContentToHead(true));
           }
           if (qS(`.${defCon.class.rndStyle}`) && document.head.lastChild.className !== defCon.class.rndStyle) {
@@ -1919,7 +1954,7 @@
                 debug("\u27A4 %s is Ready, Caused by darkreader inserted", defCon.class.rndStyle);
               } else if (qS(`.${defCon.class.rndStyle}`).nextSibling) {
                 debug("\u27A4 [:Before] %c%s", "font-style:italic", document.head.lastChild.className || "<empty string>");
-                moveStyleTolastChild(true);
+                defCon.siteIndex === undefined && moveStyleTolastChild(true);
               }
             } catch (e) {
               error("\u27A4 lastChildStyle error", e);
@@ -2291,10 +2326,14 @@
     function preInsertContentToHead(isStyleReady = false) {
       setRAFInterval(
         () => {
-          if (!qS(`.${defCon.class.rndStyle}`)) {
-            insertStyle(false);
+          if (defCon.siteIndex === undefined) {
+            if (!qS(`.${defCon.class.rndStyle}`)) {
+              insertStyle(false);
+            } else {
+              moveStyleTolastChild(false);
+              isStyleReady = true;
+            }
           } else {
-            moveStyleTolastChild(false);
             isStyleReady = true;
           }
           if (curWindowTop && !qS(`.${defCon.class.rndClass}`)) {
@@ -2704,8 +2743,10 @@
                 if (fontex) {
                   _codeFont = funcCodefont(fontex, fontface, _prefont);
                 }
-                const _textrender = `text-rendering:optimizeLegibility!important`;
-                const _tshadow = `${_fontfaces}${_bodyZoom}${_codeFont}${_exclude}${filterHtmlToText(cssfun)}{${_fontfamily}${_shadow}${_stroke}${_smoothing}${_textrender}}`;
+                const _tshadow = `${_fontfaces}${_bodyZoom}`.concat(
+                  `${filterHtmlToText(cssfun)}{${_fontfamily}${_shadow}${_stroke}${_smoothing}${textrender}}`,
+                  `${_codeFont}${_exclude}${fixStroke}`
+                );
                 const __tshadow = `@charset "UTF-8";${_tshadow}`;
                 defCon.tZoom = fzoom;
                 this.innerText = "\u4fdd\u5b58";
@@ -2714,7 +2755,7 @@
                 loadPreview(defCon.isPreview, __tshadow, false);
                 await getCurrentFontName(fontface, _refont, defautlFont);
                 setAutoZoomFontSize(`#${defCon.id.rndId}`, fzoom);
-                correctBoldErrorByStroke(fstroke);
+                await correctBoldErrorByStroke(fstroke);
               } catch (e) {
                 defCon.errors.push(`[submitPreview]: ${e}`);
                 reportErrorToAuthor(defCon.errors);
@@ -3097,7 +3138,7 @@
                 return this.value;
               },
               set: newVal => {
-                setEffectIntoSubmit(newVal, e, v, t, d, g);
+                deBounce(setEffectIntoSubmit, 360, t.id)(newVal, e, v, t, d, g);
               },
             });
           }
@@ -3395,18 +3436,6 @@
           this.checked = !!rs;
         }
       });
-    }
-
-    function correctBoldErrorByStroke(s) {
-      // Fixed incorrect rendering of bold styles by font strokes in Chrome >= 96.0.4664.45, Ｆ９ｙ４ｎｇ, 20211120.
-      const version = getNavigator.type().match(/chrome\/([\d]+)/);
-      if (s && document.body && parseInt(version ? version[1] : 0) >= 96) {
-        qA(`:not(script):not(style):not(img):not(svg):not(path):not(fr-configure *):not(fr-dialogbox *):not(gb-notice *)`).forEach(item => {
-          if (window.getComputedStyle(item, null).getPropertyValue("font-weight") >= 600 && item.style["-webkit-text-stroke"] !== "initial") {
-            item.style.cssText += "-webkit-text-stroke:initial!important;";
-          }
-        });
-      }
     }
 
     function convertFullToHalf(str, tmp = "") {
