@@ -5,7 +5,7 @@
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:ja         Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version         4.0.20220101.1
+// @version         4.0.20220107.1
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:zh  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
@@ -30,7 +30,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            恭祝2022新年快乐，大展宏图、万事如意。\n优化样式，修正bugs，优化代码。
+// @note            Chromium预兼容navigator.userAgentData.\n修正Google其他分类频道的样式错误。\n修正Google搜索栏纠错功能造成的样式错误。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -257,53 +257,92 @@
 
   const getNavigator = {
     type: (info, system = "other", browserArray = {}, browserInfo = "unknow") => {
-      const u = navigator.userAgent.toLowerCase();
-      switch (info) {
-        case "core":
-          return {
-            Trident: u.includes("trident") || u.includes("compatible"),
-            Presto: u.includes("presto"),
-            WebKit: u.includes("applewebkit"),
-            Gecko: u.includes("gecko") && !u.includes("khtml"),
-            EdgeHTML: u.includes("edge"),
-          };
-        case "system":
-          if (/windows|win32|win64|wow32|wow64/gi.test(u)) {
-            system = "Windows";
-          } else if (/macintosh|macintel|mac os x/gi.test(u) || u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/i)) {
-            system = "MacOS";
-          } else if (/x11/gi.test(u)) {
-            system = "Linux";
-          } else if (/android|adr/gi.test(u)) {
-            system = "Android";
-          } else if (/ios|iphone|ipad|ipod|iwatch/gi.test(u)) {
-            system = "iOS";
-          }
-          return system;
-        case "browser":
-          browserArray = {
-            IE: window.ActiveXObject || "ActiveXObject" in window,
-            Chromium: u.includes("chromium"),
-            Chrome: u.includes("chrome") && !u.includes("edg") && !u.includes("chromium"),
-            Firefox: u.includes("firefox") && u.includes("gecko"),
-            Opera: u.includes("presto") || u.includes("opr") || u.includes("opera"),
-            Safari: u.includes("safari") && !u.includes("chrome"),
-            Edge: u.includes("edg"),
-            QQBrowser: /qqbrowser/g.test(u),
-            Wechat: /micromessenger/g.test(u),
-            UCBrowser: /ucbrowser/g.test(u),
-            Sougou: /metasr|sogou/g.test(u),
-            Maxthon: /maxthon/g.test(u),
-            CentBrowser: /cent/g.test(u),
-          };
-          for (let i in browserArray) {
-            if (browserArray[i]) {
-              browserInfo = i;
+      if (navigator.userAgentData) {
+        const u = navigator.userAgentData;
+        const getBrowser = (ua, getBrand = true) => {
+          for (const brand_version of ua) {
+            if (getBrand) {
+              if (!brand_version.brand.includes("Chromium") && !brand_version.brand.includes("Not")) {
+                browserInfo = brand_version.brand.split(" ").slice(-1).toString().toLowerCase();
+                break;
+              }
+            } else {
+              if (brand_version.brand.includes("Chromium")) {
+                browserInfo = brand_version.version;
+                break;
+              }
             }
           }
           return browserInfo;
-        default:
-          return u;
+        };
+        switch (info) {
+          case "chromiumVersion":
+            return getBrowser(u.brands, false);
+          case "core":
+            return {
+              Trident: false,
+              Presto: false,
+              WebKit: true,
+              Gecko: false,
+            };
+          case "system":
+            return u.platform;
+          case "browser":
+            return getBrowser(u.brands);
+          default:
+            return u;
+        }
+      } else {
+        const u = navigator.userAgent.toLowerCase();
+        const version = u.match(/chrome\/([\d]+)/i);
+        switch (info) {
+          case "chromiumVersion":
+            return version ? version[1] : 0;
+          case "core":
+            return {
+              Trident: u.includes("trident") || u.includes("compatible"),
+              Presto: u.includes("presto"),
+              WebKit: u.includes("applewebkit"),
+              Gecko: u.includes("gecko") && !u.includes("khtml"),
+            };
+          case "system":
+            if (/windows|win32|win64|wow32|wow64/gi.test(u)) {
+              system = "Windows";
+            } else if (/macintosh|macintel|mac os x/gi.test(u) || u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/i)) {
+              system = "MacOS";
+            } else if (/linux|x11/gi.test(u)) {
+              system = "Linux";
+            } else if (/android|adr/gi.test(u)) {
+              system = "Android";
+            } else if (/ios|iphone|ipad|ipod|iwatch/gi.test(u)) {
+              system = "iOS";
+            }
+            return system;
+          case "browser":
+            browserArray = {
+              IE: window.ActiveXObject || "ActiveXObject" in window,
+              Chromium: u.includes("chromium"),
+              Chrome: u.includes("chrome") && !u.includes("edg") && !u.includes("chromium"),
+              Firefox: u.includes("firefox") && u.includes("gecko"),
+              Opera: u.includes("presto") || u.includes("opr") || u.includes("opera"),
+              Safari: u.includes("safari") && !u.includes("chrome"),
+              Edge: u.includes("edg"),
+              QQBrowser: /qqbrowser/g.test(u),
+              Wechat: /micromessenger/g.test(u),
+              UCBrowser: /ucbrowser/g.test(u),
+              Sougou: /metasr|sogou/g.test(u),
+              Maxthon: /maxthon/g.test(u),
+              CentBrowser: /cent/g.test(u),
+            };
+            for (let i in browserArray) {
+              if (browserArray[i]) {
+                browserInfo = i;
+              }
+            }
+            return browserInfo;
+          default:
+            return u;
+        }
       }
     },
   };
@@ -1135,7 +1174,8 @@
         MainType: "form button[type='submit']",
         HtmlCode: CONST.isUseBing
           ? String(
-              `<span id="${CONST.bdyx}">
+              `<span class="ACRAdd"></span>
+              <span id="${CONST.bdyx}">
                 <input type="button" title="百度一下" value="百度一下"/>
               </span>
               <span id="${CONST.bbyx}">
@@ -1143,13 +1183,14 @@
               </span>`
             )
           : String(
-              `<span id="${CONST.bdyx}">
+              `<span class="ACRAdd"></span>
+              <span id="${CONST.bdyx}">
                 <input type="button" title="百度一下" value="百度一下"/>
               </span>`
             ),
         StyleCode: CONST.isUseBing
-          ? `#${CONST.rndidName}{position:relative;margin:3px 4px 0 -5px;z-index:100}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd;}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-2px}.${CONST.scrollspan}{display:inline-block;margin:0;min-height:26px}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}.${CONST.scrollbars2}{display:inline-block;margin-top:-4px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #ffffff!important}#${CONST.bdyx} input{cursor:pointer;padding:1px 1px 1px 6px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;width:90px;height:38px;font-size:15px!important;font-weight:600;color:#fff;}#${CONST.bbyx} input{cursor:pointer;padding:1px 6px 1px 1px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;width:90px;height:38px;font-size:15px!important;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover,#${CONST.bbyx} input:hover{background:#2b7de9;}`
-          : `#${CONST.rndidName}{position:relative;margin:3px 4px 0 -5px;z-index:100}#${CONST.rndidName} #${CONST.bdyx}{padding:5px 0 4px 18px;border-left:1px solid #ddd}.${CONST.scrollspan}{display:inline-block;margin:0;min-height:26px}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-size:13px!important;font-weight:normal!important; text-shadow:0 0 1px #fff!important}.${CONST.scrollbars2}{display:inline-block;margin-top:-4px;height:30px!important;font-size:13px!important;font-weight:normal!important;text-shadow:0 0 1px #fff!important}#${CONST.bdyx} input{cursor:pointer;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-radius:24px;width:90px;height:38px;font-size:14px!important;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover{background:#2b7de9;}`,
+          ? `#${CONST.rndidName}{position:relative;margin:0 4px 0 -5px;z-index:100;display:flex;justify-content:center;align-items:center}#${CONST.rndidName} #${CONST.bdyx}{padding:0 0 0 8px}#${CONST.rndidName} #${CONST.bbyx}{margin-left:1px}.${CONST.scrollspan}{min-height:26px}.${CONST.scrollspan2}{min-height:26px;margin-top:0!important}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-size:13px!important}.${CONST.scrollbars2}{display:inline-block;margin:0;height:30px!important;font-size:13px!important}#${CONST.bdyx} input{cursor:pointer;padding:1px 1px 1px 6px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bbyx} input{cursor:pointer;padding:1px 6px 1px 1px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover,#${CONST.bbyx} input:hover{background:#2b7de9;}`
+          : `#${CONST.rndidName}{position:relative;margin:0 4px 0 -5px;z-index:100;display:flex;justify-content:center;align-items:center}#${CONST.rndidName} #${CONST.bdyx}{padding:0 0 0 8px}.${CONST.scrollspan}{min-height:26px}.${CONST.scrollspan2}{min-height:26px;margin-top:0!important}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;text-shadow:0 0 1px #fff!important;font-size:13px!important}.${CONST.scrollbars2}{display:inline-block;margin:0;height:30px!important;text-shadow:0 0 1px #fff!important;font-size:13px!important}#${CONST.bdyx} input{cursor:pointer;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff}#${CONST.bdyx} input:hover{background:#2b7de9}`,
         keyStyle: keywordHighlight
           ? ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe{color:#f73131cd!important;background-color:#ffff80ad!important;font-weight:700!important}"
           : "",
@@ -1516,13 +1557,7 @@
           let Target = qS(getTarget);
           if (!indexPage && Target) {
             if (!qS(SpanID) && getSearchValue()) {
-              if (/^(nws|vid|bks)$/.test(CONST.vim.trim())) {
-                Target = Target.parentNode.parentNode.firstChild;
-                Target.insertBefore(userSpan, Target.firstChild);
-                if (qS(SpanID)) {
-                  qS(SpanID).setAttribute("style", "float:right");
-                }
-              } else if (curretSite.SiteTypeID === newSiteType.BING) {
+              if (curretSite.SiteTypeID === newSiteType.BING) {
                 if (CONST.isUseBing) {
                   Target.appendChild(userSpan);
                   if (Target.parentNode.childNodes[0].tagName === "INPUT") {
@@ -1547,7 +1582,7 @@
                 // Google fixed
                 if (curretSite.SiteTypeID === newSiteType.GOOGLE) {
                   qS(SpanID).parentNode.style.width = "100%";
-                  qS(SpanID).parentNode.style.minWidth = "max-content";
+                  qS(SpanID).parentNode.style.minWidth = "100%";
                 }
               }
 
@@ -1596,7 +1631,7 @@
       },
 
       scrollDetect: () => {
-        let scrollbars, height, e;
+        let scrollbars, scrollspan, height, e;
         const getTarget = curretSite.MainType;
         const indexPage = location.pathname === "/";
         if (!indexPage && qS(getTarget)) {
@@ -1604,9 +1639,10 @@
             case newSiteType.GOOGLE:
               // Google image fixed
               e = /^isch$/.test(CONST.vim.trim());
-              scrollbars = e ? `${CONST.scrollbars2}` : `${CONST.scrollbars}`;
-              height = e ? -14 : 35;
-              setScrollButton(`#${CONST.rndidName}`, `${CONST.scrollspan}`, height);
+              scrollspan = e ? CONST.scrollspan2 : CONST.scrollspan;
+              scrollbars = e ? CONST.scrollbars2 : CONST.scrollbars;
+              height = e ? 0 : 35;
+              setScrollButton(`#${CONST.rndidName}`, scrollspan, height);
               setScrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, scrollbars, height);
               if (CONST.isUseBing) {
                 setScrollButton(`#${CONST.rndidName} #${CONST.bbyx} input`, scrollbars, height);
@@ -1614,11 +1650,12 @@
               break;
             case newSiteType.BING:
               if (CONST.isUseBing) {
-                const spanCssName = /^(images|videos)$/.test(CONST.vim.trim()) ? CONST.scrollspan : CONST.scrollspan2;
-                const barsCssName = /^(images|videos)$/.test(CONST.vim.trim()) ? CONST.scrollbars : CONST.scrollbars2;
-                setScrollButton(`#${CONST.rndidName}`, `${spanCssName}`, 50);
-                setScrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, `${barsCssName}`, 50);
-                setScrollButton(`#${CONST.rndidName} #${CONST.ggyx} input`, `${barsCssName}`, 50);
+                e = /^(images|videos)$/.test(CONST.vim.trim());
+                scrollspan = e ? CONST.scrollspan : CONST.scrollspan2;
+                scrollbars = e ? CONST.scrollbars : CONST.scrollbars2;
+                setScrollButton(`#${CONST.rndidName}`, scrollspan, 50);
+                setScrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, scrollbars, 50);
+                setScrollButton(`#${CONST.rndidName} #${CONST.ggyx} input`, scrollbars, 50);
               } else {
                 debug(`//-> No scrolling detecting.`);
               }

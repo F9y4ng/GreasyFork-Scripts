@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2022.01.01.1
+// @version           2022.01.07.1
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -324,53 +324,92 @@
 
   const getNavigator = {
     type: (info, system = "other", browserArray = {}, browserInfo = "unknow") => {
-      const u = navigator.userAgent.toLowerCase();
-      switch (info) {
-        case "core":
-          return {
-            Trident: u.includes("trident") || u.includes("compatible"),
-            Presto: u.includes("presto"),
-            WebKit: u.includes("applewebkit"),
-            Gecko: u.includes("gecko") && !u.includes("khtml"),
-            EdgeHTML: u.includes("edge"),
-          };
-        case "system":
-          if (/windows|win32|win64|wow32|wow64/gi.test(u)) {
-            system = "Windows";
-          } else if (/macintosh|macintel|mac os x/gi.test(u) || u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/i)) {
-            system = "MacOS";
-          } else if (/x11/gi.test(u)) {
-            system = "Linux";
-          } else if (/android|adr/gi.test(u)) {
-            system = "Android";
-          } else if (/ios|iphone|ipad|ipod|iwatch/gi.test(u)) {
-            system = "iOS";
-          }
-          return system;
-        case "browser":
-          browserArray = {
-            IE: window.ActiveXObject || "ActiveXObject" in window,
-            Chromium: u.includes("chromium"),
-            Chrome: u.includes("chrome") && !u.includes("edg") && !u.includes("chromium"),
-            Firefox: u.includes("firefox") && u.includes("gecko"),
-            Opera: u.includes("presto") || u.includes("opr") || u.includes("opera"),
-            Safari: u.includes("safari") && !u.includes("chrome"),
-            Edge: u.includes("edg"),
-            QQBrowser: /qqbrowser/g.test(u),
-            Wechat: /micromessenger/g.test(u),
-            UCBrowser: /ucbrowser/g.test(u),
-            Sougou: /metasr|sogou/g.test(u),
-            Maxthon: /maxthon/g.test(u),
-            CentBrowser: /cent/g.test(u),
-          };
-          for (let i in browserArray) {
-            if (browserArray[i]) {
-              browserInfo = i;
+      if (navigator.userAgentData) {
+        const u = navigator.userAgentData;
+        const getBrowser = (ua, getBrand = true) => {
+          for (const brand_version of ua) {
+            if (getBrand) {
+              if (!brand_version.brand.includes("Chromium") && !brand_version.brand.includes("Not")) {
+                browserInfo = brand_version.brand.split(" ").slice(-1).toString().toLowerCase();
+                break;
+              }
+            } else {
+              if (brand_version.brand.includes("Chromium")) {
+                browserInfo = brand_version.version;
+                break;
+              }
             }
           }
           return browserInfo;
-        default:
-          return u;
+        };
+        switch (info) {
+          case "chromiumVersion":
+            return getBrowser(u.brands, false);
+          case "core":
+            return {
+              Trident: false,
+              Presto: false,
+              WebKit: true,
+              Gecko: false,
+            };
+          case "system":
+            return u.platform;
+          case "browser":
+            return getBrowser(u.brands);
+          default:
+            return u;
+        }
+      } else {
+        const u = navigator.userAgent.toLowerCase();
+        const version = u.match(/chrome\/([\d]+)/i);
+        switch (info) {
+          case "chromiumVersion":
+            return version ? version[1] : 0;
+          case "core":
+            return {
+              Trident: u.includes("trident") || u.includes("compatible"),
+              Presto: u.includes("presto"),
+              WebKit: u.includes("applewebkit"),
+              Gecko: u.includes("gecko") && !u.includes("khtml"),
+            };
+          case "system":
+            if (/windows|win32|win64|wow32|wow64/gi.test(u)) {
+              system = "Windows";
+            } else if (/macintosh|macintel|mac os x/gi.test(u) || u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/i)) {
+              system = "MacOS";
+            } else if (/linux|x11/gi.test(u)) {
+              system = "Linux";
+            } else if (/android|adr/gi.test(u)) {
+              system = "Android";
+            } else if (/ios|iphone|ipad|ipod|iwatch/gi.test(u)) {
+              system = "iOS";
+            }
+            return system;
+          case "browser":
+            browserArray = {
+              IE: window.ActiveXObject || "ActiveXObject" in window,
+              Chromium: u.includes("chromium"),
+              Chrome: u.includes("chrome") && !u.includes("edg") && !u.includes("chromium"),
+              Firefox: u.includes("firefox") && u.includes("gecko"),
+              Opera: u.includes("presto") || u.includes("opr") || u.includes("opera"),
+              Safari: u.includes("safari") && !u.includes("chrome"),
+              Edge: u.includes("edg"),
+              QQBrowser: /qqbrowser/g.test(u),
+              Wechat: /micromessenger/g.test(u),
+              UCBrowser: /ucbrowser/g.test(u),
+              Sougou: /metasr|sogou/g.test(u),
+              Maxthon: /maxthon/g.test(u),
+              CentBrowser: /cent/g.test(u),
+            };
+            for (let i in browserArray) {
+              if (browserArray[i]) {
+                browserInfo = i;
+              }
+            }
+            return browserInfo;
+          default:
+            return u;
+        }
       }
     },
   };
@@ -519,8 +558,7 @@
 
   function correctBoldErrorByStroke(s) {
     return new Promise(resolve => {
-      const version = getNavigator.type().match(/chrome\/([\d]+)/);
-      if (s && parseInt(version ? version[1] : 0) >= 96) {
+      if (s && parseInt(getNavigator.type("chromiumVersion")) >= 96) {
         const attrib = "fr-fix-stroke";
         qA(
           `:not(html,head,head *,base,style,link,script,noscript,iframe,br,hr,canvas,form,applet,source,embed,audio,video,track,figure,progress,img,svg,path,fr-configure *,fr-dialogbox *,fr-colorpicker *,gb-notice *):not([${attrib}])`
@@ -610,7 +648,7 @@
       const setValue = (s, g, mod, z = 0) => {
         switch (mod) {
           case 1:
-            if (s.target.parentNode && s.target.parentNode !== document) {
+            if (s && s instanceof MouseEvent && s.target.parentNode && s.target.parentNode !== document) {
               z = s.target.parentNode.getBoundingClientRect()[g] / (getNavigator.type("core").Gecko ? t : 1);
             }
             break;
@@ -622,7 +660,7 @@
         }
         return z;
       };
-      d = d || document.documentElement || document.body;
+      d = d instanceof Element ? d : document.documentElement || document.body;
       // window
       Object.defineProperties(unsafeWindow, {
         pageXOffset: {
@@ -1492,10 +1530,9 @@
         messageText: String(
           `<p><span style="font-style:italic;font-weight:700;font-size:20px;color:tomato">您好！</span>这是${s}<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="font:italic 900 22px/150% Candara,'Times New Roman'!important;color:tomato;margin-left:3px">V${defCon.curVersion}</span>, 以下为更新内容：</p>
             <p><ul id="${defCon.id.seed}_update">
-              <li class="${defCon.id.seed}_info">恭祝各位用户2022新年快乐，大展宏图，万事如意。</li>
-              <li class="${defCon.id.seed}_fix">修正字体缩放函数的在特殊情况下出现的bug。</li>
-              <li class="${defCon.id.seed}_fix">优化粗体描边的修正效率，减少CPU和内存占用。</li>
-              <li class="${defCon.id.seed}_fix">优化样式，修正bugs，优化代码。</li>
+              <li class="${defCon.id.seed}_add">Chromium预兼容navigator.userAgentData.</li>
+              <li class="${defCon.id.seed}_fix">修正字体缩放函数的在特殊情况下出现的bug<sup style="font-size:8px">[2]</sup>。</li>
+              <li class="${defCon.id.seed}_fix">修正bugs，优化代码。</li>
             </ul></p>
             <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
         ),
@@ -2412,7 +2449,7 @@
                   trueButtonText: "保 存",
                   falseButtonText: "帮助文档",
                   neutralButtonText: "取 消",
-                  messageText: `<p style="color:#666;font-size:14px!important">以下文本域可按预定格式增加您自定义的字体。请按照格式样例填写，输入格式有误将被自动过滤。重复添加字体将在字体表合并时被自动忽略。【功能小贴士：<span id="${defCon.id.seed}_addTools" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${defCon.id.seed}_custom_Fontlist" style="box-sizing:border-box;min-height:160px!important;min-width:388px!important;max-width:388px!important;resize:vertical;padding:5px;border:1px solid #999;border-radius:6px;font:normal 400 14px/150% monospace,'Courier New','Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;white-space:pre!important;cursor:text" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下：\n\n{ "ch": "中文字体名一", "en": "EN Fontname 1" }\u21b2\n{ "ch": "中文字体名二", "en": "EN Fontname 2" }\u21b2\n{ "ch": "中文字体名三", "en": "EN Fontname 3" }\u21b2\n\n（注意：\u21b2为换行符号，输入(Enter)回车即可）'>${customFontlist}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:crimson;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`,
+                  messageText: `<p style="color:#666;font-size:14px!important">以下文本域可按预定格式增加自定义字体。请用小贴士或按样例填写，输入有误将被自动过滤。与『<a href="${hostURI}#fontlist" target="_blank">内置字体表</a>』重复的字体将被自动忽略。【功能小贴士：<span id="${defCon.id.seed}_addTools" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${defCon.id.seed}_custom_Fontlist" style="box-sizing:border-box;min-height:160px!important;min-width:388px!important;max-width:388px!important;resize:vertical;padding:5px;border:1px solid #999;border-radius:6px;font:normal 400 14px/150% monospace,'Courier New','Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;white-space:pre!important;cursor:text" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下：\n\n{ "ch": "中文字体名一", "en": "EN Fontname 1" }\u21b2\n{ "ch": "中文字体名二", "en": "EN Fontname 2" }\u21b2\n{ "ch": "中文字体名三", "en": "EN Fontname 3" }\u21b2\n\n（注意：\u21b2为换行符号，输入(Enter)回车即可）'>${customFontlist}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:crimson;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`,
                   titleText: "自定义字体表",
                 });
                 qS(`#${defCon.id.seed}_addTools`).addEventListener("click", () => {
@@ -2510,8 +2547,7 @@
               await getCurrentFontName(CONST.fontFace, defCon.refont, defautlFont);
               if (ffaceT.checked && !CONST.fontFace) {
                 inputFont.setAttribute("placeholder", `正在恢复之前设置的字体…`);
-                sleep(500).then(() => {
-                  const submitPreview = qS(`#${defCon.id.submit} .${defCon.class.submit}[v-Preview="true"]`);
+                sleep(360).then((submitPreview = qS(`#${defCon.id.submit} .${defCon.class.submit}[v-Preview="true"]`)) => {
                   submitPreview ? submitPreview.click() : debug("\u27A4 v-Preview:", submitPreview);
                 });
               }
@@ -2680,8 +2716,9 @@
               setEffectIntoSubmit(fontCssT.value, CONST.fontCSS, defCon.values, fontCssT, submitButton);
               fontExT.value = defValue.fontEx;
               setEffectIntoSubmit(fontExT.value, CONST.fontEx, defCon.values, fontExT, submitButton);
-              const submitPreview = qS(`#${defCon.id.submit} .${defCon.class.submit}[v-Preview="true"]`);
-              submitPreview ? submitPreview.click() : debug("\u27A4 v-Preview:", submitPreview);
+              sleep(360).then((submitPreview = qS(`#${defCon.id.submit} .${defCon.class.submit}[v-Preview="true"]`)) => {
+                submitPreview ? submitPreview.click() : debug("\u27A4 v-Preview:", submitPreview);
+              });
             } else {
               smoothT.checked !== CONST.fontSmooth ? smoothT.click() : debug("\u27A4 <fontSmooth> NOT MODIFIED");
               ffaceT.checked !== CONST.fontFace ? ffaceT.click() : debug("\u27A4 <fontFace> NOT MODIFIED");
