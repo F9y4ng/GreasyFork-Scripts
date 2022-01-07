@@ -67,7 +67,7 @@
 
 简介：最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 
-> `version 4.0.20220107.1`
+> `version 4.0.20220107.2`
 
 `!!! 重大版本更新，请使用前仔细查看` [[脚本使用说明 - WIKI](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Google_Baidu_Switcher)] `New !!!`
 
@@ -77,6 +77,7 @@
 + Chromium预兼容navigator.userAgentData.
 @ 修正Google其他分类频道的样式错误。
 @ 修正Google搜索栏纠错功能造成的样式错误。
+@ 修正Google图片搜索的样式错误。
 ```
 
 ### **重要说明**

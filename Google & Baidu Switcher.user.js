@@ -5,7 +5,7 @@
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:ja         Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version         4.0.20220107.1
+// @version         4.0.20220107.2
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:zh  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
@@ -30,7 +30,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            Chromium预兼容navigator.userAgentData.\n修正Google其他分类频道的样式错误。\n修正Google搜索栏纠错功能造成的样式错误。
+// @note            Chromium预兼容navigator.userAgentData.\n修正Google其他分类频道的样式错误。\n修正Google搜索栏纠错功能造成的样式错误。\n修正Google图片搜索的样式错误。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -1583,6 +1583,13 @@
                 if (curretSite.SiteTypeID === newSiteType.GOOGLE) {
                   qS(SpanID).parentNode.style.width = "100%";
                   qS(SpanID).parentNode.style.minWidth = "100%";
+                  if (qS(SpanID) && getUrlParam("tbs").includes("sbi:")) {
+                    qS(SpanID).parentNode.parentNode.style.width = "fit-content";
+                    qS(SpanID).parentNode.parentNode.parentNode.style.width = "fit-content";
+                  } else {
+                    qS(SpanID).parentNode.parentNode.style.width = null;
+                    qS(SpanID).parentNode.parentNode.parentNode.style.width = null;
+                  }
                 }
               }
 
