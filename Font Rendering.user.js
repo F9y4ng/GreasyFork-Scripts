@@ -20,6 +20,7 @@
 // @downloadURL     https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
 // @require         https://greasyfork.org/scripts/437214-frcolorpicker/code/frColorPicker.js?version=1001053
 // @include         *
+// @exclude         *://github.dev/*
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
