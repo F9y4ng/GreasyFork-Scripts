@@ -30,7 +30,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            优化navigator.userAgentData相关函数，提高兼容性。/n修正Google按图搜索的样式判断错误*。
+// @note            优化navigator.userAgentData相关函数，提高兼容性。\n修正Google按图搜索的样式判断错误*。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand

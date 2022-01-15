@@ -7,5 +7,5 @@
 // @version       4.0.20220115.1
 // @author        F9y4ng
 // @namespace     https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
-// @note          优化navigator.userAgentData相关函数，提高兼容性。/n修正Google按图搜索的样式判断错误*。
+// @note          优化navigator.userAgentData相关函数，提高兼容性。\n修正Google按图搜索的样式判断错误*。
 // ==/UserScript==
