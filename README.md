@@ -15,7 +15,7 @@
 
 简介：无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的 Greasemonkey 脚本和浏览器插件。
 
-> `version 2022.01.07.1`
+> `version 2022.01.15.1`
 
 `!!! 重大版本更新，请使用前仔细查看` [[脚本使用说明 - WIKI](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering)] `New !!!`
 
@@ -24,9 +24,10 @@
 `!!! 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件 !!!`
 
 ```text
-+ Chromium预兼容navigator.userAgentData.
-@ 修正字体缩放函数的在特殊情况下出现的bug。
-@ 修正bugs，优化代码。
+@ 优化部分网站因iframe跨域预览造成的兼容性问题。
+@ 优化ContentSecurityPolicy在Github.dev的兼容性。
+@ 优化navigator.userAgentData相关函数的兼容性。
+@ 修正Bugs，优化UI样式，优化代码。
 ```
 
 ### **关于问题反馈**
@@ -67,17 +68,15 @@
 
 简介：最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 
-> `version 4.0.20220107.2`
+> `version 4.0.20220115.1`
 
 `!!! 重大版本更新，请使用前仔细查看` [[脚本使用说明 - WIKI](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Google_Baidu_Switcher)] `New !!!`
 
 `!!! 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它 !!!`
 
 ```text
-+ Chromium预兼容navigator.userAgentData.
-@ 修正Google其他分类频道的样式错误。
-@ 修正Google搜索栏纠错功能造成的样式错误。
-@ 修正Google图片搜索的样式错误。
+@ 优化navigator.userAgentData相关函数，提高兼容性。
+@ 修正Google按图搜索的样式判断错误*。
 ```
 
 ### **重要说明**

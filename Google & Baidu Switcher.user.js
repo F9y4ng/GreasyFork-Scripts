@@ -5,7 +5,7 @@
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:ja         Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version         4.0.20220107.2
+// @version         4.0.20220115.1
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:zh  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
@@ -30,7 +30,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            Chromium预兼容navigator.userAgentData.\n修正Google其他分类频道的样式错误。\n修正Google搜索栏纠错功能造成的样式错误。\n修正Google图片搜索的样式错误。
+// @note            优化navigator.userAgentData相关函数，提高兼容性。/n修正Google按图搜索的样式判断错误*。
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -256,94 +256,35 @@
   /* Get browser core & system parameters */
 
   const getNavigator = {
-    type: (info, system = "other", browserArray = {}, browserInfo = "unknow") => {
-      if (navigator.userAgentData) {
-        const u = navigator.userAgentData;
-        const getBrowser = (ua, getBrand = true) => {
-          for (const brand_version of ua) {
-            if (getBrand) {
-              if (!brand_version.brand.includes("Chromium") && !brand_version.brand.includes("Not")) {
-                browserInfo = brand_version.brand.split(" ").slice(-1).toString().toLowerCase();
-                break;
-              }
-            } else {
-              if (brand_version.brand.includes("Chromium")) {
-                browserInfo = brand_version.version;
-                break;
-              }
-            }
-          }
-          return browserInfo;
-        };
-        switch (info) {
-          case "chromiumVersion":
-            return getBrowser(u.brands, false);
-          case "core":
-            return {
-              Trident: false,
-              Presto: false,
-              WebKit: true,
-              Gecko: false,
-            };
-          case "system":
-            return u.platform;
-          case "browser":
-            return getBrowser(u.brands);
-          default:
-            return u;
-        }
+    uaData: navigator.userAgentData,
+    init: function (v = this.uaData) {
+      return v ? v : navigator.userAgent.toLowerCase();
+    },
+    core: function (u = JSON.stringify(this.init())) {
+      return {
+        Trident: u.includes("trident") || u.includes("compatible"),
+        Presto: u.includes("presto"),
+        WebKit: u.includes("applewebkit") || u.includes("Chromium"),
+        Gecko: u.includes("gecko") && !u.includes("khtml"),
+      };
+    },
+    system: function (u = this.init(), system = "Unknown") {
+      if (this.uaData) {
+        system = u.platform.toString();
       } else {
-        const u = navigator.userAgent.toLowerCase();
-        const version = u.match(/chrome\/([\d]+)/i);
-        switch (info) {
-          case "chromiumVersion":
-            return version ? version[1] : 0;
-          case "core":
-            return {
-              Trident: u.includes("trident") || u.includes("compatible"),
-              Presto: u.includes("presto"),
-              WebKit: u.includes("applewebkit"),
-              Gecko: u.includes("gecko") && !u.includes("khtml"),
-            };
-          case "system":
-            if (/windows|win32|win64|wow32|wow64/gi.test(u)) {
-              system = "Windows";
-            } else if (/macintosh|macintel|mac os x/gi.test(u) || u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/i)) {
-              system = "MacOS";
-            } else if (/linux|x11/gi.test(u)) {
-              system = "Linux";
-            } else if (/android|adr/gi.test(u)) {
-              system = "Android";
-            } else if (/ios|iphone|ipad|ipod|iwatch/gi.test(u)) {
-              system = "iOS";
-            }
-            return system;
-          case "browser":
-            browserArray = {
-              IE: window.ActiveXObject || "ActiveXObject" in window,
-              Chromium: u.includes("chromium"),
-              Chrome: u.includes("chrome") && !u.includes("edg") && !u.includes("chromium"),
-              Firefox: u.includes("firefox") && u.includes("gecko"),
-              Opera: u.includes("presto") || u.includes("opr") || u.includes("opera"),
-              Safari: u.includes("safari") && !u.includes("chrome"),
-              Edge: u.includes("edg"),
-              QQBrowser: /qqbrowser/g.test(u),
-              Wechat: /micromessenger/g.test(u),
-              UCBrowser: /ucbrowser/g.test(u),
-              Sougou: /metasr|sogou/g.test(u),
-              Maxthon: /maxthon/g.test(u),
-              CentBrowser: /cent/g.test(u),
-            };
-            for (let i in browserArray) {
-              if (browserArray[i]) {
-                browserInfo = i;
-              }
-            }
-            return browserInfo;
-          default:
-            return u;
+        if (/windows|win32|win64|wow32|wow64/gi.test(u)) {
+          system = "Windows";
+        } else if (/macintosh|macintel|mac os x/gi.test(u) || u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/i)) {
+          system = "macOS";
+        } else if (/linux|x11/gi.test(u)) {
+          system = "Linux";
+        } else if (/android|adr/gi.test(u)) {
+          system = "Android";
+        } else if (/ios|iphone|ipad|ipod|iwatch/gi.test(u)) {
+          system = "iOS";
         }
       }
+      return system;
     },
   };
 
@@ -392,7 +333,7 @@
     setTimeout(() => {
       if (qA(position + ` .${Notice.item}`).length <= 0) {
         qS(position) && qS(position).remove();
-        if (getNavigator.type("core").Gecko && defCon[iCId]) {
+        if (getNavigator.core().Gecko && defCon[iCId]) {
           document.removeEventListener("scroll", defCon[iCId]);
           delete defCon[iCId];
         }
@@ -643,7 +584,7 @@
 
       if (zoom && zoom !== 1) {
         thatNotice.style.cssText += `zoom:${1 / zoom}!important`;
-      } else if (getNavigator.type("core").Gecko && transform && transform !== "none") {
+      } else if (getNavigator.core().Gecko && transform && transform !== "none") {
         const ratio = Number(transform.split(",")[3]) || 1;
         if (ratio && ratio !== 1) {
           if (thatNotice) {
@@ -1389,7 +1330,7 @@
       }
     }
 
-    const isMac = getNavigator.type("system") === "MacOS";
+    const isMac = getNavigator.system().includes("macOS");
 
     const menuManager = {
       isUsedSwitcher: (_status, _data, Tips) => {
@@ -1583,7 +1524,7 @@
                 if (curretSite.SiteTypeID === newSiteType.GOOGLE) {
                   qS(SpanID).parentNode.style.width = "100%";
                   qS(SpanID).parentNode.style.minWidth = "100%";
-                  if (qS(SpanID) && getUrlParam("tbs").includes("sbi:")) {
+                  if (qS(SpanID) && getUrlParam("tbs").startsWith("sbi")) {
                     qS(SpanID).parentNode.parentNode.style.width = "fit-content";
                     qS(SpanID).parentNode.parentNode.parentNode.style.width = "fit-content";
                   } else {
