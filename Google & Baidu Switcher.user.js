@@ -5,7 +5,7 @@
 // @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en         Google & baidu & Bing Switcher (ALL in One)
 // @name:ja         Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version         4.0.20220115.1
+// @version         4.1.20220122.1
 // @author          F9y4ng
 // @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
 // @description:zh  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
@@ -30,7 +30,7 @@
 // @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible      Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible      Safari 兼容Tampermonkey • Safari
-// @note            优化navigator.userAgentData相关函数，提高兼容性。\n修正Google按图搜索的样式判断错误*。
+// @note            优化RAF函数, 提高代码执行性能。\n修正一些bugs.
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
 // @grant           GM.registerMenuCommand
@@ -168,6 +168,81 @@
     },
   };
   defCon.rName = defCon.randString(7, "char");
+
+  /* New RAF setTimeout/setInterval */
+
+  const prefixes = ["ms", "moz", "webkit", "o"];
+  for (let l = 0; l < prefixes.length && !window.requestAnimationFrame; ++l) {
+    window.requestAnimationFrame = window[`${prefixes[l]}RequestAnimationFrame`];
+    window.cancelAnimationFrame = window[`${prefixes[l]}CancelAnimationFrame`] || window[`${prefixes[l]}CancelRequestAnimationFrame`];
+  }
+
+  if (!window.requestAnimationFrame) {
+    window.requestAnimationFrame = (callback, element, lastTime = 0) => {
+      const currTime = Date.now();
+      const timeToCall = Math.max(0, 16.7 - (currTime - lastTime));
+      const rafId = window.setTimeout(() => {
+        callback(currTime + timeToCall);
+      }, timeToCall);
+      lastTime = currTime + timeToCall;
+      return rafId;
+    };
+  }
+
+  if (!window.cancelAnimationFrame) {
+    window.cancelAnimationFrame = rafId => {
+      clearTimeout(rafId);
+    };
+  }
+
+  class RAF {
+    constructor() {
+      this._timerMap = {
+        timeout: {},
+        interval: {},
+      };
+    }
+
+    _ticking(_fn, type = "interval", interval = 100, lastTime = Date.now()) {
+      const timerSymbol = Symbol(type);
+      const step = () => {
+        this._setTimerMap(timerSymbol, type, step);
+        if (Date.now() - lastTime >= interval || interval < 17) {
+          _fn.call();
+          lastTime = type === "interval" ? Date.now() : lastTime;
+          type === "timeout" && this.clearTimeout(timerSymbol);
+        }
+      };
+      this._setTimerMap(timerSymbol, type, step);
+      return timerSymbol;
+    }
+
+    _setTimerMap(timerSymbol, type, step) {
+      const stack = window.requestAnimationFrame(step);
+      this._timerMap[type][timerSymbol] = stack;
+    }
+
+    setTimeout(fn, interval) {
+      return this._ticking(fn, "timeout", interval);
+    }
+
+    clearTimeout(timer) {
+      window.cancelAnimationFrame(this._timerMap.timeout[timer]);
+    }
+
+    setInterval(fn, interval) {
+      return this._ticking(fn, "interval", interval);
+    }
+
+    clearInterval(timer) {
+      window.cancelAnimationFrame(this._timerMap.interval[timer]);
+    }
+  }
+
+  const raf = new RAF();
+
+  /* Abbreviated function naming */
+
   const qA = str => {
     return Array.prototype.slice.call(document.querySelectorAll(str), 0);
   };
@@ -306,7 +381,7 @@
       element.classList.add(noticeJsModalClassName);
       element.classList.add(`${Notice.noticejs}-modal-open`);
       document.body.appendChild(element);
-      setTimeout(() => {
+      raf.setTimeout(() => {
         element.className = noticeJsModalClassName;
       }, 200);
     }
@@ -317,12 +392,12 @@
     if (options.animation !== null && options.animation.close !== null) {
       item.className += " " + options.animation.close;
     }
-    setTimeout(() => {
+    raf.setTimeout(() => {
       item.remove();
     }, 200);
     if (options.modal === true && qA(`[${Notice.noticejs}-modal='true']`).length >= 1) {
       qS(`.${Notice.noticejs}-modal`).className += ` ${Notice.noticejs}-modal-close`;
-      setTimeout(() => {
+      raf.setTimeout(() => {
         qS(`.${Notice.noticejs}-modal`).remove();
       }, 500);
     }
@@ -330,7 +405,7 @@
     const iCId = iC ? iC.id.replace(`${Notice.noticejs}-`, "").trim() : `bottomRight`;
     const iCC = iC ? iC.className.replace(`${Notice.noticejs}`, "").trim() : `${Notice.noticejs}-bottomRight`;
     const position = "." + iCC;
-    setTimeout(() => {
+    raf.setTimeout(() => {
       if (qA(position + ` .${Notice.item}`).length <= 0) {
         qS(position) && qS(position).remove();
         if (getNavigator.core().Gecko && defCon[iCId]) {
@@ -466,15 +541,15 @@
       element.appendChild(bar);
       if (options.progressBar === true && typeof options.timeout !== "boolean" && options.timeout !== false) {
         let width = 100;
-        const id = setInterval(() => {
+        const id = raf.setInterval(() => {
           if (width <= 0) {
-            clearInterval(id);
+            raf.clearInterval(id);
             let item = element.closest(`div.${Notice.item}`);
             if (options.animation !== null && options.animation.close !== null) {
               item.className = item.className.replace(new RegExp("(?:^|\\s)" + options.animation.open + "(?:\\s|$)"), " ");
               item.className += " " + options.animation.close;
               const close_time = parseInt(options.timeout) + 500;
-              setTimeout(() => {
+              raf.setTimeout(() => {
                 closeItem(item);
               }, close_time);
             } else {
@@ -641,8 +716,8 @@
   const callback_Countdown = {
     onShow: [
       (Interval = 3) => {
-        const m = setInterval(() => {
-          Interval ? --Interval : clearInterval(m);
+        const m = raf.setInterval(() => {
+          Interval ? --Interval : raf.clearInterval(m);
           const emText = qS(`.${defCon.rName} dl dd em`);
           if (emText) {
             emText.innerHTML = Interval;
@@ -705,17 +780,17 @@
     const controller = new window.AbortController();
     const signal = controller.signal;
     return new Promise((resolve, reject) => {
-      const t = setTimeout(() => {
+      const t = raf.setTimeout(() => {
         controller.abort();
         resolve(new Response("timeout", { status: 504, statusText: `Request timeout. (User-Defined: ${time}ms)` }));
       }, time);
       fetch(url, { signal: signal, ...options }).then(
         res => {
-          clearTimeout(t);
+          raf.clearTimeout(t);
           resolve(res);
         },
         err => {
-          clearTimeout(t);
+          raf.clearTimeout(t);
           reject(err);
         }
       );
@@ -910,7 +985,7 @@
                 );
               }
               if (!defCon.isNoticed || s || IS_OPEN_DEBUG) {
-                setTimeout(() => {
+                raf.setTimeout(() => {
                   GMnotification(
                     Notice.noticeHTML(
                       `<dt>${defCon.scriptName}</dt>
@@ -948,7 +1023,7 @@
                 if (updateNote) {
                   showdDetail = `<dd onmouseover="this.previousElementSibling.previousElementSibling.style.display='block';this.style.display='none'" style="text-align:center">&gt;&gt; 查看更新内容 &lt;&lt;</dd>`;
                 }
-                setTimeout(() => {
+                raf.setTimeout(() => {
                   GMnotification(
                     Notice.noticeHTML(
                       `<dt>${defCon.scriptName}</dt>
@@ -980,7 +1055,7 @@
                   "color:red",
                   "color:0"
                 );
-                setTimeout(() => {
+                raf.setTimeout(() => {
                   GMnotification(
                     Notice.noticeHTML(
                       `<dt>${defCon.scriptName}</dt>
@@ -1330,7 +1405,7 @@
       }
     }
 
-    const isMac = getNavigator.system().includes("macOS");
+    const isMac = getNavigator.system().startsWith("mac");
 
     const menuManager = {
       isUsedSwitcher: (_status, _data, Tips) => {
@@ -1359,11 +1434,11 @@
         this.menuRemove(in_Use_Configure);
         this.menuRemove(in_UpdateCheck_ID);
 
-        in_Use_Configure = GMregisterMenuCommand(`\ufff0\ud83c\udfaf【脚本参数】功能设置开关${Hotkey ? "(" + (isMac ? "Y" : "E") + ")" : ""}`, () => {
+        in_Use_Configure = GMregisterMenuCommand(`\ufff0\ud83c\udfaf【脚本参数】功能设置开关${Hotkey ? "(" + String.fromCharCode(isMac ? 89 : 69) + ")" : ""}`, () => {
           addActionConfigure();
         });
         _Use_Bing__ = e ? "\ufff2\u2714\ufe0f【已开启】" : "\ufff2\u274c【已关闭】";
-        _use_Bing_ID = GMregisterMenuCommand(`${_Use_Bing__}Bing 搜索跳转${Hotkey ? "(B)" : ""}`, () => {
+        _use_Bing_ID = GMregisterMenuCommand(`${_Use_Bing__}Bing 搜索跳转${Hotkey ? "(" + String.fromCharCode(66) + ")" : ""}`, () => {
           if (Date.now() - defCon.timer > 4e3) {
             this.isUsedSwitcher(e, _data, "Bing 按钮");
             defCon.timer = Date.now();
@@ -1372,34 +1447,40 @@
 
         if (checkUpdate) {
           if (CONST.isVDResult) {
-            in_UpdateCheck_ID = GMregisterMenuCommand(`\ufff5\ud83e\udded【版本更新】从服务器实时检查${Hotkey ? "(" + (isMac ? "L" : "V") + ")" : ""}`, async () => {
-              if (Date.now() - defCon.timer > 30e3) {
-                GMdeleteValue("_Check_Version_Expire_");
-                debug("//-> up-to-date? ", Boolean(await checkVersion(checkUpdate)));
-                defCon.timer = Date.now();
-              } else {
-                const remainTimer = 30 - Math.floor((Date.now() - defCon.timer) / 1e3);
-                GMnotification(Notice.noticeHTML(`<dd>更新检测过于频繁，服务器受不鸟啦，请${remainTimer}秒后重试！</dd>`), `${Notice.info}`, false, 15);
+            in_UpdateCheck_ID = GMregisterMenuCommand(
+              `\ufff5\ud83e\udded【版本更新】从服务器实时检查${Hotkey ? "(" + String.fromCharCode(isMac ? 76 : 86) + ")" : ""}`,
+              async () => {
+                if (Date.now() - defCon.timer > 30e3) {
+                  GMdeleteValue("_Check_Version_Expire_");
+                  debug("//-> up-to-date? ", Boolean(await checkVersion(checkUpdate)));
+                  defCon.timer = Date.now();
+                } else {
+                  const remainTimer = 30 - Math.floor((Date.now() - defCon.timer) / 1e3);
+                  GMnotification(Notice.noticeHTML(`<dd>更新检测过于频繁，服务器受不鸟啦，请${remainTimer}秒后重试！</dd>`), `${Notice.info}`, false, 15);
+                }
               }
-            });
+            );
           } else {
-            in_UpdateCheck_ID = GMregisterMenuCommand(`\ufff5\ud83d\udcdb【版本更新】已关闭 \u267b 重新开启${Hotkey ? "(" + (isMac ? "L" : "V") + ")" : ""}`, () => {
-              if (Date.now() - defCon.timer > 4e3) {
-                _data.VerDetAuto = true;
-                GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
-                GMdeleteValue("_Check_Version_Expire_");
-                GMdeleteValue("_nCount_");
-                debug("//-> Destroy cache & session when restart detection.");
-                GMnotification(
-                  Notice.noticeHTML(`<dd class="${Notice.center}">更新检测已<kbd class="im">开启</kbd>，网页在<em>3</em>秒后刷新！</dd>`),
-                  `${Notice.info}`,
-                  true,
-                  30,
-                  callback_Countdown
-                );
-                defCon.timer = Date.now();
+            in_UpdateCheck_ID = GMregisterMenuCommand(
+              `\ufff5\ud83d\udcdb【版本更新】已关闭 \u267b 重新开启${Hotkey ? "(" + String.fromCharCode(isMac ? 76 : 86) + ")" : ""}`,
+              () => {
+                if (Date.now() - defCon.timer > 4e3) {
+                  _data.VerDetAuto = true;
+                  GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
+                  GMdeleteValue("_Check_Version_Expire_");
+                  GMdeleteValue("_nCount_");
+                  debug("//-> Destroy cache & session when restart detection.");
+                  GMnotification(
+                    Notice.noticeHTML(`<dd class="${Notice.center}">更新检测已<kbd class="im">开启</kbd>，网页在<em>3</em>秒后刷新！</dd>`),
+                    `${Notice.info}`,
+                    true,
+                    30,
+                    callback_Countdown
+                  );
+                  defCon.timer = Date.now();
+                }
               }
-            });
+            );
           }
         }
       },
@@ -1480,7 +1561,7 @@
         try {
           const doStyName = `${CONST.rndclassName}`;
           const doStyle = CONST.noticeCss + curretSite.StyleCode + curretSite.keyStyle;
-          addStyle(doStyle, doStyName, "head");
+          addStyle(doStyle, doStyName, document.head);
         } catch (e) {
           error("//-> %csearchManager.insertCSS:\n%c%s", "font-weight:bold", "font-weight:normal", e);
         }
@@ -1625,7 +1706,7 @@
               this.insertSearchButton();
               this.scrollDetect();
             }
-            return qS(`.${CONST.rndclassName}`) && qS(`#${CONST.rndidName}`);
+            return !!(qS(`.${CONST.rndclassName}`) && qS(`#${CONST.rndidName}`));
           },
           50,
           true
@@ -1700,7 +1781,7 @@
         if (getRealHostName() !== getRealHostName(google) && !sessionStorage.getItem("_global_google_")) {
           sessionStorage.setItem("_global_google_", 1);
           try {
-            setTimeout(() => {
+            raf.setTimeout(() => {
               defCon.s = GMopenInTab(`https://${google}/ncr`, true);
               GMnotification(Notice.noticeHTML(`<dd class="${Notice.center}"><span>智能跳转</span>即将跳转至Google国际站：<br/>${google}</dd>`), `${Notice.info}`, true, 20, {
                 onClose: [
@@ -1758,31 +1839,36 @@
       }
     }
 
-    function addStyle(css, className, addToTarget, isReload = false, initType = "text/css", reNew = false) {
+    function addStyle(css, className, addToTarget, T = "S", isReload = false, initType = "text/css", reNew = false) {
       setRAFInterval(
         () => {
-          let addTo = qS(addToTarget);
-          if (typeof addToTarget === "undefined") {
-            addTo = document.head || document.body || document.documentElement || document;
-          }
-          if (typeof addToTarget === "undefined" || (typeof addToTarget !== "undefined" && qS(addToTarget))) {
-            if (isReload === true && qS(`.${className}`)) {
-              safeRemove(`.${className}`);
-              reNew = true;
-            } else if (isReload === false && qS(`.${className}`)) {
-              return true;
+          try {
+            if (typeof addToTarget === "object" && addToTarget) {
+              if (isReload === true && addToTarget.querySelector(`.${className}`)) {
+                safeRemove(`.${className}`, addToTarget);
+                debug(`//-> style[${T}] View:`, Boolean(addToTarget.querySelector(`.${className}`)));
+                while (addToTarget.querySelector(`style[id^="${T}"]`)) {
+                  safeRemove(`style[id^="${T}"]`, addToTarget);
+                  debug(`//-> style[${T}] Review:`, Boolean(addToTarget.querySelector(`style[id^="${T}"]`)));
+                }
+                reNew = true;
+              } else if (isReload === false && addToTarget.querySelector(`.${className}`)) {
+                return true;
+              }
+              const cssNode = cE("style");
+              cssNode.className = className && typeof className === "string" ? className : defCon.randString(12, "mix");
+              cssNode.id = T + Date.now().toString().slice(-8);
+              cssNode.media = "screen";
+              cssNode.setAttribute("type", initType);
+              cssNode.innerText = css;
+              addToTarget.appendChild(cssNode);
+              return !!(reNew && addToTarget.querySelector(`.${className}`));
+            } else {
+              return !reNew;
             }
-            const cssNode = cE("style");
-            if (className !== null) {
-              cssNode.className = className;
-            }
-            cssNode.id = "S" + Date.now().toString().slice(-8);
-            cssNode.setAttribute("type", initType);
-            cssNode.innerHTML = css;
-            addTo.appendChild(cssNode);
-            if (reNew && qS(`.${className}`)) {
-              return true;
-            }
+          } catch (e) {
+            error("//-> addStyle", e);
+            return true;
           }
         },
         20,
@@ -1841,29 +1927,20 @@
       }
     }
 
-    function setRAFInterval(callback, period, runNow, times = 0) {
-      const needCount = (period / 1000) * 60;
+    function setRAFInterval(callback, interval, runNow) {
       if (runNow === true) {
         const shouldFinish = callback();
         if (shouldFinish) {
           return;
         }
       }
-      const step = () => {
-        if (times < needCount) {
-          times++;
-          requestAnimationFrame(step);
-        } else {
-          const shouldFinish = callback() || false;
-          if (!shouldFinish) {
-            times = 0;
-            requestAnimationFrame(step);
-          } else {
-            return;
-          }
+      const tickId = raf.setInterval(() => {
+        const shouldFinish = callback() || false;
+        if (shouldFinish) {
+          raf.clearInterval(tickId);
+          return;
         }
-      };
-      requestAnimationFrame(step);
+      }, interval);
     }
 
     /* Let`s enjoy it! */
