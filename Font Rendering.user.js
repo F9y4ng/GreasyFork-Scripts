@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2022.01.22.1
+// @version           2022.01.29.1
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -18,7 +18,7 @@
 // @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL       https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.meta.js
 // @downloadURL     https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
-// @require         https://greasyfork.org/scripts/437214-frcolorpicker/code/frColorPicker.js?version=1011067
+// @require         https://greasyfork.org/scripts/437214-frcolorpicker/code/frColorPicker.js?version=1011323
 // @include         *
 // @grant           GM_info
 // @grant           GM_registerMenuCommand
@@ -78,7 +78,7 @@
     GMopenInTab = GM_openInTab;
   }
 
-  /* default CONST Values */
+  /* default Const Values & Functions */
 
   const defCon = {
     values: [],
@@ -90,7 +90,7 @@
     curVersion: GMinfo.script.version,
     scriptName: getScriptNameViaLanguage(),
     options: isGM ? false : { active: true, insert: true, setParent: true },
-    elCompat: (document.compatMode || "") === "CSS1Compat" ? document.documentElement : document.body,
+    elCompat: document.compatMode === "CSS1Compat" ? document.documentElement : document.body,
     encrypt: n => {
       return window.btoa(encodeURIComponent(n));
     },
@@ -300,18 +300,19 @@
   };
 
   const DEFAULT_ARRAY = [];
-  const curHostName = defCon.getHostName();
-  const curWindowTop = defCon.isWinTop();
-  const hostURI = defCon.decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkY0MTY2ODg=");
-  const fontListIMG = defCon.decrypt("aHR0cHMlM0ElMkYlMkZ6My5heDF4LmNvbSUyRjIwMjElMkYwOSUyRjA0JTJGaDJLdWRLLmdpZg==");
-  const loadingIMG = defCon.decrypt("aHR0cHMlM0ElMkYlMkZpbWcuemNvb2wuY24lMkZjb21tdW5pdHklMkYwMzhkZGU0NThmOWE4NzRhODAxMjE2MGY3NDE3ZjZlLmdpZg==");
+  const RANDOM_ID = defCon.id.seed;
+  const CUR_HOST_NAME = defCon.getHostName();
+  const CUR_WINDOW_TOP = defCon.isWinTop();
+  const HOST_URI = defCon.decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkY0MTY2ODg=");
+  const FONTLIST_IMG = defCon.decrypt("aHR0cHMlM0ElMkYlMkZ6My5heDF4LmNvbSUyRjIwMjElMkYwOSUyRjA0JTJGaDJLdWRLLmdpZg==");
+  const LOADING_IMG = defCon.decrypt("aHR0cHMlM0ElMkYlMkZpbWcuemNvb2wuY24lMkZjb21tdW5pdHklMkYwMzhkZGU0NThmOWE4NzRhODAxMjE2MGY3NDE3ZjZlLmdpZg==");
 
   /* New RAF setTimeout/setInterval */
 
-  const prefixes = ["ms", "moz", "webkit", "o"];
-  for (let l = 0; l < prefixes.length && !window.requestAnimationFrame; ++l) {
-    window.requestAnimationFrame = window[`${prefixes[l]}RequestAnimationFrame`];
-    window.cancelAnimationFrame = window[`${prefixes[l]}CancelAnimationFrame`] || window[`${prefixes[l]}CancelRequestAnimationFrame`];
+  const PREFIXES = ["ms", "moz", "webkit", "o"];
+  for (let l = 0; l < PREFIXES.length && !window.requestAnimationFrame; ++l) {
+    window.requestAnimationFrame = window[`${PREFIXES[l]}RequestAnimationFrame`];
+    window.cancelAnimationFrame = window[`${PREFIXES[l]}CancelAnimationFrame`] || window[`${PREFIXES[l]}CancelRequestAnimationFrame`];
   }
 
   if (!window.requestAnimationFrame) {
@@ -648,7 +649,7 @@
       if (s && parseInt(getNavigator.chromiumVersion()) >= 96) {
         const attrib = "fr-fix-stroke";
         qA(
-          `:not(html,head,head *,base,style,link,script,noscript,iframe,br,hr,canvas,form,applet,source,embed,audio,video,track,figure,progress,img,svg,path,fr-configure *,fr-dialogbox *,fr-colorpicker *,gb-notice *):not([${attrib}])`
+          `:not(html,head,head *,base,style,link,script,noscript,iframe,br,hr,canvas,form,applet,source,embed,audio,video,track,figure,progress,img,svg,path,[${attrib}],fr-configure *,fr-dialogbox *,fr-colorpicker *,gb-notice *)`
         ).forEach(item => {
           if (window.getComputedStyle(item, null).getPropertyValue("font-weight") >= 600) {
             item.setAttribute(attrib, "true");
@@ -680,12 +681,10 @@
         expired: Date.now() + exp,
       };
     },
-
     set: (key, options) => {
       const obj = defCon.encrypt(JSON.stringify(cache.value(options)));
       localStorage.setItem(key, obj);
     },
-
     get: key => {
       const obj = localStorage.getItem(key);
       if (!obj) {
@@ -710,7 +709,6 @@
         }
       }
     },
-
     remove: key => {
       localStorage.removeItem(key);
     },
@@ -1017,7 +1015,7 @@
     _appendfrDialog() {
       const container = this.container;
       const diag = this.frDialog;
-      if (curWindowTop && container && !qS(`#${defCon.id.dialogbox}`)) {
+      if (CUR_WINDOW_TOP && container && !qS(`#${defCon.id.dialogbox}`)) {
         this.parent.appendChild(container);
         sleep(100).then(() => {
           diag.style.opacity = 1;
@@ -1130,11 +1128,11 @@
   class SupportFontFamily {
     constructor() {
       const baseFonts = ["monospace", "serif", "Georgia", "sans-serif", "Tahoma"];
-      const testString = "这是测试、這是測試：1234567890, WWWwwwMMMmmmLlOoIi.";
+      const testString = "这是测试、這是測試\uff1a1234567890, WWWwwwMMMmmmLlOoIi.";
       const testSize = "72px";
       const h = qS("body");
       const s = cE("fr-fontfamily");
-      s.classList.add(`glyphs-${defCon.id.seed}`, `fontTest-${defCon.id.seed}`);
+      s.classList.add(`glyphs-${RANDOM_ID}`, `fontTest-${RANDOM_ID}`);
       s.id = `${defCon.id.fontTest}`;
       s.innerHTML = trustedTypesPolicy.createHTML(testString);
       let defaultWidth = {};
@@ -1327,11 +1325,11 @@
       fsearch: fontData => {
         const fHtml = String(
           `<div id="${defCon.id.selector}">
-            <span class="${defCon.class.spanlabel}">已选择字体：<span id="${defCon.id.cleaner}">[清空]</span></span>
+            <span class="${defCon.class.spanlabel}">已选择字体\uff1a<span id="${defCon.id.cleaner}">[清空]</span></span>
             <div class="${defCon.class.selector}"></div>
           </div>
           <div class="${defCon.class.selectFontId}">
-            <span class="${defCon.class.spanlabel}">设置字体，请选择：</span>
+            <span class="${defCon.class.spanlabel}">设置字体，请选择\uff1a</span>
             <input type="search" placeholder="输入关键字可检索字体" autocomplete="off" class="${defCon.class.placeholder}">
             <dl style="display:none"></dl>
             <span class="${defCon.class.tooltip} ${defCon.class.ps1}" id="${defCon.id.fonttooltip}">
@@ -1503,7 +1501,7 @@
 
   /* define default value */
 
-  const defValue = {
+  const INITIAL_VALUES = {
     fontSelect: `'Microsoft YaHei',system-ui,-apple-system,BlinkMacSystemFont,sans-serif,'iconfont','icomoon','FontAwesome','IcoFont','Material Icons Extended','Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji','Android Emoji',EmojiSymbols,'emojione mozilla','twemoji mozilla'`,
     fontFace: true,
     fontSmooth: true,
@@ -1514,10 +1512,10 @@
     fontCSS: `:not(i):not(.fa):not([class*='icon']):not([class*='vjs-']):not([class*='glyph'])`,
     fontEx: `input,select,button,textarea,kbd,pre,pre *,code,code *`,
   };
-  defCon.scriptAuthor = GMinfo.scriptMetaStr.match(/(\u0040\u0061\u0075\u0074\u0068\u006f\u0072\s+)(\S+)/)[2];
-  defCon.feedback = GMinfo.scriptMetaStr.match(/(\u0040\u0073\u0075\u0070\u0070\u006f\u0072\u0074\u0055\u0052\u004c\s+)(\S+)/)[2];
+  const SCRIPT_AUTHOR = GMinfo.scriptMetaStr.match(/(\u0040\u0061\u0075\u0074\u0068\u006f\u0072\s+)(\S+)/)[2];
+  const FEEDBACK_URI = GMinfo.scriptMetaStr.match(/(\u0040\u0073\u0075\u0070\u0070\u006f\u0072\u0074\u0055\u0052\u004c\s+)(\S+)/)[2];
   const ROOT_SECRET_KEY = `\u8ab1\u004a\u0056\u0069\u0059\u7409\u67d3\u5b7a\u80ba\u0070\u0032\u004f\u64d3\u0030\u8151\u0074\u5c80\u5b9a\u81ba\u0065`;
-  const CONST = {};
+  const CONST_VALUES = {};
 
   /* Determine whether the DOM is loaded */
 
@@ -1564,7 +1562,7 @@
     /* eslint-disable no-alert */
     /* initialling Menus */
 
-    if (curWindowTop && !isGM) {
+    if (CUR_WINDOW_TOP && !isGM) {
       loading = GMregisterMenuCommand("\ufff0\ud83d\udd52 正在载入脚本菜单，请稍候…", () => {});
     }
 
@@ -1600,7 +1598,7 @@
 
     const bool = true;
     const res = Boolean(rebuild);
-    if (curWindowTop) {
+    if (CUR_WINDOW_TOP) {
       if (res === bool && rebuild !== undefined) {
         GMdeleteValue("_fonts_set_");
         GMdeleteValue("_Exclude_site_");
@@ -1628,11 +1626,11 @@
         trueButtonText: "好，去看看",
         falseButtonText: "不，算了吧",
         messageText: String(
-          `<p><span style="font-style:italic;font-weight:700;font-size:20px;color:tomato">您好！</span>这是${s}<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="font:italic 900 22px/150% Candara,'Times New Roman'!important;color:tomato;margin-left:3px">V${defCon.curVersion}</span>, 以下为更新内容：</p>
-            <p><ul id="${defCon.id.seed}_update">
-              <li class="${defCon.id.seed}_fix">修正初始值、优化渲染参数，如遇异常请重置重新配置。</li>
-              <li class="${defCon.id.seed}_fix">优化RAFInterval/RAFTimeout, 提高代码执行性能。</li>
-              <li class="${defCon.id.seed}_fix">修正Bugs, 修正CSS错误，优化代码。</li>
+          `<p><span style="font-style:italic;font-weight:700;font-size:20px;color:tomato">您好\uff01</span>这是${s}<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="font:italic 900 22px/150% Candara,'Times New Roman'!important;color:tomato;margin-left:3px">V${defCon.curVersion}</span>, 以下为更新内容\uff1a</p>
+            <p><ul id="${RANDOM_ID}_update">
+              <li class="${RANDOM_ID}_info">牛劲冲天去，虎威贺岁来 — 恭祝🐯年吉祥，🐯🐯生威！</li>
+              <li class="${RANDOM_ID}_fix">修正颜色选择器自定义输入时alpha通道默认值的bug.</li>
+              <li class="${RANDOM_ID}_fix">修正一些问题，优化CSS，优化代码。</li>
             </ul></p>
             <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
         ),
@@ -1644,10 +1642,10 @@
       frDialog = null;
     };
 
-    if (curVersion !== defCon.curVersion && curWindowTop) {
+    if (curVersion !== defCon.curVersion && CUR_WINDOW_TOP) {
       addLoadEvents(() => {
         if (!isCloseTip) {
-          hintUpdateInfo(`${hostURI}#update`, curVersion);
+          hintUpdateInfo(`${HOST_URI}#update`, curVersion);
         }
         _config_data_.curVersion = defCon.curVersion;
         GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
@@ -1664,7 +1662,7 @@
 
     function updateExsitesIndex(e) {
       for (let i = 0; i < e.length; i++) {
-        if (e[i] === curHostName) {
+        if (e[i] === CUR_HOST_NAME) {
           return i;
         }
       }
@@ -1681,7 +1679,7 @@
     /* Set Default Value & initialize */
 
     let fontValue, domainValue, domainValueIndex;
-    function updateDomainsIndex(s, t = curHostName) {
+    function updateDomainsIndex(s, t = CUR_HOST_NAME) {
       for (let i = 0; i < s.length; i++) {
         if (s[i].domain === t) {
           return i;
@@ -1698,25 +1696,25 @@
 
     if (!fonts) {
       saveData("_fonts_set_", {
-        fontSelect: defValue.fontSelect,
-        fontFace: defValue.fontFace,
-        fontStroke: defValue.fontStroke,
-        fontShadow: defValue.fontShadow,
-        fontSize: defValue.fontSize,
-        shadowColor: defValue.shadowColor,
-        fontSmooth: defValue.fontSmooth,
-        fontCSS: defValue.fontCSS,
-        fontEx: defValue.fontEx,
+        fontSelect: INITIAL_VALUES.fontSelect,
+        fontFace: INITIAL_VALUES.fontFace,
+        fontStroke: INITIAL_VALUES.fontStroke,
+        fontShadow: INITIAL_VALUES.fontShadow,
+        fontSize: INITIAL_VALUES.fontSize,
+        shadowColor: INITIAL_VALUES.shadowColor,
+        fontSmooth: INITIAL_VALUES.fontSmooth,
+        fontCSS: INITIAL_VALUES.fontCSS,
+        fontEx: INITIAL_VALUES.fontEx,
       });
-      CONST.fontSelect = defValue.fontSelect;
-      CONST.fontFace = defValue.fontFace;
-      CONST.fontStroke = defValue.fontStroke;
-      CONST.fontShadow = defValue.fontShadow;
-      CONST.fontSize = defValue.fontSize;
-      CONST.shadowColor = defValue.shadowColor;
-      CONST.fontSmooth = defValue.fontSmooth;
-      CONST.fontCSS = defValue.fontCSS;
-      CONST.fontEx = defValue.fontEx;
+      CONST_VALUES.fontSelect = INITIAL_VALUES.fontSelect;
+      CONST_VALUES.fontFace = INITIAL_VALUES.fontFace;
+      CONST_VALUES.fontStroke = INITIAL_VALUES.fontStroke;
+      CONST_VALUES.fontShadow = INITIAL_VALUES.fontShadow;
+      CONST_VALUES.fontSize = INITIAL_VALUES.fontSize;
+      CONST_VALUES.shadowColor = INITIAL_VALUES.shadowColor;
+      CONST_VALUES.fontSmooth = INITIAL_VALUES.fontSmooth;
+      CONST_VALUES.fontCSS = INITIAL_VALUES.fontCSS;
+      CONST_VALUES.fontEx = INITIAL_VALUES.fontEx;
     } else {
       fontValue = JSON.parse(defCon.decrypt(fonts));
       if (domains) {
@@ -1724,34 +1722,34 @@
         domainValueIndex = updateDomainsIndex(domainValue);
       }
       if (domainValueIndex !== undefined) {
-        CONST.fontSelect = filterHtmlToText(domainValue[domainValueIndex].fontSelect);
-        CONST.fontFace = Boolean(domainValue[domainValueIndex].fontFace);
-        CONST.fontStroke = Number(domainValue[domainValueIndex].fontStroke) || 0;
-        CONST.fontShadow = Number(domainValue[domainValueIndex].fontShadow) || 0;
-        CONST.fontSize = isFontsize ? Number(domainValue[domainValueIndex].fontSize) || 1 : 1;
-        CONST.shadowColor = filterHtmlToText(domainValue[domainValueIndex].shadowColor);
-        CONST.fontSmooth = Boolean(domainValue[domainValueIndex].fontSmooth);
-        CONST.fontCSS = filterHtmlToText(domainValue[domainValueIndex].fontCSS);
-        CONST.fontEx = filterHtmlToText(domainValue[domainValueIndex].fontEx);
+        CONST_VALUES.fontSelect = filterHtmlToText(domainValue[domainValueIndex].fontSelect);
+        CONST_VALUES.fontFace = Boolean(domainValue[domainValueIndex].fontFace);
+        CONST_VALUES.fontStroke = Number(domainValue[domainValueIndex].fontStroke) || 0;
+        CONST_VALUES.fontShadow = Number(domainValue[domainValueIndex].fontShadow) || 0;
+        CONST_VALUES.fontSize = isFontsize ? Number(domainValue[domainValueIndex].fontSize) || 1 : 1;
+        CONST_VALUES.shadowColor = filterHtmlToText(domainValue[domainValueIndex].shadowColor);
+        CONST_VALUES.fontSmooth = Boolean(domainValue[domainValueIndex].fontSmooth);
+        CONST_VALUES.fontCSS = filterHtmlToText(domainValue[domainValueIndex].fontCSS);
+        CONST_VALUES.fontEx = filterHtmlToText(domainValue[domainValueIndex].fontEx);
       } else {
-        CONST.fontSelect = filterHtmlToText(fontValue.fontSelect);
-        CONST.fontFace = Boolean(fontValue.fontFace);
-        CONST.fontStroke = Number(fontValue.fontStroke) || 0;
-        CONST.fontShadow = Number(fontValue.fontShadow) || 0;
-        CONST.fontSize = isFontsize ? Number(fontValue.fontSize) || 1 : 1;
-        CONST.shadowColor = filterHtmlToText(fontValue.shadowColor);
-        CONST.fontSmooth = Boolean(fontValue.fontSmooth);
-        CONST.fontCSS = filterHtmlToText(fontValue.fontCSS);
-        CONST.fontEx = filterHtmlToText(fontValue.fontEx);
+        CONST_VALUES.fontSelect = filterHtmlToText(fontValue.fontSelect);
+        CONST_VALUES.fontFace = Boolean(fontValue.fontFace);
+        CONST_VALUES.fontStroke = Number(fontValue.fontStroke) || 0;
+        CONST_VALUES.fontShadow = Number(fontValue.fontShadow) || 0;
+        CONST_VALUES.fontSize = isFontsize ? Number(fontValue.fontSize) || 1 : 1;
+        CONST_VALUES.shadowColor = filterHtmlToText(fontValue.shadowColor);
+        CONST_VALUES.fontSmooth = Boolean(fontValue.fontSmooth);
+        CONST_VALUES.fontCSS = filterHtmlToText(fontValue.fontCSS);
+        CONST_VALUES.fontEx = filterHtmlToText(fontValue.fontEx);
       }
     }
-    defCon.tZoom = CONST.fontSize;
+    defCon.tZoom = CONST_VALUES.fontSize;
 
     /* Operation of CSS value */
 
     let shadow = "";
-    const shadow_r = parseFloat(CONST.fontShadow);
-    const shadow_c = CONST.shadowColor.toLowerCase() === "currentcolor" ? "#FFFFFFFF" : CONST.shadowColor; // Version compatible.
+    const shadow_r = parseFloat(CONST_VALUES.fontShadow);
+    const shadow_c = CONST_VALUES.shadowColor.toLowerCase() === "currentcolor" ? "#FFFFFFFF" : CONST_VALUES.shadowColor; // Version compatible.
     const overlayColor = (r, c, rs) => {
       if (c.substring(1) !== "FFFFFFFF") {
         rs = `text-shadow:0 0 ${(r * 1.15).toFixed(2)}px ${toColordepth(c, 1.35)},0 0 ${r}px ${c},0 0 ${(r * 0.75).toFixed(2)}px ${toColordepth(c, 0.4)}`;
@@ -1764,7 +1762,7 @@
       shadow = overlayColor(shadow_r, shadow_c);
     }
     let stroke = "";
-    const stroke_r = parseFloat(CONST.fontStroke);
+    const stroke_r = parseFloat(CONST_VALUES.fontStroke);
     if (!isNaN(stroke_r) && stroke_r > 0 && stroke_r <= 1.0) {
       stroke = `-webkit-text-stroke:${stroke_r}px currentcolor;`;
     }
@@ -1773,7 +1771,7 @@
       selection = `::selection{color:#fff!important;background:#0084ff!important}::-moz-selection{color:currentcolor!important;background:#ffeb39!important}`;
     }
     let smoothing = "";
-    const smooth_i = CONST.fontSmooth;
+    const smooth_i = CONST_VALUES.fontSmooth;
     const funcSmooth = () => {
       const kernel_Define = getNavigator.core().WebKit
         ? `-webkit-font-smoothing:antialiased!important;`
@@ -1785,8 +1783,8 @@
     if (smooth_i) {
       smoothing = funcSmooth();
     }
-    let bodyZoom = "";
-    const fontsize_r = parseFloat(CONST.fontSize);
+    let bodyzoom = "";
+    const fontsize_r = parseFloat(CONST_VALUES.fontSize);
     const funcFontsize = t => {
       return `body{${getNavigator.core().Gecko ? `transform:scale(${t});transform-origin:left top 0px;width:${100 / t}%;height:${100 / t}%;` : `zoom:${t}!important;`}}`;
     };
@@ -1794,13 +1792,13 @@
       if (defCon.siteIndex === undefined) {
         definePropertiesForZoom(fontsize_r, defCon.elCompat);
       }
-      bodyZoom = funcFontsize(fontsize_r);
+      bodyzoom = funcFontsize(fontsize_r);
     }
-    const prefont = CONST.fontSelect.split(",")[0];
+    const prefont = CONST_VALUES.fontSelect.split(",")[0];
     const refont = prefont ? prefont.replace(/"|'/g, "") : "";
     let fontfamily = "";
     let fontfaces = "";
-    const fontface_i = CONST.fontFace;
+    const fontface_i = CONST_VALUES.fontFace;
     const funcFontface = (t, rs = "") => {
       [
         convertToUnicode("宋体"),
@@ -1835,12 +1833,12 @@
       return rs;
     };
     if (fontface_i) {
-      fontfamily = `font-family:${CONST.fontSelect};`;
+      fontfamily = `font-family:${CONST_VALUES.fontSelect};`;
       fontfaces = refont.length ? funcFontface(refont) : ``;
     }
     let exclude = "";
     let codeFont = "";
-    const cssexlude = CONST.fontEx;
+    const cssexlude = CONST_VALUES.fontEx;
     const funcCodefont = (t, s, ch) => {
       if (t.search(/\bpre\b|\bcode\b/gi) !== -1) {
         const pre = t.search(/\bpre\b/gi) > -1 ? ["pre", "pre *"] : [];
@@ -1859,23 +1857,23 @@
       codeFont = funcCodefont(cssexlude, fontface_i, prefont);
     }
     let tshadow = "";
-    const cssfun = CONST.fontCSS;
+    const cssfun = CONST_VALUES.fontCSS;
     const textrender = `text-rendering:optimizeLegibility!important`;
-    const fixStroke = `[fr-fix-stroke]{-webkit-text-stroke:initial!important}`;
+    const fixstroke = `[fr-fix-stroke]{-webkit-text-stroke:initial!important}`;
     if (defCon.siteIndex === undefined) {
-      tshadow = `${fontfaces}${bodyZoom}${cssfun}{${fontfamily}${shadow}${stroke}${smoothing}${textrender}}${codeFont}${selection}${exclude}${fixStroke}`;
+      tshadow = `${fontfaces}${bodyzoom}${cssfun}{${fontfamily}${shadow}${stroke}${smoothing}${textrender}}${codeFont}${selection}${exclude}${fixstroke}`;
     }
     const fontTest = String(
-      `.fontTest-${defCon.id.seed}{font-weight:normal!important;line-height:initial!important;text-align:left!important;font-style:normal!important;text-decoration:none!important;letter-spacing:normal!important;word-wrap:normal!important;text-indent:initial!important}#${defCon.id.fontTest}{margin:0!important;padding:0!important;width:max-content!important;height:max-content!important;text-shadow:none!important;-webkit-text-stroke:initial!important;-webkit-text-size-adjust:none!important;-moz-text-size-adjust:none!important;white-space:nowrap!important}`
+      `.fontTest-${RANDOM_ID}{font-weight:normal!important;line-height:initial!important;text-align:left!important;font-style:normal!important;text-decoration:none!important;letter-spacing:normal!important;word-wrap:normal!important;text-indent:initial!important}#${defCon.id.fontTest}{margin:0!important;padding:0!important;width:max-content!important;height:max-content!important;text-shadow:none!important;-webkit-text-stroke:initial!important;-webkit-text-size-adjust:none!important;-moz-text-size-adjust:none!important;white-space:nowrap!important}`
     );
     const fontStyle_db = String(
       `#${defCon.id.dialogbox}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999995}#${defCon.id.dialogbox} .${defCon.class.db}{box-sizing:content-box;max-width:420px;color:#444;border:2px solid #efefef}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:200px;right:15px;border-radius:6px;width:100%;background:#fff;box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #777!important}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:100%;font-family:Candara,"Times New Roman",system-ui,-apple-system,BlinkMacSystemFont!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:500;text-align:left}.${defCon.class.dbb}{display:inline-block;margin:0 1%;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;cursor:pointer;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important;box-sizing:content-box}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:none!important;-webkit-text-stroke:initial!important;user-select:none}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223!important;color:#fff!important;border:1px solid #d93223!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a!important;color:#fff!important;border:1px solid #038c5a!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777!important;color:#fff!important;border:1px solid #777!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}` +
-        `.${defCon.class.dbm} button:hover{cursor:pointer;background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important}.${defCon.class.dbm} p{line-height:1.5!important;margin:5px 0!important;text-indent:0!important;font-size:16px!important;font-weight:400;text-align:left;user-select:none}.${defCon.class.dbm} ul{list-style:none;margin:0 0 0 10px!important;padding:2px;font:italic 14px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;color:gray;scrollbar-width:thin}.${defCon.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${defCon.class.dbm} ul::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #999;background:#cfcfcf;border-radius:10px}.${defCon.class.dbm} ul::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:10px}.${defCon.class.dbm} ul::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:6px}.${defCon.class.dbm} ul li{display:list-item;list-style-type:none;user-select:none;word-break:break-all}.${defCon.class.dbm} li:before{display:none}.${defCon.class.dbm} #${defCon.id.bk},.${defCon.class.dbm} #${defCon.id.pv},.${defCon.class.dbm} #${defCon.id.fs},.${defCon.class.dbm} #${defCon.id.hk},.${defCon.class.dbm} #${defCon.id.ct},.${defCon.class.dbm} #${defCon.id.mps},.${defCon.class.dbm} #${defCon.id.flc}{box-sizing:content-box;list-style:none;font-style:normal;display:flex;justify-content:space-between;align-items:flex-start;margin:0;padding:2px 4px!important;width:calc(96% - 10px);min-width:auto;height:40px;min-height:40px}.${defCon.class.dbm} #${defCon.id.bk} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.pv} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.fs} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.hk} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.ct} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.mps} .${defCon.id.seed}_VIP,.${defCon.class.dbm} #${defCon.id.flc} .${defCon.id.seed}_VIP{margin:2px 0 0 0;color:darkgoldenrod!important;font:normal 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${defCon.class.dbm} #${defCon.id.flc} button{background-color:#eee;color:#444!important;font-weight:normal;border:1px solid #999;font-size:14px!important;border-radius:4px}` +
-        `.${defCon.class.dbm} #${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}.${defCon.class.dbm} #${defCon.id.files}{display:none}.${defCon.class.dbm} #${defCon.id.feedback}:hover{color:crimson!important}.${defCon.class.dbm} #${defCon.id.feedback}:after{width:0;height:0;content:"";background:url('${loadingIMG}') no-repeat -400px -300px}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#555!important}.${defCon.class.dbm} #${defCon.id.seed}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#aaa!important}.${defCon.class.dbm} #${defCon.id.seed}_update li{margin:0;padding:0;font:italic 400 14px/150% Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:gray}.${defCon.class.dbm} .${defCon.id.seed}_add:before{content:"+";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_del:before{content:"-";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_fix:before{content:"@";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_info{color:#daa5207a!important}.${defCon.class.dbm} .${defCon.id.seed}_info:before{content:"#";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${defCon.id.seed}_warn{color:#e900007a!important}.${defCon.class.dbm} .${defCon.id.seed}_warn:before{content:"!";display:inline;margin:0 4px 0 -10px}`
+        `.${defCon.class.dbm} button:hover{cursor:pointer;background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important}.${defCon.class.dbm} p{line-height:1.5!important;margin:5px 0!important;text-indent:0!important;font-size:16px!important;font-weight:400;text-align:left;user-select:none}.${defCon.class.dbm} ul{list-style:none;margin:0 0 0 10px!important;padding:2px;font:italic 14px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;color:gray;scrollbar-width:thin}.${defCon.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${defCon.class.dbm} ul::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #999;background:#cfcfcf;border-radius:10px}.${defCon.class.dbm} ul::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:10px}.${defCon.class.dbm} ul::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:6px}.${defCon.class.dbm} ul li{display:list-item;list-style-type:none;user-select:none;word-break:break-all}.${defCon.class.dbm} li:before{display:none}.${defCon.class.dbm} #${defCon.id.bk},.${defCon.class.dbm} #${defCon.id.pv},.${defCon.class.dbm} #${defCon.id.fs},.${defCon.class.dbm} #${defCon.id.hk},.${defCon.class.dbm} #${defCon.id.ct},.${defCon.class.dbm} #${defCon.id.mps},.${defCon.class.dbm} #${defCon.id.flc}{box-sizing:content-box;list-style:none;font-style:normal;display:flex;justify-content:space-between;align-items:flex-start;margin:0;padding:2px 4px!important;width:calc(96% - 10px);min-width:auto;height:40px;min-height:40px}.${defCon.class.dbm} #${defCon.id.bk} .${RANDOM_ID}_VIP,.${defCon.class.dbm} #${defCon.id.pv} .${RANDOM_ID}_VIP,.${defCon.class.dbm} #${defCon.id.fs} .${RANDOM_ID}_VIP,.${defCon.class.dbm} #${defCon.id.hk} .${RANDOM_ID}_VIP,.${defCon.class.dbm} #${defCon.id.ct} .${RANDOM_ID}_VIP,.${defCon.class.dbm} #${defCon.id.mps} .${RANDOM_ID}_VIP,.${defCon.class.dbm} #${defCon.id.flc} .${RANDOM_ID}_VIP{margin:2px 0 0 0;color:darkgoldenrod!important;font:normal 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${defCon.class.dbm} #${defCon.id.flc} button{background-color:#eee;color:#444!important;font-weight:normal;border:1px solid #999;font-size:14px!important;border-radius:4px}` +
+        `.${defCon.class.dbm} #${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}.${defCon.class.dbm} #${defCon.id.files}{display:none}.${defCon.class.dbm} #${defCon.id.feedback}:hover{color:crimson!important}.${defCon.class.dbm} #${defCon.id.feedback}:after{width:0;height:0;content:"";background:url('${LOADING_IMG}') no-repeat -400px -300px}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#555!important}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#aaa!important}.${defCon.class.dbm} #${RANDOM_ID}_update li{margin:0;padding:0;font:italic 400 14px/150% Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:gray}.${defCon.class.dbm} .${RANDOM_ID}_add:before{content:"+";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_del:before{content:"-";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_fix:before{content:"@";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_info{color:#daa5207a!important}.${defCon.class.dbm} .${RANDOM_ID}_info:before{content:"#";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_warn{color:#e900007a!important}.${defCon.class.dbm} .${RANDOM_ID}_warn:before{content:"!";display:inline;margin:0 4px 0 -10px}`
     );
     const fontStyle_container = String(
       `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;border-radius:12px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 20px);z-index:999999;padding:4px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container} *{line-height:1.5!important;text-shadow:none!important;-webkit-text-stroke:initial!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Android Emoji",EmojiSymbols!important;font-size:16px;font-weight:700}` +
-        `#${defCon.id.container} fieldset{border:2px groove #67a5df!important;border-radius:10px;padding:4px 6px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:475px}#${defCon.id.container} legend{line-height:inherit;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;background:#f0f6ff!important;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{display:inherit;list-style:none;margin:3px 0;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default;min-width:-moz-available;min-width:-webkit-fill-available;user-select:none}#${defCon.id.container} ul li:before{display:none}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden}#${defCon.id.container} .${defCon.class.help}:hover{cursor:help}#${defCon.id.seed}_scriptname{font-weight:900!important;user-select:all;display:inline-block}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{padding:0;margin:0;width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50%;-webkit-transform:rotate(360deg);animation:rotation 5s linear infinite}` +
+        `#${defCon.id.container} fieldset{border:2px groove #67a5df!important;border-radius:10px;padding:4px 6px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:475px}#${defCon.id.container} legend{line-height:inherit;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;background:#f0f6ff!important;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{display:inherit;list-style:none;margin:3px 0;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default;min-width:-moz-available;min-width:-webkit-fill-available;user-select:none}#${defCon.id.container} ul li:before{display:none}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden}#${defCon.id.container} .${defCon.class.help}:hover{cursor:help}#${RANDOM_ID}_scriptname{font-weight:900!important;user-select:all;display:inline-block}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{padding:0;margin:0;width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50%;-webkit-transform:rotate(360deg);animation:rotation 5s linear infinite}` +
         `#${defCon.id.fontList}{padding:2px 10px 0 10px;min-height:73px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex!important;align-items:center;justify-content:space-between}#${defCon.id.fontSize}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.shadowColor}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;padding:2px 10px;min-height:45px;margin:4px;width:auto}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${defCon.id.submit}{padding:2px 10px;height:40px}` +
         `#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${defCon.id.fontList} .${defCon.class.label} span{box-sizing:border-box;color:#fff;font-size:16px!important;font-weight:400;height:max-content;width:max-content;min-width:12px;max-width:210px;padding:5px;background:#67a5df;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap}#${defCon.id.fontList} .${defCon.class.close}{width:12px}#${defCon.id.fontList} .${defCon.class.close}:hover{color:tomato;background-color:#2d7dca;border-radius:2px}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-x:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;padding:6px 6px 0 6px;margin:0 0 6px 0;width:100%;min-width:100%;max-width:fit-content;max-width:-moz-min-content;max-height:90px;min-height:45px;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} span.${defCon.class.spanlabel},#${defCon.id.selector} span.${defCon.class.spanlabel}{margin:0!important;width:auto;display:block!important;padding:0 0 4px 0;color:#333;border:0;text-align:left!important;background-color:transparent!important}` +
         `#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} input{text-overflow:ellipsis;overflow:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;padding:1px 32px 1px 2px;margin:0;width:100%;max-width:100%;min-width:100%;height:42px!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:16px!important;font-weight:700;text-indent:8px;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font:normal 700 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font:normal 700 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:4px 0 0 0;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:4px 8px;width:auto;min-width:60%;max-width:calc(100% - 68px);max-height:298px;font-size:18px!important;white-space:nowrap;background-color:#fff;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}` +
@@ -1886,7 +1884,7 @@
         `#${defCon.id.submit} button{box-sizing:border-box;background-image:initial;background-color:#67a5df;color:#fff!important;margin:0;padding:5px 10px;cursor:pointer;border:2px solid #6ba7e0;border-radius:6px;width:auto;min-width:min-content;min-height:35px;height:35px;font:normal 600 14px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${defCon.id.submit} button:hover{box-shadow:0 0 5px rgba(0,0,0,.4)!important}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.submit} #${defCon.id.backup}{margin:0 10px 0 0;display:none}.${defCon.class.anim}{animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}`
     );
     const fontStyle_tooltip = String(
-      `.${defCon.class.tooltip}{position:relative;cursor:help;user-select:none}.${defCon.class.tooltip} span.${defCon.class.emoji}{font-weight:400!important}.${defCon.class.tooltip}:active .${defCon.class.tooltip}{display:block}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;box-sizing:content-box;position:absolute;z-index:999999;border:2px solid #b8c4ce;border-radius:6px;padding:10px;width:242px;max-width:242px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:14px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} em{font-style:normal!important}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:150%;text-indent:0!important}.${defCon.class.ps1}{position:relative;top:-33px;height:0;width:24px;margin:0;padding:0;right:5px;float:right}.${defCon.class.ps2}{top:35px;right:-7px}.${defCon.class.ps3}{top:-197px;margin-left:-1px}`
+      `.${defCon.class.tooltip}{position:relative;cursor:help;user-select:none}.${defCon.class.tooltip} span.${defCon.class.emoji}{font-weight:400!important}.${defCon.class.tooltip}:active .${defCon.class.tooltip}{display:block}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;box-sizing:content-box;position:absolute;z-index:999999;border:2px solid #b8c4ce;border-radius:6px;padding:10px;width:242px;max-width:242px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9;word-break:break-all}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:14px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} em{font-style:normal!important}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:150%;text-indent:0!important}.${defCon.class.ps1}{position:relative;top:-33px;height:0;width:24px;margin:0;padding:0;right:5px;float:right}.${defCon.class.ps2}{top:35px;right:-7px}.${defCon.class.ps3}{top:-197px;margin-left:-1px}`
     );
     const fontStyle_Progress = String(
       `.${defCon.class.range}{--primary-color:#67a5df;--value-offset-y:var(--ticks-gap);--value-active-color:white;--value-background:transparent;--value-background-hover:var(--primary-color);--value-font:italic bold 14px/14px monospace,serif;--fill-color:var(--primary-color);--progress-background:rgb(223, 223, 223);--progress-radius:20px;--show-min-max:none;--track-height:calc(var(--thumb-size) / 2);--min-max-font:12px serif;--min-max-opacity:0.5;--min-max-x-offset:10%;--thumb-size:22px;--thumb-color:white;--thumb-shadow:0 0 3px rgba(0, 0, 0, 0.4),0 0 1px rgba(0, 0, 0, 0.5) inset,0 0 0 99px var(--thumb-color) inset;--thumb-shadow-active:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px var(--primary-color) inset,0 0 3px rgba(0, 0, 0, 0.4);--thumb-shadow-hover:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px darkorange inset,0 0 3px rgba(0, 0, 0, 0.4);--ticks-thickness:1px;--ticks-height:5px;--ticks-gap:var(--ticks-height, 0);--ticks-color:transparent;--step:1;--ticks-count:(var(--max) - var(--min))/var(--step);--maxTicksAllowed:1000;--too-many-ticks:Min(1, Max(var(--ticks-count) - var(--maxTicksAllowed), 0));--x-step:Max(var(--step), var(--too-many-ticks) * (var(--max) - var(--min)));--tickIntervalPerc_1:Calc((var(--max) - var(--min)) / var(--x-step));--tickIntervalPerc:calc((100% - var(--thumb-size)) / var(--tickIntervalPerc_1) * var(--tickEvery, 1));--value-a:Clamp(var(--min), var(--value, 0), var(--max));--value-b:var(--value, 0);--text-value-a:var(--text-value, "");--completed-a:calc((var(--value-a) - var(--min)) / (var(--max) - var(--min)) * 100);--completed-b:calc((var(--value-b) - var(--min)) / (var(--max) - var(--min)) * 100);--ca:Min(var(--completed-a), var(--completed-b));--cb:Max(var(--completed-a), var(--completed-b));--thumbs-too-close:Clamp(-1, 1000 * (Min(1, Max(var(--cb) - var(--ca) - 5, -1)) + 0.001), 1);--thumb-close-to-min:Min(1, Max(var(--ca) - 5, 0));--thumb-close-to-max:Min(1, Max(95 - var(--cb), 0))}` +
@@ -1904,8 +1902,8 @@
               <input id="${defCon.id.fontZoom}" type="text" v="number" maxlength="5" />
             </div>
             <div class="${defCon.class.range}" data-ticks-position="top"
-              style="--min:.8;--max:1.5;--step:.001;--value:${CONST.fontSize};--text-value:'${CONST.fontSize.toFixed(3).toString()}'">
-              <input id="${defCon.id.zoomSize}" type="range" min=".8" max="1.5" step=".001" value="${CONST.fontSize.toFixed(3)}">
+              style="--min:.8;--max:1.5;--step:.001;--value:${CONST_VALUES.fontSize};--text-value:'${CONST_VALUES.fontSize.toFixed(3).toString()}'">
+              <input id="${defCon.id.zoomSize}" type="range" min=".8" max="1.5" step=".001" value="${CONST_VALUES.fontSize.toFixed(3)}">
               <output></output>
               <div class='${defCon.class.rangeProgress}'></div>
             </div>
@@ -1916,7 +1914,7 @@
       `<div id="${defCon.id.container}">
         <fieldset id="${defCon.id.field}" style="display:block">
           <legend class="${defCon.class.title}">
-            <span id="${defCon.id.seed}_scriptname" title="Version ${curVersion}" style="color:#8b0000!important">${defCon.scriptName}</span>
+            <span id="${RANDOM_ID}_scriptname" title="Version ${curVersion}" style="color:#8b0000!important">${defCon.scriptName}</span>
             <span class="${defCon.class.guide}">
               <div class="${defCon.class.rotation}" title="打开脚本使用帮助文档" height="24" width="24"/>
                 <svg class="${defCon.class.help}" viewBox="0 0 1053 1024" version="1.1" xmlns="https://www.w3.org/2000/svg">
@@ -1930,16 +1928,16 @@
               <div class="${defCon.class.fontList}"></div>
             </li>
             <li id="${defCon.id.fontFace}">
-              <div style="margin:0;padding:0">字体重写（默认：开）</div>
+              <div style="margin:0;padding:0">字体重写（默认\uff1a开）</div>
               <div style="height:32px;margin:0;padding:0;align-self:center">
-                <input type="checkbox" id="${defCon.id.fface}" class="${defCon.class.checkbox}" ${CONST.fontFace ? "checked" : ""} />
+                <input type="checkbox" id="${defCon.id.fface}" class="${defCon.class.checkbox}" ${CONST_VALUES.fontFace ? "checked" : ""} />
                 <label for="${defCon.id.fface}"></label>
               </div>
             </li>
             <li id="${defCon.id.fontSmooth}">
-              <div style="margin:0;padding:0">字体平滑（默认：开）</div>
+              <div style="margin:0;padding:0">字体平滑（默认\uff1a开）</div>
               <div style="height:32px;margin:0;padding:0;align-self:center">
-                <input type="checkbox" id="${defCon.id.smooth}" class="${defCon.class.checkbox}" ${CONST.fontSmooth ? "checked" : ""} />
+                <input type="checkbox" id="${defCon.id.smooth}" class="${defCon.class.checkbox}" ${CONST_VALUES.fontSmooth ? "checked" : ""} />
                 <label for="${defCon.id.smooth}"></label>
               </div>
             </li>
@@ -1950,8 +1948,8 @@
                 <input id="${defCon.id.strokeSize}" type="text" v="number" maxlength="5" />
               </div>
               <div class="${defCon.class.range}" data-ticks-position="top"
-                style="--step:.001;--min:0;--max:1;--value:${CONST.fontStroke};--text-value:'${CONST.fontStroke.toFixed(3).toString()}'">
-                <input id="${defCon.id.stroke}" type="range" min="0" max="1" step=".001" value="${CONST.fontStroke.toFixed(3)}" />
+                style="--step:.001;--min:0;--max:1;--value:${CONST_VALUES.fontStroke};--text-value:'${CONST_VALUES.fontStroke.toFixed(3).toString()}'">
+                <input id="${defCon.id.stroke}" type="range" min="0" max="1" step=".001" value="${CONST_VALUES.fontStroke.toFixed(3)}" />
                 <output></output>
                 <div class="${defCon.class.rangeProgress}"></div>
               </div>
@@ -1962,8 +1960,8 @@
                 <input id="${defCon.id.shadowSize}" type="text" v="number" maxlength="4" />
               </div>
               <div class="${defCon.class.range}" data-ticks-position="top"
-                style="--step:.01;--min:0;--max:8;--value:${CONST.fontShadow};--text-value:'${CONST.fontShadow.toFixed(2).toString()}'">
-                <input id="${defCon.id.shadow}" type="range" min="0" max="8" step=".01" value="${CONST.fontShadow.toFixed(2)}" />
+                style="--step:.01;--min:0;--max:8;--value:${CONST_VALUES.fontShadow};--text-value:'${CONST_VALUES.fontShadow.toFixed(2).toString()}'">
+                <input id="${defCon.id.shadow}" type="range" min="0" max="8" step=".01" value="${CONST_VALUES.fontShadow.toFixed(2)}" />
                 <output></output>
                 <div class="${defCon.class.rangeProgress}"></div>
               </div>
@@ -1975,7 +1973,7 @@
                   <span class="${defCon.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
                   <span class="${defCon.class.tooltip} ${defCon.class.ps3}">
                     <p>阴影颜色可通过点击色块激活拾色器选择，也可自定义填写，格式支持: <em style="color:#cecece">RGB, RGBA, HEX, HEXA.</em> 纯白色的所有格式表示自身颜色 <em style="color:#cecece">currentcolor.</em></p>
-                    <p><em style="color:darkred">注意：输入数值会自动转化为HEXA格式，但数值保持一致性。错误格式会被替换为刚刚正确显示的数值。</em></p>
+                    <p><em style="color:darkred">注意\uff1a输入数值会自动转化为HEXA格式，但数值保持一致性。错误格式会被替换为刚刚正确显示的数值。</em></p>
                   </span>
                 </span>
               </div>
@@ -1984,21 +1982,21 @@
               </div>
             </li>
             <li id="${defCon.id.fontCSS}" style="min-width:254px">
-              <div style="margin: 0 0 6px 0">需要渲染的网页元素：
+              <div style="margin: 0 0 6px 0">需要渲染的网页元素\uff1a
                 <span class="${defCon.class.tooltip}">
                   <span class="${defCon.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
                   <span class="${defCon.class.tooltip} ${defCon.class.ps3}">
-                    <p>默认为排除大多数网站常用的特殊CSS样式后需要渲染的页面元素。填写格式：<em style="color:#cecece">:not(.fa)</em> 或 <em style="color:#cecece">:not([class*="fa"])</em> 或 <em style="color:#cecece">,#idname .classname</em></p>
+                    <p>默认为排除大多数网站常用的特殊CSS样式后需要渲染的页面元素。填写格式\uff1a<em style="color:#cecece">:not(.fa)</em> 或 <em style="color:#cecece">:not([class*="fa"])</em> 或 <em style="color:#cecece">,#idname .classname</em></p>
                     <p><em style="color:darkred">该选项为重要参数，默认只读，双击解锁。请尽量不要修改，避免造成样式失效。若失效请重置。</em></p>
                   </span>
                 </span>
                 <div id="${defCon.id.cSwitch}" class="${defCon.class.switch}" data-switch="ON">\u2227</div>
               </div>
               <textarea placeholder="请谨慎修改默认值，避免渲染失效。" id="${defCon.id.cssfun}" class="${defCon.class.readonly}"
-                title="重要参数，默认只读，双击解锁。" readonly="readonly">${CONST.fontCSS ? CONST.fontCSS : defValue.fontCSS}</textarea>
+                title="重要参数，默认只读，双击解锁。" readonly="readonly">${CONST_VALUES.fontCSS ? CONST_VALUES.fontCSS : INITIAL_VALUES.fontCSS}</textarea>
             </li>
             <li id="${defCon.id.fontEx}" style="min-width:254px">
-              <div style="margin: 0 0 6px 0">排除渲染的HTML标签：
+              <div style="margin: 0 0 6px 0">排除渲染的HTML标签\uff1a
                 <span class="${defCon.class.tooltip}">
                   <span class="${defCon.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
                   <span class="${defCon.class.tooltip} ${defCon.class.ps3}">
@@ -2009,7 +2007,7 @@
                 <div id="${defCon.id.eSwitch}" class="${defCon.class.switch}" data-switch="ON">\u2227</div>
               </div>
               <textarea placeholder="请输入要排除渲染的HTML标签，形如: input, em, div[id='test']"
-                id="${defCon.id.exclude}">${CONST.fontEx ? CONST.fontEx : ""}</textarea>
+                id="${defCon.id.exclude}">${CONST_VALUES.fontEx ? CONST_VALUES.fontEx : ""}</textarea>
             </li>
             <li id="${defCon.id.submit}">
               <button class="${defCon.class.reset}">重置</button>
@@ -2028,16 +2026,16 @@
 
     /* SYSTEM INFO */
 
-    const defaultFont = "\u7f51\u7ad9\u9ed8\u8ba4\u5b57\u4f53";
-    let reFontFace = defaultFont;
-    defCon.curFont = defaultFont;
+    const DEFAULT_FONT = "\u7f51\u7ad9\u9ed8\u8ba4\u5b57\u4f53";
+    let reFontFace = DEFAULT_FONT;
+    defCon.curFont = DEFAULT_FONT;
 
-    await getCurrentFontName(CONST.fontFace, defCon.refont, defaultFont);
+    await getCurrentFontName(CONST_VALUES.fontFace, defCon.refont, DEFAULT_FONT);
 
-    if (curWindowTop) {
+    if (CUR_WINDOW_TOP) {
       if (defCon.siteIndex === undefined) {
         console.info(
-          `%c${defCon.scriptName}\n%cINTRO.URL:\u0020https://f9y4ng.likes.fans/FontRendering\n%c\u259e\u0020脚本版本：%cV%s%c\n\u259e\u0020个性化设置：%c%s%c/%s%s\n%c\u259e\u0020字体缩放：%s%s\n\u259e\u0020本地备份：%s\u3000\u259a\u0020保存预览：%s\n%c\u259e\u0020渲染字体：%s\n\u259e\u0020字体平滑：%s\u3000\u259a\u0020字体重写：%s\n\u259e\u0020字体描边：%s\u3000\u259a\u0020字体阴影：%s`,
+          `%c${defCon.scriptName}\n%cINTRO.URL:\u0020https://f9y4ng.likes.fans/FontRendering\n%c\u259e\u0020脚本版本\uff1a%cV%s%c\n\u259e\u0020个性化设置\uff1a%c%s%c/%s%s\n%c\u259e\u0020字体缩放\uff1a%s%s\n\u259e\u0020本地备份\uff1a%s\u3000\u259a\u0020保存预览\uff1a%s\n%c\u259e\u0020渲染字体\uff1a%s\n\u259e\u0020字体平滑\uff1a%s\u3000\u259a\u0020字体重写\uff1a%s\n\u259e\u0020字体描边\uff1a%s\u3000\u259a\u0020字体阴影\uff1a%s`,
           "font:normal 700 16px/150% system-ui,-apple-system,BlinkMacSystemFont,sans-serif;color:crimson",
           "line-height:180%;font-size:10px;color:#777;font-style:italic",
           "line-height:180%;font-size:12px;color:slategray",
@@ -2052,22 +2050,22 @@
           "line-height:180%;font-size:12px;color:steelblue",
           isFontsize ? "ON " : "OFF",
           isFontsize
-            ? CONST.fontSize === 1
+            ? CONST_VALUES.fontSize === 1
               ? "\u3000\u259a\u0020\u7f29\u653e\u6bd4\u4f8b\uff1a(WEBSITE DEFINED)"
-              : `\u3000\u259a\u0020\u7f29\u653e\u6bd4\u4f8b\uff1a${Number(CONST.fontSize * 100).toFixed(2) + "%"}`
+              : `\u3000\u259a\u0020\u7f29\u653e\u6bd4\u4f8b\uff1a${Number(CONST_VALUES.fontSize * 100).toFixed(2) + "%"}`
             : "\u3000\u259a\u0020\u7f29\u653e\u6bd4\u4f8b\uff1a(BROWSER DEFINED)",
           isBackupFunction ? "ON " : "OFF",
           isPreview ? "ON " : "OFF",
           "line-height:180%;font-size:12px;color:teal",
           fontface_i ? reFontFace : "\u5df2\u5173\u95ed\uff08\u91c7\u7528" + reFontFace + "\uff09",
-          CONST.fontSmooth ? "ON " : "OFF",
-          CONST.fontFace ? "ON " : "OFF",
-          CONST.fontStroke ? "ON " : "OFF",
-          CONST.fontShadow ? "ON " : "OFF"
+          CONST_VALUES.fontSmooth ? "ON " : "OFF",
+          CONST_VALUES.fontFace ? "ON " : "OFF",
+          CONST_VALUES.fontStroke ? "ON " : "OFF",
+          CONST_VALUES.fontShadow ? "ON " : "OFF"
         );
       } else {
         console.info(
-          `%c${defCon.scriptName}\n%c${curHostName.toUpperCase()} 已在排除渲染列表内，若要重新渲染，请在脚本菜单中打开重新渲染。`,
+          `%c${defCon.scriptName}\n%c${CUR_HOST_NAME.toUpperCase()} 已在排除渲染列表内，若要重新渲染，请在脚本菜单中打开重新渲染。`,
           "font:normal 700 16px/150% system-ui,-apple-system,BlinkMacSystemFont,sans-serif;color:crimson",
           "line-height:180%;font-size:12px;color:darkred"
         );
@@ -2079,9 +2077,9 @@
     try {
       preInsertContentToHead();
       const callback = mutations => {
-        defCon.siteIndex === undefined && deBounce(correctBoldErrorByStroke, 50, "fixstroke")(CONST.fontStroke);
+        defCon.siteIndex === undefined && deBounce(correctBoldErrorByStroke, 50, "fixstroke")(CONST_VALUES.fontStroke);
         mutations.forEach(mutation => {
-          if (!((!curWindowTop || qS(`.${defCon.class.rndClass}`)) && (defCon.siteIndex !== undefined || qS(`.${defCon.class.rndStyle}`)))) {
+          if (!((!CUR_WINDOW_TOP || qS(`.${defCon.class.rndClass}`)) && (defCon.siteIndex !== undefined || qS(`.${defCon.class.rndStyle}`)))) {
             debug(`\u27A4 %cMutationObserver: %c%s %c%s`, "color:teal", "color:olive", mutation.type, "color:red", !preInsertContentToHead(true));
           }
           if (qS(`.${defCon.class.rndStyle}`) && document.head.lastChild.className !== defCon.class.rndStyle) {
@@ -2122,14 +2120,13 @@
             }
           });
           qS(`.${defCon.class.title} span.${defCon.class.guide}`).addEventListener("click", () => {
-            GMopenInTab(`${hostURI}#guide`, defCon.options);
+            GMopenInTab(`${HOST_URI}#guide`, defCon.options);
           });
-          qS(`#${defCon.id.field} span#${defCon.id.seed}_scriptname`).addEventListener("dblclick", function () {
-            hintUpdateInfo(`${hostURI}#update`, _config_data_.curVersion);
+          qS(`#${defCon.id.field} span#${RANDOM_ID}_scriptname`).addEventListener("dblclick", function () {
+            hintUpdateInfo(`${HOST_URI}#update`, _config_data_.curVersion);
             this.style.userSelect = "none";
           });
         } else {
-          closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
           closeConfigurePage(false);
         }
       },
@@ -2138,13 +2135,13 @@
         let frDialog = new FrDialogBox({
           trueButtonText: "确 定",
           neutralButtonText: "取 消",
-          messageText: `<p style="word-break:break-all;font:bold italic 24px/150% Candara,'Times New Roman'!important">${curHostName}</p><p style="color:darkred">该域名下所有页面将被禁止字体渲染！</p><p>确定后页面将自动刷新，请确认是否排除？</p>`,
+          messageText: `<p style="word-break:break-all;font:bold italic 24px/150% Candara,'Times New Roman'!important">${CUR_HOST_NAME}</p><p style="color:darkred">该域名下所有页面将被禁止字体渲染\uff01</p><p>确定后页面将自动刷新，请确认是否排除？</p>`,
           titleText: "禁止字体渲染",
         });
         if (await frDialog.respond()) {
           exSite = await GMgetValue("_Exclude_site_");
           exSite = JSON.parse(defCon.decrypt(exSite));
-          exSite.push(curHostName);
+          exSite.push(CUR_HOST_NAME);
           GMsetValue("_Exclude_site_", defCon.encrypt(JSON.stringify(exSite)));
           location.reload();
         }
@@ -2167,49 +2164,49 @@
           messageText: String(
             `<ul class="${defCon.class.main}" style="box-sizing:content-box;max-height:215px;overflow-x:hidden;margin:0;padding:5px 0">
               <li id="${defCon.id.bk}">
-                <div class="${defCon.id.seed}_VIP" title="养成定期备份的好习惯，保护自己的数据安全！">\u2460 本地备份功能（默认：开启）</div>
+                <div class="${RANDOM_ID}_VIP" title="养成定期备份的好习惯，保护自己的数据安全\uff01">\u2460 本地备份功能（默认\uff1a开启）</div>
                 <div style="margin:0;padding:0">
                   <input type="checkbox" id="${defCon.id.isbackup}" class="${defCon.class.checkbox}" ${isBackupFunction ? "checked" : ""} />
                   <label for="${defCon.id.isbackup}"></label>
                 </div>
               </li>
               <li id="${defCon.id.pv}">
-                <div class="${defCon.id.seed}_VIP" title="无需保存刷新页面，直接预览渲染效果！">\u2461 保存预览功能（默认：关闭）</div>
+                <div class="${RANDOM_ID}_VIP" title="无需保存刷新页面，直接预览渲染效果\uff01">\u2461 保存预览功能（默认\uff1a关闭）</div>
                 <div style="margin:0;padding:0">
                   <input type="checkbox" id="${defCon.id.ispreview}" class="${defCon.class.checkbox}" ${isPreview ? "checked" : ""} />
                   <label for="${defCon.id.ispreview}"></label>
                 </div>
               </li>
               <li id="${defCon.id.fs}">
-                <div class="${defCon.id.seed}_VIP" title="实验性功能：不推荐Firefox浏览器开启字体缩放！">\u2462 字体缩放功能（默认：关闭）</div>
+                <div class="${RANDOM_ID}_VIP" title="实验性功能\uff1a不推荐Firefox浏览器开启字体缩放\uff01">\u2462 字体缩放功能（默认\uff1a关闭）</div>
                 <div style="margin:0;padding:0">
                   <input type="checkbox" id="${defCon.id.isfontsize}" class="${defCon.class.checkbox}" ${isFontsize ? "checked" : ""} />
                   <label for="${defCon.id.isfontsize}"></label>
                 </div>
               </li>
               <li id="${defCon.id.hk}">
-                <div class="${defCon.id.seed}_VIP" title="如快捷键有冲突，请在此关闭它！">\u2463 键盘快捷键功能（默认：开启）</div>
+                <div class="${RANDOM_ID}_VIP" title="如快捷键有冲突，请在此关闭它\uff01">\u2463 键盘快捷键功能（默认\uff1a开启）</div>
                 <div style="margin:0;padding:0">
                   <input type="checkbox" id="${defCon.id.ishotkey}" class="${defCon.class.checkbox}" ${isHotkey ? "checked" : ""} />
                   <label for="${defCon.id.ishotkey}"></label>
                 </div>
               </li>
               <li id="${defCon.id.ct}">
-                <div class="${defCon.id.seed}_VIP" title="您将无法第一时间获得更新内容，错过重要提示！">\u2464 关闭更新提示功能（不推荐）</div>
+                <div class="${RANDOM_ID}_VIP" title="您将无法第一时间获得更新内容，错过重要提示\uff01">\u2464 关闭更新提示功能（不推荐）</div>
                 <div style="margin:0;padding:0">
                   <input type="checkbox" id="${defCon.id.isclosetip}" class="${defCon.class.checkbox}" ${isCloseTip ? "checked" : ""} />
                   <label for="${defCon.id.isclosetip}"></label>
                 </div>
               </li>
               <li id="${defCon.id.mps}">
-                <div class="${defCon.id.seed}_VIP" title="防止页面加载缓慢，不建议设置过高的数值！">\u2465 个性化设置总数（默认：100）</div>
+                <div class="${RANDOM_ID}_VIP" title="防止页面加载缓慢，不建议设置过高的数值\uff01">\u2465 个性化设置总数（默认\uff1a100）</div>
                 <div style="margin:0 5px 0 0;padding:0">
                   <input maxlength="4" id="${defCon.id.maxps}" placeholder="100" value="${maxPersonalSites}"
                     style="box-sizing:border-box;font:normal 500 16px/150% Impact,Times,serif!important;border:2px solid darkgoldenrod;border-radius:4px;width:70px;min-width:70px;text-align:center;padding:4px 5px;color:#333" />
                 </div>
               </li>
               <li id="${defCon.id.flc}">
-                <div class="${defCon.id.seed}_VIP" title="安装新字体后，请先重启浏览器再重建缓存！">\u2466 字体列表缓存（时效：24小时）</div>
+                <div class="${RANDOM_ID}_VIP" title="安装新字体后，请先重启浏览器再重建缓存\uff01">\u2466 字体列表缓存（时效\uff1a24小时）</div>
                 <button id="${defCon.id.flcid}" title="重建当前网站字体列表缓存"
                   style="box-sizing:border-box;margin:0 5px 0 0;padding:2px 5px;width:max-content;height:max-content;min-width:70px;min-height:32px;background:#eee;letter-spacing:normal">
                   重建缓存
@@ -2236,7 +2233,7 @@
         if (getNavigator.core().Gecko) {
           confirmIfValueChange(
             qS(`#${defCon.id.isfontsize}`),
-            "由于 Firefox(Gecko内核) 对部分 CSS 及 Javascript 的兼容性原因，会造成某些站点样式异常、坐标漂移等问题，我们建议您在 Firefox 浏览器中谨慎使用脚本级字体缩放功能。\n\n如有必要需求，请使用 Firefox 自身的缩放功能来放大(Ctrl+)或缩小(Ctrl-)当前网站页面（注意：清除 历史记录\u2192数据\u2192网站设置 会重置所有网站的缩放设置），或在 设置\u2192全局缩放 中配置缩放比例。\n\n请确认是否开启字体缩放功能？"
+            "由于 Firefox(Gecko内核) 对部分 CSS 及 Javascript 的兼容性原因，会造成某些站点样式异常、坐标漂移等问题，我们建议您在 Firefox 浏览器中谨慎使用脚本级字体缩放功能。\n\n如有必要需求，请使用 Firefox 自身的缩放功能来放大(Ctrl+)或缩小(Ctrl-)当前网站页面，或在 设置\u2192全局缩放 中配置缩放比例。注意\uff1a清除 历史记录\u2192数据\u2192网站设置 会重置所有网站的缩放设置。\n\n请确认是否开启字体缩放功能？"
           );
         }
         confirmIfValueChange(
@@ -2248,7 +2245,7 @@
           cache.remove("_fontlist_");
           let frDialog = new FrDialogBox({
             trueButtonText: "确 定",
-            messageText: `<p style="font-size:18px!important;text-align:center;padding-bottom:6px;color:darkgoldenrod">字体列表缓存已重建，页面即将刷新！</p><p style="text-align:center"><a style="display:inline-block;border:2px solid darkgoldenrod;border-radius:8px;width:302px;height:237px;background:url('${loadingIMG}') 50% 50% no-repeat;overflow:hidden"><img src='${fontListIMG}' alt="当前网站的字体列表缓存重建"/></a></p>`,
+            messageText: `<p style="font-size:18px!important;text-align:center;padding-bottom:6px;color:darkgoldenrod">字体列表缓存已重建，页面即将刷新\uff01</p><p style="text-align:center"><a style="display:inline-block;border:2px solid darkgoldenrod;border-radius:8px;width:302px;height:237px;background:url('${LOADING_IMG}') 50% 50% no-repeat;overflow:hidden"><img src='${FONTLIST_IMG}' alt="当前网站的字体列表缓存重建"/></a></p>`,
             titleText: "当前网站字体列表缓存重建",
           });
           if (await frDialog.respond()) {
@@ -2257,7 +2254,7 @@
           }
         });
         qS(`#${defCon.id.feedback}`).addEventListener("click", () => {
-          GMopenInTab(defCon.feedback, defCon.options);
+          GMopenInTab(FEEDBACK_URI, defCon.options);
         });
         qA(`#${defCon.id.isbackup}, #${defCon.id.ispreview}, #${defCon.id.isfontsize}, #${defCon.id.ishotkey}, #${defCon.id.isclosetip}, #${defCon.id.maxps}`).forEach(items => {
           items.addEventListener("change", () => {
@@ -2279,7 +2276,7 @@
           GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
           let frDialog = new FrDialogBox({
             trueButtonText: "确 定",
-            messageText: `<p style="color:darkgoldenrod">高级核心功能参数已成功保存，页面即将刷新！</p>`,
+            messageText: `<p style="color:darkgoldenrod">高级核心功能参数已成功保存，页面即将刷新\uff01</p>`,
             titleText: "高级核心功能设置保存",
           });
           closeConfigurePage(true);
@@ -2288,7 +2285,7 @@
             location.reload();
           }
         } else {
-          GMopenInTab(`${hostURI}#warning`, defCon.options);
+          GMopenInTab(`${HOST_URI}#warning`, defCon.options);
         }
         frDialog = null;
       },
@@ -2297,7 +2294,7 @@
         let frDialog = new FrDialogBox({
           trueButtonText: "确 定",
           neutralButtonText: "取 消",
-          messageText: `<p style="font:italic bold 22px/150% Candara,'Times New Roman'!important">${curHostName}</p><p style="color:darkgreen">该域名下所有页面将重新进行字体渲染！</p><p>确定后页面将自动刷新，请确认是否恢复？</p>`,
+          messageText: `<p style="font:italic bold 22px/150% Candara,'Times New Roman'!important">${CUR_HOST_NAME}</p><p style="color:darkgreen">该域名下所有页面将重新进行字体渲染\uff01</p><p>确定后页面将自动刷新，请确认是否恢复？</p>`,
           titleText: "恢复字体渲染",
         });
         if (await frDialog.respond()) {
@@ -2315,29 +2312,29 @@
     const isMac = getNavigator.system().startsWith("mac");
 
     sleep(3e3).then((Font_Set, Feed_Back, Exclude_site, Parameter_Set) => {
-      if (curWindowTop) {
+      if (CUR_WINDOW_TOP) {
         loading ? GMunregisterMenuCommand(loading) : debug("\u27A4 No Loading_Menu");
         if (defCon.siteIndex === undefined) {
-          Font_Set ? GMunregisterMenuCommand(Font_Set) : debug("\u27A4 No Font_Set_Menu");
+          Font_Set ? GMunregisterMenuCommand(Font_Set) : debug("\u27A4 Installing Font_Set_Menu");
           Font_Set = GMregisterMenuCommand(`\ufff2\ud83c\udf13 字体渲染设置${isHotkey ? "(" + String.fromCharCode(isMac ? 81 : 80) + ")" : ""}`, () => {
             addAction.setConfigure();
           });
-          Exclude_site ? GMunregisterMenuCommand(Exclude_site) : debug("\u27A4 No Exclude_site_Menu");
-          Exclude_site = GMregisterMenuCommand(`\ufff3\u26d4 排除渲染 ${curHostName} ${isHotkey ? "(" + String.fromCharCode(isMac ? 71 : 88) + ")" : ""}`, () => {
+          Exclude_site ? GMunregisterMenuCommand(Exclude_site) : debug("\u27A4 Installing Exclude_site_Menu");
+          Exclude_site = GMregisterMenuCommand(`\ufff3\u26d4 排除渲染 ${CUR_HOST_NAME} ${isHotkey ? "(" + String.fromCharCode(isMac ? 71 : 88) + ")" : ""}`, () => {
             addAction.excludeSites();
           });
-          Parameter_Set ? GMunregisterMenuCommand(Parameter_Set) : debug("\u27A4 No Parameter_Set_Menu");
+          Parameter_Set ? GMunregisterMenuCommand(Parameter_Set) : debug("\u27A4 Installing Parameter_Set_Menu");
           Parameter_Set = GMregisterMenuCommand(`\ufff7\ud83d\udc8e 高级核心功能设置${isHotkey ? "(" + String.fromCharCode(isMac ? 77 : 71) + ")" : ""}`, () => {
             addAction.vipConfigure();
           });
         } else {
-          Exclude_site ? GMunregisterMenuCommand(Exclude_site) : debug("\u27A4 No Exclude_site_Menu");
-          Exclude_site = GMregisterMenuCommand(`\ufff2\ud83c\udf40 重新渲染 ${curHostName} ${isHotkey ? "(" + String.fromCharCode(isMac ? 71 : 88) + ")" : ""}`, () => {
+          Exclude_site ? GMunregisterMenuCommand(Exclude_site) : debug("\u27A4 Installing Exclude_site_Menu");
+          Exclude_site = GMregisterMenuCommand(`\ufff2\ud83c\udf40 重新渲染 ${CUR_HOST_NAME} ${isHotkey ? "(" + String.fromCharCode(isMac ? 71 : 88) + ")" : ""}`, () => {
             addAction.includeSites();
           });
-          Feed_Back ? GMunregisterMenuCommand(Feed_Back) : debug("\u27A4 No Feed_Back_Menu");
+          Feed_Back ? GMunregisterMenuCommand(Feed_Back) : debug("\u27A4 Installing Feed_Back_Menu");
           Feed_Back = GMregisterMenuCommand(`\ufff9\ud83e\udde1 向作者反馈问题或建议${isHotkey ? "(" + String.fromCharCode(isMac ? 85 : 84) + ")" : ""}`, () => {
-            GMopenInTab(defCon.feedback, defCon.options);
+            GMopenInTab(FEEDBACK_URI, defCon.options);
           });
         }
       }
@@ -2345,7 +2342,7 @@
 
     /* hotkey setting */
 
-    if (isHotkey && curWindowTop) {
+    if (isHotkey && CUR_WINDOW_TOP) {
       document.addEventListener("keydown", event => {
         const e = event || window.Event;
         const ekey = (isMac ? e.metaKey : e.altKey) && !e.ctrlKey && !e.shiftKey;
@@ -2386,7 +2383,7 @@
           e.preventDefault();
           if (Date.now() - defCon.clickTimer > 10e3) {
             defCon.clickTimer = Date.now();
-            GMopenInTab(defCon.feedback, defCon.options);
+            GMopenInTab(FEEDBACK_URI, defCon.options);
           }
         }
       });
@@ -2435,8 +2432,7 @@
     function moveStyleTolastChild(isMutationObserver) {
       try {
         if (isMutationObserver) {
-          const cssScriptCount = document.head.querySelectorAll("style[id^='TC']").length;
-          if (cssScriptCount > 1) {
+          if (document.head.querySelectorAll("style[id^='TC']").length > 1) {
             if (!defCon.scriptCount) {
               defCon.scriptCount = true;
               const info = `\u53d1\u73b0\u5197\u4f59\u5b89\u88c5\u7684\u201c${defCon.scriptName}\u201d\u811a\u672c\uff0c\u8bf7\u5220\u9664\u91cd\u590d\u811a\u672c\u4fdd\u7559\u5176\u4e00\u3002`;
@@ -2455,11 +2451,11 @@
             const isPrevious = document.head.lastChild.previousSibling.className === defCon.class.rndStyle;
             const isLastChild = isLast || isPrevious;
             debug("\u27A4 Style in lastChild: %c%s", "color:crimson;font-weight:bold", isLastChild);
-            sleep(2e3).then(() => {
+            sleep(2e3).then((endTime = Date.now()) => {
               if (document.head.lastChild.className !== defCon.class.rndStyle) {
                 insertStyle(true);
               }
-              debug("\u27A4 [lastChild] %c%s %c%s", "color:0;font-weight:bold", document.head.lastChild.className, "color:gray", Date.now() - startTime);
+              debug("\u27A4 [lastChild] %c%s %c%s", "color:0;font-weight:bold", document.head.lastChild.className, "color:gray", endTime - startTime);
             });
             return isLastChild;
           });
@@ -2482,7 +2478,7 @@
           } else {
             isStyleReady = true;
           }
-          if (curWindowTop && !qS(`.${defCon.class.rndClass}`)) {
+          if (CUR_WINDOW_TOP && !qS(`.${defCon.class.rndClass}`)) {
             insertCSS();
           }
           return isStyleReady;
@@ -2521,7 +2517,7 @@
 
     async function operateConfigure(fontData = []) {
       try {
-        if (curWindowTop) {
+        if (CUR_WINDOW_TOP) {
           // fontlist with cache expires
           try {
             const fontlist_Cache = cache.get("_fontlist_");
@@ -2558,31 +2554,31 @@
                   trueButtonText: "保 存",
                   falseButtonText: "帮助文档",
                   neutralButtonText: "取 消",
-                  messageText: `<p style="color:#666;font-size:14px!important">以下文本域可按预定格式增加自定义字体。请用小贴士或按样例填写，输入有误将被自动过滤。与『<a href="${hostURI}#fontlist" target="_blank">内置字体表</a>』重复的字体将被自动忽略。【功能小贴士：<span id="${defCon.id.seed}_addTools" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${defCon.id.seed}_custom_Fontlist" style="box-sizing:border-box;min-height:160px!important;min-width:388px!important;max-width:388px!important;resize:vertical;padding:5px;border:1px solid #999;border-radius:6px;font:normal 400 14px/150% monospace,'Courier New','Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;white-space:pre!important;cursor:text" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下：\n\n{ "ch": "中文字体名一", "en": "EN Fontname 1" }\u21b2\n{ "ch": "中文字体名二", "en": "EN Fontname 2" }\u21b2\n{ "ch": "中文字体名三", "en": "EN Fontname 3" }\u21b2\n\n（注意：\u21b2为换行符号，输入(Enter)回车即可）'>${customFontlist}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:crimson;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`,
+                  messageText: `<p style="color:#666;font-size:14px!important">以下文本域可按预定格式增加自定义字体。请用小贴士或按样例填写，输入有误将被自动过滤。与『<a href="${HOST_URI}#fontlist" target="_blank">内置字体表</a>』重复的字体将被自动忽略。【功能小贴士\uff1a<span id="${RANDOM_ID}_addTools" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${RANDOM_ID}_custom_Fontlist" style="box-sizing:border-box;min-height:160px!important;min-width:388px!important;max-width:388px!important;resize:vertical;padding:5px;border:1px solid #999;border-radius:6px;font:normal 400 14px/150% monospace,'Courier New','Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;white-space:pre!important;cursor:text" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下\uff1a\n\n{ "ch": "中文字体名一", "en": "EN Fontname 1" }\u21b2\n{ "ch": "中文字体名二", "en": "EN Fontname 2" }\u21b2\n{ "ch": "中文字体名三", "en": "EN Fontname 3" }\u21b2\n\n（注意\uff1a\u21b2为换行符号，输入(Enter)回车即可）'>${customFontlist}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:crimson;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`,
                   titleText: "自定义字体表",
                 });
-                qS(`#${defCon.id.seed}_addTools`).addEventListener("click", () => {
+                qS(`#${RANDOM_ID}_addTools`).addEventListener("click", () => {
                   let chName, enName, cusFontName;
-                  chName = prompt("请输入中文字体名：(例如：鸿蒙黑体，仅支持半角输入模式，包括中文、日文、韩文、英文，数字、减号、下划线、空格、@)", "鸿蒙黑体");
+                  chName = prompt("请输入中文字体名\uff1a(例如\uff1a鸿蒙黑体，仅支持半角输入模式，包括中文、日文、韩文、英文，数字、减号、下划线、空格、@)", "鸿蒙黑体");
                   if (chName === null) {
                     return;
                   } else if (/^@?[a-zA-Z0-9\u2E80-\uD7FF\-_ ]+$/.test(chName.trim())) {
-                    enName = prompt("请输入英文字体名：(例如：HarmonyOS Sans SC，仅支持半角输入模式，包括英文、数字、减号、下划线、空格、@)", "HarmonyOS Sans SC");
+                    enName = prompt("请输入英文字体名\uff1a(例如\uff1aHarmonyOS Sans SC，仅支持半角输入模式，包括英文、数字、减号、下划线、空格、@)", "HarmonyOS Sans SC");
                     if (enName === null) {
                       return;
                     } else if (/^@?[a-zA-Z0-9\-_ ]+$/.test(enName.trim())) {
                       cusFontName = `{"ch":"${chName.trim()}","en":"${enName.trim()}"}`;
-                      const aTrim = qS(`#${defCon.id.seed}_custom_Fontlist`).value.trim() ? "\n" : "";
-                      qS(`#${defCon.id.seed}_custom_Fontlist`).value = qS(`#${defCon.id.seed}_custom_Fontlist`).value.trim().concat(aTrim, cusFontName, "\n");
-                      custom_Fontlist = qS(`#${defCon.id.seed}_custom_Fontlist`).value.trim();
+                      const aTrim = qS(`#${RANDOM_ID}_custom_Fontlist`).value.trim() ? "\n" : "";
+                      qS(`#${RANDOM_ID}_custom_Fontlist`).value = qS(`#${RANDOM_ID}_custom_Fontlist`).value.trim().concat(aTrim, cusFontName, "\n");
+                      custom_Fontlist = qS(`#${RANDOM_ID}_custom_Fontlist`).value.trim();
                     } else {
-                      alert("英文字体名 格式输入错误！");
+                      alert("英文字体名 格式输入错误\uff01");
                     }
                   } else {
-                    alert("中文字体名 格式输入错误！");
+                    alert("中文字体名 格式输入错误\uff01");
                   }
                 });
-                qS(`#${defCon.id.seed}_custom_Fontlist`).addEventListener("change", function () {
+                qS(`#${RANDOM_ID}_custom_Fontlist`).addEventListener("change", function () {
                   this.value = convertFullToHalf(this.value)
                     .replace(/'|`|·|“|”|‘|’/g, `"`)
                     .replace(/，/g, `,`)
@@ -2595,7 +2591,7 @@
                     GMsetValue("_Custom_fontlist_", defCon.encrypt(JSON.stringify(DEFAULT_ARRAY)));
                     let frDialog = new FrDialogBox({
                       trueButtonText: "确 定",
-                      messageText: `<p>自定义字体表已重置成功！<p><p style="color:green">当前网站字体列表缓存已自动重建，页面即将刷新。</p>`,
+                      messageText: `<p>自定义字体表已重置成功\uff01<p><p style="color:green">当前网站字体列表缓存已自动重建，页面即将刷新。</p>`,
                       titleText: "自定义字体重置成功",
                     });
                     closeConfigurePage(true);
@@ -2612,7 +2608,7 @@
                     GMsetValue("_Custom_fontlist_", defCon.encrypt(JSON.stringify(save_Fontlist)));
                     let frDialog = new FrDialogBox({
                       trueButtonText: "确 定",
-                      messageText: `<p>您所提交的自定义字体已保存成功！<p><p style="color:green">当前网站字体列表缓存已自动重建，页面即将刷新。</p>`,
+                      messageText: `<p>您所提交的自定义字体已保存成功\uff01<p><p style="color:green">当前网站字体列表缓存已自动重建，页面即将刷新。</p>`,
                       titleText: "自定义字体保存成功",
                     });
                     closeConfigurePage(true);
@@ -2636,7 +2632,7 @@
                     }
                   }
                 } else {
-                  GMopenInTab(`${hostURI}#custom`, defCon.options);
+                  GMopenInTab(`${HOST_URI}#custom`, defCon.options);
                 }
                 frDialog = null;
               });
@@ -2650,11 +2646,11 @@
 
           const ffaceT = qS(`#${defCon.id.fface}`);
           const inputFont = qS(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`);
-          await getCurrentFontName(CONST.fontFace, defCon.refont, defaultFont);
+          await getCurrentFontName(CONST_VALUES.fontFace, defCon.refont, DEFAULT_FONT);
           if (ffaceT && inputFont) {
             ffaceT.addEventListener("change", async () => {
-              await getCurrentFontName(CONST.fontFace, defCon.refont, defaultFont);
-              if (ffaceT.checked && !CONST.fontFace) {
+              await getCurrentFontName(CONST_VALUES.fontFace, defCon.refont, DEFAULT_FONT);
+              if (ffaceT.checked && !CONST_VALUES.fontFace) {
                 inputFont.setAttribute("placeholder", `正在恢复之前设置的字体…`);
                 sleep(360).then((submitPreview = qS(`#${defCon.id.submit} .${defCon.class.submit}[v-Preview="true"]`)) => {
                   submitPreview ? submitPreview.click() : debug("\u27A4 v-Preview:", submitPreview);
@@ -2666,12 +2662,12 @@
           /* Fonts Face */
 
           const submitButton = qS(`#${defCon.id.submit} .${defCon.class.submit}`);
-          saveChangeStatus(ffaceT, CONST.fontFace, submitButton, defCon.values);
+          saveChangeStatus(ffaceT, CONST_VALUES.fontFace, submitButton, defCon.values);
 
           /* Font Smooth */
 
           const smoothT = qS(`#${defCon.id.smooth}`);
-          saveChangeStatus(smoothT, CONST.fontSmooth, submitButton, defCon.values);
+          saveChangeStatus(smoothT, CONST_VALUES.fontSmooth, submitButton, defCon.values);
 
           /* FontSize Zoom */
 
@@ -2680,14 +2676,14 @@
           if (isFontsize) {
             try {
               drawZoom = document.querySelector(`#${defCon.id.zoomSize}`);
-              zoom.value = CONST.fontSize === 1 ? "OFF" : CONST.fontSize.toFixed(3);
+              zoom.value = CONST_VALUES.fontSize === 1 ? "OFF" : CONST_VALUES.fontSize.toFixed(3);
               rangeSliderWidget(drawZoom, zoom, 3, true);
               checkInputValue(zoom, drawZoom, /^[0-1](\.[0-9]{1,3})?$/, 3, true);
             } catch (e) {
               defCon.errors.push(`[FontSize Zoom]: ${e}`);
               error("\u27A4 FontSize Zoom:", e);
             } finally {
-              saveChangeStatus(zoom, CONST.fontSize, submitButton, defCon.values, true);
+              saveChangeStatus(zoom, CONST_VALUES.fontSize, submitButton, defCon.values, true);
             }
           }
 
@@ -2697,14 +2693,14 @@
           const stroke = qS(`#${defCon.id.strokeSize}`);
           try {
             drawStrock = document.querySelector(`#${defCon.id.stroke}`);
-            stroke.value = CONST.fontStroke === 0 ? "OFF" : CONST.fontStroke.toFixed(3);
+            stroke.value = CONST_VALUES.fontStroke === 0 ? "OFF" : CONST_VALUES.fontStroke.toFixed(3);
             rangeSliderWidget(drawStrock, stroke, 3);
             checkInputValue(stroke, drawStrock, /^[0-1](\.[0-9]{1,3})?$/, 3);
           } catch (e) {
             defCon.errors.push(`[Fonts stroke]: ${e}`);
             error("\u27A4 Fonts stroke:", e);
           } finally {
-            saveChangeStatus(stroke, CONST.fontStroke, submitButton, defCon.values);
+            saveChangeStatus(stroke, CONST_VALUES.fontStroke, submitButton, defCon.values);
           }
 
           /* Fonts shadow */
@@ -2713,7 +2709,7 @@
           const shadows = qS(`#${defCon.id.shadowSize}`);
           try {
             drawShadow = document.querySelector(`#${defCon.id.shadow}`);
-            shadows.value = CONST.fontShadow === 0 ? "OFF" : CONST.fontShadow.toFixed(2);
+            shadows.value = CONST_VALUES.fontShadow === 0 ? "OFF" : CONST_VALUES.fontShadow.toFixed(2);
             qS(`#${defCon.id.shadowColor}`).style.display = shadows.value === "OFF" ? "none" : "flex";
             rangeSliderWidget(drawShadow, shadows, 2);
             checkInputValue(shadows, drawShadow, /^[0-8](\.[0-9]{1,2})?$/, 2);
@@ -2721,7 +2717,7 @@
             defCon.errors.push(`[Fonts shadow]: ${e}`);
             error("\u27A4 Fonts shadow:", e);
           } finally {
-            saveChangeStatus(shadows, CONST.fontShadow, submitButton, defCon.values);
+            saveChangeStatus(shadows, CONST_VALUES.fontShadow, submitButton, defCon.values);
           }
 
           /* Fonts shadow color selection */
@@ -2731,7 +2727,7 @@
           const colorReg = /^#[0-9A-F]{8}$|^currentcolor$/i;
           try {
             colorPicker = new window.frColorPicker(`#${defCon.id.color}`, {
-              value: CONST.shadowColor,
+              value: CONST_VALUES.shadowColor,
               alpha: 1.0,
               format: "hexa",
               previewSize: 35,
@@ -2751,14 +2747,14 @@
                 colorshow._value_ = colorshow.value;
               },
             });
-            colorPicker.fromString(CONST.shadowColor);
+            colorPicker.fromString(CONST_VALUES.shadowColor);
             colorshow.value = colorPicker.toHEXAString() === "#FFFFFFFF" ? "currentcolor" : colorPicker.toHEXAString();
             debug("\u27A4 FRColorPicker:", colorPicker.toHEXAString());
           } catch (e) {
             defCon.errors.push(`[Fonts shadowColor]: ${e}`);
             error("\u27A4 Fonts shadowColor:", e);
           } finally {
-            saveChangeStatus(colorshow, CONST.shadowColor, submitButton, defCon.values);
+            saveChangeStatus(colorshow, CONST_VALUES.shadowColor, submitButton, defCon.values);
           }
 
           /* click to selectAll */
@@ -2782,8 +2778,8 @@
             });
           }
 
-          saveChangeStatus(fontCssT, CONST.fontCSS, submitButton, defCon.values);
-          saveChangeStatus(fontExT, CONST.fontEx, submitButton, defCon.values);
+          saveChangeStatus(fontCssT, CONST_VALUES.fontCSS, submitButton, defCon.values);
+          saveChangeStatus(fontExT, CONST_VALUES.fontEx, submitButton, defCon.values);
 
           /* Expand & Collapse */
 
@@ -2797,62 +2793,62 @@
               trueButtonText: "重 置",
               falseButtonText: "恢 复",
               neutralButtonText: "取 消",
-              messageText: `<p>『重置/恢复』将当前设置初始化为 <span style="color:slategray">程序默认的初始数据</span> 或 <span style="color:slategrey">上次正确保存的数据</span>。一般是在您错误配置参数且造成无法挽回的情况下才进行重置参数的操作。</p><p style="color:darkgreen">重置：重置当前数据为程序初始值，手动保存生效。</p><p style="color:darkred">恢复：替换为上次正确保存的数据，自动恢复预览。</p><p style="color:gray">取消：放弃重置操作。</p>`,
+              messageText: `<p>『重置/恢复』将当前设置初始化为 <span style="color:slategray">程序默认的初始数据</span> 或 <span style="color:slategrey">上次正确保存的数据</span>。一般是在您错误配置参数且造成无法挽回的情况下才进行重置参数的操作。</p><p style="color:darkgreen">重置\uff1a重置当前数据为程序初始值，手动保存生效。</p><p style="color:darkred">恢复\uff1a替换为上次正确保存的数据，自动恢复预览。</p><p style="color:gray">取消\uff1a放弃重置操作。</p>`,
               titleText: "参数重置确认",
             });
             if (await frDialog.respond()) {
-              smoothT.checked !== defValue.fontSmooth ? smoothT.click() : debug("\u27A4 <fontSmooth> NOT MODIFIED");
-              ffaceT.checked !== defValue.fontFace ? ffaceT.click() : debug("\u27A4 <fontFace> NOT MODIFIED");
-              CONST.fontSelect.split(",")[0] !== defValue.fontSelect.split(",")[0] ? fontSet().fresetList(fontData) : fontSet().fdeleteList(fontData);
-              await getCurrentFontName(ffaceT.checked, defCon.refont, defaultFont);
+              smoothT.checked !== INITIAL_VALUES.fontSmooth ? smoothT.click() : debug("\u27A4 <fontSmooth> NOT MODIFIED");
+              ffaceT.checked !== INITIAL_VALUES.fontFace ? ffaceT.click() : debug("\u27A4 <fontFace> NOT MODIFIED");
+              CONST_VALUES.fontSelect.split(",")[0] !== INITIAL_VALUES.fontSelect.split(",")[0] ? fontSet().fresetList(fontData) : fontSet().fdeleteList(fontData);
+              await getCurrentFontName(ffaceT.checked, defCon.refont, DEFAULT_FONT);
               if (isFontsize) {
-                zoom.value = defValue.fontSize === 1 ? "OFF" : defValue.fontSize.toFixed(3);
-                zoom._value_ = defValue.fontSize;
-                setSliderProperty(drawZoom, defValue.fontSize, 3);
-                defCon.tZoom = defValue.fontSize;
+                zoom.value = INITIAL_VALUES.fontSize === 1 ? "OFF" : INITIAL_VALUES.fontSize.toFixed(3);
+                zoom._value_ = INITIAL_VALUES.fontSize;
+                setSliderProperty(drawZoom, INITIAL_VALUES.fontSize, 3);
+                defCon.tZoom = INITIAL_VALUES.fontSize;
               }
-              stroke.value = defValue.fontStroke === 0 ? "OFF" : defValue.fontStroke.toFixed(3);
-              stroke._value_ = defValue.fontStroke;
-              setSliderProperty(drawStrock, defValue.fontStroke, 3);
-              shadows.value = defValue.fontShadow === 0 ? "OFF" : defValue.fontShadow.toFixed(2);
-              shadows._value_ = defValue.fontShadow;
-              setSliderProperty(drawShadow, defValue.fontShadow, 2);
+              stroke.value = INITIAL_VALUES.fontStroke === 0 ? "OFF" : INITIAL_VALUES.fontStroke.toFixed(3);
+              stroke._value_ = INITIAL_VALUES.fontStroke;
+              setSliderProperty(drawStrock, INITIAL_VALUES.fontStroke, 3);
+              shadows.value = INITIAL_VALUES.fontShadow === 0 ? "OFF" : INITIAL_VALUES.fontShadow.toFixed(2);
+              shadows._value_ = INITIAL_VALUES.fontShadow;
+              setSliderProperty(drawShadow, INITIAL_VALUES.fontShadow, 2);
               qS(`#${defCon.id.shadowColor}`).style.display = shadows.value === "OFF" ? "none" : "flex";
-              colorPicker.fromString(defValue.shadowColor);
-              colorshow.value = defValue.shadowColor;
-              colorshow._value_ = defValue.shadowColor;
-              fontCssT.value = defValue.fontCSS;
-              setEffectIntoSubmit(fontCssT.value, CONST.fontCSS, defCon.values, fontCssT, submitButton);
-              fontExT.value = defValue.fontEx;
-              setEffectIntoSubmit(fontExT.value, CONST.fontEx, defCon.values, fontExT, submitButton);
+              colorPicker.fromString(INITIAL_VALUES.shadowColor);
+              colorshow.value = INITIAL_VALUES.shadowColor;
+              colorshow._value_ = INITIAL_VALUES.shadowColor;
+              fontCssT.value = INITIAL_VALUES.fontCSS;
+              setEffectIntoSubmit(fontCssT.value, CONST_VALUES.fontCSS, defCon.values, fontCssT, submitButton);
+              fontExT.value = INITIAL_VALUES.fontEx;
+              setEffectIntoSubmit(fontExT.value, CONST_VALUES.fontEx, defCon.values, fontExT, submitButton);
               sleep(360).then((submitPreview = qS(`#${defCon.id.submit} .${defCon.class.submit}[v-Preview="true"]`)) => {
                 submitPreview ? submitPreview.click() : debug("\u27A4 v-Preview:", submitPreview);
               });
             } else {
-              smoothT.checked !== CONST.fontSmooth ? smoothT.click() : debug("\u27A4 <fontSmooth> NOT MODIFIED");
-              ffaceT.checked !== CONST.fontFace ? ffaceT.click() : debug("\u27A4 <fontFace> NOT MODIFIED");
+              smoothT.checked !== CONST_VALUES.fontSmooth ? smoothT.click() : debug("\u27A4 <fontSmooth> NOT MODIFIED");
+              ffaceT.checked !== CONST_VALUES.fontFace ? ffaceT.click() : debug("\u27A4 <fontFace> NOT MODIFIED");
               fontSet().fdeleteList(fontData);
-              await getCurrentFontName(ffaceT.checked, defCon.refont, defaultFont);
+              await getCurrentFontName(ffaceT.checked, defCon.refont, DEFAULT_FONT);
               if (isFontsize) {
-                zoom.value = CONST.fontSize === 1 ? "OFF" : CONST.fontSize.toFixed(3);
-                zoom._value_ = CONST.fontSize;
-                setSliderProperty(drawZoom, CONST.fontSize, 3);
-                defCon.tZoom = CONST.fontSize;
+                zoom.value = CONST_VALUES.fontSize === 1 ? "OFF" : CONST_VALUES.fontSize.toFixed(3);
+                zoom._value_ = CONST_VALUES.fontSize;
+                setSliderProperty(drawZoom, CONST_VALUES.fontSize, 3);
+                defCon.tZoom = CONST_VALUES.fontSize;
               }
-              stroke.value = CONST.fontStroke === 0 ? "OFF" : CONST.fontStroke.toFixed(3);
-              stroke._value_ = CONST.fontStroke;
-              setSliderProperty(drawStrock, CONST.fontStroke, 3);
-              shadows.value = CONST.fontShadow === 0 ? "OFF" : CONST.fontShadow.toFixed(2);
-              shadows._value_ = CONST.fontShadow;
-              setSliderProperty(drawShadow, CONST.fontShadow, 2);
+              stroke.value = CONST_VALUES.fontStroke === 0 ? "OFF" : CONST_VALUES.fontStroke.toFixed(3);
+              stroke._value_ = CONST_VALUES.fontStroke;
+              setSliderProperty(drawStrock, CONST_VALUES.fontStroke, 3);
+              shadows.value = CONST_VALUES.fontShadow === 0 ? "OFF" : CONST_VALUES.fontShadow.toFixed(2);
+              shadows._value_ = CONST_VALUES.fontShadow;
+              setSliderProperty(drawShadow, CONST_VALUES.fontShadow, 2);
               qS(`#${defCon.id.shadowColor}`).style.display = shadows.value === "OFF" ? "none" : "flex";
-              colorPicker.fromString(CONST.shadowColor);
-              colorshow.value = CONST.shadowColor === "#FFFFFFFF" ? "currentcolor" : colorPicker.toHEXAString();
+              colorPicker.fromString(CONST_VALUES.shadowColor);
+              colorshow.value = CONST_VALUES.shadowColor === "#FFFFFFFF" ? "currentcolor" : colorPicker.toHEXAString();
               colorshow._value_ = colorshow.value;
-              fontCssT.value = CONST.fontCSS;
-              setEffectIntoSubmit(fontCssT.value, CONST.fontCSS, defCon.values, fontCssT, submitButton);
-              fontExT.value = CONST.fontEx;
-              setEffectIntoSubmit(fontExT.value, CONST.fontEx, defCon.values, fontExT, submitButton);
+              fontCssT.value = CONST_VALUES.fontCSS;
+              setEffectIntoSubmit(fontCssT.value, CONST_VALUES.fontCSS, defCon.values, fontCssT, submitButton);
+              fontExT.value = CONST_VALUES.fontEx;
+              setEffectIntoSubmit(fontExT.value, CONST_VALUES.fontEx, defCon.values, fontExT, submitButton);
               loadPreview(defCon.preview);
               setAutoZoomFontSize(`#${defCon.id.rndId}`, defCon.tZoom);
             }
@@ -2861,22 +2857,22 @@
 
           qS(`#${defCon.id.submit} .${defCon.class.submit}`).addEventListener("click", async function () {
             const fontlists = fontSet().fsearchList(`${defCon.id.fontName}`);
-            const fontselect = fontlists.length > 0 ? addSingleQuoteToArray(fontlists) : CONST.fontSelect;
+            const fontselect = fontlists.length > 0 ? addSingleQuoteToArray(fontlists) : CONST_VALUES.fontSelect;
             const fontface = ffaceT.checked;
             const smooth = smoothT.checked;
-            const prefzoom = isFontsize ? (/^[0-1](\.[0-9]{1,3})?$/.test(zoom.value) ? zoom.value : defValue.fontSize) : 1;
+            const prefzoom = isFontsize ? (/^[0-1](\.[0-9]{1,3})?$/.test(zoom.value) ? zoom.value : INITIAL_VALUES.fontSize) : 1;
             const fzoom = prefzoom < 0.8 ? 0.8 : prefzoom > 1.5 ? 1.5 : prefzoom;
-            const fstroke = /^[0-1](\.[0-9]{1,3})?$/.test(stroke.value) ? stroke.value : stroke.value === "OFF" ? 0 : defValue.fontStroke;
-            const fshadow = /^[0-8](\.[0-9]{1,2})?$/.test(shadows.value) ? shadows.value : shadows.value === "OFF" ? 0 : defValue.fontShadow;
+            const fstroke = /^[0-1](\.[0-9]{1,3})?$/.test(stroke.value) ? stroke.value : stroke.value === "OFF" ? 0 : INITIAL_VALUES.fontStroke;
+            const fshadow = /^[0-8](\.[0-9]{1,2})?$/.test(shadows.value) ? shadows.value : shadows.value === "OFF" ? 0 : INITIAL_VALUES.fontShadow;
             const pickedcolor = colorshow.value;
-            const fscolor = colorReg.test(pickedcolor) ? (pickedcolor.toLowerCase() === "currentcolor" ? "#FFFFFFFF" : pickedcolor) : defValue.shadowColor;
+            const fscolor = colorReg.test(pickedcolor) ? (pickedcolor.toLowerCase() === "currentcolor" ? "#FFFFFFFF" : pickedcolor) : INITIAL_VALUES.shadowColor;
             const fcss = fontCssT.value;
-            const cssfun = fcss ? fcss.replace(/"|`/g, "'") : defValue.fontCSS;
+            const cssfun = fcss ? fcss.replace(/"|`/g, "'") : INITIAL_VALUES.fontCSS;
             const fex = fontExT.value;
             const fontex = fex ? fex.replace(/"|`/g, "'") : "";
             if (defCon.isPreview && this.getAttribute("v-Preview")) {
               try {
-                const _bodyZoom = isFontsize ? (fzoom >= 0.8 && fzoom <= 1.5 && fzoom !== 1 ? funcFontsize(fzoom) : ``) : ``;
+                const _bodyzoom = isFontsize ? (fzoom >= 0.8 && fzoom <= 1.5 && fzoom !== 1 ? funcFontsize(fzoom) : ``) : ``;
                 const _shadow = fshadow > 0 && fshadow <= 8 ? overlayColor(fshadow, fscolor) : ``;
                 const _stroke = fstroke > 0 && fstroke <= 1.0 ? `-webkit-text-stroke:${fstroke}px currentcolor;` : ``;
                 const _smoothing = smooth ? funcSmooth() : ``;
@@ -2889,9 +2885,9 @@
                 if (fontex) {
                   _codeFont = funcCodefont(fontex, fontface, _prefont);
                 }
-                const _tshadow = `${_fontfaces}${_bodyZoom}`.concat(
+                const _tshadow = `${_fontfaces}${_bodyzoom}`.concat(
                   `${filterHtmlToText(cssfun)}{${_fontfamily}${_shadow}${_stroke}${_smoothing}${textrender}}`,
-                  `${_codeFont}${_exclude}${fixStroke}`
+                  `${_codeFont}${_exclude}${fixstroke}`
                 );
                 const __tshadow = `@charset "UTF-8";${_tshadow}`;
                 defCon.tZoom = fzoom;
@@ -2899,7 +2895,7 @@
                 this.removeAttribute("style");
                 this.removeAttribute("v-Preview");
                 loadPreview(defCon.isPreview, __tshadow, false);
-                await getCurrentFontName(fontface, _refont, defaultFont);
+                await getCurrentFontName(fontface, _refont, DEFAULT_FONT);
                 setAutoZoomFontSize(`#${defCon.id.rndId}`, fzoom);
                 await correctBoldErrorByStroke(fstroke);
               } catch (e) {
@@ -2913,12 +2909,12 @@
                   trueButtonText: "保存到全局数据",
                   falseButtonText: "保存到网站数据",
                   neutralButtonText: "取 消",
-                  messageText: `<p style="color:darkgreen;font-weight:900">保存到全局数据：</p><p>将当前设置保存为全局设置，默认使用全局参数。</p><p style="color:darkred;font-weight:900">保存到当前网站数据：<span id="${defCon.id.seed}_a_w_d_l_">[<span style="font-size:12px!important;font-weight:normal;padding:0 2px;margin:0;cursor:pointer;color:#3e3e3e">全部数据列表</span>]</span></p><p style="min-height:22px"><span title="保存到网站数据会自动覆盖之前的数据" style="word-break:break-all;cursor:help;color:indigo" id="${defCon.id.seed}_c_w_d_">为 ${curHostName} 保存独立的设置数据。</span>`,
+                  messageText: `<p style="color:darkgreen;font-weight:900">保存到全局数据\uff1a</p><p>将当前设置保存为全局设置，默认使用全局参数。</p><p style="color:darkred;font-weight:900">保存到当前网站数据\uff1a<span id="${RANDOM_ID}_a_w_d_l_">[<span style="font-size:12px!important;font-weight:normal;padding:0 2px;margin:0;cursor:pointer;color:#3e3e3e">全部数据列表</span>]</span></p><p style="min-height:22px"><span title="保存到网站数据会自动覆盖之前的数据" style="word-break:break-all;cursor:help;color:indigo" id="${RANDOM_ID}_c_w_d_">为 ${CUR_HOST_NAME} 保存独立的设置数据。</span>`,
                   titleText: "保存设置数据",
                 });
                 domains = await GMgetValue("_domains_fonts_set_");
                 domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : DEFAULT_ARRAY;
-                const _awdl = qS(`#${defCon.id.seed}_a_w_d_l_`);
+                const _awdl = qS(`#${RANDOM_ID}_a_w_d_l_`);
                 if (_awdl) {
                   if (domainValue.length > 0) {
                     _awdl.style.cssText += "display:line-block";
@@ -2931,21 +2927,21 @@
                   });
                 }
                 domainValueIndex = updateDomainsIndex(domainValue);
-                if (domainValueIndex !== undefined && qS(`#${defCon.id.seed}_c_w_d_`)) {
+                if (domainValueIndex !== undefined && qS(`#${RANDOM_ID}_c_w_d_`)) {
                   const fontDate = setDateFormat("yyyy-MM-dd HH:mm:ss", new Date(domainValue[domainValueIndex].fontDate));
-                  qS(`#${defCon.id.seed}_c_w_d_`).innerHTML = trustedTypesPolicy.createHTML(
+                  qS(`#${RANDOM_ID}_c_w_d_`).innerHTML = trustedTypesPolicy.createHTML(
                     String(
-                      `<p style="height:30px;display:flex;align-items:center"><span style="color:indigo"><strong>上次保存：</strong>${fontDate} </span><button id="${defCon.id.seed}_c_w_d_d_" style="box-sizing:border-box;padding:3px 5px;margin-left:15px;cursor:pointer;color:#333;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-height:30px;background-color:#eee;letter-spacing:normal" title="删除数据后将刷新页面">删除当前网站数据</button></p>`
+                      `<p style="height:30px;display:flex;align-items:center"><span style="color:indigo"><strong>上次保存\uff1a</strong>${fontDate} </span><button id="${RANDOM_ID}_c_w_d_d_" style="box-sizing:border-box;padding:3px 5px;margin-left:15px;cursor:pointer;color:#333;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-height:30px;background-color:#eee;letter-spacing:normal" title="删除数据后将刷新页面">删除当前网站数据</button></p>`
                     )
                   );
-                  qS(`#${defCon.id.seed}_c_w_d_d_`).addEventListener("click", async () => {
+                  qS(`#${RANDOM_ID}_c_w_d_d_`).addEventListener("click", async () => {
                     domainValue.splice(domainValueIndex, 1);
                     GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
                     cache.remove("_fontlist_");
                     closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
                     let frDialog = new FrDialogBox({
                       trueButtonText: "感谢使用",
-                      messageText: `<p style="color:darkred">时间戳 ${fontDate} 的数据已成功删除！</p><p>当前页面将在您确认后自动刷新。</p>`,
+                      messageText: `<p style="color:darkred">时间戳 ${fontDate} 的数据已成功删除\uff01</p><p>当前页面将在您确认后自动刷新。</p>`,
                       titleText: "个性化数据删除",
                     });
                     closeConfigurePage(true);
@@ -2956,7 +2952,7 @@
                     frDialog = null;
                   });
                 }
-                defCon.fontlistchanged = fontselect.split(",")[0] !== CONST.fontSelect.split(",")[0];
+                defCon.fontlistchanged = fontselect.split(",")[0] !== CONST_VALUES.fontSelect.split(",")[0];
                 if (await frDialog.respond()) {
                   saveData("_fonts_set_", {
                     fontSelect: filterHtmlToText(fontselect),
@@ -2972,7 +2968,7 @@
                   defCon.successId = true;
                 } else {
                   const _savedata_ = {
-                    domain: curHostName,
+                    domain: CUR_HOST_NAME,
                     fontDate: Date.now(),
                     fontSelect: filterHtmlToText(fontselect),
                     fontFace: Boolean(fontface),
@@ -3024,7 +3020,7 @@
                   closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
                   let frDialog = new FrDialogBox({
                     trueButtonText: "感谢使用",
-                    messageText: `<p style="color:darkgreen">您设置的参数已保存！</p><p>当前页面将在您确认后自动刷新。</p>`,
+                    messageText: `<p style="color:darkgreen">您设置的参数已保存\uff01</p><p>当前页面将在您确认后自动刷新。</p>`,
                     titleText: "数据保存完毕",
                   });
                   if (defCon.fontlistchanged) {
@@ -3066,7 +3062,7 @@
         if (!isReload) {
           if (defCon.preview) {
             loadPreview(defCon.isPreview);
-            defCon.tZoom = CONST.fontSize;
+            defCon.tZoom = CONST_VALUES.fontSize;
           }
           closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
         }
@@ -3111,7 +3107,7 @@
               trueButtonText: "备 份",
               falseButtonText: "还 原",
               neutralButtonText: "取 消",
-              messageText: `<p style="color:darkgreen;font-weight:900">备份到本地文件：</p><p>备份到本地，自动下载 backup.*.sqlitedb 文件。</p><p style="color:darkred;font-weight:900">从本地文件还原：</p><p><span style="cursor:pointer;color:indigo" id="${defCon.id.tfiles}">\ud83d\udc49\u0020[点击这里载入*.sqlitedb备份文件]</span><input accept=".sqlitedb" type="file" id="${defCon.id.files}"/></p>`,
+              messageText: `<p style="color:darkgreen;font-weight:900">备份到本地文件\uff1a</p><p>备份到本地，自动下载 backup.*.sqlitedb 文件。</p><p style="color:darkred;font-weight:900">从本地文件还原\uff1a</p><p><span style="cursor:pointer;color:indigo" id="${defCon.id.tfiles}">\ud83d\udc49\u0020[点击这里载入*.sqlitedb备份文件]</span><input accept=".sqlitedb" type="file" id="${defCon.id.files}"/></p>`,
               titleText: "备份与还原数据",
             });
             const tfs = qS(`#${defCon.id.tfiles}`);
@@ -3170,7 +3166,7 @@
                     const _data_3 = _rs.db_3 ? JSON.parse(defCon.decrypt(_rs.db_3)) : def;
                     const _data_4 = _rs.db_4 ? JSON.parse(defCon.decrypt(_rs.db_4)) : def;
                     const _data_5 = _rs.db_5 ? JSON.parse(defCon.decrypt(_rs.db_5)) : undefined;
-                    if (!isNaN(Date.parse(_data_0)) && new Date(_data_0) <= new Date() && _data_R.includes(defCon.scriptAuthor)) {
+                    if (!isNaN(Date.parse(_data_0)) && new Date(_data_0) <= new Date() && _data_R.includes(SCRIPT_AUTHOR)) {
                       GMsetValue("_fonts_set_", defCon.encrypt(JSON.stringify(_data_1)));
                       GMsetValue("_Exclude_site_", defCon.encrypt(JSON.stringify(_data_2)));
                       GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(_data_3)));
@@ -3184,7 +3180,7 @@
                       }
                       let frDialog = new FrDialogBox({
                         trueButtonText: "确 定",
-                        messageText: `<p style="color:darkgreen">本地备份数据还原完毕！</p><p>当前页面将在您确认后自动刷新。</p>`,
+                        messageText: `<p style="color:darkgreen">本地备份数据还原完毕\uff01</p><p>当前页面将在您确认后自动刷新。</p>`,
                         titleText: "数据还原成功",
                       });
                       closeConfigurePage(true);
@@ -3199,7 +3195,7 @@
                     error("\u27A4 FileReader.onload:", e.name);
                     let frDialog = new FrDialogBox({
                       trueButtonText: "确 定",
-                      messageText: `<p style="color:red">数据校验错误，请选择正确的本地备份文件！</p>`,
+                      messageText: `<p style="color:red">数据校验错误，请选择正确的本地备份文件\uff01</p>`,
                       titleText: "数据文件错误",
                     });
                     if (await frDialog.respond()) {
@@ -3212,7 +3208,7 @@
                 error("\u27A4 thatFile:", e.name);
                 let frDialog = new FrDialogBox({
                   trueButtonText: "确 定",
-                  messageText: `<p style="color:indigo">载入文件为空，请选择要还原的备份文件！</p>`,
+                  messageText: `<p style="color:indigo">载入文件为空，请选择要还原的备份文件\uff01</p>`,
                   titleText: "没有文件载入",
                 });
                 if (await frDialog.respond()) {
@@ -3301,11 +3297,11 @@
 
     function setEffectIntoSubmit(value, e, v, t, d, h = false) {
       try {
-        const _thatOffValue = h ? 1 : 0;
+        const _thatoffvalue = h ? 1 : 0;
         const _value =
           t.attributes.v !== undefined
             ? value === "OFF"
-              ? _thatOffValue
+              ? _thatoffvalue
               : Number(value)
             : typeof value === "string" && value.toLowerCase() === "currentcolor"
             ? "#FFFFFFFF"
@@ -3345,8 +3341,8 @@
             d.removeAttribute("style");
             d.removeAttribute("v-Preview");
             loadPreview(defCon.preview);
-            defCon.tZoom = CONST.fontSize;
-            setAutoZoomFontSize(`#${defCon.id.rndId}`, CONST.fontSize);
+            defCon.tZoom = CONST_VALUES.fontSize;
+            setAutoZoomFontSize(`#${defCon.id.rndId}`, CONST_VALUES.fontSize);
           }
         }
       } catch (err) {
@@ -3361,14 +3357,14 @@
         domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : DEFAULT_ARRAY;
         const _data_search_ =
           domainValue.length > 6
-            ? `<p style="display:flex;justify-content:left;align-items:center"><input id="${defCon.id.seed}_d_s_" style="box-sizing:content-box;width:57%;height:22px;font:normal 16px/150% monospace,Consolas,system-ui,-apple-system,BlinkMacSystemFont,serif!important;border:2px solid #777;border-radius:4px;margin:4px 6px;padding:2px 6px"><button id="${defCon.id.seed}_d_s_s_" style="box-sizing:border-box;background:#eee;color:#333;vertical-align:initial;padding:3px 10px;margin:0;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-width:60px;min-height:30px;letter-spacing:normal;text-align:center">查 询</button><button id="${defCon.id.seed}_d_s_c_" style="box-sizing:border-box;background:#eee;color:#333;vertical-align:initial;margin:0 0 0 4px;padding:3px 10px;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-width:60px;min-height:30px;letter-spacing:normal;text-align:center">清 除</button></p>`
+            ? `<p style="display:flex;justify-content:left;align-items:center"><input id="${RANDOM_ID}_d_s_" style="box-sizing:content-box;width:57%;height:22px;font:normal 16px/150% monospace,Consolas,system-ui,-apple-system,BlinkMacSystemFont,serif!important;border:2px solid #777;border-radius:4px;margin:4px 6px;padding:2px 6px"><button id="${RANDOM_ID}_d_s_s_" style="box-sizing:border-box;background:#eee;color:#333;vertical-align:initial;padding:3px 10px;margin:0;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-width:60px;min-height:30px;letter-spacing:normal;text-align:center">查 询</button><button id="${RANDOM_ID}_d_s_c_" style="box-sizing:border-box;background:#eee;color:#333;vertical-align:initial;margin:0 0 0 4px;padding:3px 10px;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-width:60px;min-height:30px;letter-spacing:normal;text-align:center">清 除</button></p>`
             : ``;
         for (let i = 0; i < domainValue.length; i++) {
           Contents += String(
-            `<li id="${defCon.id.seed}_d_d_l_${i}"
+            `<li id="${RANDOM_ID}_d_d_l_${i}"
               style="margin:0;padding:5px;list-style:none;user-select:text!important;font:normal 400 14px/150% 'Microsoft YaHei UI',system-ui,-apple-system,sans-serif!important;color:#555;display:flex;justify-content:space-between;white-space:nowrap;max-width:364px;overflow:hidden">
               <span>
-                [<a id="${defCon.id.seed}_d_d_l_s_${i}" style="display:inline;padding:2px;cursor:pointer;color:darkred;background:transparent;font-size:14px!important">删除</a>]
+                [<a id="${RANDOM_ID}_d_d_l_s_${i}" style="display:inline;padding:2px;cursor:pointer;color:darkred;background:transparent;font-size:14px!important">删除</a>]
                 <span>${i + 1 > 9 ? i + 1 : "0".concat(i + 1)}.</span>
               </span>
               <span style="font-weight:900;margin-left:5px">${filterHtmlToText(domainValue[i].domain)}</span>
@@ -3379,49 +3375,49 @@
         let frDialog = new FrDialogBox({
           trueButtonText: "确认操作，保存数据",
           neutralButtonText: "取 消",
-          messageText: `<p style="font-size:14px!important;text-indent:6px!important;color:darkred">请谨慎操作，保存后生效，已删除的数据将不可恢复！</p>${_data_search_}<ul id="${defCon.id.seed}_d_d_" style="margin:0!important;padding:0!important;list-style:none!important;max-height:190px;overflow-x:hidden">${Contents}</ul>`,
-          titleText: "网站个性化设置数据列表：",
+          messageText: `<p style="font-size:14px!important;text-indent:6px!important;color:darkred">请谨慎操作，保存后生效，已删除的数据将不可恢复\uff01</p>${_data_search_}<ul id="${RANDOM_ID}_d_d_" style="margin:0!important;padding:0!important;list-style:none!important;max-height:190px;overflow-x:hidden">${Contents}</ul>`,
+          titleText: "网站个性化设置数据列表\uff1a",
         });
-        if (qS(`#${defCon.id.seed}_d_s_`) && qS(`#${defCon.id.seed}_d_s_c_`) && qS(`#${defCon.id.seed}_d_s_s_`)) {
-          qS(`#${defCon.id.seed}_d_s_`).addEventListener("keydown", e => {
+        if (qS(`#${RANDOM_ID}_d_s_`) && qS(`#${RANDOM_ID}_d_s_c_`) && qS(`#${RANDOM_ID}_d_s_s_`)) {
+          qS(`#${RANDOM_ID}_d_s_`).addEventListener("keydown", e => {
             const event = e || window.event;
             if (event.keyCode === 13) {
-              qS(`#${defCon.id.seed}_d_s_s_`).click();
+              qS(`#${RANDOM_ID}_d_s_s_`).click();
             }
           });
-          qS(`#${defCon.id.seed}_d_s_`).addEventListener("input", () => {
-            qS(`#${defCon.id.seed}_d_s_`).value = qS(`#${defCon.id.seed}_d_s_`).value.replace(/[^a-z0-9.-]/gi, "");
+          qS(`#${RANDOM_ID}_d_s_`).addEventListener("input", () => {
+            qS(`#${RANDOM_ID}_d_s_`).value = qS(`#${RANDOM_ID}_d_s_`).value.replace(/[^a-z0-9.-]/gi, "");
           });
-          qS(`#${defCon.id.seed}_d_s_c_`).addEventListener("click", () => {
-            qS(`#${defCon.id.seed}_d_s_`).value = "";
-            qS(`#${defCon.id.seed}_d_s_`).style.cssText += "border-color:#777";
-            qS(`#${defCon.id.seed}_d_d_`).scrollTop = 0;
-            qS(`#${defCon.id.seed}_d_s_`).focus();
+          qS(`#${RANDOM_ID}_d_s_c_`).addEventListener("click", () => {
+            qS(`#${RANDOM_ID}_d_s_`).value = "";
+            qS(`#${RANDOM_ID}_d_s_`).style.cssText += "border-color:#777";
+            qS(`#${RANDOM_ID}_d_d_`).scrollTop = 0;
+            qS(`#${RANDOM_ID}_d_s_`).focus();
           });
-          qS(`#${defCon.id.seed}_d_d_`).addEventListener("click", () => {
-            qS(`#${defCon.id.seed}_d_s_`).focus();
+          qS(`#${RANDOM_ID}_d_d_`).addEventListener("click", () => {
+            qS(`#${RANDOM_ID}_d_s_`).focus();
           });
-          qS(`#${defCon.id.seed}_d_s_s_`).addEventListener("click", () => {
-            if (qS(`#${defCon.id.seed}_d_s_`).value) {
+          qS(`#${RANDOM_ID}_d_s_s_`).addEventListener("click", () => {
+            if (qS(`#${RANDOM_ID}_d_s_`).value) {
               if (window.find) {
-                qS(`#${defCon.id.seed}_d_s_`).style.cssText += window.find(qS(`#${defCon.id.seed}_d_s_`).value, 0) ? "border-color:#777" : "border-color:red";
+                qS(`#${RANDOM_ID}_d_s_`).style.cssText += window.find(qS(`#${RANDOM_ID}_d_s_`).value, 0) ? "border-color:#777" : "border-color:red";
                 if (window.getSelection) {
                   const _sTxt = window.getSelection();
-                  const _rows = Number(_sTxt.anchorNode.parentNode.parentNode.id.replace(`${defCon.id.seed}_d_d_l_`, "")) || 0;
+                  const _rows = Number(_sTxt.anchorNode.parentNode.parentNode.id.replace(`${RANDOM_ID}_d_d_l_`, "")) || 0;
                   const _offsetHeight = Number(_sTxt.anchorNode.parentNode.parentNode.offsetHeight) || 0;
-                  qS(`#${defCon.id.seed}_d_d_`).scrollTop = _rows * _offsetHeight;
+                  qS(`#${RANDOM_ID}_d_d_`).scrollTop = _rows * _offsetHeight;
                 }
               }
             }
           });
         }
-        const items = qA(`#${defCon.id.seed}_d_d_ li span>a[id^="${defCon.id.seed}_d_d_l_s_"]`);
+        const items = qA(`#${RANDOM_ID}_d_d_ li span>a[id^="${RANDOM_ID}_d_d_l_s_"]`);
         for (let j = 0; j < items.length; j++) {
           items[j].addEventListener(
             "click",
             function (a, b) {
               if (!this.getAttribute("data-del")) {
-                const _list_Id_ = Number(this.id.replace(`${defCon.id.seed}_d_d_l_s_`, "")) || 0;
+                const _list_Id_ = Number(this.id.replace(`${RANDOM_ID}_d_d_l_s_`, "")) || 0;
                 a.push(b[_list_Id_].domain);
                 this.setAttribute("data-del", b[_list_Id_].domain);
                 this.textContent = "恢复";
@@ -3446,15 +3442,16 @@
             domainValueIndex = updateDomainsIndex(domainValue, _temp_[l]);
             domainValue.splice(domainValueIndex, 1);
             GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
-            if (_temp_[l] === curHostName) {
+            if (_temp_[l] === CUR_HOST_NAME) {
               defCon.equal = true;
-              continue;
             }
           }
           let frDialog = new FrDialogBox({
             trueButtonText: "感谢使用",
             messageText: String(
-              `<p style="color:darkgreen">网站个性化设置数据已保存！${defCon.equal ? "</p><p>当前页面将在您确认后自动刷新。" : "</p><p>确认后您可以在当前页面继续其他操作。"}</p>`
+              `<p style="color:darkgreen">网站个性化设置数据已保存\uff01${
+                defCon.equal ? "</p><p>当前页面将在您确认后自动刷新。" : "</p><p>确认后您可以在当前页面继续其他操作。"
+              }</p>`
             ),
             titleText: "数据保存完毕",
           });
@@ -3489,24 +3486,24 @@
               let frDialog = new FrDialogBox({
                 trueButtonText: "反馈问题",
                 messageText: String(
-                  `<p style="font-size:14px!important;color:crimson">脚本在运行过程中发生了重大异常或错误，请及时告知作者，感谢您的反馈！以下信息会自动保存至您的剪切板：</p>
-                  <p><ul id="${defCon.id.seed}_copy_to_author" style="list-style-position:outside;margin:0!important;padding:0!important;max-height:300px;overflow-y:auto">
-                    <li>浏览器信息：${await getNavigator.getUA()}\u3000</li>
-                    <li>脚本扩展信息：${handlerInfo} ${GMversion}\u3000</li>
-                    <li>脚本版本信息：${defCon.curVersion}\u3000</li>
-                    <li>当前访问域名：${curHostName}\u3000</li>
-                    <li>错误信息：<span style="color:tan">${errors}</span></li>
+                  `<p style="font-size:14px!important;color:crimson">脚本在运行过程中发生了重大异常或错误，请及时告知作者，感谢您的反馈\uff01以下信息会自动保存至您的剪切板\uff1a</p>
+                  <p><ul id="${RANDOM_ID}_copy_to_author" style="list-style-position:outside;margin:0!important;padding:0!important;max-height:300px;overflow-y:auto">
+                    <li>浏览器信息\uff1a${await getNavigator.getUA()}\u3000</li>
+                    <li>脚本扩展信息\uff1a${handlerInfo} ${GMversion}\u3000</li>
+                    <li>脚本版本信息\uff1a${defCon.curVersion}\u3000</li>
+                    <li>当前访问域名\uff1a${CUR_HOST_NAME}\u3000</li>
+                    <li>错误信息\uff1a<span style="color:tan">${errors}</span></li>
                   </ul></p>`
                 ),
                 titleText: defCon.scriptName + "错误报告",
               });
               frDialog.container.setAttribute("error", true);
-              const copyText = qS(`#${defCon.id.seed}_copy_to_author`).textContent.replace(/\u3000/g, "\n");
+              const copyText = qS(`#${RANDOM_ID}_copy_to_author`).textContent.replace(/\u3000/g, "\n");
               defCon.errors.length = 0;
               if (await frDialog.respond()) {
                 copyToClipboard(copyText);
                 closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
-                GMopenInTab(defCon.feedback, defCon.options);
+                GMopenInTab(FEEDBACK_URI, defCon.options);
               }
               frDialog = null;
             }
@@ -3569,7 +3566,7 @@
         if (curZoom !== 1) {
           debug(
             "\u27A4 FontSize Zoom: save[%s%] current[%c%s% %c%s%]",
-            (CONST.fontSize * 100).toFixed(2),
+            (CONST_VALUES.fontSize * 100).toFixed(2),
             "color:teal",
             (curZoom * 100).toFixed(2),
             "color:indigo",
@@ -3624,13 +3621,13 @@
         });
         let checkFont = new SupportFontFamily();
         if (hasYH || !checkFont.detect("Microsoft YaHei")) {
-          returnStr += defValue.fontSelect.replace(`'Microsoft YaHei',`, ``);
+          returnStr += INITIAL_VALUES.fontSelect.replace(`'Microsoft YaHei',`, ``);
         } else {
-          returnStr += defValue.fontSelect;
+          returnStr += INITIAL_VALUES.fontSelect;
         }
         checkFont = null;
       } else {
-        returnStr = defValue.fontSelect;
+        returnStr = INITIAL_VALUES.fontSelect;
       }
       return returnStr;
     }
