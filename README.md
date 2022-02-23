@@ -9,7 +9,7 @@
 
 (不建议使用AdGuard安装脚本，因为脚本设置功能将无法查看。如有配置需要，请使用“键盘快捷键”。)
 
-警告：经检测发现 **Tampermonkey 14.14** 版本存在严重bug，请勿升级Tampermonkey或使用Violentmonkey替代！
+警告：经检测发现 **Tampermonkey 4.14** 版本存在严重bug，请勿升级Tampermonkey或使用Violentmonkey替代！
 
 ***
 
