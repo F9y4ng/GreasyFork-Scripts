@@ -5,7 +5,7 @@
 // @name:zh-TW        字體渲染（自用腳本）
 // @name:ja           フォントレンダリング（カスタマイズ）
 // @name:en           Font Rendering (Customized)
-// @version           2022.02.20.2
+// @version           2022.02.23.1
 // @author            F9y4ng
 // @description       无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh    无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -341,7 +341,6 @@
         interval: {},
       };
     }
-
     _ticking(_fn, type = "interval", interval = 100, lastTime = Date.now()) {
       const timerSymbol = Symbol(type);
       const step = () => {
@@ -737,14 +736,15 @@
             }
             break;
           case 2:
-            if (s && s instanceof Element) {
+            if (s && s instanceof HTMLElement) {
               z = 0 - s.getBoundingClientRect()[g] / t;
             }
             break;
         }
         return z;
       };
-      d = d instanceof HTMLHtmlElement ? d : document.documentElement || document.body;
+      d = d instanceof HTMLElement ? d : document.documentElement || document.body;
+      debug("\u27A4 %cdefineProperties: <%s> %s", "color:crimson;font-weight:bold", t, d instanceof HTMLElement);
       // window
       Object.defineProperties(unsafeWindow, {
         pageXOffset: {
@@ -1620,11 +1620,8 @@
           `<p><span style="font-style:italic;font-weight:700;font-size:20px;color:tomato">您好\uff01</span>这是${CANDIDATE_FIELD}<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="font:italic 900 22px/150% Candara,'Times New Roman'!important;color:tomato;margin-left:3px">V${defCon.curVersion}</span>, 以下为更新内容\uff1a</p>
             <p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}
-              <li class="${RANDOM_ID}_add">延长字体列表缓存时间至一周，提升页面启动速度。</li>
-              <li class="${RANDOM_ID}_fix">修正在Chromium V96.0及以上版本Blink内核浏览器下，对粗体样式描边渲染的bug，并优化代码执行性能。</li>
-              <li class="${RANDOM_ID}_fix">修正某些网站因远程字体载入超时，造成脚本菜单不显示，或造成字体表解析缓慢使配置页面样式错误的bug。</li>
-              <li class="${RANDOM_ID}_fix">修正Firefox的字体描边效果在选取文字时出现的渲染错误，并对明亮及黑暗模式优化渲染效果。</li>
-              <li class="${RANDOM_ID}_fix">修正其他小问题，优化CSS兼容性，优化代码。</li>
+              <li class="${RANDOM_ID}_warn">经检测发现 <strong>Tampermonkey4.14</strong> 版本存在严重bug，请勿升级Tampermonkey或使用 <strong>Violentmonkey</strong> 替代！</li>
+              <li class="${RANDOM_ID}_fix">修正其他小问题，优化代码。</li>
             </ul></p>
             <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
         ),
@@ -1769,7 +1766,7 @@
     const funcSmooth = () => {
       const kernel_Define = getNavigator.core().WebKit
         ? `-webkit-font-smoothing:antialiased!important;`
-        : getNavigator.core().Gecko && getNavigator.system().startsWith("mac")
+        : getNavigator.core().Gecko && IS_MACOS
         ? "-moz-osx-font-smoothing:grayscale!important;"
         : "";
       return String(`font-feature-settings:"liga" 0;font-variant:no-common-ligatures proportional-nums;font-optical-sizing:auto;font-kerning:auto;${kernel_Define}`);
@@ -1784,7 +1781,9 @@
     };
     if (isFontsize && !isNaN(fontsize_r) && fontsize_r >= 0.8 && fontsize_r <= 1.5 && fontsize_r !== 1) {
       if (defCon.siteIndex === undefined) {
-        definePropertiesForZoom(fontsize_r, defCon.elCompat);
+        sleep(100).then((dom = defCon.elCompat) => {
+          definePropertiesForZoom(fontsize_r, dom);
+        });
       }
       bodyzoom = funcFontsize(fontsize_r);
     }
@@ -2083,7 +2082,10 @@
               `)`
             )
           ).forEach(item => {
-            if (window.getComputedStyle(item, null).getPropertyValue("font-weight") >= 600) {
+            if (
+              window.getComputedStyle(item, null).getPropertyValue("font-weight") >= 600 &&
+              window.getComputedStyle(item, null).getPropertyValue("-webkit-text-stroke-width") !== "0px"
+            ) {
               item.setAttribute(ATT, "true");
             }
           });
@@ -2150,7 +2152,7 @@
           setAutoZoomFontSize(`#${defCon.id.rndId}`, defCon.tZoom);
           sleep(100).then(() => {
             qS(`#${defCon.id.container}`).style.opacity = 1;
-            debug("\u27A4 errorCount:", defCon.errors.length);
+            debug("\u27A4 configure <errorCount>:", defCon.errors.length);
             if (defCon.errors.length) {
               reportErrorToAuthor(defCon.errors, true);
             }
