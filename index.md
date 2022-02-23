@@ -9,6 +9,8 @@
 
 (不建议使用AdGuard安装脚本，因为脚本设置功能将无法查看。如有配置需要，请使用“键盘快捷键”。)
 
+警告：经检测发现 **Tampermonkey4.14** 版本存在严重bug，请勿升级版本或使用 **Violentmonkey** 替代！
+
 ***
 
 ## 字体渲染（自用脚本）[**Font Rendering.user.js**](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering) `WIKI`
