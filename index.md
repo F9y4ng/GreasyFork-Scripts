@@ -33,7 +33,7 @@
 
 ### **关于字体的添加**
 
-> **如果您需要向字体表添加自定义字体，请按[帮助说明的指引](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering#customfont)进行操作。**
+> **如果您需要向字体表添加自定义字体，请按[帮助说明的指引](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/64)进行操作。**
 
 > 如果您需要增加新的字体进入代码字体表，请将 **完整且准确** 的字体 **中文全称** 及 **英文全称** 按 **预设格式** 添加进自定义字体列表。格式如：```{"ch":"鸿蒙黑体", "en":"HarmonyOS Sans SC"}```
 >
