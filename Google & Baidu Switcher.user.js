@@ -1,53 +1,55 @@
-/* jshint esversion: 9 */
 // ==UserScript==
-// @name            Google & baidu Switcher (ALL in One)
-// @name:zh         谷歌、百度、必应的搜索引擎跳转工具
-// @name:zh-TW      谷歌、百度、必應的搜索引擎跳轉工具
-// @name:en         Google & baidu & Bing Switcher (ALL in One)
-// @name:ja         Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version         4.1.20220122.1
-// @author          F9y4ng
-// @description     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
-// @description:zh  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
-// @description:en  Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
-// @description:zh-TW 谷歌、百度、必應的搜索引擎跳轉工具，腳本默認自動更新檢測，可在菜單自定義設置必應按鈕，搜索引擎跳轉的最佳體驗。
-// @description:ja  Google、Baidu、Bingの検索エンジンのジャンプツールは、スクリプトのデフォルトの自動更新検出は、メニューのカスタマイズに必要なボタンを設定することができます。
-// @namespace       https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
-// @homepageURL     https://f9y4ng.github.io/GreasyFork-Scripts
-// @supportURL      https://github.com/F9y4ng/GreasyFork-Scripts/issues
-// @updateURL       https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.meta.js
-// @downloadURL     https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js
-// @icon            https://img.icons8.com/fluent/48/000000/google-logo.png
-// @include         *://*.google.*/search*
-// @include         *://*.google.*/webhp*
-// @include         *://www.baidu.com/*
-// @include         *://ipv6.baidu.com/*
-// @include         *://image.baidu.com/*
-// @include         *://*.bing.com/*
-// @exclude         *://www.baidu.com/link*
-// @compatible      edge 兼容TamperMonkey, ViolentMonkey
-// @compatible      Chrome 兼容TamperMonkey, ViolentMonkey
-// @compatible      Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
-// @compatible      Opera 兼容TamperMonkey, ViolentMonkey
-// @compatible      Safari 兼容Tampermonkey • Safari
-// @note            优化RAF函数, 提高代码执行性能。\n修正一些bugs.
-// @grant           GM_info
-// @grant           GM_registerMenuCommand
-// @grant           GM.registerMenuCommand
-// @grant           GM_unregisterMenuCommand
-// @grant           GM_openInTab
-// @grant           GM.openInTab
-// @grant           GM_getValue
-// @grant           GM.getValue
-// @grant           GM_setValue
-// @grant           GM.setValue
-// @grant           GM_deleteValue
-// @grant           GM.deleteValue
-// @license         GPL-3.0-only
-// @create          2015-10-07
-// @copyright       2015-2022, F9y4ng
-// @run-at          document-start
+// @name               Google & baidu Switcher (ALL in One)
+// @name:zh            谷歌、百度、必应的搜索引擎跳转工具
+// @name:zh-TW         谷歌、百度、必應的搜索引擎跳轉工具
+// @name:en            Google & baidu & Bing Switcher (ALL in One)
+// @name:ja            Google、Baidu、Bingの検索エンジンのジャンプツール
+// @version            4.2.20220305.1
+// @author             F9y4ng
+// @description        谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
+// @description:zh     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
+// @description:en     Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
+// @description:zh-TW  谷歌、百度、必應的搜索引擎跳轉工具，腳本默認自動更新檢測，可在菜單自定義設置必應按鈕，搜索引擎跳轉的最佳體驗。
+// @description:ja     Google、Baidu、Bingの検索エンジンのジャンプツールは、スクリプトのデフォルトの自動更新検出は、メニューのカスタマイズに必要なボタンを設定することができます。
+// @namespace          https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
+// @homepage           https://f9y4ng.github.io/GreasyFork-Scripts/
+// @homepageURL        https://f9y4ng.github.io/GreasyFork-Scripts/
+// @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
+// @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.meta.js
+// @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js
+// @icon               https://img.icons8.com/fluent/48/000000/google-logo.png
+// @include            *://*.google.*/search*
+// @include            *://*.google.*/webhp*
+// @include            *://www.baidu.com/*
+// @include            *://ipv6.baidu.com/*
+// @include            *://image.baidu.com/*
+// @include            *://*.bing.com/*
+// @exclude            *://www.baidu.com/link*
+// @compatible         edge 兼容TamperMonkey, ViolentMonkey
+// @compatible         Chrome 兼容TamperMonkey, ViolentMonkey
+// @compatible         Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
+// @compatible         Opera 兼容TamperMonkey, ViolentMonkey
+// @compatible         Safari 兼容Tampermonkey • Safari
+// @note               修正一些错误，优化代码。
+// @grant              GM_info
+// @grant              GM_registerMenuCommand
+// @grant              GM.registerMenuCommand
+// @grant              GM_unregisterMenuCommand
+// @grant              GM_openInTab
+// @grant              GM.openInTab
+// @grant              GM_getValue
+// @grant              GM.getValue
+// @grant              GM_setValue
+// @grant              GM.setValue
+// @grant              GM_deleteValue
+// @grant              GM.deleteValue
+// @license            GPL-3.0-only
+// @create             2015-10-07
+// @copyright          2015-2022, F9y4ng
+// @run-at             document-start
 // ==/UserScript==
+
+/* jshint esversion: 9 */
 
 !(function () {
   "use strict";
@@ -171,24 +173,22 @@
 
   /* New RAF setTimeout/setInterval */
 
-  const prefixes = ["ms", "moz", "webkit", "o"];
-  for (let l = 0; l < prefixes.length && !window.requestAnimationFrame; ++l) {
-    window.requestAnimationFrame = window[`${prefixes[l]}RequestAnimationFrame`];
-    window.cancelAnimationFrame = window[`${prefixes[l]}CancelAnimationFrame`] || window[`${prefixes[l]}CancelRequestAnimationFrame`];
+  const _PREFIXES = ["ms", "moz", "webkit", "o"];
+  for (let l = 0; l < _PREFIXES.length && !window.requestAnimationFrame; ++l) {
+    window.requestAnimationFrame = window[`${_PREFIXES[l]}RequestAnimationFrame`];
+    window.cancelAnimationFrame = window[`${_PREFIXES[l]}CancelAnimationFrame`] || window[`${_PREFIXES[l]}CancelRequestAnimationFrame`];
   }
-
   if (!window.requestAnimationFrame) {
     window.requestAnimationFrame = (callback, element, lastTime = 0) => {
       const currTime = Date.now();
       const timeToCall = Math.max(0, 16.7 - (currTime - lastTime));
-      const rafId = window.setTimeout(() => {
+      const rafId = setTimeout(() => {
         callback(currTime + timeToCall);
       }, timeToCall);
       lastTime = currTime + timeToCall;
       return rafId;
     };
   }
-
   if (!window.cancelAnimationFrame) {
     window.cancelAnimationFrame = rafId => {
       clearTimeout(rafId);
@@ -202,7 +202,6 @@
         interval: {},
       };
     }
-
     _ticking(_fn, type = "interval", interval = 100, lastTime = Date.now()) {
       const timerSymbol = Symbol(type);
       const step = () => {
@@ -216,24 +215,19 @@
       this._setTimerMap(timerSymbol, type, step);
       return timerSymbol;
     }
-
     _setTimerMap(timerSymbol, type, step) {
       const stack = window.requestAnimationFrame(step);
       this._timerMap[type][timerSymbol] = stack;
     }
-
     setTimeout(fn, interval) {
       return this._ticking(fn, "timeout", interval);
     }
-
     clearTimeout(timer) {
       window.cancelAnimationFrame(this._timerMap.timeout[timer]);
     }
-
     setInterval(fn, interval) {
       return this._ticking(fn, "interval", interval);
     }
-
     clearInterval(timer) {
       window.cancelAnimationFrame(this._timerMap.interval[timer]);
     }
@@ -1561,7 +1555,7 @@
         try {
           const doStyName = `${CONST.rndclassName}`;
           const doStyle = CONST.noticeCss + curretSite.StyleCode + curretSite.keyStyle;
-          addStyle(doStyle, doStyName, document.head);
+          addStyle(doStyle, doStyName, document.head, "SS");
         } catch (e) {
           error("//-> %csearchManager.insertCSS:\n%c%s", "font-weight:bold", "font-weight:normal", e);
         }
@@ -1839,35 +1833,39 @@
       }
     }
 
-    function addStyle(css, className, addToTarget, T = "S", isReload = false, initType = "text/css", reNew = false) {
+    function addStyle(css, className, addToTarget, T = "T", isReload = false, initType = "text/css") {
       setRAFInterval(
-        () => {
+        cssNode => {
           try {
-            if (typeof addToTarget === "object" && addToTarget) {
-              if (isReload === true && addToTarget.querySelector(`.${className}`)) {
-                safeRemove(`.${className}`, addToTarget);
-                debug(`//-> style[${T}] View:`, Boolean(addToTarget.querySelector(`.${className}`)));
-                while (addToTarget.querySelector(`style[id^="${T}"]`)) {
-                  safeRemove(`style[id^="${T}"]`, addToTarget);
-                  debug(`//-> style[${T}] Review:`, Boolean(addToTarget.querySelector(`style[id^="${T}"]`)));
+            if (addToTarget && typeof addToTarget === "object") {
+              if (className && typeof className === "string") {
+                if (isReload === true && addToTarget.querySelector(`.${className}`)) {
+                  safeRemove(`.${className}`, addToTarget);
+                  debug(`\u27A4 style<c:${className}> View:%c %s`, "color:crimson", Boolean(addToTarget.querySelector(`.${className}`)));
+                  while (addToTarget.querySelectorAll(`style[id^="${T}"]`).length) {
+                    safeRemove(`style[id^="${T}"]`, addToTarget);
+                    debug(`\u27A4 style<i:${T}> Review:%c %s`, "color:crimson", !!addToTarget.querySelectorAll(`style[id^="${T}"]`).length);
+                  }
+                } else if (isReload === false && addToTarget.querySelector(`.${className}`)) {
+                  return true;
                 }
-                reNew = true;
-              } else if (isReload === false && addToTarget.querySelector(`.${className}`)) {
-                return true;
+              } else {
+                className = defCon.randString(10, "char");
               }
-              const cssNode = cE("style");
-              cssNode.className = className && typeof className === "string" ? className : defCon.randString(12, "mix");
-              cssNode.id = T + Date.now().toString().slice(-8);
+              cssNode = cE("style");
+              cssNode.className = className;
+              cssNode.id = T + defCon.randString(null, "digit");
               cssNode.media = "screen";
-              cssNode.setAttribute("type", initType);
-              cssNode.innerText = css;
+              cssNode.type = initType;
+              cssNode.textContent = css;
               addToTarget.appendChild(cssNode);
-              return !!(reNew && addToTarget.querySelector(`.${className}`));
+              cssNode = null;
+              return Boolean(addToTarget.querySelector(`.${className}`));
             } else {
-              return !reNew;
+              return true;
             }
           } catch (e) {
-            error("//-> addStyle", e);
+            error("AddStyle:", e);
             return true;
           }
         },
@@ -1934,8 +1932,8 @@
           return;
         }
       }
-      const tickId = raf.setInterval(() => {
-        const shouldFinish = callback() || false;
+      const tickId = raf.setInterval(shouldFinish => {
+        shouldFinish = callback() || false;
         if (shouldFinish) {
           raf.clearInterval(tickId);
           return;
