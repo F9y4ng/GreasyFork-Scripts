@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.03.05.1
+// @version            2022.03.12.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh     无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -18,20 +18,19 @@
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.meta.js
 // @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
-// @require            https://greasyfork.org/scripts/437214-frcolorpicker/code/frColorPicker.js?version=1011323
+// @require            https://greasyfork.org/scripts/437214-frcolorpicker/code/frColorPicker.js?version=1025231
 // @include            *
-// @grant              GM_info
-// @grant              GM_registerMenuCommand
-// @grant              GM.registerMenuCommand
-// @grant              GM_unregisterMenuCommand
-// @grant              GM_openInTab
-// @grant              GM.openInTab
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
 // @grant              GM.setValue
 // @grant              GM_deleteValue
 // @grant              GM.deleteValue
+// @grant              GM_openInTab
+// @grant              GM.openInTab
+// @grant              GM_registerMenuCommand
+// @grant              GM.registerMenuCommand
+// @grant              GM_unregisterMenuCommand
 // @compatible         edge 兼容TamperMonkey, ViolentMonkey
 // @compatible         Chrome 兼容TamperMonkey, ViolentMonkey
 // @compatible         Firefox 兼容Greasemonkey, TamperMonkey, ViolentMonkey
@@ -54,11 +53,10 @@
 
   /* Perfectly Compatible For Greasemonkey4.0+, TamperMonkey, ViolentMonkey * F9y4ng * 20210609 */
 
-  let GMsetValue, GMgetValue, GMdeleteValue, GMregisterMenuCommand, GMunregisterMenuCommand, GMopenInTab;
   const GMinfo = GM_info;
-  const handlerInfo = GMinfo.scriptHandler;
   const GMversion = GMinfo.version;
-  const isGM = Boolean(handlerInfo.toLowerCase() === "greasemonkey");
+  const GMscriptHandler = GMinfo.scriptHandler;
+  const isGM = GMscriptHandler.toLowerCase() === "greasemonkey";
   const debug = IS_OPEN_DEBUG ? console.log.bind(console) : () => {};
   const error = IS_OPEN_DEBUG ? console.error.bind(console) : () => {};
   const timeStart = IS_OPEN_DEBUG ? console.time.bind(console) : () => {};
@@ -66,21 +64,12 @@
 
   /* GM selector */
 
-  if (isGM) {
-    GMsetValue = GM.setValue;
-    GMgetValue = GM.getValue;
-    GMdeleteValue = GM.deleteValue;
-    GMregisterMenuCommand = GM.registerMenuCommand;
-    GMunregisterMenuCommand = () => {};
-    GMopenInTab = GM.openInTab;
-  } else {
-    GMsetValue = GM_setValue;
-    GMgetValue = GM_getValue;
-    GMdeleteValue = GM_deleteValue;
-    GMregisterMenuCommand = GM_registerMenuCommand;
-    GMunregisterMenuCommand = GM_unregisterMenuCommand;
-    GMopenInTab = GM_openInTab;
-  }
+  const GMsetValue = isGM ? GM.setValue : GM_setValue;
+  const GMgetValue = isGM ? GM.getValue : GM_getValue;
+  const GMdeleteValue = isGM ? GM.deleteValue : GM_deleteValue;
+  const GMopenInTab = isGM ? GM.openInTab : GM_openInTab;
+  const GMregisterMenuCommand = isGM ? GM.registerMenuCommand : GM_registerMenuCommand;
+  const GMunregisterMenuCommand = isGM ? () => {} : GM_unregisterMenuCommand;
 
   /* default Const Values & Functions */
 
@@ -622,7 +611,8 @@
     );
   }
 
-  function convertToUnicode(str, value = "") {
+  function convertToUnicode(str) {
+    let value = "";
     for (let i = 0; i < str.length; i++) {
       value += "\\" + ("00" + str.charCodeAt(i).toString(16)).slice(-4);
     }
@@ -656,7 +646,7 @@
             }
             items.removeAttribute("sandbox");
           } catch (e) {
-            error("Window.Frames:", e);
+            error("Window.Frames:", e.name);
           }
         });
         defCon.preview = !s;
@@ -1065,25 +1055,25 @@
 
   /* Font filtering & discriminating list */
 
-  let fontCheck = new Set([
+  const fontCheck = new Set([
     { ch: "微软雅黑", en: "Microsoft YaHei" },
     { ch: "微軟正黑體", en: "Microsoft JhengHei" },
-    { ch: "苹方-简", en: "PingFang SC" },
-    { ch: "蘋方-繁", en: "PingFang TC" },
-    { ch: "蘋方-港", en: "PingFang HK" },
-    { ch: "更纱黑体 SC", en: "Sarasa Gothic SC" },
-    { ch: "更紗黑體 TC", en: "Sarasa Gothic TC" },
-    { ch: "冬青黑体简", en: "Hiragino Sans GB" },
-    { ch: "兰亭黑-简", en: "Lantinghei SC" },
-    { ch: "OPPOSans", en: "OPPOSans" },
+    { ch: "苹方-简", en: "PingFang SC", ps: "PingFangSC-Regular" },
+    { ch: "蘋方-繁", en: "PingFang TC", ps: "PingFangTC-Regular" },
+    { ch: "蘋方-港", en: "PingFang HK", ps: "PingFangHK-Regular" },
+    { ch: "更纱黑体 SC", en: "Sarasa Gothic SC", ps: "Sarasa-Gothic-SC-Regular" },
+    { ch: "更紗黑體 TC", en: "Sarasa Gothic TC", ps: "Sarasa-Gothic-TC-Regular" },
+    { ch: "冬青黑体简", en: "Hiragino Sans GB", ps: "HiraginoSansGB-Regular" },
+    { ch: "兰亭黑-简", en: "Lantinghei SC", ps: "FZLTTHK--GBK1-0" },
+    { ch: "OPPOSans", en: "OPPOSans", ps: "OPPOSans-R" },
     { ch: "霞鹜文楷", en: "LXGW WenKai" },
     { ch: "鸿蒙黑体", en: "HarmonyOS Sans SC" },
     { ch: "浪漫雅圆", en: "LMYY" },
     { ch: "思源黑体", en: "Source Han Sans SC" },
     { ch: "思源宋体", en: "Source Han Serif SC" },
-    { ch: "汉仪旗黑", en: "HYQiHei" },
-    { ch: "文泉驿微米黑", en: "WenQuanYi Micro Hei" },
-    { ch: "文泉驿正黑", en: "WenQuanYi Zen Hei" },
+    { ch: "汉仪旗黑", en: "HYQiHei", ps: "HYQiHei-EES" },
+    { ch: "文泉驿微米黑", en: "WenQuanYi Micro Hei", ps: "WenQuanYiMicroHei" },
+    { ch: "文泉驿正黑", en: "WenQuanYi Zen Hei", ps: "WenQuanYiZenHei" },
     { ch: "方正舒体", en: "FZShuTi" },
     { ch: "方正姚体", en: "FZYaoti" },
     { ch: "华文仿宋", en: "STFangsong" },
@@ -1094,14 +1084,30 @@
     { ch: "华文新魏", en: "STXinwei" },
     { ch: "华文隶书", en: "STLiti" },
     { ch: "华文行楷", en: "STXingkai" },
-    { ch: "华康翩翩体", en: "Hanzipen SC" },
-    { ch: "华康手札体", en: "Hannotate SC" },
-    { ch: "娃娃体-简", en: "Wawati SC" },
-    { ch: "雅痞-简", en: "Yapi SC" },
-    { ch: "圆体-简", en: "Yuanti SC" },
+    { ch: "雅痞-简", en: "Yuppy SC", ps: "YuppySC-Regular" },
+    { ch: "圆体-简", en: "Yuanti SC", ps: "YuantiSC-Regular" },
     { ch: "手书体", en: "ShouShuti" },
     { ch: "幼圆", en: "YouYuan" },
   ]);
+
+  async function matchByPostScriptName(t) {
+    let returnName;
+    const fontCheckList = await getMergedFontCheckList();
+    for (const fontname of fontCheckList.values()) {
+      if (fontname.en === t && fontname.ps) {
+        returnName = fontname.ps;
+        break;
+      }
+    }
+    return returnName ? returnName : t;
+  }
+
+  async function getMergedFontCheckList(defFontCheck = fontCheck) {
+    const cusFontList = await GMgetValue("_Custom_fontlist_");
+    const cusFontCheck = cusFontList ? JSON.parse(defCon.decrypt(cusFontList)) : DEFAULT_ARRAY;
+    const formatFontList = JSON.parse(JSON.stringify([...defFontCheck, ...cusFontCheck]));
+    return getUniqueValues(formatFontList);
+  }
 
   class SupportFontFamily {
     constructor() {
@@ -1158,15 +1164,34 @@
   }
 
   function getUniqueValues(arr) {
+    if (!Array.isArray(arr)) {
+      return DEFAULT_ARRAY;
+    }
     for (let i = 0; i < arr.length; i++) {
       for (let j = i + 1; j < arr.length; j++) {
         if (arr[i].ch === arr[j].ch || arr[i].en === arr[j].en) {
-          arr.splice(j, 1);
-          j--;
+          if (!arr[i].ps) {
+            arr.splice(i, 1);
+            i--;
+          } else if (!arr[j].ps) {
+            arr.splice(j, 1);
+            j--;
+          } else {
+            arr.splice(j, 1);
+            j--;
+          }
         }
       }
     }
     return arr;
+  }
+
+  function getDeduplicatedValues(arra, arrb) {
+    return [...arra].filter(x => {
+      return ![...arrb].some(y => {
+        return y.en === x.en || y.ch === x.ch;
+      });
+    });
   }
 
   const ddRemove = item => {
@@ -1200,7 +1225,7 @@
         const sort = Number(item.parentNode.children[1].attributes.sort.value) || -1;
         const text = item.parentNode.children[0].textContent;
         fontData.push({ ch: text, en: value, sort: sort });
-        fontData.sort((a, b) => {
+        getUniqueValues(fontData).sort((a, b) => {
           return a.sort - b.sort;
         });
         const submitButton = qS(`#${defCon.id.submit} .${defCon.class.submit}`);
@@ -1230,12 +1255,10 @@
           const ffaceT = qS(`#${defCon.id.fface}`);
           const inputFont = qS(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`);
           if (ffaceT.checked) {
-            const cusFontList = await GMgetValue("_Custom_fontlist_");
-            const cusFontCheck = cusFontList ? JSON.parse(defCon.decrypt(cusFontList)) : DEFAULT_ARRAY;
-            fontCheck = getUniqueValues([...fontCheck, ...cusFontCheck]);
-            for (let i = 0; i < fontCheck.length; i++) {
-              if (fontCheck[i].en === defCon.refont || convertToUnicode(fontCheck[i].ch) === defCon.refont) {
-                defCon.curFont = fontCheck[i].ch;
+            const fontCheckList = await getMergedFontCheckList();
+            for (let i = 0; i < fontCheckList.length; i++) {
+              if (fontCheckList[i].en === defCon.refont || convertToUnicode(fontCheckList[i].ch) === defCon.refont) {
+                defCon.curFont = fontCheckList[i].ch;
                 break;
               }
             }
@@ -1287,7 +1310,8 @@
           });
         });
       },
-      fsearchList: (name, arr = []) => {
+      fsearchList: name => {
+        let arr = [];
         fontSet(`#${defCon.id.selector} .${defCon.class.selector} input[name="${name}"]`).that.forEach(item => {
           arr.push(item.value);
         });
@@ -1348,7 +1372,7 @@
               dl.innerHTML = trustedTypesPolicy.createHTML("<dd>\u6570\u636e\u6e90\u6682\u65e0\u6570\u636e</dd>");
             } else {
               dl.textContent = "";
-              fontData.sort((a, b) => {
+              getUniqueValues(fontData).sort((a, b) => {
                 return a.sort - b.sort;
               });
               fontData.forEach(item => {
@@ -1398,7 +1422,7 @@
             const sRegExp = new RegExp(sText, "i");
             let sMatched = false;
             dl.textContent = "";
-            fontData.forEach(item => {
+            getUniqueValues(fontData).forEach(item => {
               if (sRegExp.test(item.ch) || sRegExp.test(item.en)) {
                 sMatched = true;
                 dl.insertAdjacentHTML(
@@ -1429,6 +1453,7 @@
                   )
                 );
                 selector.parentNode.style.cssText += "display:block;";
+                fontData = getUniqueValues(fontData);
                 for (let i = 0; i < fontData.length; i++) {
                   if (fontData[i].en === value) {
                     fontData.splice(i, 1);
@@ -1598,9 +1623,12 @@
           `<p><span style="font-style:italic;font-weight:700;font-size:20px;color:tomato">您好\uff01</span>这是${CANDIDATE_FIELD}<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="font:italic 900 22px/150% Candara,'Times New Roman'!important;color:tomato;margin-left:3px">V${defCon.curVersion}</span>, 以下为更新内容\uff1a</p>
             <p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}
-              <li class="${RANDOM_ID}_fix">修正iframe框架在预览时预览样式无限重复载入的bug.(注：全局保存即生效，独享数据需额外设置跨域部分)</li>
-              <li class="${RANDOM_ID}_fix">优化无痕模式/隐私窗口下脚本运行的兼容性。</li>
-              <li class="${RANDOM_ID}_fix">修正其他细节问题，优化代码。</li>
+              <li class="${RANDOM_ID}_fix">精简内置字体表，优化字体表的全局兼容性。</li>
+              <li class="${RANDOM_ID}_fix">修正字体列表数据在字体反选时重复载入的问题。</li>
+              <li class="${RANDOM_ID}_fix">Match @font-face{src:local(&lt;name&gt;)} names by PostScript and full font name for FontList.</li>
+              <li class="${RANDOM_ID}_fix">修正自定义字体添加保存数据的Bug, 数据去重验证。</li>
+              <li class="${RANDOM_ID}_fix">修正Blink内核异步载入iframe字体不渲染的Bug.<a href="https://github.com/F9y4ng/GreasyFork-Scripts/issues/68" target="_blank">(#68)</a></li>
+              <li class="${RANDOM_ID}_fix">修正一些细节问题，优化样式，优化代码。</li>
             </ul></p>
             <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
         ),
@@ -1770,7 +1798,9 @@
     let fontfamily = "";
     let fontfaces = "";
     const fontface_i = CONST_VALUES.fontFace;
-    const funcFontface = (t, rs = "") => {
+    const funcFontface = async t => {
+      let returnFontface = "";
+      const receiveFont = await matchByPostScriptName(t);
       [
         convertToUnicode("宋体"),
         convertToUnicode("新宋体"),
@@ -1798,14 +1828,14 @@
         "Open Sans",
       ].forEach(item => {
         if (item !== t) {
-          rs += `@font-face{font-family:"${item}";src:local("${t}")}`;
+          returnFontface += `@font-face{font-family:"${item}";src:local("${receiveFont}")}`;
         }
       });
-      return rs;
+      return returnFontface;
     };
     if (fontface_i) {
       fontfamily = `font-family:${CONST_VALUES.fontSelect};`;
-      fontfaces = refont.length ? funcFontface(refont) : ``;
+      fontfaces = refont ? await funcFontface(refont) : ``;
     }
     let exclude = "";
     let codeFont = "";
@@ -1840,7 +1870,7 @@
     const fontStyle_db = String(
       `#${defCon.id.dialogbox}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999995}#${defCon.id.dialogbox} .${defCon.class.db}{box-sizing:content-box;max-width:420px;color:#444;border:2px solid #efefef}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:200px;right:15px;border-radius:6px;width:100%;background:#fff;box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #777!important}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:100%;font-family:Candara,"Times New Roman",system-ui,-apple-system,BlinkMacSystemFont!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:500;text-align:left}.${defCon.class.dbb}{display:inline-block;margin:0 1%;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;cursor:pointer;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important;box-sizing:content-box}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:none!important;-webkit-text-stroke:initial!important;-webkit-user-select:none;user-select:none}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223!important;color:#fff!important;border:1px solid #d93223!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a!important;color:#fff!important;border:1px solid #038c5a!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777!important;color:#fff!important;border:1px solid #777!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}` +
         `.${defCon.class.dbm} button:hover{cursor:pointer;background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important}.${defCon.class.dbm} p{line-height:1.5!important;margin:5px 0!important;text-indent:0!important;font-size:16px!important;font-weight:400;text-align:left;-webkit-user-select:none;user-select:none}.${defCon.class.dbm} ul{list-style:none;margin:0 0 0 10px!important;padding:2px;font:italic 14px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;color:gray;scrollbar-width:thin}.${defCon.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${defCon.class.dbm} ul::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #999;background:#cfcfcf;border-radius:10px}.${defCon.class.dbm} ul::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:10px}.${defCon.class.dbm} ul::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:6px}.${defCon.class.dbm} ul li{display:list-item;list-style-type:none;-webkit-user-select:none;user-select:none;word-break:break-all}.${defCon.class.dbm} li:before{display:none}.${defCon.class.dbm} #${defCon.id.bk},.${defCon.class.dbm} #${defCon.id.pv},.${defCon.class.dbm} #${defCon.id.fs},.${defCon.class.dbm} #${defCon.id.hk},.${defCon.class.dbm} #${defCon.id.ct},.${defCon.class.dbm} #${defCon.id.mps},.${defCon.class.dbm} #${defCon.id.flc}{box-sizing:content-box;list-style:none;font-style:normal;display:flex;justify-content:space-between;align-items:flex-start;margin:0;padding:2px 4px!important;width:calc(96% - 10px);min-width:auto;height:40px;min-height:40px}.${defCon.class.dbm} #${defCon.id.bk} .${RANDOM_ID}_VIP,.${defCon.class.dbm} #${defCon.id.pv} .${RANDOM_ID}_VIP,.${defCon.class.dbm} #${defCon.id.fs} .${RANDOM_ID}_VIP,.${defCon.class.dbm} #${defCon.id.hk} .${RANDOM_ID}_VIP,.${defCon.class.dbm} #${defCon.id.ct} .${RANDOM_ID}_VIP,.${defCon.class.dbm} #${defCon.id.mps} .${RANDOM_ID}_VIP,.${defCon.class.dbm} #${defCon.id.flc} .${RANDOM_ID}_VIP{margin:2px 0 0 0;color:darkgoldenrod!important;font:normal 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${defCon.class.dbm} #${defCon.id.flc} button{background-color:#eee;color:#444!important;font-weight:normal;border:1px solid #999;font-size:14px!important;border-radius:4px}` +
-        `.${defCon.class.dbm} #${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}.${defCon.class.dbm} #${defCon.id.files}{display:none}.${defCon.class.dbm} #${defCon.id.feedback}:hover{color:crimson!important}.${defCon.class.dbm} #${defCon.id.feedback}:after{width:0;height:0;content:"";background:url('${LOADING_IMG}') no-repeat -400px -300px}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#555!important}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#aaa!important}.${defCon.class.dbm} #${RANDOM_ID}_update li{margin:0;padding:0;font:italic 400 14px/150% Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:gray}.${defCon.class.dbm} .${RANDOM_ID}_add:before{content:"+";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_del:before{content:"-";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_fix:before{content:"@";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_info{color:#daa5207a!important}.${defCon.class.dbm} .${RANDOM_ID}_info:before{content:"#";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_warn{color:#e900007a!important}.${defCon.class.dbm} .${RANDOM_ID}_warn:before{content:"!";display:inline;margin:0 4px 0 -10px}`
+        `.${defCon.class.dbm} a{color:#0969da;text-decoration:none}.${defCon.class.dbm} a:hover{color:crimson;text-decoration:underline}.${defCon.class.dbm} #${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}.${defCon.class.dbm} #${defCon.id.files}{display:none}.${defCon.class.dbm} #${defCon.id.feedback}:hover{color:crimson!important}.${defCon.class.dbm} #${defCon.id.feedback}:after{width:0;height:0;content:"";background:url('${LOADING_IMG}') no-repeat -400px -300px}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#555!important}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#aaa!important}.${defCon.class.dbm} #${RANDOM_ID}_update li{margin:0;padding:0;font:italic 400 14px/150% Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:gray}.${defCon.class.dbm} .${RANDOM_ID}_add:before{content:"+";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_del:before{content:"-";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_fix:before{content:"@";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_info{color:#daa5207a!important}.${defCon.class.dbm} .${RANDOM_ID}_info:before{content:"#";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_warn{color:#e900007a!important}.${defCon.class.dbm} .${RANDOM_ID}_warn:before{content:"!";display:inline;margin:0 4px 0 -10px}`
     );
     const fontStyle_container = String(
       `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;border-radius:12px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 20px);z-index:999999;padding:4px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container} *{line-height:1.5!important;text-shadow:none!important;-webkit-text-stroke:initial!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Android Emoji",EmojiSymbols!important;font-size:16px;font-weight:700}` +
@@ -2126,6 +2156,20 @@
         if (defCon.siteIndex === undefined && SHOULD_FIX_STROKE()) {
           deBounce(correctBoldErrorByStroke, 50, "fixstroke")(CONST_VALUES.fontStroke);
         }
+        if (defCon.siteIndex === undefined && (getNavigator.core().WebKit || isGM)) {
+          // Greasemonkey4.0+ need to wait all frames loaded to excute.
+          qA("iframe").forEach(items => {
+            try {
+              items.setAttribute("sandbox", "allow-forms allow-scripts allow-same-origin allow-top-navigation");
+              const h = items.contentWindow;
+              const sT = h.document.head.querySelectorAll("style[id^='TS']");
+              !sT.length && addStyle(defCon.tStyle, null, h.document.head, "TS", false);
+              items.removeAttribute("sandbox");
+            } catch (e) {
+              error("<insertStyle to iframe>", e.name);
+            }
+          });
+        }
       }).observe(document, { childList: true, subtree: true });
     } catch (e) {
       error("InsertCSS.Operation:", e);
@@ -2344,7 +2388,8 @@
           debug("\u27A4 isFontReady:", Boolean(fontReady), parseInt(fontReady));
           return fontReady;
         })
-        .then((Font_Ready, Font_Set, Feed_Back, Exclude_site, Parameter_Set) => {
+        .then(Font_Ready => {
+          let Font_Set, Exclude_site, Parameter_Set, Feed_Back;
           loading ? GMunregisterMenuCommand(loading) : debug("\u27A4 No Loading_Menu");
           if (Font_Ready) {
             if (defCon.siteIndex === undefined) {
@@ -2552,17 +2597,16 @@
       }
     }
 
-    async function fontCheck_DetectOnce(fontData = []) {
+    async function fontCheck_DetectOnce() {
       timeStart("\u27A4 [FONTCHECK]");
       const fontReady = await isFontReady();
       let checkFont = new SupportFontFamily();
       let fontAvailable = new Set();
       let ii = 1;
       if (fontReady) {
-        const cusFontList = await GMgetValue("_Custom_fontlist_");
-        const cusFontCheck = cusFontList ? JSON.parse(defCon.decrypt(cusFontList)) : DEFAULT_ARRAY;
-        fontCheck = getUniqueValues([...fontCheck, ...cusFontCheck]);
-        for (const font of fontCheck.values()) {
+        const fontCheckList = await getMergedFontCheckList();
+        for (const font of fontCheckList.values()) {
+          font.ps && delete font.ps;
           if (checkFont.detect(font.en)) {
             font.sort = ii;
             fontAvailable.add(font);
@@ -2574,12 +2618,12 @@
           ii++;
         }
       }
-      fontData = [...fontAvailable.values()].sort((a, b) => {
+      const fontData = [...fontAvailable.values()].sort((a, b) => {
         return a.sort - b.sort;
       });
-      timeEnd("\u27A4 [FONTCHECK]");
       checkFont = null;
       fontAvailable = null;
+      timeEnd("\u27A4 [FONTCHECK]");
       return fontData;
     }
 
@@ -2587,12 +2631,10 @@
       try {
         if (CUR_WINDOW_TOP) {
           timeStart("\u27A4 [CONFIGURE]");
-
-          /* Fontlist with cache expires */
-
+          // * set fontData with cache expires * //
           try {
             const fontlist_Cache = cache.get("_fontlist_");
-            if (fontlist_Cache && Array.isArray(fontlist_Cache) && fontlist_Cache.length) {
+            if (Array.isArray(fontlist_Cache) && fontlist_Cache.length) {
               debug("\u27A4 %cLoad font_Data from Cache", "color:green;font-weight:bold");
               fontData = fontlist_Cache;
             } else {
@@ -2612,41 +2654,61 @@
           try {
             if (qS(`#${defCon.id.fontList} .${defCon.class.fontList}`)) {
               fontSet(`#${defCon.id.fontList} .${defCon.class.fontList}`).fsearch(fontData);
-              qS(`#${defCon.id.fonttooltip}`).addEventListener("dblclick", async (custom_Fontlist, save_Fontlist = DEFAULT_ARRAY, customFontlist = "") => {
+              qS(`#${defCon.id.fonttooltip}`).addEventListener("dblclick", async () => {
+                let custom_Fontlist = "";
+                let received_Fontlist = "";
+                let save_Fontlist = [];
                 const cusFontList = await GMgetValue("_Custom_fontlist_");
                 const cusFontCheck = cusFontList ? JSON.parse(defCon.decrypt(cusFontList)) : DEFAULT_ARRAY;
-                if (cusFontCheck && Array.isArray(cusFontCheck) && cusFontCheck.length) {
+                if (Array.isArray(cusFontCheck) && cusFontCheck.length) {
                   cusFontCheck.forEach(item => {
-                    delete item.sort;
-                    customFontlist += JSON.stringify(item) + "\n";
+                    item.sort && delete item.sort;
+                    received_Fontlist += JSON.stringify(item) + "\n";
                   });
                 }
                 let frDialog = new FrDialogBox({
                   trueButtonText: "保 存",
                   falseButtonText: "帮助文档",
                   neutralButtonText: "取 消",
-                  messageText: `<p style="color:#555;font-size:14px!important">以下文本域可按预定格式增加自定义字体。请用小贴士或按样例填写，输入有误将被自动过滤。与『<a href="${HOST_URI}#fontlist" style="color:grey" title="查看内置字体表" target="_blank">内置字体表</a>』重复的字体将被自动忽略。【功能小贴士\uff1a<span id="${RANDOM_ID}_addTools" title="点击开启工具" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${RANDOM_ID}_custom_Fontlist" style="box-sizing:border-box;min-height:160px!important;min-width:388px!important;max-width:388px!important;resize:vertical;padding:5px;border:1px solid #999;border-radius:6px;font:normal 400 14px/150% monospace,'Courier New','Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;white-space:pre!important;cursor:text" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下\uff1a\n\n{ "ch": "中文字体名一", "en": "EN Fontname 1" }\u21b2\n{ "ch": "中文字体名二", "en": "EN Fontname 2" }\u21b2\n{ "ch": "中文字体名三", "en": "EN Fontname 3" }\u21b2\n\n（注意\uff1a\u21b2为换行符号，输入(Enter)回车即可）'>${customFontlist}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:crimson;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`,
+                  messageText: `<p style="color:#555;font-size:14px!important">以下文本域可按预定格式增加自定义字体。请用小贴士或按样例填写，输入有误将被自动过滤。与『<a href="${HOST_URI}#fontlist" title="查看内置字体表" target="_blank">内置字体表</a>』重复的字体将被自动剔除。【功能小贴士\uff1a<span id="${RANDOM_ID}_addTools" title="点击开启工具" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${RANDOM_ID}_custom_Fontlist" style="box-sizing:border-box;min-height:160px!important;min-width:388px!important;max-width:388px!important;resize:vertical;padding:5px;border:1px solid #999;border-radius:6px;font:normal 400 14px/150% monospace,'Courier New','Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;white-space:pre!important;cursor:text" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下\uff1a\n{ "ch":"中文字体名一","en":"EN Fontname 1" }\u21b2\n{ "ch":"中文字体名二","en":"EN Fontname 2","ps"\n:"Postscript Name" }\u21b2\n\n（注一\uff1a“ps:”该项为字体PostScript名称，可选填写）\n（注二\uff1a\u21b2为换行符号，输入(Enter)回车即可）'>${received_Fontlist}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:crimson;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`,
                   titleText: "自定义字体表",
                 });
+                custom_Fontlist = qS(`#${RANDOM_ID}_custom_Fontlist`).value.trim();
                 qS(`#${RANDOM_ID}_addTools`).addEventListener("click", () => {
-                  let chName, enName, cusFontName;
-                  chName = prompt("请输入中文字体名\uff1a(例如\uff1a鸿蒙黑体，仅支持半角输入模式，包括中文、日文、韩文、英文，数字、减号、下划线、空格、@)", "鸿蒙黑体");
+                  let chName, enName, psName, cusFontName;
+                  chName = prompt(
+                    "请输入「中文字体家族名称」\uff1a\n(例如\uff1a鸿蒙黑体，仅支持半角输入模式，包括中文、日文、韩文、英文，数字、减号、下划线、空格、@)",
+                    "鸿蒙黑体"
+                  );
                   if (chName === null) {
                     return;
                   } else if (/^@?[a-zA-Z0-9\u2E80-\uD7FF\-_ ]+$/.test(chName.trim())) {
-                    enName = prompt("请输入英文字体名\uff1a(例如\uff1aHarmonyOS Sans SC，仅支持半角输入模式，包括英文、数字、减号、下划线、空格、@)", "HarmonyOS Sans SC");
+                    enName = prompt(
+                      "请输入「英文字体家族名称」\uff1a\n(例如\uff1aHarmonyOS Sans SC，仅支持半角输入模式，包括英文、数字、减号、下划线、空格、@)",
+                      "HarmonyOS Sans SC"
+                    );
                     if (enName === null) {
                       return;
                     } else if (/^@?[a-zA-Z0-9\-_ ]+$/.test(enName.trim())) {
-                      cusFontName = `{"ch":"${chName.trim()}","en":"${enName.trim()}"}`;
+                      psName = prompt(
+                        "请输入「PostScript名称」\uff1a\n(为使新增字体全局生效，请尽量填写PostScript名称。如果您暂时无法提供PostScript名称，可留空)（如有需要请访问fontke.com查询）",
+                        ""
+                      );
+                      if (psName === null) {
+                        return;
+                      } else if (/^@?[a-zA-Z0-9\u2E80-\uD7FF\-_ ]+$/.test(psName.trim())) {
+                        cusFontName = `{"ch":"${chName.trim()}","en":"${enName.trim()}","ps":"${psName.trim()}"}`;
+                      } else {
+                        cusFontName = `{"ch":"${chName.trim()}","en":"${enName.trim()}"}`;
+                      }
                       const aTrim = qS(`#${RANDOM_ID}_custom_Fontlist`).value.trim() ? "\n" : "";
                       qS(`#${RANDOM_ID}_custom_Fontlist`).value = qS(`#${RANDOM_ID}_custom_Fontlist`).value.trim().concat(aTrim, cusFontName, "\n");
                       custom_Fontlist = qS(`#${RANDOM_ID}_custom_Fontlist`).value.trim();
                     } else {
-                      alert("英文字体名 格式输入错误\uff01");
+                      alert("英文字体家族名称 格式输入错误\uff01");
                     }
                   } else {
-                    alert("中文字体名 格式输入错误\uff01");
+                    alert("中文字体家族名称 格式输入错误\uff01");
                   }
                 });
                 qS(`#${RANDOM_ID}_custom_Fontlist`).addEventListener("change", function () {
@@ -2657,9 +2719,11 @@
                   custom_Fontlist = this.value.trim();
                 });
                 if (await frDialog.respond()) {
-                  const fontListArray = custom_Fontlist.match(/{\s*"ch":\s*"@?[a-zA-Z0-9\u2E80-\uD7FF\-_ ]+"\s*,\s*"en":\s*"@?[a-zA-Z0-9\-_ ]+"\s*}/g);
+                  const fontListArray = custom_Fontlist.match(
+                    /{\s*"ch":\s*"@?[a-zA-Z0-9\u2E80-\uD7FF\-_ ]+"\s*,\s*"en":\s*"@?[a-zA-Z0-9\-_ ]+"\s*(,\s*"ps":\s*"@?[a-zA-Z0-9\u2E80-\uD7FF\-_ ]+"\s*)?}/g
+                  );
                   if (!custom_Fontlist.length) {
-                    GMsetValue("_Custom_fontlist_", defCon.encrypt(JSON.stringify(DEFAULT_ARRAY)));
+                    GMdeleteValue("_Custom_fontlist_");
                     let frDialog = new FrDialogBox({
                       trueButtonText: "确 定",
                       messageText: `<p>自定义字体表已重置成功\uff01<p><p style="color:green">当前网站字体列表缓存已自动重建，页面即将刷新。</p>`,
@@ -2672,11 +2736,12 @@
                       location.reload();
                       frDialog = null;
                     }
-                  } else if (fontListArray && Array.isArray(fontListArray) && fontListArray.length) {
+                  } else if (Array.isArray(fontListArray) && fontListArray.length) {
                     fontListArray.forEach(item => {
                       save_Fontlist.push(JSON.parse(item));
                     });
-                    GMsetValue("_Custom_fontlist_", defCon.encrypt(JSON.stringify(save_Fontlist)));
+                    const unique_Save_Fontlist = getUniqueValues(save_Fontlist);
+                    GMsetValue("_Custom_fontlist_", defCon.encrypt(JSON.stringify(getDeduplicatedValues(unique_Save_Fontlist, fontCheck))));
                     let frDialog = new FrDialogBox({
                       trueButtonText: "确 定",
                       messageText: `<p>您所提交的自定义字体已保存成功\uff01<p><p style="color:green">当前网站字体列表缓存已自动重建，页面即将刷新。</p>`,
@@ -2947,7 +3012,7 @@
                 const _fontfamily = fontface ? `font-family:${fontselect};` : ``;
                 const _prefont = fontselect.split(",")[0];
                 const _refont = _prefont.replace(/"|'/g, "");
-                const _fontfaces = fontface ? (_refont.length ? funcFontface(_refont) : ``) : ``;
+                const _fontfaces = fontface ? (_refont ? await funcFontface(_refont) : ``) : ``;
                 let _codeFont = "";
                 const _exclude = fontex ? `${filterHtmlToText(fontex)}{font-family:inherit;-webkit-text-stroke:initial!important;text-shadow:none!important}` : ``;
                 if (fontex) {
@@ -3141,14 +3206,12 @@
       reFontFace = def;
       defCon.curFont = def;
       if (_isfontface_) {
-        const cusFontList = await GMgetValue("_Custom_fontlist_");
-        const cusFontCheck = cusFontList ? JSON.parse(defCon.decrypt(cusFontList)) : DEFAULT_ARRAY;
-        fontCheck = getUniqueValues([...fontCheck, ...cusFontCheck]);
-        for (let i = 0; i < fontCheck.length; i++) {
-          if (fontCheck[i].en === refont || convertToUnicode(fontCheck[i].ch) === refont) {
-            defCon.curFont = refont.includes("\\") ? "" : " (" + fontCheck[i].en + ")";
-            reFontFace = fontCheck[i].ch + defCon.curFont;
-            defCon.curFont = fontCheck[i].ch;
+        const fontCheckList = await getMergedFontCheckList();
+        for (let i = 0; i < fontCheckList.length; i++) {
+          if (fontCheckList[i].en === refont || convertToUnicode(fontCheckList[i].ch) === refont) {
+            defCon.curFont = refont.includes("\\") ? "" : " (" + fontCheckList[i].en + ")";
+            reFontFace = fontCheckList[i].ch + defCon.curFont;
+            defCon.curFont = fontCheckList[i].ch;
             break;
           }
         }
@@ -3273,7 +3336,7 @@
                 };
                 reader = null;
               } catch (e) {
-                error("<ThatFile is null>", e.name);
+                error("<thatFile is null>", e.name);
                 let frDialog = new FrDialogBox({
                   trueButtonText: "确 定",
                   messageText: `<p style="color:indigo">载入文件为空，请选择要还原的备份文件\uff01</p>`,
@@ -3418,8 +3481,10 @@
       }
     }
 
-    async function manageDomainsList(_temp_ = [], Contents = "") {
+    async function manageDomainsList() {
       let domains, domainValue, domainValueIndex;
+      let _temp_ = [];
+      let Contents = "";
       try {
         domains = await GMgetValue("_domains_fonts_set_");
         domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : DEFAULT_ARRAY;
@@ -3541,8 +3606,9 @@
       }
     }
 
-    function reportErrorToAuthor(e, show = IS_OPEN_DEBUG, errors = "") {
+    function reportErrorToAuthor(e, show = IS_OPEN_DEBUG) {
       if (show) {
+        let errors = "";
         closeConfigurePage(false);
         sleep(1e3).then(async () => {
           try {
@@ -3558,7 +3624,7 @@
                   `<p style="font-size:14px!important;color:crimson">脚本在运行过程中发生了重大异常或错误，请及时告知作者，感谢您的反馈\uff01以下信息会自动保存至您的剪切板\uff1a</p>
                   <p><ul id="${RANDOM_ID}_copy_to_author" style="list-style-position:outside;margin:0!important;padding:0!important;max-height:300px;overflow-y:auto">
                     <li>浏览器信息\uff1a${await getNavigator.getUA()}\u3000</li>
-                    <li>脚本扩展信息\uff1a${handlerInfo} ${GMversion}\u3000</li>
+                    <li>脚本扩展信息\uff1a${GMscriptHandler} ${GMversion}\u3000</li>
                     <li>脚本版本信息\uff1a${defCon.curVersion}\u3000</li>
                     <li>当前访问域名\uff1a${CUR_HOST_NAME}\u3000</li>
                     <li>错误信息\uff1a<span style="color:tan">${errors}</span></li>
@@ -3585,7 +3651,7 @@
       }
     }
 
-    function setDateFormat(fmt, date, ret = null) {
+    function setDateFormat(fmt, date) {
       const opt = {
         "y+": date.getFullYear().toString(),
         "M+": (date.getMonth() + 1).toString(),
@@ -3595,6 +3661,7 @@
         "s+": date.getSeconds().toString(),
         "S+": date.getMilliseconds().toString(),
       };
+      let ret;
       for (let k in opt) {
         ret = new RegExp("(" + k + ")").exec(fmt);
         if (ret) {
@@ -3604,10 +3671,10 @@
       return fmt;
     }
 
-    function setAutoZoomFontSize(target, zoom, curZoom) {
+    function setAutoZoomFontSize(target, zoom) {
+      let curZoom = zoom || 1;
       try {
         if (getNavigator.core().Gecko) {
-          curZoom = zoom || 1;
           if (curZoom !== 1) {
             qS(target).style.transformOrigin = "left top";
             qS(target).style.transform = "scale(" + 1 / curZoom + ")";
@@ -3655,7 +3722,8 @@
       });
     }
 
-    function convertFullToHalf(str, tmp = "") {
+    function convertFullToHalf(str) {
+      let tmp = "";
       for (let i = 0; i < str.length; i++) {
         if (str.charCodeAt(i) === 12288) {
           tmp += String.fromCharCode(str.charCodeAt(i) - 12256);
@@ -3682,8 +3750,10 @@
       return html;
     }
 
-    function addSingleQuoteToArray(arr, hasYH = false, returnStr = "") {
-      if (arr && Array.isArray(arr) && arr.length) {
+    function addSingleQuoteToArray(arr) {
+      let returnStr = "";
+      let hasYH = false;
+      if (Array.isArray(arr) && arr.length) {
         arr.forEach(item => {
           if (item === "Microsoft YaHei") {
             hasYH = true;
