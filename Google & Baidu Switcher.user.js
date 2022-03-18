@@ -4,13 +4,13 @@
 // @name:zh-TW         谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en            Google & baidu & Bing Switcher (ALL in One)
 // @name:ja            Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version            4.2.20220305.1
+// @version            5.0.20220319.1
 // @author             F9y4ng
-// @description        谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
-// @description:zh     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮，搜索引擎跳转的最佳体验。
-// @description:en     Google, Baidu and Bing search engine tool, Automatically updated and detected by default, The Bing button can be customized.
-// @description:zh-TW  谷歌、百度、必應的搜索引擎跳轉工具，腳本默認自動更新檢測，可在菜單自定義設置必應按鈕，搜索引擎跳轉的最佳體驗。
-// @description:ja     Google、Baidu、Bingの検索エンジンのジャンプツールは、スクリプトのデフォルトの自動更新検出は、メニューのカスタマイズに必要なボタンを設定することができます。
+// @description        谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮及其他搜索跳转效果。
+// @description:zh     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮及其他搜索跳转效果。
+// @description:zh-TW  谷歌、百度、必應的搜索引擎跳轉工具，腳本默認自動更新檢測，可在菜單自定義設置必應按鈕及其他搜索跳轉效果。
+// @description:en     The search engine jump tools of Google, Baidu and Bing automatically update and detect the script by default. You can customize the Bing button and other search jump effect settings in the menu.
+// @description:ja     Google、百度、必ず対応する検索エンジンジャンプツール、スクリプトはデフォルトで自動的に検出を更新し、メニューで必ず対応するボタンとその他の検索ジャンプ効果の設定をカスタマイズすることができます。
 // @namespace          https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
 // @homepage           https://f9y4ng.github.io/GreasyFork-Scripts/
 // @homepageURL        https://f9y4ng.github.io/GreasyFork-Scripts/
@@ -30,19 +30,18 @@
 // @compatible         Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible         Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible         Safari 兼容Tampermonkey • Safari
-// @note               修正一些错误，优化代码。
-// @grant              GM_info
-// @grant              GM_registerMenuCommand
-// @grant              GM.registerMenuCommand
-// @grant              GM_unregisterMenuCommand
-// @grant              GM_openInTab
-// @grant              GM.openInTab
+// @note               修正MacOS中键盘快捷键冲突的问题。\n修正兼容性错误，优化MetaData，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
 // @grant              GM.setValue
 // @grant              GM_deleteValue
 // @grant              GM.deleteValue
+// @grant              GM_openInTab
+// @grant              GM.openInTab
+// @grant              GM_registerMenuCommand
+// @grant              GM.registerMenuCommand
+// @grant              GM_unregisterMenuCommand
 // @license            GPL-3.0-only
 // @create             2015-10-07
 // @copyright          2015-2022, F9y4ng
@@ -60,37 +59,34 @@
 
   /* Perfectly Compatible For Greasemonkey4.0+, TamperMonkey, ViolentMonkey * F9y4ng * 20210609 */
 
-  let GMsetValue, GMgetValue, GMdeleteValue, GMregisterMenuCommand, GMunregisterMenuCommand, GMnotification, GMopenInTab;
   const GMinfo = GM_info;
-  const handlerInfo = GMinfo.scriptHandler;
-  const isGM = Boolean(handlerInfo.toLowerCase() === "greasemonkey");
+  const GMscriptHandler = GMinfo.scriptHandler;
+  const isGM = GMscriptHandler.toLowerCase() === "greasemonkey";
   const debug = IS_OPEN_DEBUG ? console.log.bind(console) : () => {};
   const error = IS_OPEN_DEBUG ? console.error.bind(console) : () => {};
 
   /* GM selector */
 
-  if (isGM) {
-    GMsetValue = GM.setValue;
-    GMgetValue = GM.getValue;
-    GMdeleteValue = GM.deleteValue;
-    GMregisterMenuCommand = GM.registerMenuCommand;
-    GMunregisterMenuCommand = () => {};
-    GMopenInTab = GM.openInTab;
-  } else {
-    GMsetValue = GM_setValue;
-    GMgetValue = GM_getValue;
-    GMdeleteValue = GM_deleteValue;
-    GMregisterMenuCommand = GM_registerMenuCommand;
-    GMunregisterMenuCommand = GM_unregisterMenuCommand;
-    GMopenInTab = GM_openInTab;
-  }
+  const GMsetValue = isGM ? GM.setValue : GM_setValue;
+  const GMgetValue = isGM ? GM.getValue : GM_getValue;
+  const GMdeleteValue = isGM ? GM.deleteValue : GM_deleteValue;
+  const GMopenInTab = isGM ? GM.openInTab : GM_openInTab;
+  const GMregisterMenuCommand = isGM ? GM.registerMenuCommand : GM_registerMenuCommand;
+  const GMunregisterMenuCommand = isGM ? () => {} : GM_unregisterMenuCommand;
 
   /* default CONST Values */
 
   const defCon = {
+    timer: 0,
+    restTime: {},
+    updateNote: "",
+    isNeedUpdate: 0,
+    fetchResult: "success",
+    isUpgrade: getUrlParam("f9y4ng"),
     scriptName: GMinfo.script.name,
     curVersion: GMinfo.script.version,
-    elCompat: (document.compatMode || "") === "CSS1Compat" ? document.documentElement : document.body,
+    options: isGM ? false : { active: true, insert: true, setParent: true },
+    elCompat: document.compatMode === "CSS1Compat" ? document.documentElement : document.body,
     support: GMinfo.scriptMetaStr.match(/(\u0040\u0073\u0075\u0070\u0070\u006f\u0072\u0074\u0055\u0052\u004c\s+)(\S+)/)[2],
     encrypt: n => {
       return window.btoa(encodeURIComponent(n));
@@ -98,7 +94,6 @@
     decrypt: n => {
       return decodeURIComponent(window.atob(n));
     },
-    fetchResult: "success",
     titleCase: (str, bool) => {
       const RegExp = bool ? /( |^)[a-z]/g : /(^)[a-z]/g;
       return str
@@ -108,11 +103,6 @@
           return L.toUpperCase();
         });
     },
-    isNeedUpdate: 0,
-    updateNote: "",
-    restTime: {},
-    timer: 0,
-    options: isGM ? false : { active: true, insert: true, setParent: true },
     durationTime: t => {
       let w, d, h, m, s;
       const wks = Math.floor(t / 1000 / 60 / 60 / 24 / 7);
@@ -161,15 +151,22 @@
       }
       return z ? s : c[Math.floor(Math.random() * c.length)].concat(s);
     },
-    isUpgrade: Boolean(getUrlParam("f9y4ng")),
     lastRuntime: () => {
       return new Date().toLocaleString("en-US", {
         timeZoneName: "short",
         hour12: false,
       });
     },
+    isWinTop: () => {
+      try {
+        return window.self === window.top;
+      } catch (e) {
+        error("Window.Top:", e.name);
+        const eI = parent.frames.length > 0;
+        return !eI;
+      }
+    },
   };
-  defCon.rName = defCon.randString(7, "char");
 
   /* New RAF setTimeout/setInterval */
 
@@ -247,6 +244,123 @@
     return document.createElement(str);
   };
 
+  /* Get browser core & system parameters */
+
+  const getNavigator = {
+    // eslint-disable-next-line no-undef
+    uaData: navigator.userAgentData && navigator.userAgentData instanceof NavigatorUAData,
+    init: function (v = this.uaData) {
+      return v ? navigator.userAgentData : navigator.userAgent.toLowerCase();
+    },
+    getBrowser: (brands, getBrand, info = "Other", version = "0.0") => {
+      try {
+        if (getBrand) {
+          brands.some(b => {
+            switch (b.brand) {
+              case "Microsoft Edge":
+                info = "Edge";
+                version = b.version;
+                break;
+              case "Google Chrome":
+                info = "Chrome";
+                version = b.version;
+                break;
+              case "Opera":
+                info = "Opera";
+                version = b.version;
+                break;
+            }
+          });
+        } else {
+          brands.some(b => {
+            if (b.brand === "Chromium") {
+              info = "WebKit";
+              version = b.version;
+            }
+          });
+        }
+      } catch (e) {
+        error("Navigator.getBrowser:", e.name);
+      } finally {
+        return { info, version };
+      }
+    },
+    core: function (u = JSON.stringify(this.init())) {
+      return {
+        Trident: u.includes("trident") || u.includes("compatible"),
+        Presto: u.includes("presto"),
+        WebKit: u.includes("applewebkit") || u.includes("Chromium"),
+        Gecko: u.includes("gecko") && !u.includes("khtml"),
+      };
+    },
+    chromiumVersion: function (u = this.init()) {
+      if (this.uaData) {
+        return this.getBrowser(u.brands, null).version;
+      } else {
+        const m = u.match(/chrom[e|ium]\/([\d]+)/i);
+        return m && m[1] ? m[1] : 0;
+      }
+    },
+    system: function (u = this.init(), system = "Unknown") {
+      if (this.uaData) {
+        system = u.platform ? u.platform.toString() : system;
+      } else {
+        if (/windows|win32|win64|wow32|wow64/gi.test(u)) {
+          system = "Windows";
+        } else if (/macintosh|macintel|mac os x/gi.test(u) || u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/i)) {
+          system = "macOS";
+        } else if (/linux|x11/gi.test(u)) {
+          system = "Linux";
+        } else if (/android|adr/gi.test(u)) {
+          system = "Android";
+        } else if (/ios|iphone|ipad|ipod|iwatch/gi.test(u)) {
+          system = "iOS";
+        }
+      }
+      return system;
+    },
+    browser: function (u = this.init(), browserInfo = "Other") {
+      if (this.uaData) {
+        browserInfo = this.getBrowser(u.brands, "browser").info;
+      } else {
+        const browserArray = {
+          IE: u.includes("msie") || u.includes("trident"),
+          Chromium: u.includes("chromium"),
+          Chrome: u.includes("chrome") && !u.includes("edg") && !u.includes("chromium"),
+          Firefox: u.includes("firefox") && u.includes("gecko"),
+          Opera: u.includes("presto") || u.includes("opr") || u.includes("opera"),
+          Safari: u.includes("safari") && !u.includes("chrome"),
+          Edge: u.includes("edg"),
+          QQBrowser: /qqbrowser/g.test(u),
+          Wechat: /micromessenger/g.test(u),
+          UCBrowser: /ubrowser/g.test(u),
+          Sougou: /metasr|sogou/g.test(u),
+          Maxthon: /maxthon/g.test(u),
+          CentBrowser: /cent/g.test(u),
+          Vivaldi: /vivaldi/g.test(u),
+        };
+        for (let i in browserArray) {
+          if (browserArray[i]) {
+            browserInfo = i;
+          }
+        }
+      }
+      return browserInfo;
+    },
+    getUA: async function (u = this.init()) {
+      try {
+        return this.uaData
+          ? JSON.stringify(await u.getHighEntropyValues(["architecture", "bitness", "model", "platform", "platformVersion", "uaFullVersion"]))
+          : navigator.userAgentData
+          ? "(Cheat-uaData) ".concat(u)
+          : u;
+      } catch (e) {
+        error("Navigator.getUA:", e.name);
+        return u;
+      }
+    },
+  };
+
   /* Define random aliases */
 
   const Notice = {
@@ -284,8 +398,11 @@
       return String(`<div class="${defCon.rName}"><dl>${str}<dl></div>`);
     },
   };
+  defCon.rName = defCon.randString(7, "char");
 
-  /* Refactoring NoticeJs Functions */
+  const CUR_WINDOW_TOP = defCon.isWinTop();
+
+  /* NoticeJs Functions */
 
   const Defaults = {
     title: "",
@@ -318,46 +435,8 @@
       onTemplate: [],
     },
   };
-
   const noticeJsModalClassName = `${Notice.noticejs}-modal`;
   const options = Defaults;
-
-  /* Get browser core & system parameters */
-
-  const getNavigator = {
-    uaData: navigator.userAgentData,
-    init: function (v = this.uaData) {
-      return v ? v : navigator.userAgent.toLowerCase();
-    },
-    core: function (u = JSON.stringify(this.init())) {
-      return {
-        Trident: u.includes("trident") || u.includes("compatible"),
-        Presto: u.includes("presto"),
-        WebKit: u.includes("applewebkit") || u.includes("Chromium"),
-        Gecko: u.includes("gecko") && !u.includes("khtml"),
-      };
-    },
-    system: function (u = this.init(), system = "Unknown") {
-      if (this.uaData) {
-        system = u.platform.toString();
-      } else {
-        if (/windows|win32|win64|wow32|wow64/gi.test(u)) {
-          system = "Windows";
-        } else if (/macintosh|macintel|mac os x/gi.test(u) || u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/i)) {
-          system = "macOS";
-        } else if (/linux|x11/gi.test(u)) {
-          system = "Linux";
-        } else if (/android|adr/gi.test(u)) {
-          system = "Android";
-        } else if (/ios|iphone|ipad|ipod|iwatch/gi.test(u)) {
-          system = "iOS";
-        }
-      }
-      return system;
-    },
-  };
-
-  /* Notice */
 
   function getCallback(ref, eventName) {
     if (ref.callbacks.hasOwnProperty(eventName)) {
@@ -489,7 +568,6 @@
       element.id = element_class;
       return element;
     }
-
     createHeader() {
       let element;
       if (options.title && options.title !== "") {
@@ -509,7 +587,6 @@
       }
       return element;
     }
-
     createBody() {
       const element = cE("div");
       element.setAttribute("class", `${Notice.noticejs}-body`);
@@ -526,7 +603,6 @@
       }
       return element;
     }
-
     createProgressBar() {
       const element = cE("div");
       element.setAttribute("class", `${Notice.noticejs}-progressbar`);
@@ -571,7 +647,6 @@
       this.on("onClick", this.options.callbacks.onClick);
       this.on("onHover", this.options.callbacks.onHover);
     }
-
     show() {
       let container = this.component.createContainer();
       if (document.body && qS(`.${Notice.noticejs}-` + this.options.position) === null) {
@@ -586,21 +661,50 @@
       const noticeJs = appendNoticeJs(noticeJsHeader, noticeJsBody, noticeJsProgressBar);
       return noticeJs;
     }
-
     on(eventName, cb = () => {}) {
       if (typeof cb === "function" && this.options.callbacks.hasOwnProperty(eventName)) {
         this.options.callbacks[eventName].push(cb);
       }
       return this;
     }
-
     static overrideDefaults(options) {
       this.options = Object.assign(Defaults, options);
       return this;
     }
   }
 
-  /* Refactoring functions of GMsetValue/GMgetValue/GMdeleteValue with Expire */
+  const GMnotification = (text = "", type = `${Notice.info}`, closeWith = true, timeout = 30, { ...options } = {}, position = "bottomRight") => {
+    try {
+      new NoticeJs({
+        text: text,
+        type: type,
+        closeWith: closeWith ? ["button"] : ["click"],
+        timeout: timeout,
+        callbacks: { ...options },
+        position: position,
+      }).show();
+      scrollInsteadFixed(position);
+    } catch (e) {
+      error("//-> %cGMnotification:\n%c%s", "font-weight:bold", "font-weight:normal", e);
+    }
+  };
+
+  const callback_Countdown = {
+    onShow: [
+      (Interval = 3) => {
+        const m = raf.setInterval(() => {
+          Interval ? --Interval : raf.clearInterval(m);
+          const emText = qS(`.${defCon.rName} dl dd em`);
+          if (emText) {
+            emText.innerHTML = Interval;
+          }
+          !Interval ? location.reload() : debug("//->", Interval);
+        }, 1e3);
+      },
+    ],
+  };
+
+  /* Refactoring functions of GMsetValue/GMgetValue with Expire */
 
   function GMsetExpire(key, value) {
     const obj = {
@@ -632,95 +736,6 @@
     }
     return vals.data;
   }
-
-  function scrollInsteadFixed(position) {
-    if (document.body) {
-      const zoom = Number(window.getComputedStyle(document.body, null).getPropertyValue("zoom"));
-      const transform = window.getComputedStyle(document.body, null).getPropertyValue("transform");
-      const thatNotice = qS(`#${Notice.noticejs}-${position}`);
-      const rePosition = (item, ratio, _top, distTop) => {
-        let sT = 0 - (defCon.elCompat.getBoundingClientRect().top || 0);
-        item.style.top = `${(_top + sT) / ratio}px`;
-        window.scrollTo(0, sT - 1e-5);
-        if (item.childNodes.length === 1) {
-          defCon[distTop] = () => {
-            sT = 0 - (defCon.elCompat.getBoundingClientRect().top || 0);
-            item.style.top = `${(_top + sT) / ratio}px`;
-          };
-          document.addEventListener("scroll", defCon[distTop]);
-        }
-      };
-
-      if (zoom && zoom !== 1) {
-        thatNotice.style.cssText += `zoom:${1 / zoom}!important`;
-      } else if (getNavigator.core().Gecko && transform && transform !== "none") {
-        const ratio = Number(transform.split(",")[3]) || 1;
-        if (ratio && ratio !== 1) {
-          if (thatNotice) {
-            thatNotice.style.cssText += `width:${defCon.elCompat.clientWidth / ratio}px;height:${defCon.elCompat.clientHeight / ratio}px;top:0;left:0`;
-            thatNotice.childNodes.forEach((item, index, array, curItem = 0) => {
-              switch (position) {
-                case "topRight":
-                  item.style.cssText += String(
-                    `transform-origin:right top 0px;
-                      transform:scale(${1 / ratio});
-                      position:absolute;
-                      right:${10 / ratio}px;
-                      top:${10 / ratio}px`
-                  );
-                  break;
-
-                default:
-                  curItem = !index ? 10 / ratio : (array[index - 1].clientHeight + 10) / ratio + Number(array[index - 1].style.bottom.replace("px", ""));
-                  item.style.cssText += String(
-                    `transform-origin:right bottom 0px;
-                      transform:scale(${1 / ratio});
-                      position:absolute;
-                      right:${10 / ratio}px;
-                      bottom:${curItem}px`
-                  );
-                  break;
-              }
-            });
-            rePosition(thatNotice, ratio, 0, position);
-          }
-        }
-      }
-    }
-  }
-
-  /* Refactoring GMnotification Function */
-
-  GMnotification = (text = "", type = `${Notice.info}`, closeWith = true, timeout = 30, { ...options } = {}, position = "bottomRight") => {
-    try {
-      new NoticeJs({
-        text: text,
-        type: type,
-        closeWith: closeWith ? ["button"] : ["click"],
-        timeout: timeout,
-        callbacks: { ...options },
-        position: position,
-      }).show();
-      scrollInsteadFixed(position);
-    } catch (e) {
-      error("//-> %cGMnotification:\n%c%s", "font-weight:bold", "font-weight:normal", e);
-    }
-  };
-
-  const callback_Countdown = {
-    onShow: [
-      (Interval = 3) => {
-        const m = raf.setInterval(() => {
-          Interval ? --Interval : raf.clearInterval(m);
-          const emText = qS(`.${defCon.rName} dl dd em`);
-          if (emText) {
-            emText.innerHTML = Interval;
-          }
-          !Interval ? location.reload() : debug("//->", Interval);
-        }, 1e3);
-      },
-    ],
-  };
 
   /* Common functions */
 
@@ -754,18 +769,99 @@
     }
   }
 
-  /* SYSTEM INFO */
+  function scrollInsteadFixed(position) {
+    if (document.body) {
+      const zoom = Number(window.getComputedStyle(document.body, null).getPropertyValue("zoom"));
+      const transform = window.getComputedStyle(document.body, null).getPropertyValue("transform");
+      const thatNotice = qS(`#${Notice.noticejs}-${position}`);
+      const rePosition = (item, ratio, _top, distTop) => {
+        let sT = 0 - (defCon.elCompat.getBoundingClientRect().top || 0);
+        item.style.top = `${(_top + sT) / ratio}px`;
+        window.scrollTo(0, sT - 1e-5);
+        if (item.childNodes.length === 1) {
+          defCon[distTop] = () => {
+            sT = 0 - (defCon.elCompat.getBoundingClientRect().top || 0);
+            item.style.top = `${(_top + sT) / ratio}px`;
+          };
+          document.addEventListener("scroll", defCon[distTop]);
+        }
+      };
+      if (zoom && zoom !== 1) {
+        thatNotice.style.cssText += `zoom:${1 / zoom}!important`;
+      } else if (getNavigator.core().Gecko && transform && transform !== "none") {
+        const ratio = Number(transform.split(",")[3]) || 1;
+        if (ratio && ratio !== 1) {
+          if (thatNotice) {
+            thatNotice.style.cssText += `width:${defCon.elCompat.clientWidth / ratio}px;height:${defCon.elCompat.clientHeight / ratio}px;top:0;left:0`;
+            thatNotice.childNodes.forEach((item, index, array, curItem = 0) => {
+              switch (position) {
+                case "topRight":
+                  item.style.cssText += String(
+                    `transform-origin:right top 0px;
+                      transform:scale(${1 / ratio});
+                      position:absolute;
+                      right:${10 / ratio}px;
+                      top:${10 / ratio}px`
+                  );
+                  break;
+                default:
+                  curItem = !index ? 10 / ratio : (array[index - 1].clientHeight + 10) / ratio + Number(array[index - 1].style.bottom.replace("px", ""));
+                  item.style.cssText += String(
+                    `transform-origin:right bottom 0px;
+                      transform:scale(${1 / ratio});
+                      position:absolute;
+                      right:${10 / ratio}px;
+                      bottom:${curItem}px`
+                  );
+                  break;
+              }
+            });
+            rePosition(thatNotice, ratio, 0, position);
+          }
+        }
+      }
+    }
+  }
 
-  if (window.self === window.top) {
-    console.info(
-      `%c[GB-Init]%c\nVersion: ${defCon.curVersion} %c[%s]%c\nExtension: %s\nlastRuntime: ${defCon.lastRuntime()}`,
-      "font-weight:bold;color:dodgerblue",
-      "color:0",
-      "color:snow",
-      defCon.titleCase(checkVersion(defCon.isUpgrade) instanceof Object),
-      "color:0",
-      defCon.titleCase(handlerInfo)
-    );
+  /* initialize configure data */
+
+  let useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit, GoogleJump, Hotkey, keywordHighlight, localWindow, _data;
+  async function initialData() {
+    const _configuration = await GMgetValue("_configuration_");
+    if (!_configuration) {
+      useBing = 0;
+      VerDetAuto = true;
+      checkUpdate = true;
+      timeNumber = 24;
+      timeUnit = "h";
+      GoogleJump = false;
+      Hotkey = true;
+      keywordHighlight = false;
+      localWindow = false;
+      _data = {
+        useBing,
+        VerDetAuto,
+        checkUpdate,
+        timeNumber,
+        timeUnit,
+        GoogleJump,
+        Hotkey,
+        keywordHighlight,
+        localWindow,
+      };
+      GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
+    } else {
+      _data = JSON.parse(defCon.decrypt(_configuration));
+      useBing = _data.useBing;
+      VerDetAuto = _data.VerDetAuto;
+      checkUpdate = _data.checkUpdate;
+      timeNumber = _data.timeNumber;
+      timeUnit = _data.timeUnit;
+      GoogleJump = _data.GoogleJump;
+      Hotkey = _data.Hotkey !== undefined ? _data.Hotkey : true;
+      keywordHighlight = _data.keywordHighlight;
+      localWindow = _data.localWindow;
+    }
   }
 
   /* Version Detection with Cache and timeout * F9y4ng * 20210614 */
@@ -792,19 +888,19 @@
   }
 
   function getFetchVersion(u) {
-    return new Promise((e, t) => {
+    return new Promise((resolve, reject) => {
       fetchTimeout(u, 2000, {
         method: "GET",
         mode: "cors",
         cache: "no-store",
         credentials: "omit",
       })
-        .then(e => {
-          debug("//-> %c%s %s %s", "color:green", new URL(u).hostname, e.ok, e.status);
-          if (!e.ok) {
-            throw Error(`${e.status} ${e.statusText}`);
+        .then(s => {
+          debug("//-> %c%s %s %s", "color:green", new URL(u).hostname, s.ok, s.status);
+          if (!s.ok) {
+            throw Error(`${s.status} ${s.statusText}`);
           }
-          return e.text();
+          return s.text();
         })
         .then(t => {
           let n = defCon.curVersion;
@@ -819,11 +915,11 @@
               m = note[2];
             }
           });
-          e([compareVersion(defCon.curVersion, n), defCon.encrypt(n), defCon.encrypt(m), defCon.encrypt(u)]);
+          resolve([compareVersion(defCon.curVersion, n), defCon.encrypt(n), defCon.encrypt(m), defCon.encrypt(u)]);
         })
-        .catch(e => {
-          error("//-> %cfetchVersion:\n%c%s", "font-weight:bold", "font-weight:normal", e);
-          t();
+        .catch(exp => {
+          error("//-> %cfetchVersion:\n%c%s", "font-weight:bold", "font-weight:normal", exp);
+          reject();
         });
     });
   }
@@ -853,52 +949,13 @@
   }
 
   async function checkVersion(s = false) {
-    let t, setResult, useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit, GoogleJump, Hotkey, keywordHighlight, localWindow, _data;
-    const _configuration = await GMgetValue("_configuration_");
-    if (!_configuration) {
-      useBing = 0;
-      VerDetAuto = true;
-      checkUpdate = true;
-      timeNumber = 24;
-      timeUnit = "h";
-      GoogleJump = false;
-      Hotkey = true;
-      keywordHighlight = false;
-      localWindow = false;
-      _data = {
-        useBing,
-        VerDetAuto,
-        checkUpdate,
-        timeNumber,
-        timeUnit,
-        GoogleJump,
-        Hotkey,
-        keywordHighlight,
-        localWindow,
-      };
-      console.warn("%c[GB-Warning]%c\nThis is your first visit, the Bing search button will not be inserted by default.", "font-weight:bold;color:salmon", "color:1");
-      // initialization
-      GMdeleteValue("_Check_Version_Expire_");
-      GMdeleteValue("_expire_time_");
-      GMdeleteValue("_nCount_");
-      GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
-    } else {
-      _data = JSON.parse(defCon.decrypt(_configuration));
-      useBing = _data.useBing;
-      VerDetAuto = _data.VerDetAuto;
-      checkUpdate = _data.checkUpdate;
-      timeNumber = _data.timeNumber;
-      timeUnit = _data.timeUnit;
-      GoogleJump = _data.GoogleJump;
-      Hotkey = _data.Hotkey !== undefined ? _data.Hotkey : true;
-      keywordHighlight = _data.keywordHighlight;
-      localWindow = _data.localWindow;
-    }
-    setResult = checkUpdate ? Boolean(VerDetAuto) : false;
-    const _expire_time = String(timeNumber + timeUnit);
-    const _expire_time_ = /(?!^0)^[0-9]+[smhdw]$/i.test(_expire_time) ? _expire_time : "24h";
+    let t;
+    await initialData();
+    let setResult = checkUpdate ? Boolean(VerDetAuto) : false;
+    const _expiretime_ = String(timeNumber + timeUnit);
+    const _expire_time_ = /(?!^0)^[0-9]+[smhdw]$/i.test(_expiretime_) ? _expiretime_ : "24h";
     if (setResult) {
-      if (window.self === window.top) {
+      if (CUR_WINDOW_TOP) {
         const cache = await GMgetExpire("_Check_Version_Expire_", _expire_time_);
         if (!cache) {
           // first: greasyfork
@@ -967,7 +1024,7 @@
             : `\nExpire time: ${_expire_time_}\nDetect time: ${defCon.lastRuntime()}\n`;
           switch (defCon.isNeedUpdate) {
             case 2:
-              if (window.self === window.top) {
+              if (CUR_WINDOW_TOP) {
                 console.warn(
                   String(
                     `%c[GB-Update]%c\nWe found your local version %c${defCon.curVersion} %cis not current.\nPlease confirm whether you had edited your local script, then you need to update it manually.\n${repo}(${sourceSite})`
@@ -987,7 +1044,7 @@
                     ),
                     `${Notice.error}`,
                     true,
-                    150,
+                    100,
                     {
                       onClose: [
                         () => {
@@ -1003,7 +1060,7 @@
               }
               return false;
             case 1:
-              if (window.self === window.top) {
+              if (CUR_WINDOW_TOP) {
                 console.info(
                   String(`%c[GB-Update]%c\nWe found a new version: %c${lastestVersion}%c.\nPlease upgrade from your update source to the latest version.${repo}(${sourceSite})`),
                   "font-weight:bold;color:crimson",
@@ -1041,7 +1098,7 @@
               }
               return false;
             default:
-              if (window.self === window.top && (s || IS_OPEN_DEBUG)) {
+              if (CUR_WINDOW_TOP && (s || IS_OPEN_DEBUG)) {
                 console.info(
                   `%c[GB-Update]%c\nCurretVersion: %c${defCon.curVersion}%c is up-to-date!${repo}(${sourceSite})`,
                   "font-weight:bold;color:darkcyan",
@@ -1059,7 +1116,7 @@
                     ),
                     `${Notice.success}`,
                     false,
-                    defCon.isNeedUpdate === 3 ? 50 : 30
+                    30
                   );
                   GMdeleteValue("_nCount_");
                 }, 100);
@@ -1069,56 +1126,31 @@
         }
       }
     } else {
-      if (window.self === window.top) {
+      if (CUR_WINDOW_TOP) {
         console.log(`%c[GB-Update]%c\nUpdate detection has been ${!checkUpdate ? "manually" : "automatically"} turned off.`, "font-weight:bold;color:red", "color:0");
       }
-      return false;
+      return;
     }
+  }
+
+  /* SYSTEM INFO */
+
+  if (CUR_WINDOW_TOP) {
+    console.info(
+      `%c[GB-Init]%c\nVersion: ${defCon.curVersion} %c[%s]%c\nExtension: %s\nlastRuntime: ${defCon.lastRuntime()}`,
+      "font-weight:bold;color:dodgerblue",
+      "color:0",
+      "color:snow",
+      defCon.titleCase(checkVersion(defCon.isUpgrade) instanceof Object),
+      "color:0",
+      defCon.titleCase(GMscriptHandler)
+    );
   }
 
   /* Menus & Button insert  */
 
   !(async function () {
-    let useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit, GoogleJump, Hotkey, keywordHighlight, localWindow, _data;
-
-    /* Set Default Value & initialize */
-
-    const _configuration = await GMgetValue("_configuration_");
-    if (!_configuration) {
-      useBing = 0;
-      VerDetAuto = true;
-      checkUpdate = true;
-      timeNumber = 24;
-      timeUnit = "h";
-      GoogleJump = false;
-      Hotkey = true;
-      keywordHighlight = false;
-      localWindow = false;
-      _data = {
-        useBing,
-        VerDetAuto,
-        checkUpdate,
-        timeNumber,
-        timeUnit,
-        GoogleJump,
-        Hotkey,
-        keywordHighlight,
-        localWindow,
-      };
-      GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
-    } else {
-      _data = JSON.parse(defCon.decrypt(_configuration));
-      useBing = _data.useBing;
-      VerDetAuto = _data.VerDetAuto;
-      checkUpdate = _data.checkUpdate;
-      timeNumber = _data.timeNumber;
-      timeUnit = _data.timeUnit;
-      GoogleJump = _data.GoogleJump;
-      Hotkey = _data.Hotkey !== undefined ? _data.Hotkey : true;
-      keywordHighlight = _data.keywordHighlight;
-      localWindow = _data.localWindow;
-    }
-
+    await initialData();
     const CONST = {
       isSecurityPolicy: false,
       rndidName: defCon.randString(9, "char"),
@@ -1399,8 +1431,7 @@
       }
     }
 
-    const isMac = getNavigator.system().startsWith("mac");
-
+    const isMac = getNavigator.system().toLocaleLowerCase().startsWith("mac");
     const menuManager = {
       isUsedSwitcher: (_status, _data, Tips) => {
         const info = x => {
@@ -1414,20 +1445,14 @@
           GMnotification(info("\u6dfb\u52a0"), `${Notice.info}`, true, 30, callback_Countdown);
         }
       },
-
       menuRemove: t => {
-        if (t) {
-          GMunregisterMenuCommand(t);
-        }
+        t && GMunregisterMenuCommand(t);
       },
-
       registerMenuCommand: function (e) {
         let _Use_Bing__, in_Use_Configure, _use_Bing_ID, in_UpdateCheck_ID;
-
         this.menuRemove(_use_Bing_ID);
         this.menuRemove(in_Use_Configure);
         this.menuRemove(in_UpdateCheck_ID);
-
         in_Use_Configure = GMregisterMenuCommand(`\ufff0\ud83c\udfaf【脚本参数】功能设置开关${Hotkey ? "(" + String.fromCharCode(isMac ? 89 : 69) + ")" : ""}`, () => {
           addActionConfigure();
         });
@@ -1438,11 +1463,10 @@
             defCon.timer = Date.now();
           }
         });
-
         if (checkUpdate) {
           if (CONST.isVDResult) {
             in_UpdateCheck_ID = GMregisterMenuCommand(
-              `\ufff5\ud83e\udded【版本更新】从服务器实时检查${Hotkey ? "(" + String.fromCharCode(isMac ? 76 : 86) + ")" : ""}`,
+              `\ufff5\ud83e\udded【版本更新】从服务器实时检查${Hotkey ? "(" + String.fromCharCode(isMac ? 75 : 86) + ")" : ""}`,
               async () => {
                 if (Date.now() - defCon.timer > 30e3) {
                   GMdeleteValue("_Check_Version_Expire_");
@@ -1456,7 +1480,7 @@
             );
           } else {
             in_UpdateCheck_ID = GMregisterMenuCommand(
-              `\ufff5\ud83d\udcdb【版本更新】已关闭 \u267b 重新开启${Hotkey ? "(" + String.fromCharCode(isMac ? 76 : 86) + ")" : ""}`,
+              `\ufff5\ud83d\udcdb【版本更新】已关闭 \u267b 重新开启${Hotkey ? "(" + String.fromCharCode(isMac ? 75 : 86) + ")" : ""}`,
               () => {
                 if (Date.now() - defCon.timer > 4e3) {
                   _data.VerDetAuto = true;
@@ -1478,12 +1502,11 @@
           }
         }
       },
-
       menuDisplay: function () {
         if (!CONST.isSecurityPolicy) {
           this.registerMenuCommand(CONST.isUseBing);
         }
-        if (window.self === window.top) {
+        if (CUR_WINDOW_TOP) {
           console.log(
             "%c[GB-Status]%c\nInsert the Bing Search Button: %c%s",
             "font-weight:bold;color:darkorange",
@@ -1493,7 +1516,6 @@
           );
         }
       },
-
       init: function () {
         this.menuDisplay();
       },
@@ -1519,7 +1541,7 @@
             menuManager.isUsedSwitcher(CONST.isUseBing, _data, "Bing 按钮");
           }
         }
-        if (e.keyCode === (isMac ? 76 : 86) && ekey && checkUpdate) {
+        if (e.keyCode === (isMac ? 75 : 86) && ekey && checkUpdate) {
           e.preventDefault();
           if (Date.now() - defCon.timer > 30e3) {
             defCon.timer = Date.now();
@@ -1555,12 +1577,11 @@
         try {
           const doStyName = `${CONST.rndclassName}`;
           const doStyle = CONST.noticeCss + curretSite.StyleCode + curretSite.keyStyle;
-          addStyle(doStyle, doStyName, document.head, "SS");
+          CUR_WINDOW_TOP && addStyle(doStyle, doStyName, document.head, "SS");
         } catch (e) {
           error("//-> %csearchManager.insertCSS:\n%c%s", "font-weight:bold", "font-weight:normal", e);
         }
       },
-
       insertSearchButton: () => {
         try {
           const getTarget = curretSite.MainType;
@@ -1593,7 +1614,8 @@
                 insterAfter(userSpan, Target);
                 // Baidu image fixed
                 if (qS(SpanID) && /^baiduimage$/.test(CONST.vim.trim())) {
-                  qS(SpanID).setAttribute("style", "margin-left:12px");
+                  qS(SpanID).setAttribute("style", "margin-left:16px");
+                  qS(`#${CONST.bbyx}`).setAttribute("style", "margin-left:2px");
                 }
                 // Google fixed
                 if (curretSite.SiteTypeID === newSiteType.GOOGLE) {
@@ -1608,9 +1630,7 @@
                   }
                 }
               }
-
               debug(`//-> searchManager $(Target): ${Target}`);
-
               qA(`#${CONST.ggyx}, #${CONST.bbyx}, #${CONST.bdyx}`).forEach(per => {
                 per.addEventListener("click", () => {
                   let gotoUrl = "about:blank";
@@ -1652,7 +1672,6 @@
           error("//-> %csearchManager.insertSearchButton:\n%c%s", "font-weight:bold", "font-weight:normal", e);
         }
       },
-
       scrollDetect: () => {
         let scrollbars, scrollspan, height, e;
         const getTarget = curretSite.MainType;
@@ -1689,7 +1708,6 @@
           }
         }
       },
-
       preInsertContentToHTML: function () {
         setRAFInterval(
           () => {
@@ -1706,12 +1724,11 @@
           true
         );
       },
-
       doSwitch: function () {
         try {
           if (curretSite.SiteTypeID !== newSiteType.OTHERS) {
             if (CONST.isSecurityPolicy) {
-              if (window.self === window.top) {
+              if (CUR_WINDOW_TOP) {
                 console.log(
                   "%c[GB-Prohibit]%c\nBlocked By: %c%s Security Policy",
                   "font-weight:bold;color:indigo",
@@ -1725,25 +1742,27 @@
               this.preInsertContentToHTML();
               const callback = mutations => {
                 mutations.forEach(mutation => {
-                  if (!(qS(`.${CONST.rndclassName}`) && qS(`#${CONST.rndidName}`))) {
-                    debug(
-                      "%c[GB-MutationObserver]\n%c(%c%s%c: %c%s%c)",
-                      "font-weight:bold;color:olive",
-                      "color:0",
-                      "color:olive",
-                      mutation.type,
-                      "color:0",
-                      "font-weight:bold;color:red",
-                      defCon.titleCase(!this.preInsertContentToHTML()),
-                      "color:0"
-                    );
+                  if (mutation.removedNodes.length > 0) {
+                    if (!(qS(`.${CONST.rndclassName}`) && qS(`#${CONST.rndidName}`))) {
+                      debug(
+                        "%c[GB-MutationObserver]\n%c(%c%s%c: %c%s%c)",
+                        "font-weight:bold;color:olive",
+                        "color:0",
+                        "color:olive",
+                        mutation.type,
+                        "color:0",
+                        "font-weight:bold;color:red",
+                        defCon.titleCase(!this.preInsertContentToHTML()),
+                        "color:0"
+                      );
+                    }
                   }
                 });
               };
               const opts = { childList: true, subtree: true };
               const observer = new MutationObserver(callback);
               observer.observe(document, opts);
-              if (window.self === window.top) {
+              if (CUR_WINDOW_TOP) {
                 console.log(
                   "%c[GB-Switch]%c\nWe are using The %c%s%c Search Engine.",
                   "font-weight:bold;color:Green",
@@ -1759,7 +1778,6 @@
           error("//-> %csearchManager.doSwitch:\n%c%s", "font-weight:bold", "font-weight:normal", e);
         }
       },
-
       init: function () {
         if (curretSite.SiteTypeID === newSiteType.GOOGLE) {
           getGlobalGoogle("www.google.com", GoogleJump);
