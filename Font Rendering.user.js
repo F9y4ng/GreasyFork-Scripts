@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.03.19.1
+// @version            2022.03.26.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh     无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -653,7 +653,8 @@
     try {
       if (_preview_) {
         addStyle(ts, `${defCon.class.rndStyle}`, document.head, "TS", { isReload: true });
-        qA("iframe").forEach(items => {
+        qA("iframe").forEach(async items => {
+          await sleep(30);
           try {
             if (
               items.offsetParent !== null &&
@@ -664,17 +665,17 @@
               window.getComputedStyle(items, null).getPropertyValue("visibility") !== "hidden"
             ) {
               const ORIGIN_SANDBOX = items.getAttribute("sandbox");
-              ORIGIN_SANDBOX && items.setAttribute("sandbox", "allow-scripts allow-same-origin");
+              ORIGIN_SANDBOX && items.removeAttribute("sandbox");
               const h = items.contentWindow;
               const sT = h.document.head.querySelectorAll("style[id^='TS']");
               debug("\u27A4 preview <styleCount>:", sT.length);
               if (sT.length) {
                 addStyle(ts, sT[0].className, h.document.head, "TS", { isReload: true });
-                debug("\u27A4 fr-async-frames <loadPreview>: %cpreview-load", "color:blue");
               } else {
                 addStyle(ts, null, h.document.head, "TS", { isReload: false });
-                debug("\u27A4 fr-async-frames <loadPreview>: %cmanual-load", "color:blue");
               }
+              debug("\u27A4 fr-async-frames <loadPreview>: %cPreview", "color:indigo", items.src || "<NULL>");
+              items.setAttribute("fr-async-frames", "Preview");
               ORIGIN_SANDBOX && items.setAttribute("sandbox", ORIGIN_SANDBOX);
             }
           } catch (e) {
@@ -692,9 +693,10 @@
     // Greasemonkey4.0+ need to wait all frames loaded to excute.
     if (getNavigator.core().WebKit || isGM) {
       const frames = qA("iframe");
-      if (frames.length) {
-        isCount && timeStart("\u27A4 [ASYNCFRAMES]");
+      if (frames.length && isCount) {
+        timeStart("\u27A4 [ASYNCFRAMES]");
         frames.forEach(async items => {
+          await sleep(30);
           try {
             if (
               items.offsetParent !== null &&
@@ -705,13 +707,16 @@
               window.getComputedStyle(items, null).getPropertyValue("visibility") !== "hidden"
             ) {
               const ORIGIN_SANDBOX = items.getAttribute("sandbox");
-              ORIGIN_SANDBOX && items.setAttribute("sandbox", "allow-forms allow-scripts allow-same-origin allow-top-navigation");
+              ORIGIN_SANDBOX && items.removeAttribute("sandbox");
               const h = items.contentWindow;
               const sT = h.document.head.querySelectorAll("style[id^='TS']");
               const bT = h.document.body.textContent.trim();
               if (!sT.length && bT.length) {
                 addStyle(defCon.tStyle, null, h.document.head, "TS", { isReload: false });
-                h.document.head.querySelectorAll("style[id^='TS']").length && debug("\u27A4 fr-async-frames <insertStyle>: %cauto-load", "color:blue");
+                if (h.document.head.querySelectorAll("style[id^='TS']").length) {
+                  debug("\u27A4 fr-async-frames <insertStyle>: %cAutoload", "color:indigo", items.src || "<NULL>");
+                  items.setAttribute("fr-async-frames", "Autoload");
+                }
               }
               ORIGIN_SANDBOX && items.setAttribute("sandbox", ORIGIN_SANDBOX);
             }
@@ -719,7 +724,7 @@
             !isMutationObserver && error("InsertStyle.AsyncFrames:", e.name);
           }
         });
-        isCount && timeEnd("\u27A4 [ASYNCFRAMES]");
+        timeEnd("\u27A4 [ASYNCFRAMES]");
       }
     }
   }
@@ -728,7 +733,7 @@
 
   const cache = {
     value: (data, eT = 6048e5) => {
-      debug("\u27A4 %ccache expiration time: %s hrs", "font-weight:bold", eT / 36e5);
+      debug("\u27A4 %ccache Time: %s hrs", "font-weight:bold", eT / 36e5);
       return {
         data: data,
         expired: Date.now() + eT,
@@ -748,7 +753,7 @@
           const data = value.data;
           const expiredTime = value.expired;
           const curTime = Date.now();
-          debug("\u27A4 cache expiration remaining: %s hrs", ((expiredTime - curTime) / 36e5).toFixed(2));
+          debug("\u27A4 cache Remaining: %s hrs", ((expiredTime - curTime) / 36e5).toFixed(2));
           if (expiredTime > curTime && typeof data === "object") {
             return data;
           } else {
@@ -1241,9 +1246,6 @@
           if (!arr[i].ps) {
             arr.splice(i, 1);
             i--;
-          } else if (!arr[j].ps) {
-            arr.splice(j, 1);
-            j--;
           } else {
             arr.splice(j, 1);
             j--;
@@ -1695,12 +1697,9 @@
           `<p><span style="font-style:italic;font-weight:700;font-size:20px;color:tomato">您好\uff01</span>这是${CANDIDATE_FIELD}<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="font:italic 900 22px/150% Candara,'Times New Roman'!important;color:tomato;margin-left:3px">V${defCon.curVersion}</span>, 以下为更新内容\uff1a</p>
             <p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}
-              <li class="${RANDOM_ID}_info">近期功能更新多、操作变更较大，建议阅读新版使用说明。</li>
-              <li class="${RANDOM_ID}_fix">优化字体列表缓存机制，由站点缓存变更为全局缓存。</li>
-              <li class="${RANDOM_ID}_fix">修正MacOS中在不同浏览器键盘快捷键冲突的问题。</li>
-              <li class="${RANDOM_ID}_fix">优化保存预览iframe框架及异步载入iframe的渲染机制。</li>
-              <li class="${RANDOM_ID}_fix">为“User-Agent Switcher and Manager”容错处理NavigatorUAData，但不保证脚本功能的完整性。(<a target="_blank" href="https://github.com/F9y4ng/GreasyFork-Scripts/issues/70">#70</a>)</li>
-              <li class="${RANDOM_ID}_fix">修正其他兼容问题，修正配置页面样式错误，优化代码。</li>
+              <li class="${RANDOM_ID}_info">保证数据安全，建议时常备份设置数据，以防数据丢失。</li>
+              <li class="${RANDOM_ID}_fix">修正脚本设置页面在某些站点内的样式错误。</li>
+              <li class="${RANDOM_ID}_fix">修正一些细节问题，优化代码。</li>
             </ul></p>
             <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
         ),
@@ -1917,7 +1916,7 @@
         const precode = pre.concat(code);
         ch = (s ? ch : "'Microsoft YaHei UI'").concat(",system-ui,-apple-system,BlinkMacSystemFont");
         return String(
-          `${precode.toString()}{font-size:14px!important;line-height:150%!important;font-family:'Operator Mono Lig','Fira Code','Source Code Pro','DejaVu Sans Mono','Ubuntu Mono','Anonymous Pro','Droid Sans Mono',Menlo,Monaco,Consolas,Inconsolata,Courier,monospace,${ch},sans-serif,'iconfont','icomoon','FontAwesome','IcoFont','Material Icons Extended','Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji','Android Emoji',EmojiSymbols,'emojione mozilla','twemoji mozilla'!important;font-feature-settings:"liga" 0,"zero"!important}`
+          `${precode.toString()}{font-size:14px!important;line-height:150%!important;font-family:'Operator Mono Lig','Fira Code','Source Code Pro','DejaVu Sans Mono','Ubuntu Mono','Roboto Mono','JetBrains Mono','Anonymous Pro','Droid Sans Mono',Monaco,Mono,Menlo,Inconsolata,ui-monospace,'Liberation Mono',Consolas,'Courier New',monospace,${ch},sans-serif,'iconfont','icomoon','FontAwesome','IcoFont','Material Icons Extended','Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji','Android Emoji',EmojiSymbols,'emojione mozilla','twemoji mozilla'!important;font-feature-settings:"liga" 0,"zero"!important}`
         );
       } else {
         return ``;
@@ -1948,7 +1947,7 @@
         `#${defCon.id.fontList}{padding:2px 10px 0 10px;min-height:73px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex!important;align-items:center;justify-content:space-between}#${defCon.id.fontSize}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.shadowColor}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;padding:2px 10px;min-height:45px;margin:4px;width:auto}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${defCon.id.submit}{padding:2px 10px;height:40px}` +
         `#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${defCon.id.fontList} .${defCon.class.label} span{box-sizing:border-box;color:#fff;font-size:16px!important;font-weight:400;height:max-content;width:max-content;min-width:12px;max-width:200px;padding:5px;background:#67a5df;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap}#${defCon.id.fontList} .${defCon.class.close}{width:12px}#${defCon.id.fontList} .${defCon.class.close}:hover{color:tomato;background-color:#2d7dca;border-radius:2px}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-x:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;padding:6px 6px 0 6px;margin:0 0 6px 0;width:100%;min-width:100%;max-width:fit-content;max-width:-moz-min-content;max-height:90px;min-height:45px;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} span.${defCon.class.spanlabel},#${defCon.id.selector} span.${defCon.class.spanlabel}{margin:0!important;width:auto;display:block!important;padding:0 0 4px 0;color:#333;border:0;text-align:left!important;background-color:transparent!important}` +
         `#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} input{text-overflow:ellipsis;overflow:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;padding:1px 23px 1px 2px;margin:0;width:100%;max-width:100%;min-width:100%;height:42px!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:16px!important;font-weight:700;text-indent:8px;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font:normal 700 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font:normal 700 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:4px 0 0 0;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:4px 8px;width:auto;min-width:60%;max-width:calc(100% - 68px);max-height:298px;font-size:18px!important;white-space:nowrap;background-color:#fff;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}` +
-        `#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;margin:1px 8px;padding:5px 0;font-weight:400;font-size:21px!important;min-width:100%;max-width:100%;width:-moz-available;width:-webkit-fill-available;}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff}` +
+        `#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{display:block;box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;margin:1px 8px;padding:5px 0;font-weight:400;font-size:21px!important;min-width:100%;max-width:100%;width:-moz-available;width:-webkit-fill-available;}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff}` +
         `.${defCon.class.checkbox}{display:none!important}.${defCon.class.checkbox}+label{cursor:pointer;padding:0;margin:0 2px 0 0;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:76px;height:32px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;box-sizing:content-box}.${defCon.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${defCon.class.checkbox}+label::after{position:absolute;top:0;left:28px;border-radius:100px;padding:5px;font-size:16px;font-weight:700;font-style:normal;color:#fff;content:"OFF"}.${defCon.class.checkbox}:checked+label{cursor:pointer;margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.${defCon.class.checkbox}:checked+label::after{content:"ON";left:10px}.${defCon.class.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px}#${defCon.id.fface} label,#${defCon.id.fface}+label::after,#${defCon.id.fface}+label::before,#${defCon.id.smooth} label,#${defCon.id.smooth}+label::after,#${defCon.id.smooth}+label::before{-webkit-transition:all .3s ease-in;transition:all .3s ease-in}` +
         `#${defCon.id.fontShadow} div.${defCon.class.flex}:before,#${defCon.id.fontShadow} div.${defCon.class.flex}:after,#${defCon.id.fontStroke} div.${defCon.class.flex}:before,#${defCon.id.fontStroke} div.${defCon.class.flex}:after,#${defCon.id.fontSize} div.${defCon.class.flex}:before,#${defCon.id.fontSize} div.${defCon.class.flex}:after{display:none}#${defCon.id.fontShadow} #${defCon.id.shadowSize},#${defCon.id.fontStroke} #${defCon.id.strokeSize},#${defCon.id.fontSize} #${defCon.id.fontZoom}{color:#111!important;width:56px!important;text-indent:0;margin:0 10px 0 0!important;height:32px!important;font-size:17px!important;font-weight:400!important;font-family:Impact,Times,serif!important;border:#67a5df 2px solid!important;border-radius:4px;text-align:center;box-sizing:content-box;padding:0;background:#fafafa!important}.${defCon.class.flex}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;width:auto;min-width:100%}.${defCon.class.slider} input{visibility:hidden}#${defCon.id.shadowColor} *{box-sizing:content-box}#${defCon.id.shadowColor} .${defCon.class.frColorPicker}{width:auto;margin:0;padding:0}#${defCon.id.shadowColor} .${defCon.class.frColorPicker} #${defCon.id.color}{width:160px!important;min-width:160px;height:35px!important;text-indent:0;font-size:18px!important;font-weight:400!important;background:#fdfdffb0;box-sizing:border-box;font-family:Impact,Times,serif!important;color:#333!important;border:#67a5df 2px solid!important;border-radius:4px;padding: 0 8px 0 0;margin:0;text-align:center;cursor:pointer}` +
         `#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{font:bold 14px/150% "Roboto Mono",Monaco,"Courier New",Consolas,monospace,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;min-width:calc(100% - 2px);max-width:calc(100% - 2px);width:calc(100% - 2px)!important;height:78px;min-height:78px;max-height:78px;resize:none;border:2px solid #67a5df!important;border-radius:6px;box-sizing:border-box;padding:5px;margin:0;color:#0b5b9c!important;word-break:break-all;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px rgba(0,0,0,.2);background:#efefef;border-radius:10px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontEx} textarea{background:#fafafa!important}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}.${defCon.class.switch}{box-sizing:border-box;float:right;margin:-2px 4px 0 0;padding:0 6px;border:2px double #67a5df;color:#0a68c1;border-radius:4px}#${defCon.id.cSwitch}:hover,#${defCon.id.eSwitch}:hover{cursor:pointer;-webkit-user-select:none;user-select:none}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent)!important;background-size:50px 50px;background-color:#f7fff7!important}` +
@@ -2712,7 +2711,7 @@
               cache.set("_FontCheckList_", fontData);
             }
           } catch (e) {
-            error("Fontlist with cache expires:", e.name);
+            error("Fontlist With Cache:", e.name);
             cache.remove("_FontCheckList_");
             fontData = await fontCheck_DetectOnce();
             cache.set("_FontCheckList_", fontData);
@@ -2954,7 +2953,7 @@
             });
             colorPicker.fromString(CONST_VALUES.shadowColor);
             colorshow.value = colorPicker.toHEXAString() === "#FFFFFFFF" ? "currentcolor" : colorPicker.toHEXAString();
-            debug("\u27A4 frColorPicker:", colorPicker.toHEXAString());
+            debug("\u27A4 frColorPicker:%c%s", `padding:4px 10px;background-color:${colorPicker.toRGBAString()}`, colorPicker.toHEXAString());
           } catch (e) {
             defCon.errors.push(`[Fonts shadowColor]: ${e}`);
             error("Fonts shadowColor:", e);

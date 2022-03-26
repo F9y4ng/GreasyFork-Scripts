@@ -4,7 +4,7 @@
 // @name:zh-TW         谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en            Google & baidu & Bing Switcher (ALL in One)
 // @name:ja            Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version            5.0.20220319.1
+// @version            5.0.20220326.1
 // @author             F9y4ng
 // @description        谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮及其他搜索跳转效果。
 // @description:zh     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮及其他搜索跳转效果。
@@ -30,7 +30,7 @@
 // @compatible         Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible         Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible         Safari 兼容Tampermonkey • Safari
-// @note               修正MacOS中键盘快捷键冲突的问题。\n修正兼容性错误，优化MetaData，优化代码。
+// @note               修正iframe框架页面引用时样式加载的bug.
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -1577,7 +1577,7 @@
         try {
           const doStyName = `${CONST.rndclassName}`;
           const doStyle = CONST.noticeCss + curretSite.StyleCode + curretSite.keyStyle;
-          CUR_WINDOW_TOP && addStyle(doStyle, doStyName, document.head, "SS");
+          addStyle(doStyle, doStyName, document.head, "SS");
         } catch (e) {
           error("//-> %csearchManager.insertCSS:\n%c%s", "font-weight:bold", "font-weight:normal", e);
         }
