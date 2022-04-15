@@ -4,7 +4,7 @@
 // @name:zh-TW         谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en            Google & baidu & Bing Switcher (ALL in One)
 // @name:ja            Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version            5.0.20220409.1
+// @version            5.0.20220416.1
 // @author             F9y4ng
 // @description        谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮及其他搜索跳转效果。
 // @description:zh     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮及其他搜索跳转效果。
@@ -18,19 +18,18 @@
 // @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.meta.js
 // @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js
 // @icon               https://img.icons8.com/fluent/48/000000/google-logo.png
-// @include            *://*.google.*/search*
-// @include            *://*.google.*/webhp*
-// @include            *://www.baidu.com/*
-// @include            *://ipv6.baidu.com/*
-// @include            *://image.baidu.com/*
-// @include            *://*.bing.com/*
+// @match              *://www.baidu.com/*
+// @match              *://ipv6.baidu.com/*
+// @match              *://image.baidu.com/*
+// @match              *://*.bing.com/*
+// @include            /^https?:\/\/(\w+\.)?google\.[a-z.]{2,6}\/(webhp|search).*$/
 // @exclude            *://www.baidu.com/link*
 // @compatible         edge 兼容TamperMonkey, ViolentMonkey
 // @compatible         Chrome 兼容TamperMonkey, ViolentMonkey
 // @compatible         Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible         Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible         Safari 兼容Tampermonkey • Safari
-// @note               修正百度搜索跳转按钮的样式问题。
+// @note               优化MetaData参数增强代码访问安全性。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue

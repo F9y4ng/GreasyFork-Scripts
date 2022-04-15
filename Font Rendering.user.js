@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.04.04.1
+// @version            2022.04.16.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh     无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -19,7 +19,7 @@
 // @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.meta.js
 // @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
 // @require            https://greasyfork.org/scripts/437214-frcolorpicker/code/frColorPicker.js?version=1025231
-// @include            *
+// @match              *://*/*
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -1181,7 +1181,7 @@
   async function getMergedFontCheckList(defFontCheck = fontCheck) {
     const cusFontList = await GMgetValue("_Custom_fontlist_");
     const cusFontCheck = cusFontList ? JSON.parse(defCon.decrypt(cusFontList)) : DEFAULT_ARRAY;
-    const formatFontList = JSON.parse(JSON.stringify([...defFontCheck, ...cusFontCheck]));
+    const formatFontList = Array.from(new Set([...defFontCheck, ...cusFontCheck]));
     return getUniqueValues(formatFontList);
   }
 
@@ -1566,14 +1566,14 @@
   /* define default value */
 
   const INITIAL_VALUES = {
-    fontSelect: `'Microsoft YaHei',system-ui,-apple-system,BlinkMacSystemFont,sans-serif,'iconfont','icomoon','FontAwesome','IcoFont','Material Icons Extended','Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji','Android Emoji',EmojiSymbols,'emojione mozilla','twemoji mozilla'`,
+    fontSelect: `'Microsoft YaHei',system-ui,-apple-system,BlinkMacSystemFont,sans-serif,'iconfont','icomoon','FontAwesome','Font Awesome 5 Pro','Font Awesome 6 Pro','IcoFont','fontello','themify','Material Icons','Material Icons Extended','bootstrap-icons','Segoe Fluent Icons','Material-Design-Iconic-Font','office365icons','Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji','Android Emoji',EmojiSymbols,'emojione mozilla','twemoji mozilla'`,
     fontFace: true,
     fontSmooth: true,
     fontSize: 1.0,
     fontStroke: getNavigator.core().Gecko ? 0.08 : 0.05,
     fontShadow: getNavigator.core().Gecko ? 0.5 : 1.0,
     shadowColor: getNavigator.core().Gecko ? "#7F7F7FAA" : "#7B7B7BCC",
-    fontCSS: `:not(i):not(.fa):not([class*='icon']):not([class*='vjs-']):not([class*='glyph'])`,
+    fontCSS: `:not(i):not([class*='icon'],[class*='glyph'],[class*='fa-'],[class*='vjs-'])`,
     fontEx: `input,select,button,textarea,kbd,pre,pre *,code,code *`,
   };
   const IS_MACOS = getNavigator.system().toLocaleLowerCase().startsWith("mac");
@@ -1700,9 +1700,9 @@
           `<p><span style="font-style:italic;font-weight:700;font-size:20px;color:tomato">您好\uff01</span>这是${CANDIDATE_FIELD}<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="font:italic 900 22px/150% Candara,'Times New Roman'!important;color:tomato;margin-left:3px">V${defCon.curVersion}</span>, 以下为更新内容\uff1a</p>
             <p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}
-              <li class="${RANDOM_ID}_info">遇到问题请反馈至Github, 不再处理其他途径的反馈。脚本错误、运行异常请反馈至[<a href="https://github.com/F9y4ng/GreasyFork-Scripts/issues" target="_blank">Issues</a>], 字体、渲染样式、字符乱码问题请反馈至[<a href="https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA" target="_blank">Discussions</a>]。</li>
-              <li class="${RANDOM_ID}_fix">修正页面预载入阶段快捷键呼出脚本菜单出错的问题。</li>
-              <li class="${RANDOM_ID}_fix">优化配置页面CSS样式，修正一些样式问题。</li>
+              <li class="${RANDOM_ID}_fix">优化MetaData参数增强代码访问安全性。</li>
+              <li class="${RANDOM_ID}_fix">优化初始参数，应用新参数需重置数据并重新设置保存。</li>
+              <li class="${RANDOM_ID}_fix">修正一些细小的Bug，优化样式，优化代码。</li>
             </ul></p>
             <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
         ),
@@ -1913,14 +1913,18 @@
     let exclude = "";
     let codeFont = "";
     const cssexlude = CONST_VALUES.fontEx;
-    const funcCodefont = (t, s, ch) => {
+    const funcCodefont = (t, s, r) => {
       if (t.search(/\bpre\b|\bcode\b/gi) !== -1) {
         const pre = t.search(/\bpre\b/gi) > -1 ? ["pre", "pre *"] : [];
         const code = t.search(/\bcode\b/gi) > -1 ? ["code", "code *"] : [];
         const precode = pre.concat(code);
-        ch = (s ? ch : "'Microsoft YaHei UI'").concat(",system-ui,-apple-system,BlinkMacSystemFont");
+        r = s ? r : INITIAL_VALUES.fontSelect.replace("'Microsoft YaHei',", "");
         return String(
-          `${precode.toString()}{font-size:14px!important;line-height:150%!important;font-family:'Operator Mono Lig','Fira Code','Source Code Pro','DejaVu Sans Mono','Ubuntu Mono','Roboto Mono','JetBrains Mono','Anonymous Pro','Droid Sans Mono',Monaco,Mono,Menlo,Inconsolata,ui-monospace,'Liberation Mono',Consolas,'Courier New',monospace,${ch},sans-serif,'iconfont','icomoon','FontAwesome','IcoFont','Material Icons Extended','Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji','Android Emoji',EmojiSymbols,'emojione mozilla','twemoji mozilla'!important;font-feature-settings:"liga" 0,"zero"!important}`
+          `${precode.toString()}{font-size:14px!important;line-height:150%!important;` +
+            `font-family:'Operator Mono Lig','Fira Code','Source Code Pro','DejaVu Sans Mono',` +
+            `'Ubuntu Mono','Roboto Mono','JetBrains Mono','Anonymous Pro','Droid Sans Mono','Mono',` +
+            `'Monaco','Menlo','Inconsolata','Liberation Mono','Consolas','Courier New',monospace,` +
+            `${r}!important;font-feature-settings:"liga" 0,"zero"!important}`
         );
       } else {
         return ``;
@@ -1928,7 +1932,7 @@
     };
     if (cssexlude) {
       exclude = `${cssexlude}{font-family:inherit;-webkit-text-stroke:initial!important;text-shadow:none!important}`;
-      codeFont = funcCodefont(cssexlude, fontface_i, prefont);
+      codeFont = funcCodefont(cssexlude, fontface_i, CONST_VALUES.fontSelect);
     }
     let tshadow = "";
     const cssfun = CONST_VALUES.fontCSS;
@@ -1949,12 +1953,12 @@
       `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;border-radius:12px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 20px);z-index:999999;padding:4px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container} *{line-height:1.5!important;text-shadow:none!important;-webkit-text-stroke:initial!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Android Emoji",EmojiSymbols!important;font-size:16px;font-weight:700}` +
         `#${defCon.id.container} fieldset{border:2px groove #67a5df!important;border-radius:10px;padding:4px 6px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:475px}#${defCon.id.container} legend{line-height:inherit;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;background:#f0f6ff!important;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{display:inherit;list-style:none;margin:3px 0;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default;min-width:-webkit-fill-available;min-width:-moz-available;-webkit-user-select:none;user-select:none}#${defCon.id.container} ul li:before{display:none}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden}#${defCon.id.container} .${defCon.class.help}:hover{cursor:help}#${RANDOM_ID}_scriptname{font-weight:900!important;-webkit-user-select:all;user-select:all;display:inline-block}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{padding:0;margin:0;width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50%;-webkit-transform:rotate(360deg);animation:rotation 5s linear infinite}` +
         `#${defCon.id.fontList}{padding:2px 10px 0 10px;min-height:73px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex!important;align-items:center;justify-content:space-between}#${defCon.id.fontSize}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.shadowColor}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;padding:2px 10px;min-height:45px;margin:4px;width:auto}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${defCon.id.submit}{padding:2px 10px;height:40px}` +
-        `#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${defCon.id.fontList} .${defCon.class.label} span{box-sizing:border-box;color:#fff;font-size:16px!important;font-weight:400;height:max-content;width:max-content;min-width:12px;max-width:200px;padding:5px;background:#67a5df;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap}#${defCon.id.fontList} .${defCon.class.close}{width:12px}#${defCon.id.fontList} .${defCon.class.close}:hover{color:tomato;background-color:#2d7dca;border-radius:2px}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-x:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;padding:6px 6px 0 6px;margin:0 0 6px 0;width:100%;min-width:100%;max-width:fit-content;max-width:-moz-min-content;max-height:90px;min-height:45px;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} span.${defCon.class.spanlabel},#${defCon.id.selector} span.${defCon.class.spanlabel}{margin:0!important;width:auto;display:block!important;padding:0 0 4px 0;color:#333;border:0;text-align:left!important;background-color:transparent!important}` +
+        `#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${defCon.id.fontList} .${defCon.class.label} span{box-sizing:border-box;color:#fff;font-size:16px!important;font-weight:400;height:max-content;width:max-content;min-width:12px;max-width:200px;padding:5px;background:#67a5df;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap}#${defCon.id.fontList} .${defCon.class.close}{width:12px}#${defCon.id.fontList} .${defCon.class.close}:hover{color:tomato;background-color:#2d7dca;border-radius:2px}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-x:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;padding:6px 6px 0 6px;margin:0 0 6px 0;width:100%;min-width:100%;max-width:fit-content;max-width:-moz-min-content;max-height:90px;min-height:45px;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:6px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 2px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} span.${defCon.class.spanlabel},#${defCon.id.selector} span.${defCon.class.spanlabel}{margin:0!important;width:auto;display:block!important;padding:0 0 4px 0;color:#333;border:0;text-align:left!important;background-color:transparent!important}` +
         `#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} input{text-overflow:ellipsis;overflow:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;outline:none!important;padding:1px 23px 1px 2px;margin:0;width:100%;max-width:100%;min-width:100%;height:42px!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:16px!important;font-weight:700;text-indent:8px;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font:normal 700 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font:normal 700 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:4px 0 0 0;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:4px 8px;width:auto;min-width:60%;max-width:calc(100% - 68px);max-height:298px;font-size:18px!important;white-space:nowrap;background-color:#fff;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}` +
         `#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{display:block;box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;margin:1px 8px;padding:5px 0;font-weight:400;font-size:21px!important;min-width:100%;max-width:100%;width:-moz-available;width:-webkit-fill-available;}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff}` +
         `.${defCon.class.checkbox}{display:none!important}.${defCon.class.checkbox}+label{cursor:pointer;padding:0;margin:0 2px 0 0;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:76px;height:32px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;box-sizing:content-box}.${defCon.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${defCon.class.checkbox}+label::after{position:absolute;top:0;left:28px;border-radius:100px;padding:5px;font-size:16px;font-weight:700;font-style:normal;color:#fff;content:"OFF"}.${defCon.class.checkbox}:checked+label{cursor:pointer;margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.${defCon.class.checkbox}:checked+label::after{content:"ON";left:10px}.${defCon.class.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px}#${defCon.id.fface} label,#${defCon.id.fface}+label::after,#${defCon.id.fface}+label::before,#${defCon.id.smooth} label,#${defCon.id.smooth}+label::after,#${defCon.id.smooth}+label::before{-webkit-transition:all .3s ease-in;transition:all .3s ease-in}` +
         `#${defCon.id.fontShadow} div.${defCon.class.flex}:before,#${defCon.id.fontShadow} div.${defCon.class.flex}:after,#${defCon.id.fontStroke} div.${defCon.class.flex}:before,#${defCon.id.fontStroke} div.${defCon.class.flex}:after,#${defCon.id.fontSize} div.${defCon.class.flex}:before,#${defCon.id.fontSize} div.${defCon.class.flex}:after{display:none}#${defCon.id.fontShadow} #${defCon.id.shadowSize},#${defCon.id.fontStroke} #${defCon.id.strokeSize},#${defCon.id.fontSize} #${defCon.id.fontZoom}{color:#111!important;width:56px!important;text-indent:0;margin:0 10px 0 0!important;height:32px!important;font-size:17px!important;font-weight:400!important;font-family:Impact,Times,serif!important;border:#67a5df 2px solid!important;border-radius:4px;outline:none!important;text-align:center;box-sizing:content-box;padding:0;background:#fafafa!important}.${defCon.class.flex}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;width:auto;min-width:100%}.${defCon.class.slider} input{visibility:hidden}#${defCon.id.shadowColor} *{box-sizing:content-box}#${defCon.id.shadowColor} .${defCon.class.frColorPicker}{width:auto;margin:0;padding:0}#${defCon.id.shadowColor} .${defCon.class.frColorPicker} #${defCon.id.color}{width:160px!important;min-width:160px;height:35px!important;text-indent:0;font-size:18px!important;font-weight:400!important;background:#fdfdffb0;box-sizing:border-box;font-family:Impact,Times,serif!important;color:#333!important;border:#67a5df 2px solid!important;border-radius:4px;outline:none!important;padding: 0 8px 0 0;margin:0;text-align:center;cursor:pointer}` +
-        `#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{font:bold 14px/150% "Roboto Mono",Monaco,"Courier New",Consolas,monospace,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;min-width:calc(100% - 2px);max-width:calc(100% - 2px);width:calc(100% - 2px)!important;height:78px;min-height:78px;max-height:78px;resize:none;border:2px solid #67a5df!important;border-radius:6px;outline:none!important;box-sizing:border-box;padding:5px;margin:0;color:#0b5b9c!important;word-break:break-all;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px rgba(0,0,0,.2);background:#efefef;border-radius:10px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontEx} textarea{background:#fafafa!important}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}.${defCon.class.switch}{box-sizing:border-box;float:right;margin:-2px 4px 0 0;padding:0 6px;border:2px double #67a5df;color:#0a68c1;border-radius:4px}#${defCon.id.cSwitch}:hover,#${defCon.id.eSwitch}:hover{cursor:pointer;-webkit-user-select:none;user-select:none}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent)!important;background-size:50px 50px;background-color:#f7fff7!important}` +
+        `#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{font:bold 14px/150% "Roboto Mono",Monaco,"Courier New",Consolas,monospace,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;min-width:calc(100% - 2px);max-width:calc(100% - 2px);width:calc(100% - 2px)!important;height:78px;min-height:78px;max-height:78px;resize:none;border:2px solid #67a5df!important;border-radius:6px;outline:none!important;box-sizing:border-box;padding:5px;margin:0;color:#0b5b9c!important;word-break:break-all;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:6px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{box-shadow:inset 0 0 2px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 2px rgba(0,0,0,.2);background:#efefef;border-radius:10px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontEx} textarea{background:#fafafa!important}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:6px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{box-shadow:inset 0 0 2px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}.${defCon.class.switch}{box-sizing:border-box;float:right;margin:-2px 4px 0 0;padding:0 6px;border:2px double #67a5df;color:#0a68c1;border-radius:4px}#${defCon.id.cSwitch}:hover,#${defCon.id.eSwitch}:hover{cursor:pointer;-webkit-user-select:none;user-select:none}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent)!important;background-size:50px 50px;background-color:#f7fff7!important}` +
         `.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist{scrollbar-width:thin}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-webkit-scrollbar{width:8px;height:8px}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-webkit-scrollbar-corner{box-shadow:inset 0 0 3px #aaa;background:#efefef;border-radius:2px}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #999;background:#cfcfcf;border-radius:2px}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:2px}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:2px}` +
         `#${defCon.id.submit} button{box-sizing:border-box;background-image:initial;background-color:#67a5df;color:#fff!important;margin:0;padding:5px 10px;cursor:pointer;border:2px solid #6ba7e0;border-radius:6px;width:auto;min-width:min-content;min-height:35px;height:35px;font:normal 600 14px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${defCon.id.submit} button:hover{box-shadow:0 0 5px rgba(0,0,0,.4)!important}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.submit} #${defCon.id.backup}{margin:0 10px 0 0;display:none}.${defCon.class.anim}{animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}`
     );
@@ -2162,9 +2166,9 @@
           qA(
             `:not`.concat(
               `(`,
-              `html,head,head *,base,meta,style,link,script,noscript,iframe,body,`,
-              `img,form,br,hr,ul,canvas,applet,source,svg,clippath,rect,circle,path,`,
-              `mask,filter,g,symbol,picture,embed,audio,video,track,figure,progress,[fr-fix-stroke],`,
+              `html,head,head *,base,meta,style,link,script,noscript,body,`,
+              `iframe,img,br,hr,ul,canvas,applet,source,svg,svg *,picture,`,
+              `form,embed,audio,video,track,figure,progress,[fr-fix-stroke],`,
               `fr-configure *,fr-dialogbox *,fr-colorpicker *,gb-notice *`,
               `)`
             )
@@ -2239,8 +2243,10 @@
             }
           };
           const isAddedNodes = checkMutationHasAddedNodes();
-          (SHOULD_FIX_STROKE() || getNavigator.isCheatUA()) && deBounce(correctBoldErrorByStroke, 50, "fixstroke")(CONST_VALUES.fontStroke, { isCount: isAddedNodes });
           insertStyle_AsyncFrames({ isMutationObserver: true, isCount: isAddedNodes });
+          if (SHOULD_FIX_STROKE() || getNavigator.isCheatUA()) {
+            deBounce(correctBoldErrorByStroke, 50, "fixstroke")(CONST_VALUES.fontStroke, { isCount: isAddedNodes });
+          }
         }
       }).observe(document, { childList: true, subtree: true });
     } catch (e) {
@@ -3062,7 +3068,8 @@
 
           qS(`#${defCon.id.submit} .${defCon.class.submit}`).addEventListener("click", async function () {
             const fontlists = fontSet().fsearchList(`${defCon.id.fontName}`);
-            const fontselect = fontlists.length > 0 ? addSingleQuoteToArray(fontlists) : CONST_VALUES.fontSelect;
+            const reconstruct_fontselect = String(Array.from(new Set(CONST_VALUES.fontSelect.split(",").concat(INITIAL_VALUES.fontSelect.split(",")))));
+            const fontselect = fontlists.length ? addSingleQuoteToArray(fontlists) : filter_MicrosoftYaHei("", reconstruct_fontselect);
             const fontface = ffaceT.checked;
             const smooth = smoothT.checked;
             const prefzoom = isFontsize ? (/^[0-1](\.[0-9]{1,3})?$/.test(zoom.value) ? zoom.value : INITIAL_VALUES.fontSize) : 1;
@@ -3088,7 +3095,7 @@
                 let _codeFont = "";
                 const _exclude = fontex ? `${filterHtmlToText(fontex)}{font-family:inherit;-webkit-text-stroke:initial!important;text-shadow:none!important}` : ``;
                 if (fontex) {
-                  _codeFont = funcCodefont(fontex, fontface, _prefont);
+                  _codeFont = funcCodefont(fontex, fontface, fontselect);
                 }
                 const _tshadow = `${_fontfaces}${_bodyzoom}`.concat(
                   `${filterHtmlToText(cssfun)}{${_fontfamily}${_shadow}${_stroke}${_smoothing}${textrender}}`,
@@ -3136,7 +3143,7 @@
                   const fontDate = setDateFormat("yyyy-MM-dd HH:mm:ss", new Date(domainValue[domainValueIndex].fontDate));
                   qS(`#${RANDOM_ID}_c_w_d_`).innerHTML = trustedTypesPolicy.createHTML(
                     String(
-                      `<p style="height:30px;display:flex;align-items:center"><span style="color:indigo"><strong>上次保存\uff1a</strong>${fontDate} </span><button id="${RANDOM_ID}_c_w_d_d_" style="box-sizing:border-box;padding:3px 5px;margin-left:15px;cursor:pointer;color:#333;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;max-width:120px;height:max-content;min-height:30px;background-color:#eee;letter-spacing:normal" title="删除数据后将刷新页面">删除当前网站数据</button></p>`
+                      `<p style="height:30px;display:flex;align-items:center"><span style="color:indigo"><strong>上次保存\uff1a</strong>${fontDate} </span><button id="${RANDOM_ID}_c_w_d_d_" style="box-sizing:border-box;padding:3px 5px;margin-left:15px;cursor:pointer;color:#333!important;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;max-width:120px;height:max-content;min-height:30px;background-color:#eee;letter-spacing:normal" title="删除数据后将刷新页面">删除当前网站数据</button></p>`
                     )
                   );
                   qS(`#${RANDOM_ID}_c_w_d_d_`).addEventListener("click", async () => {
@@ -3557,7 +3564,7 @@
         domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : DEFAULT_ARRAY;
         const _data_search_ =
           domainValue.length > 6
-            ? `<p style="display:flex;justify-content:left;align-items:center"><input id="${RANDOM_ID}_d_s_" style="box-sizing:content-box;width:57%;height:22px;font:normal 16px/150% monospace,Consolas,system-ui,-apple-system,BlinkMacSystemFont,serif!important;border:2px solid #777;border-radius:4px;outline:none!important;margin:4px 6px;padding:2px 6px"><button id="${RANDOM_ID}_d_s_s_" style="box-sizing:border-box;background:#eee;color:#333;vertical-align:initial;padding:3px 10px;margin:0;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-width:60px;min-height:30px;letter-spacing:normal;text-align:center">查 询</button><button id="${RANDOM_ID}_d_s_c_" style="box-sizing:border-box;background:#eee;color:#333;vertical-align:initial;margin:0 0 0 4px;padding:3px 10px;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-width:60px;min-height:30px;letter-spacing:normal;text-align:center">清 除</button></p>`
+            ? `<p style="display:flex;justify-content:left;align-items:center"><input id="${RANDOM_ID}_d_s_" style="box-sizing:content-box;width:57%;height:22px;font:normal 16px/150% monospace,Consolas,system-ui,-apple-system,BlinkMacSystemFont,serif!important;border:2px solid #777;border-radius:4px;outline:none!important;margin:4px 6px;padding:2px 6px"><button id="${RANDOM_ID}_d_s_s_" style="box-sizing:border-box;background:#eee;color:#333!important;vertical-align:initial;padding:3px 10px;margin:0;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-width:60px;min-height:30px;letter-spacing:normal;text-align:center">查 询</button><button id="${RANDOM_ID}_d_s_c_" style="box-sizing:border-box;background:#eee;color:#333!important;vertical-align:initial;margin:0 0 0 4px;padding:3px 10px;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-width:60px;min-height:30px;letter-spacing:normal;text-align:center">清 除</button></p>`
             : ``;
         for (let i = 0; i < domainValue.length; i++) {
           Contents += String(
@@ -3636,16 +3643,16 @@
           );
         }
         if (await frDialog.respond()) {
+          domains = await GMgetValue("_domains_fonts_set_");
+          domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : DEFAULT_ARRAY;
           for (let l = _temp_.length - 1; l >= 0; l--) {
-            domains = await GMgetValue("_domains_fonts_set_");
-            domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : DEFAULT_ARRAY;
             domainValueIndex = updateDomainsIndex(domainValue, _temp_[l]);
             domainValue.splice(domainValueIndex, 1);
-            GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
             if (_temp_[l] === CUR_HOST_NAME) {
               defCon.equal = true;
             }
           }
+          GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
           let frDialog = new FrDialogBox({
             trueButtonText: "感谢使用",
             messageText: String(
@@ -3820,25 +3827,24 @@
 
     function addSingleQuoteToArray(arr) {
       let returnStr = "";
-      let hasYH = false;
       if (Array.isArray(arr) && arr.length) {
         arr.forEach(item => {
-          if (item === "Microsoft YaHei") {
-            hasYH = true;
-          }
           returnStr += `'${item}',`;
         });
-        let checkFont = new SupportFontFamily();
-        if (hasYH || !checkFont.detect("Microsoft YaHei")) {
-          returnStr += INITIAL_VALUES.fontSelect.replace(`'Microsoft YaHei',`, ``);
-        } else {
-          returnStr += INITIAL_VALUES.fontSelect;
-        }
-        checkFont = null;
-      } else {
-        returnStr = INITIAL_VALUES.fontSelect;
       }
-      return returnStr;
+      returnStr = filter_MicrosoftYaHei(returnStr, INITIAL_VALUES.fontSelect);
+      return String(Array.from(new Set(returnStr.split(","))));
+    }
+
+    function filter_MicrosoftYaHei(returnRes, res) {
+      let checkFont = new SupportFontFamily();
+      if (!checkFont.detect("Microsoft YaHei")) {
+        returnRes += res.replace(`'Microsoft YaHei',`, ``);
+      } else {
+        returnRes += res;
+      }
+      checkFont = null;
+      return returnRes;
     }
 
     function saveData(key, { ...Options }) {

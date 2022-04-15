@@ -1,9 +1,6 @@
 # [**GreasyFork-Scripts**](https://f9y4ng.github.io/GreasyFork-Scripts/) - F9y4ng -  [![WIKI](https://img.shields.io/badge/WIKI-GREASYFORK%20SCRIPTS-brightgreen.svg?logo=github "wiki")](https://github.com/F9y4ng/GreasyFork-Scripts/wiki)
 
-[![LICENSE](https://img.shields.io/badge/License-GPL--3.0--only-blue.svg?style=for-the-badge&logo=github "LICENSE")](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/LICENSE)
-[![LAST COMMIT](https://img.shields.io/github/last-commit/F9y4ng/GreasyFork-Scripts?color=blue&logo=github&style=for-the-badge "LAST COMMIT")](https://github.com/F9y4ng/GreasyFork-Scripts/commits/master)
-[![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues)
-[![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/login?return_to=%2FF9y4ng%2FGreasyFork-Scripts)
+[![LICENSE](https://img.shields.io/badge/License-GPL--3.0--only-blue.svg?style=for-the-badge&logo=github "LICENSE")](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/LICENSE) [![LAST COMMIT](https://img.shields.io/github/last-commit/F9y4ng/GreasyFork-Scripts?color=blue&logo=github&style=for-the-badge "LAST COMMIT")](https://github.com/F9y4ng/GreasyFork-Scripts/commits/master) [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues) [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/login?return_to=%2FF9y4ng%2FGreasyFork-Scripts)
 
 请先根据你的浏览器安装一个**用户脚本管理器**扩展(如TamperMonkey, ViolentMonkey) 然后再**安装脚本**。
 
@@ -15,18 +12,18 @@
 
 简介：无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的 Greasemonkey 脚本和浏览器插件。
 
-> `version 2022.04.04.1`
+`version 2022.04.16.1`
 
-`!!! 重大版本更新，请使用前仔细查看` [[脚本使用说明 - WIKI](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering)] `New !!!`
+[`!!! 重大版本更新，请使用前仔细查看脚本使用说明(WIKI) !!!`](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering) `New!`
 
-`!!! 首次使用前请仔细阅读使用说明！仔细阅读使用说明！阅读使用说明 !!!`
+`!!! 脚本错误/异常反馈至[Issues], 字体/渲染样式/乱码问题反馈至[Discussions] !!!`
 
 `!!! 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件 !!!`
 
 ```text
-# 遇到问题请至Github, 不再处理其他途径的反馈。脚本错误、运行异常请反馈至[Issues], 字体、渲染样式、字符乱码问题请反馈至[Discussions].
-@ 修正页面预载入阶段快捷键呼出脚本菜单出错的问题。
-@ 优化配置页面CSS样式，修正一些样式问题。
+@ 优化MetaData参数增强代码访问安全性。
+@ 优化初始参数，应用新参数需重置数据并重新设置保存。
+@ 修正一些细小的Bug，优化样式，优化代码。
 ```
 
 ### **关于问题反馈**
@@ -34,6 +31,8 @@
 > 请反馈问题的朋友注意：反馈脚本错误或样式显示问题，请把**仅使用本脚本的情况下**发生问题的**具体访问网址**、使用的**浏览器版本**、**脚本运行器版**、**相关错误的截图**、以及**具体操作流程**或**错误提示**（如果有的话）发出来，你遇到的问题不一定能在其他地方复现。
 
 * [关于个别网站样式错误修正的设置分享，不定期更新，自取自用。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42)
+
+* [分享：关于分别设置英文字体和中文字体的方法。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83)
 
 * 字体表字体及其他中文字体分享：[点这里下载字体包](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/46)
 
@@ -71,14 +70,14 @@
 
 简介：最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用！
 
-> `version 5.0.20220409.1`
+`version 5.0.20220416.1`
 
-`!!! 重大版本更新，请使用前仔细查看` [[脚本使用说明 - WIKI](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Google_Baidu_Switcher)] `New !!!`
+[`!!! 重大版本更新，请使用前仔细查看脚本使用说明(WIKI) !!!`](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Google_Baidu_Switcher) `New!`
 
 `!!! 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它 !!!`
 
 ```text
-@ 修正百度搜索跳转按钮的样式问题。
+@ 优化MetaData参数增强代码访问安全性。
 ```
 
 ### **重要说明**
