@@ -16,9 +16,9 @@
 
 简介：无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的 Greasemonkey 脚本和浏览器插件。
 
-`!!! 重大版本更新，请使用前仔细查看` [[脚本使用说明 - WIKI](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering)] `New !!!`
+[`!!! 重大版本更新，请使用前仔细查看脚本使用说明(WIKI) !!!`](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering) `New!`
 
-`!!! 首次使用前请仔细阅读使用说明！仔细阅读使用说明！阅读使用说明 !!!`
+`!!! 脚本错误、异常请反馈至[Issues], 字体、渲染样式、乱码问题请反馈至[Discussions] !!!`
 
 `!!! 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件 !!!`
 
@@ -27,6 +27,9 @@
 > 反馈问题的朋友请注意：反馈脚本错误或样式问题，请将发生问题的 **具体访问网址**、使用的 **浏览器版本**、**脚本运行器版**、**相关错误的截图**（仅开此脚本的情况下的）、以及 **具体操作流程** 或 **错误提示**（如果有的话）发出来，你遇到的问题不一定能在其他地方复现。建议通过 **错误报告(Bug report)** 来提交ISSUES.
 
 * [关于个别网站样式错误修正的设置分享，不定期更新，自取自用。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42)
+
+* [分享：关于分别设置英文字体和中文字体的方法。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83)
+
 * 字体表字体及其他中文字体分享：[点这里下载字体包](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/46)
 
 ### **关于字体的添加**
@@ -63,7 +66,7 @@
 
 简介：最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用，感谢使用！
 
-`!!! 重大版本更新，请使用前仔细查看` [[脚本使用说明 - WIKI](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Google_Baidu_Switcher)] `New !!!`
+[`!!! 重大版本更新，请使用前仔细查看脚本使用说明(WIKI) !!!`](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Google_Baidu_Switcher) `New!`
 
 `!!! 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它 !!!`
 
