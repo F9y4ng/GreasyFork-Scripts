@@ -16,7 +16,7 @@
 
 [`!!! 重大版本更新，请使用前仔细查看脚本使用说明(WIKI) !!!`](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering) `New!`
 
-`!!! 脚本错误/异常反馈至[Issues], 字体/渲染样式/乱码问题反馈至[Discussions] !!!`
+`!!! 脚本错误、异常请反馈至[Issues], 字体、渲染样式、乱码问题请反馈至[Discussions] !!!`
 
 `!!! 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件 !!!`
 
