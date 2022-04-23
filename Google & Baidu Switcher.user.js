@@ -27,7 +27,7 @@
 // @compatible         Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible         Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible         Safari 兼容Tampermonkey • Safari
-// @note               优化MetaData参数增强代码访问安全性。
+// @note               优化MetaData参数增强代码访问安全性。\n修正代码语言设置。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
