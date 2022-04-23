@@ -3,7 +3,7 @@
 // @name:zh-CN         谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW         谷歌、百度、必應的搜索引擎跳轉工具
 // @name:ja            Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version            5.0.20220423.1
+// @version            5.0.20220423.2
 // @author             F9y4ng
 // @description        The search engine jump tools of Google, Baidu and Bing automatically update and detect the script by default. You can customize the Bing button and other search jump effect settings in the menu.
 // @description:zh-CN  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮及其他搜索跳转效果。
