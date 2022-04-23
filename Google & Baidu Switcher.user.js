@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name               Google & baidu Switcher (ALL in One)
-// @name:zh            谷歌、百度、必应的搜索引擎跳转工具
+// @name:zh-CN         谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW         谷歌、百度、必應的搜索引擎跳轉工具
 // @name:en            Google & baidu & Bing Switcher (ALL in One)
 // @name:ja            Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version            5.0.20220416.1
+// @version            5.0.20220423.1
 // @author             F9y4ng
-// @description        谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮及其他搜索跳转效果。
-// @description:zh     谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮及其他搜索跳转效果。
+// @description        The search engine jump tools of Google, Baidu and Bing automatically update and detect the script by default. You can customize the Bing button and other search jump effect settings in the menu.
+// @description:zh-CN  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮及其他搜索跳转效果。
 // @description:zh-TW  谷歌、百度、必應的搜索引擎跳轉工具，腳本默認自動更新檢測，可在菜單自定義設置必應按鈕及其他搜索跳轉效果。
 // @description:en     The search engine jump tools of Google, Baidu and Bing automatically update and detect the script by default. You can customize the Bing button and other search jump effect settings in the menu.
 // @description:ja     Google、百度、必ず対応する検索エンジンジャンプツール、スクリプトはデフォルトで自動的に検出を更新し、メニューで必ず対応するボタンとその他の検索ジャンプ効果の設定をカスタマイズすることができます。
@@ -684,7 +684,7 @@
       }).show();
       scrollInsteadFixed(position);
     } catch (e) {
-      error("//-> %cGMnotification:\n%c%s", "font-weight:bold", "font-weight:normal", e);
+      error("%cGMnotification:\n%c%s", "font-weight:bold", "font-weight:normal", e);
     }
   };
 
@@ -917,7 +917,7 @@
           resolve([compareVersion(defCon.curVersion, n), defCon.encrypt(n), defCon.encrypt(m), defCon.encrypt(u)]);
         })
         .catch(exp => {
-          error("//-> %cfetchVersion:\n%c%s", "font-weight:bold", "font-weight:normal", exp);
+          error("%cfetchVersion:\n%c%s", "font-weight:bold", "font-weight:normal", exp);
           reject();
         });
     });
@@ -1424,7 +1424,7 @@
               callback_Countdown
             );
           } catch (e) {
-            error("//-> configuration:", e);
+            error("configuration:", e);
           }
         });
       }
@@ -1578,7 +1578,7 @@
           const doStyle = CONST.noticeCss + curretSite.StyleCode + curretSite.keyStyle;
           addStyle(doStyle, doStyName, document.head, "SS");
         } catch (e) {
-          error("//-> %csearchManager.insertCSS:\n%c%s", "font-weight:bold", "font-weight:normal", e);
+          error("%csearchManager.insertCSS:\n%c%s", "font-weight:bold", "font-weight:normal", e);
         }
       },
       insertSearchButton: () => {
@@ -1668,7 +1668,7 @@
             }
           }
         } catch (e) {
-          error("//-> %csearchManager.insertSearchButton:\n%c%s", "font-weight:bold", "font-weight:normal", e);
+          error("%csearchManager.insertSearchButton:\n%c%s", "font-weight:bold", "font-weight:normal", e);
         }
       },
       scrollDetect: () => {
@@ -1774,7 +1774,7 @@
             }
           }
         } catch (e) {
-          error("//-> %csearchManager.doSwitch:\n%c%s", "font-weight:bold", "font-weight:normal", e);
+          error("%csearchManager.doSwitch:\n%c%s", "font-weight:bold", "font-weight:normal", e);
         }
       },
       init: function () {
@@ -1806,7 +1806,7 @@
               });
             }, 500);
           } catch (e) {
-            error("//-> getGlobalGoogle:", e);
+            error("getGlobalGoogle:", e);
           }
         }
       }
@@ -1898,7 +1898,7 @@
           removeNodes[i].remove();
         }
       } catch (e) {
-        error("//-> safeRemove:", e.name);
+        error("safeRemove:", e.name);
       }
     }
 
@@ -1923,7 +1923,7 @@
             debug(`//-> QUERY: ${val}`);
           } else {
             val = "";
-            error(`//-> QUERY is null`);
+            debug(`//-> QUERY is null`);
           }
         } else {
           return "";

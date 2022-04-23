@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name               字体渲染（自用脚本）
-// @name:zh            字体渲染（自用脚本）
+// @name:zh-CN         字体渲染（自用脚本）
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.04.16.2
+// @version            2022.04.23.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
-// @description:zh     无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
+// @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh-TW  無需安裝MacType，優化浏覽器字體顯示，讓每個頁面的中文字體變得有質感，默認使用微軟雅黑字體，亦可自定義設置多種中文字體，附加字體描邊、字體重寫、字體陰影、字體平滑、對特殊樣式元素的過濾和許可等效果，腳本菜單中可使用設置界面進行參數設置，亦可對某域名下所有頁面進行排除渲染，兼容常用的Greasemonkey腳本和瀏覽器插件。
 // @description:ja     各ページの中国語フォントをテクスチャにしたり、デフォルトでMicrosoft Yaheiフォントを使用したり、複数の中国語フォントをカスタマイズしたり、フォントストローク、フォント書き換え、フォントシャドウ、フォントスムージング、特別なスタイル要素のフィルタリングやライセンスなどの効果を追加したり、スクリプトメニューで設定インターフェイスを使用してパラメータ設定を行ったり、ドメイン名の下にあるすべてのページを除外してレンダリングしたり、一般的なGreasemonkeyスクリプトやブラウザプラグインと互換性があります。
 // @description:en     Let each page of the Chinese font becomes texture, the default uses Microsoft YaHei font, and you can customize the set of Chinese fonts, additional font strokes, font rewriting, font shadows, smooth, and special Filtering and licensing of style elements, etc., you can use the setting interface to perform parameter settings in the script menu, or you can exclude all pages under a domain name, compatible with common Greasemonkey scripts and browser plugins.
@@ -18,7 +18,7 @@
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.meta.js
 // @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
-// @require            https://greasyfork.org/scripts/437214-frcolorpicker/code/frColorPicker.js?version=1025231
+// @require            https://greasyfork.org/scripts/437214-frcolorpicker/code/frColorPicker.js?version=1042523
 // @match              *://*/*
 // @grant              GM_getValue
 // @grant              GM.getValue
@@ -404,8 +404,21 @@
 
   /* Content-Security-Policy: trustedTypes */
 
-  if (window.trustedTypes && window.trustedTypes.createPolicy) {
-    trustedTypesPolicy = window.trustedTypes.createPolicy("safeInnerHtml", {
+  if (CUR_WINDOW_TOP && window.trustedTypes && window.trustedTypes.createPolicy) {
+    const wTcP = (wTrs = "fr#safecreateHTML") => {
+      const wT = new Set([
+        { host: "teams.live.com", policy: "goog#html" },
+        { host: "github.dev", policy: "safeInnerHtml" },
+      ]);
+      for (const wTs of wT.values()) {
+        if (location.hostname.startsWith(wTs.host)) {
+          wTrs = wTs.policy;
+          break;
+        }
+      }
+      return wTrs;
+    };
+    trustedTypesPolicy = window.trustedTypes.createPolicy(wTcP(), {
       createHTML: string => {
         return string;
       },
@@ -1566,7 +1579,7 @@
   /* define default value */
 
   const INITIAL_VALUES = {
-    fontSelect: `'Microsoft YaHei',system-ui,-apple-system,BlinkMacSystemFont,sans-serif,'iconfont','icomoon','FontAwesome','Font Awesome 5 Pro','Font Awesome 6 Pro','IcoFont','fontello','themify','Material Icons','Material Icons Extended','bootstrap-icons','Segoe Fluent Icons','Material-Design-Iconic-Font','office365icons','Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji','Android Emoji',EmojiSymbols,'emojione mozilla','twemoji mozilla'`,
+    fontSelect: `'Microsoft YaHei',system-ui,-apple-system,BlinkMacSystemFont,sans-serif,'iconfont','icomoon','FontAwesome','Font Awesome 5 Pro','Font Awesome 6 Pro','IcoFont','fontello','themify','Material Icons','Material Icons Extended','bootstrap-icons','Segoe Fluent Icons','Material-Design-Iconic-Font','office365icons','Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji','Android Emoji','EmojiSymbols','emojione mozilla','twemoji mozilla'`,
     fontFace: true,
     fontSmooth: true,
     fontSize: 1.0,
@@ -1625,6 +1638,7 @@
   /* Start specific operation */
 
   !(async function FontRendering(loading) {
+    "use strict";
     /* eslint-disable no-alert */
     /* initialling Menus */
 
@@ -1700,9 +1714,9 @@
           `<p><span style="font-style:italic;font-weight:700;font-size:20px;color:tomato">您好\uff01</span>这是${CANDIDATE_FIELD}<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="font:italic 900 22px/150% Candara,'Times New Roman'!important;color:tomato;margin-left:3px">V${defCon.curVersion}</span>, 以下为更新内容\uff1a</p>
             <p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}
-              <li class="${RANDOM_ID}_fix">优化MetaData参数增强代码访问安全性。</li>
-              <li class="${RANDOM_ID}_fix">优化初始参数，应用新参数需重置数据并重新设置保存。</li>
-              <li class="${RANDOM_ID}_fix">修正一些细小的Bug，优化样式，优化代码。</li>
+              <li class="${RANDOM_ID}_fix">修正Teams@live因trustedTypes权限造成的bug.<a href="https://github.com/F9y4ng/GreasyFork-Scripts/issues/85" target="_blank">#85</a></li>
+              <li class="${RANDOM_ID}_fix">优化读取数组型数据的容错性，提高运行兼容性。</li>
+              <li class="${RANDOM_ID}_fix">修正一些细小的Bug，优化代码。</li>
             </ul></p>
             <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
         ),
@@ -1726,7 +1740,7 @@
 
     /* initialize Exclude site */
 
-    let exSite = await GMgetValue("_Exclude_site_");
+    let exSite, _exSite;
     const defExSite = ["workstation-xi"].sort();
     function updateExsitesIndex(e) {
       for (let i = 0; i < e.length; i++) {
@@ -1735,11 +1749,12 @@
         }
       }
     }
-    if (!exSite) {
+    _exSite = await GMgetValue("_Exclude_site_");
+    if (!_exSite) {
       GMsetValue("_Exclude_site_", defCon.encrypt(JSON.stringify(defExSite)));
       exSite = defExSite;
     } else {
-      exSite = JSON.parse(defCon.decrypt(exSite));
+      exSite = [...JSON.parse(defCon.decrypt(_exSite))];
       defCon.siteIndex = updateExsitesIndex(exSite);
     }
 
@@ -1758,7 +1773,7 @@
     if (!domains) {
       GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(DEFAULT_ARRAY)));
     } else {
-      domainValue = JSON.parse(defCon.decrypt(domains));
+      domainValue = [...JSON.parse(defCon.decrypt(domains))];
       defCon.domainCount = domainValue.length;
       defCon.domainIndex = updateDomainsIndex(domainValue);
     }
@@ -1787,7 +1802,7 @@
     } else {
       fontValue = JSON.parse(defCon.decrypt(fonts));
       if (domains) {
-        domainValue = JSON.parse(defCon.decrypt(domains));
+        domainValue = [...JSON.parse(defCon.decrypt(domains))];
         domainValueIndex = updateDomainsIndex(domainValue);
       }
       if (domainValueIndex !== undefined) {
@@ -2290,8 +2305,8 @@
           titleText: "禁止字体渲染",
         });
         if (await frDialog.respond()) {
-          exSite = await GMgetValue("_Exclude_site_");
-          exSite = JSON.parse(defCon.decrypt(exSite));
+          _exSite = await GMgetValue("_Exclude_site_");
+          exSite = _exSite ? [...JSON.parse(defCon.decrypt(_exSite))] : defExSite;
           exSite.push(CUR_HOST_NAME);
           GMsetValue("_Exclude_site_", defCon.encrypt(JSON.stringify(exSite)));
           location.reload();
@@ -2449,8 +2464,8 @@
           titleText: "恢复字体渲染",
         });
         if (await frDialog.respond()) {
-          exSite = await GMgetValue("_Exclude_site_");
-          exSite = JSON.parse(defCon.decrypt(exSite));
+          _exSite = await GMgetValue("_Exclude_site_");
+          exSite = _exSite ? [...JSON.parse(defCon.decrypt(_exSite))] : defExSite;
           defCon.siteIndex = updateExsitesIndex(exSite);
           exSite.splice(defCon.siteIndex, 1);
           GMsetValue("_Exclude_site_", defCon.encrypt(JSON.stringify(exSite)));
@@ -3125,7 +3140,7 @@
                   titleText: "保存设置数据",
                 });
                 domains = await GMgetValue("_domains_fonts_set_");
-                domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : DEFAULT_ARRAY;
+                domainValue = domains ? [...JSON.parse(defCon.decrypt(domains))] : DEFAULT_ARRAY;
                 const _awdl = qS(`#${RANDOM_ID}_a_w_d_l_`);
                 if (_awdl) {
                   if (domainValue.length > 0) {
@@ -3191,7 +3206,7 @@
                     fontEx: filterHtmlToText(fontex),
                   };
                   domains = await GMgetValue("_domains_fonts_set_");
-                  domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : DEFAULT_ARRAY;
+                  domainValue = domains ? [...JSON.parse(defCon.decrypt(domains))] : DEFAULT_ARRAY;
                   domainValueIndex = updateDomainsIndex(domainValue);
                   if (domainValueIndex !== undefined) {
                     domainValue.splice(domainValueIndex, 1, _savedata_);
@@ -3561,7 +3576,7 @@
       let Contents = "";
       try {
         domains = await GMgetValue("_domains_fonts_set_");
-        domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : DEFAULT_ARRAY;
+        domainValue = domains ? [...JSON.parse(defCon.decrypt(domains))] : DEFAULT_ARRAY;
         const _data_search_ =
           domainValue.length > 6
             ? `<p style="display:flex;justify-content:left;align-items:center"><input id="${RANDOM_ID}_d_s_" style="box-sizing:content-box;width:57%;height:22px;font:normal 16px/150% monospace,Consolas,system-ui,-apple-system,BlinkMacSystemFont,serif!important;border:2px solid #777;border-radius:4px;outline:none!important;margin:4px 6px;padding:2px 6px"><button id="${RANDOM_ID}_d_s_s_" style="box-sizing:border-box;background:#eee;color:#333!important;vertical-align:initial;padding:3px 10px;margin:0;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-width:60px;min-height:30px;letter-spacing:normal;text-align:center">查 询</button><button id="${RANDOM_ID}_d_s_c_" style="box-sizing:border-box;background:#eee;color:#333!important;vertical-align:initial;margin:0 0 0 4px;padding:3px 10px;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-width:60px;min-height:30px;letter-spacing:normal;text-align:center">清 除</button></p>`
@@ -3610,7 +3625,8 @@
                 qS(`#${RANDOM_ID}_d_s_`).style.cssText += window.find(qS(`#${RANDOM_ID}_d_s_`).value, 0) ? "border-color:#777" : "border-color:red";
                 if (window.getSelection) {
                   const _sTxt = window.getSelection();
-                  const _rows = Number(_sTxt.anchorNode.parentNode.parentNode.id.replace(`${RANDOM_ID}_d_d_l_`, "")) || 0;
+                  const _sNode = _sTxt.anchorNode && _sTxt.anchorNode.parentNode && _sTxt.anchorNode.parentNode.parentNode;
+                  const _rows = Number(_sNode && _sNode.id.replace(`${RANDOM_ID}_d_d_l_`, "")) || 0;
                   const _offsetHeight = Number(_sTxt.anchorNode.parentNode.parentNode.offsetHeight) || 0;
                   qS(`#${RANDOM_ID}_d_d_`).scrollTop = _rows * _offsetHeight;
                 }
@@ -3624,7 +3640,7 @@
             "click",
             function (a, b) {
               if (!this.getAttribute("data-del")) {
-                const _list_Id_ = Number(this.id.replace(`${RANDOM_ID}_d_d_l_s_`, "")) || 0;
+                const _list_Id_ = Number(this && this.id.replace(`${RANDOM_ID}_d_d_l_s_`, "")) || 0;
                 a.push(b[_list_Id_].domain);
                 this.setAttribute("data-del", b[_list_Id_].domain);
                 this.textContent = "恢复";
@@ -3644,7 +3660,7 @@
         }
         if (await frDialog.respond()) {
           domains = await GMgetValue("_domains_fonts_set_");
-          domainValue = domains ? JSON.parse(defCon.decrypt(domains)) : DEFAULT_ARRAY;
+          domainValue = domains ? [...JSON.parse(defCon.decrypt(domains))] : DEFAULT_ARRAY;
           for (let l = _temp_.length - 1; l >= 0; l--) {
             domainValueIndex = updateDomainsIndex(domainValue, _temp_[l]);
             domainValue.splice(domainValueIndex, 1);

@@ -8,11 +8,11 @@
 
 ***
 
-## 字体渲染（自用脚本）[**Font Rendering.user.js**](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Font%20Rendering.user.js)
+## 字体渲染（自用脚本） [**Font Rendering.user.js**](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Font%20Rendering.user.js)
 
 简介：无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的 Greasemonkey 脚本和浏览器插件。
 
-`version 2022.04.16.2`
+`version 2022.04.23.1` 【🔥 [安装脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 [`!!! 重大版本更新，请使用前仔细查看脚本使用说明(WIKI) !!!`](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering) `New!`
 
@@ -21,9 +21,9 @@
 `!!! 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件 !!!`
 
 ```text
-@ 优化MetaData参数增强代码访问安全性。
-@ 优化初始参数，应用新参数需重置数据并重新设置保存。
-@ 修正一些细小的Bug，优化样式，优化代码。
+@ 修正Teams@live因trustedTypes权限造成的bug. #85
+@ 优化读取数组型数据的容错性，提高运行兼容性。
+@ 修正一些细小的Bug，优化代码。
 ```
 
 ### **关于问题反馈**
@@ -70,7 +70,7 @@
 
 简介：最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用！
 
-`version 5.0.20220416.1`
+`version 5.0.20220423.1` 【🔥 [安装脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 [`!!! 重大版本更新，请使用前仔细查看脚本使用说明(WIKI) !!!`](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Google_Baidu_Switcher) `New!`
 
