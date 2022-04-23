@@ -2,14 +2,12 @@
 // @name               Google & baidu Switcher (ALL in One)
 // @name:zh-CN         谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW         谷歌、百度、必應的搜索引擎跳轉工具
-// @name:en            Google & baidu & Bing Switcher (ALL in One)
 // @name:ja            Google、Baidu、Bingの検索エンジンのジャンプツール
 // @version            5.0.20220423.1
 // @author             F9y4ng
 // @description        The search engine jump tools of Google, Baidu and Bing automatically update and detect the script by default. You can customize the Bing button and other search jump effect settings in the menu.
 // @description:zh-CN  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮及其他搜索跳转效果。
 // @description:zh-TW  谷歌、百度、必應的搜索引擎跳轉工具，腳本默認自動更新檢測，可在菜單自定義設置必應按鈕及其他搜索跳轉效果。
-// @description:en     The search engine jump tools of Google, Baidu and Bing automatically update and detect the script by default. You can customize the Bing button and other search jump effect settings in the menu.
 // @description:ja     Google、百度、必ず対応する検索エンジンジャンプツール、スクリプトはデフォルトで自動的に検出を更新し、メニューで必ず対応するボタンとその他の検索ジャンプ効果の設定をカスタマイズすることができます。
 // @namespace          https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
 // @homepage           https://f9y4ng.github.io/GreasyFork-Scripts/
