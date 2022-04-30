@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.04.23.1
+// @version            2022.05.01.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -18,7 +18,7 @@
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.meta.js
 // @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
-// @require            https://greasyfork.org/scripts/437214-frcolorpicker/code/frColorPicker.js?version=1042523
+// @require            https://greasyfork.org/scripts/437214-frcolorpicker/code/frColorPicker.js?version=1045723
 // @match              *://*/*
 // @grant              GM_getValue
 // @grant              GM.getValue
@@ -88,10 +88,27 @@
     options: isGM ? false : { active: true, insert: true, setParent: true },
     elCompat: document.compatMode === "CSS1Compat" ? document.documentElement : document.body,
     encrypt: n => {
-      return window.btoa(encodeURIComponent(n));
+      try {
+        if (typeof n === "string") {
+          return window.btoa(encodeURIComponent(n));
+        } else {
+          throw new Error("Non-string type");
+        }
+      } catch (e) {
+        error("Encrypt.error:", e.message);
+      }
     },
     decrypt: n => {
-      return decodeURIComponent(window.atob(n));
+      try {
+        if (typeof n === "string") {
+          n = n.replace(/[^A-Za-z0-9+/=]/g, "");
+          return decodeURIComponent(window.atob(n));
+        } else {
+          throw new Error("Non-string type");
+        }
+      } catch (e) {
+        error("Decrypt.error:", e.message);
+      }
     },
     randString: (n, v) => {
       const a = "0123456789";
@@ -404,8 +421,8 @@
 
   /* Content-Security-Policy: trustedTypes */
 
-  if (CUR_WINDOW_TOP && window.trustedTypes && window.trustedTypes.createPolicy) {
-    const wTcP = (wTrs = "fr#safecreateHTML") => {
+  if (window.trustedTypes && window.trustedTypes.createPolicy) {
+    const wTcP = (wTrs = "fr#safeCreateHTML") => {
       const wT = new Set([
         { host: "teams.live.com", policy: "goog#html" },
         { host: "github.dev", policy: "safeInnerHtml" },
@@ -557,7 +574,8 @@
     const language = navigator.browserLanguage || navigator.language;
     const name_i18n = new RegExp(`(@name:${language}\\s+)(\\S+)`);
     const languageString = GMinfo.scriptMetaStr.match(name_i18n);
-    return languageString ? languageString[2] : GMinfo.script.name;
+    const scriptName = languageString ? languageString[2] : GMinfo.script.name;
+    return String(scriptName);
   }
 
   function setRAFInterval(callback, interval, { runNow } = {}) {
@@ -597,9 +615,9 @@
       for (let i = 0; i < removeNodes.length; i++) {
         try {
           removeNodes[i].parentNode && removeNodes[i].parentNode.removeChild(removeNodes[i]);
-        } catch (exp) {
+        } catch (e) {
           removeNodes[i].remove();
-          error("SafeRemove:", exp);
+          error("SafeRemove:", e);
         }
       }
     }
@@ -792,7 +810,7 @@
 
   function dataDownload(f, d) {
     let e = cE("a");
-    e.setAttribute("href", "data:application/octet-stream;charset=utf-8," + defCon.encrypt(d));
+    e.setAttribute("href", "data:application/octet-stream;charset=utf-8," + defCon.encrypt(String(d)));
     e.setAttribute("download", f);
     e.style.display = "none";
     document.body.appendChild(e);
@@ -1005,6 +1023,7 @@
 
   /* new FrDialogBox */
 
+  let frDialog;
   class FrDialogBox {
     constructor({ titleText = "Error", messageText = "Something unexpected has gone wrong.", trueButtonText = "OK", falseButtonText = null, neutralButtonText = null } = {}) {
       this.titleText = titleText;
@@ -1026,7 +1045,7 @@
       this.zoomText = undefined;
       this._createfrDialog(this);
       this._appendfrDialog();
-      this._resetfrDialog(0);
+      this._resetfrDialog();
     }
     _createfrDialog(context) {
       this.container = cE("fr-dialogbox");
@@ -1082,17 +1101,11 @@
         });
       }
     }
-    _resetfrDialog(topnum) {
+    _resetfrDialog() {
       const zoom = Number(window.getComputedStyle(this.parent, null).getPropertyValue("zoom")) || defCon.tZoom || 1;
       if (zoom !== 1) {
         if (getNavigator.core().Gecko) {
-          this.zoomText = String(
-            `transform-origin:left top 0px;
-            transform:scale(${1 / zoom});
-            width:${defCon.elCompat.clientWidth}px;
-            height:${defCon.elCompat.clientHeight}px;
-            top:${topnum}px`
-          );
+          this.zoomText = `transform-origin:left top 0px;transform:scale(${1 / zoom});width:${defCon.elCompat.clientWidth}px;height:${defCon.elCompat.clientHeight}px;top:0px;`;
           this.container.style.cssText += this.zoomText;
           scrollInsteadFixed(this.container, zoom, "dialogbox");
         } else {
@@ -1133,13 +1146,17 @@
   }
 
   function closeAllFrDialogBox(s) {
-    if (qS(s)) {
+    const target = qA(s);
+    if (target.length) {
+      target.forEach(item => {
+        item.remove();
+      });
       if (getNavigator.core().Gecko && defCon.dialogbox) {
         document.removeEventListener("scroll", defCon.dialogbox);
         delete defCon.dialogbox;
       }
-      qS(s).remove();
     }
+    frDialog = null;
   }
 
   /* Font filtering & discriminating list */
@@ -1192,8 +1209,14 @@
   }
 
   async function getMergedFontCheckList(defFontCheck = fontCheck) {
+    let cusFontCheck;
     const cusFontList = await GMgetValue("_Custom_fontlist_");
-    const cusFontCheck = cusFontList ? JSON.parse(defCon.decrypt(cusFontList)) : DEFAULT_ARRAY;
+    try {
+      cusFontCheck = cusFontList ? [...JSON.parse(defCon.decrypt(cusFontList))] : DEFAULT_ARRAY;
+    } catch (e) {
+      error("cusFontCheck.JSON.parse:", e.message);
+      cusFontCheck = DEFAULT_ARRAY;
+    }
     const formatFontList = Array.from(new Set([...defFontCheck, ...cusFontCheck]));
     return getUniqueValues(formatFontList);
   }
@@ -1660,9 +1683,15 @@
       rebuild = undefined;
       curVersion = undefined;
       _config_data_ = { maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, rebuild, curVersion };
-      GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
+      saveData("_configure_", _config_data_);
     } else {
-      _config_data_ = JSON.parse(defCon.decrypt(configure));
+      try {
+        _config_data_ = JSON.parse(defCon.decrypt(configure));
+      } catch (e) {
+        error("_config_data_.JSON.parse:", e.message);
+        defCon.structureError = true;
+        _config_data_ = {};
+      }
       maxPersonalSites = Number(_config_data_.maxPersonalSites) || 100;
       isBackupFunction = Boolean(_config_data_.isBackupFunction);
       isPreview = Boolean(_config_data_.isPreview);
@@ -1673,70 +1702,6 @@
       curVersion = _config_data_.curVersion;
     }
     defCon.isPreview = isPreview;
-
-    /* Rebuild data for update if necessary */
-
-    const SET_BOOL_FOR_UPDATE = true; // 2022.03.19
-    if (CUR_WINDOW_TOP) {
-      const isRebuild = Boolean(rebuild);
-      if (isRebuild === SET_BOOL_FOR_UPDATE && rebuild !== undefined) {
-        const keys = await GMlistValues();
-        for (let key of keys) {
-          if (key !== "_configure_") {
-            GMdeleteValue(key);
-          }
-        }
-        _config_data_.rebuild = !SET_BOOL_FOR_UPDATE;
-        _config_data_.curVersion = undefined;
-        GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
-        debug("\u27A4 %cData has been rebuilt: %s", "font-style:italic;background-color:red;color:snow", isRebuild === SET_BOOL_FOR_UPDATE);
-      } else if (rebuild === undefined) {
-        _config_data_.rebuild = !SET_BOOL_FOR_UPDATE;
-        GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
-        !!curVersion && cache.remove("_FontCheckList_");
-        debug(`\u27A4 %c${!curVersion ? "Configdata is undefined, rebuilding!" : "Data has been restored!"}`, `font-style:italic;color:${!curVersion ? "crimson" : "dodgerblue"}`);
-      } else {
-        const dataStatus = curVersion === defCon.curVersion;
-        debug("\u27A4 %cGood data status: %c%s", "font-style:italic;color:green", `font-style:italic;${dataStatus ? "color:green" : "color:red"}`, dataStatus);
-      }
-    }
-
-    /* DialogBox for the first visit after upgrading */
-
-    const hintUpdateInfo = async (url, curVersion) => {
-      const CANDIDATE_FIELD = curVersion === undefined ? "新安装首次运行" : curVersion !== defCon.curVersion ? "更新后首次运行" : "您通过历史查询";
-      const FIRST_INSTALL_NOTICE_WARNING =
-        curVersion === undefined ? `<li class="${RANDOM_ID}_warn">首次使用内置参数渲染，若效果不理想属正常情况，请根据您显示器及浏览器设置重新配置参数以达到最佳效果！</li>` : ``;
-      let frDialog = new FrDialogBox({
-        trueButtonText: "好，去看看",
-        falseButtonText: "不，算了吧",
-        messageText: String(
-          `<p><span style="font-style:italic;font-weight:700;font-size:20px;color:tomato">您好\uff01</span>这是${CANDIDATE_FIELD}<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="font:italic 900 22px/150% Candara,'Times New Roman'!important;color:tomato;margin-left:3px">V${defCon.curVersion}</span>, 以下为更新内容\uff1a</p>
-            <p><ul id="${RANDOM_ID}_update">
-              ${FIRST_INSTALL_NOTICE_WARNING}
-              <li class="${RANDOM_ID}_fix">修正Teams@live因trustedTypes权限造成的bug.<a href="https://github.com/F9y4ng/GreasyFork-Scripts/issues/85" target="_blank">#85</a></li>
-              <li class="${RANDOM_ID}_fix">优化读取数组型数据的容错性，提高运行兼容性。</li>
-              <li class="${RANDOM_ID}_fix">修正一些细小的Bug，优化代码。</li>
-            </ul></p>
-            <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
-        ),
-        titleText: "脚本更新 - 温馨提示",
-      });
-      if (await frDialog.respond()) {
-        GMopenInTab(url, defCon.options);
-      }
-      frDialog = null;
-    };
-
-    if (curVersion !== defCon.curVersion && CUR_WINDOW_TOP) {
-      addLoadEvents(() => {
-        !isCloseTip && hintUpdateInfo(`${HOST_URI}#update`, curVersion);
-        _config_data_.curVersion = defCon.curVersion;
-        GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
-        debug("\u27A4 %cThe script has been upgraded to V%s", "font-style:italic;background-color:yellow;color:crimson", defCon.curVersion);
-        return true;
-      });
-    }
 
     /* initialize Exclude site */
 
@@ -1751,12 +1716,18 @@
     }
     _exSite = await GMgetValue("_Exclude_site_");
     if (!_exSite) {
-      GMsetValue("_Exclude_site_", defCon.encrypt(JSON.stringify(defExSite)));
+      saveData("_Exclude_site_", defExSite);
       exSite = defExSite;
     } else {
-      exSite = [...JSON.parse(defCon.decrypt(_exSite))];
-      defCon.siteIndex = updateExsitesIndex(exSite);
+      try {
+        exSite = [...JSON.parse(defCon.decrypt(_exSite))];
+      } catch (e) {
+        error("exSite.JSON.parse:", e.message);
+        defCon.structureError = true;
+        exSite = defExSite;
+      }
     }
+    defCon.siteIndex = updateExsitesIndex(exSite);
 
     /* Set Default Fonts Value & initialize */
 
@@ -1771,11 +1742,18 @@
       }
     }
     if (!domains) {
-      GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(DEFAULT_ARRAY)));
+      saveData("_domains_fonts_set_", DEFAULT_ARRAY);
     } else {
-      domainValue = [...JSON.parse(defCon.decrypt(domains))];
+      try {
+        domainValue = [...JSON.parse(defCon.decrypt(domains))];
+      } catch (e) {
+        error("domainValue.JSON.parse:", e.message);
+        defCon.structureError = true;
+        domainValue = DEFAULT_ARRAY;
+      }
+      domainValueIndex = updateDomainsIndex(domainValue);
       defCon.domainCount = domainValue.length;
-      defCon.domainIndex = updateDomainsIndex(domainValue);
+      defCon.domainIndex = domainValueIndex;
     }
 
     if (!fonts) {
@@ -1800,10 +1778,12 @@
       CONST_VALUES.fontCSS = INITIAL_VALUES.fontCSS;
       CONST_VALUES.fontEx = INITIAL_VALUES.fontEx;
     } else {
-      fontValue = JSON.parse(defCon.decrypt(fonts));
-      if (domains) {
-        domainValue = [...JSON.parse(defCon.decrypt(domains))];
-        domainValueIndex = updateDomainsIndex(domainValue);
+      try {
+        fontValue = JSON.parse(defCon.decrypt(fonts));
+      } catch (e) {
+        error("fontValue.JSON.parse:", e.message);
+        defCon.structureError = true;
+        fontValue = {};
       }
       if (domainValueIndex !== undefined) {
         CONST_VALUES.fontSelect = filterHtmlToText(domainValue[domainValueIndex].fontSelect);
@@ -1829,11 +1809,87 @@
     }
     defCon.tZoom = CONST_VALUES.fontSize;
 
+    /* Rebuild data for update if necessary */
+
+    const SET_BOOL_FOR_UPDATE = true; // 2022.03.19
+    if (CUR_WINDOW_TOP) {
+      const isRebuild = Boolean(rebuild);
+      if (defCon.structureError === true || (isRebuild === SET_BOOL_FOR_UPDATE && rebuild !== undefined)) {
+        const keys = await GMlistValues();
+        for (let key of keys) {
+          if (key !== "_configure_") {
+            GMdeleteValue(key);
+          }
+        }
+        _config_data_.rebuild = !SET_BOOL_FOR_UPDATE;
+        _config_data_.curVersion = undefined;
+        saveData("_configure_", _config_data_);
+        curVersion = defCon.structureError === true ? null : curVersion;
+        debug("\u27A4 %cData has been rebuilt: %s", "font-style:italic;background-color:red;color:snow", isRebuild !== SET_BOOL_FOR_UPDATE);
+      } else if (rebuild === undefined) {
+        _config_data_.rebuild = !SET_BOOL_FOR_UPDATE;
+        saveData("_configure_", _config_data_);
+        !!curVersion && cache.remove("_FontCheckList_");
+        debug(`\u27A4 %c${!curVersion ? "Configdata is undefined, rebuilding!" : "Data has been restored!"}`, `font-style:italic;color:${!curVersion ? "crimson" : "dodgerblue"}`);
+      } else {
+        const dataStatus = curVersion === defCon.curVersion;
+        debug("\u27A4 %cGood data status: %c%s", "font-style:italic;color:green", `font-style:italic;${dataStatus ? "color:green" : "color:red"}`, dataStatus);
+      }
+    }
+
+    /* DialogBox for the first visit after upgrading */
+
+    const hintUpdateInfo = async (url, curVersion) => {
+      const CANDIDATE_FIELD = curVersion === undefined ? "新安装首次运行" : curVersion !== defCon.curVersion ? "更新后首次运行" : "您通过历史查询";
+      const FIRST_INSTALL_NOTICE_WARNING =
+        curVersion === undefined
+          ? `<li class="${RANDOM_ID}_warn"><strong>注意</strong>：首次使用内置参数渲染，若效果不佳属正常情况，请根据显示器及浏览器设置重新配置参数以达到最佳效果！</li>`
+          : ``;
+      const STRUCTURE_ERROR_NOTICE_WARNING =
+        defCon.structureError === true
+          ? `<li class="${RANDOM_ID}_warn"><strong>警告</strong>：检测到存储数据解析异常或被非法篡改，确保程序正常运行，数据已初始化，请手动还原正确的备份数据！</li>`
+          : ``;
+      closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+      frDialog = new FrDialogBox({
+        trueButtonText: "好，去看看",
+        falseButtonText: "不，算了吧",
+        messageText: String(
+          `<p><span style="font-style:italic;font-weight:700;font-size:20px;color:tomato">您好\uff01</span>这是${CANDIDATE_FIELD}<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="font:italic 900 22px/150% Candara,'Times New Roman'!important;color:tomato;margin-left:3px">V${defCon.curVersion}</span>, 以下为更新内容\uff1a</p>
+            <p><ul id="${RANDOM_ID}_update">
+              ${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}
+              <!-- START VERSION NOTICE -->
+              <li class="${RANDOM_ID}_fix">修正从早期版本跨版本直接升级至最新版本时已存储数据的兼容性错误（处置：初始化数据）</li>
+              <li class="${RANDOM_ID}_fix">修正数据被非法篡改时的解析错误（处置：初始化数据）</li>
+              <li class="${RANDOM_ID}_info">注意：防止数据意外丢失，请及时且定期备份本地数据。</li>
+              <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化代码。</li>
+              <!-- END VERSION NOTICE -->
+            </ul></p>
+            <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
+        ),
+        titleText: "脚本更新 - 温馨提示",
+      });
+      if (await frDialog.respond()) {
+        GMopenInTab(url, defCon.options);
+      }
+      frDialog = null;
+      sleep(5e2)(true) && defCon.structureError === true && location.reload(true);
+    };
+
+    if (curVersion !== defCon.curVersion && CUR_WINDOW_TOP) {
+      addLoadEvents(() => {
+        (!isCloseTip || defCon.structureError === true) && hintUpdateInfo(`${HOST_URI}#update`, curVersion);
+        _config_data_.curVersion = defCon.curVersion;
+        saveData("_configure_", _config_data_);
+        debug("\u27A4 %cThe script has been upgraded to V%s", "font-style:italic;background-color:yellow;color:crimson", defCon.curVersion);
+        return true;
+      });
+    }
+
     /* Operation of CSS value */
 
     let shadow = "";
     const shadow_r = parseFloat(CONST_VALUES.fontShadow);
-    const shadow_c = CONST_VALUES.shadowColor.toLowerCase() === "currentcolor" ? "#FFFFFFFF" : CONST_VALUES.shadowColor; // Version compatible.
+    const shadow_c = CONST_VALUES.shadowColor && CONST_VALUES.shadowColor.toLowerCase() === "currentcolor" ? "#FFFFFFFF" : CONST_VALUES.shadowColor; // Version compatible.
     const overlayColor = (r, c, rs) => {
       if (c.substring(1) !== "FFFFFFFF") {
         rs = `text-shadow:0 0 ${(r * 1.15).toFixed(2)}px ${toColordepth(c, 1.35)},0 0 ${r}px ${c},0 0 ${(r * 0.75).toFixed(2)}px ${toColordepth(c, 0.4)}`;
@@ -1880,7 +1936,7 @@
       }
       bodyzoom = funcFontsize(fontsize_r);
     }
-    const prefont = CONST_VALUES.fontSelect.split(",")[0];
+    const prefont = CONST_VALUES.fontSelect && CONST_VALUES.fontSelect.split(",")[0];
     const refont = prefont ? prefont.replace(/"|'/g, "") : "";
     let fontfamily = "";
     let fontfaces = "";
@@ -2240,7 +2296,7 @@
                 document.head.lastChild.previousSibling.className === defCon.class.rndStyle
               ) {
                 debug("\u27A4 %s is Ready <darkreader inserted>", defCon.class.rndStyle);
-              } else if (qS(`.${defCon.class.rndStyle}`).nextSibling && defCon.siteIndex === undefined) {
+              } else if (qS(`.${defCon.class.rndStyle}`).nextSibling) {
                 debug("\u27A4 className(Before): %c%s", "font-style:italic", document.head.lastChild.className || "<empty string>");
                 moveStyleTolastChild({ isMutationObserver: true });
               }
@@ -2298,24 +2354,34 @@
       },
       excludeSites: async () => {
         closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
-        let frDialog = new FrDialogBox({
+        frDialog = new FrDialogBox({
           trueButtonText: "确 定",
           neutralButtonText: "取 消",
-          messageText: `<p style="word-break:break-all;font:bold italic 24px/150% Candara,'Times New Roman'!important">${CUR_HOST_NAME}</p><p style="color:darkred">该域名下所有页面将被禁止字体渲染\uff01</p><p>确定后页面将自动刷新，请确认是否排除？</p>`,
+          messageText: `<p style="word-break:break-all;font:bold italic 24px/150% Candara,'Times New Roman'!important">${CUR_HOST_NAME}</p><p style="color:darkred">该域名下所有页面将被禁止字体渲染\uff01</p><p>确定后当前页面将自动刷新，请确认是否排除？</p>`,
           titleText: "禁止字体渲染",
         });
         if (await frDialog.respond()) {
           _exSite = await GMgetValue("_Exclude_site_");
-          exSite = _exSite ? [...JSON.parse(defCon.decrypt(_exSite))] : defExSite;
+          try {
+            exSite = _exSite ? [...JSON.parse(defCon.decrypt(_exSite))] : defExSite;
+          } catch (e) {
+            error("exSite.JSON.parse:", e.message);
+            exSite = defExSite;
+          }
           exSite.push(CUR_HOST_NAME);
-          GMsetValue("_Exclude_site_", defCon.encrypt(JSON.stringify(exSite)));
-          location.reload();
+          saveData("_Exclude_site_", exSite);
+          closeConfigurePage({ isReload: true });
         }
         frDialog = null;
       },
       vipConfigure: async () => {
         configure = await GMgetValue("_configure_");
-        _config_data_ = JSON.parse(defCon.decrypt(configure));
+        try {
+          _config_data_ = JSON.parse(defCon.decrypt(configure));
+        } catch (e) {
+          error("_config_data_.JSON.parse:", e.message);
+          _config_data_ = {};
+        }
         isBackupFunction = Boolean(_config_data_.isBackupFunction);
         isPreview = Boolean(_config_data_.isPreview);
         isFontsize = Boolean(_config_data_.isFontsize);
@@ -2323,7 +2389,7 @@
         isCloseTip = Boolean(_config_data_.isCloseTip);
         maxPersonalSites = Number(_config_data_.maxPersonalSites) || 100;
         closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
-        let frDialog = new FrDialogBox({
+        frDialog = new FrDialogBox({
           trueButtonText: "保存数据",
           falseButtonText: "帮助文件",
           neutralButtonText: "取 消",
@@ -2396,28 +2462,27 @@
         qS(`#${defCon.id.maxps}`).addEventListener("input", function () {
           this.value = this.value.replace(/[^0-9]/g, "");
         });
-        if (getNavigator.core().Gecko) {
+        getNavigator.core().Gecko &&
           confirmIfValueChange(
             qS(`#${defCon.id.isfontsize}`),
             "由于 Firefox(Gecko内核) 对部分 CSS 及 Javascript 的兼容性原因，会造成某些站点样式异常、坐标漂移等问题，我们建议您在 Firefox 浏览器中谨慎使用脚本级字体缩放功能。\n\n如有必要需求，请使用 Firefox 自身的缩放功能来放大(Ctrl+)或缩小(Ctrl-)当前网站页面，或在 设置\u2192全局缩放 中配置缩放比例。注意\uff1a清除 历史记录\u2192数据\u2192网站设置 会重置所有网站的缩放设置。\n\n请确认是否开启字体缩放功能？"
           );
-        }
         confirmIfValueChange(
           qS(`#${defCon.id.isclosetip}`),
           "关闭更新提示，您将不能在第一时间获取更新内容，或错过重要的使用提示和警示通告。如遇重大功能升级，忽略更新提示有几率影响正常使用。双击字体渲染设置窗口顶部的脚本名称，可查看历史更新提示。\n\n请确认是否关闭更新提示功能？"
         );
         qS(`#${defCon.id.flcid}`).addEventListener("click", async () => {
           closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
-          let frDialog = new FrDialogBox({
+          frDialog = new FrDialogBox({
             trueButtonText: "确 定",
-            messageText: `<p style="font-size:18px!important;text-align:center;padding-bottom:6px;color:darkgoldenrod">字体列表全局缓存已重建，页面即将刷新\uff01</p><p style="text-align:center"><a style="display:inline-block;border:2px solid darkgoldenrod;border-radius:8px;width:302px;height:237px;background:url('${LOADING_IMG}') 50% 50% no-repeat;overflow:hidden"><img src='${FONTLIST_IMG}' alt="字体列表全局缓存已重建"/></a></p>`,
+            messageText: `<p style="font-size:18px!important;text-align:center;padding-bottom:6px;color:darkgoldenrod">字体列表全局缓存已重建，当前页面即将刷新\uff01</p><p style="text-align:center"><a style="display:inline-block;border:2px solid darkgoldenrod;border-radius:8px;width:302px;height:237px;background:url('${LOADING_IMG}') 50% 50% no-repeat;overflow:hidden"><img src='${FONTLIST_IMG}' alt="字体列表全局缓存已重建"/></a></p>`,
             titleText: "字体列表全局缓存已重建",
           });
           cache.remove("_FontCheckList_");
           if (await frDialog.respond()) {
-            frDialog = null;
-            location.reload();
+            closeConfigurePage({ isReload: true });
           }
+          frDialog = null;
         });
         qS(`#${defCon.id.feedback}`).addEventListener("click", () => {
           GMopenInTab(FEEDBACK_URI, defCon.options);
@@ -2439,17 +2504,17 @@
           _config_data_.isHotkey = _hk;
           _config_data_.isCloseTip = _ct;
           _config_data_.maxPersonalSites = _mps;
-          GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_config_data_)));
-          let frDialog = new FrDialogBox({
+          saveData("_configure_", _config_data_);
+          closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+          frDialog = new FrDialogBox({
             trueButtonText: "确 定",
-            messageText: `<p style="color:darkgoldenrod">高级核心功能参数已成功保存，页面即将刷新\uff01</p>`,
+            messageText: `<p style="color:darkgoldenrod">高级核心功能参数已成功保存，当前页面即将刷新\uff01</p>`,
             titleText: "高级核心功能设置保存",
           });
-          closeConfigurePage({ isReload: true });
           if (await frDialog.respond()) {
-            frDialog = null;
-            location.reload();
+            closeConfigurePage({ isReload: true });
           }
+          frDialog = null;
         } else {
           GMopenInTab(`${HOST_URI}#warning`, defCon.options);
         }
@@ -2457,19 +2522,24 @@
       },
       includeSites: async () => {
         closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
-        let frDialog = new FrDialogBox({
+        frDialog = new FrDialogBox({
           trueButtonText: "确 定",
           neutralButtonText: "取 消",
-          messageText: `<p style="font:italic bold 22px/150% Candara,'Times New Roman'!important">${CUR_HOST_NAME}</p><p style="color:darkgreen">该域名下所有页面将重新进行字体渲染\uff01</p><p>确定后页面将自动刷新，请确认是否恢复？</p>`,
+          messageText: `<p style="font:italic bold 22px/150% Candara,'Times New Roman'!important">${CUR_HOST_NAME}</p><p style="color:darkgreen">该域名下所有页面将重新进行字体渲染\uff01</p><p>确定后当前页面将自动刷新，请确认是否恢复？</p>`,
           titleText: "恢复字体渲染",
         });
         if (await frDialog.respond()) {
           _exSite = await GMgetValue("_Exclude_site_");
-          exSite = _exSite ? [...JSON.parse(defCon.decrypt(_exSite))] : defExSite;
+          try {
+            exSite = _exSite ? [...JSON.parse(defCon.decrypt(_exSite))] : defExSite;
+          } catch (e) {
+            error("exSite.JSON.parse:", e.message);
+            exSite = defExSite;
+          }
           defCon.siteIndex = updateExsitesIndex(exSite);
           exSite.splice(defCon.siteIndex, 1);
-          GMsetValue("_Exclude_site_", defCon.encrypt(JSON.stringify(exSite)));
-          location.reload();
+          saveData("_Exclude_site_", exSite);
+          closeConfigurePage({ isReload: true });
         }
         frDialog = null;
       },
@@ -2751,15 +2821,22 @@
                 let custom_Fontlist = "";
                 let received_Fontlist = "";
                 let save_Fontlist = [];
+                let cusFontCheck;
                 const cusFontList = await GMgetValue("_Custom_fontlist_");
-                const cusFontCheck = cusFontList ? JSON.parse(defCon.decrypt(cusFontList)) : DEFAULT_ARRAY;
+                try {
+                  cusFontCheck = cusFontList ? [...JSON.parse(defCon.decrypt(cusFontList))] : DEFAULT_ARRAY;
+                } catch (e) {
+                  error("cusFontCheck.JSON.parse:", e.message);
+                  cusFontCheck = DEFAULT_ARRAY;
+                }
                 if (Array.isArray(cusFontCheck) && cusFontCheck.length) {
                   cusFontCheck.forEach(item => {
                     item.sort && delete item.sort;
                     received_Fontlist += JSON.stringify(item) + "\n";
                   });
                 }
-                let frDialog = new FrDialogBox({
+                closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+                frDialog = new FrDialogBox({
                   trueButtonText: "保 存",
                   falseButtonText: "帮助文档",
                   neutralButtonText: "取 消",
@@ -2817,38 +2894,37 @@
                   );
                   if (!custom_Fontlist.length) {
                     GMdeleteValue("_Custom_fontlist_");
-                    let frDialog = new FrDialogBox({
+                    closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+                    frDialog = new FrDialogBox({
                       trueButtonText: "确 定",
-                      messageText: `<p style="color:indigo">自定义字体表已初始化成功\uff01<p><p>字体列表全局缓存已自动重建，页面即将刷新。</p>`,
+                      messageText: `<p style="color:indigo">自定义字体表已初始化成功\uff01<p><p>字体列表全局缓存已自动重建，当前页面即将刷新。</p>`,
                       titleText: "自定义字体数据重置",
                     });
-                    closeConfigurePage({ isReload: true });
                     cache.remove("_FontCheckList_");
                     if (await frDialog.respond()) {
-                      closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
-                      location.reload();
-                      frDialog = null;
+                      closeConfigurePage({ isReload: true });
                     }
+                    frDialog = null;
                   } else if (Array.isArray(fontListArray) && fontListArray.length) {
                     fontListArray.forEach(item => {
                       save_Fontlist.push(JSON.parse(item));
                     });
                     const unique_Save_Fontlist = getUniqueValues(save_Fontlist);
-                    GMsetValue("_Custom_fontlist_", defCon.encrypt(JSON.stringify(getDeduplicatedValues(unique_Save_Fontlist, fontCheck))));
-                    let frDialog = new FrDialogBox({
+                    saveData("_Custom_fontlist_", getDeduplicatedValues(unique_Save_Fontlist, fontCheck));
+                    closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+                    frDialog = new FrDialogBox({
                       trueButtonText: "确 定",
-                      messageText: `<p style="color:darkgreen">您所提交的自定义字体已保存成功\uff01<p><p>字体列表全局缓存已自动重建，页面即将刷新。</p>`,
+                      messageText: `<p style="color:darkgreen">您所提交的自定义字体已保存成功\uff01<p><p>字体列表全局缓存已自动重建，当前页面即将刷新。</p>`,
                       titleText: "自定义字体数据保存",
                     });
-                    closeConfigurePage({ isReload: true });
                     cache.remove("_FontCheckList_");
                     if (await frDialog.respond()) {
-                      closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
-                      location.reload();
-                      frDialog = null;
+                      closeConfigurePage({ isReload: true });
                     }
+                    frDialog = null;
                   } else {
-                    let frDialog = new FrDialogBox({
+                    closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+                    frDialog = new FrDialogBox({
                       trueButtonText: "确 定",
                       messageText: `<p style="color:crimson">您所提交的自定义字体数据格式有误，请重新输入。<p>`,
                       titleText: "字体表数据格式错误",
@@ -2857,8 +2933,8 @@
                       let clickEvent = new Event("dblclick", { bubbles: true, cancelable: false });
                       qS(`#${defCon.id.fonttooltip}`).dispatchEvent(clickEvent);
                       clickEvent = null;
-                      frDialog = null;
                     }
+                    frDialog = null;
                   }
                 } else {
                   GMopenInTab(`${HOST_URI}#custom`, defCon.options);
@@ -3015,7 +3091,8 @@
           /* Buttons control */
 
           qS(`#${defCon.id.submit} .${defCon.class.reset}`).addEventListener("click", async () => {
-            let frDialog = new FrDialogBox({
+            closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+            frDialog = new FrDialogBox({
               trueButtonText: "重 置",
               falseButtonText: "恢 复",
               neutralButtonText: "取 消",
@@ -3132,7 +3209,8 @@
               }
             } else {
               try {
-                let frDialog = new FrDialogBox({
+                closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+                frDialog = new FrDialogBox({
                   trueButtonText: "保存到全局数据",
                   falseButtonText: "保存到网站数据",
                   neutralButtonText: "取 消",
@@ -3140,7 +3218,12 @@
                   titleText: "保存设置数据",
                 });
                 domains = await GMgetValue("_domains_fonts_set_");
-                domainValue = domains ? [...JSON.parse(defCon.decrypt(domains))] : DEFAULT_ARRAY;
+                try {
+                  domainValue = domains ? [...JSON.parse(defCon.decrypt(domains))] : DEFAULT_ARRAY;
+                } catch (e) {
+                  error("domainValue.JSON.parse:", e.message);
+                  domainValue = DEFAULT_ARRAY;
+                }
                 const _awdl = qS(`#${RANDOM_ID}_a_w_d_l_`);
                 if (_awdl) {
                   if (domainValue.length > 0) {
@@ -3163,17 +3246,15 @@
                   );
                   qS(`#${RANDOM_ID}_c_w_d_d_`).addEventListener("click", async () => {
                     domainValue.splice(domainValueIndex, 1);
-                    GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
+                    saveData("_domains_fonts_set_", domainValue);
                     closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
-                    let frDialog = new FrDialogBox({
+                    frDialog = new FrDialogBox({
                       trueButtonText: "感谢使用",
-                      messageText: `<p style="color:darkred">当前网站的个性化数据已成功删除\uff01</p><p>网页将在您确认后自动刷新。</p>`,
+                      messageText: `<p style="color:darkred">当前网站的个性化数据已成功删除\uff01</p><p>当前页面将在您确认后自动刷新。</p>`,
                       titleText: "个性化数据删除",
                     });
-                    closeConfigurePage({ isReload: true });
                     if (await frDialog.respond()) {
-                      closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
-                      location.reload();
+                      closeConfigurePage({ isReload: true });
                     }
                     frDialog = null;
                   });
@@ -3206,7 +3287,12 @@
                     fontEx: filterHtmlToText(fontex),
                   };
                   domains = await GMgetValue("_domains_fonts_set_");
-                  domainValue = domains ? [...JSON.parse(defCon.decrypt(domains))] : DEFAULT_ARRAY;
+                  try {
+                    domainValue = domains ? [...JSON.parse(defCon.decrypt(domains))] : DEFAULT_ARRAY;
+                  } catch (e) {
+                    error("domainValue.JSON.parse:", e.message);
+                    domainValue = DEFAULT_ARRAY;
+                  }
                   domainValueIndex = updateDomainsIndex(domainValue);
                   if (domainValueIndex !== undefined) {
                     domainValue.splice(domainValueIndex, 1, _savedata_);
@@ -3214,10 +3300,11 @@
                     domainValue.push(_savedata_);
                   }
                   if (domainValue.length <= maxPersonalSites || domainValueIndex !== undefined) {
-                    GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
+                    saveData("_domains_fonts_set_", domainValue);
                     defCon.successId = true;
                   } else {
-                    let frDialog = new FrDialogBox({
+                    closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+                    frDialog = new FrDialogBox({
                       trueButtonText: "依然保存",
                       falseButtonText: "管理列表",
                       neutralButtonText: "我放弃",
@@ -3225,7 +3312,7 @@
                       titleText: "数据过多的提示",
                     });
                     if (await frDialog.respond()) {
-                      GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
+                      saveData("_domains_fonts_set_", domainValue);
                       defCon.successId = true;
                     } else {
                       manageDomainsList();
@@ -3243,16 +3330,15 @@
               } finally {
                 if (defCon.successId) {
                   closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
-                  let frDialog = new FrDialogBox({
+                  frDialog = new FrDialogBox({
                     trueButtonText: "感谢使用",
-                    messageText: `<p style="color:darkgreen">您设置的字体渲染数据已成功保存\uff01</p><p>网页将在您确认后自动刷新。</p>`,
+                    messageText: `<p style="color:darkgreen">您设置的字体渲染数据已成功保存\uff01</p><p>当前页面将在您确认后自动刷新。</p>`,
                     titleText: "字体渲染数据保存",
                   });
-                  closeConfigurePage({ isReload: true });
                   if (await frDialog.respond()) {
-                    frDialog = null;
-                    location.reload();
+                    closeConfigurePage({ isReload: true });
                   }
+                  frDialog = null;
                 }
               }
             }
@@ -3272,22 +3358,21 @@
     function closeConfigurePage({ isReload } = {}) {
       if (qS(`#${defCon.id.container}`)) {
         qS(`#${defCon.id.container}`).style.opacity = 0;
-        sleep(500).then(() => {
-          qS(`#${defCon.id.rndId}`) && qS(`#${defCon.id.rndId}`).remove();
+        sleep(500)(qS("fr-configure")).then(r => {
+          r && r.remove();
         });
         qS("fr-colorpicker") && qS("fr-colorpicker").remove();
         if (getNavigator.core().Gecko && defCon.configurePage) {
           document.removeEventListener("scroll", defCon.configurePage);
           delete defCon.configurePage;
         }
-        if (!isReload) {
-          if (defCon.preview) {
-            loadPreview(defCon.isPreview);
-            defCon.tZoom = CONST_VALUES.fontSize;
-          }
-          closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+        if (isReload === false && defCon.preview) {
+          loadPreview(defCon.isPreview);
+          defCon.tZoom = CONST_VALUES.fontSize;
         }
       }
+      closeAllFrDialogBox(`fr-dialogbox`);
+      isReload === true && location.reload();
     }
 
     async function getCurrentFontName(_isfontface_, refont, def) {
@@ -3322,7 +3407,8 @@
         backupT.style.display = "inline-block";
         backupT.addEventListener("click", async () => {
           try {
-            let frDialog = new FrDialogBox({
+            closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+            frDialog = new FrDialogBox({
               trueButtonText: "备 份",
               falseButtonText: "还 原",
               neutralButtonText: "取 消",
@@ -3350,24 +3436,27 @@
               const _Custom_fontlist__ = _Custom_fontlist_ || defCon.encrypt(JSON.stringify(def));
               const _configure_ = await GMgetValue("_configure_");
               const db_R = "QXV0aGVyJUUyJTlBJUExRjl5NG5nJUYwJTlGJTkyJTk2JTQw".concat(defCon.encrypt(defCon.scriptName));
-              const db_0 = defCon.encrypt(new Date());
+              const db_0 = defCon.encrypt(String(new Date()));
               const db_1 = _fonts_set_;
               const db_2 = _Exclude_site_;
               const db_3 = _domains_fonts_set__;
               const db_4 = _Custom_fontlist__;
               const db_5 = _configure_;
               const db = { db_R, db_0, db_1, db_2, db_3, db_4, db_5 };
-              const timeStamp = setDateFormat("yyyy-MM-ddTHH-mm-ssZ", new Date());
               const via = `${getNavigator.browser().toLowerCase()}`;
-              dataDownload(`FontRendering-backup-${via}-${timeStamp}.sqlitedb`, defCon.sqliteDB(JSON.stringify(db), 22, ROOT_SECRET_KEY));
-              let frDialog = new FrDialogBox({
+              const timeStamp = setDateFormat("yyyy-MM-ddTHH-mm-ssZ", new Date());
+              const _fileName_ = `FontRendering-backup-${via}-${timeStamp}.sqlitedb`;
+              dataDownload(_fileName_, defCon.sqliteDB(JSON.stringify(db), 22, ROOT_SECRET_KEY));
+              closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+              frDialog = new FrDialogBox({
                 trueButtonText: "确 定",
-                messageText: `<p style="color:darkgreen">备份数据已归档，备份文件导出下载中……</p><p style="word-break:break-all;color:darkred;font-style:italic;font-size:12px!important">FontRendering-backup-${via}-${timeStamp}.sqlitedb</p>`,
+                messageText: `<p style="color:darkgreen">备份数据已归档，备份文件导出下载中……</p><p style="word-break:break-all;color:darkred;font-style:italic;font-size:12px!important">${_fileName_}</p>`,
                 titleText: "数据备份",
               });
               if (await frDialog.respond()) {
-                frDialog = null;
+                debug(`\u27A4 Backup succeeded: ${_fileName_}`);
               }
+              frDialog = null;
             } else {
               try {
                 const thatFile = fs.files[0];
@@ -3376,7 +3465,7 @@
                 reader.readAsText(thatFile);
                 reader.onload = async function () {
                   try {
-                    const _file = defCon.decrypt(this.result);
+                    const _file = defCon.decrypt(String(this.result));
                     const _rs = JSON.parse(defCon.sqliteDB(_file, null, ROOT_SECRET_KEY));
                     const _data_R = defCon.decrypt(_rs.db_R);
                     const _data_0 = defCon.decrypt(_rs.db_0);
@@ -3386,55 +3475,57 @@
                     const _data_4 = _rs.db_4 ? JSON.parse(defCon.decrypt(_rs.db_4)) : def;
                     const _data_5 = _rs.db_5 ? JSON.parse(defCon.decrypt(_rs.db_5)) : undefined;
                     if (!isNaN(Date.parse(_data_0)) && new Date(_data_0) <= new Date() && _data_R.includes(SCRIPT_AUTHOR)) {
-                      GMsetValue("_fonts_set_", defCon.encrypt(JSON.stringify(_data_1)));
-                      GMsetValue("_Exclude_site_", defCon.encrypt(JSON.stringify(_data_2)));
-                      GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(_data_3)));
-                      GMsetValue("_Custom_fontlist_", defCon.encrypt(JSON.stringify(_data_4)));
+                      saveData("_fonts_set_", _data_1);
+                      saveData("_Exclude_site_", _data_2);
+                      saveData("_domains_fonts_set_", _data_3);
+                      saveData("_Custom_fontlist_", _data_4);
                       if (_data_5) {
                         _data_5.curVersion = defCon.curVersion;
                         _data_5.rebuild = undefined;
-                        GMsetValue("_configure_", defCon.encrypt(JSON.stringify(_data_5)));
+                        saveData("_configure_", _data_5);
                       } else {
                         debug("\u27A4 no configure data");
                       }
-                      let frDialog = new FrDialogBox({
+                      closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+                      frDialog = new FrDialogBox({
                         trueButtonText: "确 定",
                         messageText: `<p style="color:darkgreen">本地备份数据还原完毕\uff01</p><p>当前页面将在您确认后自动刷新。</p>`,
                         titleText: "数据还原成功",
                       });
-                      closeConfigurePage({ isReload: true });
                       if (await frDialog.respond()) {
-                        frDialog = null;
-                        location.reload();
+                        closeConfigurePage({ isReload: true });
                       }
+                      frDialog = null;
                     } else {
                       throw new Error("Invalid Data Error");
                     }
                   } catch (e) {
-                    error("FileReader.onload:", e.name);
-                    let frDialog = new FrDialogBox({
+                    error("FileReader.onload:", e.message);
+                    closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+                    frDialog = new FrDialogBox({
                       trueButtonText: "确 定",
                       messageText: `<p style="color:red">数据校验错误，请选择正确的本地备份文件\uff01</p>`,
                       titleText: "数据文件错误",
                     });
                     if (await frDialog.respond()) {
-                      frDialog = null;
                       qS(`#${defCon.id.backup}`).click();
                     }
+                    frDialog = null;
                   }
                 };
                 reader = null;
               } catch (e) {
                 error("<thatFile is null>", e.name);
-                let frDialog = new FrDialogBox({
+                closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+                frDialog = new FrDialogBox({
                   trueButtonText: "确 定",
                   messageText: `<p style="color:indigo">载入文件为空，请选择要还原的备份文件\uff01</p>`,
                   titleText: "没有文件载入",
                 });
                 if (await frDialog.respond()) {
-                  frDialog = null;
                   qS(`#${defCon.id.backup}`).click();
                 }
+                frDialog = null;
               }
             }
             frDialog = null;
@@ -3576,7 +3667,12 @@
       let Contents = "";
       try {
         domains = await GMgetValue("_domains_fonts_set_");
-        domainValue = domains ? [...JSON.parse(defCon.decrypt(domains))] : DEFAULT_ARRAY;
+        try {
+          domainValue = domains ? [...JSON.parse(defCon.decrypt(domains))] : DEFAULT_ARRAY;
+        } catch (e) {
+          error("domainValue.JSON.parse:", e.message);
+          domainValue = DEFAULT_ARRAY;
+        }
         const _data_search_ =
           domainValue.length > 6
             ? `<p style="display:flex;justify-content:left;align-items:center"><input id="${RANDOM_ID}_d_s_" style="box-sizing:content-box;width:57%;height:22px;font:normal 16px/150% monospace,Consolas,system-ui,-apple-system,BlinkMacSystemFont,serif!important;border:2px solid #777;border-radius:4px;outline:none!important;margin:4px 6px;padding:2px 6px"><button id="${RANDOM_ID}_d_s_s_" style="box-sizing:border-box;background:#eee;color:#333!important;vertical-align:initial;padding:3px 10px;margin:0;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-width:60px;min-height:30px;letter-spacing:normal;text-align:center">查 询</button><button id="${RANDOM_ID}_d_s_c_" style="box-sizing:border-box;background:#eee;color:#333!important;vertical-align:initial;margin:0 0 0 4px;padding:3px 10px;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-width:60px;min-height:30px;letter-spacing:normal;text-align:center">清 除</button></p>`
@@ -3594,7 +3690,8 @@
             </li>`
           );
         }
-        let frDialog = new FrDialogBox({
+        closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+        frDialog = new FrDialogBox({
           trueButtonText: "确认操作，保存数据",
           neutralButtonText: "取 消",
           messageText: `<p style="font-size:14px!important;text-indent:6px!important;color:darkred">请谨慎操作，保存后生效，已删除的数据将不可恢复\uff01</p>${_data_search_}<ul id="${RANDOM_ID}_d_d_" style="margin:0!important;padding:0!important;list-style:none!important;max-height:190px;overflow-x:hidden">${Contents}</ul>`,
@@ -3660,7 +3757,12 @@
         }
         if (await frDialog.respond()) {
           domains = await GMgetValue("_domains_fonts_set_");
-          domainValue = domains ? [...JSON.parse(defCon.decrypt(domains))] : DEFAULT_ARRAY;
+          try {
+            domainValue = domains ? [...JSON.parse(defCon.decrypt(domains))] : DEFAULT_ARRAY;
+          } catch (e) {
+            error("domainValue.JSON.parse:", e.message);
+            domainValue = DEFAULT_ARRAY;
+          }
           for (let l = _temp_.length - 1; l >= 0; l--) {
             domainValueIndex = updateDomainsIndex(domainValue, _temp_[l]);
             domainValue.splice(domainValueIndex, 1);
@@ -3668,22 +3770,21 @@
               defCon.equal = true;
             }
           }
-          GMsetValue("_domains_fonts_set_", defCon.encrypt(JSON.stringify(domainValue)));
-          let frDialog = new FrDialogBox({
+          saveData("_domains_fonts_set_", domainValue);
+          closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+          frDialog = new FrDialogBox({
             trueButtonText: "感谢使用",
             messageText: String(
-              `<p style="color:darkgreen">网站个性化设置数据已成功保存\uff01</p><p>${defCon.equal ? "网页将在您确认后自动刷新。" : "确认后您可以在当前页面继续其他操作。"}</p>`
+              `<p style="color:darkgreen">网站个性化设置数据已成功保存\uff01</p><p>${
+                defCon.equal ? "当前网站数据有变动，页面将在您确认后自动刷新。" : "提示：您可继续留在当前页面进行其他操作。"
+              }</p>`
             ),
             titleText: "个性化数据保存",
           });
           if (await frDialog.respond()) {
-            closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
-            frDialog = null;
-            if (defCon.equal) {
-              closeConfigurePage({ isReload: true });
-              location.reload();
-            }
+            closeConfigurePage({ isReload: !!defCon.equal });
           }
+          frDialog = null;
         }
         frDialog = null;
       } catch (e) {
@@ -3704,7 +3805,7 @@
               for (let i in e) {
                 errors += e[i] + br;
               }
-              let frDialog = new FrDialogBox({
+              frDialog = new FrDialogBox({
                 trueButtonText: "反馈问题",
                 falseButtonText: "刷新页面",
                 messageText: String(
@@ -3728,7 +3829,7 @@
               defCon.errors.length = 0;
               if (await frDialog.respond()) {
                 copyToClipboard(copyText);
-                closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+                closeAllFrDialogBox(`fr-dialogbox`);
                 GMopenInTab(FEEDBACK_URI, defCon.options);
               } else {
                 location.reload(true);
@@ -3830,15 +3931,19 @@
     }
 
     function filterHtmlToText(html) {
-      html = html.replace(/expression|\\u|`|{|}/gi, "");
-      let _tmp = document.createElement("div");
-      _tmp.innerHTML = trustedTypesPolicy.createHTML(html);
-      html = _tmp.innerText.trim() || _tmp.textContent.trim() || "";
-      while (html.substr(html.length - 1, 1) === ",") {
-        html = html.substr(0, html.length - 1).trim();
+      if (typeof html === "string") {
+        html = html.replace(/expression|\\u|`|{|}/gi, "");
+        let _tmp = document.createElement("div");
+        _tmp.innerHTML = trustedTypesPolicy.createHTML(html);
+        html = _tmp.innerText.trim() || _tmp.textContent.trim() || "";
+        while (html.substr(html.length - 1, 1) === ",") {
+          html = html.substr(0, html.length - 1).trim();
+        }
+        _tmp = null;
+        return html;
+      } else {
+        return "";
       }
-      _tmp = null;
-      return html;
     }
 
     function addSingleQuoteToArray(arr) {
@@ -3863,10 +3968,9 @@
       return returnRes;
     }
 
-    function saveData(key, { ...Options }) {
-      const obj = { ...Options };
+    function saveData(key, data) {
       try {
-        GMsetValue(key, defCon.encrypt(JSON.stringify(obj)));
+        GMsetValue(key, defCon.encrypt(JSON.stringify(data)));
       } catch (e) {
         error("SaveData:", e);
       }
