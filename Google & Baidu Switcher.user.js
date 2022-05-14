@@ -3,7 +3,7 @@
 // @name:zh-CN         谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW         谷歌、百度、必應的搜索引擎跳轉工具
 // @name:ja            Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version            5.0.20220423.2
+// @version            5.0.20220515.1
 // @author             F9y4ng
 // @description        The search engine jump tools of Google, Baidu and Bing automatically update and detect the script by default. You can customize the Bing button and other search jump effect settings in the menu.
 // @description:zh-CN  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮及其他搜索跳转效果。
@@ -27,7 +27,7 @@
 // @compatible         Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible         Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible         Safari 兼容Tampermonkey • Safari
-// @note               优化MetaData参数增强代码访问安全性。\n修正代码语言设置。
+// @note               修正一些已知的问题，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -167,27 +167,39 @@
 
   /* New RAF setTimeout/setInterval */
 
-  const _PREFIXES = ["ms", "moz", "webkit", "o"];
-  for (let l = 0; l < _PREFIXES.length && !window.requestAnimationFrame; ++l) {
-    window.requestAnimationFrame = window[`${_PREFIXES[l]}RequestAnimationFrame`];
-    window.cancelAnimationFrame = window[`${_PREFIXES[l]}CancelAnimationFrame`] || window[`${_PREFIXES[l]}CancelRequestAnimationFrame`];
-  }
-  if (!window.requestAnimationFrame) {
-    window.requestAnimationFrame = (callback, element, lastTime = 0) => {
-      const currTime = Date.now();
-      const timeToCall = Math.max(0, 16.7 - (currTime - lastTime));
-      const rafId = setTimeout(() => {
-        callback(currTime + timeToCall);
-      }, timeToCall);
-      lastTime = currTime + timeToCall;
-      return rafId;
-    };
-  }
-  if (!window.cancelAnimationFrame) {
-    window.cancelAnimationFrame = rafId => {
-      clearTimeout(rafId);
-    };
-  }
+  window.requestAnimationFrame ||
+    (function () {
+      "use strict";
+      window.requestAnimationFrame =
+        window.msRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.webkitRequestAnimationFrame ||
+        (function () {
+          const fps = 60;
+          const delay = 1000 / fps;
+          const animationStartTime = Date.now();
+          let previousCallTime = animationStartTime;
+          return function requestAnimationFrame(callback) {
+            const requestTime = Date.now();
+            const timeout = Math.max(0, delay - (requestTime - previousCallTime));
+            const timeToCall = requestTime + timeout;
+            previousCallTime = timeToCall;
+            return window.setTimeout(function onAnimationFrame() {
+              callback(timeToCall - animationStartTime);
+            }, timeout);
+          };
+        })();
+      window.cancelAnimationFrame =
+        window.mozCancelAnimationFrame ||
+        window.webkitCancelAnimationFrame ||
+        window.cancelRequestAnimationFrame ||
+        window.msCancelRequestAnimationFrame ||
+        window.mozCancelRequestAnimationFrame ||
+        window.webkitCancelRequestAnimationFrame ||
+        function cancelAnimationFrame(id) {
+          window.clearTimeout(id);
+        };
+    })();
 
   class RAF {
     constructor() {
@@ -231,6 +243,7 @@
 
   /* Abbreviated function naming */
 
+  const oH = Object.prototype.hasOwnProperty;
   const qA = str => {
     return Array.prototype.slice.call(document.querySelectorAll(str), 0);
   };
@@ -244,8 +257,15 @@
   /* Get browser core & system parameters */
 
   const getNavigator = {
-    // eslint-disable-next-line no-undef
-    uaData: navigator.userAgentData && navigator.userAgentData instanceof NavigatorUAData,
+    uaData: (navigator => {
+      try {
+        // eslint-disable-next-line no-undef
+        return Boolean(navigator.userAgentData && navigator.userAgentData instanceof NavigatorUAData);
+      } catch (e) {
+        error("getNavigator.uaData:", e.message);
+        return false;
+      }
+    })(unsafeWindow.navigator),
     init: function (v = this.uaData) {
       return v ? navigator.userAgentData : navigator.userAgent.toLowerCase();
     },
@@ -278,16 +298,16 @@
         }
       } catch (e) {
         error("Navigator.getBrowser:", e.name);
-      } finally {
-        return { info, version };
       }
+      return { info, version };
     },
     core: function (u = JSON.stringify(this.init())) {
       return {
         Trident: u.includes("trident") || u.includes("compatible"),
         Presto: u.includes("presto"),
         WebKit: u.includes("applewebkit") || u.includes("Chromium"),
-        Gecko: u.includes("gecko") && !u.includes("khtml"),
+        Gecko: u.includes("gecko") && !u.includes("khtml") && !u.includes("trident") && !u.includes("compatible"),
+        Blink: (u.includes("applewebkit") && (u.includes("chromium") || u.includes("chrome"))) || u.includes("Chromium"),
       };
     },
     chromiumVersion: function (u = this.init()) {
@@ -321,7 +341,7 @@
         browserInfo = this.getBrowser(u.brands, "browser").info;
       } else {
         const browserArray = {
-          IE: u.includes("msie") || u.includes("trident"),
+          IE: u.includes("msie") || u.includes("trident") || u.includes("compatible"),
           Chromium: u.includes("chromium"),
           Chrome: u.includes("chrome") && !u.includes("edg") && !u.includes("chromium"),
           Firefox: u.includes("firefox") && u.includes("gecko"),
@@ -337,7 +357,7 @@
           Vivaldi: /vivaldi/g.test(u),
         };
         for (let i in browserArray) {
-          if (browserArray[i]) {
+          if (oH.call(browserArray, i) && browserArray[i]) {
             browserInfo = i;
           }
         }
@@ -348,15 +368,20 @@
       try {
         return this.uaData
           ? JSON.stringify(await u.getHighEntropyValues(["architecture", "bitness", "model", "platform", "platformVersion", "uaFullVersion"]))
-          : navigator.userAgentData
-          ? "(Cheat-uaData) ".concat(u)
+          : this.isCheatUA()
+          ? "(CHEAT-UA) ".concat(u)
           : u;
       } catch (e) {
         error("Navigator.getUA:", e.name);
         return u;
       }
     },
+    isCheatUA: function () {
+      return (!this.uaData && !!navigator.userAgentData) || (!this.core().Gecko && !!unsafeWindow.sidebar) || (this.core().Gecko && !unsafeWindow.sidebar);
+    },
   };
+
+  const IS_REAL_GECKO = (getNavigator.core().Gecko && !getNavigator.isCheatUA()) || !!unsafeWindow.sidebar;
 
   /* Define random aliases */
 
@@ -396,7 +421,6 @@
     },
   };
   defCon.rName = defCon.randString(7, "char");
-
   const CUR_WINDOW_TOP = defCon.isWinTop();
 
   /* NoticeJs Functions */
@@ -478,7 +502,7 @@
     raf.setTimeout(() => {
       if (qA(position + ` .${Notice.item}`).length <= 0) {
         qS(position) && qS(position).remove();
-        if (getNavigator.core().Gecko && defCon[iCId]) {
+        if (IS_REAL_GECKO && defCon[iCId]) {
           document.removeEventListener("scroll", defCon[iCId]);
           delete defCon[iCId];
         }
@@ -785,7 +809,7 @@
       };
       if (zoom && zoom !== 1) {
         thatNotice.style.cssText += `zoom:${1 / zoom}!important`;
-      } else if (getNavigator.core().Gecko && transform && transform !== "none") {
+      } else if (IS_REAL_GECKO && transform && transform !== "none") {
         const ratio = Number(transform.split(",")[3]) || 1;
         if (ratio && ratio !== 1) {
           if (thatNotice) {
@@ -794,7 +818,7 @@
               switch (position) {
                 case "topRight":
                   item.style.cssText += String(
-                    `transform-origin:right top 0px;
+                    `transform-origin:right top 0;
                       transform:scale(${1 / ratio});
                       position:absolute;
                       right:${10 / ratio}px;
@@ -804,7 +828,7 @@
                 default:
                   curItem = !index ? 10 / ratio : (array[index - 1].clientHeight + 10) / ratio + Number(array[index - 1].style.bottom.replace("px", ""));
                   item.style.cssText += String(
-                    `transform-origin:right bottom 0px;
+                    `transform-origin:right bottom 0;
                       transform:scale(${1 / ratio});
                       position:absolute;
                       right:${10 / ratio}px;
