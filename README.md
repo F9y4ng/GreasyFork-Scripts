@@ -12,7 +12,7 @@
 
 简介：无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的 Greasemonkey 脚本和浏览器插件。
 
-`version 2022.05.15.1` 【🔥 [安装脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+`version 2022.05.21.1` 【🔥 [安装脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 [`!!! 重大版本更新，请使用前仔细查看脚本使用说明(WIKI) !!!`](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering) `New!`
 
@@ -21,9 +21,8 @@
 `!!! 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件 !!!`
 
 ```text
-@ 修正某些站点对QuerySelector重新定义造成的错误。
-@ 修正取色器因chrome++插件CSP设置造成报错的问题。
-@ 优化NavigatorUAData兼容性，增强UA伪造的识别率。
+@ 修正异步iframe框架内联样式预览重复载入的错误。
+@ 优化QuerySelector兼容性，修正多元素筛选时的错误。
 @ 修正一些已知的问题，优化代码。
 ```
 

@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.05.15.1
+// @version            2022.05.21.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -101,8 +101,7 @@
     decrypt: n => {
       try {
         if (typeof n === "string") {
-          n = n.replace(/[^A-Za-z0-9+/=]/g, "");
-          return decodeURIComponent(window.atob(n));
+          return decodeURIComponent(window.atob(n.replace(/[^A-Za-z0-9+/=]/g, "")));
         } else {
           throw new Error("Non-string type");
         }
@@ -206,8 +205,7 @@
         return window.self === window.top;
       } catch (e) {
         error("Window.Top:", e.name);
-        const eI = parent.frames.length > 0;
-        return !eI;
+        return !parent.frames.length;
       }
     },
   };
@@ -319,7 +317,7 @@
   const FONTLIST_IMG = defCon.decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjIlMkYwNCUyRjAyJTJGcW9SZldkLmdpZg==");
   const LOADING_IMG = defCon.decrypt("aHR0cHMlM0ElMkYlMkZpbWcuemNvb2wuY24lMkZjb21tdW5pdHklMkYwMzhkZGU0NThmOWE4NzRhODAxMjE2MGY3NDE3ZjZlLmdpZg==");
 
-  /* New RAF setTimeout/setInterval */
+  /* New RAF for setTimeout & setInterval */
 
   window.requestAnimationFrame ||
     (function () {
@@ -393,10 +391,9 @@
     }
   }
 
-  const raf = new RAF();
-
   /* Sleep Promise Function */
 
+  const raf = new RAF();
   const cachedSetTimeout = setTimeout;
   const createSleepPromise = (timeout, { useCachedSetTimeout }) => {
     return new Promise(resolve => {
@@ -422,18 +419,18 @@
   /* Abbreviated functions */
 
   const oH = Object.prototype.hasOwnProperty;
-  const qA = str => {
+  const qA = (str, target = document) => {
     try {
-      return Array.prototype.slice.call(document.querySelectorAll(str), 0);
+      return Array.prototype.slice.call(target.querySelectorAll(str), 0);
     } catch (e) {
-      return typeof str === "string" ? getElements(str) : [];
+      return typeof str === "string" ? getElements(str, target) : [];
     }
   };
-  const qS = str => {
+  const qS = (str, target = document) => {
     try {
-      return document.querySelector(str);
+      return target.querySelector(str);
     } catch (e) {
-      return typeof str === "string" ? getElements(str)[0] : null;
+      return typeof str === "string" ? getElements(str, target)[0] : null;
     }
   };
   const cE = str => {
@@ -484,7 +481,7 @@
     init: function (v = this.uaData) {
       return v ? navigator.userAgentData : navigator.userAgent.toLowerCase();
     },
-    getBrowser: (brands, getBrand, info = "Other", version = "0.0") => {
+    getBrowser: (brands, getBrand, info = "Other", version = "0") => {
       try {
         if (getBrand) {
           brands.some(b => {
@@ -537,15 +534,15 @@
       if (this.uaData) {
         system = u.platform ? u.platform.toString() : system;
       } else {
-        if (/windows|win32|win64|wow32|wow64/gi.test(u)) {
+        if (/windows|win32|win64|wow32|wow64/g.test(u)) {
           system = "Windows";
-        } else if (/macintosh|macintel|mac os x/gi.test(u) || u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/i)) {
+        } else if (/macintosh|macintel|mac os x/g.test(u)) {
           system = "macOS";
         } else if (/linux|x11/gi.test(u)) {
           system = "Linux";
         } else if (/android|adr/gi.test(u)) {
           system = "Android";
-        } else if (/ios|iphone|ipad|ipod|iwatch/gi.test(u)) {
+        } else if (/ios|iphone|ipad|ipod|iwatch/g.test(u)) {
           system = "iOS";
         }
       }
@@ -561,7 +558,7 @@
           Chrome: u.includes("chrome") && !u.includes("edg") && !u.includes("chromium"),
           Firefox: u.includes("firefox") && u.includes("gecko"),
           Opera: u.includes("presto") || u.includes("opr") || u.includes("opera"),
-          Safari: u.includes("safari") && !u.includes("chrome"),
+          Safari: u.includes("safari") && u.includes("version") && !u.includes("chrome"),
           Edge: u.includes("edg"),
           QQBrowser: /qqbrowser/g.test(u),
           Wechat: /micromessenger/g.test(u),
@@ -609,19 +606,24 @@
     return String(scriptName || "Font Rendering");
   }
 
-  function getElements(str) {
-    const qStr = str.replace(/^\s+|\s+$/g, "").split(/\s+/g);
-    let rChild = [];
-    let rParent = [document];
+  function getElements(str, target) {
+    const aStr = str.trim().startsWith(":not") ? [] : str.trim().split(",");
+    let aChild = [];
     try {
-      for (let i = 0; i < qStr.length; i++) {
-        rChild = getElementsByStr(rParent, qStr[i]);
-        rParent = rChild;
-      }
+      aStr.forEach(items => {
+        const rStr = items.trim().split(/\s+|>|,/g);
+        let rChild = [];
+        let rParent = [target];
+        for (let i = 0; i < rStr.length; i++) {
+          rChild = getElementsByStr(rParent, rStr[i]) || [];
+          rParent = rChild;
+        }
+        aChild = aChild.concat(rChild);
+      });
     } catch (e) {
       error("QuerySelector.getElements:", e.message);
     }
-    return rChild;
+    return [...aChild];
   }
 
   function setRAFInterval(callback, interval, { runNow } = {}) {
@@ -657,66 +659,67 @@
 
   function getElementsByStr(aParent, str) {
     const aChild = [];
+    const pushElemIntoNodelist = (a, b, c) => {
+      for (let j = 0; j < a.length; j++) {
+        const aValue = a[j].getAttribute(c[1]) || "";
+        const rStr = c[2].replace(/"|'|`/g, "");
+        if (
+          (str.search(/[^*^$~]=/) !== -1 && aValue === rStr) ||
+          (str.search(/\^=/) !== -1 && aValue.startsWith(rStr)) ||
+          (str.search(/\$=/) !== -1 && aValue.endsWith(rStr)) ||
+          (str.search(/\*=/) !== -1 && aValue.includes(rStr)) ||
+          (str.search(/~=/) !== -1 && aValue.match(new RegExp(`\\b${rStr}\\b`)))
+        ) {
+          a[j] && b.push(a[j]);
+        }
+      }
+    };
     try {
       for (let i = 0; aParent && i < aParent.length; i++) {
         switch (str.charAt(0)) {
           case "#":
-            if (aParent[i]) {
-              if (/#[-\w]+\[[-\w]+="?\w+"?\]/g.test(str)) {
-                let aStr = str.split(/\[|=|\]/g);
-                let aRes = aParent[i].getElementById(aStr[0].substring(1));
-                for (let j = 0; j < aRes.length; j++) {
-                  if (aRes[j].getAttribute(aStr[1]) === aStr[2].replace(/"/g, "")) {
-                    aChild.push(aRes[j]);
-                  }
-                }
-              } else {
-                let aRes = aParent[i].getElementById(str.substring(1));
-                aChild.push(aRes);
-              }
+            if (/^#[-\w]+\[[-\w]+[*^$~]?=["'`]?\w+["'`]?\]/g.test(str)) {
+              let aStr = str.split(/\[|[*^$~]?=|\]/g);
+              let aRes = document.getElementById(aStr[0].substring(1));
+              pushElemIntoNodelist([aRes], aChild, aStr);
+            } else {
+              let aRes = document.getElementById(str.substring(1));
+              aRes && aChild.push(aRes);
             }
             break;
           case ".":
             if (aParent[i]) {
-              if (/\.[-\w]+\[[-\w]+="?\w+"?\]/g.test(str)) {
-                let aStr = str.split(/\[|=|\]/g);
+              if (/^\.[-\w]+\[[-\w]+[*^$~]?=["'`]?\w+["'`]?\]/g.test(str)) {
+                let aStr = str.split(/\[|[*^$~]?=|\]/g);
                 let aRes = aParent[i].getElementsByClassName(aStr[0].substring(1));
-                for (let j = 0; j < aRes.length; j++) {
-                  if (aRes[j].getAttribute(aStr[1]) === aStr[2].replace(/"/g, "")) {
-                    aChild.push(aRes[j]);
-                  }
-                }
+                pushElemIntoNodelist(aRes, aChild, aStr);
               } else {
                 let aRes = aParent[i].getElementsByClassName(str.substring(1));
                 for (let j = 0; j < aRes.length; j++) {
-                  aChild.push(aRes[j]);
+                  aRes[j] && aChild.push(aRes[j]);
                 }
               }
             }
             break;
           default:
             if (aParent[i]) {
-              if (/[-\w]+\.\w+/g.test(str)) {
+              if (/^[-\w]+\.\w+/g.test(str)) {
                 let aStr = str.split(".");
                 let aRes = aParent[i].getElementsByTagName(aStr[0]);
                 let reg = new RegExp("\\b" + aStr[1] + "\\b", "g");
                 for (let j = 0; j < aRes.length; j++) {
-                  if (reg.test(aRes[j].className)) {
+                  if (aRes[j] && reg.test(aRes[j].className)) {
                     aChild.push(aRes[j]);
                   }
                 }
-              } else if (/[-\w]*\[[-\w]+="?\w+"?\]/g.test(str)) {
-                let aStr = str.split(/\[|=|\]/g);
+              } else if (/^[-\w]*\[[-\w]+[*^$~]?=["'`]?\w+["'`]?\]/g.test(str)) {
+                let aStr = str.split(/\[|[*^$~]?=|\]/g);
                 let aRes = aParent[i].getElementsByTagName(aStr[0] || "*");
-                for (let j = 0; j < aRes.length; j++) {
-                  if (aRes[j].getAttribute(aStr[1]) === aStr[2]) {
-                    aChild.push(aRes[j]);
-                  }
-                }
+                pushElemIntoNodelist(aRes, aChild, aStr);
               } else {
                 let aRes = aParent[i].getElementsByTagName(str);
                 for (let j = 0; j < aRes.length; j++) {
-                  aChild.push(aRes[j]);
+                  aRes[j] && aChild.push(aRes[j]);
                 }
               }
             }
@@ -731,7 +734,7 @@
 
   function safeRemove(s, t) {
     if (s && t && typeof t === "object") {
-      const removeNodes = t.querySelectorAll(s);
+      const removeNodes = qA(s, t);
       for (let i = 0; i < removeNodes.length; i++) {
         try {
           removeNodes[i].parentNode && removeNodes[i].parentNode.removeChild(removeNodes[i]);
@@ -749,14 +752,14 @@
         try {
           if (addToTarget && typeof addToTarget === "object") {
             if (className && typeof className === "string") {
-              if (isReload === true && addToTarget.querySelector(`.${className}`)) {
+              if (isReload === true && qS(`.${className}`, addToTarget)) {
                 safeRemove(`.${className}`, addToTarget);
-                debug(`\u27A4 style<c:${className}> View:%c %s`, "color:crimson", Boolean(addToTarget.querySelector(`.${className}`)));
-                while (addToTarget.querySelectorAll(`style[id^="${T}"]`).length > 0) {
+                debug(`\u27A4 style<c:${className}> View:%c %s`, "color:crimson", Boolean(qS(`.${className}`, addToTarget)));
+                while (qA(`style[id^="${T}"]`, addToTarget).length > 0) {
                   safeRemove(`style[id^="${T}"]`, addToTarget);
-                  debug(`\u27A4 style<i:${T}> Review:%c %s`, "color:crimson", addToTarget.querySelectorAll(`style[id^="${T}"]`).length > 0);
+                  debug(`\u27A4 style<i:${T}> Review:%c %s`, "color:crimson", qA(`style[id^="${T}"]`, addToTarget).length > 0);
                 }
-              } else if (isReload === false && addToTarget.querySelector(`.${className}`)) {
+              } else if (isReload === false && qS(`.${className}`, addToTarget)) {
                 return true;
               }
             } else {
@@ -770,7 +773,7 @@
             cssNode.textContent = css;
             addToTarget.appendChild(cssNode);
             cssNode = null;
-            return Boolean(addToTarget.querySelector(`.${className}`));
+            return Boolean(qS(`.${className}`, addToTarget));
           } else {
             return true;
           }
@@ -821,8 +824,8 @@
               const ORIGIN_SANDBOX = items.getAttribute("sandbox");
               ORIGIN_SANDBOX && items.removeAttribute("sandbox");
               const h = items.contentWindow;
-              const sT = h.document.head.querySelectorAll("style[id^='TS']");
-              debug("\u27A4 preview <styleCount>:", sT.length);
+              const sT = qA("style[id^='TS']", h.document.head);
+              debug("\u27A4 preview<styleCount>:", sT.length);
               if (sT.length > 0) {
                 addStyle(ts, sT[0].className, h.document.head, "TS", { isReload: true });
               } else {
@@ -863,11 +866,11 @@
               const ORIGIN_SANDBOX = items.getAttribute("sandbox");
               ORIGIN_SANDBOX && items.removeAttribute("sandbox");
               const h = items.contentWindow;
-              const sT = h.document.head.querySelectorAll("style[id^='TS']");
+              const sT = qA("style[id^='TS']", h.document.head);
               const bT = h.document.body.textContent.trim();
               if (!sT.length && bT.length > 0) {
                 addStyle(defCon.tStyle, null, h.document.head, "TS", { isReload: false });
-                if (h.document.head.querySelectorAll("style[id^='TS']").length > 0) {
+                if (qA("style[id^='TS']", h.document.head).length > 0) {
                   debug("\u27A4 fr-async-frames <insertStyle>: %cAutoload", "color:indigo", items.src || "<NULL>");
                   items.setAttribute("fr-async-frames", "Autoload");
                 }
@@ -1126,12 +1129,12 @@
         Math.floor(a).toString(16).padStart(2, "0")
       );
     };
-    const hexaToRgba = hex => {
+    const hexaToRgba = hexa => {
       return {
-        r: parseInt(hex.substr(0, 2), 16),
-        g: parseInt(hex.substr(2, 2), 16),
-        b: parseInt(hex.substr(4, 2), 16),
-        a: parseInt(hex.substr(6, 2) || "FF", 16),
+        r: parseInt(hexa.substr(0, 2), 16),
+        g: parseInt(hexa.substr(2, 2), 16),
+        b: parseInt(hexa.substr(4, 2), 16),
+        a: parseInt(hexa.substr(6, 2) || "FF", 16),
       };
     };
     const setBrightness = rgba => {
@@ -1143,6 +1146,15 @@
     };
     const { r, g, b, a } = hexaToRgba(hexa);
     return `#${rgbaToHexa(setBrightness({ r: tl(r), g: tl(g), b: tl(b), a: tl(a) }))}`;
+  };
+  const getBrightness = hexa => {
+    const { r, g, b, a } = {
+      r: parseInt(hexa.substr(0, 2), 16),
+      g: parseInt(hexa.substr(2, 2), 16),
+      b: parseInt(hexa.substr(4, 2), 16),
+      a: parseInt(hexa.substr(6, 2), 16) / 256,
+    };
+    return (0.299 * r + 0.587 * g + 0.114 * b) / a;
   };
 
   /* new FrDialogBox */
@@ -1976,7 +1988,8 @@
     /* DialogBox for the first visit after upgrading */
 
     const hintUpdateInfo = async (url, curVersion) => {
-      const CANDIDATE_FIELD = typeof curVersion === "undefined" ? "新安装首次运行" : curVersion !== defCon.curVersion ? "更新后首次运行" : "您通过历史查询";
+      const CANDIDATE_FIELD =
+        typeof curVersion === "undefined" ? "新安装首次运行" : curVersion === null ? "数据被重置后运行" : curVersion === defCon.curVersion ? "您通过历史查询" : "更新后首次运行";
       const FIRST_INSTALL_NOTICE_WARNING =
         typeof curVersion === "undefined"
           ? `<li class="${RANDOM_ID}_warn"><strong>注意</strong>：首次使用内置参数渲染，若效果不佳属正常情况，请根据显示器及浏览器设置重新配置参数以达到最佳效果！</li>`
@@ -1994,9 +2007,8 @@
             <p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}
               <!-- START VERSION NOTICE -->
-              <li class="${RANDOM_ID}_fix">修正某些站点对QuerySelector重新定义造成的错误。</li>
-              <li class="${RANDOM_ID}_fix">修正取色器因chrome++插件CSP设置造成报错的问题。</li>
-              <li class="${RANDOM_ID}_fix">优化NavigatorUAData兼容性，增强UA伪造的识别率。</li>
+              <li class="${RANDOM_ID}_fix">修正异步iframe框架内联样式预览重复载入的错误。</li>
+              <li class="${RANDOM_ID}_fix">优化QuerySelector兼容性，修正多元素筛选时的错误。</li>
               <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化代码。</li>
               <!-- END VERSION NOTICE -->
             </ul></p>
@@ -2074,6 +2086,7 @@
         convertToUnicode("宋体"),
         convertToUnicode("新宋体"),
         convertToUnicode("黑体"),
+        convertToUnicode("仿宋"),
         convertToUnicode("微软雅黑"),
         convertToUnicode("微軟正黑體"),
         "SimSun",
@@ -2142,7 +2155,7 @@
     );
     const fontStyle_container = String(
       `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;border-radius:12px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 20px);z-index:999999;padding:4px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container} *{line-height:1.5!important;text-shadow:none!important;-webkit-text-stroke:initial!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Android Emoji",EmojiSymbols!important;font-size:16px;font-weight:700}` +
-        `#${defCon.id.container} fieldset{border:2px groove #67a5df!important;border-radius:10px;padding:4px 6px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:475px}#${defCon.id.container} legend{line-height:inherit;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;background:#f0f6ff!important;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{display:inherit;list-style:none;margin:3px 0;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default;min-width:-webkit-fill-available;min-width:-moz-available;-webkit-user-select:none;user-select:none}#${defCon.id.container} ul li:before{display:none}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden}#${defCon.id.container} .${defCon.class.help}:hover{cursor:help}#${RANDOM_ID}_scriptname{font-weight:900!important;-webkit-user-select:all;user-select:all;display:inline-block}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{padding:0;margin:0;width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50% 0;-webkit-transform:rotate(360deg);animation:rotation 5s linear infinite}` +
+        `#${defCon.id.container} fieldset{border:2px groove #67a5df!important;border-radius:10px;padding:4px 6px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:475px}#${defCon.id.container} legend{line-height:inherit;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;background:#f0f6ff!important;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{display:inherit;list-style:none;margin:3px 0;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default;min-width:-webkit-fill-available;min-width:-moz-available;-webkit-user-select:none;user-select:none}#${defCon.id.container} ul li:before{display:none}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden;visibility:visible!important}#${defCon.id.container} .${defCon.class.help}:hover{cursor:help}#${RANDOM_ID}_scriptname{font-weight:900!important;-webkit-user-select:all;user-select:all;display:inline-block}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{padding:0;margin:0;width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50% 0;-webkit-transform:rotate(360deg);animation:rotation 5s linear infinite}` +
         `#${defCon.id.fontList}{padding:2px 10px 0 10px;min-height:73px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex!important;align-items:center;justify-content:space-between}#${defCon.id.fontSize}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.shadowColor}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;padding:2px 10px;min-height:45px;margin:4px;width:auto}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${defCon.id.submit}{padding:2px 10px;height:40px}` +
         `#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${defCon.id.fontList} .${defCon.class.label} span{box-sizing:border-box;color:#fff;font-size:16px!important;font-weight:400;height:max-content;width:max-content;min-width:12px;max-width:200px;padding:5px;background:#67a5df;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap}#${defCon.id.fontList} .${defCon.class.close}{width:12px}#${defCon.id.fontList} .${defCon.class.close}:hover{color:tomato;background-color:#2d7dca;border-radius:2px}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-x:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;padding:6px 6px 0 6px;margin:0 0 6px 0;width:100%;min-width:100%;max-width:fit-content;max-width:-moz-min-content;max-height:90px;min-height:45px;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:6px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 2px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} span.${defCon.class.spanlabel},#${defCon.id.selector} span.${defCon.class.spanlabel}{margin:0!important;width:auto;display:block!important;padding:0 0 4px 0;color:#333;border:0;text-align:left!important;background-color:transparent!important}` +
         `#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} input{text-overflow:ellipsis;overflow:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;outline:none!important;padding:1px 23px 1px 2px;margin:0;width:100%;max-width:100%;min-width:100%;height:42px!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:16px!important;font-weight:700;text-indent:8px;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font:normal 700 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font:normal 700 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:4px 0 0 0;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:4px 8px;width:auto;min-width:60%;max-width:calc(100% - 68px);max-height:298px;font-size:18px!important;white-space:nowrap;background-color:#fff;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}` +
@@ -2439,7 +2452,7 @@
             return false;
           };
           const HAS_ADDED_NODES = checkMutationHasAddedNodes();
-          HAS_ADDED_NODES && deBounce(insertStyle_AsyncFrames, 20, "asyncframes")({ isMutationObserver: true });
+          HAS_ADDED_NODES && insertStyle_AsyncFrames({ isMutationObserver: true });
           SHOULD_FIX_STROKE && deBounce(correctBoldErrorByStroke, 50, "fixstroke")(CONST_VALUES.fontStroke, { isCount: HAS_ADDED_NODES });
         }
       }).observe(document, { childList: true, subtree: true });
@@ -2458,13 +2471,13 @@
             setAutoZoomFontSize(`#${defCon.id.rndId}`, defCon.tZoom);
             sleep(100).then(() => {
               qS(`#${defCon.id.container}`).style.opacity = 1;
-              debug("\u27A4 configure <errorCount>:", defCon.errors.length);
+              debug("\u27A4 configure<errorCount>:", defCon.errors.length);
               defCon.errors.length > 0 && reportErrorToAuthor(defCon.errors, true);
             });
             qS(`.${defCon.class.title} span.${defCon.class.guide}`).addEventListener("click", () => {
               GMopenInTab(`${HOST_URI}#guide`, defCon.options);
             });
-            qS(`#${defCon.id.field} span#${RANDOM_ID}_scriptname`).addEventListener("dblclick", function () {
+            qS(`#${defCon.id.field} #${RANDOM_ID}_scriptname`).addEventListener("dblclick", function () {
               hintUpdateInfo(`${HOST_URI}#update`, _config_data_.curVersion);
               this.style.userSelect = "none";
             });
@@ -2803,7 +2816,7 @@
     function moveStyleTolastChild({ isMutationObserver } = {}) {
       try {
         if (isMutationObserver) {
-          if (document.head.querySelectorAll("style[id^='TC']").length > 1) {
+          if (qA("style[id^='TC']", document.head).length > 1) {
             if (!defCon.scriptCount) {
               defCon.scriptCount = true;
               const info = `\u53d1\u73b0\u5197\u4f59\u5b89\u88c5\u7684\u201c${defCon.scriptName}\u201d\u811a\u672c\uff0c\u8bf7\u5220\u9664\u91cd\u590d\u811a\u672c\u4fdd\u7559\u5176\u4e00\u3002`;
@@ -2812,7 +2825,7 @@
               console.error("Redundant Scripts:", info);
             }
             return;
-          } else if (document.head.querySelectorAll("style[id^='TS']").length > 0) {
+          } else if (qA("style[id^='TS']", document.head).length > 0) {
             timeStart("\u27A4 [MOVESTYLE]");
             insertStyle({ isReload: true });
             debug("\u27A4 className(After): %c%s", "font-style:italic", document.head.lastChild.className);
@@ -3100,7 +3113,7 @@
           const zoom = qS(`#${defCon.id.fontZoom}`);
           if (isFontsize) {
             try {
-              drawZoom = document.querySelector(`#${defCon.id.zoomSize}`);
+              drawZoom = qS(`#${defCon.id.zoomSize}`);
               zoom.value = CONST_VALUES.fontSize === 1 ? "OFF" : CONST_VALUES.fontSize.toFixed(3);
               rangeSliderWidget(drawZoom, zoom, 3, true);
               checkInputValue(zoom, drawZoom, /^[0-1](\.[0-9]{1,3})?$/, 3, true);
@@ -3117,7 +3130,7 @@
           let drawStrock;
           const stroke = qS(`#${defCon.id.strokeSize}`);
           try {
-            drawStrock = document.querySelector(`#${defCon.id.stroke}`);
+            drawStrock = qS(`#${defCon.id.stroke}`);
             stroke.value = CONST_VALUES.fontStroke === 0 ? "OFF" : CONST_VALUES.fontStroke.toFixed(3);
             rangeSliderWidget(drawStrock, stroke, 3);
             checkInputValue(stroke, drawStrock, /^[0-1](\.[0-9]{1,3})?$/, 3);
@@ -3133,7 +3146,7 @@
           let drawShadow;
           const shadows = qS(`#${defCon.id.shadowSize}`);
           try {
-            drawShadow = document.querySelector(`#${defCon.id.shadow}`);
+            drawShadow = qS(`#${defCon.id.shadow}`);
             shadows.value = CONST_VALUES.fontShadow === 0 ? "OFF" : CONST_VALUES.fontShadow.toFixed(2);
             qS(`#${defCon.id.shadowColor}`).style.display = shadows.value === "OFF" ? "none" : "flex";
             rangeSliderWidget(drawShadow, shadows, 2);
@@ -3173,12 +3186,13 @@
               },
             });
             colorPicker.fromString(CONST_VALUES.shadowColor);
-            colorshow.value = colorPicker.toHEXAString() === "#FFFFFFFF" ? "currentcolor" : colorPicker.toHEXAString();
+            const cp = colorPicker.toHEXAString();
+            const cl = getBrightness(cp.substring(1)) > 182 ? "#333" : "#eee";
+            colorshow.value = cp === "#FFFFFFFF" ? "currentcolor" : cp;
             debug(
-              "%c\u27A4 frColorPicker: %c%s",
+              `%c\u27A4 frColorPicker: %c${cp}`,
               `display:inline-block;padding:5px 0`,
-              `display:inline-block;border-radius:4px;padding:5px 10px;background-color:${colorPicker.toRGBAString()}`,
-              colorPicker.toHEXAString()
+              `display:inline-block;border:1px solid #eee;border-radius:4px;padding:5px 10px;background-color:${cp};color:${cl}`
             );
           } catch (e) {
             defCon.errors.push(`[Fonts shadowColor]: ${e}`);
@@ -3228,7 +3242,6 @@
               smoothT.checked !== INITIAL_VALUES.fontSmooth ? smoothT.click() : debug("\u27A4 <fontSmooth> NOT MODIFIED");
               ffaceT.checked !== INITIAL_VALUES.fontFace ? ffaceT.click() : debug("\u27A4 <fontFace> NOT MODIFIED");
               CONST_VALUES.fontSelect.split(",")[0] !== INITIAL_VALUES.fontSelect.split(",")[0] ? fontSet().fresetList(fontData) : fontSet().fdeleteList(fontData);
-              await getCurrentFontName(ffaceT.checked, defCon.refont, DEFAULT_FONT);
               if (isFontsize) {
                 zoom.value = INITIAL_VALUES.fontSize === 1 ? "OFF" : INITIAL_VALUES.fontSize.toFixed(3);
                 zoom._value_ = INITIAL_VALUES.fontSize;
@@ -3249,6 +3262,7 @@
               setEffectIntoSubmit(fontCssT.value, CONST_VALUES.fontCSS, defCon.values, fontCssT, submitButton);
               fontExT.value = INITIAL_VALUES.fontEx;
               setEffectIntoSubmit(fontExT.value, CONST_VALUES.fontEx, defCon.values, fontExT, submitButton);
+              await getCurrentFontName(ffaceT.checked, defCon.refont, DEFAULT_FONT);
               sleep(360).then((submitPreview = qS(`#${defCon.id.submit} .${defCon.class.submit}[v-Preview="true"]`)) => {
                 submitPreview && submitPreview.click();
               });
@@ -3256,7 +3270,6 @@
               smoothT.checked !== CONST_VALUES.fontSmooth ? smoothT.click() : debug("\u27A4 <fontSmooth> NOT MODIFIED");
               ffaceT.checked !== CONST_VALUES.fontFace ? ffaceT.click() : debug("\u27A4 <fontFace> NOT MODIFIED");
               fontSet().fdeleteList(fontData);
-              await getCurrentFontName(ffaceT.checked, defCon.refont, DEFAULT_FONT);
               if (isFontsize) {
                 zoom.value = CONST_VALUES.fontSize === 1 ? "OFF" : CONST_VALUES.fontSize.toFixed(3);
                 zoom._value_ = CONST_VALUES.fontSize;
@@ -3277,6 +3290,7 @@
               setEffectIntoSubmit(fontCssT.value, CONST_VALUES.fontCSS, defCon.values, fontCssT, submitButton);
               fontExT.value = CONST_VALUES.fontEx;
               setEffectIntoSubmit(fontExT.value, CONST_VALUES.fontEx, defCon.values, fontExT, submitButton);
+              await getCurrentFontName(ffaceT.checked, defCon.refont, DEFAULT_FONT);
               loadPreview(defCon.preview);
               setAutoZoomFontSize(`#${defCon.id.rndId}`, defCon.tZoom);
             }
@@ -3321,8 +3335,15 @@
                 this.removeAttribute("style");
                 this.removeAttribute("v-Preview");
                 loadPreview(defCon.isPreview, __tshadow, false);
-                await getCurrentFontName(fontface, _refont, DEFAULT_FONT);
-                setAutoZoomFontSize(`#${defCon.id.rndId}`, fzoom);
+                await getCurrentFontName(fontface, _refont, DEFAULT_FONT).then(() => {
+                  const cl = getBrightness(fscolor.substring(1)) > 182 ? "#333" : "#eee";
+                  debug(
+                    `%c\u27A4 frColorPicker<Preview>: %c${fscolor}`,
+                    `display:inline-block;padding:5px 0`,
+                    `display:inline-block;border:1px solid #eee;border-radius:4px;padding:5px 10px;background:${fscolor};color:${cl}`
+                  );
+                  setAutoZoomFontSize(`#${defCon.id.rndId}`, fzoom);
+                });
                 await correctBoldErrorByStroke(NEED_FIX_STROKE(fstroke), { isCount: false });
               } catch (e) {
                 defCon.errors.push(`[submitPreview]: ${e}`);
@@ -3742,7 +3763,7 @@
             ? "#FFFFFFFF"
             : value;
         if (_value !== e) {
-          !v.includes(t.id) ? v.push(t.id) : debug(`\u27A4 "${t.id}" already exist`);
+          !v.includes(t.id) && v.push(t.id);
           if (defCon.isPreview) {
             d.textContent = "\u9884\u89c8";
             d.setAttribute("style", "background-color:coral!important;border-color:coral!important");
@@ -3924,7 +3945,7 @@
         closeConfigurePage({ isReload: false });
         sleep(1e3).then(async () => {
           try {
-            if (!document.querySelector("fr-dialogbox[error='true']")) {
+            if (!qS("fr-dialogbox[error='true']")) {
               const br = e.length > 1 ? "\u3000<br/>" : "";
               for (let i in e) {
                 if (oH.call(e, i)) {
@@ -3935,7 +3956,7 @@
                 trueButtonText: "反馈问题",
                 falseButtonText: "刷新页面",
                 messageText: String(
-                  `<p style="font-size:14px!important;color:crimson">脚本在运行时发生了重大异常或错误，若在『刷新页面』后依然报错，请通过『反馈问题』及时告知作者，感谢您的反馈\uff01<kbd>以下信息会自动保存至您的剪切板\uff1a</kbd></p>
+                  `<p style="font-size:14px!important;color:crimson">脚本在运行时发生了重大异常或错误，若在『刷新页面』后依然报错，请通过『反馈问题』及时告知作者，感谢您的反馈\uff01<br/><kbd style="display: inline-block;padding:3px 5px;font-size:14px!important;margin:4px 0 0 0;color:crimson;vertical-align:middle;background-color:#f6f8fa;border:solid 1px rgba(175,184,193,0.4);border-radius:6px;box-shadow:inset 0 -1px 0 rgba(175,184,193,0.2);">以下信息会自动保存至您的剪切板\uff1a</kbd></p>
                   <p><ul id="${RANDOM_ID}_copy_to_author" style="list-style-position:outside;margin:0!important;padding:0!important;max-height:300px;overflow-y:auto">
                     <li>浏览器信息\uff1a${await getNavigator.getUA()}\u3000</li>
                     <li>脚本扩展信息\uff1a${GMscriptHandler} ${GMversion}\u3000</li>
@@ -4022,7 +4043,7 @@
       } finally {
         if (curZoom !== 1) {
           debug(
-            "\u27A4 fontSize Zoom: save[%s%] current[%c%s% %c%s%]",
+            "\u27A4 fontSize<Zoom>: save[%s%] current[%c%s% %c%s%]",
             (CONST_VALUES.fontSize * 100).toFixed(2),
             "color:teal",
             (curZoom * 100).toFixed(2),
