@@ -3,7 +3,7 @@
 // @name:zh-CN         谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW         谷歌、百度、必應的搜索引擎跳轉工具
 // @name:ja            Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version            5.0.20220515.1
+// @version            5.0.20220528.1
 // @author             F9y4ng
 // @description        The search engine jump tools of Google, Baidu and Bing automatically update and detect the script by default. You can customize the Bing button and other search jump effect settings in the menu.
 // @description:zh-CN  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮及其他搜索跳转效果。
@@ -27,7 +27,7 @@
 // @compatible         Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible         Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible         Safari 兼容Tampermonkey • Safari
-// @note               修正一些已知的问题，优化代码。
+// @note               修正在Firefox下脚本缩放页面后的坐标偏移问题。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -795,14 +795,14 @@
       const zoom = Number(window.getComputedStyle(document.body, null).getPropertyValue("zoom"));
       const transform = window.getComputedStyle(document.body, null).getPropertyValue("transform");
       const thatNotice = qS(`#${Notice.noticejs}-${position}`);
-      const rePosition = (item, ratio, _top, distTop) => {
-        let sT = 0 - (defCon.elCompat.getBoundingClientRect().top || 0);
-        item.style.top = `${(_top + sT) / ratio}px`;
+      const rePosition = (item, top, distTop) => {
+        let sT = -defCon.elCompat.getBoundingClientRect().top;
+        item.style.top = `${top + sT}px`;
         window.scrollTo(0, sT - 1e-5);
         if (item.childNodes.length === 1) {
           defCon[distTop] = () => {
-            sT = 0 - (defCon.elCompat.getBoundingClientRect().top || 0);
-            item.style.top = `${(_top + sT) / ratio}px`;
+            sT = -defCon.elCompat.getBoundingClientRect().top;
+            item.style.top = `${top + sT}px`;
           };
           document.addEventListener("scroll", defCon[distTop]);
         }
@@ -837,7 +837,7 @@
                   break;
               }
             });
-            rePosition(thatNotice, ratio, 0, position);
+            rePosition(thatNotice, 0, position);
           }
         }
       }
@@ -1957,7 +1957,7 @@
     function setSecurityPolicy() {
       if (window.trustedTypes && window.trustedTypes.createPolicy) {
         window.trustedTypes.createPolicy("default", {
-          createHTML: (string, sink) => {
+          createHTML: string => {
             return string;
           },
         });

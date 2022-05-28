@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.05.21.1
+// @version            2022.05.28.2
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -18,7 +18,7 @@
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.meta.js
 // @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
-// @require            https://greasyfork.org/scripts/437214-frcolorpicker/code/frColorPicker.js?version=1050215
+// @require            https://greasyfork.org/scripts/437214-frcolorpicker/code/frColorPicker.js?version=1053073
 // @match              *://*/*
 // @grant              GM_getValue
 // @grant              GM.getValue
@@ -77,6 +77,7 @@
   /* default Const Values & Functions */
 
   const defCon = {
+    oZoom: [],
     values: [],
     errors: [],
     clickTimer: 0,
@@ -196,7 +197,6 @@
       try {
         return top.location.hostname;
       } catch (e) {
-        error("Hostname:", e.name);
         return location.hostname;
       }
     },
@@ -204,7 +204,6 @@
       try {
         return window.self === window.top;
       } catch (e) {
-        error("Window.Top:", e.name);
         return !parent.frames.length;
       }
     },
@@ -317,6 +316,12 @@
   const FONTLIST_IMG = defCon.decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjIlMkYwNCUyRjAyJTJGcW9SZldkLmdpZg==");
   const LOADING_IMG = defCon.decrypt("aHR0cHMlM0ElMkYlMkZpbWcuemNvb2wuY24lMkZjb21tdW5pdHklMkYwMzhkZGU0NThmOWE4NzRhODAxMjE2MGY3NDE3ZjZlLmdpZg==");
 
+  defCon.queryString = `html,head,head *,base,meta,style,link,script,`.concat(
+    `noscript,body,iframe,img,br,hr,ul,canvas,applet,source,svg,svg *,picture,`,
+    `form,embed,audio,video,track,figure,progress,fr-colorpicker,fr-colorpicker *,`,
+    `fr-configure,fr-configure *,fr-dialogbox,fr-dialogbox *,gb-notice,gb-notice *`
+  );
+
   /* New RAF for setTimeout & setInterval */
 
   window.requestAnimationFrame ||
@@ -399,7 +404,7 @@
     return new Promise(resolve => {
       useCachedSetTimeout ? cachedSetTimeout(resolve, timeout) : raf.setTimeout(resolve, timeout);
     }).catch(e => {
-      error("CreateSleepPromise:", e);
+      error("CreateSleepPromise:", e.message);
     });
   };
   const sleep = function (timeout, { useCachedSetTimeout } = {}) {
@@ -419,6 +424,13 @@
   /* Abbreviated functions */
 
   const oH = Object.prototype.hasOwnProperty;
+  const cP = (target, prop) => {
+    try {
+      return window.getComputedStyle(target, null).getPropertyValue(prop);
+    } catch (e) {
+      return target.style[prop];
+    }
+  };
   const qA = (str, target = document) => {
     try {
       return Array.prototype.slice.call(target.querySelectorAll(str), 0);
@@ -509,7 +521,7 @@
           });
         }
       } catch (e) {
-        error("Navigator.getBrowser:", e.name);
+        error("Navigator.getBrowser:", e.message);
       }
       return { info, version };
     },
@@ -584,7 +596,7 @@
           ? "(CHEAT-UA) ".concat(u)
           : u;
       } catch (e) {
-        error("Navigator.getUA:", e.name);
+        error("Navigator.getUA:", e.message);
         return u;
       }
     },
@@ -596,6 +608,122 @@
   const IS_REAL_GECKO = (getNavigator.core().Gecko && !getNavigator.isCheatUA()) || !!unsafeWindow.sidebar;
   const IS_REAL_BLINK = (getNavigator.core().Blink && !getNavigator.isCheatUA()) || !!unsafeWindow.chrome;
 
+  /* New DefinePropertise */
+
+  const definePropertiesForZoom = ratio => {
+    const obj_Targets = new Set([
+      {
+        obj: MouseEvent.prototype,
+        props: IS_REAL_GECKO
+          ? ["clientX", "clientY", "pageX", "pageY", "offsetX", "offsetY", "screenX", "screenY", "movementX", "movementY", "x", "y"]
+          : ["clientX", "clientY", "pageX", "pageY", "layerX", "layerY", "offsetX", "offsetY", "screenX", "screenY", "movementX", "movementY", "x", "y"],
+      },
+      {
+        obj: unsafeWindow,
+        props: ["pageXOffset", "pageYOffset", "scrollX", "scrollY"],
+      },
+      {
+        obj: Element.prototype,
+        props: ["scrollLeft", "scrollTop", "scrollWidth", "scrollHeight", "offsetLeft", "offsetTop", "offsetWidth", "offsetHeight", "clientLeft", "clientTop"],
+      },
+    ]);
+    try {
+      for (const obj_Target of obj_Targets.values()) {
+        obj_Target.props.forEach(prop => {
+          const oPD = Object.getOwnPropertyDescriptor(obj_Target.obj, prop);
+          const obj_get = (oPD && oPD.get) || (obj_Target.obj[prop] && obj_Target.obj[prop].get);
+          if (obj_Target.obj instanceof Element && ["scrollLeft", "scrollTop"].includes(prop)) {
+            const obj_set = (oPD && oPD.set) || (obj_Target.obj[prop] && obj_Target.obj[prop].set);
+            Object.defineProperty(obj_Target.obj, prop, {
+              configurable: true,
+              enumerable: true,
+              get: function () {
+                return obj_get && obj_get.call(this) / ratio;
+              },
+              set: function (Value) {
+                obj_set && obj_set.call(this)(Value * ratio);
+              },
+            });
+          } else {
+            Object.defineProperty(obj_Target.obj, prop, {
+              configurable: true,
+              enumerable: true,
+              get: function () {
+                return obj_get && obj_get.call(this) / ratio;
+              },
+            });
+          }
+        });
+      }
+    } catch (e) {
+      error("defineProperty:", e.message);
+    }
+    if (IS_REAL_GECKO) {
+      try {
+        let getBoundingClientRect = Element.prototype.getBoundingClientRect;
+        Object.defineProperty(Element.prototype, "getBoundingClientRect", {
+          value: function () {
+            const value = getBoundingClientRect.call(this);
+            let newValue = new Proxy(value, {
+              get: function (target, proper) {
+                return Reflect.get(target, proper) / ratio;
+              },
+            });
+            return newValue;
+          },
+        });
+        //* Patch2022.2.alhpa: Fix Position:sticky/fixed Compatible Error in Firefox *//
+        const positionCompatibility = scale => {
+          sleep(2e2)(scale).then(t => {
+            if (t && t !== 1) {
+              const fn = [];
+              qA(`:not(${defCon.queryString})`).forEach((item, index) => {
+                if (cP(item, "position") === "sticky" && item.offsetParent !== null) {
+                  const offset = Number(cP(item, "top").replace("px", "")) || 0;
+                  const sticky = {};
+                  sticky[index] = function () {
+                    const s = defCon.elCompat.getBoundingClientRect().top * (t - 1);
+                    const r = parseFloat(s + offset);
+                    item.style.cssText += `top:${r}px!important`;
+                  };
+                  fn.push(sticky[index]);
+                  // // TODO: Fix Position:fixed still have many problems, some sites may cause serious errors.
+                  // } else if (cP(item, "position") === "fixed") {
+                  //   const offsetTop = Number(cP(item, "top").replace("px", "")) || 0;
+                  //   const offsetBottom = Number(cP(item, "bottom").replace("px", "")) || 0;
+                  //   const availHeight = window.screen.availHeight;
+                  //   const fixed = {};
+                  //   fixed[index] = function () {
+                  //     const s = offsetTop > availHeight ? availHeight / t - item.getBoundingClientRect().height * 2 - offsetBottom : offsetTop / t;
+                  //     const r = parseFloat(s - defCon.elCompat.getBoundingClientRect().top);
+                  //     item.style.cssText += `top:${r}px!important;height:-moz-fit-content`;
+                  //   };
+                  //   fn.push(fixed[index]);
+                }
+              });
+              const fixedPosition = function () {
+                for (let i = 0; i < fn.length; i++) {
+                  fn[i]();
+                }
+              };
+              window.removeEventListener("scroll", fixedPosition);
+              window.addEventListener("scroll", fixedPosition);
+            }
+          });
+        };
+        if (defCon.oZoom.length > 1) {
+          positionCompatibility(defCon.tZoom);
+        } else {
+          window.onload = () => {
+            positionCompatibility(ratio);
+          };
+        }
+      } catch (e) {
+        error("defineProperty.Firefox:", e.message);
+      }
+    }
+  };
+
   /* Initialized important functions */
 
   function getScriptNameViaLanguage() {
@@ -604,26 +732,6 @@
     const languageString = GMinfo.scriptMetaStr.match(name_i18n);
     const scriptName = languageString ? languageString[2] : GMinfo.script.name;
     return String(scriptName || "Font Rendering");
-  }
-
-  function getElements(str, target) {
-    const aStr = str.trim().startsWith(":not") ? [] : str.trim().split(",");
-    let aChild = [];
-    try {
-      aStr.forEach(items => {
-        const rStr = items.trim().split(/\s+|>|,/g);
-        let rChild = [];
-        let rParent = [target];
-        for (let i = 0; i < rStr.length; i++) {
-          rChild = getElementsByStr(rParent, rStr[i]) || [];
-          rParent = rChild;
-        }
-        aChild = aChild.concat(rChild);
-      });
-    } catch (e) {
-      error("QuerySelector.getElements:", e.message);
-    }
-    return [...aChild];
   }
 
   function setRAFInterval(callback, interval, { runNow } = {}) {
@@ -655,6 +763,26 @@
         delete defCon[timer];
       }, delay);
     };
+  }
+
+  function getElements(str, target) {
+    const aStr = str.trim().startsWith(":not") ? [] : str.trim().split(",");
+    let aChild = [];
+    try {
+      aStr.forEach(items => {
+        const rStr = items.trim().split(/\s+|>|,/g);
+        let rChild = [];
+        let rParent = [target];
+        for (let i = 0; i < rStr.length; i++) {
+          rChild = getElementsByStr(rParent, rStr[i]) || [];
+          rParent = rChild;
+        }
+        aChild = aChild.concat(rChild);
+      });
+    } catch (e) {
+      error("QuerySelector.getElements:", e.message);
+    }
+    return [...aChild];
   }
 
   function getElementsByStr(aParent, str) {
@@ -733,17 +861,13 @@
   }
 
   function safeRemove(s, t) {
-    if (s && t && typeof t === "object") {
-      const removeNodes = qA(s, t);
-      for (let i = 0; i < removeNodes.length; i++) {
-        try {
-          removeNodes[i].parentNode && removeNodes[i].parentNode.removeChild(removeNodes[i]);
-        } catch (e) {
-          removeNodes[i].remove();
-          error("SafeRemove:", e);
-        }
+    qA(s, t).forEach(item => {
+      try {
+        item.parentNode && item.parentNode.removeChild(item);
+      } catch (e) {
+        item.remove();
       }
-    }
+    });
   }
 
   function addStyle(css, className, addToTarget, T = "T", { isReload } = {}, initType = "text/css") {
@@ -778,13 +902,105 @@
             return true;
           }
         } catch (e) {
-          error("AddStyle:", e);
+          error("AddStyle:", e.message);
           return true;
         }
       },
       20,
       { runNow: true }
     );
+  }
+
+  function framesInsertStyle({ items, condition, tstyle } = {}) {
+    if (
+      items.offsetParent !== null &&
+      cP(items, "visibility") !== "hidden" &&
+      items.getBoundingClientRect().top >= 0 &&
+      items.getBoundingClientRect().left >= 0 &&
+      items.getBoundingClientRect().width > 4 &&
+      items.getBoundingClientRect().height > 4
+    ) {
+      timeStart("\u27A4 [ASYNCFRAMES]");
+      const ORIGIN_SANDBOX = items.getAttribute("sandbox");
+      ORIGIN_SANDBOX && items.removeAttribute("sandbox");
+      const h = items.contentWindow;
+      const sT = qA("style[id^='TS']", h.document.head);
+      const bT = h.document.body.textContent.trim();
+      switch (condition) {
+        case "Preview":
+          debug("\u27A4 preview<styleCount>:", sT.length);
+          if (sT.length > 0) {
+            addStyle(tstyle, sT[0].className, h.document.head, "TS", { isReload: true });
+          } else {
+            addStyle(tstyle, null, h.document.head, "TS", { isReload: false });
+          }
+          debug("\u27A4 asyncFrames<loadPreview>: %c%s\n\u3000 \u27A5 %s", "color:indigo", condition, items.src || "<NULL>");
+          items.setAttribute("fr-async-frames", condition);
+          break;
+        case "Autoload":
+          if (!sT.length && bT.length > 0) {
+            addStyle(tstyle, null, h.document.head, "TS", { isReload: false });
+            if (qA("style[id^='TS']", h.document.head).length > 0) {
+              debug("\u27A4 asyncFrames<insertStyle>: %c%s\n\u3000 \u27A5 %s", "color:indigo", condition, items.src || "<NULL>");
+              items.setAttribute("fr-async-frames", condition);
+            }
+          }
+          break;
+      }
+      ORIGIN_SANDBOX && items.setAttribute("sandbox", ORIGIN_SANDBOX);
+      timeEnd("\u27A4 [ASYNCFRAMES]");
+    }
+  }
+
+  function loadPreview(_preview_, ts = defCon.tStyle, s = true) {
+    try {
+      if (_preview_) {
+        addStyle(ts, `${defCon.class.rndStyle}`, document.head, "TS", { isReload: true });
+        if (defCon.isFontsize) {
+          const oScale = Number(defCon.oZoom.slice(-2, -1)) || 1;
+          const tScale = Number(defCon.oZoom.slice(-1));
+          debug("\u27A4 Scale<Matrix>: %o\n\u3000 \u27A5 Scale<Previous>: %o\n\u3000 \u27A5 Scale<Current>: %o", defCon.oZoom, oScale, tScale);
+          definePropertiesForZoom(tScale / oScale);
+        }
+        qA("iframe").forEach(async items => {
+          await sleep(30);
+          try {
+            framesInsertStyle({ items: items, condition: "Preview", tstyle: ts });
+          } catch (e) {
+            error("Window.Frames:", e.message);
+          }
+        });
+        defCon.preview = !s;
+      }
+    } catch (e) {
+      error("LoadPreview:", e.message);
+    }
+  }
+
+  function insertStyle_AsyncFrames({ isMutationObserver } = {}) {
+    // Greasemonkey4.0+ need to wait all frames loaded to excute.
+    if (IS_REAL_BLINK || isGM) {
+      qA("iframe").forEach(async items => {
+        await sleep(30);
+        try {
+          framesInsertStyle({ items: items, condition: "Autoload", tstyle: defCon.tStyle });
+        } catch (e) {
+          !isMutationObserver && error("InsertStyle.AsyncFrames:", e.message);
+        }
+      });
+    }
+  }
+
+  function scrollInsteadFixed(target, distTop) {
+    if (target) {
+      const sT = -defCon.elCompat.getBoundingClientRect().top;
+      target.style.top = `${sT}px`;
+      window.scrollTo(0, sT - 1e-5);
+      defCon[distTop] = () => {
+        target.style.top = `${-defCon.elCompat.getBoundingClientRect().top}px`;
+      };
+      document.addEventListener("scroll", defCon[distTop]);
+    }
   }
 
   function convertToUnicode(str) {
@@ -795,102 +1011,11 @@
     return value.toUpperCase();
   }
 
-  function scrollInsteadFixed(target, size, distTop) {
-    let sT = 0 - (defCon.elCompat.getBoundingClientRect().top || 0);
-    target.style.top = `${sT / size}px`;
-    window.scrollTo(0, sT - 1e-5);
-    defCon[distTop] = () => {
-      sT = 0 - (defCon.elCompat.getBoundingClientRect().top || 0);
-      target.style.top = `${sT / size}px`;
-    };
-    document.addEventListener("scroll", defCon[distTop]);
-  }
-
-  function loadPreview(_preview_, ts = defCon.tStyle, s = true) {
-    try {
-      if (_preview_) {
-        addStyle(ts, `${defCon.class.rndStyle}`, document.head, "TS", { isReload: true });
-        qA("iframe").forEach(async items => {
-          await sleep(30);
-          try {
-            if (
-              items.offsetParent !== null &&
-              items.getBoundingClientRect().top >= 0 &&
-              items.getBoundingClientRect().left >= 0 &&
-              items.getBoundingClientRect().width > 4 &&
-              items.getBoundingClientRect().height > 4 &&
-              window.getComputedStyle(items, null).getPropertyValue("visibility") !== "hidden"
-            ) {
-              const ORIGIN_SANDBOX = items.getAttribute("sandbox");
-              ORIGIN_SANDBOX && items.removeAttribute("sandbox");
-              const h = items.contentWindow;
-              const sT = qA("style[id^='TS']", h.document.head);
-              debug("\u27A4 preview<styleCount>:", sT.length);
-              if (sT.length > 0) {
-                addStyle(ts, sT[0].className, h.document.head, "TS", { isReload: true });
-              } else {
-                addStyle(ts, null, h.document.head, "TS", { isReload: false });
-              }
-              debug("\u27A4 fr-async-frames <loadPreview>: %cPreview", "color:indigo", items.src || "<NULL>");
-              items.setAttribute("fr-async-frames", "Preview");
-              ORIGIN_SANDBOX && items.setAttribute("sandbox", ORIGIN_SANDBOX);
-            }
-          } catch (e) {
-            error("Window.Frames:", e.name);
-          }
-        });
-        defCon.preview = !s;
-      }
-    } catch (e) {
-      error("LoadPreview:", e);
-    }
-  }
-
-  function insertStyle_AsyncFrames({ isMutationObserver } = {}) {
-    // Greasemonkey4.0+ need to wait all frames loaded to excute.
-    if (IS_REAL_BLINK || isGM) {
-      const frames = qA("iframe");
-      if (frames.length > 0) {
-        timeStart("\u27A4 [ASYNCFRAMES]");
-        frames.forEach(async items => {
-          await sleep(30);
-          try {
-            if (
-              items.offsetParent !== null &&
-              items.getBoundingClientRect().top >= 0 &&
-              items.getBoundingClientRect().left >= 0 &&
-              items.getBoundingClientRect().width > 4 &&
-              items.getBoundingClientRect().height > 4 &&
-              window.getComputedStyle(items, null).getPropertyValue("visibility") !== "hidden"
-            ) {
-              const ORIGIN_SANDBOX = items.getAttribute("sandbox");
-              ORIGIN_SANDBOX && items.removeAttribute("sandbox");
-              const h = items.contentWindow;
-              const sT = qA("style[id^='TS']", h.document.head);
-              const bT = h.document.body.textContent.trim();
-              if (!sT.length && bT.length > 0) {
-                addStyle(defCon.tStyle, null, h.document.head, "TS", { isReload: false });
-                if (qA("style[id^='TS']", h.document.head).length > 0) {
-                  debug("\u27A4 fr-async-frames <insertStyle>: %cAutoload", "color:indigo", items.src || "<NULL>");
-                  items.setAttribute("fr-async-frames", "Autoload");
-                }
-              }
-              ORIGIN_SANDBOX && items.setAttribute("sandbox", ORIGIN_SANDBOX);
-            }
-          } catch (e) {
-            !isMutationObserver && error("InsertStyle.AsyncFrames:", e.name);
-          }
-        });
-        timeEnd("\u27A4 [ASYNCFRAMES]");
-      }
-    }
-  }
-
   /* expire for fontlist cache */
 
   const cache = {
     value: (data, eT = 6048e5) => {
-      debug("\u27A4 %ccache Time: %s hrs", "font-weight:bold", eT / 36e5);
+      debug("\u27A4 cache Expiration: %c%s hrs", "color:green;font-weight:700", eT / 36e5);
       return {
         data: data,
         expired: Date.now() + eT,
@@ -910,7 +1035,7 @@
           const data = value.data;
           const expiredTime = value.expired;
           const curTime = Date.now();
-          debug("\u27A4 cache Remaining: %s hrs", ((expiredTime - curTime) / 36e5).toFixed(2));
+          debug("\u27A4 cache Remaining: %c%s hrs", "color:crimson;font-weight:700", ((expiredTime - curTime) / 36e5).toFixed(2));
           if (expiredTime > curTime && typeof data === "object") {
             return data;
           } else {
@@ -918,7 +1043,7 @@
             return null;
           }
         } catch (e) {
-          error("Cache.get:", e);
+          error("Cache.get:", e.message);
           cache.remove(key);
           return null;
         }
@@ -941,152 +1066,6 @@
     document.body.removeChild(e);
     e = null;
   }
-
-  /* New DefinePropertise */
-
-  const definePropertiesForZoom = function (t, d) {
-    try {
-      const setValue = (s, g, mod, z = 0) => {
-        try {
-          switch (mod) {
-            case 0:
-              if (s && s instanceof MouseEvent && s.target && s.target !== document) {
-                z = s.target.getBoundingClientRect()[g];
-              }
-              break;
-            case 1:
-              if (s && s instanceof MouseEvent && s.target.parentNode && s.target.parentNode !== document) {
-                z = s.target.parentNode.getBoundingClientRect()[g];
-              }
-              break;
-            case 2:
-              if (s && s instanceof Element && s !== document) {
-                z = 0 - s.getBoundingClientRect()[g] / t;
-              }
-              break;
-          }
-        } catch (e) {
-          error("DPFZ.setValue:", e.message);
-        }
-        return z;
-      };
-      d = d instanceof Element ? d : document.documentElement || document.body;
-      debug("\u27A4 %cdefineProperties: <%s> %s", "color:crimson;font-weight:bold", t, d instanceof Element);
-      // window
-      Object.defineProperties(unsafeWindow, {
-        pageXOffset: {
-          get: function () {
-            return setValue(d, "left", 2);
-          },
-          configurable: false,
-        },
-        pageYOffset: {
-          get: function () {
-            return setValue(d, "top", 2);
-          },
-          configurable: false,
-        },
-        scrollX: {
-          get: function () {
-            return setValue(d, "left", 2);
-          },
-          configurable: false,
-        },
-        scrollY: {
-          get: function () {
-            return setValue(d, "top", 2);
-          },
-          configurable: false,
-        },
-      });
-      // HtmlElement
-      Object.defineProperties(d, {
-        scrollLeft: {
-          get: function () {
-            return setValue(this, "left", 2);
-          },
-          set: Value => {
-            d.scrollTo(Value * t, 0);
-          },
-          configurable: true,
-        },
-        scrollTop: {
-          get: function () {
-            return setValue(this, "top", 2);
-          },
-          set: Value => {
-            d.scrollTo(0, Value * t);
-          },
-          configurable: true,
-        },
-      });
-      // MouseEvents
-      Object.defineProperties(MouseEvent.prototype, {
-        clientX: {
-          get: function () {
-            return this.x / t;
-          },
-          configurable: false,
-        },
-        clientY: {
-          get: function () {
-            return this.y / t;
-          },
-          configurable: false,
-        },
-        pageX: {
-          get: function () {
-            return this.x / t + setValue(d, "left", 2);
-          },
-          configurable: false,
-        },
-        pageY: {
-          get: function () {
-            return this.y / t + setValue(d, "top", 2);
-          },
-          configurable: false,
-        },
-        layerX: {
-          get: function () {
-            return this.x / t - setValue(this, "left", 1);
-          },
-          configurable: false,
-        },
-        layerY: {
-          get: function () {
-            return this.y / t - setValue(this, "top", 1);
-          },
-          configurable: false,
-        },
-        offsetX: {
-          get: function () {
-            return this.x / t - setValue(this, "left", 0);
-          },
-          configurable: false,
-        },
-        offsetY: {
-          get: function () {
-            return this.y / t - setValue(this, "top", 0);
-          },
-          configurable: false,
-        },
-        screenX: {
-          get: function () {
-            return this.x / t + window.screenLeft;
-          },
-          configurable: false,
-        },
-        screenY: {
-          get: function () {
-            return this.y / t + window.screenTop;
-          },
-          configurable: false,
-        },
-      });
-    } catch (e) {
-      error("DefinePropertiesForZoom:", e);
-    }
-  };
 
   /* New SliderChecker */
 
@@ -1238,10 +1217,10 @@
       }
     }
     _resetfrDialog() {
-      const zoom = Number(window.getComputedStyle(this.parent, null).getPropertyValue("zoom")) || defCon.tZoom || 1;
+      const zoom = Number(cP(this.parent, "zoom")) || defCon.tZoom || 1;
       if (zoom !== 1) {
         if (IS_REAL_GECKO) {
-          this.zoomText = `transform-origin:left top 0;transform:scale(${1 / zoom});width:${defCon.elCompat.clientWidth}px;height:${defCon.elCompat.clientHeight}px;top:0;`;
+          this.zoomText = `transform-origin:left top 0;transform:scale(${1 / zoom});width:99vw;height:99vh;top:0;`;
           this.container.style.cssText += this.zoomText;
           scrollInsteadFixed(this.container, zoom, "dialogbox");
         } else {
@@ -1380,7 +1359,7 @@
             defaultHeight[baseFonts[index]] = s.offsetHeight;
             h.removeChild(s);
           } catch (e) {
-            error("SupportFontFamily:", e);
+            error("SupportFontFamily:", e.message);
           }
         }
       }
@@ -1397,7 +1376,7 @@
               h.removeChild(s);
               detected = detected || matched;
               if (detected) {
-                debug("\u27A4 detect Fonts: <matched>", {
+                debug("\u27A4 detect Fonts: <matched> %O", {
                   font: font,
                   width: _offsetWidth,
                   defwidth: defaultWidth[baseFonts[index]],
@@ -1409,7 +1388,7 @@
             }
           }
         } catch (e) {
-          error("FontFamily.Detect:", e);
+          error("FontFamily.Detect:", e.message);
         }
         return detected;
       };
@@ -1843,13 +1822,14 @@
       maxPersonalSites = Number(_config_data_.maxPersonalSites) || 100;
       isBackupFunction = Boolean(_config_data_.isBackupFunction);
       isPreview = Boolean(_config_data_.isPreview);
-      isFontsize = Boolean(_config_data_.isFontsize);
+      isFontsize = isGM ? false : Boolean(_config_data_.isFontsize);
       isHotkey = Boolean(typeof _config_data_.isHotkey !== "undefined" ? _config_data_.isHotkey : true);
       isCloseTip = Boolean(_config_data_.isCloseTip);
       rebuild = _config_data_.rebuild;
       curVersion = _config_data_.curVersion;
     }
     defCon.isPreview = isPreview;
+    defCon.isFontsize = isFontsize;
 
     /* initialize Exclude site */
 
@@ -1955,14 +1935,14 @@
         CONST_VALUES.fontEx = filterHtmlToText(fontValue.fontEx);
       }
     }
-    defCon.tZoom = CONST_VALUES.fontSize;
+    defCon.tZoom = typeof defCon.siteIndex === "undefined" ? CONST_VALUES.fontSize : INITIAL_VALUES.fontSize;
 
     /* Rebuild data for update if necessary */
 
     const SET_BOOL_FOR_UPDATE = true; // 2022.03.19
     if (CUR_WINDOW_TOP) {
       const isRebuild = Boolean(rebuild);
-      if (defCon.structureError === true || (isRebuild === SET_BOOL_FOR_UPDATE && typeof rebuild !== "undefined")) {
+      if (defCon.structureError === true || (isRebuild === SET_BOOL_FOR_UPDATE && typeof rebuild === "boolean")) {
         const keys = await GMlistValues();
         for (let key of keys) {
           if (key !== "_configure_") {
@@ -2007,8 +1987,9 @@
             <p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}
               <!-- START VERSION NOTICE -->
-              <li class="${RANDOM_ID}_fix">修正异步iframe框架内联样式预览重复载入的错误。</li>
-              <li class="${RANDOM_ID}_fix">优化QuerySelector兼容性，修正多元素筛选时的错误。</li>
+              <li class="${RANDOM_ID}_info">使用字体缩放功能请仔细阅读注意事项『<a href="${HOST_URI}#scale" target="_blank">关于字体缩放</a>』</li>
+              <li class="${RANDOM_ID}_fix">优化字体比例缩放功能针对大部分主流浏览器的兼容性。</li>
+              <li class="${RANDOM_ID}_fix">修正Firefox经transform缩放后对Position:sticky的兼容性问题。[alpha version]</li>
               <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化代码。</li>
               <!-- END VERSION NOTICE -->
             </ul></p>
@@ -2067,13 +2048,14 @@
     let bodyzoom = "";
     const fontsize_r = parseFloat(CONST_VALUES.fontSize);
     const funcFontsize = t => {
-      return `body{${IS_REAL_GECKO ? `transform:scale(${t});transform-origin:left top 0;width:${100 / t}%;height:${100 / t}%;` : `zoom:${t}!important;`}}`;
+      return `body{${IS_REAL_GECKO ? `transform:scale(${t});transform-origin:left top 0;width:${100 / t}%;` : `zoom:${t}!important;`}}`;
     };
     if (isFontsize && !isNaN(fontsize_r) && fontsize_r >= 0.8 && fontsize_r <= 1.5 && fontsize_r !== 1) {
       bodyzoom = funcFontsize(fontsize_r);
       typeof defCon.siteIndex === "undefined" &&
-        sleep(100).then(() => {
-          definePropertiesForZoom(fontsize_r, defCon.elCompat);
+        sleep(100)(fontsize_r).then(r => {
+          defCon.oZoom.push(r);
+          definePropertiesForZoom(r);
         });
     }
     const prefont = CONST_VALUES.fontSelect && CONST_VALUES.fontSelect.split(",")[0];
@@ -2149,20 +2131,20 @@
       `.fontTest-${RANDOM_ID}{font-weight:normal!important;line-height:initial!important;text-align:left!important;font-style:normal!important;text-decoration:none!important;letter-spacing:normal!important;word-wrap:normal!important;text-indent:initial!important}#${defCon.id.fontTest}{margin:0!important;padding:0!important;width:max-content!important;height:max-content!important;text-shadow:none!important;-webkit-text-stroke:initial!important;-moz-text-size-adjust:none!important;-webkit-text-size-adjust:none!important;text-size-adjust:none!important;white-space:nowrap!important}`
     );
     const fontStyle_db = String(
-      `#${defCon.id.dialogbox}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999995}#${defCon.id.dialogbox} .${defCon.class.db}{box-sizing:content-box;max-width:420px;color:#444;border:2px solid #efefef}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:200px;right:15px;border-radius:6px;width:100%;background:#fff;box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #777!important}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:auto;font-family:Candara,"Times New Roman",system-ui,-apple-system,BlinkMacSystemFont!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:500;text-align:left}.${defCon.class.dbb}{display:inline-block;margin:2px 1%;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;cursor:pointer;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important;box-sizing:content-box}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:none!important;-webkit-text-stroke:initial!important;-webkit-user-select:none;user-select:none}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223!important;color:#fff!important;border:1px solid #d93223!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a!important;color:#fff!important;border:1px solid #038c5a!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777!important;color:#fff!important;border:1px solid #777!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}` +
+      `#${defCon.id.dialogbox}{width:100vw;height:100vh;background:transparent;position:fixed;top:0;left:0;z-index:1999999995}#${defCon.id.dialogbox} .${defCon.class.db}{box-sizing:content-box;max-width:420px;color:#444;border:2px solid #efefef}.${defCon.class.db}{display:block;overflow:hidden;position:fixed;top:200px;right:15px;border-radius:6px;width:100%;background:#fff;box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #777!important}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:auto;font-family:Candara,"Times New Roman",system-ui,-apple-system,BlinkMacSystemFont!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:500;text-align:left}.${defCon.class.dbb}{display:inline-block;margin:2px 1%;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;cursor:pointer;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important;box-sizing:content-box}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:none!important;-webkit-text-stroke:initial!important;-webkit-user-select:none;user-select:none}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223!important;color:#fff!important;border:1px solid #d93223!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a!important;color:#fff!important;border:1px solid #038c5a!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777!important;color:#fff!important;border:1px solid #777!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}` +
         `.${defCon.class.dbm} button:hover{cursor:pointer;background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important}.${defCon.class.dbm} p{line-height:1.5!important;margin:5px 0!important;text-indent:0!important;font-size:16px!important;font-weight:400;text-align:left;-webkit-user-select:none;user-select:none}.${defCon.class.dbm} ul{list-style:none;margin:0 0 0 10px!important;padding:2px;font:italic 14px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;color:gray;scrollbar-width:thin}.${defCon.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${defCon.class.dbm} ul::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #999;background:#cfcfcf;border-radius:10px}.${defCon.class.dbm} ul::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:10px}.${defCon.class.dbm} ul::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:6px}.${defCon.class.dbm} ul li{display:list-item;list-style-type:none;-webkit-user-select:none;user-select:none;word-break:break-all}.${defCon.class.dbm} li:before{display:none}.${defCon.class.dbm} #${defCon.id.bk},.${defCon.class.dbm} #${defCon.id.pv},.${defCon.class.dbm} #${defCon.id.fs},.${defCon.class.dbm} #${defCon.id.hk},.${defCon.class.dbm} #${defCon.id.ct},.${defCon.class.dbm} #${defCon.id.mps},.${defCon.class.dbm} #${defCon.id.flc}{box-sizing:content-box;list-style:none;font-style:normal;display:flex;justify-content:space-between;align-items:flex-start;margin:0;padding:2px 4px!important;width:calc(96% - 10px);min-width:auto;height:max-content;min-height:40px;word-break:break-word}.${defCon.class.dbm} #${defCon.id.bk} .${RANDOM_ID}_VIP,.${defCon.class.dbm} #${defCon.id.pv} .${RANDOM_ID}_VIP,.${defCon.class.dbm} #${defCon.id.fs} .${RANDOM_ID}_VIP,.${defCon.class.dbm} #${defCon.id.hk} .${RANDOM_ID}_VIP,.${defCon.class.dbm} #${defCon.id.ct} .${RANDOM_ID}_VIP,.${defCon.class.dbm} #${defCon.id.mps} .${RANDOM_ID}_VIP,.${defCon.class.dbm} #${defCon.id.flc} .${RANDOM_ID}_VIP{margin:2px 0 0 0;color:darkgoldenrod!important;font:normal 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${defCon.class.dbm} #${defCon.id.flc} button{background-color:#eee;color:#444!important;font-weight:normal;border:1px solid #999;font-size:14px!important;border-radius:4px}` +
         `.${defCon.class.dbm} a{color:#0969da;text-decoration:none!important;font-style:inherit}.${defCon.class.dbm} a:hover{color:crimson;text-decoration:underline}.${defCon.class.dbm} #${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}.${defCon.class.dbm} #${defCon.id.files}{display:none}.${defCon.class.dbm} #${defCon.id.feedback}:hover{color:crimson!important}.${defCon.class.dbm} #${defCon.id.feedback}:after{width:0;height:0;content:"";background:url('${LOADING_IMG}') no-repeat -400px -300px}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#555!important}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#aaa!important}.${defCon.class.dbm} #${RANDOM_ID}_update li{margin:0;padding:0;font:italic 400 14px/150% Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:gray}.${defCon.class.dbm} .${RANDOM_ID}_add:before{content:"+";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_del:before{content:"-";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_fix:before{content:"@";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_info{color:#daa5207a!important}.${defCon.class.dbm} .${RANDOM_ID}_info:before{content:"#";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_warn{color:#e900007a!important}.${defCon.class.dbm} .${RANDOM_ID}_warn:before{content:"!";display:inline;margin:0 4px 0 -10px}`
     );
     const fontStyle_container = String(
-      `#${defCon.id.rndId}{width:100%;height:100%;background:transparent;position:fixed;top:0;left:0;z-index:1999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;border-radius:12px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;min-height:10%;max-height:calc(100% - 20px);z-index:999999;padding:4px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container} *{line-height:1.5!important;text-shadow:none!important;-webkit-text-stroke:initial!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Android Emoji",EmojiSymbols!important;font-size:16px;font-weight:700}` +
+      `#${defCon.id.rndId}{width:100vw;height:100vh;background:transparent;position:fixed;top:0;left:0;z-index:1999999991}body #${defCon.id.container}{position:fixed;top:10px;right:24px;border-radius:12px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;min-height:10%;max-height:calc(100% - 20px);z-index:999999;padding:4px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container} *{line-height:1.5!important;text-shadow:none!important;-webkit-text-stroke:initial!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Android Emoji",EmojiSymbols!important;font-size:16px;font-weight:700}` +
         `#${defCon.id.container} fieldset{border:2px groove #67a5df!important;border-radius:10px;padding:4px 6px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:475px}#${defCon.id.container} legend{line-height:inherit;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;background:#f0f6ff!important;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{display:inherit;list-style:none;margin:3px 0;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default;min-width:-webkit-fill-available;min-width:-moz-available;-webkit-user-select:none;user-select:none}#${defCon.id.container} ul li:before{display:none}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden;visibility:visible!important}#${defCon.id.container} .${defCon.class.help}:hover{cursor:help}#${RANDOM_ID}_scriptname{font-weight:900!important;-webkit-user-select:all;user-select:all;display:inline-block}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:fixed;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{padding:0;margin:0;width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50% 0;-webkit-transform:rotate(360deg);animation:rotation 5s linear infinite}` +
         `#${defCon.id.fontList}{padding:2px 10px 0 10px;min-height:73px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex!important;align-items:center;justify-content:space-between}#${defCon.id.fontSize}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.shadowColor}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;padding:2px 10px;min-height:45px;margin:4px;width:auto}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${defCon.id.submit}{padding:2px 10px;height:40px}` +
-        `#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${defCon.id.fontList} .${defCon.class.label} span{box-sizing:border-box;color:#fff;font-size:16px!important;font-weight:400;height:max-content;width:max-content;min-width:12px;max-width:200px;padding:5px;background:#67a5df;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap}#${defCon.id.fontList} .${defCon.class.close}{width:12px}#${defCon.id.fontList} .${defCon.class.close}:hover{color:tomato;background-color:#2d7dca;border-radius:2px}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-x:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;padding:6px 6px 0 6px;margin:0 0 6px 0;width:100%;min-width:100%;max-width:fit-content;max-width:-moz-min-content;max-height:90px;min-height:45px;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:6px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 2px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} span.${defCon.class.spanlabel},#${defCon.id.selector} span.${defCon.class.spanlabel}{margin:0!important;width:auto;display:block!important;padding:0 0 4px 0;color:#333;border:0;text-align:left!important;background-color:transparent!important}` +
-        `#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} input{text-overflow:ellipsis;overflow:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;outline:none!important;padding:1px 23px 1px 2px;margin:0;width:100%;max-width:100%;min-width:100%;height:42px!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:16px!important;font-weight:700;text-indent:8px;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font:normal 700 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font:normal 700 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;position:fixed;z-index:1000;margin:4px 0 0 0;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:4px 8px;width:auto;min-width:60%;max-width:calc(100% - 68px);max-height:298px;font-size:18px!important;white-space:nowrap;background-color:#fff;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}` +
-        `#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{display:block;box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;margin:1px 8px;padding:5px 0;font-weight:400;font-size:21px!important;min-width:100%;max-width:100%;width:-moz-available;width:-webkit-fill-available;}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff}` +
+        `#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${defCon.id.fontList} .${defCon.class.label} span{box-sizing:border-box;color:#fff;font-size:16px!important;font-weight:400;height:max-content;width:max-content;min-width:12px;max-width:200px;padding:5px;background:#67a5df;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap}#${defCon.id.fontList} .${defCon.class.close}{width:12px}#${defCon.id.fontList} .${defCon.class.close}:hover{color:tomato;background-color:#2d7dca;border-radius:2px}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-x:hidden;box-sizing:border-box;overscroll-behavior:contain;border:2px solid #67a5df!important;border-radius:6px;padding:6px 6px 0 6px;margin:0 0 6px 0;width:100%;min-width:100%;max-width:fit-content;max-width:-moz-min-content;max-height:90px;min-height:45px;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:6px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 2px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} span.${defCon.class.spanlabel},#${defCon.id.selector} span.${defCon.class.spanlabel}{margin:0!important;width:auto;display:block!important;padding:0 0 4px 0;color:#333;border:0;text-align:left!important;background-color:transparent!important}` +
+        `#${defCon.id.fontList} .${defCon.class.selectFontId}{width:auto}#${defCon.id.fontList} .${defCon.class.selectFontId} input{text-overflow:ellipsis;overflow:hidden;box-sizing:border-box;border:2px solid #67a5df!important;border-radius:6px;outline:none!important;padding:1px 23px 1px 2px;margin:0;width:100%;max-width:100%;min-width:100%;height:42px!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:16px!important;font-weight:700;text-indent:8px;background:#fafafa;outline-color:#67a5df}#${defCon.id.fontList} .${defCon.class.selectFontId} input[disabled]{pointer-events:none!important}.${defCon.class.placeholder}::-moz-placeholder{color:#369!important;font:normal 700 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}.${defCon.class.placeholder}::-webkit-input-placeholder{color:#369!important;font:normal 700 16px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}#${defCon.id.fontList} .${defCon.class.selectFontId} dl{overflow-x:hidden;overscroll-behavior:contain;position:fixed;z-index:1000;margin:4px 0 0 0;box-sizing:content-box;border:2px solid #67a5df!important;border-radius:6px;padding:4px 8px;width:auto;min-width:60%;max-width:calc(100% - 68px);max-height:298px;font-size:18px!important;white-space:nowrap;background-color:#fff;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}` +
+        `#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd{display:block;box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;margin:1px 8px;padding:5px 0;font-weight:400;font-size:21px!important;min-width:100%;max-width:100%;width:-moz-available;width:-webkit-fill-available}#${defCon.id.fontList} .${defCon.class.selectFontId} dl dd:hover{box-sizing:content-box;text-overflow:ellipsis;overflow-x:hidden;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff}` +
         `.${defCon.class.checkbox}{display:none!important}.${defCon.class.checkbox}+label{cursor:pointer;padding:0;margin:0 2px 0 0;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:76px;height:32px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;box-sizing:content-box}.${defCon.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${defCon.class.checkbox}+label::after{position:absolute;top:0;left:28px;border-radius:100px;padding:5px;font-size:16px;font-weight:700;font-style:normal;color:#fff;content:"OFF"}.${defCon.class.checkbox}:checked+label{cursor:pointer;margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}.${defCon.class.checkbox}:checked+label::after{content:"ON";left:10px}.${defCon.class.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px}#${defCon.id.fface} label,#${defCon.id.fface}+label::after,#${defCon.id.fface}+label::before,#${defCon.id.smooth} label,#${defCon.id.smooth}+label::after,#${defCon.id.smooth}+label::before{-webkit-transition:all .3s ease-in;transition:all .3s ease-in}` +
         `#${defCon.id.fontShadow} div.${defCon.class.flex}:before,#${defCon.id.fontShadow} div.${defCon.class.flex}:after,#${defCon.id.fontStroke} div.${defCon.class.flex}:before,#${defCon.id.fontStroke} div.${defCon.class.flex}:after,#${defCon.id.fontSize} div.${defCon.class.flex}:before,#${defCon.id.fontSize} div.${defCon.class.flex}:after{display:none}#${defCon.id.fontShadow} #${defCon.id.shadowSize},#${defCon.id.fontStroke} #${defCon.id.strokeSize},#${defCon.id.fontSize} #${defCon.id.fontZoom}{color:#111!important;width:56px!important;text-indent:0;margin:0 10px 0 0!important;height:32px!important;font-size:17px!important;font-weight:400!important;font-family:Impact,Times,serif!important;border:#67a5df 2px solid!important;border-radius:4px;outline:none!important;text-align:center;box-sizing:content-box;padding:0;background:#fafafa!important}.${defCon.class.flex}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;width:auto;min-width:100%}.${defCon.class.slider} input{visibility:hidden}#${defCon.id.shadowColor} *{box-sizing:content-box}#${defCon.id.shadowColor} .${defCon.class.frColorPicker}{width:auto;margin:0;padding:0}#${defCon.id.shadowColor} .${defCon.class.frColorPicker} #${defCon.id.color}{width:160px!important;min-width:160px;height:35px!important;text-indent:0;font-size:18px!important;font-weight:400!important;background:#fdfdffb0;box-sizing:border-box;font-family:Impact,Times,serif!important;color:#333!important;border:#67a5df 2px solid!important;border-radius:4px;outline:none!important;padding: 0 8px 0 0;margin:0;text-align:center;cursor:pointer}` +
-        `#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{font:bold 14px/150% "Roboto Mono",Monaco,"Courier New",Consolas,monospace,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;min-width:calc(100% - 2px);max-width:calc(100% - 2px);width:calc(100% - 2px)!important;height:78px;min-height:78px;max-height:78px;resize:none;border:2px solid #67a5df!important;border-radius:6px;outline:none!important;box-sizing:border-box;padding:5px;margin:0;color:#0b5b9c!important;word-break:break-all;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:6px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{box-shadow:inset 0 0 2px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 2px rgba(0,0,0,.2);background:#efefef;border-radius:10px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontEx} textarea{background:#fafafa!important}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:6px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{box-shadow:inset 0 0 2px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}.${defCon.class.switch}{box-sizing:border-box;float:right;margin:-2px 4px 0 0;padding:0 6px;border:2px double #67a5df;color:#0a68c1;border-radius:4px}#${defCon.id.cSwitch}:hover,#${defCon.id.eSwitch}:hover{cursor:pointer;-webkit-user-select:none;user-select:none}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent)!important;background-size:50px 50px;background-color:#f7fff7!important}` +
+        `#${defCon.id.fontCSS} textarea,#${defCon.id.fontEx} textarea{font:bold 14px/150% "Roboto Mono",Monaco,"Courier New",Consolas,monospace,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;min-width:calc(100% - 2px);max-width:calc(100% - 2px);width:calc(100% - 2px)!important;height:78px;min-height:78px;max-height:78px;resize:none;border:2px solid #67a5df!important;border-radius:6px;outline:none!important;box-sizing:border-box;padding:5px;margin:0;color:#0b5b9c!important;word-break:break-all;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin;overscroll-behavior:contain}#${defCon.id.fontCSS} textarea::-webkit-scrollbar{width:6px;height:1px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-thumb{box-shadow:inset 0 0 2px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 2px rgba(0,0,0,.2);background:#efefef;border-radius:10px}#${defCon.id.fontCSS} textarea::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontEx} textarea{background:#fafafa!important}#${defCon.id.fontEx} textarea::-webkit-scrollbar{width:6px;height:1px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-thumb{box-shadow:inset 0 0 2px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontEx} textarea::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}.${defCon.class.switch}{box-sizing:border-box;float:right;margin:-2px 4px 0 0;padding:0 6px;border:2px double #67a5df;color:#0a68c1;border-radius:4px}#${defCon.id.cSwitch}:hover,#${defCon.id.eSwitch}:hover{cursor:pointer;-webkit-user-select:none;user-select:none}.${defCon.class.readonly}{background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:50px 50px!important;background-color:#fff7f7!important}.${defCon.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9 0,#e9ffe9 25%,transparent 25%,transparent 50%,#e9ffe9 50%,#e9ffe9 75%,transparent 75%,transparent)!important;background-size:50px 50px;background-color:#f7fff7!important}` +
         `.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist{scrollbar-width:thin}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-webkit-scrollbar{width:8px;height:8px}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-webkit-scrollbar-corner{box-shadow:inset 0 0 3px #aaa;background:#efefef;border-radius:2px}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #999;background:#cfcfcf;border-radius:2px}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:2px}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:2px}` +
         `#${defCon.id.submit} button{box-sizing:border-box;background-image:initial;background-color:#67a5df;color:#fff!important;margin:0;padding:5px 10px;cursor:pointer;border:2px solid #6ba7e0;border-radius:6px;width:auto;min-width:min-content;min-height:35px;height:35px;font:normal 600 14px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${defCon.id.submit} button:hover{box-shadow:0 0 5px rgba(0,0,0,.4)!important}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.submit} #${defCon.id.backup}{margin:0 10px 0 0;display:none}.${defCon.class.anim}{animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}`
     );
@@ -2366,38 +2348,26 @@
     };
     const SHOULD_FIX_STROKE = NEED_FIX_STROKE(CONST_VALUES.fontStroke);
 
-    function correctBoldErrorByStroke(SHOULDFIXSTROKE, { isCount } = {}) {
+    function correctBoldErrorByStroke(SHOULDFIXSTROKE, { isCount }) {
       return new Promise(resolve => {
         if (SHOULDFIXSTROKE) {
+          const attrName = "fr-fix-stroke";
           isCount && timeStart("\u27A4 [FIXSTROKE]");
-          qA(
-            `:not`.concat(
-              `(`,
-              `html,head,head *,base,meta,style,link,script,noscript,body,`,
-              `iframe,img,br,hr,ul,canvas,applet,source,svg,svg *,picture,`,
-              `form,embed,audio,video,track,figure,progress,[fr-fix-stroke],`,
-              `fr-configure *,fr-dialogbox *,fr-colorpicker *,gb-notice *`,
-              `)`
-            )
-          ).forEach(item => {
-            if (
-              window.getComputedStyle(item, null).getPropertyValue("font-weight") >= 600 &&
-              window.getComputedStyle(item, null).getPropertyValue("-webkit-text-stroke-width") !== "0px"
-            ) {
-              item.setAttribute("fr-fix-stroke", true);
+          qA(`:not(${defCon.queryString},[${attrName}])`).forEach(item => {
+            if (cP(item, "font-weight") >= 600 && cP(item, "-webkit-text-stroke-width") !== "0px") {
+              item.setAttribute(attrName, true);
             }
           });
-          resolve(qA("[fr-fix-stroke]"));
+          resolve(attrName);
         }
       })
         .then(result => {
-          if (result.length > 0) {
-            result.forEach(item => {
-              if (window.getComputedStyle(item, null).getPropertyValue("font-weight") < 600) {
-                item.removeAttribute("fr-fix-stroke");
+          result &&
+            qA(`[${result}]`).forEach(item => {
+              if (cP(item, "font-weight") < 600) {
+                item.removeAttribute(result);
               }
             });
-          }
           isCount && timeEnd("\u27A4 [FIXSTROKE]");
         })
         .catch(e => {
@@ -2438,13 +2408,13 @@
                 moveStyleTolastChild({ isMutationObserver: true });
               }
             } catch (e) {
-              error("LastChildStyle.Operation:", e);
+              error("LastChildStyle.Operation:", e.message);
             }
           }
           const checkMutationHasAddedNodes = () => {
-            for (let j = 0; j < mutations.length; j++) {
-              for (let i = 0; i < mutations[j].addedNodes.length; i++) {
-                if (mutations[j].addedNodes[i].nodeType === 1 && mutations[j].addedNodes[i].isConnected) {
+            for (const mutation of mutations) {
+              for (const node of mutation.addedNodes) {
+                if (node.nodeType === 1 && node.isConnected) {
                   return true;
                 }
               }
@@ -2457,7 +2427,7 @@
         }
       }).observe(document, { childList: true, subtree: true });
     } catch (e) {
-      error("InsertCSS.Operation:", e);
+      error("MutationObserver.InsertCSS:", e.message);
     }
 
     /* Menus Insert */
@@ -2518,7 +2488,7 @@
         }
         isBackupFunction = Boolean(_config_data_.isBackupFunction);
         isPreview = Boolean(_config_data_.isPreview);
-        isFontsize = Boolean(_config_data_.isFontsize);
+        isFontsize = isGM ? false : Boolean(_config_data_.isFontsize);
         isHotkey = Boolean(typeof _config_data_.isHotkey !== "undefined" ? _config_data_.isHotkey : true);
         isCloseTip = Boolean(_config_data_.isCloseTip);
         maxPersonalSites = Number(_config_data_.maxPersonalSites) || 100;
@@ -2528,7 +2498,7 @@
           falseButtonText: "帮助文件",
           neutralButtonText: "取 消",
           messageText: String(
-            `<ul class="${defCon.class.main}" style="box-sizing:content-box;max-height:215px;overflow-x:hidden;margin:0;padding:5px 0">
+            `<ul class="${defCon.class.main}" style="box-sizing:content-box;max-height:215px;overflow-x:hidden;margin:0;padding:5px 0;overscroll-behavior:contain">
               <li id="${defCon.id.bk}">
                 <div class="${RANDOM_ID}_VIP" title="养成定期备份的好习惯，保护自己的数据安全\uff01">\u2460 本地备份功能（默认\uff1a开启）</div>
                 <div style="margin:0;padding:0">
@@ -2544,7 +2514,7 @@
                 </div>
               </li>
               <li id="${defCon.id.fs}">
-                <div class="${RANDOM_ID}_VIP" title="实验性功能\uff1a不推荐Firefox浏览器开启字体缩放\uff01">\u2462 字体缩放功能（默认\uff1a关闭）</div>
+                <div class="${RANDOM_ID}_VIP" title="实验性功能\uff1a已兼容大部分浏览器，但仍在Alpha测试阶段\uff01">\u2462 字体缩放功能（默认\uff1a关闭）</div>
                 <div style="margin:0;padding:0">
                   <input type="checkbox" id="${defCon.id.isfontsize}" class="${defCon.class.checkbox}" ${isFontsize ? "checked" : ""} />
                   <label for="${defCon.id.isfontsize}"></label>
@@ -2599,11 +2569,15 @@
         IS_REAL_GECKO &&
           confirmIfValueChange(
             qS(`#${defCon.id.isfontsize}`),
-            "由于 Firefox(Gecko内核) 对部分 CSS 及 Javascript 的兼容性原因，会造成某些站点样式异常、坐标漂移等问题，我们建议您在 Firefox 浏览器中谨慎使用脚本级字体缩放功能。\n\n如有必要需求，请使用 Firefox 自身的缩放功能来放大(Ctrl+)或缩小(Ctrl-)当前网站页面，或在 设置\u2192全局缩放 中配置缩放比例。注意\uff1a清除 历史记录\u2192数据\u2192网站设置 会重置所有网站的缩放设置。\n\n请确认是否开启字体缩放功能？"
+            `字体比例缩放（实验性功能 - Alpha版本）\n目前已兼容大部分主流浏览器，但Firefox由于Gecko内核兼容性问题会对部分网站代码兼容不佳而造成样式错乱等问题，请根据需要酌情在特定站点内使用。(如有其他需求请使用浏览器缩放替代)${
+              isGM ? "\n\n扩展Greasemonkey不支持字体缩放功能！" : "\n\n请确认是否开启字体缩放功能？"
+            }`,
+            { useGM: false }
           );
         confirmIfValueChange(
           qS(`#${defCon.id.isclosetip}`),
-          "关闭更新提示，您将不能在第一时间获取更新内容，或错过重要的使用提示和警示通告。如遇重大功能升级，忽略更新提示有几率影响正常使用。双击字体渲染设置窗口顶部的脚本名称，可查看历史更新提示。\n\n请确认是否关闭更新提示功能？"
+          "关闭更新提示，您将不能在第一时间获取更新内容，或错过重要的使用提示和警示通告。如遇重大功能升级，忽略更新提示有几率影响正常使用。双击字体渲染设置窗口顶部的脚本名称，可查看历史更新提示。\n\n请确认是否关闭更新提示功能？",
+          { useGM: true }
         );
         qS(`#${defCon.id.flcid}`).addEventListener("click", async () => {
           closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
@@ -2722,7 +2696,7 @@
           timeEnd("\u27A4 [MENUINSERT]");
         })
         .catch(e => {
-          error("MenusInsert:", e);
+          error("MenusInsert:", e.message);
         });
     }
 
@@ -2793,7 +2767,7 @@
           { runNow: true }
         );
       } catch (e) {
-        error("InsertHTML:", e);
+        error("InsertHTML:", e.message);
       }
     }
 
@@ -2801,15 +2775,15 @@
       try {
         addStyle(tCSS, `${defCon.class.rndClass}`, document.head, "TC", { isReload: false });
       } catch (e) {
-        error("InsertCSS:", e);
+        error("InsertCSS:", e.message);
       }
     }
 
-    function insertStyle({ isReload }) {
+    function insertStyle({ isReload } = {}) {
       try {
         addStyle(tStyle, `${defCon.class.rndStyle}`, document.head, "TS", { isReload });
       } catch (e) {
-        error("InsertStyle:", e);
+        error("InsertStyle:", e.message);
       }
     }
 
@@ -2839,14 +2813,14 @@
             const lastStyle = isLast || isPrevious;
             sleep(2e3)(lastStyle).then(r => {
               qS(`#${defCon.class.rndStyle}`) && document.head.lastChild.className !== defCon.class.rndStyle && insertStyle({ isReload: r });
-              debug("\u27A4 lastChild ClassName: %c%s", "font-weight:bold", document.head.lastChild.className);
+              debug("\u27A4 lastChild ClassName: %c%s", "font-weight:700", document.head.lastChild.className);
               timeEnd("\u27A4 [LASTCHILD]");
             });
             return lastStyle;
           });
         }
       } catch (e) {
-        error("MoveStyleTolastChild:", e);
+        error("MoveStyleTolastChild:", e.message);
       }
     }
 
@@ -2931,15 +2905,15 @@
           try {
             const cache_FontCheckList = await cache.get("_FontCheckList_");
             if (Array.isArray(cache_FontCheckList) && cache_FontCheckList.length > 0) {
-              debug("\u27A4 %cLoad font_Data from Cache", "color:green;font-weight:bold");
+              debug("\u27A4 %cLoad font_Data from Cache", "color:green;font-weight:700");
               fontData = cache_FontCheckList;
             } else {
-              debug("\u27A4 %cStart real-time font detection", "color:crimson;font-weight:bold");
+              debug("\u27A4 %cStart real-time font detection", "color:crimson;font-weight:700");
               fontData = await fontCheck_DetectOnce();
               cache.set("_FontCheckList_", fontData);
             }
           } catch (e) {
-            error("Fontlist With Cache:", e.name);
+            error("Fontlist With Cache:", e.message);
             cache.remove("_FontCheckList_");
             fontData = await fontCheck_DetectOnce();
             cache.set("_FontCheckList_", fontData);
@@ -2973,7 +2947,7 @@
                   trueButtonText: "保 存",
                   falseButtonText: "帮助文档",
                   neutralButtonText: "取 消",
-                  messageText: `<p style="color:#555;font-size:14px!important">以下文本域可按预定格式增加自定义字体。请用小贴士或按样例填写，输入有误将被自动过滤。与『<a href="${HOST_URI}#fontlist" title="查看内置字体表" target="_blank">内置字体表</a>』重复的字体将被自动剔除。【功能小贴士\uff1a<span id="${RANDOM_ID}_addTools" title="点击开启工具" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${RANDOM_ID}_custom_Fontlist" style="box-sizing:border-box;min-height:160px!important;min-width:388px!important;max-width:388px!important;resize:vertical;padding:5px;border:1px solid #999;border-radius:6px;outline:none!important;font:normal 400 14px/150% monospace,'Courier New','Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;white-space:pre!important" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下\uff1a\n{ "ch":"中文字体名一","en":"EN Fontname 1" }\u21b2\n{ "ch":"中文字体名二","en":"EN Fontname 2","ps"\n:"Postscript Name" }\u21b2\n\n（注一\uff1a“ps:”该项为字体PostScript名称，可选填写）\n（注二\uff1a\u21b2为换行符号，输入(Enter)回车即可）'>${received_Fontlist}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:crimson;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`,
+                  messageText: `<p style="color:#555;font-size:14px!important">以下文本域可按预定格式增加自定义字体。请用小贴士或按样例填写，输入有误将被自动过滤。与『<a href="${HOST_URI}#fontlist" title="查看内置字体表" target="_blank">内置字体表</a>』重复的字体将被自动剔除。【功能小贴士\uff1a<span id="${RANDOM_ID}_addTools" title="点击开启工具" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${RANDOM_ID}_custom_Fontlist" style="box-sizing:border-box;scrollbar-width:thin;overscroll-behavior:contain;min-height:160px!important;min-width:388px!important;max-width:388px!important;resize:vertical;padding:5px;border:1px solid #999;border-radius:6px;outline:none!important;font:normal 400 14px/150% monospace,'Courier New','Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;white-space:pre!important" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下\uff1a\n{ "ch":"中文字体名一","en":"EN Fontname 1" }\u21b2\n{ "ch":"中文字体名二","en":"EN Fontname 2","ps"\n:"Postscript Name" }\u21b2\n\n（注一\uff1a“ps:”该项为字体PostScript名称，可选填写）\n（注二\uff1a\u21b2为换行符号，输入(Enter)回车即可）'>${received_Fontlist}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:crimson;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`,
                   titleText: "自定义字体表",
                 });
                 custom_Fontlist = qS(`#${RANDOM_ID}_custom_Fontlist`).value.trim();
@@ -3077,7 +3051,7 @@
             }
           } catch (e) {
             defCon.errors.push(`[Fonts selection]: ${e}`);
-            error("Fonts selection:", e);
+            error("Fonts selection:", e.message);
           }
 
           /* selector placeholder style */
@@ -3090,7 +3064,7 @@
               await getCurrentFontName(CONST_VALUES.fontFace, defCon.refont, DEFAULT_FONT);
               if (ffaceT.checked && !CONST_VALUES.fontFace) {
                 inputFont.setAttribute("placeholder", `正在恢复之前设置的字体…`);
-                sleep(360).then((submitPreview = qS(`#${defCon.id.submit} .${defCon.class.submit}[v-Preview="true"]`)) => {
+                sleep(120).then((submitPreview = qS(`#${defCon.id.submit} .${defCon.class.submit}[v-Preview="true"]`)) => {
                   submitPreview && submitPreview.click();
                 });
               }
@@ -3119,7 +3093,7 @@
               checkInputValue(zoom, drawZoom, /^[0-1](\.[0-9]{1,3})?$/, 3, true);
             } catch (e) {
               defCon.errors.push(`[FontSize Zoom]: ${e}`);
-              error("FontSize Zoom:", e);
+              error("FontSize Zoom:", e.message);
             } finally {
               saveChangeStatus(zoom, CONST_VALUES.fontSize, submitButton, defCon.values, true);
             }
@@ -3136,7 +3110,7 @@
             checkInputValue(stroke, drawStrock, /^[0-1](\.[0-9]{1,3})?$/, 3);
           } catch (e) {
             defCon.errors.push(`[Fonts stroke]: ${e}`);
-            error("Fonts stroke:", e);
+            error("Fonts stroke:", e.message);
           } finally {
             saveChangeStatus(stroke, CONST_VALUES.fontStroke, submitButton, defCon.values);
           }
@@ -3153,7 +3127,7 @@
             checkInputValue(shadows, drawShadow, /^[0-8](\.[0-9]{1,2})?$/, 2);
           } catch (e) {
             defCon.errors.push(`[Fonts shadow]: ${e}`);
-            error("Fonts shadow:", e);
+            error("Fonts shadow:", e.message);
           } finally {
             saveChangeStatus(shadows, CONST_VALUES.fontShadow, submitButton, defCon.values);
           }
@@ -3196,7 +3170,7 @@
             );
           } catch (e) {
             defCon.errors.push(`[Fonts shadowColor]: ${e}`);
-            error("Fonts shadowColor:", e);
+            error("Fonts shadowColor:", e.message);
           } finally {
             saveChangeStatus(colorshow, CONST_VALUES.shadowColor, submitButton, defCon.values);
           }
@@ -3263,7 +3237,7 @@
               fontExT.value = INITIAL_VALUES.fontEx;
               setEffectIntoSubmit(fontExT.value, CONST_VALUES.fontEx, defCon.values, fontExT, submitButton);
               await getCurrentFontName(ffaceT.checked, defCon.refont, DEFAULT_FONT);
-              sleep(360).then((submitPreview = qS(`#${defCon.id.submit} .${defCon.class.submit}[v-Preview="true"]`)) => {
+              sleep(120).then((submitPreview = qS(`#${defCon.id.submit} .${defCon.class.submit}[v-Preview="true"]`)) => {
                 submitPreview && submitPreview.click();
               });
             } else {
@@ -3274,6 +3248,7 @@
                 zoom.value = CONST_VALUES.fontSize === 1 ? "OFF" : CONST_VALUES.fontSize.toFixed(3);
                 zoom._value_ = CONST_VALUES.fontSize;
                 setSliderProperty(drawZoom, CONST_VALUES.fontSize, 3);
+                defCon.oZoom.push(CONST_VALUES.fontSize);
                 defCon.tZoom = CONST_VALUES.fontSize;
               }
               stroke.value = CONST_VALUES.fontStroke === 0 ? "OFF" : CONST_VALUES.fontStroke.toFixed(3);
@@ -3304,7 +3279,7 @@
             const fontface = ffaceT.checked;
             const smooth = smoothT.checked;
             const prefzoom = !isFontsize ? 1 : /^[0-1](\.[0-9]{1,3})?$/.test(zoom.value) ? zoom.value : INITIAL_VALUES.fontSize;
-            const fzoom = prefzoom < 0.8 ? 0.8 : prefzoom > 1.5 ? 1.5 : prefzoom;
+            const fzoom = prefzoom < 0.8 ? 0.8 : prefzoom > 1.5 ? 1.5 : Number(prefzoom);
             const fstroke = /^[0-1](\.[0-9]{1,3})?$/.test(stroke.value) ? stroke.value : stroke.value === "OFF" ? 0 : INITIAL_VALUES.fontStroke;
             const fshadow = /^[0-8](\.[0-9]{1,2})?$/.test(shadows.value) ? shadows.value : shadows.value === "OFF" ? 0 : INITIAL_VALUES.fontShadow;
             const pickedcolor = colorshow.value;
@@ -3330,6 +3305,7 @@
                   `${_codeFont}${_exclude}${fixstroke}`
                 );
                 const __tshadow = `@charset "UTF-8";${_tshadow}`;
+                defCon.oZoom.push(fzoom);
                 defCon.tZoom = fzoom;
                 this.textContent = "\u4fdd\u5b58";
                 this.removeAttribute("style");
@@ -3348,7 +3324,7 @@
               } catch (e) {
                 defCon.errors.push(`[submitPreview]: ${e}`);
                 reportErrorToAuthor(defCon.errors);
-                error("SubmitPreview:", e);
+                error("SubmitPreview:", e.message);
               }
             } else {
               try {
@@ -3468,7 +3444,7 @@
               } catch (e) {
                 defCon.errors.push(`[submitData]: ${e}`);
                 reportErrorToAuthor(defCon.errors, true);
-                error("SubmitData:", e);
+                error("SubmitData:", e.message);
                 defCon.successId = false;
               } finally {
                 if (defCon.successId) {
@@ -3494,7 +3470,7 @@
         }
       } catch (e) {
         defCon.errors.push(`[operateConfigure]: ${e}`);
-        error("OperateConfigure:", e);
+        error("OperateConfigure:", e.message);
       }
     }
 
@@ -3510,8 +3486,9 @@
           delete defCon.configurePage;
         }
         if (isReload === false && defCon.preview) {
-          loadPreview(defCon.isPreview);
+          defCon.oZoom.push(CONST_VALUES.fontSize);
           defCon.tZoom = CONST_VALUES.fontSize;
+          loadPreview(defCon.isPreview);
         }
       }
       closeAllFrDialogBox("fr-dialogbox");
@@ -3677,7 +3654,7 @@
           } catch (e) {
             defCon.errors.push(`[loadBackupData]: ${e}`);
             reportErrorToAuthor(defCon.errors);
-            error("LoadBackupData:", e);
+            error("LoadBackupData:", e.message);
           }
         });
       }
@@ -3740,7 +3717,7 @@
                 return this.value;
               },
               set: newVal => {
-                deBounce(setEffectIntoSubmit, 360, t.id)(newVal, e, v, t, d, g);
+                deBounce(setEffectIntoSubmit, 100, t.id)(newVal, e, v, t, d, g);
               },
             });
           }
@@ -3839,7 +3816,7 @@
         frDialog = new FrDialogBox({
           trueButtonText: "确认操作，保存数据",
           neutralButtonText: "取 消",
-          messageText: `<p style="font-size:14px!important;text-indent:6px!important;color:darkred">请谨慎操作，保存后生效，已删除的数据将不可恢复\uff01</p>${_data_search_}<ul id="${RANDOM_ID}_d_d_" style="margin:0!important;padding:0!important;list-style:none!important;max-height:190px;overflow-x:hidden">${Contents}</ul>`,
+          messageText: `<p style="font-size:14px!important;text-indent:6px!important;color:darkred">请谨慎操作，保存后生效，已删除的数据将不可恢复\uff01</p>${_data_search_}<ul id="${RANDOM_ID}_d_d_" style="margin:0!important;padding:0!important;list-style:none!important;max-height:190px;overflow-x:hidden;overscroll-behavior:contain">${Contents}</ul>`,
           titleText: "网站个性化设置数据列表\uff1a",
         });
         if (qS(`#${RANDOM_ID}_d_s_`) && qS(`#${RANDOM_ID}_d_s_c_`) && qS(`#${RANDOM_ID}_d_s_s_`)) {
@@ -3935,7 +3912,7 @@
       } catch (e) {
         defCon.errors.push(`[manageDomainsList]: ${e}`);
         reportErrorToAuthor(defCon.errors);
-        error("ManageDomainsList:", e);
+        error("ManageDomainsList:", e.message);
       }
     }
 
@@ -3984,7 +3961,7 @@
               frDialog = null;
             }
           } catch (e) {
-            error("ReportError:", e);
+            error("ReportError:", e.message);
           }
         });
       }
@@ -4019,8 +3996,8 @@
           if (curZoom !== 1) {
             qS(target).style.transformOrigin = "left top";
             qS(target).style.transform = "scale(" + 1 / curZoom + ")";
-            qS(target).style.width = defCon.elCompat.clientWidth + "px";
-            qS(target).style.height = defCon.elCompat.clientHeight + "px";
+            qS(target).style.width = "99vw";
+            qS(target).style.height = "99vh";
             scrollInsteadFixed(qS(target), curZoom, "configurePage");
           } else {
             if (defCon.configurePage) {
@@ -4030,7 +4007,7 @@
             qS(target).removeAttribute("style");
           }
         } else {
-          curZoom = Number(window.getComputedStyle(document.body, null).getPropertyValue("zoom")) || zoom || 1;
+          curZoom = Number(cP(document.body, "zoom")) || zoom || 1;
           if (curZoom !== 1) {
             qS(target).style.cssText += "zoom:" + Number(1 / curZoom);
           } else {
@@ -4039,11 +4016,11 @@
         }
       } catch (e) {
         defCon.errors.push(`[setAutoZoomFontSize]: ${e}`);
-        error("SetAutoZoomFontSize:", e);
+        error("SetAutoZoomFontSize:", e.message);
       } finally {
         if (curZoom !== 1) {
           debug(
-            "\u27A4 fontSize<Zoom>: save[%s%] current[%c%s% %c%s%]",
+            "\u27A4 fontSize<Scale>: save [%s%]\n\u3000 \u27A5 current [%c%s% %c%s%]",
             (CONST_VALUES.fontSize * 100).toFixed(2),
             "color:teal",
             (curZoom * 100).toFixed(2),
@@ -4054,10 +4031,10 @@
       }
     }
 
-    function confirmIfValueChange(target, info) {
+    function confirmIfValueChange(target, info, { useGM }) {
       target.addEventListener("change", function () {
         if (this.checked) {
-          const rs = confirm(info);
+          const rs = useGM ? confirm(info) : isGM ? alert(info) : confirm(info);
           this.checked = !!rs;
         }
       });
@@ -4121,7 +4098,7 @@
       try {
         GMsetValue(key, defCon.encrypt(JSON.stringify(data)));
       } catch (e) {
-        error("SaveData:", e);
+        error("SaveData:", e.message);
       }
     }
   })();

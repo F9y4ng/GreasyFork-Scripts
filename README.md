@@ -12,7 +12,7 @@
 
 简介：无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的 Greasemonkey 脚本和浏览器插件。
 
-`version 2022.05.21.1` 【🔥 [安装脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+`version 2022.05.28.2` 【🔥 [安装脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 [`!!! 重大版本更新，请使用前仔细查看脚本使用说明(WIKI) !!!`](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering) `New!`
 
@@ -21,8 +21,9 @@
 `!!! 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件 !!!`
 
 ```text
-@ 修正异步iframe框架内联样式预览重复载入的错误。
-@ 优化QuerySelector兼容性，修正多元素筛选时的错误。
+# 使用字体缩放功能请仔细阅读注意事项『关于字体缩放』。
+@ 优化字体比例缩放功能针对大部分主流浏览器的兼容性。
+@ 修正Firefox经transform缩放后对Position:sticky的兼容性问题。[alpha version]
 @ 修正一些已知的问题，优化代码。
 ```
 
@@ -57,10 +58,11 @@
 
 ### **关于字体缩放**
 
-> 字体比例缩放（正式版），默认关闭，请在 **高级核心功能设置** 中打开字体缩放功能。
+> 字体比例缩放（实验性功能）Alpha版，默认关闭，请在 **高级核心功能设置** 中打开字体缩放功能。
 >
-> * **已知问题：** 因Firefox的Gecko内核对JS及CSS限制，建议Firefox用户谨慎使用该功能。
-> * **未知情况：** 如在非Firefox浏览器中遇到样式异常或坐标偏移，请及时向我[反馈](https://github.com/F9y4ng/GreasyFork-Scripts/issues)。
+> * **已知问题一：Firefox/Gecko内核**：由于Gecko内核兼容性问题会对部分网站代码兼容不佳而造成样式错乱等问题，请根据需要酌情在特定站点内使用，如有其他需求请使用浏览器缩放替代。_（Greasemonkey扩展不支持此功能）_
+> * **已知问题二：Chrome/Safari/WebKit内核**：对svg、canvas等H5容器的鼠标坐标偏移问题已在处理日程中，请勿重复反馈，感谢合作。
+> * **未知情况：** 如遇到非以上情况的样式异常或坐标偏移，请及时向我[反馈](https://github.com/F9y4ng/GreasyFork-Scripts/issues)。
 
 ### **字体渲染（自用脚本）的新版本已完成，在使用新版脚本前，请注意以下事项：**
 
@@ -72,14 +74,14 @@
 
 简介：最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用！
 
-`version 5.0.20220515.1` 【🔥 [安装脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+`version 5.0.20220528.1` 【🔥 [安装脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 [`!!! 重大版本更新，请使用前仔细查看脚本使用说明(WIKI) !!!`](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Google_Baidu_Switcher) `New!`
 
 `!!! 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它 !!!`
 
 ```text
-@ 修正一些已知的问题，优化代码。
+@ 修正在Firefox下脚本缩放页面后的坐标偏移问题。
 ```
 
 ### **重要说明**
