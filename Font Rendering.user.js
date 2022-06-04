@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.06.04.1
+// @version            2022.06.04.2
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -626,19 +626,25 @@
     ]);
     try {
       for (const obj_Target of obj_Targets.values()) {
+        const t = ratio;
         obj_Target.props.forEach(prop => {
-          const oPD = Object.getOwnPropertyDescriptor(obj_Target.obj, prop);
-          const obj_get = (oPD && oPD.get) || (obj_Target.obj[prop] && obj_Target.obj[prop].get);
-          if (obj_Target.obj instanceof Element && ["scrollLeft", "scrollTop"].includes(prop)) {
-            const obj_set = (oPD && oPD.set) || (obj_Target.obj[prop] && obj_Target.obj[prop].set);
+          const obj_get = Reflect.getOwnPropertyDescriptor(obj_Target.obj, prop).get;
+          if (["scrollLeft", "scrollTop"].includes(prop)) {
             Object.defineProperty(obj_Target.obj, prop, {
               configurable: true,
               enumerable: true,
               get: function () {
-                return obj_get && obj_get.call(this) / ratio;
+                return obj_get && obj_get.call(this) / t;
               },
               set: function (Value) {
-                obj_set && obj_set.call(this)(Value / ratio);
+                switch (prop) {
+                  case "scrollLeft":
+                    this.scrollTo(Value * t, 0);
+                    break;
+                  case "scrollTop":
+                    this.scrollTo(0, Value * t);
+                    break;
+                }
               },
             });
           } else {
@@ -646,7 +652,7 @@
               configurable: true,
               enumerable: true,
               get: function () {
-                return obj_get && obj_get.call(this) / ratio;
+                return obj_get && obj_get.call(this) / t;
               },
             });
           }
@@ -2087,6 +2093,7 @@
               <li class="${RANDOM_ID}_fix">优化字体缩放对Position:sticky在更多站点的兼容性。</li>
               <li class="${RANDOM_ID}_fix">修正字体缩放对Position:fixed的兼容性问题，如在某些网站遇到样式错误或卡顿，请暂停使用。(alpha版本)</li>
               <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化样式，优化代码。</li>
+              <li class="${RANDOM_ID}_fix">紧急修正字体缩放函数错误。<span style="color:red">New!</span></li>
               <!-- END VERSION NOTICE -->
             </ul></p>
             <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
