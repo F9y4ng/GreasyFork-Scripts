@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.06.04.2
+// @version            2022.06.12.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -88,6 +88,8 @@
     scriptName: getScriptNameViaLanguage(),
     options: isGM ? false : { active: true, insert: true, setParent: true },
     elCompat: document.compatMode === "CSS1Compat" ? document.documentElement : document.body,
+    getScreenCTM: SVGGraphicsElement.prototype.getScreenCTM,
+    getClientRects: Element.prototype.getClientRects,
     getBoundingClientRect: Element.prototype.getBoundingClientRect,
     encrypt: n => {
       try {
@@ -607,63 +609,118 @@
 
   /* New DefinePropertise */
 
-  const definePropertiesForZoom = ratio => {
+  let controller = IS_REAL_GECKO ? new AbortController() : null;
+  const definePropertiesForZoom = (ratio, { deleteProperty }) => {
     const obj_Targets = new Set([
       {
-        obj: MouseEvent.prototype,
-        props: IS_REAL_GECKO
-          ? ["clientX", "clientY", "pageX", "pageY", "offsetX", "offsetY", "screenX", "screenY", "movementX", "movementY", "x", "y"]
-          : ["clientX", "clientY", "pageX", "pageY", "layerX", "layerY", "offsetX", "offsetY", "screenX", "screenY", "movementX", "movementY", "x", "y"],
+        objs: [MouseEvent.prototype],
+        props: ["clientX", "clientY", "pageX", "pageY", "layerX", "layerY", "offsetX", "offsetY", "screenX", "screenY", "movementX", "movementY", "x", "y"],
       },
       {
-        obj: unsafeWindow,
+        objs: [window, unsafeWindow],
         props: ["pageXOffset", "pageYOffset", "scrollX", "scrollY"],
       },
       {
-        obj: Element.prototype,
-        props: ["scrollLeft", "scrollTop", "offsetLeft", "offsetTop", "clientLeft", "clientTop"],
+        objs: [Element.prototype],
+        props: ["scrollLeft", "scrollTop"],
       },
     ]);
     try {
       for (const obj_Target of obj_Targets.values()) {
         const t = ratio;
-        obj_Target.props.forEach(prop => {
-          const obj_get = Reflect.getOwnPropertyDescriptor(obj_Target.obj, prop).get;
-          if (["scrollLeft", "scrollTop"].includes(prop)) {
-            Object.defineProperty(obj_Target.obj, prop, {
-              configurable: true,
-              enumerable: true,
-              get: function () {
-                return obj_get && obj_get.call(this) / t;
-              },
-              set: function (Value) {
-                switch (prop) {
-                  case "scrollLeft":
-                    this.scrollTo(Value * t, 0);
-                    break;
-                  case "scrollTop":
-                    this.scrollTo(0, Value * t);
-                    break;
-                }
-              },
-            });
-          } else {
-            Object.defineProperty(obj_Target.obj, prop, {
-              configurable: true,
-              enumerable: true,
-              get: function () {
-                return obj_get && obj_get.call(this) / t;
-              },
-            });
-          }
+        const d = deleteProperty;
+        obj_Target.objs.forEach(obj => {
+          obj_Target.props.forEach(prop => {
+            const object = Reflect.getOwnPropertyDescriptor(obj, prop);
+            if (object) {
+              d && Reflect.deleteProperty(obj, prop) && debug(`\u27A4 %O - %s %cdeleted`, obj, prop, "color:red");
+              if (["scrollLeft", "scrollTop"].includes(prop)) {
+                Reflect.defineProperty(obj, prop, {
+                  configurable: true,
+                  enumerable: true,
+                  get: function () {
+                    return object.get.call(this) / t;
+                  },
+                  set: function (Value) {
+                    switch (prop) {
+                      case "scrollLeft":
+                        this.scrollTo(Value * t, 0);
+                        break;
+                      case "scrollTop":
+                        this.scrollTo(0, Value * t);
+                        break;
+                    }
+                  },
+                }) && debug(`\u27A4 %O - %s %csucceeded`, obj, prop, "color:green");
+              } else {
+                Reflect.defineProperty(obj, prop, {
+                  configurable: true,
+                  enumerable: true,
+                  get: function () {
+                    return object.get.call(this) / t;
+                  },
+                }) && debug(`\u27A4 %O - %s %csucceeded`, obj, prop, "color:green");
+              }
+            }
+          });
         });
+      }
+      if (IS_REAL_BLINK && qS("svg")) {
+        deleteProperty &&
+          Reflect.deleteProperty(SVGGraphicsElement.prototype, "getScreenCTM") &&
+          debug(`\u27A4 %O - getScreenCTM() %cdeleted`, SVGGraphicsElement.prototype, "color:red");
+        Reflect.defineProperty(SVGGraphicsElement.prototype, "getScreenCTM", {
+          configurable: true,
+          enumerable: true,
+          value: function () {
+            const value = defCon.getScreenCTM.call(this);
+            let newSVGMatrix = this.ownerSVGElement.createSVGMatrix();
+            let newValue = new Proxy(value, {
+              get: function (target, proper) {
+                return Reflect.get(target, proper) / defCon.tZoom;
+              },
+            });
+            newSVGMatrix.a = newValue.a;
+            newSVGMatrix.b = newValue.b;
+            newSVGMatrix.c = newValue.c;
+            newSVGMatrix.d = newValue.d;
+            newSVGMatrix.e = newValue.e;
+            newSVGMatrix.f = newValue.f;
+            return newSVGMatrix;
+          },
+        }) && debug(`\u27A4 %O - getScreenCTM() %csucceeded`, SVGGraphicsElement.prototype, "color:green");
       }
     } catch (e) {
       error("defineProperty:", e.message);
     }
     if (IS_REAL_GECKO) {
       try {
-        Object.defineProperty(Element.prototype, "getBoundingClientRect", {
+        deleteProperty &&
+          Reflect.deleteProperty(Element.prototype, "getClientRects") &&
+          debug(`\u27A4 %O - getClientRects() [DOMRectList] %cdeleted`, Element.prototype, "color:red");
+        Reflect.defineProperty(Element.prototype, "getClientRects", {
+          configurable: true,
+          enumerable: true,
+          value: function () {
+            const list = defCon.getClientRects.call(this);
+            let newRectlist = new Set();
+            for (let i = 0; i !== list.length; i++) {
+              let newRect = new Proxy(list[i], {
+                get: function (target, proper) {
+                  return Reflect.get(target, proper) / defCon.tZoom;
+                },
+              });
+              newRectlist[i] = newRect;
+            }
+            return newRectlist;
+          },
+        }) && debug(`\u27A4 %O - getClientRects() [DOMRectList] %csucceeded`, Element.prototype, "color:green");
+        deleteProperty &&
+          Reflect.deleteProperty(Element.prototype, "getBoundingClientRect") &&
+          debug(`\u27A4 %O - getBoundingClientRect() [DOMRect] %cdeleted`, Element.prototype, "color:red");
+        Reflect.defineProperty(Element.prototype, "getBoundingClientRect", {
+          configurable: true,
+          enumerable: true,
           value: function () {
             const value = defCon.getBoundingClientRect.call(this);
             let newValue = new Proxy(value, {
@@ -673,36 +730,11 @@
             });
             return newValue;
           },
-        });
-        const getLayerCoordinate = evt => {
-          let el = evt.target;
-          let x = 0;
-          let y = 0;
-          while (el && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
-            x += el.offsetLeft - el.scrollLeft;
-            y += el.offsetTop - el.scrollTop;
-            el = el.offsetParent;
-          }
-          x = evt.clientX - x;
-          y = evt.clientY - y;
-          return { x: x, y: y };
-        };
-        Object.defineProperties(MouseEvent.prototype, {
-          layerX: {
-            configurable: true,
-            get: function () {
-              return getLayerCoordinate(this).x;
-            },
-          },
-          layerY: {
-            configurable: true,
-            get: function () {
-              return getLayerCoordinate(this).y;
-            },
-          },
-        });
-        // Patch2022.2.3.alhpa: Fixed CSS compatibility error of Position:sticky/fixed when setting transform:scale() in Firefox.
-        const positionCompatibility = (t, { preview }) => {
+        }) && debug(`\u27A4 %O - getBoundingClientRect() [DOMRect] %csucceeded`, Element.prototype, "color:green");
+
+        /* Patch2022.2.Beta: Fixed Position:sticky/fixed while transform:scale() in Firefox. --START-- */
+
+        const fixStyleHandler = (t, { preview }) => {
           const el = [];
           if (t && document.body) {
             const checkPositionStatus = (type, target) => {
@@ -741,7 +773,9 @@
               checkPositionStatus("fixed", item) && getFixedArray(item, true);
               checkPositionStatus("sticky", item) && getStickyArray(item);
             });
+            const { oScale } = getSacleMatrix();
             const observer = new MutationObserver(mutations => {
+              oScale !== 1 && preview === true && (el.length = 0), (preview = false);
               mutations.forEach(mutation => {
                 switch (mutation.type) {
                   case "attributes":
@@ -785,70 +819,76 @@
                   }
                 }
               }
-              preview === true && (el.length = 0), (preview = false);
             });
             observer.observe(document.body, { childList: true, attributes: true, attributeFilter: ["style", "class"], subtree: true });
-            const fixPosition = async function () {
-              let s, r;
-              for (let i = 0; i < el.length; i++) {
-                switch (el[i].type) {
-                  case "sticky":
-                    s = defCon.elCompat.getBoundingClientRect().top * (defCon.tZoom - 1);
-                    r = parseFloat(s + el[i].offset);
-                    if (defCon.tZoom !== 1) {
-                      el[i].item.style.cssText += `top:var(--sticky)!important;--sticky:${r.toFixed(4)}px;`;
-                    } else {
-                      el[i].item.style.cssText = el[i].style;
+            window.addEventListener(
+              "scroll",
+              () => {
+                let s, r;
+                const doFix = window.requestAnimationFrame(async () => {
+                  for (let i = 0; i < el.length; i++) {
+                    switch (el[i].type) {
+                      case "sticky":
+                        s = defCon.elCompat.getBoundingClientRect().top * (defCon.tZoom - 1);
+                        r = parseFloat(s + el[i].offset);
+                        if (defCon.tZoom !== 1) {
+                          el[i].item.style.cssText += `top:var(--sticky)!important;--sticky:${r.toFixed(4)}px;`;
+                        } else {
+                          el[i].item.style.cssText = el[i].style;
+                        }
+                        break;
+                      case "fixed":
+                        s = defCon.elCompat.getBoundingClientRect().top;
+                        r = parseFloat(el[i].offset - s);
+                        if (defCon.tZoom !== 1) {
+                          if (["fr-configure", "fr-dialogbox"].includes(el[i].item.nodeName.toLowerCase())) {
+                            el[i].item.style.cssText += `top:var(--fixed)!important;--fixed:${r.toFixed(4)}px;`;
+                          } else if (["fr-colorpicker", "gb-notice"].includes(el[i].item.nodeName.toLowerCase())) {
+                            el[i].item.style.cssText += `--fixed:0px;`;
+                          } else {
+                            await sleep(10);
+                            el[i] &&
+                              (el[i].item.style.cssText += `height:${Math.min(el[i].height, window.innerHeight)}px;`.concat(
+                                `max-height:fit-content;`,
+                                `top:var(--fixed)!important;`,
+                                `--fixed:${r.toFixed(4)}px;`
+                              ));
+                          }
+                        } else {
+                          if (["fr-colorpicker", "gb-notice"].includes(el[i].item.nodeName.toLowerCase())) {
+                            el[i].item.style.setProperty("--fixed", "");
+                          } else if (["fr-configure", "fr-dialogbox"].includes(el[i].item.nodeName.toLowerCase())) {
+                            el[i].item.removeAttribute("style");
+                          }
+                        }
+                        break;
                     }
-                    break;
-                  case "fixed":
-                    s = defCon.elCompat.getBoundingClientRect().top;
-                    r = parseFloat(el[i].offset - s);
-                    if (defCon.tZoom !== 1) {
-                      if (["fr-configure", "fr-dialogbox"].includes(el[i].item.nodeName.toLowerCase())) {
-                        el[i].item.style.cssText += `top:var(--fixed)!important;--fixed:${r.toFixed(4)}px;`;
-                      } else if (["fr-colorpicker", "gb-notice"].includes(el[i].item.nodeName.toLowerCase())) {
-                        el[i].item.style.cssText += `--fixed:0px;`;
-                      } else {
-                        await sleep(0);
-                        el[i] &&
-                          (el[i].item.style.cssText += `height:${Math.min(el[i].height, window.innerHeight)}px;`.concat(
-                            `max-height:fit-content;`,
-                            `top:var(--fixed)!important;`,
-                            `--fixed:${r.toFixed(4)}px;`
-                          ));
-                      }
-                    } else {
-                      if (["fr-colorpicker", "gb-notice"].includes(el[i].item.nodeName.toLowerCase())) {
-                        el[i].item.style.setProperty("--fixed", "");
-                      } else if (["fr-configure", "fr-dialogbox"].includes(el[i].item.nodeName.toLowerCase())) {
-                        el[i].item.removeAttribute("style");
-                      }
+                  }
+                  qA(`[style*="--fixed"]`).forEach(item => {
+                    if (cP(item, "position") !== "fixed") {
+                      item.style.setProperty("height", "");
+                      item.style.setProperty("max-height", "");
+                      item.style.setProperty("top", "");
+                      item.style.setProperty("--fixed", "");
                     }
-                    break;
-                }
-              }
-              qA(`[style*="--fixed"]`).forEach(item => {
-                if (cP(item, "position") !== "fixed") {
-                  item.style.setProperty("height", "");
-                  item.style.setProperty("max-height", "");
-                  item.style.setProperty("top", "");
-                  item.style.setProperty("--fixed", "");
-                }
-              });
-            };
-            window.addEventListener("scroll", fixPosition, true);
+                  });
+                  window.cancelAnimationFrame(doFix);
+                });
+              },
+              { signal: controller.signal }
+            );
           }
         };
         if (defCon.oZoom.length > 1) {
-          positionCompatibility(ratio, { preview: true });
+          fixStyleHandler(ratio, { preview: true });
         } else {
           document.addEventListener("readystatechange", () => {
             if (document.readyState !== "loading") {
-              positionCompatibility(ratio, { preview: false });
+              fixStyleHandler(ratio, { preview: false });
             }
           });
         }
+        // Patch2022.2.alhpa: Fixed Position:sticky/fixed while transform:scale() in Firefox. --END-- //
       } catch (e) {
         error("defineProperty.Firefox:", e.message);
       }
@@ -881,13 +921,15 @@
     }, interval);
   }
 
-  function deBounce(fn, delay, timer) {
+  function deBounce(fn, delay, timer, immediate) {
     return function () {
       const _this = this;
       const args = arguments;
+      if (!defCon[timer] && immediate) {
+        fn.apply(_this, args);
+      }
       if (defCon[timer]) {
         raf.clearTimeout(defCon[timer]);
-        delete defCon[timer];
       }
       defCon[timer] = raf.setTimeout(function () {
         fn.apply(_this, args);
@@ -1042,7 +1084,7 @@
     );
   }
 
-  function framesInsertStyle({ items, condition, tstyle } = {}) {
+  function framesInsertStyle({ items, condition, tstyle }) {
     const rect = items.getBoundingClientRect();
     if (rect.bottom >= 0 && rect.right >= 0 && rect.width > 4 && rect.height > 4 && cP(items, "display") !== "none" && cP(items, "visibility") !== "hidden") {
       timeStart("\u27A4 [ASYNCFRAMES]");
@@ -1077,15 +1119,21 @@
     }
   }
 
+  function getSacleMatrix() {
+    defCon.oZoom = defCon.oZoom.slice(-2);
+    const oScale = Number(defCon.oZoom.slice(-2, -1)) || 1;
+    const tScale = Number(defCon.oZoom.slice(-1));
+    return { oScale, tScale };
+  }
+
   function loadPreview(_preview_, ts = defCon.tStyle, s = true) {
     try {
       if (_preview_) {
         addStyle(ts, `${defCon.class.rndStyle}`, document.head, "TS", { isReload: true });
         if (defCon.isFontsize) {
-          const oScale = Number(defCon.oZoom.slice(-2, -1)) || 1;
-          const tScale = Number(defCon.oZoom.slice(-1));
-          debug("\u27A4 Scale<Matrix>: %o\n\u3000 \u27A5 Scale<Previous>: %o\n\u3000 \u27A5 Scale<Current>: %o", defCon.oZoom, oScale, tScale);
-          definePropertiesForZoom(tScale / oScale);
+          const { oScale, tScale } = getSacleMatrix();
+          tScale !== oScale && definePropertiesForZoom(tScale / oScale, { deleteProperty: true });
+          debug("\u27A4 Scale<Matrix>: %o", defCon.oZoom);
         }
         qA("iframe").forEach(async items => {
           await sleep(30);
@@ -1102,7 +1150,7 @@
     }
   }
 
-  function insertStyle_AsyncFrames({ isMutationObserver } = {}) {
+  function insertStyle_AsyncFrames({ isMutationObserver }) {
     // Greasemonkey4.0+ need to wait all frames loaded to excute.
     if (IS_REAL_BLINK || isGM) {
       qA("iframe").forEach(async items => {
@@ -2089,11 +2137,11 @@
             <p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}
               <!-- START VERSION NOTICE -->
-              <li class="${RANDOM_ID}_info">进一步优化Firefox的字体缩放功能，查看<a href="${HOST_URI}#scale" target="_blank">关于字体缩放</a>。</li>
-              <li class="${RANDOM_ID}_fix">优化字体缩放对Position:sticky在更多站点的兼容性。</li>
-              <li class="${RANDOM_ID}_fix">修正字体缩放对Position:fixed的兼容性问题，如在某些网站遇到样式错误或卡顿，请暂停使用。(alpha版本)</li>
-              <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化样式，优化代码。</li>
-              <li class="${RANDOM_ID}_fix">紧急修正字体缩放函数错误。<span style="color:red">New!</span></li>
+              <li class="${RANDOM_ID}_fix">修正自定义字体添加字符检测范围的遗漏。参见<a href="${FEEDBACK_URI}/94" target="_blank">#94</a></li>
+              <li class="${RANDOM_ID}_fix">优化字体缩放函数，监听FF事件终止，提升执行效率。</li>
+              <li class="${RANDOM_ID}_fix">修正chrome下SVG元素因字体缩放造成坐标偏移的问题。</li>
+              <li class="${RANDOM_ID}_fix">修正Firefox下monospace造成中文字体声明失效的问题。</li>
+              <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化代码。</li>
               <!-- END VERSION NOTICE -->
             </ul></p>
             <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
@@ -2158,8 +2206,10 @@
       typeof defCon.siteIndex === "undefined" &&
         sleep(20)(fontsize_r).then(r => {
           defCon.oZoom.push(r);
-          definePropertiesForZoom(r);
+          definePropertiesForZoom(r, { deleteProperty: false });
         });
+    } else {
+      defCon.oZoom.push(1);
     }
     const prefont = CONST_VALUES.fontSelect && CONST_VALUES.fontSelect.split(",")[0];
     const refont = prefont ? prefont.replace(/"|'/g, "") : "";
@@ -2214,7 +2264,7 @@
           `${precode.toString()}{font-size:14px!important;line-height:150%!important;` +
             `font-family:'Operator Mono Lig','Fira Code','Source Code Pro','DejaVu Sans Mono',` +
             `'Ubuntu Mono','Roboto Mono','JetBrains Mono','Anonymous Pro','Droid Sans Mono','Mono',` +
-            `'Monaco','Menlo','Inconsolata','Liberation Mono','Consolas','Courier New',monospace,` +
+            `'Monaco','Menlo','Inconsolata','Liberation Mono','Consolas','Courier New',${IS_REAL_GECKO ? "" : "monospace,"}` +
             `${r}!important;font-feature-settings:"liga" 0,"zero"!important}`
         );
       }
@@ -2444,13 +2494,12 @@
       }
     }
 
-    /* Patch2022.1: Fixed font-style:bold error while setting font stroke in chromium 96+ */
+    /* Patch2022.1: Fixed font-style:bold while font stroke in chromium 96+ --START-- */
 
     const NEED_FIX_STROKE = IFFontStroke => {
       return IS_REAL_BLINK && IFFontStroke && (Number(getNavigator.chromiumVersion()) >= 96 || getNavigator.isCheatUA());
     };
     const SHOULD_FIX_STROKE = NEED_FIX_STROKE(CONST_VALUES.fontStroke);
-
     function correctBoldErrorByStroke(SHOULDFIXSTROKE, { isCount }) {
       return new Promise(resolve => {
         if (SHOULDFIXSTROKE) {
@@ -2477,6 +2526,7 @@
           isCount && timeEnd("\u27A4 [FIXSTROKE]");
         });
     }
+    // Patch2022.1: Fixed font-style:bold while font stroke in chromium 96+ --END-- //
 
     /* Insert CSS */
 
@@ -2524,8 +2574,8 @@
             return false;
           };
           const HAS_ADDED_NODES = checkMutationHasAddedNodes();
-          HAS_ADDED_NODES && insertStyle_AsyncFrames({ isMutationObserver: true });
-          SHOULD_FIX_STROKE && deBounce(correctBoldErrorByStroke, 50, "fixstroke")(CONST_VALUES.fontStroke, { isCount: HAS_ADDED_NODES });
+          HAS_ADDED_NODES && deBounce(insertStyle_AsyncFrames, 200, "asyncframes", true)({ isMutationObserver: true });
+          SHOULD_FIX_STROKE && deBounce(correctBoldErrorByStroke, 100, "fixstroke", true)(CONST_VALUES.fontStroke, { isCount: HAS_ADDED_NODES });
         }
       }).observe(document, { childList: true, subtree: true });
     } catch (e) {
@@ -2616,7 +2666,7 @@
                 </div>
               </li>
               <li id="${defCon.id.fs}">
-                <div class="${RANDOM_ID}_VIP" title="实验性功能\uff1a已兼容大部分浏览器，但仍在Alpha测试阶段\uff01">\u2462 字体缩放功能（默认\uff1a关闭）</div>
+                <div class="${RANDOM_ID}_VIP" title="实验性功能\uff1a兼容大部分浏览器，但仍在Beta测试阶段\uff01">\u2462 字体缩放功能（默认\uff1a关闭）</div>
                 <div style="margin:0;padding:0">
                   <input type="checkbox" id="${defCon.id.isfontsize}" class="${defCon.class.checkbox}" ${isFontsize ? "checked" : ""} />
                   <label for="${defCon.id.isfontsize}"></label>
@@ -2671,7 +2721,7 @@
         IS_REAL_GECKO &&
           confirmIfValueChange(
             qS(`#${defCon.id.isfontsize}`),
-            `字体比例缩放（实验性功能 - Alpha版本）\n目前已兼容大部分主流浏览器，但Firefox由于Gecko内核兼容性问题会对部分网站代码兼容不佳而造成样式错乱等问题，请根据需要酌情在特定站点内使用。(如有其他需求请使用浏览器缩放替代)${
+            `字体比例缩放（实验性功能）\n警告：Firefox因Gecko内核的兼容性，会对部分网站兼容不足而造成样式错乱、页面卡顿等问题，请根据需要酌情在特定站点内使用。\n(建议：如有必要的需求，请使用浏览器缩放替代。)${
               isGM ? "\n\n扩展Greasemonkey不支持字体缩放功能！" : "\n\n请确认是否开启字体缩放功能？"
             }`,
             { useGM: false }
@@ -3056,26 +3106,26 @@
                 qS(`#${RANDOM_ID}_addTools`).addEventListener("click", () => {
                   let chName, enName, psName, cusFontName;
                   chName = prompt(
-                    "请输入「中文字体家族名称」\uff1a\n(例如\uff1a鸿蒙黑体，仅支持半角输入模式，包括中文、日文、韩文、英文，数字、减号、下划线、空格、@)",
+                    "请输入「中文字体家族名称」\uff1a\n(例如\uff1a鸿蒙黑体，仅支持半角输入模式，包括中文、日文、韩文、英文，数字、小数点、减号、下划线、空格、@)",
                     "鸿蒙黑体"
                   );
                   if (chName === null) {
                     return;
-                  } else if (/^@?[a-zA-Z0-9\u2E80-\uD7FF\-_ ]+$/.test(chName.trim())) {
+                  } else if (/^@?[a-zA-Z0-9\u2E80-\uD7FF,\-_.(（ !/）)]+$/.test(chName.trim())) {
                     enName = prompt(
-                      "请输入「英文字体家族名称」\uff1a\n(例如\uff1aHarmonyOS Sans SC，仅支持半角输入模式，包括英文、数字、减号、下划线、空格、@)",
+                      "请输入「英文字体家族名称」\uff1a\n(例如\uff1aHarmonyOS Sans SC，仅支持半角输入模式，包括英文、数字、小数点、减号、下划线、空格、@)",
                       "HarmonyOS Sans SC"
                     );
                     if (enName === null) {
                       return;
-                    } else if (/^@?[a-zA-Z0-9\-_ ]+$/.test(enName.trim())) {
+                    } else if (/^@?[a-zA-Z0-9,\-_.( !/)]+$/.test(enName.trim())) {
                       psName = prompt(
                         "请输入「PostScript名称」\uff1a\n(为使新增字体全局生效，请尽量填写PostScript名称。如果您暂时无法提供PostScript名称，可留空)（如有需要请访问fontke.com查询）",
                         ""
                       );
                       if (psName === null) {
                         return;
-                      } else if (/^@?[a-zA-Z0-9\u2E80-\uD7FF\-_ ]+$/.test(psName.trim())) {
+                      } else if (/^[a-zA-Z0-9\u2E80-\uD7FF,\-_.@!&=?|+~ ]+$/.test(psName.trim())) {
                         cusFontName = `{"ch":"${chName.trim()}","en":"${enName.trim()}","ps":"${psName.trim()}"}`;
                       } else {
                         cusFontName = `{"ch":"${chName.trim()}","en":"${enName.trim()}"}`;
@@ -3099,7 +3149,7 @@
                 });
                 if (await frDialog.respond()) {
                   const fontListArray = custom_Fontlist.match(
-                    /{\s*"ch":\s*"@?[a-zA-Z0-9\u2E80-\uD7FF\-_ ]+"\s*,\s*"en":\s*"@?[a-zA-Z0-9\-_ ]+"\s*(,\s*"ps":\s*"@?[a-zA-Z0-9\u2E80-\uD7FF\-_ ]+"\s*)?}/g
+                    /{\s*"ch":\s*"@?[a-zA-Z0-9\u2E80-\uD7FF,\-_.(（ !/）)]+"\s*,\s*"en":\s*"@?[a-zA-Z0-9,\-_.( !/)]+"\s*(,\s*"ps":\s*"[a-zA-Z0-9\u2E80-\uD7FF,\-_.@!&=?|+~ ]+"\s*)?}/g
                   );
                   if (!custom_Fontlist.length) {
                     GMdeleteValue("_Custom_fontlist_");
@@ -3370,6 +3420,7 @@
               await getCurrentFontName(ffaceT.checked, defCon.refont, DEFAULT_FONT);
               loadPreview(defCon.preview);
               setAutoZoomFontSize(`#${defCon.id.rndId}`, defCon.tZoom);
+              abortController(defCon.tZoom);
             }
             frDialog = null;
           });
@@ -3421,6 +3472,7 @@
                     `display:inline-block;border:1px solid #eee;border-radius:4px;padding:5px 10px;background:${fscolor};color:${cl}`
                   );
                   setAutoZoomFontSize(`#${defCon.id.rndId}`, fzoom);
+                  abortController(defCon.tZoom);
                 });
                 await correctBoldErrorByStroke(NEED_FIX_STROKE(fstroke), { isCount: false });
               } catch (e) {
@@ -3587,6 +3639,7 @@
           defCon.oZoom.push(CONST_VALUES.fontSize);
           defCon.tZoom = CONST_VALUES.fontSize;
           loadPreview(defCon.isPreview);
+          abortController(defCon.tZoom);
         }
       }
       closeAllFrDialogBox("fr-dialogbox");
@@ -3815,7 +3868,7 @@
                 return this.value;
               },
               set: newVal => {
-                deBounce(setEffectIntoSubmit, 100, t.id)(newVal, e, v, t, d, g);
+                deBounce(setEffectIntoSubmit, 100, t.id, false)(newVal, e, v, t, d, g);
               },
             });
           }
@@ -4089,6 +4142,7 @@
 
     function setAutoZoomFontSize(target, zoom) {
       let curZoom = zoom || 1;
+      const { oScale, tScale } = getSacleMatrix();
       try {
         if (IS_REAL_GECKO) {
           if (curZoom !== 1) {
@@ -4099,9 +4153,9 @@
           } else {
             qS(target).removeAttribute("style");
           }
-          window.scrollTo(0, defCon.elCompat.scrollTop * curZoom - 1);
+          window.scrollTo(0, oScale === 1 || tScale === 1 ? 0 : defCon.elCompat.scrollTop * curZoom - 1);
         } else {
-          curZoom = Number(cP(document.body, "zoom")) || zoom || 1;
+          curZoom = Number(cP(document.body, "zoom")) || curZoom;
           if (curZoom !== 1) {
             qS(target).style.cssText += "zoom:" + Number(1 / curZoom);
           } else {
@@ -4112,16 +4166,31 @@
         defCon.errors.push(`[setAutoZoomFontSize]: ${e}`);
         error("SetAutoZoomFontSize:", e.message);
       } finally {
-        if (curZoom !== 1) {
+        if (curZoom !== 1 && defCon.preview && oScale !== tScale) {
           debug(
             "\u27A4 fontSize<Scale>: save [%s%]\n\u3000 \u27A5 current [%c%s% %c%s%]",
             (CONST_VALUES.fontSize * 100).toFixed(2),
-            "color:teal",
+            "color:teal;padding:5px 0",
             (curZoom * 100).toFixed(2),
-            "color:indigo",
+            "color:indigo;padding:5px 0",
             ((1 / curZoom) * 100).toFixed(2)
           );
         }
+      }
+    }
+
+    function abortController(scale) {
+      if (IS_REAL_GECKO && scale === 1) {
+        controller.abort();
+        while (controller.signal.aborted) {
+          debug("\u27A4 Redeploy >> AbortSignal.aborted:%o", controller.signal.aborted);
+          controller = new AbortController();
+        }
+        qA(`[style*="--sticky"],[style*="--fixed"]`).forEach(item => {
+          item.style.setProperty("--fixed", "");
+          item.style.setProperty("--sticky", "");
+          item.style.setProperty("top", "");
+        });
       }
     }
 
