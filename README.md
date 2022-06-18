@@ -12,7 +12,7 @@
 
 简介：无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的 Greasemonkey 脚本和浏览器插件。
 
-`version 2022.06.12.1` 【🔥 [安装脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+`version 2022.06.18.1` 【🔥 [安装脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 [`!!! 重大版本更新，请使用前仔细查看脚本使用说明(WIKI) !!!`](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font_Rendering) `New!`
 
@@ -21,10 +21,8 @@
 `!!! 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件 !!!`
 
 ```text
-@ 修正自定义字体添加字符检测范围的遗漏。参见#94
-@ 优化字体缩放函数，监听FF事件终止，提升执行效率。
-@ 修正chrome下SVG元素因字体缩放造成坐标偏移的问题。
-@ 修正Firefox下monospace造成中文字体声明失效的问题。
++ 新增文字粗体附加描边时的样式修正开关(Chrome) #91
+@ 修正字体缩放函数的已知bug，优化执行效率。
 @ 修正一些已知的问题，优化代码。
 ```
 
@@ -59,7 +57,7 @@
 
 ### **关于字体缩放**
 
-> 字体比例缩放（实验性功能）Alpha版，默认关闭，请在 **高级核心功能设置** 中打开字体缩放功能。
+> 字体比例缩放（实验性功能）Beta版，默认关闭，请在 **高级核心功能设置** 中打开字体缩放功能。
 >
 > * **已知问题：Firefox/Gecko内核**：针对Position:sticky/fixed的修正说明：因Gecko内核限制，1.部分网站样式无法完美修正，会造成样式错乱；2.在某些网站样式修正操作会造成页面卡顿；3.如遇到以上两种情况，请暂停使用该功能；若有必要需求，请使用浏览器缩放替代。_（Greasemonkey扩展不支持此功能）_
 > * **未知情况：** 如遇到非以上情况的样式异常或坐标偏移，请及时向我[反馈](https://github.com/F9y4ng/GreasyFork-Scripts/issues)。
@@ -74,14 +72,14 @@
 
 简介：最新版本的集合谷歌、百度、必应的搜索引擎跳转工具，必应跳转可在菜单进行自定义设置。此版本无外部脚本调用，更快速和准确的进行按钮定位，显示速度大大提升。如有异常请清空浏览器缓存，再次载入使用！
 
-`version 5.0.20220528.1` 【🔥 [安装脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+`version 5.0.20220618.1` 【🔥 [安装脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 [`!!! 重大版本更新，请使用前仔细查看脚本使用说明(WIKI) !!!`](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Google_Baidu_Switcher) `New!`
 
 `!!! 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它 !!!`
 
 ```text
-@ 修正在Firefox下脚本缩放页面后的坐标偏移问题。
+@ 修正Google搜索下跳转按钮的样式问题。
 ```
 
 ### **重要说明**

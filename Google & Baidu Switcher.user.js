@@ -3,7 +3,7 @@
 // @name:zh-CN         谷歌、百度、必应的搜索引擎跳转工具
 // @name:zh-TW         谷歌、百度、必應的搜索引擎跳轉工具
 // @name:ja            Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version            5.0.20220528.1
+// @version            5.0.20220618.1
 // @author             F9y4ng
 // @description        The search engine jump tools of Google, Baidu and Bing automatically update and detect the script by default. You can customize the Bing button and other search jump effect settings in the menu.
 // @description:zh-CN  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮及其他搜索跳转效果。
@@ -27,7 +27,7 @@
 // @compatible         Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible         Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible         Safari 兼容Tampermonkey • Safari
-// @note               修正在Firefox下脚本缩放页面后的坐标偏移问题。
+// @note               修正Google搜索下跳转按钮的样式问题。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -1252,8 +1252,8 @@
               </span>`
             ),
         StyleCode: CONST.isUseBing
-          ? `#${CONST.rndidName}{position:relative;margin:0 4px 0 -5px;z-index:100;display:flex;justify-content:center;align-items:center}#${CONST.rndidName} #${CONST.bdyx}{padding:0 0 0 8px}#${CONST.rndidName} #${CONST.bbyx}{margin-left:1px}.${CONST.scrollspan}{min-height:26px}.${CONST.scrollspan2}{min-height:26px;margin-top:0!important}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-size:13px!important}.${CONST.scrollbars2}{display:inline-block;margin:0;height:30px!important;font-size:13px!important}#${CONST.bdyx} input{cursor:pointer;padding:1px 1px 1px 6px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bbyx} input{cursor:pointer;padding:1px 6px 1px 1px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover,#${CONST.bbyx} input:hover{background:#2b7de9;}`
-          : `#${CONST.rndidName}{position:relative;margin:0 4px 0 -5px;z-index:100;display:flex;justify-content:center;align-items:center}#${CONST.rndidName} #${CONST.bdyx}{padding:0 0 0 8px}.${CONST.scrollspan}{min-height:26px}.${CONST.scrollspan2}{min-height:26px;margin-top:0!important}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;text-shadow:0 0 1px #fff!important;font-size:13px!important}.${CONST.scrollbars2}{display:inline-block;margin:0;height:30px!important;text-shadow:0 0 1px #fff!important;font-size:13px!important}#${CONST.bdyx} input{cursor:pointer;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff}#${CONST.bdyx} input:hover{background:#2b7de9}`,
+          ? `#${CONST.rndidName}{position:relative;margin:0 4px 0 -5px;z-index:100;display:flex;justify-content:center;align-items:center}#${CONST.rndidName} #${CONST.bdyx}{padding:0 0 0 8px}#${CONST.rndidName} #${CONST.bbyx}{margin-left:1px}.${CONST.scrollspan}{min-height:26px}.${CONST.scrollspan2}{min-height:26px;margin-top:0!important}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-size:13px!important}.${CONST.scrollbars2}{display:inline-block;margin:0;height:26px!important;font-size:13px!important}#${CONST.bdyx} input{cursor:pointer;padding:1px 1px 1px 6px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bbyx} input{cursor:pointer;padding:1px 6px 1px 1px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover,#${CONST.bbyx} input:hover{background:#2b7de9;}`
+          : `#${CONST.rndidName}{position:relative;margin:0 4px 0 -5px;z-index:100;display:flex;justify-content:center;align-items:center}#${CONST.rndidName} #${CONST.bdyx}{padding:0 0 0 8px}.${CONST.scrollspan}{min-height:26px}.${CONST.scrollspan2}{min-height:26px;margin-top:0!important}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;text-shadow:0 0 1px #fff!important;font-size:13px!important}.${CONST.scrollbars2}{display:inline-block;margin:0;height:26px!important;text-shadow:0 0 1px #fff!important;font-size:13px!important}#${CONST.bdyx} input{cursor:pointer;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff}#${CONST.bdyx} input:hover{background:#2b7de9}`,
         keyStyle: keywordHighlight
           ? ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe{color:#f73131cd!important;background-color:#ffff80ad!important;font-weight:700!important}"
           : "",
