@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.06.18.1
+// @version            2022.06.25.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -1050,10 +1050,10 @@
             if (className && typeof className === "string") {
               if (isReload === true && qS(`.${className}`, addToTarget)) {
                 safeRemove(`.${className}`, addToTarget);
-                debug(`\u27A4 style<c:${className}> View:%c %s`, "color:crimson", !!qS(`.${className}`, addToTarget));
+                debug(`\u27A4 style<c:${className}> View:%c %s`, "color:crimson", !!qA(`style[id^="${T}"]`, addToTarget).length);
                 while (qA(`style[id^="${T}"]`, addToTarget).length > 0) {
                   safeRemove(`style[id^="${T}"]`, addToTarget);
-                  debug(`\u27A4 style<i:${T}> Review:%c %s`, "color:crimson", !!qA(`style[id^="${T}"]`, addToTarget).length);
+                  debug(`\u27A4 style<i:${T}????????> Review:%c %s`, "color:crimson", !!qA(`style[id^="${T}"]`, addToTarget).length);
                 }
               } else if (isReload === false && qS(`.${className}`, addToTarget)) {
                 return true;
@@ -1871,13 +1871,13 @@
     fontSmooth: true,
     fontSize: 1.0,
     fontStroke: IS_REAL_GECKO ? 0.08 : 0.05,
-    fixStroke: !IS_REAL_GECKO,
+    fixStroke: IS_REAL_BLINK,
     fontShadow: IS_REAL_GECKO ? 0.5 : 1.0,
     shadowColor: IS_REAL_GECKO ? "#7F7F7FAA" : "#7B7B7BCC",
     fontCSS: `:not(i):not([class*='glyph']):not([class*='icon']):not([class*='fa-']):not([class*='vjs-'])`,
     fontEx: `input,select,button,textarea,kbd,pre,pre *,code,code *`,
   };
-  const IS_MACOS = getNavigator.system().toLocaleLowerCase().startsWith("mac");
+  const IS_MACOS = getNavigator.system().startsWith("macOS");
   const SCRIPT_AUTHOR = GMinfo.scriptMetaStr.match(/(\u0040\u0061\u0075\u0074\u0068\u006f\u0072\s+)(\S+)/)[2];
   const FEEDBACK_URI = GMinfo.scriptMetaStr.match(/(\u0040\u0073\u0075\u0070\u0070\u006f\u0072\u0074\u0055\u0052\u004c\s+)(\S+)/)[2];
   const ROOT_SECRET_KEY = `\u8ab1\u004a\u0056\u0069\u0059\u7409\u67d3\u5b7a\u80ba\u0070\u0032\u004f\u64d3\u0030\u8151\u0074\u5c80\u5b9a\u81ba\u0065`;
@@ -2067,9 +2067,9 @@
         CONST_VALUES.fontSelect = filterHtmlToText(domainValue[domainValueIndex].fontSelect);
         CONST_VALUES.fontFace = Boolean(domainValue[domainValueIndex].fontFace);
         CONST_VALUES.fontStroke = Number(domainValue[domainValueIndex].fontStroke) || 0;
-        CONST_VALUES.fixStroke = IS_REAL_GECKO ? false : typeof domainValue[domainValueIndex].fixStroke === "undefined" ? true : Boolean(domainValue[domainValueIndex].fixStroke);
+        CONST_VALUES.fixStroke = !IS_REAL_BLINK ? false : typeof domainValue[domainValueIndex].fixStroke === "undefined" ? true : Boolean(domainValue[domainValueIndex].fixStroke);
         CONST_VALUES.fontShadow = Number(domainValue[domainValueIndex].fontShadow) || 0;
-        CONST_VALUES.fontSize = isFontsize ? Number(domainValue[domainValueIndex].fontSize) || 1 : 1;
+        CONST_VALUES.fontSize = defCon.isFontsize ? Number(domainValue[domainValueIndex].fontSize) || 1 : 1;
         CONST_VALUES.shadowColor = filterHtmlToText(domainValue[domainValueIndex].shadowColor);
         CONST_VALUES.fontSmooth = Boolean(domainValue[domainValueIndex].fontSmooth);
         CONST_VALUES.fontCSS = filterHtmlToText(domainValue[domainValueIndex].fontCSS);
@@ -2078,9 +2078,9 @@
         CONST_VALUES.fontSelect = filterHtmlToText(fontValue.fontSelect);
         CONST_VALUES.fontFace = Boolean(fontValue.fontFace);
         CONST_VALUES.fontStroke = Number(fontValue.fontStroke) || 0;
-        CONST_VALUES.fixStroke = IS_REAL_GECKO ? false : typeof fontValue.fixStroke === "undefined" ? true : Boolean(fontValue.fixStroke);
+        CONST_VALUES.fixStroke = !IS_REAL_BLINK ? false : typeof fontValue.fixStroke === "undefined" ? true : Boolean(fontValue.fixStroke);
         CONST_VALUES.fontShadow = Number(fontValue.fontShadow) || 0;
-        CONST_VALUES.fontSize = isFontsize ? Number(fontValue.fontSize) || 1 : 1;
+        CONST_VALUES.fontSize = defCon.isFontsize ? Number(fontValue.fontSize) || 1 : 1;
         CONST_VALUES.shadowColor = filterHtmlToText(fontValue.shadowColor);
         CONST_VALUES.fontSmooth = Boolean(fontValue.fontSmooth);
         CONST_VALUES.fontCSS = filterHtmlToText(fontValue.fontCSS);
@@ -2139,8 +2139,8 @@
             <p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}
               <!-- START VERSION NOTICE -->
-              <li class="${RANDOM_ID}_add">新增文字粗体附加描边时的样式修正开关(Chrome) <a href="${FEEDBACK_URI}/91#event-6743930441" target="_blank">#91</a></li>
-              <li class="${RANDOM_ID}_fix">修正字体缩放函数的已知bug，优化执行效率。</li>
+              <li class="${RANDOM_ID}_fix">修正百度地图、QQ邮箱等工具网站的兼容性问题。</li>
+              <li class="${RANDOM_ID}_fix">优化一般渲染效率，优化描边修正效率。</li>
               <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化代码。</li>
               <!-- END VERSION NOTICE -->
             </ul></p>
@@ -2201,7 +2201,7 @@
     const funcFontsize = t => {
       return `body{${IS_REAL_GECKO ? `transform:scale(${t});transform-origin:left top 0;width:${100 / t}%;height:${100 / t}%;` : `zoom:${t}!important;`}}`;
     };
-    if (isFontsize && !isNaN(fontsize_r) && fontsize_r >= 0.8 && fontsize_r <= 1.5 && fontsize_r !== 1) {
+    if (defCon.isFontsize && !isNaN(fontsize_r) && fontsize_r >= 0.8 && fontsize_r <= 1.5 && fontsize_r !== 1) {
       bodyzoom = funcFontsize(fontsize_r);
       typeof defCon.siteIndex === "undefined" &&
         sleep(20)(fontsize_r).then(r => {
@@ -2363,11 +2363,11 @@
                 <label for="${defCon.id.smooth}"></label>
               </div>
             </li>
-            ${isFontsize ? tFontSizeHTML : ""}
+            ${defCon.isFontsize ? tFontSizeHTML : ""}
             <li id="${defCon.id.fontStroke}">
               <div class="${defCon.class.flex}">
                 <span style="margin:0;padding:0">字体描边尺寸</span>
-                ${IS_REAL_GECKO ? "" : tFixStrokeHTML}
+                ${IS_REAL_BLINK ? tFixStrokeHTML : ""}
                 <input id="${defCon.id.strokeSize}" type="text" v="number" maxlength="5" />
               </div>
               <div class="${defCon.class.range}" data-ticks-position="top"
@@ -2473,8 +2473,8 @@
           maxPersonalSites,
           typeof defCon.domainIndex !== "undefined" ? "\uff08\u5f53\u524d\uff1a\u4e2a\u6027\u5316\uff09" : "\uff08\u5f53\u524d\uff1a\u5168\u5c40\uff09",
           "line-height:180%;font-size:12px;color:steelblue",
-          isFontsize ? "ON " : "OFF",
-          isFontsize
+          defCon.isFontsize ? "ON " : "OFF",
+          defCon.isFontsize
             ? CONST_VALUES.fontSize === 1
               ? "\u3000\u259a\u0020\u7f29\u653e\u6bd4\u4f8b\uff1a(WEBSITE DEFINED)"
               : `\u3000\u259a\u0020\u7f29\u653e\u6bd4\u4f8b\uff1a${Number(CONST_VALUES.fontSize * 100).toFixed(2) + "%"}`
@@ -2505,21 +2505,21 @@
       return IS_REAL_BLINK && IFFontStroke && (Number(getNavigator.chromiumVersion()) >= 96 || getNavigator.isCheatUA());
     };
     const SHOULD_FIX_STROKE = NEED_FIX_STROKE(CONST_VALUES.fixStroke);
-    function correctBoldErrorByStroke(should_fix_stroke, { logger, action }) {
+    function correctBoldErrorIfStroke(should_fix_stroke, { logger, action }) {
       return new Promise(resolve => {
         if (should_fix_stroke) {
-          const attributeName = "fr-fix-stroke";
-          qA(`:not(${defCon.queryString},[${attributeName}])`).forEach(item => {
-            if (cP(item, "font-weight") >= 600 && cP(item, "-webkit-text-stroke-width") !== "0px") {
-              item.setAttribute(attributeName, true);
+          const attrName = "fr-fix-stroke";
+          qA(`:not(${defCon.queryString},[${attrName}])`).forEach(item => {
+            if (cP(item, "display") !== "none" && cP(item, "font-weight") >= 600 && !item.getAttribute("fr-fix-stroke")) {
+              item.setAttribute(attrName, true);
             }
           });
-          resolve(attributeName);
+          resolve(attrName);
         }
       })
         .then(result => {
           qA(`[${result}]`).forEach(item => {
-            if (cP(item, "font-weight") < 600) {
+            if (cP(item, "font-weight") < 600 && item.getAttribute("fr-fix-stroke")) {
               item.removeAttribute(result);
             }
           });
@@ -2555,9 +2555,9 @@
               mutation.addedNodes.forEach(node => {
                 if (node instanceof HTMLElement && node.isConnected) {
                   if (
-                    mutation.target === document.head &&
                     typeof defCon.siteIndex === "undefined" &&
                     document.head.lastChild.className !== defCon.class.rndStyle &&
+                    mutation.target === document.head &&
                     qS(`.${defCon.class.rndStyle}`)
                   ) {
                     const lastChildEleclassName = document.head.lastChild.className || "lastChildEleclassName";
@@ -2569,15 +2569,18 @@
                       deBounce(moveStyleTolastChild, 200, "moveStyleTolastChild", false)({ isMutationObserver: true });
                     }
                   }
-                  node.nodeName === "IFRAME" && deBounce(insertStyle_AsyncFrames, 500, "asyncframes", true)({ isMutationObserver: true });
-                  SHOULD_FIX_STROKE && deBounce(correctBoldErrorByStroke, 100, "fixstroke", true)(CONST_VALUES.fontStroke, { logger: true, action: mutation.type });
+                  node.nodeName === "IFRAME" && deBounce(insertStyle_AsyncFrames, 200, "asyncframes", true)({ isMutationObserver: true });
+                  SHOULD_FIX_STROKE && deBounce(correctBoldErrorIfStroke, 100, "fixstroke", true)(CONST_VALUES.fontStroke, { logger: true, action: mutation.type });
                 }
               });
               break;
             case "attributes":
-              if (SHOULD_FIX_STROKE && mutation.attributeName !== "fr-fix-stroke" && !defCon.queryString.split(",").includes(mutation.target.nodeName.toLowerCase())) {
-                deBounce(correctBoldErrorByStroke, 300, "fixstroke-attr", true)(CONST_VALUES.fontStroke, { logger: true, action: mutation.type });
-              }
+              SHOULD_FIX_STROKE &&
+                mutation.attributeName !== "fr-fix-stroke" &&
+                !defCon.queryString.split(",").includes(mutation.target.nodeName.toLowerCase()) &&
+                ((cP(mutation.target, "font-weight") >= 600 && !mutation.target.getAttribute("fr-fix-stroke")) ||
+                  (cP(mutation.target, "font-weight") < 600 && mutation.target.getAttribute("fr-fix-stroke"))) &&
+                deBounce(correctBoldErrorIfStroke, 200, "fixstroke-attr", true)(CONST_VALUES.fontStroke, { logger: true, action: mutation.type });
               break;
           }
         });
@@ -2933,6 +2936,11 @@
       }
     }
 
+    function doNotMoveStyle() {
+      const blackList = ["bWFwLmJhaWR1LmNvbQ==", "bWFpbC5xcS5jb20="]; // Domestic cancer
+      return blackList.includes(defCon.encrypt(CUR_HOST_NAME));
+    }
+
     function insertStyle({ isReload } = {}) {
       try {
         addStyle(tStyle, `${defCon.class.rndStyle}`, document.head, "TS", { isReload });
@@ -2953,7 +2961,7 @@
               console.error("Redundant Scripts:", info);
             }
             return;
-          } else if (qA("style[id^='TS']", document.head).length > 0) {
+          } else if (qA("style[id^='TS']", document.head).length > 0 && !doNotMoveStyle()) {
             insertStyle({ isReload: true });
             count(`\u27A4 [MOVESTYLE][c:${document.head.lastChild.className}]`);
           }
@@ -2961,16 +2969,19 @@
           addLoadEvents(() => {
             sleep(2e3)
               .then(() => {
+                const hasDarkreader = document.head.lastChild.className.includes("darkreader");
                 const isLast = document.head.lastChild.className === defCon.class.rndStyle;
                 const isPrevious = document.head.lastChild.previousSibling.className === defCon.class.rndStyle;
-                const isLastStyle = document.head.lastChild.className.includes("darkreader") ? isPrevious : isLast;
-                qS(`.${defCon.class.rndStyle}`) && insertStyle({ isReload: isLastStyle });
-                return isLastStyle;
+                const isLastStyle = hasDarkreader ? isPrevious : isLast;
+                qS(`.${defCon.class.rndStyle}`) && !doNotMoveStyle() && insertStyle({ isReload: !isLastStyle });
+                return { hasDarkreader, isLastStyle };
               })
-              .then(r => {
+              .then(resolve => {
+                const { hasDarkreader: d, isLastStyle: l } = resolve;
                 debug(
-                  `\u27A4 lastChild ClassName: %c${document.head.lastChild.className} %c${CUR_WINDOW_TOP ? "" : "<FRAMES>"}`,
-                  `color:${r ? "teal" : "red"};font-weight:700`,
+                  `\u27A4 lastChild ClassName: %c%s %c${CUR_WINDOW_TOP ? "" : "<FRAMES>"}`,
+                  `color:${l ? "teal" : "red"};font-weight:700`,
+                  d ? document.head.lastChild.previousSibling.className : document.head.lastChild.className,
                   `color:grey;font-style:italic`
                 );
               })
@@ -3242,7 +3253,7 @@
 
           let drawZoom;
           const zoom = qS(`#${defCon.id.fontZoom}`);
-          if (isFontsize) {
+          if (defCon.isFontsize) {
             try {
               drawZoom = qS(`#${defCon.id.zoomSize}`);
               zoom.value = CONST_VALUES.fontSize === 1 ? "OFF" : CONST_VALUES.fontSize.toFixed(3);
@@ -3273,7 +3284,7 @@
           }
 
           let fixStrokeT;
-          if (!IS_REAL_GECKO) {
+          if (IS_REAL_BLINK) {
             fixStrokeT = qS(`#${defCon.id.fixStroke}`);
             saveChangeStatus(fixStrokeT, CONST_VALUES.fixStroke, submitButton, defCon.values);
             qS(`#${defCon.id.fstroke}`).style.visibility = stroke.value === "OFF" ? "hidden" : "visible";
@@ -3380,7 +3391,7 @@
               smoothT.checked !== INITIAL_VALUES.fontSmooth ? smoothT.click() : debug("\u27A4 <fontSmooth> NOT MODIFIED");
               ffaceT.checked !== INITIAL_VALUES.fontFace ? ffaceT.click() : debug("\u27A4 <fontFace> NOT MODIFIED");
               CONST_VALUES.fontSelect.split(",")[0] !== INITIAL_VALUES.fontSelect.split(",")[0] ? fontSet().fresetList(fontData) : fontSet().fdeleteList(fontData);
-              if (isFontsize) {
+              if (defCon.isFontsize) {
                 zoom.value = INITIAL_VALUES.fontSize === 1 ? "OFF" : INITIAL_VALUES.fontSize.toFixed(3);
                 zoom._value_ = INITIAL_VALUES.fontSize;
                 setSliderProperty(drawZoom, INITIAL_VALUES.fontSize, 3);
@@ -3389,7 +3400,7 @@
               stroke.value = INITIAL_VALUES.fontStroke === 0 ? "OFF" : INITIAL_VALUES.fontStroke.toFixed(3);
               stroke._value_ = INITIAL_VALUES.fontStroke;
               setSliderProperty(drawStrock, INITIAL_VALUES.fontStroke, 3);
-              if (!IS_REAL_GECKO) {
+              if (IS_REAL_BLINK) {
                 fixStrokeT.checked !== INITIAL_VALUES.fixStroke ? fixStrokeT.click() : debug("\u27A4 <fixStroke> NOT MODIFIED");
                 qS(`#${defCon.id.fstroke}`).style.visibility = stroke.value === "OFF" ? "hidden" : "visible";
               }
@@ -3412,7 +3423,7 @@
               smoothT.checked !== CONST_VALUES.fontSmooth ? smoothT.click() : debug("\u27A4 <fontSmooth> NOT MODIFIED");
               ffaceT.checked !== CONST_VALUES.fontFace ? ffaceT.click() : debug("\u27A4 <fontFace> NOT MODIFIED");
               fontSet().fdeleteList(fontData);
-              if (isFontsize) {
+              if (defCon.isFontsize) {
                 zoom.value = CONST_VALUES.fontSize === 1 ? "OFF" : CONST_VALUES.fontSize.toFixed(3);
                 zoom._value_ = CONST_VALUES.fontSize;
                 setSliderProperty(drawZoom, CONST_VALUES.fontSize, 3);
@@ -3422,7 +3433,7 @@
               stroke.value = CONST_VALUES.fontStroke === 0 ? "OFF" : CONST_VALUES.fontStroke.toFixed(3);
               stroke._value_ = CONST_VALUES.fontStroke;
               setSliderProperty(drawStrock, CONST_VALUES.fontStroke, 3);
-              if (!IS_REAL_GECKO) {
+              if (IS_REAL_BLINK) {
                 fixStrokeT.checked !== CONST_VALUES.fixStroke ? fixStrokeT.click() : debug("\u27A4 <fixStroke> NOT MODIFIED");
                 qS(`#${defCon.id.fstroke}`).style.visibility = stroke.value === "OFF" ? "hidden" : "visible";
               }
@@ -3451,10 +3462,10 @@
             const fontselect = fontlists.length > 0 ? addSingleQuoteToArray(fontlists) : filter_MicrosoftYaHei("", reconstruct_fontselect);
             const fontface = ffaceT.checked;
             const smooth = smoothT.checked;
-            const prefzoom = !isFontsize ? 1 : /^[0-1](\.[0-9]{1,3})?$/.test(zoom.value) ? zoom.value : INITIAL_VALUES.fontSize;
+            const prefzoom = !defCon.isFontsize ? 1 : /^[0-1](\.[0-9]{1,3})?$/.test(zoom.value) ? zoom.value : INITIAL_VALUES.fontSize;
             const fzoom = prefzoom < 0.8 ? 0.8 : prefzoom > 1.5 ? 1.5 : Number(prefzoom);
             const fstroke = /^[0-1](\.[0-9]{1,3})?$/.test(stroke.value) ? stroke.value : stroke.value === "OFF" ? 0 : INITIAL_VALUES.fontStroke;
-            const fixfstroke = IS_REAL_GECKO ? false : fstroke === 0 ? false : fixStrokeT.checked;
+            const fixfstroke = !IS_REAL_BLINK ? false : fstroke === 0 ? false : fixStrokeT.checked;
             const fshadow = /^[0-8](\.[0-9]{1,2})?$/.test(shadows.value) ? shadows.value : shadows.value === "OFF" ? 0 : INITIAL_VALUES.fontShadow;
             const pickedcolor = colorshow.value;
             const fscolor = colorReg.test(pickedcolor) ? (pickedcolor.toLowerCase() === "currentcolor" ? "#FFFFFFFF" : pickedcolor) : INITIAL_VALUES.shadowColor;
@@ -3464,7 +3475,14 @@
             const fontex = fex ? fex.replace(/"|`/g, "'") : "";
             if (defCon.isPreview && this.getAttribute("v-Preview")) {
               try {
-                const _bodyzoom = !isFontsize ? "" : fzoom >= 0.8 && fzoom <= 1.5 && fzoom !== 1 ? funcFontsize(fzoom) : "";
+                if (doNotMoveStyle()) {
+                  this.textContent = "\u4fdd\u5b58";
+                  this.removeAttribute("style");
+                  this.removeAttribute("v-Preview");
+                  this.click();
+                  return;
+                }
+                const _bodyzoom = !defCon.isFontsize ? "" : fzoom >= 0.8 && fzoom <= 1.5 && fzoom !== 1 ? funcFontsize(fzoom) : "";
                 const _shadow = fshadow > 0 && fshadow <= 8 ? overlayColor(fshadow, fscolor) : "";
                 const _stroke = fstroke > 0 && fstroke <= 1.0 ? `-webkit-text-stroke:${fstroke}px currentcolor;` : "";
                 const _smoothing = smooth ? funcSmooth : "";
@@ -3495,7 +3513,7 @@
                   setAutoZoomFontSize(`#${defCon.id.rndId}`, fzoom);
                   abortController(defCon.tZoom);
                 });
-                await correctBoldErrorByStroke(NEED_FIX_STROKE(fixfstroke && fstroke), { logger: false, action: "preview" });
+                await correctBoldErrorIfStroke(NEED_FIX_STROKE(fixfstroke && fstroke), { logger: false, action: "preview" });
               } catch (e) {
                 defCon.errors.push(`[submitPreview]: ${e}`);
                 reportErrorToAuthor(defCon.errors);
@@ -3872,7 +3890,7 @@
             qS(`#${defCon.id.shadowColor}`).style.setProperty("display", target.value === "OFF" ? "none" : "flex");
             break;
           case defCon.id.stroke:
-            !IS_REAL_GECKO && qS(`#${defCon.id.fstroke}`).style.setProperty("visibility", target.value === "OFF" ? "hidden" : "visible");
+            IS_REAL_BLINK && qS(`#${defCon.id.fstroke}`).style.setProperty("visibility", target.value === "OFF" ? "hidden" : "visible");
             break;
         }
       });
@@ -4208,7 +4226,7 @@
 
     function abortController(scale) {
       const { oScale, tScale } = getSacleMatrix();
-      if (isFontsize && IS_REAL_GECKO && scale === 1 && oScale !== tScale) {
+      if (defCon.isFontsize && IS_REAL_GECKO && scale === 1 && oScale !== tScale) {
         controller.abort();
         while (controller.signal.aborted) {
           debug("\u27A4 Redeploy >> AbortSignal.aborted:%o", controller.signal.aborted);
