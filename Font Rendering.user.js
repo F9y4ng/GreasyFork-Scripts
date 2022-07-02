@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.07.02.1
+// @version            2022.07.03.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -2156,6 +2156,7 @@
             <p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}
               <!-- START VERSION NOTICE -->
+              <li class="${RANDOM_ID}_fix">修正FF.v102+版本恢复排除渲染站点时样式丢失的问题。</li>
               <li class="${RANDOM_ID}_fix">修正浏览器UA检测在FF.v102+版本的兼容性错误。</li>
               <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化代码。</li>
               <!-- END VERSION NOTICE -->
@@ -2569,14 +2570,18 @@
                 }
               });
               mutation.addedNodes.forEach(node => {
-                if (typeof defCon.siteIndex === "undefined" && node instanceof HTMLElement && node.isConnected) {
-                  mutation.target === document.head &&
-                    qS(`.${defCon.class.rndStyle}`) &&
-                    qS(`.${defCon.class.rndStyle}`).nextElementSibling &&
-                    shouldMoveStyle(node) &&
-                    deBounce(moveStyleTolastChild, 40, "moveStyleTolastChild", false)({ isMutationObserver: true });
-                  node.nodeName === "IFRAME" && deBounce(insertStyle_AsyncFrames, 200, "asyncframes", true)({ isMutationObserver: true });
-                  SHOULD_FIX_STROKE && deBounce(correctBoldErrorIfStroke, 100, "fixstroke", true)(CONST_VALUES.fontStroke, { logger: true, action: mutation.type });
+                if (typeof defCon.siteIndex !== "undefined") {
+                  CUR_WINDOW_TOP && !qS(`.${defCon.class.rndClass}`) && preInsertContentToHead(true);
+                } else {
+                  if (node instanceof HTMLElement && node.isConnected) {
+                    mutation.target === document.head &&
+                      qS(`.${defCon.class.rndStyle}`) &&
+                      qS(`.${defCon.class.rndStyle}`).nextElementSibling &&
+                      shouldMoveStyle(node) &&
+                      deBounce(moveStyleTolastChild, 40, "moveStyleTolastChild", false)({ isMutationObserver: true });
+                    node.nodeName === "IFRAME" && deBounce(insertStyle_AsyncFrames, 200, "asyncframes", true)({ isMutationObserver: true });
+                    SHOULD_FIX_STROKE && deBounce(correctBoldErrorIfStroke, 100, "fixstroke", true)(CONST_VALUES.fontStroke, { logger: true, action: mutation.type });
+                  }
                 }
               });
               break;
