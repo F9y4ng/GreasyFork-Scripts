@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.06.25.1
+// @version            2022.07.02.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -602,11 +602,15 @@
       }
     },
     isCheatUA: function () {
-      return (!this.uaData && !!navigator.userAgentData) || (!this.core().Gecko && !!unsafeWindow.sidebar) || (this.core().Gecko && !unsafeWindow.sidebar);
+      return (
+        (!this.uaData && !!navigator.userAgentData) ||
+        (!this.core().Gecko && !isNaN(parseFloat(unsafeWindow.mozInnerScreenX))) ||
+        (this.core().Gecko && isNaN(parseFloat(unsafeWindow.mozInnerScreenX)))
+      );
     },
   };
 
-  const IS_REAL_GECKO = (getNavigator.core().Gecko && !getNavigator.isCheatUA()) || !!unsafeWindow.sidebar;
+  const IS_REAL_GECKO = (getNavigator.core().Gecko && !getNavigator.isCheatUA()) || !isNaN(parseFloat(unsafeWindow.mozInnerScreenX));
   const IS_REAL_BLINK = (getNavigator.core().Blink && !getNavigator.isCheatUA()) || !!unsafeWindow.chrome;
 
   /* New DefinePropertise */
@@ -1032,6 +1036,18 @@
     return aChild;
   }
 
+  function getAsyncStyleNode(target) {
+    let el = qA(`style,link[rel*="stylesheet" i]:not([disabled])`, target).slice(-1)[0] || target.lastElementChild;
+    const styleSheets = (target.parentNode && target.parentNode.parentNode && target.parentNode.parentNode.styleSheets) || document.styleSheets;
+    for (let i = styleSheets.length - 1; i >= 0; i--) {
+      if (styleSheets[i].ownerNode && styleSheets[i].ownerNode.parentNode === target) {
+        el = styleSheets[i].ownerNode;
+        break;
+      }
+    }
+    return el;
+  }
+
   function safeRemove(s, t) {
     qA(s, t).forEach(item => {
       try {
@@ -1067,7 +1083,8 @@
             cssNode.media = "screen";
             cssNode.type = initType;
             cssNode.textContent = css;
-            addToTarget.appendChild(cssNode);
+            const element = getAsyncStyleNode(addToTarget);
+            isReload === true && element && element.nextElementSibling ? addToTarget.insertBefore(cssNode, element.nextElementSibling) : addToTarget.appendChild(cssNode);
             cssNode = null;
             return Boolean(qS(`.${className}`, addToTarget));
           } else {
@@ -2139,8 +2156,7 @@
             <p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}
               <!-- START VERSION NOTICE -->
-              <li class="${RANDOM_ID}_fix">修正百度地图、QQ邮箱等工具网站的兼容性问题。</li>
-              <li class="${RANDOM_ID}_fix">优化一般渲染效率，优化描边修正效率。</li>
+              <li class="${RANDOM_ID}_fix">修正浏览器UA检测在FF.v102+版本的兼容性错误。</li>
               <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化代码。</li>
               <!-- END VERSION NOTICE -->
             </ul></p>
@@ -2553,29 +2569,20 @@
                 }
               });
               mutation.addedNodes.forEach(node => {
-                if (node instanceof HTMLElement && node.isConnected) {
-                  if (
-                    typeof defCon.siteIndex === "undefined" &&
-                    document.head.lastChild.className !== defCon.class.rndStyle &&
-                    mutation.target === document.head &&
-                    qS(`.${defCon.class.rndStyle}`)
-                  ) {
-                    const lastChildEleclassName = document.head.lastChild.className || "lastChildEleclassName";
-                    const lastChildPrevious = document.head.lastChild.previousSibling || {};
-                    const isStyleInPrevious = lastChildPrevious.className === defCon.class.rndStyle;
-                    if (lastChildEleclassName.includes("darkreader") && isStyleInPrevious) {
-                      debug("\u27A4 Darkreader is inserted!");
-                    } else if (qS(`.${defCon.class.rndStyle}`).nextSibling) {
-                      deBounce(moveStyleTolastChild, 200, "moveStyleTolastChild", false)({ isMutationObserver: true });
-                    }
-                  }
+                if (typeof defCon.siteIndex === "undefined" && node instanceof HTMLElement && node.isConnected) {
+                  mutation.target === document.head &&
+                    qS(`.${defCon.class.rndStyle}`) &&
+                    qS(`.${defCon.class.rndStyle}`).nextElementSibling &&
+                    shouldMoveStyle(node) &&
+                    deBounce(moveStyleTolastChild, 40, "moveStyleTolastChild", false)({ isMutationObserver: true });
                   node.nodeName === "IFRAME" && deBounce(insertStyle_AsyncFrames, 200, "asyncframes", true)({ isMutationObserver: true });
                   SHOULD_FIX_STROKE && deBounce(correctBoldErrorIfStroke, 100, "fixstroke", true)(CONST_VALUES.fontStroke, { logger: true, action: mutation.type });
                 }
               });
               break;
             case "attributes":
-              SHOULD_FIX_STROKE &&
+              typeof defCon.siteIndex === "undefined" &&
+                SHOULD_FIX_STROKE &&
                 mutation.attributeName !== "fr-fix-stroke" &&
                 !defCon.queryString.split(",").includes(mutation.target.nodeName.toLowerCase()) &&
                 ((cP(mutation.target, "font-weight") >= 600 && !mutation.target.getAttribute("fr-fix-stroke")) ||
@@ -2936,17 +2943,21 @@
       }
     }
 
-    function doNotMoveStyle() {
-      const blackList = ["bWFwLmJhaWR1LmNvbQ==", "bWFpbC5xcS5jb20="]; // Domestic cancer
-      return blackList.includes(defCon.encrypt(CUR_HOST_NAME));
-    }
-
     function insertStyle({ isReload } = {}) {
       try {
         addStyle(tStyle, `${defCon.class.rndStyle}`, document.head, "TS", { isReload });
       } catch (e) {
         error("InsertStyle:", e.message);
       }
+    }
+
+    function shouldMoveStyle(element) {
+      return (
+        (element instanceof HTMLStyleElement || (element instanceof HTMLLinkElement && element.rel && element.rel.toLowerCase().includes("stylesheet") && !element.disabled)) &&
+        element.media.toLowerCase() !== "print" &&
+        !element.classList.contains(defCon.class.rndStyle) &&
+        !element.classList.contains("darkreader")
+      );
     }
 
     function moveStyleTolastChild({ isMutationObserver }) {
@@ -2961,32 +2972,21 @@
               console.error("Redundant Scripts:", info);
             }
             return;
-          } else if (qA("style[id^='TS']", document.head).length > 0 && !doNotMoveStyle()) {
+          } else if (qA("style[id^='TS']", document.head).length > 0) {
             insertStyle({ isReload: true });
-            count(`\u27A4 [MOVESTYLE][c:${document.head.lastChild.className}]`);
+            count(`\u27A4 [MOVESTYLE][c:${getAsyncStyleNode(document.head).className}]`);
           }
         } else {
           addLoadEvents(() => {
-            sleep(2e3)
+            sleep(2e3, { useCachedSetTimeout: true })
               .then(() => {
-                const hasDarkreader = document.head.lastChild.className.includes("darkreader");
-                const isLast = document.head.lastChild.className === defCon.class.rndStyle;
-                const isPrevious = document.head.lastChild.previousSibling.className === defCon.class.rndStyle;
-                const isLastStyle = hasDarkreader ? isPrevious : isLast;
-                qS(`.${defCon.class.rndStyle}`) && !doNotMoveStyle() && insertStyle({ isReload: !isLastStyle });
-                return { hasDarkreader, isLastStyle };
+                qS(`.${defCon.class.rndStyle}`)
+                  ? qS(`.${defCon.class.rndStyle}`).nextElementSibling && shouldMoveStyle(getAsyncStyleNode(document.head)) && insertStyle({ isReload: true })
+                  : insertStyle({ isReload: false });
+                return getAsyncStyleNode(document.head).className || "<NULL>";
               })
-              .then(resolve => {
-                const { hasDarkreader: d, isLastStyle: l } = resolve;
-                debug(
-                  `\u27A4 lastChild ClassName: %c%s %c${CUR_WINDOW_TOP ? "" : "<FRAMES>"}`,
-                  `color:${l ? "teal" : "red"};font-weight:700`,
-                  d ? document.head.lastChild.previousSibling.className : document.head.lastChild.className,
-                  `color:grey;font-style:italic`
-                );
-              })
-              .catch(e => {
-                return e;
+              .then(r => {
+                debug(`\u27A4 lastChildStyle.ClassName: %c%s %c${CUR_WINDOW_TOP ? "" : "<FRAMES>"}`, `color:teal;font-weight:700`, r, `color:grey;font-style:italic`);
               });
             return true;
           });
@@ -2999,9 +2999,14 @@
     function preInsertContentToHead(isStyleReady = false) {
       setRAFInterval(
         () => {
+          if (CUR_WINDOW_TOP && !qS(`.${defCon.class.rndClass}`)) {
+            insertCSS();
+            count(`\u27A4 [INSERTCSS][c:${defCon.class.rndClass}]`);
+          }
           if (typeof defCon.siteIndex === "undefined") {
             if (!qS(`.${defCon.class.rndStyle}`)) {
               insertStyle({ isReload: false });
+              count(`\u27A4 [INSERTSTYLE][c:${defCon.class.rndStyle}]${CUR_WINDOW_TOP ? "" : "[FRAMES]"}`);
             } else {
               moveStyleTolastChild({ isMutationObserver: false });
               isStyleReady = true;
@@ -3009,10 +3014,6 @@
           } else {
             isStyleReady = true;
           }
-          if (CUR_WINDOW_TOP && !qS(`.${defCon.class.rndClass}`)) {
-            insertCSS();
-          }
-          count(`\u27A4 [INSERTCSS][c:${defCon.class.rndClass}]${CUR_WINDOW_TOP ? "" : "[FRAMES]"}`);
           return isStyleReady;
         },
         60,
@@ -3475,13 +3476,6 @@
             const fontex = fex ? fex.replace(/"|`/g, "'") : "";
             if (defCon.isPreview && this.getAttribute("v-Preview")) {
               try {
-                if (doNotMoveStyle()) {
-                  this.textContent = "\u4fdd\u5b58";
-                  this.removeAttribute("style");
-                  this.removeAttribute("v-Preview");
-                  this.click();
-                  return;
-                }
                 const _bodyzoom = !defCon.isFontsize ? "" : fzoom >= 0.8 && fzoom <= 1.5 && fzoom !== 1 ? funcFontsize(fzoom) : "";
                 const _shadow = fshadow > 0 && fshadow <= 8 ? overlayColor(fshadow, fscolor) : "";
                 const _stroke = fstroke > 0 && fstroke <= 1.0 ? `-webkit-text-stroke:${fstroke}px currentcolor;` : "";
