@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.07.09.1
+// @version            2022.07.16.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -313,6 +313,7 @@
   const DEFAULT_ARRAY = [];
   const CUR_WINDOW_TOP = defCon.isWinTop();
   const CUR_HOST_NAME = defCon.getHostName();
+  const IS_FRAMES = CUR_WINDOW_TOP ? "" : "[FRAMES]";
   const RANDOM_ID = defCon.randString(2).concat(defCon.randString(4, "digit"));
   const HOST_URI = defCon.decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkY0MTY2ODg=");
   const FONTLIST_IMG = defCon.decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjIlMkYwNCUyRjAyJTJGcW9SZldkLmdpZg==");
@@ -659,7 +660,7 @@
                         break;
                     }
                   },
-                }) && debug(`\u27A4 %O - %s %csucceeded`, obj, prop, "color:green");
+                }) && debug(`\u27A4 %O ${IS_FRAMES || "-"} %s %csucceeded`, obj, prop, "color:green");
               } else {
                 Reflect.defineProperty(obj, prop, {
                   configurable: true,
@@ -667,7 +668,7 @@
                   get: function () {
                     return object.get.call(this) / t;
                   },
-                }) && debug(`\u27A4 %O - %s %csucceeded`, obj, prop, "color:green");
+                }) && debug(`\u27A4 %O ${IS_FRAMES || "-"} %s %csucceeded`, obj, prop, "color:green");
               }
             }
           });
@@ -694,7 +695,7 @@
             newSVGMatrix.f = newValue.f;
             return newSVGMatrix;
           },
-        }) && debug(`\u27A4 %O - getScreenCTM() %csucceeded`, SVGGraphicsElement.prototype, "color:green");
+        }) && debug(`\u27A4 %O ${IS_FRAMES || "-"} getScreenCTM() %csucceeded`, SVGGraphicsElement.prototype, "color:green");
       }
     } catch (e) {
       error("defineProperty:", e.message);
@@ -718,7 +719,7 @@
             }
             return newRectlist;
           },
-        }) && debug(`\u27A4 %O - getClientRects() [DOMRectList] %csucceeded`, Element.prototype, "color:green");
+        }) && debug(`\u27A4 %O ${IS_FRAMES || "-"} getClientRects() [DOMRectList] %csucceeded`, Element.prototype, "color:green");
         deleteProperty && Reflect.deleteProperty(Element.prototype, "getBoundingClientRect");
         Reflect.defineProperty(Element.prototype, "getBoundingClientRect", {
           configurable: true,
@@ -732,7 +733,7 @@
             });
             return newValue;
           },
-        }) && debug(`\u27A4 %O - getBoundingClientRect() [DOMRect] %csucceeded`, Element.prototype, "color:green");
+        }) && debug(`\u27A4 %O ${IS_FRAMES || "-"} getBoundingClientRect() [DOMRect] %csucceeded`, Element.prototype, "color:green");
 
         /* Patch2022.2.Beta: Fixed Position:sticky/fixed while transform:scale() in Firefox. --START-- */
 
@@ -2164,9 +2165,9 @@
             <p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}
               <!-- START VERSION NOTICE -->
-              <li class="${RANDOM_ID}_add">新增自定义等宽字体集合的添加工具。参阅<a target="_blank" href="https://github.com/F9y4ng/GreasyFork-Scripts/discussions/101#discussioncomment-3072426">#101</a>/<a target="_blank" href="${HOST_URI}#custommonofont">Wiki</a></li>
-              <li class="${RANDOM_ID}_fix">优化等宽字体的OpenType高级参数，提高渲染效率。</li>
-              <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化样式，优化代码。</li>
+              <li class="${RANDOM_ID}_fix">优化等宽字体渲染规则，修正部分网站的渲染问题。</li>
+              <li class="${RANDOM_ID}_info"><a target="_blank" href="${HOST_URI}#custommonofont">英文等宽字体的设置方法</a>、<a target="_blank" href="${FEEDBACK_URI}/83">中英文字体混编的设置方法</a></li>
+              <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化代码。</li>
               <!-- END VERSION NOTICE -->
             </ul></p>
             <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
@@ -2283,7 +2284,7 @@
       if (t.search(/\bpre\b|\bcode\b/gi) !== -1) {
         const pre = t.search(/\bpre\b/gi) > -1 ? ["pre", "pre *"] : [];
         const code = t.search(/\bcode\b/gi) > -1 ? ["code", "code *"] : [];
-        const elcode = ["[class*='code']", "[class*='code']>*"];
+        const elcode = ["[class~='code']", "[class~='code'] *", "[class~='blob-code']", "[class~='blob-code'] *"];
         const codeSelector = pre.concat(code, elcode).join();
         const monospace = CONST_VALUES.monospacedFont || INITIAL_VALUES.monospacedFont;
         const strokeWidth = !isNaN(stroke_r) && stroke_r > 0 && stroke_r <= 1.0 ? stroke_r : 0;
@@ -2292,9 +2293,9 @@
           `${codeSelector}{` +
             `font-size:14px!important;line-height:150%!important;` +
             `-webkit-text-stroke:${strokeWidth}px currentcolor;text-shadow:none!important;` +
-            `font-family:${monospace},ui-monospace,'Courier New',${IS_REAL_GECKO ? "" : "monospace,"}` +
+            `font-family:${monospace},ui-monospace,Consolas,'Lucida Console',${IS_REAL_GECKO ? "" : "monospace,"}` +
             `${IS_REAL_GECKO ? mono.replace("system-ui", "monospace,system-ui") : mono}!important;` +
-            `font-feature-settings:"liga" 0,"tnum","zero"!important;}`
+            `font-feature-settings:"liga" 0,"tnum","zero"!important;user-select:text!important}`
         );
       }
       return "";
@@ -2541,7 +2542,7 @@
         if (should_fix_stroke) {
           const attrName = "fr-fix-stroke";
           qA(`:not(${defCon.queryString},[${attrName}])`).forEach(item => {
-            if (cP(item, "display") !== "none" && cP(item, "font-weight") >= 600 && !item.getAttribute("fr-fix-stroke")) {
+            if (cP(item, "display") !== "none" && cP(item, "font-weight") >= 600) {
               item.setAttribute(attrName, true);
             }
           });
@@ -2550,11 +2551,11 @@
       })
         .then(result => {
           qA(`[${result}]`).forEach(item => {
-            if (cP(item, "font-weight") < 600 && item.getAttribute("fr-fix-stroke")) {
+            if (cP(item, "font-weight") < 600) {
               item.removeAttribute(result);
             }
           });
-          logger && count(`\u27A4 [FIXSTROKE][t:${action}]`);
+          logger && count(`\u27A4 [FIXSTROKE]${IS_FRAMES}[t:${action}]`);
         })
         .catch(e => {
           error("<Font-Fix-Stroke>", e.message);
@@ -3015,7 +3016,7 @@
                 return getAsyncStyleNode(document.head).className || "<NULL>";
               })
               .then(r => {
-                debug(`\u27A4 lastChildStyle.ClassName: %c%s %c${CUR_WINDOW_TOP ? "" : "<FRAMES>"}`, `color:teal;font-weight:700`, r, `color:grey;font-style:italic`);
+                debug(`\u27A4 lastStyle${IS_FRAMES}.className: %c%s`, `color:teal;font-weight:700`, r);
               });
             return true;
           });
@@ -3035,7 +3036,7 @@
           if (typeof defCon.exSitesIndex === "undefined") {
             if (!qS(`.${defCon.class.rndStyle}`)) {
               insertStyle({ isReload: false });
-              count(`\u27A4 [INSERTSTYLE][c:${defCon.class.rndStyle}]${CUR_WINDOW_TOP ? "" : "[FRAMES]"}`);
+              count(`\u27A4 [INSERTSTYLE]${IS_FRAMES}[c:${defCon.class.rndStyle}]`);
             } else {
               moveStyleTolastChild({ isMutationObserver: false });
               isStyleReady = true;
