@@ -1,12 +1,11 @@
 // ==UserScript==
 // @name         Google & baidu Switcher (ALL in One)
-// @name:zh-CN   谷歌、百度、必应的搜索引擎跳转工具
-// @name:zh-TW   谷歌、百度、必應的搜索引擎跳轉工具
-// @name:en      Google & baidu & Bing Switcher (ALL in One)
-// @name:ja      Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version      5.0.20220618.1
+// @name:zh-CN   优雅的搜索引擎跳转助手
+// @name:zh-TW   优雅的搜索引擎跳轉助手
+// @name:ja      検索エンジンジャンプアシスタント
+// @version      2022.08.04.1
 // @author       F9y4ng
+// @description  优雅的搜索引擎跳转助手，更美观、更便捷。新版本增加去重定向功能、自定义搜索引擎选取功能，提供可视化搜索参数设置，及自动更新检测等高级功能。
 // @namespace    https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
-// @description  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮及其他搜索跳转效果设置。
-// @note         修正Google搜索下跳转按钮的样式问题。
+// @note         重大功能性版本更新，变更版本号规则。\n新增自定义搜索引擎的选取功能。\n新增搜索结果链接去重定向功能。\n修正一些已知的问题。
 // ==/UserScript==

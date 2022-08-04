@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name               Google & baidu Switcher (ALL in One)
-// @name:zh-CN         谷歌、百度、必应的搜索引擎跳转工具
-// @name:zh-TW         谷歌、百度、必應的搜索引擎跳轉工具
-// @name:ja            Google、Baidu、Bingの検索エンジンのジャンプツール
-// @version            5.0.20220618.1
+// @name:zh-CN         优雅的搜索引擎跳转助手
+// @name:zh-TW         优雅的搜索引擎跳轉助手
+// @name:ja            検索エンジンジャンプアシスタント
+// @version            2022.08.04.1
 // @author             F9y4ng
-// @description        The search engine jump tools of Google, Baidu and Bing automatically update and detect the script by default. You can customize the Bing button and other search jump effect settings in the menu.
-// @description:zh-CN  谷歌、百度、必应的搜索引擎跳转工具，脚本默认自动更新检测，可在菜单自定义设置必应按钮及其他搜索跳转效果。
-// @description:zh-TW  谷歌、百度、必應的搜索引擎跳轉工具，腳本默認自動更新檢測，可在菜單自定義設置必應按鈕及其他搜索跳轉效果。
-// @description:ja     Google、百度、必ず対応する検索エンジンジャンプツール、スクリプトはデフォルトで自動的に検出を更新し、メニューで必ず対応するボタンとその他の検索ジャンプ効果の設定をカスタマイズすることができます。
+// @description        Graceful search engine Switch assistant, more beautiful and more convenient. The new version adds anti-redirect function, custom search engine selection function, visual search parameter setting, and automatic update detection and other advanced functions.
+// @description:zh-CN  优雅的搜索引擎跳转助手，更美观、更便捷。新版本增加去重定向功能、自定义搜索引擎选取功能，提供可视化搜索参数设置，及自动更新检测等高级功能。
+// @description:zh-TW  優雅的搜尋引擎跳轉助手，更美觀、更便捷。新版本增加去重定向功能、自定義搜尋引擎選取功能，提供可視化搜索參數設置，及自動更新檢測等高級功能。
+// @description:ja     エレガントな検索エンジンジャンプアシスタントは、より美しく、より便利です。 新しいバージョンは、リダイレクト機能、カスタム検索エンジン選択機能、ビジュアル検索パラメータ設定、自動更新検出などの高度な機能を追加します。
 // @namespace          https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
 // @homepage           https://f9y4ng.github.io/GreasyFork-Scripts/
 // @homepageURL        https://f9y4ng.github.io/GreasyFork-Scripts/
@@ -20,24 +20,46 @@
 // @match              *://ipv6.baidu.com/*
 // @match              *://image.baidu.com/*
 // @match              *://*.bing.com/*
-// @include            /^https?:\/\/(\w+\.)?google\.[a-z.]{2,6}\/(webhp|search).*$/
-// @exclude            *://www.baidu.com/link*
+// @match              *://duckduckgo.com/*
+// @match              *://www.sogou.com/*
+// @match              *://pic.sogou.com/pics*
+// @match              *://fsoufsou.com/search*
+// @match              *://www.so.com/s*
+// @match              *://image.so.com/i*
+// @match              *://so.toutiao.com/search*
+// @include            /^https?:\/\/yandex\.[a-z.]{2,6}\/(search|images|video).*$/
+// @include            /^https?:\/\/(\w+\.)?google\.[a-z.]{2,6}\/search.*$/
+// @exclude-match      *://www.google.com/sorry*
+// @exclude-match      *://www.baidu.com/link*
+// @exclude-match      *://www.sogou.com/link*
+// @exclude-match      *://www.so.com/link*
+// @exclude-match      *://so.toutiao.com/search/jump*
+// @connect            baidu.com
+// @connect            sogou.com
+// @connect            so.com
+// @connect            greasyfork.org
+// @connect            openuserjs.org
+// @connect            githubusercontent.com
 // @compatible         edge 兼容TamperMonkey, ViolentMonkey
 // @compatible         Chrome 兼容TamperMonkey, ViolentMonkey
 // @compatible         Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible         Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible         Safari 兼容Tampermonkey • Safari
-// @note               修正Google搜索下跳转按钮的样式问题。
+// @note               重大功能性版本更新，变更版本号规则。\n新增自定义搜索引擎的选取功能。\n新增搜索结果链接去重定向功能。\n修正一些已知的问题。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
 // @grant              GM.setValue
+// @grant              GM_listValues
+// @grant              GM.listValues
 // @grant              GM_deleteValue
 // @grant              GM.deleteValue
 // @grant              GM_openInTab
 // @grant              GM.openInTab
 // @grant              GM_registerMenuCommand
 // @grant              GM.registerMenuCommand
+// @grant              GM_xmlhttpRequest
+// @grant              GM.xmlHttpRequest
 // @grant              GM_unregisterMenuCommand
 // @license            GPL-3.0-only
 // @create             2015-10-07
@@ -47,7 +69,7 @@
 
 /* jshint esversion: 9 */
 
-!(function () {
+~(function (trustedTypesPolicy) {
   "use strict";
 
   /* customize */
@@ -61,61 +83,45 @@
   const isGM = GMscriptHandler.toLowerCase() === "greasemonkey";
   const debug = IS_OPEN_DEBUG ? console.log.bind(console) : () => {};
   const error = IS_OPEN_DEBUG ? console.error.bind(console) : () => {};
+  const warn = IS_OPEN_DEBUG ? console.warn.bind(console) : () => {};
+  const count = IS_OPEN_DEBUG ? console.count.bind(console) : () => {};
 
   /* GM selector */
 
   const GMsetValue = isGM ? GM.setValue : GM_setValue;
   const GMgetValue = isGM ? GM.getValue : GM_getValue;
   const GMdeleteValue = isGM ? GM.deleteValue : GM_deleteValue;
+  const GMlistValues = isGM ? GM.listValues : GM_listValues;
   const GMopenInTab = isGM ? GM.openInTab : GM_openInTab;
+  const GMxmlhttpRequest = isGM ? GM.xmlHttpRequest : GM_xmlhttpRequest;
   const GMregisterMenuCommand = isGM ? GM.registerMenuCommand : GM_registerMenuCommand;
   const GMunregisterMenuCommand = isGM ? () => {} : GM_unregisterMenuCommand;
 
   /* default CONST Values */
 
   const defCon = {
-    timer: 0,
-    restTime: {},
-    updateNote: "",
-    isNeedUpdate: 0,
-    fetchResult: "success",
-    isUpgrade: getUrlParam("f9y4ng"),
-    scriptName: GMinfo.script.name,
+    clickTimer: 0,
+    scriptName: getScriptNameViaLanguage(),
     curVersion: GMinfo.script.version,
     options: isGM ? false : { active: true, insert: true, setParent: true },
     elCompat: document.compatMode === "CSS1Compat" ? document.documentElement : document.body,
-    support: GMinfo.scriptMetaStr.match(/(\u0040\u0073\u0075\u0070\u0070\u006f\u0072\u0074\u0055\u0052\u004c\s+)(\S+)/)[2],
     encrypt: n => {
-      return window.btoa(encodeURIComponent(n));
+      try {
+        return window.btoa(encodeURIComponent(String(n)));
+      } catch (e) {
+        error("Encrypt.error:", e.message);
+      }
     },
     decrypt: n => {
-      return decodeURIComponent(window.atob(n));
-    },
-    titleCase: (str, bool) => {
-      const RegExp = bool ? /( |^)[a-z]/g : /(^)[a-z]/g;
-      return str
-        .toString()
-        .toLowerCase()
-        .replace(RegExp, L => {
-          return L.toUpperCase();
-        });
-    },
-    durationTime: t => {
-      let w, d, h, m, s;
-      const wks = Math.floor(t / 1000 / 60 / 60 / 24 / 7);
-      const ds = Math.floor(t / 1000 / 60 / 60 / 24 - wks * 7);
-      const hs = Math.floor(t / 1000 / 60 / 60 - wks * 7 * 24 - ds * 24);
-      const ms = Math.floor(t / 1000 / 60 - wks * 7 * 24 * 60 - ds * 24 * 60 - hs * 60);
-      const ss = Math.floor(t / 1000 - wks * 7 * 24 * 60 * 60 - ds * 24 * 60 * 60 - hs * 60 * 60 - ms * 60);
-      w = wks > 0 ? ` ${wks}wk` : "";
-      d = ds > 0 ? ` ${ds}d` : "";
-      h = hs > 0 ? ` ${hs}h` : "";
-      m = ms > 0 ? ` ${ms}min` : "";
-      s = wks > 0 || ds > 0 || hs > 0 || ms > 0 ? "" : ss > 0 ? ` ${ss}s` : " expired";
-      return `${w}${d}${h}${m}${s}`;
-    },
-    showDate: s => {
-      return s.replace(/w/i, " 周 ").replace(/d/i, " 天 ").replace(/h/i, " 小时 ").replace(/m/i, " 分钟 ").replace(/s/i, " 秒 ");
+      try {
+        if (typeof n === "string") {
+          return decodeURIComponent(window.atob(n.replace(/[^A-Za-z0-9+/=]/g, "")));
+        } else {
+          throw new Error("Non-string type");
+        }
+      } catch (e) {
+        error("Decrypt.error:", e.message);
+      }
     },
     randString: (n, v) => {
       const a = "0123456789";
@@ -148,24 +154,54 @@
       }
       return z ? s : c[Math.floor(Math.random() * c.length)].concat(s);
     },
-    lastRuntime: () => {
-      return new Date().toLocaleString("en-US", {
-        timeZoneName: "short",
-        hour12: false,
-      });
-    },
     isWinTop: () => {
       try {
         return window.self === window.top;
       } catch (e) {
-        error("Window.Top:", e.name);
-        const eI = parent.frames.length > 0;
-        return !eI;
+        return !parent.frames.length;
       }
     },
   };
 
-  /* New RAF setTimeout/setInterval */
+  const CUR_WINDOW_TOP = defCon.isWinTop();
+
+  /* Define random aliases */
+
+  const Notice = {
+    rName: defCon.randString(8, "char"),
+    random: defCon.randString(4, "char"),
+    noticejs: defCon.randString(7, "char"),
+    item: defCon.randString(5, "mix"),
+    close: defCon.randString(5, "mix"),
+    center: defCon.randString(5, "mix"),
+    success: defCon.randString(7, "char"),
+    warning: defCon.randString(7, "char"),
+    info: defCon.randString(7, "char"),
+    error: defCon.randString(7, "char"),
+    checkbox: defCon.randString(6, "char"),
+    configuration: defCon.randString(7, "char"),
+    animated: defCon.randString(7, "char"),
+    stopUpdate: defCon.randString(6, "mix"),
+    searchButton: defCon.randString(6, "mix"),
+    favicon: defCon.randString(6, "mix"),
+    searchList: defCon.randString(7, "mix"),
+    fieldset: defCon.randString(6, "char"),
+    legend: defCon.randString(6, "char"),
+    settingList: defCon.randString(7, "mix"),
+    hk: defCon.randString(5, "mix"),
+    gj: defCon.randString(5, "mix"),
+    lw: defCon.randString(5, "mix"),
+    kh: defCon.randString(5, "mix"),
+    ar: defCon.randString(5, "mix"),
+    au: defCon.randString(5, "mix"),
+    grid: defCon.randString(7, "char"),
+    card: defCon.randString(5, "char"),
+    noticeHTML: str => {
+      return String(`<div class="${Notice.rName}"><dl>${str}</dl></div>`);
+    },
+  };
+
+  /* New RAF for setTimeout & setInterval */
 
   window.requestAnimationFrame ||
     (function () {
@@ -230,29 +266,70 @@
     }
     clearTimeout(timer) {
       window.cancelAnimationFrame(this._timerMap.timeout[timer]);
+      delete this._timerMap.timeout[timer];
     }
     setInterval(fn, interval) {
       return this._ticking(fn, "interval", interval);
     }
     clearInterval(timer) {
       window.cancelAnimationFrame(this._timerMap.interval[timer]);
+      delete this._timerMap.interval[timer];
     }
   }
 
-  const raf = new RAF();
+  /* Sleep Promise Function */
 
-  /* Abbreviated function naming */
+  const raf = new RAF();
+  const cachedSetTimeout = setTimeout;
+  const createSleepPromise = (timeout, { useCachedSetTimeout }) => {
+    return new Promise(resolve => {
+      useCachedSetTimeout ? cachedSetTimeout(resolve, timeout) : raf.setTimeout(resolve, timeout);
+    }).catch(e => {
+      error("CreateSleepPromise:", e.message);
+    });
+  };
+  const sleep = function (timeout, { useCachedSetTimeout } = {}) {
+    const sleepPromise = createSleepPromise(timeout, { useCachedSetTimeout });
+    const promiseFunction = value => {
+      return sleepPromise.then(() => {
+        return value;
+      });
+    };
+    promiseFunction.then = (...args) => {
+      return sleepPromise.then(...args);
+    };
+    promiseFunction.catch = Promise.resolve().catch;
+    return promiseFunction;
+  };
+
+  /* Abbreviated functions */
 
   const oH = Object.prototype.hasOwnProperty;
-  const qA = str => {
-    return Array.prototype.slice.call(document.querySelectorAll(str), 0);
+  const qA = (str, node = document) => {
+    return Array.prototype.slice.call(node.querySelectorAll(str), 0);
   };
-  const qS = str => {
-    return document.querySelector(str);
+  const qS = (str, node = document) => {
+    return node.querySelector(str);
   };
   const cE = str => {
     return document.createElement(str);
   };
+
+  /* Content-Security-Policy: trustedTypes */
+
+  if (window.trustedTypes && window.trustedTypes.createPolicy) {
+    trustedTypesPolicy = window.trustedTypes.createPolicy("default", {
+      createHTML: string => {
+        return string;
+      },
+    });
+  } else {
+    trustedTypesPolicy = {
+      createHTML: string => {
+        return string;
+      },
+    };
+  }
 
   /* Get browser core & system parameters */
 
@@ -269,38 +346,6 @@
     init: function (v = this.uaData) {
       return v ? navigator.userAgentData : navigator.userAgent.toLowerCase();
     },
-    getBrowser: (brands, getBrand, info = "Other", version = "0.0") => {
-      try {
-        if (getBrand) {
-          brands.some(b => {
-            switch (b.brand) {
-              case "Microsoft Edge":
-                info = "Edge";
-                version = b.version;
-                break;
-              case "Google Chrome":
-                info = "Chrome";
-                version = b.version;
-                break;
-              case "Opera":
-                info = "Opera";
-                version = b.version;
-                break;
-            }
-          });
-        } else {
-          brands.some(b => {
-            if (b.brand === "Chromium") {
-              info = "WebKit";
-              version = b.version;
-            }
-          });
-        }
-      } catch (e) {
-        error("Navigator.getBrowser:", e.name);
-      }
-      return { info, version };
-    },
     core: function (u = JSON.stringify(this.init())) {
       return {
         Trident: u.includes("trident") || u.includes("compatible"),
@@ -310,118 +355,163 @@
         Blink: (u.includes("applewebkit") && (u.includes("chromium") || u.includes("chrome"))) || u.includes("Chromium"),
       };
     },
-    chromiumVersion: function (u = this.init()) {
-      if (this.uaData) {
-        return this.getBrowser(u.brands, null).version;
-      } else {
-        const m = u.match(/chrom[e|ium]\/([\d]+)/i);
-        return m && m[1] ? m[1] : 0;
-      }
-    },
     system: function (u = this.init(), system = "Unknown") {
       if (this.uaData) {
         system = u.platform ? u.platform.toString() : system;
       } else {
-        if (/windows|win32|win64|wow32|wow64/gi.test(u)) {
+        if (/windows|win32|win64|wow32|wow64/g.test(u)) {
           system = "Windows";
-        } else if (/macintosh|macintel|mac os x/gi.test(u) || u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/i)) {
+        } else if (/macintosh|macintel|mac os x/g.test(u)) {
           system = "macOS";
-        } else if (/linux|x11/gi.test(u)) {
+        } else if (/linux|x11/g.test(u)) {
           system = "Linux";
-        } else if (/android|adr/gi.test(u)) {
+        } else if (/android|adr/g.test(u)) {
           system = "Android";
-        } else if (/ios|iphone|ipad|ipod|iwatch/gi.test(u)) {
+        } else if (/ios|iphone|ipad|ipod|iwatch/g.test(u)) {
           system = "iOS";
         }
       }
       return system;
     },
-    browser: function (u = this.init(), browserInfo = "Other") {
-      if (this.uaData) {
-        browserInfo = this.getBrowser(u.brands, "browser").info;
+    isCheatUA: function () {
+      return (
+        (!this.uaData && !!navigator.userAgentData) ||
+        (!this.core().Gecko && !isNaN(parseFloat(unsafeWindow.mozInnerScreenX))) ||
+        (this.core().Gecko && isNaN(parseFloat(unsafeWindow.mozInnerScreenX)))
+      );
+    },
+  };
+
+  const IS_REAL_GECKO = (getNavigator.core().Gecko && !getNavigator.isCheatUA()) || !isNaN(parseFloat(unsafeWindow.mozInnerScreenX));
+
+  /* expire for fontlist cache */
+
+  const cache = {
+    value: (data, eT = 6048e5) => {
+      return {
+        data: data,
+        expired: Date.now() + eT,
+      };
+    },
+    set: (key, ...options) => {
+      const obj = defCon.encrypt(JSON.stringify(cache.value(...options)));
+      GMsetValue(key, obj);
+    },
+    get: async key => {
+      const obj = await GMgetValue(key);
+      if (!obj) {
+        return null;
       } else {
-        const browserArray = {
-          IE: u.includes("msie") || u.includes("trident") || u.includes("compatible"),
-          Chromium: u.includes("chromium"),
-          Chrome: u.includes("chrome") && !u.includes("edg") && !u.includes("chromium"),
-          Firefox: u.includes("firefox") && u.includes("gecko"),
-          Opera: u.includes("presto") || u.includes("opr") || u.includes("opera"),
-          Safari: u.includes("safari") && !u.includes("chrome"),
-          Edge: u.includes("edg"),
-          QQBrowser: /qqbrowser/g.test(u),
-          Wechat: /micromessenger/g.test(u),
-          UCBrowser: /ubrowser/g.test(u),
-          Sougou: /metasr|sogou/g.test(u),
-          Maxthon: /maxthon/g.test(u),
-          CentBrowser: /cent/g.test(u),
-          Vivaldi: /vivaldi/g.test(u),
-        };
-        for (let i in browserArray) {
-          if (oH.call(browserArray, i) && browserArray[i]) {
-            browserInfo = i;
+        try {
+          const value = JSON.parse(defCon.decrypt(obj));
+          const data = value.data;
+          const expiredTime = value.expired;
+          const curTime = Date.now();
+          if (expiredTime > curTime && typeof data !== "undefined") {
+            return data;
+          } else {
+            cache.remove(key);
+            return null;
           }
+        } catch (e) {
+          error("Cache.get:", e.message);
+          cache.remove(key);
+          return null;
         }
       }
-      return browserInfo;
     },
-    getUA: async function (u = this.init()) {
-      try {
-        return this.uaData
-          ? JSON.stringify(await u.getHighEntropyValues(["architecture", "bitness", "model", "platform", "platformVersion", "uaFullVersion"]))
-          : this.isCheatUA()
-          ? "(CHEAT-UA) ".concat(u)
-          : u;
-      } catch (e) {
-        error("Navigator.getUA:", e.name);
-        return u;
+    remove: key => {
+      GMdeleteValue(key);
+    },
+  };
+
+  /* Initialized important functions */
+
+  function titleUpperCase(str) {
+    if (str === null || typeof str === "undefined") {
+      return "";
+    }
+    return str
+      .toString()
+      .toLowerCase()
+      .replace(/^[a-z]/g, L => {
+        return L.toUpperCase();
+      });
+  }
+
+  function getScriptNameViaLanguage() {
+    const language = navigator.language || "zh-CN";
+    const name_i18n = new RegExp(`(@name:${language}\\s+)(\\S+)`);
+    const languageString = GMinfo.scriptMetaStr.match(name_i18n);
+    const scriptName = languageString ? languageString[2] : GMinfo.script.name;
+    return String(scriptName || "Search Engine Assistant");
+  }
+
+  function getCookie(sKey) {
+    const cookies = decodeURIComponent(
+      document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[-.+*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")
+    );
+    return cookies ? cookies.replace(/[a-z=]+/gi, "") : 0;
+  }
+
+  function setRAFInterval(callback, interval, { runNow }) {
+    if (runNow === true) {
+      const shouldFinish = callback();
+      if (shouldFinish) {
+        return;
       }
-    },
-    isCheatUA: function () {
-      return (!this.uaData && !!navigator.userAgentData) || (!this.core().Gecko && !!unsafeWindow.sidebar) || (this.core().Gecko && !unsafeWindow.sidebar);
-    },
-  };
+    }
+    const tickId = raf.setInterval(shouldFinish => {
+      shouldFinish = callback() || false;
+      if (shouldFinish) {
+        raf.clearInterval(tickId);
+        return;
+      }
+    }, interval);
+  }
 
-  const IS_REAL_GECKO = (getNavigator.core().Gecko && !getNavigator.isCheatUA()) || !!unsafeWindow.sidebar;
+  function deBounce(fn, delay, timer, immediate) {
+    return function () {
+      const _this = this;
+      const args = arguments;
+      if (!defCon[timer] && immediate) {
+        fn.apply(_this, args);
+      }
+      if (defCon[timer]) {
+        raf.clearTimeout(defCon[timer]);
+      }
+      defCon[timer] = raf.setTimeout(function () {
+        fn.apply(_this, args);
+        delete defCon[timer];
+      }, delay);
+    };
+  }
 
-  /* Define random aliases */
-
-  const Notice = {
-    noticejs: defCon.randString(7, "char"),
-    item: defCon.randString(5, "mix"),
-    close: defCon.randString(5, "mix"),
-    center: defCon.randString(5, "mix"),
-    success: defCon.randString(7, "char"),
-    warning: defCon.randString(7, "char"),
-    info: defCon.randString(7, "char"),
-    error: defCon.randString(7, "char"),
-    checkbox: defCon.randString(6, "char"),
-    configuration: defCon.randString(7, "char"),
-    fc: defCon.randString(8, "char"),
-    fcSave: defCon.randString(5, "mix"),
-    fcClose: defCon.randString(5, "mix"),
-    fchk: defCon.randString(6, "char"),
-    hotkey: defCon.randString(5, "mix"),
-    fcGoogle: defCon.randString(6, "char"),
-    google: defCon.randString(5, "mix"),
-    fcKwhl: defCon.randString(6, "char"),
-    kwhl: defCon.randString(5, "mix"),
-    localWindow: defCon.randString(6, "char"),
-    lw: defCon.randString(5, "mix"),
-    fcUpdate: defCon.randString(6, "char"),
-    isUpdate: defCon.randString(5, "mix"),
-    fcExpire: defCon.randString(6, "char"),
-    Expire: defCon.randString(6, "mix"),
-    timeUnit: defCon.randString(6, "char"),
-    fcFeedback: defCon.randString(6, "mix"),
-    fcSubmit: defCon.randString(6, "char"),
-    feedback: defCon.randString(5, "mix"),
-    animated: defCon.randString(7, "char"),
-    noticeHTML: str => {
-      return String(`<div class="${defCon.rName}"><dl>${str}<dl></div>`);
-    },
-  };
-  defCon.rName = defCon.randString(7, "char");
-  const CUR_WINDOW_TOP = defCon.isWinTop();
+  function getUrlParam(paraName) {
+    let arr = [];
+    if (typeof paraName === "undefined" || paraName === null || paraName === "") {
+      return "";
+    } else if (paraName === "/") {
+      const parameter = document.location.pathname.toString();
+      arr = parameter.split("/");
+      return typeof arr[1] === "undefined" ? "" : arr[1];
+    } else {
+      const url = document.location.toString();
+      const arrObj = url.split("?");
+      if (arrObj.length > 1) {
+        const arrPara = arrObj[1].split("&");
+        for (let i = 0; i < arrPara.length; i++) {
+          arr = arrPara[i].split("=");
+          if (arr !== null && arr[0] === paraName) {
+            return arr[1];
+          }
+        }
+        return "";
+      } else {
+        return "";
+      }
+    }
+  }
 
   /* NoticeJs Functions */
 
@@ -440,43 +530,29 @@
     },
     modal: false,
     width: 400,
-    scroll: {
-      maxHeightContent: 400,
-      showOnHover: true,
-    },
+    scroll: { maxHeight: 400, showOnHover: false },
     rtl: false,
-    callbacks: {
-      beforeShow: [],
-      onShow: [],
-      afterShow: [],
-      onClose: [],
-      afterClose: [],
-      onClick: [],
-      onHover: [],
-      onTemplate: [],
-    },
+    callbacks: { beforeShow: [], onShow: [], afterShow: [], onClose: [], afterClose: [], onClick: [], onHover: [], onTemplate: [] },
   };
-  const noticeJsModalClassName = `${Notice.noticejs}-modal`;
   const options = Defaults;
-
-  function getCallback(ref, eventName) {
-    if (ref.callbacks.hasOwnProperty(eventName)) {
+  const getCallback = (ref, eventName) => {
+    if (oH.call(ref.callbacks, eventName)) {
       ref.callbacks[eventName].forEach(cb => {
         if (typeof cb === "function") {
           cb.apply(ref);
         }
       });
     }
-  }
+  };
 
   const addModal = () => {
-    if (document.getElementsByClassName(noticeJsModalClassName).length <= 0) {
+    if (document.getElementsByClassName(`${Notice.noticejs}-modal`).length <= 0) {
       const element = cE("div");
-      element.classList.add(noticeJsModalClassName);
+      element.classList.add(`${Notice.noticejs}-modal`);
       element.classList.add(`${Notice.noticejs}-modal-open`);
       document.body.appendChild(element);
       raf.setTimeout(() => {
-        element.className = noticeJsModalClassName;
+        element.className = `${Notice.noticejs}-modal`;
       }, 200);
     }
   };
@@ -495,17 +571,12 @@
         qS(`.${Notice.noticejs}-modal`).remove();
       }, 500);
     }
-    const iC = item.closest(`.${Notice.noticejs}`);
-    const iCId = iC ? iC.id.replace(`${Notice.noticejs}-`, "").trim() : `bottomRight`;
-    const iCC = iC ? iC.className.replace(`${Notice.noticejs}`, "").trim() : `${Notice.noticejs}-bottomRight`;
-    const position = "." + iCC;
+    const closetNode = item.closest(`.${Notice.noticejs}`);
+    const closetNodeCName = closetNode ? closetNode.className.replace(`${Notice.noticejs}`, "").trim() : `${Notice.noticejs}-bottomRight`;
+    const position = "." + closetNodeCName;
     raf.setTimeout(() => {
       if (qA(position + ` .${Notice.item}`).length <= 0) {
         qS(position) && qS(position).remove();
-        if (IS_REAL_GECKO && defCon[iCId]) {
-          document.removeEventListener("scroll", defCon[iCId]);
-          delete defCon[iCId];
-        }
       }
     }, 500);
   };
@@ -559,7 +630,7 @@
       noticeJsItem.appendChild(noticeJsProgressBar);
     }
     if (["top", "bottom"].includes(options.position)) {
-      qS(target_class).innerHTML = "";
+      qS(target_class).textContent = "";
     }
     if (options.animation !== null && options.animation.open !== null) {
       noticeJsItem.className += " " + options.animation.open;
@@ -568,7 +639,7 @@
       noticeJsItem.setAttribute(`${Notice.noticejs}-modal`, "true");
       addModal();
     }
-    addListener(noticeJsItem, options.closeWith);
+    addListener(noticeJsItem);
     getCallback(options, "beforeShow");
     getCallback(options, "onShow");
     if (options.newestOnTop === true) {
@@ -599,7 +670,7 @@
       if (options.closeWith.includes("button")) {
         const close = cE("div");
         close.setAttribute("class", `${Notice.close}`);
-        close.innerHTML = "&times;";
+        close.innerHTML = trustedTypesPolicy.createHTML("&times;");
         if (element) {
           element.appendChild(close);
         } else {
@@ -613,7 +684,7 @@
       element.setAttribute("class", `${Notice.noticejs}-body`);
       const content = cE("div");
       content.setAttribute("class", `${Notice.noticejs}-content`);
-      content.innerHTML = options.text;
+      content.innerHTML = trustedTypesPolicy.createHTML(options.text);
       element.appendChild(content);
       if (options.scroll !== null && options.scroll.maxHeight !== "") {
         element.style.overflowY = "auto";
@@ -632,9 +703,9 @@
       element.appendChild(bar);
       if (options.progressBar === true && typeof options.timeout !== "boolean" && options.timeout !== false) {
         let width = 100;
-        const id = raf.setInterval(() => {
+        const progress = raf.setInterval(() => {
           if (width <= 0) {
-            raf.clearInterval(id);
+            raf.clearInterval(progress);
             let item = element.closest(`div.${Notice.item}`);
             if (options.animation !== null && options.animation.close !== null) {
               item.className = item.className.replace(new RegExp("(?:^|\\s)" + options.animation.open + "(?:\\s|$)"), " ");
@@ -647,7 +718,7 @@
               closeItem(item);
             }
           } else {
-            width--;
+            width = width - 1;
             bar.style.width = width + "%";
           }
         }, options.timeout);
@@ -683,7 +754,7 @@
       return noticeJs;
     }
     on(eventName, cb = () => {}) {
-      if (typeof cb === "function" && this.options.callbacks.hasOwnProperty(eventName)) {
+      if (typeof cb === "function" && oH.call(this.options.callbacks, eventName)) {
         this.options.callbacks[eventName].push(cb);
       }
       return this;
@@ -694,103 +765,7 @@
     }
   }
 
-  const GMnotification = (text = "", type = `${Notice.info}`, closeWith = true, timeout = 30, { ...options } = {}, position = "bottomRight") => {
-    try {
-      new NoticeJs({
-        text: text,
-        type: type,
-        closeWith: closeWith ? ["button"] : ["click"],
-        timeout: timeout,
-        callbacks: { ...options },
-        position: position,
-      }).show();
-      scrollInsteadFixed(position);
-    } catch (e) {
-      error("%cGMnotification:\n%c%s", "font-weight:bold", "font-weight:normal", e);
-    }
-  };
-
-  const callback_Countdown = {
-    onShow: [
-      (Interval = 3) => {
-        const m = raf.setInterval(() => {
-          Interval ? --Interval : raf.clearInterval(m);
-          const emText = qS(`.${defCon.rName} dl dd em`);
-          if (emText) {
-            emText.innerHTML = Interval;
-          }
-          !Interval ? location.reload() : debug("//->", Interval);
-        }, 1e3);
-      },
-    ],
-  };
-
-  /* Refactoring functions of GMsetValue/GMgetValue with Expire */
-
-  function GMsetExpire(key, value) {
-    const obj = {
-      data: value,
-      time: Date.now(),
-    };
-    GMsetValue(key, defCon.encrypt(JSON.stringify(obj)));
-  }
-
-  async function GMgetExpire(key, curExpire) {
-    let vals, expire, expires, expireTime;
-    vals = await GMgetValue(key);
-    if (!vals) {
-      return vals;
-    }
-    vals = JSON.parse(defCon.decrypt(vals));
-    if (curExpire) {
-      expire = /(?!^0)^[0-9]+[smhdw]$/i.test(curExpire) ? curExpire : "24h";
-      expire = expire.replace(/w/i, "*7*24*3600*1000").replace(/d/i, "*24*3600*1000").replace(/h/i, "*3600*1000").replace(/m/i, "*60*1000").replace(/s/i, "*1000");
-      expires = expire.split("*");
-      expireTime = expires.reduce((a, b) => {
-        return a * b;
-      }, 1);
-    }
-    defCon.restTime[key] = vals.time + expireTime - Date.now();
-    if (defCon.restTime[key] <= 0) {
-      GMdeleteValue(key);
-      return null;
-    }
-    return vals.data;
-  }
-
-  /* Common functions */
-
-  function getCookie(sKey) {
-    const cookies = decodeURIComponent(
-      document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[-.+*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")
-    );
-    return cookies ? cookies.replace(/[a-z=]+/gi, "") : 0;
-  }
-
-  function getUrlParam(paraName, arr = "") {
-    if (!paraName) {
-      const parameter = document.location.pathname.toString();
-      arr = parameter.split("/");
-      return arr[1] === undefined ? "" : arr[1];
-    } else {
-      const url = document.location.toString();
-      const arrObj = url.split("?");
-      if (arrObj.length > 1) {
-        const arrPara = arrObj[1].split("&");
-        for (let i = 0; i < arrPara.length; i++) {
-          arr = arrPara[i].split("=");
-          if (arr !== null && arr[0] === paraName) {
-            return arr[1];
-          }
-        }
-        return "";
-      } else {
-        return "";
-      }
-    }
-  }
-
-  function scrollInsteadFixed(position) {
+  const fixedZoomNodeStyle = position => {
     if (document.body) {
       const zoom = Number(window.getComputedStyle(document.body, null).getPropertyValue("zoom"));
       const transform = window.getComputedStyle(document.body, null).getPropertyValue("transform");
@@ -814,7 +789,8 @@
         if (ratio && ratio !== 1) {
           if (thatNotice) {
             thatNotice.style.cssText += `width:${defCon.elCompat.clientWidth / ratio}px;height:${defCon.elCompat.clientHeight / ratio}px;top:0;left:0`;
-            thatNotice.childNodes.forEach((item, index, array, curItem = 0) => {
+            thatNotice.childNodes.forEach((item, index, array) => {
+              let curItem = 0;
               switch (position) {
                 case "topRight":
                   item.style.cssText += String(
@@ -842,447 +818,596 @@
         }
       }
     }
-  }
+  };
 
-  /* initialize configure data */
-
-  let useBing, VerDetAuto, checkUpdate, timeNumber, timeUnit, GoogleJump, Hotkey, keywordHighlight, localWindow, _data;
-  async function initialData() {
-    const _configuration = await GMgetValue("_configuration_");
-    if (!_configuration) {
-      useBing = 0;
-      VerDetAuto = true;
-      checkUpdate = true;
-      timeNumber = 24;
-      timeUnit = "h";
-      GoogleJump = false;
-      Hotkey = true;
-      keywordHighlight = false;
-      localWindow = false;
-      _data = {
-        useBing,
-        VerDetAuto,
-        checkUpdate,
-        timeNumber,
-        timeUnit,
-        GoogleJump,
-        Hotkey,
-        keywordHighlight,
-        localWindow,
-      };
-      GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
-    } else {
-      _data = JSON.parse(defCon.decrypt(_configuration));
-      useBing = _data.useBing;
-      VerDetAuto = _data.VerDetAuto;
-      checkUpdate = _data.checkUpdate;
-      timeNumber = _data.timeNumber;
-      timeUnit = _data.timeUnit;
-      GoogleJump = _data.GoogleJump;
-      Hotkey = _data.Hotkey !== undefined ? _data.Hotkey : true;
-      keywordHighlight = _data.keywordHighlight;
-      localWindow = _data.localWindow;
+  const GMnotification = ({ title, text, type, scroll, width, closeWith, newestOnTop, progressBar, timeout, callbacks, position }) => {
+    try {
+      new NoticeJs({
+        title: title || "",
+        text: text,
+        type: type || `${Notice.success}`,
+        width: width || 400,
+        newestOnTop: newestOnTop || false,
+        closeWith: closeWith || ["button"],
+        progressBar: typeof progressBar === "undefined" ? true : progressBar,
+        timeout: typeof timeout === "undefined" ? 30 : timeout,
+        scroll: scroll || { maxHeight: 400, showOnHover: true },
+        callbacks: { ...callbacks },
+        position: position || "bottomRight",
+      }).show();
+      fixedZoomNodeStyle(position || "bottomRight");
+    } catch (e) {
+      error("GMnotification:", e.message);
     }
-  }
+  };
 
-  /* Version Detection with Cache and timeout * F9y4ng * 20210614 */
+  /* initialize configure_data function */
 
-  function fetchTimeout(url, time, { ...options } = {}) {
-    const controller = new window.AbortController();
-    const signal = controller.signal;
-    return new Promise((resolve, reject) => {
-      const t = raf.setTimeout(() => {
-        controller.abort();
-        resolve(new Response("timeout", { status: 504, statusText: `Request timeout. (User-Defined: ${time}ms)` }));
-      }, time);
-      fetch(url, { signal: signal, ...options }).then(
-        res => {
-          raf.clearTimeout(t);
-          resolve(res);
-        },
-        err => {
-          raf.clearTimeout(t);
-          reject(err);
-        }
-      );
-    });
-  }
-
-  function getFetchVersion(u) {
-    return new Promise((resolve, reject) => {
-      fetchTimeout(u, 2000, {
-        method: "GET",
-        mode: "cors",
-        cache: "no-store",
-        credentials: "omit",
-      })
-        .then(s => {
-          debug("//-> %c%s %s %s", "color:green", new URL(u).hostname, s.ok, s.status);
-          if (!s.ok) {
-            throw Error(`${s.status} ${s.statusText}`);
-          }
-          return s.text();
-        })
-        .then(t => {
-          let n = defCon.curVersion;
-          let m = defCon.updateNote;
-          t.split(/[\r\n]+/).forEach(item => {
-            const key = item.match(/^(\/\/\s+@version\s+)(\S+)$/);
-            if (key) {
-              n = key[2];
-            }
-            const note = item.match(/^(\/\/\s+@note\s+)(.+)$/);
-            if (note) {
-              m = note[2];
-            }
-          });
-          resolve([compareVersion(defCon.curVersion, n), defCon.encrypt(n), defCon.encrypt(m), defCon.encrypt(u)]);
-        })
-        .catch(exp => {
-          error("%cfetchVersion:\n%c%s", "font-weight:bold", "font-weight:normal", exp);
-          reject();
-        });
-    });
-  }
-
-  function compareVersion(current, compare) {
-    const compare_array = compare.split(".");
-    const current_array = current.split(".");
-    let upgradeID = 0;
-    if (compare_array.length === current_array.length) {
-      for (let i = 0; i < compare_array.length; i++) {
-        if (parseInt(compare_array[i]) < parseInt(current_array[i])) {
-          upgradeID = 3;
-          break;
-        } else {
-          if (parseInt(compare_array[i]) === parseInt(current_array[i])) {
-            continue;
-          } else {
-            upgradeID = 1;
-            break;
-          }
-        }
+  let config_date, isAutoUpdate, keywordHighlight, isHotkey, selectedEngine, localWindow, GoogleJump, antiLinkRedirect;
+  async function init_Config_Data() {
+    const configure = await GMgetValue("_configure_");
+    if (!configure) {
+      // delete Invalid config data for NG.
+      const keys = await GMlistValues();
+      for (let key of keys) {
+        GMdeleteValue(key);
       }
+      // rebuild if not exist.
+      isAutoUpdate = true;
+      keywordHighlight = false;
+      isHotkey = true;
+      selectedEngine = [1, 2, 3];
+      localWindow = true;
+      GoogleJump = true;
+      antiLinkRedirect = true;
+      config_date = { isAutoUpdate, keywordHighlight, isHotkey, selectedEngine, localWindow, GoogleJump, antiLinkRedirect };
+      GMsetValue("_configure_", defCon.encrypt(JSON.stringify(config_date)));
     } else {
-      upgradeID = 2;
+      config_date = JSON.parse(defCon.decrypt(configure));
+      isAutoUpdate = config_date.isAutoUpdate;
+      keywordHighlight = config_date.keywordHighlight;
+      isHotkey = config_date.isHotkey;
+      selectedEngine = config_date.selectedEngine;
+      localWindow = config_date.localWindow;
+      GoogleJump = config_date.GoogleJump;
+      antiLinkRedirect = config_date.antiLinkRedirect;
     }
-    return upgradeID;
   }
 
-  async function checkVersion(s = false) {
-    let t;
-    await initialData();
-    let setResult = checkUpdate ? Boolean(VerDetAuto) : false;
-    const _expiretime_ = String(timeNumber + timeUnit);
-    const _expire_time_ = /(?!^0)^[0-9]+[smhdw]$/i.test(_expiretime_) ? _expiretime_ : "24h";
-    if (setResult) {
-      if (CUR_WINDOW_TOP) {
-        const cache = await GMgetExpire("_Check_Version_Expire_", _expire_time_);
-        if (!cache) {
-          // first: greasyfork
-          t = await getFetchVersion(`https://greasyfork.org/scripts/12909/code/${defCon.randString(32, "mix")}.meta.js`).catch(async () => {
-            defCon.fetchResult = "GreasyFork - Failed to fetch";
-            error(defCon.fetchResult);
-          });
-          // second: github
-          if (defCon.fetchResult.includes("GreasyFork")) {
-            t = await getFetchVersion(`https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`).catch(async () => {
-              defCon.fetchResult = "Github - Failed to fetch";
-              error(defCon.fetchResult);
-            });
+  /* auto check update */
+
+  !(async function AutoUpdate() {
+    "use strict";
+    await init_Config_Data();
+    const cache_autoupdate = await cache.get("_autoupdate_");
+    if (CUR_WINDOW_TOP && isAutoUpdate && !cache_autoupdate) {
+      const isNeedUpdate = (current, compare) => {
+        const compare_array = compare.split(".");
+        const current_array = current.split(".");
+        if (compare_array.length === current_array.length) {
+          for (let i = 0; i < compare_array.length; i++) {
+            if (parseInt(compare_array[i]) < parseInt(current_array[i])) {
+              return false;
+            } else {
+              if (parseInt(compare_array[i]) === parseInt(current_array[i])) {
+                continue;
+              }
+            }
           }
-          // final: Jsdelivr points to gitee
-          if (defCon.fetchResult.includes("Github")) {
-            t = await getFetchVersion(`https://cdn.jsdelivr.net/gh/F9y4ng/GreasyFork-Scripts@master/Google%20%26%20Baidu%20Switcher.meta.js`).catch(async () => {
-              defCon.fetchResult = "Jsdelivr - Failed to fetch";
-              error(defCon.fetchResult);
-            });
-          }
-          // Set value with expire
-          if (t !== undefined) {
-            GMsetExpire("_Check_Version_Expire_", t);
-            debug("//-> %ccheckVersion: Loading Data from Server.", "background-color:darkorange;color:snow");
-          } else {
-            console.error(
-              "%c[GB-Update]\n%cSome unknown exceptions cause version detection failure, most likely by a network error. Please try again later.",
-              "font-weight:bold;color:red",
-              "font-weight:bold;color:darkred"
-            );
-          }
-        } else {
-          t = cache;
-          debug("//-> %ccheckVersion: Loading Data from Cache.", "background-color:green;color:snow");
         }
-        // Resolution return data
-        if (typeof t !== "undefined" && defCon.fetchResult === "success") {
-          const lastestVersion = defCon.decrypt(t[1]);
-          defCon.isNoticed = Boolean(await GMgetExpire("_nCount_", _expire_time_));
-          defCon.isNeedUpdate = cache ? compareVersion(defCon.curVersion, lastestVersion) : t[0];
-          const updateNote = ((w = "") => {
-            if (defCon.decrypt(t[2])) {
-              defCon
-                .decrypt(t[2])
-                .split(/\\n/)
-                .forEach(item => {
-                  w += `<li>${item}</li>`;
+        return true;
+      };
+      const update = url => {
+        return new Promise((resolve, reject) => {
+          GMxmlhttpRequest({
+            url: url,
+            nocache: true,
+            headers: { Accept: "*/*", Referer: url.replace(new URL(url).pathname, "") },
+            method: "GET",
+            timeout: 9e3,
+            onreadystatechange: response => {
+              if (response.status === 200 && response.readyState === 4) {
+                const res = response.responseText || response.response || "";
+                res && resolve({ res: res, source: url });
+              }
+            },
+            ontimeout: () => {
+              reject(new Error("Update.TimeoutError"));
+            },
+          });
+        }).catch(e => {
+          error("AutoUpdate.XHR:", e.message);
+          return { res: undefined, source: undefined };
+        });
+      };
+      Promise.race([
+        update(`https://greasyfork.org/scripts/12909/code/Google%20%20baidu%20Switcher%20(ALL%20in%20One).meta.js`),
+        update(`https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`),
+        update(`https://openuserjs.org/install/f9y4ng/Google_baidu_Switcher_(ALL_in_One).meta.js`),
+      ])
+        .then(value => {
+          let version, note;
+          let updateInfoList = "";
+          value.res
+            ? value.res.split(/[\r\n]+/).forEach(item => {
+                const versions = item.match(/^(\/\/\s+@version\s+)(\S+)$/);
+                version = versions ? versions[2] : version;
+                const notes = item.match(/^(\/\/\s+@note\s+)(.+)$/);
+                note = notes ? notes[2] : note;
+              })
+            : console.warn(
+                String(`%c[GB-UpdateError]%c\nRefused to connect to 'the UpdateList URLs', Please check your Network or local DNS!`),
+                "font-weight:bold;color:crimson",
+                "color:darkred"
+              );
+          note &&
+            note.split(/\\n/g).forEach(item => {
+              updateInfoList += `<li>${item}</li>`;
+            });
+          const updateInfo = note ? `<dd><ul>${updateInfoList}</ul></dd>` : "<dd><ul>暂时无法获取更新详情。</ul></dd>";
+          const updateHost = value.source ? new URL(value.source).hostname : null;
+          updateHost && debug("\ud83d\udd33 [UpdateURI]: %c%s", "color:crimson", updateHost.replace(/raw\.|usercontent/g, ""));
+          if (version) {
+            if (isNeedUpdate(defCon.curVersion, version)) {
+              const preInstall = () => {
+                sleep(500, { useCachedSetTimeout: true })(value.source.replace(".meta.", ".user."))
+                  .then(url => {
+                    if (IS_REAL_GECKO) {
+                      defCon.install = GMopenInTab(url, false);
+                    } else {
+                      location.href = url;
+                    }
+                  })
+                  .then(cache.set("_autoupdate_", version));
+              };
+              const updateMessage = Notice.noticeHTML(
+                `<dd><span>发现新版本</span><i>V${version}</i>，点击可自动更新。</dd>${updateInfo}<dd id="${Notice.stopUpdate}"><input type="checkbox">一周内不再提醒</dd>`
+              );
+              sleep(5e2, { useCachedSetTimeout: true })
+                .then(() => {
+                  GMnotification({
+                    title: `更新检测`,
+                    text: updateMessage,
+                    type: `${Notice.warning}`,
+                    closeWith: ["click"],
+                    timeout: 60,
+                    callbacks: { onClick: [preInstall] },
+                  });
+                  return qS(`#${Notice.stopUpdate}`);
+                })
+                .then(r => {
+                  r &&
+                    r.addEventListener("click", event => {
+                      event.stopPropagation();
+                      closeItem(qS(`gb-notice.${Notice.noticejs} .${Notice.warning}`));
+                      cache.set("_autoupdate_", version);
+                    });
+                })
+                .then(() => {
+                  console.log(
+                    String(`%c[GB-Update]%c\nWe found a new version: %c${version}%c.You can update it now!`),
+                    "font-weight:bold;color:crimson",
+                    "color:0",
+                    "color:crimson",
+                    "color:0"
+                  );
+                });
+            } else {
+              sleep(5e2, { useCachedSetTimeout: true })
+                .then(() => {
+                  GMnotification({
+                    title: `更新检测`,
+                    text: Notice.noticeHTML(`<dd style="margin: 10px 0"><span>恭喜您！</span>当前版本 <i>${defCon.curVersion}</i> 已为最新！</dd>`),
+                    type: `${Notice.success}`,
+                    closeWith: ["click"],
+                    timeout: 5,
+                  });
+                })
+                .then(cache.set("_autoupdate_", version))
+                .then(() => {
+                  console.log(`%c[GB-Update]%c\nCurretVersion: %c${defCon.curVersion}%c is up-to-date!`, "font-weight:bold;color:darkcyan", "color:0", "color:crimson", "color:0");
                 });
             }
-            return w ? `<dd class="disappear"><ul>${w}</ul></dd>` : "";
-          })();
-          const updateUrl = defCon.decrypt(t[3]).replace("meta", "user");
-          const recheckURLs = new URL(
-            updateUrl
-              .replace("raw.githubusercontent.com", "github.com")
-              .replace("cdn.jsdelivr.net/gh", "gitee.com")
-              .replace("@", "/")
-              .replace("master", "blob/master")
-              .replace(/code\/[^/]+\.js/, "")
-          );
-          let sourceSite = defCon.titleCase(recheckURLs.hostname).split(".")[0];
-          sourceSite = cache ? `${sourceSite} on Cache` : sourceSite;
-          const repo = cache
-            ? `\nCache expire:${defCon.durationTime(defCon.restTime._Check_Version_Expire_)}\nDetect time: ${defCon.lastRuntime()}\n`
-            : `\nExpire time: ${_expire_time_}\nDetect time: ${defCon.lastRuntime()}\n`;
-          switch (defCon.isNeedUpdate) {
-            case 2:
-              if (CUR_WINDOW_TOP) {
-                console.warn(
-                  String(
-                    `%c[GB-Update]%c\nWe found your local version %c${defCon.curVersion} %cis not current.\nPlease confirm whether you had edited your local script, then you need to update it manually.\n${repo}(${sourceSite})`
-                  ),
-                  "font-weight:bold;color:crimson",
-                  "color:0",
-                  "font-weight:bold;color:tomato",
-                  "color:0"
-                );
-              }
-              if (!defCon.isNoticed || s || IS_OPEN_DEBUG) {
-                raf.setTimeout(() => {
-                  GMnotification(
-                    Notice.noticeHTML(
-                      `<dt>${defCon.scriptName}</dt>
-                      <dd><span>发现版本异常</span>版本号 <i>${defCon.curVersion}</i> 错误。由于您手动编辑过本地脚本，为避免未知错误的出现，脚本将自动设置为禁止检测更新。</dd><dd style="text-align: center;margin-top:8px!important"><img src="https://z3.ax1x.com/2021/08/14/fyvfk6.png" alt="开启自动检测"></dd><dd style="color:lemonchiffon;font-style:italic">注：若要重新启用自动更新，您需要在<a href="${recheckURLs}" target="_blank" style="padding:0 2px;font-weight:700;color:gold">脚本源网站</a>覆盖安装正式版本后，从脚本菜单重新开启更新检测。</dd><dd>[ ${sourceSite} ]</dd>`
-                    ),
-                    `${Notice.error}`,
-                    true,
-                    100,
-                    {
-                      onClose: [
-                        () => {
-                          location.reload();
-                        },
-                      ],
-                    }
-                  );
-                }, 100);
-                _data.VerDetAuto = false;
-                GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
-                GMsetExpire("_nCount_", true);
-              }
-              return false;
-            case 1:
-              if (CUR_WINDOW_TOP) {
-                console.info(
-                  String(`%c[GB-Update]%c\nWe found a new version: %c${lastestVersion}%c.\nPlease upgrade from your update source to the latest version.${repo}(${sourceSite})`),
-                  "font-weight:bold;color:crimson",
-                  "color:0",
-                  "color:crimson",
-                  "color:0"
-                );
-              }
-              if (!defCon.isNoticed || s || IS_OPEN_DEBUG) {
-                let showdDetail = "";
-                if (updateNote) {
-                  showdDetail = `<dd onmouseover="this.previousElementSibling.previousElementSibling.style.display='block';this.style.display='none'" style="text-align:center">&gt;&gt; 查看更新内容 &lt;&lt;</dd>`;
-                }
-                raf.setTimeout(() => {
-                  GMnotification(
-                    Notice.noticeHTML(
-                      `<dt>${defCon.scriptName}</dt>
-                      <dd><span>发现版本更新</span>最新版本 <i>${lastestVersion}</i>，如果您现在需要更新脚本，请点击这里完成升级安装。</dd>${updateNote}
-                      <dd>[ ${sourceSite} ]<kbd style="float:right;font-size:11px!important;">( 缓存时间：${defCon.showDate(_expire_time_)} )</kbd></dd>${showdDetail}`
-                    ),
-                    `${Notice.warning}`,
-                    false,
-                    60,
-                    {
-                      onClick: [
-                        () => {
-                          GMopenInTab(updateUrl, defCon.options);
-                          GMdeleteValue("_Check_Version_Expire_");
-                        },
-                      ],
-                    }
-                  );
-                }, 100);
-                GMsetExpire("_nCount_", true);
-              }
-              return false;
-            default:
-              if (CUR_WINDOW_TOP && (s || IS_OPEN_DEBUG)) {
-                console.info(
-                  `%c[GB-Update]%c\nCurretVersion: %c${defCon.curVersion}%c is up-to-date!${repo}(${sourceSite})`,
-                  "font-weight:bold;color:darkcyan",
-                  "color:0",
-                  "color:red",
-                  "color:0"
-                );
-                raf.setTimeout(() => {
-                  GMnotification(
-                    Notice.noticeHTML(
-                      `<dt>${defCon.scriptName}</dt>
-                      <dd><span>更新成功</span>当前版本 <i>${defCon.curVersion}</i> 已为最新！</dd>` +
-                        String(defCon.isNeedUpdate === 3 ? `<dd style="color:yellow;font-style:italic">（注意：您的本地版本高于服务器版本，请核验）</dd>` : ``) +
-                        `<dd>[ ${sourceSite} ]<kbd style="float:right;font-size:11px!important">( 缓存时间：${defCon.showDate(_expire_time_)} )</kbd></dd>`
-                    ),
-                    `${Notice.success}`,
-                    false,
-                    30
-                  );
-                  GMdeleteValue("_nCount_");
-                }, 100);
-              }
-              return true;
           }
-        }
-      }
-    } else {
-      if (CUR_WINDOW_TOP) {
-        console.log(`%c[GB-Update]%c\nUpdate detection has been ${!checkUpdate ? "manually" : "automatically"} turned off.`, "font-weight:bold;color:red", "color:0");
-      }
-      return;
+        })
+        .catch(e => {
+          error("CheckUpdate:", e);
+        });
+    }
+  })();
+
+  /* init CONST values */
+
+  const IS_MACOS = getNavigator.system().startsWith("macOS");
+  const API_ICO_YANDEX = defCon.decrypt("aHR0cHMlM0ElMkYlMkZmYXZpY29uLnlhbmRleC5uZXQlMkZmYXZpY29uJTJGdjI=");
+  const API_ICO_DDUCKGO = defCon.decrypt("aHR0cHMlM0ElMkYlMkZpY29ucy5kdWNrZHVja2dvLmNvbSUyRmlwMg==");
+  const HOST_URI = defCon.decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkYxMjkwOQ==");
+  const FEEDBACK_URI = GMinfo.scriptMetaStr.match(/(\u0040\u0073\u0075\u0070\u0070\u006f\u0072\u0074\u0055\u0052\u004c\s+)(\S+)/)[2];
+  const CONST = {
+    isSecurityPolicy: false,
+    rndID: defCon.randString(9, "char"),
+    rndclassName: defCon.randString(9, "char"),
+    rndstyleName: defCon.randString(9, "char"),
+    leftButton: defCon.randString(6, "mix"),
+    rightButton: defCon.randString(6, "mix"),
+    scrollspan: defCon.randString(8, "char"),
+    scrollspan2: defCon.randString(8, "char"),
+    scrollbars: defCon.randString(8, "char"),
+    scrollbars2: defCon.randString(8, "char"),
+  };
+
+  CONST.noticeCss = String(
+    String(
+      `@charset "UTF-8";.${Notice.noticejs} *,.${Notice.noticejs} *::after,.${Notice.noticejs} *::before {scrollbar-width:thin;box-sizing:content-box;}.${Notice.animated}{animation-duration:1s;animation-fill-mode:both}.${Notice.animated}.infinite{animation-iteration-count:infinite}.${Notice.animated}.hinge{animation-duration:2s}.${Notice.animated}.bounceIn,.${Notice.animated}.bounceOut,.${Notice.animated}.flipOutX,.${Notice.animated}.flipOutY{animation-duration:1.25s}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.fadeOut{animation-name:fadeOut}#${CONST.rndID} *{font-family:'Helvetica',system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:initial!important}.${Notice.noticejs},.${Notice.noticejs} *{font-family:'Microsoft YaHei',system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:initial!important}.${Notice.noticejs}-top{top:0;width:100%}.${Notice.noticejs}-top .${Notice.item}{border-radius:0!important;margin:0!important}.${Notice.noticejs}-topRight{top:10px;right:10px;z-index:10059!important}.${Notice.noticejs}-topLeft{top:10px;left:10px}.${Notice.noticejs}-topCenter{top:10px;left:50%;transform:translate(-50%)}.${Notice.noticejs}-middleLeft,.${Notice.noticejs}-middleRight{right:10px;top:50%;transform:translateY(-50%)}.${Notice.noticejs}-middleLeft{left:10px}.${Notice.noticejs}-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.${Notice.noticejs}-bottom{bottom:0;width:100%}.${Notice.noticejs}-bottom .${Notice.item}{border-radius:0!important;margin:0!important}.${Notice.noticejs}-bottomRight{bottom:10px;right:10px;z-index:10055!important}.${Notice.noticejs}-bottomLeft{bottom:10px;left:10px}.${Notice.noticejs}-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.${Notice.noticejs} .${Notice.item}{margin:0 0 10px;border-radius:6px;overflow:hidden}` +
+        `.${Notice.noticejs} .${Notice.item} .${Notice.close}{float:right;font-size:18px!important;font-weight:700;line-height:1;color:#fff;text-shadow:0 1px 0 #fff;opacity:1;margin-right:7px}.${Notice.noticejs} .${Notice.item} .${Notice.close}:hover{opacity:.5;color:#000;cursor:pointer}.${Notice.noticejs} .${Notice.item} a{color:#fff;border-bottom:1px dashed #fff}.${Notice.noticejs} .${Notice.item} a,.${Notice.noticejs} .${Notice.item} a:hover{text-decoration:none}.${Notice.noticejs} .${Notice.success}{background-color:#64ce83}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-heading{font-size:14px!important;background-color:#3da95c;color:#fff;padding:10px;font-weight:700}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-body{color:#fff;padding:10px!important}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.info}{background-color:#3ea2ff}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-heading{font-size:14px!important;background-color:#067cea;color:#fff;padding:10px;font-weight:700}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-body{color:#fff;padding:10px!important}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.warning}{background-color:#ff7f48;}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-heading{font-size:14px!important;background-color:#f97038;color:#fff;padding:10px!important;font-weight:700}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-body{color:#fff;padding:10px}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.error}{background-color:#e74c3c}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-heading{font-size:14px!important;background-color:#e93724;color:#fff;padding:10px!important;font-weight:700}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-body{color:#fff;padding:10px}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-body:hover{visibility:visible!important}` +
+        `.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-content{visibility:visible}.${Notice.configuration} input[disabled],.${Notice.configuration} select[disabled]{color:#bbb;background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:20px 20px!important;background-color:#fff7f7!important}.${Notice.noticejs} .${Notice.configuration}{background-color:linear-gradient(to right,#fcfcfc,#f2f2f7);background:-webkit-gradient(linear,0 0,0 100%,from(#fcfcfc),to(#f2f2f7));box-shadow:0 0 5px #888}.${Notice.noticejs} .${Notice.configuration} .${Notice.close}{float:right;font-size:18px!important;font-weight:700;line-height:1;color:#000;text-shadow:0 1px 0 #aaa;opacity:1;margin-right:7px}.${Notice.noticejs} .${Notice.configuration} .${Notice.close}:hover{opacity:.5;color:#555;cursor:pointer}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-heading{font-size:14px!important;background-color:#e7e7e7;color:#333;padding:10px!important;font-weight:700}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-body{color:#333;padding:10px}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-progressbar{width:100%;background-color:#64ce83;margin-top:-1px}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#3da95c;}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-progressbar{width:100%;background-color:#3ea2ff;margin-top:-1px}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#067cea;}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-progressbar{width:100%;background-color:#ff7f48;margin-top:-1px}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#f44e06;}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-progressbar{width:100%;background-color:#fd5f4e;margin-top:-1px}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#ba2c1d;}` +
+        `.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-progressbar{width:100%;background-color:#efefef;margin-top:-1px}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{background:#ccc;width:100%;height:5px}@keyframes ${Notice.noticejs}-fadeOut{0%{opacity:1}to{opacity:0}}.${Notice.noticejs}-fadeOut{animation-name:${Notice.noticejs}-fadeOut}@keyframes ${Notice.noticejs}-modal-in{to{opacity:.3}}@keyframes ${Notice.noticejs}-modal-out{to{opacity:0}}.${Notice.noticejs}{position:fixed;z-index:10050}.${Notice.noticejs} ::-webkit-scrollbar{width:8px}.${Notice.noticejs} ::-webkit-scrollbar-button{width:8px;height:5px}.${Notice.noticejs} ::-webkit-scrollbar-track{border-radius:3px}.${Notice.noticejs} ::-webkit-scrollbar-thumb{background:#e1e1e1;border-radius:3px}.${Notice.noticejs} ::-webkit-scrollbar-thumb:hover{background:#cccccc;}.${Notice.noticejs}-modal{position:fixed;width:100%;height:100%;background-color:#000;z-index:999999;opacity:.3;left:0;top:0}.${Notice.noticejs}-modal-open{opacity:0;animation:${Notice.noticejs}-modal-in .3s ease-out}.${Notice.noticejs}-modal-close{animation:${Notice.noticejs}-modal-out .3s ease-out;animation-fill-mode:forwards}.${Notice.rName}{padding:2px!important}.${Notice.noticejs} .${Notice.rName} dl{margin:0!important;padding:1px!important}.${Notice.noticejs} .${Notice.rName} dl dt{margin:2px 0 6px 0!important;font-size:16px!important;font-weight:900!important}.${Notice.noticejs} .${Notice.rName} dl dd{margin:2px 2px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${Notice.noticejs} .${Notice.rName} .${Notice.center}{width:100%;text-align:center!important}.${Notice.noticejs} .${Notice.rName} dl dd em{color:#fff;font-family:Candara,sans-serif!important;font-size:24px!important;padding:0 5px;font-style:italic}.${Notice.noticejs} .${Notice.rName} dl dd span{font-weight:700;font-size:15px!important;margin-right:8px}.${Notice.noticejs} .${Notice.rName} dl dd i{font-family:Candara,sans-serif!important;font-size:20px!important}.${Notice.noticejs} .${Notice.rName} dl dd .im{color:gold;font-size:16px!important;font-weight:900;padding:0 3px}` +
+        `.${Notice.noticejs} .${Notice.warning} .${Notice.rName} ul{width:90%;display:inline-block;text-align:left;vertical-align:top;color:rgba(255, 255, 255, 0.8);padding:0.2em;margin:0 0 0 1em;counter-reset:xxx 0}.${Notice.noticejs} .${Notice.warning} .${Notice.rName} li{list-style:none;font-style:italic!important;position:relative;padding:0 0 0 0.1em;margin:0 0 0 2px;-webkit-transition:.12s;transition:.12s}.${Notice.noticejs} .${Notice.warning} .${Notice.rName} li::before{content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-family:Candara,sans-serif;font-size:1em;display:inline-block;width:1.5em;margin-left:-1.5em;-webkit-transition:.5s;transition:.5s}.${Notice.noticejs} .${Notice.warning} .${Notice.rName} #${Notice.stopUpdate}{float:right;margin:0px 5px!important;font-size:12px!important;cursor:help}#${Notice.stopUpdate} input[type='checkbox']{box-sizing:content-box;vertical-align:top;margin:2px 4px 0 0;width:14px;height:14px;cursor:help;-webkit-appearance:none;border-radius:50%;border:2px solid #fff;background:#ffa077;}#${Notice.stopUpdate}:hover input,#${Notice.stopUpdate} input:hover{background:#ba2c1d;}.${Notice.noticejs} .${Notice.configuration} .${Notice.checkbox}{display:none!important}.${Notice.noticejs} .${Notice.configuration} .${Notice.checkbox}+label{cursor:pointer;padding:11px 9px;margin:0 0 0 25px;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:58px;height:10px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);-webkit-box-sizing:content-box;box-sizing:content-box;word-wrap:normal!important}.${Notice.noticejs} .${Notice.configuration} .${Notice.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;-webkit-border-radius:7px;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${Notice.noticejs} .${Notice.configuration} .${Notice.checkbox}+label::after{position:absolute;top:0;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;-webkit-border-radius:100px;border-radius:100px;padding:5px;font-size:1em;font-weight:700;color:#fff;content:"OFF"}.${Notice.noticejs} .${Notice.configuration} .${Notice.checkbox}:checked+label{cursor:pointer;margin:0 0 0 25px;-webkit-box-sizing:content-box;box-sizing:content-box;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}` +
+        `.${Notice.noticejs} .${Notice.configuration} .${Notice.checkbox}:checked+label::after{content:"ON";left:10px}.${Notice.noticejs} .${Notice.configuration} .${Notice.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px}.${Notice.noticejs} .${Notice.configuration} button.${Notice.searchButton}{width:146px;margin:0 0 10px 0;padding:4px 0;border-radius:6px;border:2px solid #eee;background:#fff;box-shadow:1px 1px 0px 1px #aaa;font-size:14px!important;cursor:pointer}.${Notice.noticejs} .${Notice.configuration} button.${Notice.searchButton}:hover{color:red;box-shadow:1px 1px 3px 0px #888;}.${Notice.noticejs} .${Notice.configuration} img.${Notice.favicon}{width:24px;height:24px;border-radius:10px;vertical-align:middle;margin:0px 6px 0 0;}.${Notice.noticejs} .${Notice.configuration} ul.${Notice.searchList}{list-style:none;margin:5px;padding:2px;}.${Notice.noticejs} .${Notice.configuration} ul.${Notice.searchList} li{list-style:none;font-style:normal;margin:0}.${Notice.noticejs} .${Notice.configuration} .${Notice.fieldset}{border:2px dashed #dfdfdf;border-radius:10px;padding:4px 6px;margin:2px;background:transparent!important;width:auto;height:auto;display:block}.${Notice.noticejs} .${Notice.configuration} .${Notice.legend}{width:auto;margin:0;color:#8b0000!important;font-size:14px!important;font-weight:900!important;-webkit-user-select:all;user-select:all;display:block;padding:0 8px}.${Notice.noticejs} .${Notice.configuration} .${Notice.settingList}{padding:0;margin:0;background:transparent!important}.${Notice.noticejs} .${Notice.configuration} .${Notice.settingList} li{display:flex;list-style:none;margin:3px 0;border:none;float:none;background:transparent!important;cursor:default;-webkit-user-select:none;user-select:none;padding:2px 8px 2px 12px;height:36px;align-content:center;justify-content:space-between}.${Notice.noticejs} .${Notice.configuration} .${Notice.settingList} li>div{font:normal 700 14px/150% 'Microsoft YaHei','Helvetica Neue',sans-serif!important}.${Notice.noticejs} .${Notice.configuration} .${Notice.settingList} button{background:#fafafa;border:1px solid #ccc;border-radius:8px;min-width:65px;height:36px;padding:4px 8px;margin:0 0 0 8px;box-sizing:border-box;font-size:14px!important;font-weight:700;color:#5e5e5e;box-shadow:1px 1px 1px 0 #ccc}.${Notice.noticejs} .${Notice.configuration} .${Notice.settingList} button:hover{background:#fff;cursor:pointer}` +
+        `.${Notice.noticejs} .${Notice.configuration} .${Notice.settingList} .${Notice.random}__content{margin:0;height:268px;display:block}.${Notice.noticejs} .${Notice.configuration} .${Notice.settingList} .${Notice.grid}{overflow-y:auto;overflow-x:hidden;box-sizing:border-box;max-height:237px;width:266px;padding:8px;margin:4px 0 3px 0;overscroll-behavior:contain;}.${Notice.card} h2{margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline}.${Notice.card}{--background:#fff;--background-chackbox:#0082ff;--background-image:#fff, rgba(0, 107, 175, 0.2);--text-color:#666;--text-headline:#000;--card-shadow:#0082ff;--card-height:48px;--card-witght:240px;--card-radius:12px;--header-height:47px;--blend-mode:overlay;--transition:0.15s;-webkit-user-select:none; -moz-user-select:none;-ms-user-select:none;user-select:none;padding:0;margin:0}.${Notice.card}__input{position:absolute;display:block;outline:none;border:none;background:none;padding:0;margin:0;-webkit-appearance:none;}.${Notice.card}__input:checked ~ .${Notice.card}__body{--shadow:0 0 0 3px var(--card-shadow);}.${Notice.card}__input:checked ~ .${Notice.card}__body .${Notice.card}__body-cover-chackbox{--chack-bg:var(--background-chackbox);--chack-border:#fff;--chack-scale:1;--chack-opacity:1;}.${Notice.card}__input:checked ~ .${Notice.card}__body .${Notice.card}__body-cover-chackbox--svg{--stroke-color:#fff;--stroke-dashoffset:0;}.${Notice.card}__input:checked ~ .${Notice.card}__body .${Notice.card}__body-cover:after{--opacity-bg:0;}.${Notice.card}__input:disabled ~ .${Notice.card}__body{cursor:not-allowed;opacity:0.5;}.${Notice.card}__input:disabled ~ .${Notice.card}__body:active{--scale:1;}.${Notice.card}__body{display:grid;grid-auto-rows:calc(var(--card-height) - var(--header-height)) auto;background:var(--background);height:var(--card-height);width:var(--card-witght);border-radius:var(--card-radius);overflow:hidden;position:relative;cursor:pointer;box-shadow:var(--shadow, 1px 1px 3px 1px #cccccc);-webkit-transition:box-shadow var(--transition), -webkit-transform var(--transition);transition:box-shadow var(--transition), -webkit-transform var(--transition);transition:transform var(--transition), box-shadow var(--transition);transition:transform var(--transition), box-shadow var(--transition), -webkit-transform var(--transition);-webkit-transform:scale(var(--scale, 1)) translateZ(0);transform:scale(var(--scale, 1)) translateZ(0);}` +
+        `.${Notice.card}__body:active{--scale:0.96;}.${Notice.card}__body-cover-image{position:absolute;left:10px;top:8px;z-index:100;width:32px;height:32px;}.${Notice.card}__body-cover-image img{width:32px;height:32px;}.${Notice.card}__body-cover-chackbox{background:var(--chack-bg, var(--background-chackbox));border:2px solid var(--chack-border, #fff);position:absolute;right:10px;top:10px;z-index:1;width:28px;height:28px;border-radius:50%;opacity:var(--chack-opacity, 0);transition:transform var(--transition), opacity calc(var(--transition) * 1.2) linear, -webkit-transform var(--transition) ease;-webkit-transform:scale(var(--chack-scale, 0));transform:scale(var(--chack-scale, 0));}.${Notice.card}__body-cover-chackbox--svg{visibility:visible!important;width:13px;height:11px;display:inline-block;vertical-align:top;fill:none;margin:8px 0 0 7px;stroke:var(--stroke-color, #fff);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16px;stroke-dashoffset:var(--stroke-dashoffset, 16px);-webkit-transition:stroke-dashoffset 0.4s ease var(--transition);transition:stroke-dashoffset 0.4s ease var(--transition);}.${Notice.card}__body-header{height:var(--header-height);background:var(--background);padding:4px 10px 6px 48px;}.${Notice.card}__body-header-title{color:var(--text-headline);font-weight:700!important;margin-bottom:0!important;font-size:15px!important;}.${Notice.card}__body-header-subtitle{color:var(--text-color);font-weight:500;font-size:13px!important;}.${Notice.noticejs} .${Notice.configuration} .${Notice.settingList} .${Notice.grid}{display:grid;grid-template-columns:repeat(1, 1fr);grid-gap:10px;}#${Notice.random}_help{position:relative;right:16%;background:#f07f6a!important;color:#ffffff!important;padding:4px 15px!important;border:1px solid transparent;box-shadow:0 0 6px 0 #f5846f;cursor:help}`
+    )
+  );
+
+  /* antiRedirect Functions */
+
+  function filterRegx(string, reg) {
+    const regEx = new RegExp(reg);
+    try {
+      return regEx.exec(string)[1];
+    } catch (e) {
+      return "";
     }
   }
 
-  /* SYSTEM INFO */
+  function addTargetEvent(str, siteName) {
+    count(`\ud83d\udd33 [${siteName}-Anti-Redirect]`);
+    qA(str).forEach(node => {
+      node.setAttribute("target", "_blank");
+    });
+  }
 
-  if (CUR_WINDOW_TOP) {
-    console.info(
-      `%c[GB-Init]%c\nVersion: ${defCon.curVersion} %c[%s]%c\nExtension: %s\nlastRuntime: ${defCon.lastRuntime()}`,
-      "font-weight:bold;color:dodgerblue",
-      "color:0",
-      "color:snow",
-      defCon.titleCase(checkVersion(defCon.isUpgrade) instanceof Object),
-      "color:0",
-      defCon.titleCase(GMscriptHandler)
-    );
+  function findRedirectLink(str, siteName) {
+    count(`\ud83d\udd33 [${siteName}-Anti-Redirect]`);
+    qA(str).forEach(node => {
+      switch (siteName) {
+        case "Baidu":
+          antiRedirect_Baidu(node);
+          break;
+        case "Sogou":
+          antiRedirect_Sogou(node);
+          break;
+      }
+    });
+  }
+
+  function antiRedirect_Baidu(node) {
+    node.setAttribute("gd-antiredirect-status", "pending");
+    const url = node.href.replace(/http:/, "https:");
+    return new Promise((resolve, reject) => {
+      GMxmlhttpRequest({
+        url: url,
+        headers: { Accept: "*/*", Referer: location.href.replace(/^http:/, "https:") },
+        method: "GET",
+        timeout: 5e3,
+        onreadystatechange: response => {
+          if (response.status === 200 && response.readyState === 4) {
+            resolve(response.finalUrl);
+          }
+        },
+        onerror: e => {
+          if (e.error && e.error.indexOf("Request was redirected to a not whitelisted URL") >= 0) {
+            const rUrl = filterRegx(e.error, 'Refused to connect to "([^"]*)": Request was redirected to a not whitelisted URL');
+            if (rUrl === null || rUrl === "" || rUrl.indexOf("www.baidu.com/search/error") > 0) {
+              return;
+            }
+            resolve(rUrl);
+          } else if (e.responseHeaders && e.responseHeaders.match(/Location: ([\S]+)/)) {
+            resolve(e.responseHeaders.match(/Location: ([\S]+)/)[1]);
+          } else {
+            reject(new Error(`URLBrokenError`));
+          }
+        },
+        ontimeout: () => {
+          warn("\ud83d\udd33 Timeout Retrying: %o", { Node: node, Text: node.textContent, URL: node.href });
+          node.style.backgroundColor = "lemonchiffon";
+          GMxmlhttpRequest({
+            url: url,
+            headers: { Accept: "*/*", Referer: location.href.replace(/^http:/, "https:") },
+            method: "GET",
+            timeout: 1e4,
+            onload: response => {
+              resolve(response.finalUrl);
+            },
+            ontimeout: () => {
+              reject(new Error(`TimeoutError`));
+            },
+          });
+        },
+      });
+    })
+      .then(res => {
+        debug("\ud83d\udd33", res);
+        node.href = res;
+        node.style.backgroundColor = null;
+        node.setAttribute("gd-antiredirect-status", "success");
+      })
+      .catch(e => {
+        node.style = "color:gray!important;text-decoration:line-through!important";
+        error("antiRedirect_Baidu: %s %O", e.message, { Node: node, Text: node.textContent, URL: node.href });
+      });
+  }
+
+  function antiRedirect_Sogou(node) {
+    node.setAttribute("gd-antiredirect-status", "pending");
+    const url = node.href;
+    return new Promise((resolve, reject) => {
+      GMxmlhttpRequest({
+        url: url,
+        headers: { Accept: "*/*", Referer: location.href },
+        method: "GET",
+        timeout: 8e3,
+        onreadystatechange: response => {
+          if (response.status === 200 && response.readyState === 4) {
+            const resText = response.responseText || response.response || "";
+            let res = resText.match(/(URL=')([^']*)(')/);
+            res = res ? res[2] : response.finalUrl || null;
+            resolve(res);
+          }
+        },
+        onerror: () => {
+          reject(new Error(`URLBrokenError`));
+        },
+        ontimeout: () => {
+          reject(new Error(`TimeoutError`));
+        },
+      });
+    })
+      .then(res => {
+        debug("\ud83d\udd33", res);
+        node.href = res || node.href;
+        node.setAttribute("gd-antiredirect-status", "success");
+      })
+      .catch(e => {
+        node.style = "color:gray!important;text-decoration:line-through!important";
+        error("antiRedirect_Sogou: %s %O", e.message, { Node: node, Text: node.textContent, URL: node.href });
+      });
+  }
+
+  function antiRedirect_Goolge(str) {
+    const clearHrefEvents = node => {
+      node.removeAttribute("data-hveid");
+      node.removeAttribute("data-cthref");
+      node.removeAttribute("data-jsarwt");
+      node.removeAttribute("data-usg");
+      node.removeAttribute("data-ved");
+      node.removeAttribute("ping");
+      node.removeAttribute("onmouseover");
+      node.setAttribute("target", "_blank");
+      node.setAttribute("gd-antiredirect-status", "success");
+    };
+    count("\ud83d\udd33 [Google-Anti-Redirect]");
+    qA(str).forEach(node => {
+      node.getAttribute("href") &&
+        (node.getAttribute("data-hveid") ||
+          node.getAttribute("data-usg") ||
+          node.getAttribute("data-cthref") ||
+          node.getAttribute("data-ved") ||
+          node.getAttribute("ping") ||
+          node.getAttribute("data-jsarwt") ||
+          node.getAttribute("onmouseover")) &&
+        clearHrefEvents(node);
+    });
+  }
+
+  function antiRedirect_So360(str) {
+    count("\ud83d\udd33 [So360-Anti-Redirect]");
+    qA(str).forEach(node => {
+      if (node.getAttribute("data-mdurl")) {
+        node.href = node.dataset.mdurl;
+        node.setAttribute("gd-antiredirect-status", "success");
+      } else {
+        const url = node.href;
+        return new Promise((resolve, reject) => {
+          GMxmlhttpRequest({
+            url: url,
+            headers: { Accept: "*/*", Referer: location.href },
+            method: "GET",
+            timeout: 8e3,
+            onreadystatechange: response => {
+              if (response.status === 200 && response.readyState === 4) {
+                const resText = response.responseText || response.response || "";
+                let res = resText.match(/(URL=')([^']*)(')/);
+                res = res ? res[2] : response.finalUrl || null;
+                resolve(res);
+              }
+            },
+            onerror: () => {
+              reject(new Error(`URLBrokenError`));
+            },
+            ontimeout: () => {
+              reject(new Error(`TimeoutError`));
+            },
+          });
+        })
+          .then(res => {
+            debug("\ud83d\udd33", res);
+            node.href = res || node.href;
+            node.setAttribute("gd-antiredirect-status", "success");
+          })
+          .catch(e => {
+            node.style = "color:gray!important;text-decoration:line-through!important";
+            error("antiRedirect_So360: %s %O", e.message, { Node: node, Text: node.textContent, URL: node.href });
+          });
+      }
+      node.removeAttribute("data-res");
+      node.removeAttribute("data-mdurl");
+      node.removeAttribute("data-replaceurl");
+      node.removeAttribute("data-initurl");
+    });
+  }
+
+  function antiRedirect_Toutiao(str) {
+    count("\ud83d\udd33 [Toutiao-Anti-Redirect]");
+    qA(str).forEach(node => {
+      const localUrl = node.href || "#";
+      const realUrl = localUrl.match(/(\/search\/jump\?url=)([^&]+)(&)/);
+      node.href = realUrl ? decodeURI(decodeURIComponent(realUrl[2])) : localUrl;
+      node.setAttribute("gd-antiredirect-status", "success");
+    });
   }
 
   /* Menus & Button insert  */
 
   !(async function () {
-    await initialData();
-    const CONST = {
-      isSecurityPolicy: false,
-      rndidName: defCon.randString(9, "char"),
-      rndclassName: defCon.randString(12, "char"),
-      bdyx: defCon.randString(5, "mix"),
-      ggyx: defCon.randString(5, "mix"),
-      bbyx: defCon.randString(5, "mix"),
-      scrollspan: defCon.randString(8, "char"),
-      scrollspan2: defCon.randString(8, "char"),
-      scrollbars: defCon.randString(8, "char"),
-      scrollbars2: defCon.randString(8, "char"),
-      isUseBing: Boolean(useBing),
-      isVDResult: checkUpdate ? Boolean(VerDetAuto) : false,
-    };
-    CONST.noticeCss = String(
-      `@charset "UTF-8";.${Notice.animated}{animation-duration:1s;animation-fill-mode:both}.${Notice.animated}.infinite{animation-iteration-count:infinite}.${Notice.animated}.hinge{animation-duration:2s}.${Notice.animated}.bounceIn,.${Notice.animated}.bounceOut,.${Notice.animated}.flipOutX,.${Notice.animated}.flipOutY{animation-duration:1.25s}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.fadeOut{animation-name:fadeOut}#${CONST.rndidName} *,.${Notice.noticejs},.${Notice.noticejs} *{font-family:'Microsoft YaHei','Helvetica Neue',sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:initial!important}.${Notice.noticejs}-top{top:0;width:100%}.${Notice.noticejs}-top .${Notice.item}{border-radius:0!important;margin:0!important}.${Notice.noticejs}-topRight{top:10px;right:10px;z-index:10059!important}.${Notice.noticejs}-topLeft{top:10px;left:10px}.${Notice.noticejs}-topCenter{top:10px;left:50%;transform:translate(-50%)}.${Notice.noticejs}-middleLeft,.${Notice.noticejs}-middleRight{right:10px;top:50%;transform:translateY(-50%)}.${Notice.noticejs}-middleLeft{left:10px}.${Notice.noticejs}-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.${Notice.noticejs}-bottom{bottom:0;width:100%}.${Notice.noticejs}-bottom .${Notice.item}{border-radius:0!important;margin:0!important}.${Notice.noticejs}-bottomRight{bottom:10px;right:10px;z-index:10055!important}.${Notice.noticejs}-bottomLeft{bottom:10px;left:10px}.${Notice.noticejs}-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.${Notice.noticejs}{font-family:Helvetica Neue,Helvetica,Arial,sans-serif}.${Notice.noticejs} .${Notice.item}{margin:0 0 10px;border-radius:3px;overflow:hidden}` +
-        `.${Notice.noticejs} .${Notice.item} .${Notice.close}{float:right;font-size:18px!important;font-weight:700;line-height:1;color:#fff;text-shadow:0 1px 0 #fff;opacity:1;margin-right:7px}.${Notice.noticejs} .${Notice.item} .${Notice.close}:hover{opacity:.5;color:#000;cursor:pointer}.${Notice.noticejs} .${Notice.item} a{color:#fff;border-bottom:1px dashed #fff}.${Notice.noticejs} .${Notice.item} a,.${Notice.noticejs} .${Notice.item} a:hover{text-decoration:none}.${Notice.noticejs} .${Notice.success}{background-color:#64ce83}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-heading{background-color:#3da95c;color:#fff;padding:10px}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-body{color:#fff;padding:10px!important}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.info}{background-color:#3ea2ff}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-heading{background-color:#067cea;color:#fff;padding:10px}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-body{color:#fff;padding:10px!important}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.warning}{background-color:#ff7f48}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-heading{background-color:#f44e06;color:#fff;padding:10px!important}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-body{color:#fff;padding:10px}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.error}{background-color:#e74c3c}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-heading{background-color:#ba2c1d;color:#fff;padding:10px!important}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-body{color:#fff;padding:10px}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-body:hover{visibility:visible!important}` +
-        `.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-content{visibility:visible}.${Notice.configuration} input[disabled],.${Notice.configuration} select[disabled]{color:#bbb;background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:20px 20px!important;background-color:#fff7f7!important}.${Notice.noticejs} .${Notice.configuration}{background-color:linear-gradient(to right,#fcfcfc,#f2f2f7);background:-webkit-gradient(linear,0 0,0 100%,from(#fcfcfc),to(#f2f2f7));box-shadow:0 0 5px #888}.${Notice.noticejs} .${Notice.configuration} .${Notice.close}{float:right;font-size:18px!important;font-weight:700;line-height:1;color:#000;text-shadow:0 1px 0 #aaa;opacity:1;margin-right:7px}.${Notice.noticejs} .${Notice.configuration} .${Notice.close}:hover{opacity:.5;color:#555;cursor:pointer}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-heading{background-color:#F2F2F7;color:#333;padding:10px!important}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-body{color:#333;padding:10px}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-body ul{color:#333!important;list-style:none;margin:5px;padding:2px;font:italic 14px/140% "Microsoft YaHei",sans-serif}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-body ul ol{list-style:none;font-style:normal;margin:5px 0;cursor:default}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-body:hover{visibility:visible!important}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-content{visibility:visible}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-progressbar{width:100%;background-color:#64ce83;margin-top:-1px}.${Notice.noticejs} .${Notice.success} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#3da95c}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-progressbar{width:100%;background-color:#3ea2ff;margin-top:-1px}.${Notice.noticejs} .${Notice.info} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#067cea}.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-progressbar{width:100%;background-color:#ff7f48;margin-top:-1px}` +
-        `.${Notice.noticejs} .${Notice.warning} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#f44e06}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-progressbar{width:100%;background-color:#e74c3c;margin-top:-1px}.${Notice.noticejs} .${Notice.error} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{width:100%;height:5px;background:#ba2c1d}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-progressbar{width:100%;background-color:#efefef;margin-top:-1px}.${Notice.noticejs} .${Notice.configuration} .${Notice.noticejs}-progressbar .${Notice.noticejs}-bar{background:#ccc;width:100%;height:5px}@keyframes ${Notice.noticejs}-fadeOut{0%{opacity:1}to{opacity:0}}.${Notice.noticejs}-fadeOut{animation-name:${Notice.noticejs}-fadeOut}@keyframes ${Notice.noticejs}-modal-in{to{opacity:.3}}@keyframes ${Notice.noticejs}-modal-out{to{opacity:0}}.${Notice.noticejs}{position:fixed;z-index:10050}.${Notice.noticejs} ::-webkit-scrollbar{width:8px}.${Notice.noticejs} ::-webkit-scrollbar-button{width:8px;height:5px}.${Notice.noticejs} ::-webkit-scrollbar-track{border-radius:10px}.${Notice.noticejs} ::-webkit-scrollbar-thumb{background:hsla(0,0%,100%,.5);border-radius:10px}.${Notice.noticejs} ::-webkit-scrollbar-thumb:hover{background:#fff}.${Notice.noticejs}-modal{position:fixed;width:100%;height:100%;background-color:#000;z-index:999999;opacity:.3;left:0;top:0}.${Notice.noticejs}-modal-open{opacity:0;animation:${Notice.noticejs}-modal-in .3s ease-out}.${Notice.noticejs}-modal-close{animation:${Notice.noticejs}-modal-out .3s ease-out;animation-fill-mode:forwards}.${defCon.rName}{padding:2px!important}.${defCon.rName} dl{margin:0!important;padding:1px!important}.${defCon.rName} dl dt{margin:2px 0 6px 0!important;font-size:16px!important;font-weight:900!important}.${defCon.rName} dl dd{margin:2px 2px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${defCon.rName} .${Notice.center}{width:100%;text-align:center!important}.${defCon.rName} dl dd em{color:#fff;font-family:Candara,sans-serif!important;font-size:24px!important;padding:0 5px}.${defCon.rName} dl dd span{font-weight:700;font-size:15px!important;margin-right:8px}` +
-        `.${defCon.rName} dl dd i{font-family:Candara,sans-serif!important;font-size:20px!important}.${defCon.rName} dl dd .im{color:gold;font-size:16px!important;font-weight:900;padding:0 3px}.${defCon.rName} ul{width:90%;display:inline-block;text-align:left;vertical-align:top;color:rgba(255, 255, 255, 0.8);padding:0.2em;margin:0 0 0 1em;counter-reset:xxx 0}.${defCon.rName} li{list-style:none;font-style:italic!important;position:relative;padding:0 0 0 0.1em;margin:0 0 0 2px;-webkit-transition:.12s;transition:.12s}.${defCon.rName} li::before{content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-family:Candara,sans-serif;font-size:1em;display:inline-block;width:1.5em;margin-left:-1.5em;-webkit-transition:.5s;transition:.5s}.${defCon.rName} .disappear{display:none}/* checkbox */.${Notice.checkbox}{display:none!important}.${Notice.checkbox}+label{cursor:pointer;padding:11px 9px;margin:0 0 0 25px;border-radius:7px;display:inline-block;position:relative;background:#f7836d;width:58px;height:10px;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);-webkit-box-sizing:content-box;box-sizing:content-box;word-wrap:normal!important}.${Notice.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;-webkit-border-radius:7px;border-radius:7px;width:24px;height:32px;color:#fff;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);content:" "}.${Notice.checkbox}+label::after{position:absolute;top:0;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;-webkit-border-radius:100px;border-radius:100px;padding:5px;font-size:1em;font-weight:700;color:#fff;content:"OFF"}.${Notice.checkbox}:checked+label{cursor:pointer;margin:0 0 0 25px;-webkit-box-sizing:content-box;box-sizing:content-box;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4)}` +
-        `.${Notice.checkbox}:checked+label::after{content:"ON";left:10px}.${Notice.checkbox}:checked+label::before{content:" ";position:absolute;z-index:99;left:52px}#${Notice.fcUpdate},#${Notice.fcExpire},#${Notice.fcGoogle},#${Notice.fchk},#${Notice.fcFeedback},#${Notice.fcKwhl},#${Notice.localWindow}{padding:2px 10px;height:36px;width:100%;font:bold 16px/140% "Microsoft YaHei",sans-serif}#${Notice.Expire}{-webkit-box-sizing:border-box;box-sizing:border-box;-webkit-border-radius:4px;border-radius:4px;width:46px;padding:2px;height:30px;border:2px solid #777;background:#fff;font-size:15px!important;font-weight:normal;font-family:Impact,sans-serif!important;text-align:center}#${Notice.timeUnit}{-webkit-box-sizing:border-box;box-sizing:border-box;-webkit-border-radius:4px;border-radius:4px;width:60px;height:30px;padding:2px;background:#fff;font-size:15px!important;font-weight:normal;font-family:"Microsoft YaHei",sans-serif!important;border:2px solid #777}#${Notice.fcFeedback} .${Notice.feedback}{cursor:help;font-weight:normal;font-size:16px!important;margin:0}#${Notice.fcFeedback} .${Notice.feedback}>span{font-size:16px!important;font-weight:700!important}#${Notice.fcFeedback} .${Notice.feedback}:hover{color:crimson}#${Notice.fcSubmit}{padding:2px 10px;height:30px;width:100%}#${Notice.fcSubmit} button{color:#333;font-weight:600;border:1px solid #777;font-size:16px!important;padding:5px 15px;margin-left:10px;border-radius:4px}#${Notice.fcSubmit} .${Notice.fcSave}{cursor:pointer;background-color:linear-gradient(to bottom,#fff7f7,#ffe9e9);background:-webkit-gradient(linear,0 0,0 100%,from(#fff7f7),to(#ffe9e9))}#${Notice.fcSubmit} .${Notice.fcClose}{cursor:pointer}`
-    );
+    "use strict";
+    await init_Config_Data();
+    const selectedSite = [];
 
-    let curretSite = {
-      SiteTypeID: 0,
-      SiteName: "",
-      SplitName: "",
-      MainType: "",
-      HtmlCode: "",
-      StyleType: "",
-      keyStyle: "",
-    };
+    /* init search engine sites */
 
     const listSite = {
       baidu: {
         SiteTypeID: 1,
-        SiteName: "Baidu",
+        SiteName: "百度一下",
+        SiteNick: "百度 搜索",
+        SiteURI: "www.baidu.com",
+        WebURL: "https://www.baidu.com/s?ie=utf-8&rqlang=cn&wd=",
+        ImgURL: "https://image.baidu.com/search/index?tn=baiduimage&ps=1&ie=utf-8&word=",
+        IMGType: "baiduimage",
         SplitName: "tn",
         MainType: ".s_btn_wr",
-        HtmlCode: CONST.isUseBing
-          ? String(
-              `<span id="${CONST.ggyx}">
-                <input type="button" title="Google一下" value="Google"/>
-              </span>
-              <span id="${CONST.bbyx}">
-                <input type="button" title="Bing一下" value="Bing ®"/>
-              </span>`
-            )
-          : String(
-              `<span id="${CONST.ggyx}">
-                <input type="button" title="Google一下" value="Google一下"/>
-              </span>`
-            ),
-        StyleCode: CONST.isUseBing
-          ? `#form{white-space:nowrap}#u{z-index:1!important}#${CONST.rndidName}{position:relative;z-index:999999999;margin-left:4px;display:inline-block}#${CONST.rndidName} #${CONST.bbyx}{margin-left:-1.5px}#${CONST.rndidName} #${CONST.ggyx}{margin-left:2px}#${CONST.bbyx} input{background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px!important;font-weight:bold}#${CONST.ggyx} input{background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#fff;width:80px;border:1px solid #3476d2;font-size:16px!important;font-weight:bold}#${CONST.ggyx} input:hover,#${CONST.bbyx} input:hover{background: #4662D9;border:1px solid #3476d2}`
-          : `#form{white-space:nowrap}#u{z-index:1!important}#${CONST.rndidName}{position:relative;margin-left:1px;z-index:999999999;margin-left:4px;display:inline-block}#${CONST.ggyx} input{background:#4e6ef2;border-radius:10px;cursor:pointer;height:40px;color:#fff;width:112px;border:1px solid #3476d2;font-size:16px!important;font-weight:bold}#${CONST.ggyx} input:hover{background:#4662D9;border:1px solid #3476d2;}`,
-        keyStyle: keywordHighlight ? "#wrapper_wrapper em{color:#f73131cd!important;background-color:#ffff80ad!important;font-weight:700!important}" : "",
+        StyleCode: `a,a em{text-decoration:none!important}a:hover{text-decoration:underline!important}#form{white-space:nowrap}#u{z-index:1!important}#${CONST.rndID}{z-index:1999999995;position:relative;margin-left:4px;height:40px;display:inline-block}#${CONST.rndID} #${CONST.leftButton}{display:inline-block;margin-left:2px;height:40px}#${CONST.rndID} #${CONST.rightButton}{display:inline-block;margin-left:-1px;height:40px}#${CONST.leftButton} input{padding:1px 12px 1px 18px!important;background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#fff;min-width:80px;border:1px solid #3476d2;font-size:16px!important;vertical-align:top;font-weight:600}#${CONST.rightButton} input{padding:1px 18px 1px 12px!important;background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#fff;min-width:80px;border:1px solid #3476d2;font-size:16px!important;vertical-align:top;font-weight:600}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background: #4662D9;border:1px solid #3476d2}`,
+        keyStyle: "#wrapper_wrapper em",
+        antiRedirect: () => {
+          deBounce(findRedirectLink, 200, "baidu", true)(".c-container a[href*='//www.baidu.com/link?url=']:not([gd-antiredirect-status])", "Baidu");
+        },
       },
       google: {
         SiteTypeID: 2,
         SiteName: "Google",
+        SiteNick: "Google 搜索",
+        SiteURI: "www.google.com",
+        WebURL: "https://www.google.com/search?hl=zh-CN&source=hp&newwindow=1&q=",
+        ImgURL: "https://www.google.com/search?hl=zh-CN&source=lnms&tbm=isch&sa=X&q=",
+        IMGType: "isch",
         SplitName: "tbm",
         MainType: "form button[type='submit']",
-        HtmlCode: CONST.isUseBing
-          ? String(
-              `<span class="ACRAdd"></span>
-              <span id="${CONST.bdyx}">
-                <input type="button" title="百度一下" value="百度一下"/>
-              </span>
-              <span id="${CONST.bbyx}">
-                <input type="button" title="Bing一下" value="Bing一下"/>
-              </span>`
-            )
-          : String(
-              `<span class="ACRAdd"></span>
-              <span id="${CONST.bdyx}">
-                <input type="button" title="百度一下" value="百度一下"/>
-              </span>`
-            ),
-        StyleCode: CONST.isUseBing
-          ? `#${CONST.rndidName}{position:relative;margin:0 4px 0 -5px;z-index:100;display:flex;justify-content:center;align-items:center}#${CONST.rndidName} #${CONST.bdyx}{padding:0 0 0 8px}#${CONST.rndidName} #${CONST.bbyx}{margin-left:1px}.${CONST.scrollspan}{min-height:26px}.${CONST.scrollspan2}{min-height:26px;margin-top:0!important}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-size:13px!important}.${CONST.scrollbars2}{display:inline-block;margin:0;height:26px!important;font-size:13px!important}#${CONST.bdyx} input{cursor:pointer;padding:1px 1px 1px 6px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bbyx} input{cursor:pointer;padding:1px 6px 1px 1px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff;}#${CONST.bdyx} input:hover,#${CONST.bbyx} input:hover{background:#2b7de9;}`
-          : `#${CONST.rndidName}{position:relative;margin:0 4px 0 -5px;z-index:100;display:flex;justify-content:center;align-items:center}#${CONST.rndidName} #${CONST.bdyx}{padding:0 0 0 8px}.${CONST.scrollspan}{min-height:26px}.${CONST.scrollspan2}{min-height:26px;margin-top:0!important}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;text-shadow:0 0 1px #fff!important;font-size:13px!important}.${CONST.scrollbars2}{display:inline-block;margin:0;height:26px!important;text-shadow:0 0 1px #fff!important;font-size:13px!important}#${CONST.bdyx} input{cursor:pointer;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-radius:24px;width:90px;height:38px;font-size:15px;font-weight:600;color:#fff}#${CONST.bdyx} input:hover{background:#2b7de9}`,
-        keyStyle: keywordHighlight
-          ? ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe{color:#f73131cd!important;background-color:#ffff80ad!important;font-weight:700!important}"
-          : "",
+        StyleCode: `#${CONST.rndID}{z-index:100;position:relative;margin:0 4px 0 -5px;display:flex;justify-content:center;align-items:center}#${CONST.rndID} #${CONST.leftButton}{padding:0 2px 0 8px}.${CONST.scrollspan}{min-height:26px}.${CONST.scrollspan2}{min-height:26px;margin-top:0!important}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}.${CONST.scrollbars2}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}#${CONST.leftButton} input{cursor:pointer;padding:1px 12px 1px 18px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;min-width:90px;height:38px;font-size:16px;font-weight:600;color:#fff;vertical-align:top;}#${CONST.rightButton} input{cursor:pointer;padding:1px 18px 1px 12px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;min-width:90px;height:38px;font-size:16px;font-weight:600;color:#fff;vertical-align:top;}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background:#2b7de9;}`,
+        keyStyle: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
+        antiRedirect: () => {
+          deBounce(antiRedirect_Goolge, 500, "google", true)("#rcnt a:not([gd-antiredirect-ok])");
+        },
       },
       bing: {
         SiteTypeID: 3,
-        SiteName: "Bing",
-        SplitName: "",
+        SiteName: "Bing ®",
+        SiteNick: "Bing 搜索",
+        SiteURI: "www.bing.com",
+        WebURL: "https://cn.bing.com/search?q=",
+        ImgURL: "https://cn.bing.com/images/search?first=1&tsc=ImageBasicHover&q=",
+        IMGType: "images",
+        SplitName: "/",
         MainType: "#sb_search",
-        HtmlCode: CONST.isUseBing
-          ? String(
-              `<span id="${CONST.bdyx}">
-                <input type="button" title="百度一下" value="百度一下"/>
-              </span>
-              <span id="${CONST.ggyx}">
-                <input type="button" title="Google一下" value="Google"/>
-              </span>`
-            )
-          : ``,
-        StyleCode: CONST.isUseBing
-          ? `#${CONST.rndidName}{position:relative;z-index:999;display:inline-block;height:40px;min-width:193px;width:max-content;vertical-align:top;margin:0 0 0 8px}#${CONST.bdyx},#${CONST.ggyx}{display:inline-block}#${CONST.rndidName} span>input{box-sizing:border-box;cursor:pointer;min-width:96px;height:40px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;font:normal 900 16px/1.5 "Microsoft YaHei",sans-serif!important}#${CONST.bdyx} input{border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px}#${CONST.ggyx} input{border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 -3px;padding:0 18px 0 12px}.${CONST.scrollspan}{max-height:33px;margin:3px 3px 0 8px!important}.${CONST.scrollspan2}{max-height:30px;margin:5px 0 0 8px!important}.${CONST.scrollbars}{border-radius:4px!important;max-height:33px;padding:0 12px!important;margin-right:1px!important}.${CONST.scrollbars2}{max-height:30px}#${CONST.bdyx} input:hover,#${CONST.ggyx} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border:2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7}`
-          : ``,
-        keyStyle: keywordHighlight
-          ? String(
-              Number(getUrlParam("ensearch")) || Number(getCookie("ENSEARCH"))
-                ? ".b_caption p strong, .b_caption .b_factrow strong, .b_secondaryText strong,th, h2 strong, h3 strong"
-                : "#sp_requery strong, #sp_recourse strong, #tile_link_cn strong, .b_ad .ad_esltitle~div strong, h2 strong, .b_caption p strong, .b_snippetBigText strong, .recommendationsTableTitle+.b_slideexp strong, .recommendationsTableTitle+table strong, .recommendationsTableTitle+ul strong, .pageRecoContainer .b_module_expansion_control strong, .b_rs strong, .b_rrsr strong, #dict_ans strong, .b_listnav>.b_ans_stamp>strong, .adltwrnmsg strong"
-            ) + "{font-weight:700!important;color:#f73131cd!important;background-color:#ffff80ad!important}"
-          : "",
+        StyleCode: `#${CONST.rndID}{z-index:1500;position:relative;display:inline-flex;top:0;left:0;height:39px;min-width:160px;width:max-content;align-content:center;justify-content: center;margin:0 0 0 8px;padding:0}#${CONST.leftButton}{padding:0 5px 0 0;}#${CONST.rndID} input{box-sizing:border-box;cursor:pointer;min-width:80px;height:38px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;font-weight:600;font-size:16px}#${CONST.leftButton} input{border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px;}#${CONST.rightButton} input{border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 -3px;padding:0 18px 0 12px;}.${CONST.scrollspan}{max-height:30px;padding:0 3px 0 8px!important;margin:0!important;top:3px!important;}.${CONST.scrollspan2}{max-height:30px;top:-1px!important;}.${CONST.scrollbars}{border-radius:4px!important;max-height:30px;padding:0 12px!important;margin-right:1px!important;vertical-align:bottom}.${CONST.scrollbars2}{max-height:30px}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border:2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7}`,
+        keyStyle: String(
+          Number(getUrlParam("ensearch")) || Number(getCookie("ENSEARCH"))
+            ? ".b_caption p strong, .b_caption .b_factrow strong, .b_secondaryText strong,th, h2 strong, h3 strong"
+            : "#sp_requery strong, #sp_recourse strong, #tile_link_cn strong, .b_ad .ad_esltitle~div strong, h2 strong, .b_caption p strong, .b_snippetBigText strong, .recommendationsTableTitle+.b_slideexp strong, .recommendationsTableTitle+table strong, .recommendationsTableTitle+ul strong, .pageRecoContainer .b_module_expansion_control strong, .b_rs strong, .b_rrsr strong, #dict_ans strong, .b_listnav>.b_ans_stamp>strong, .adltwrnmsg strong"
+        ),
+        antiRedirect: () => {
+          deBounce(addTargetEvent, 200, "bing", true)(".b_algo a:not([target])", "Bing");
+        },
+      },
+      duckduckgo: {
+        SiteTypeID: 4,
+        SiteName: "Duckduckgo",
+        SiteNick: "鸭鸭 搜索",
+        SiteURI: "duckduckgo.com",
+        WebURL: "https://duckduckgo.com/?k1=-1&kl=wt-wt&kd=-1&ko=1&kn=1&kp=-2&t=h_&ia=web&q=",
+        ImgURL: "https://duckduckgo.com/?k1=-1&kl=wt-wt&kd=-1&ko=s&kn=1&kp=-2&t=h_&iax=images&ia=images&q=",
+        IMGType: "images",
+        SplitName: "ia",
+        MainType: "#search_form",
+        StyleCode: `#${CONST.rndID}{z-index:1999999995;position:absolute;top:0;right:-188px;height:44px;display:block;}#${CONST.leftButton}{display:inline-block;height:44px}#${CONST.rightButton}{margin:0 0 0 -2px;display:inline-block;height:44px}#${CONST.leftButton} input{cursor:pointer;padding:1px 10px 1px 15px!important;border:1px solid #00000026;box-shadow:0 2px 3px rgb(0 0 0 / 6%);background:#fff;border-top-left-radius:8px;border-bottom-left-radius:8px;min-width:90px;height:44px;font-size:16px;font-weight:400;color:#888;vertical-align:top;}#${CONST.rightButton} input{cursor:pointer;padding:1px 15px 1px 10px!important;border:1px solid #00000026;box-shadow:0 2px 3px rgb(0 0 0 / 6%);background:#fff;border-top-right-radius:8px;border-bottom-right-radius:8px;min-width:90px;height:44px;font-size:16px;font-weight:400;color:#888;vertical-align:top;}#${CONST.rndID}:hover #${CONST.leftButton} input,#${CONST.rndID}:hover #${CONST.rightButton} input{background:#3969ef;color:#fff;}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background-color:#2950bf!important;border:1px solid #00000026;color:#fff;}`,
+        keyStyle: "strong, b",
+        antiRedirect: () => {},
+      },
+      sogou: {
+        SiteTypeID: 5,
+        SiteName: "Sogou ®",
+        SiteNick: "搜狗 搜索",
+        SiteURI: "www.sogou.com",
+        WebURL: "https://www.sogou.com/web?query=",
+        ImgURL: "https://pic.sogou.com/pics?query=",
+        IMGType: "pics",
+        SplitName: "/",
+        MainType: "input[type='submit'].sbtn1",
+        StyleCode: `#${CONST.rndID}{z-index:1999999995;position:absolute;right:0;top:0;width:auto;height:105%;margin:-1px 0 0 0;padding:0;cursor:pointer;-webkit-appearance:none}#${CONST.leftButton}{display:inline-block;height:105%}#${CONST.rightButton}{display:inline-block;height:105%}#${CONST.leftButton} input{padding:0 18px!important;background:#fafafa;border-radius:3px;cursor:pointer;height:100%;color:#000;min-width:80px;border:1px solid #ababab;font-size:14px!important;font-weight:400;vertical-align:top;margin:0}#${CONST.rightButton} input{padding:0 18px!important;background:#fafafa;border-radius:3px;cursor:pointer;height:100%;color:#000;min-width:80px;border:1px solid #ababab;font-size:14px!important;font-weight:400;vertical-align:top;margin:0}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background: #f2f2f2;border:1px solid #7a7a7a;}`,
+        keyStyle: "#wrapper em",
+        antiRedirect: () => {
+          deBounce(findRedirectLink, 200, "sogou", true)(".vrwrap a[href^='/link?url=']:not([gd-antiredirect-status])", "Sogou");
+        },
+      },
+      fsou: {
+        SiteTypeID: 6,
+        SiteName: "FSou ®",
+        SiteNick: "FSou 搜索",
+        SiteURI: "fsoufsou.com",
+        WebURL: "https://fsoufsou.com/search?tbn=all&q=",
+        ImgURL: "https://fsoufsou.com/search?tbn=images&q=",
+        IMGType: "images",
+        SplitName: "tbn",
+        MainType: ".input-group-container .search-icon",
+        StyleCode: `#${CONST.rndID}{z-index:1999999995;position:relative;height:36px;margin:0 -17px 0 15px;z-index:100;display:inline-flex;justify-content:center;align-items:center}#${CONST.rightButton}{padding:0 0 0 2px}#${CONST.leftButton} input{cursor:pointer;padding:1px 12px 1px 18px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:22px;border-bottom-left-radius:22px;min-width:90px;height:36px;font-size:15px;font-weight:600;color:#fff;vertical-align:top;}#${CONST.rightButton} input{cursor:pointer;padding:1px 18px 1px 12px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:22px;border-bottom-right-radius:22px;min-width:90px;height:36px;font-size:15px;font-weight:600;color:#fff;vertical-align:top;}`,
+        keyStyle: ".highlight-style",
+        antiRedirect: () => {},
+      },
+      yandex: {
+        SiteTypeID: 7,
+        SiteName: "Yandex",
+        SiteNick: "Yandex 搜索",
+        SiteURI: "yandex.com",
+        WebURL: "https://yandex.com/search/?text=",
+        ImgURL: "https://yandex.com/images/search?from=tabbar&text=",
+        IMGType: "images",
+        SplitName: "/",
+        MainType: "form>div.search2__input",
+        StyleCode: `#${CONST.rndID}{z-index:1999999995;position:absolute;right:0;top:0;width:auto;height:40px;margin:0;padding:0;cursor:pointer;-webkit-appearance:none}#${CONST.leftButton}{display:inline-block;height:40px}#${CONST.rightButton}{margin:0 0 0 -2px;display:inline-block;height:40px}#${CONST.leftButton} input{cursor:pointer;padding:0 12px 0 18px!important;border:1px solid transparent;background:#fc0;box-shadow:none;border-top-left-radius:10px;border-bottom-left-radius:10px;min-width:90px;height:40px;font-size:15px;font-weight:400;color:#000;vertical-align:top;}#${CONST.rightButton} input{cursor:pointer;padding:0 18px 0 12px!important;border:1px solid transparent;background:#fc0;box-shadow:none;border-top-right-radius:10px;border-bottom-right-radius:10px;min-width:90px;height:40px;font-size:15px;font-weight:400;color:#000;vertical-align:top;}`,
+        keyStyle: ".OrganicTitleContentSpan b,.OrganicTextContentSpan b",
+        antiRedirect: () => {},
+      },
+      so360: {
+        SiteTypeID: 8,
+        SiteName: "360搜索",
+        SiteNick: "360 搜索",
+        SiteURI: "www.so.com",
+        WebURL: "https://www.so.com/s?ie=utf-8&q=",
+        ImgURL: "https://image.so.com/i?q=",
+        IMGType: "i",
+        SplitName: "/",
+        MainType: "input[type='submit'][value='搜索']",
+        StyleCode: `#hd-rtools{z-index:1!important}#${CONST.rndID}{z-index:199999995;position:relative;left:0;top:0;width:auto;height:40px;margin:0 0 0 5px;padding:0;cursor:pointer;-webkit-appearance:none}#${CONST.leftButton}{padding:0 1px 0 0;height:40px;display:inline-block;vertical-align:top}#${CONST.rightButton}{height:40px;display:inline-block;vertical-align:top}#${CONST.leftButton} input{padding:0 18px!important;background:#0fb264;border:1px solid #0fb264;border-top-left-radius:8px;border-bottom-left-radius:8px;cursor:pointer;height:40px;color:#fff;min-width:80px;font-size:16px!important;font-weight:400;vertical-align:top;margin:0 -2px 0 0}#${CONST.rightButton} input{padding:0 18px!important;background:#0fb264;border:1px solid #0fb264;border-top-right-radius:8px;border-bottom-right-radius:8px;cursor:pointer;height:40px;color:#fff;min-width:80px;font-size:16px!important;font-weight:400;vertical-align:top;margin:0}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background: #109e5a;border:1px solid #109e5a;}`,
+        keyStyle: "em,#mohe-newdict_dict .mh-exsentence b",
+        antiRedirect: () => {
+          deBounce(antiRedirect_So360, 500, "so360", true)(".res-list a[href*='//www.so.com/link?m=']:not([gd-antiredirect-status])");
+        },
+      },
+      toutiao: {
+        SiteTypeID: 9,
+        SiteName: "搜头条",
+        SiteNick: "头条 搜索",
+        SiteURI: "so.toutiao.com",
+        WebURL: "https://so.toutiao.com/search?dvpf=pc&keyword=",
+        ImgURL: "https://so.toutiao.com/search?dvpf=pc&pd=atlas&from=gallery&keyword=",
+        IMGType: "atlas",
+        SplitName: "pd",
+        MainType: "div[class^='search'][data-log-click]",
+        StyleCode: `#${CONST.rndID}{z-index:1999999995;position:absolute;right:-160px;top:0;width:auto;height:44px;margin:-1px;padding:0;cursor:pointer;-webkit-appearance:none}#${CONST.leftButton}{display:inline-block;height:44px}#${CONST.rightButton}{margin:0 0 0 -2px;display:inline-block;height:44px}#${CONST.leftButton} input{cursor:pointer;padding:1px 10px 1px 15px!important;background:#f04142ff;border:1px solid transparent;border-top-left-radius:8px;border-bottom-left-radius:8px;min-width:90px;height:44px;font-size:18px;font-weight:500;color:#fff;vertical-align:top;}#${CONST.rightButton} input{cursor:pointer;padding:1px 15px 1px 10px!important;background:#f04142ff;border:1px solid transparent;border-top-right-radius:8px;border-bottom-right-radius:8px;min-width:90px;height:44px;font-size:18px;font-weight:500;color:#fff;vertical-align:top;}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background-color:#f04142b3;color:#fff;}`,
+        keyStyle: "em",
+        antiRedirect: () => {
+          deBounce(antiRedirect_Toutiao, 200, "toutiao", true)(".main a[href*='/search/jump?url=']:not([gd-antiredirect-status]),.main a.cs-view-block[href*='/search/jump?url=']");
+        },
       },
       other: { SiteTypeID: 0 },
     };
@@ -1291,358 +1416,477 @@
       BAIDU: listSite.baidu.SiteTypeID,
       GOOGLE: listSite.google.SiteTypeID,
       BING: listSite.bing.SiteTypeID,
-      OTHERS: 0,
+      DUCKDUCKGO: listSite.duckduckgo.SiteTypeID,
+      SOGOU: listSite.sogou.SiteTypeID,
+      FSOU: listSite.fsou.SiteTypeID,
+      YANDEX: listSite.yandex.SiteTypeID,
+      SO360: listSite.so360.SiteTypeID,
+      TOUTIAO: listSite.toutiao.SiteTypeID,
+      OTHERS: listSite.other.SiteTypeID,
     };
 
-    debug("//-> initialized complete, start running...");
-
-    if (location.host.includes(".baidu.com")) {
-      // Includes baidu
-      curretSite = listSite.baidu;
-    } else if (location.host.includes(".bing.com")) {
-      // Includes bing
-      curretSite = listSite.bing;
-    } else if (/^([0-9a-z-]+\.)?google(\.[a-z]{2,3}){1,3}$/.test(location.host)) {
-      // Regular google
-      curretSite = listSite.google;
+    let listCurrentSite, currentSite;
+    if (location.host.endsWith(".baidu.com")) {
+      currentSite = selectedEngine.includes(newSiteType.BAIDU) ? listSite.baidu : listSite.other;
+      listCurrentSite = listSite.baidu;
+    } else if (location.host.endsWith(".bing.com")) {
+      currentSite = selectedEngine.includes(newSiteType.BING) ? listSite.bing : listSite.other;
+      listCurrentSite = listSite.bing;
+    } else if (/^(\w+\.)?google\.[a-z.]{2,6}$/.test(location.hostname)) {
+      currentSite = selectedEngine.includes(newSiteType.GOOGLE) ? listSite.google : listSite.other;
+      listCurrentSite = listSite.google;
+    } else if (location.host.endsWith("duckduckgo.com")) {
+      currentSite = selectedEngine.includes(newSiteType.DUCKDUCKGO) ? listSite.duckduckgo : listSite.other;
+      listCurrentSite = listSite.duckduckgo;
+    } else if (location.host.endsWith(".sogou.com")) {
+      currentSite = selectedEngine.includes(newSiteType.SOGOU) ? listSite.sogou : listSite.other;
+      listCurrentSite = listSite.sogou;
+    } else if (location.host.endsWith("fsoufsou.com")) {
+      currentSite = selectedEngine.includes(newSiteType.FSOU) ? listSite.fsou : listSite.other;
+      listCurrentSite = listSite.fsou;
+    } else if (/^yandex\.[a-z.]{2,6}$/.test(location.hostname)) {
+      currentSite = selectedEngine.includes(newSiteType.YANDEX) ? listSite.yandex : listSite.other;
+      listCurrentSite = listSite.yandex;
+    } else if (location.host.endsWith(".so.com")) {
+      currentSite = selectedEngine.includes(newSiteType.SO360) ? listSite.so360 : listSite.other;
+      listCurrentSite = listSite.so360;
+    } else if (location.host.endsWith("so.toutiao.com")) {
+      currentSite = selectedEngine.includes(newSiteType.TOUTIAO) ? listSite.toutiao : listSite.other;
+      listCurrentSite = listSite.toutiao;
     } else {
-      curretSite = listSite.other;
+      currentSite = listSite.other;
+      listCurrentSite = listSite.other;
     }
 
-    CONST.vim = getUrlParam(curretSite.SplitName);
+    for (let site in listSite) {
+      if (oH.call(listSite, site)) {
+        if (listSite[site].SiteTypeID === listCurrentSite.SiteTypeID) {
+          defCon.curSiteName = site;
+        }
+        if (listSite[site].SiteTypeID !== currentSite.SiteTypeID && selectedEngine.includes(Number(listSite[site].SiteTypeID))) {
+          selectedSite.length < 2 && selectedSite.push(listSite[site]);
+        }
+      }
+    }
+
+    CONST.vim = getUrlParam(currentSite.SplitName).trim();
+    CONST.highlightCss = `{color:#f73131cd!important;background-color:#ffff80ad!important;font-weight:700!important}`;
+    CONST.googleSplitLine = currentSite.SiteTypeID === newSiteType.GOOGLE ? `<span jsname="s1VaRe" class="ACRAdd M2vV3"></span>` : ``;
+    CONST.fsouSplitLine = currentSite.SiteTypeID === newSiteType.FSOU ? `<div class="divider"></div>` : ``;
+    CONST.buttonCode = String(
+      CONST.googleSplitLine +
+        CONST.fsouSplitLine +
+        `<span id="${CONST.leftButton}" sn="${selectedSite[0].SiteTypeID}">
+          <input type="button" title="${selectedSite[0].SiteNick}一下" value="${selectedSite[0].SiteName}"/>
+        </span>
+        <span id="${CONST.rightButton}" sn="${selectedSite[1].SiteTypeID}">
+          <input type="button" title="${selectedSite[1].SiteNick}一下" value="${selectedSite[1].SiteName}"/>
+        </span>`
+    );
+    CONST.indexPage = () => {
+      return currentSite.SiteTypeID === newSiteType.DUCKDUCKGO ? !location.search.includes("q=") : location.pathname === "/";
+    };
 
     if (
-      (curretSite.SiteTypeID === newSiteType.GOOGLE && /^(lcl|flm|fin)$/.test(CONST.vim)) ||
-      (curretSite.SiteTypeID === newSiteType.BING && /^(maps)$/.test(CONST.vim)) ||
-      (curretSite.SiteTypeID === newSiteType.BAIDU && /^(news|vsearch|baiduimagedetail)$/.test(CONST.vim))
+      (listCurrentSite.SiteTypeID === newSiteType.GOOGLE && /^(lcl|flm|fin)$/.test(CONST.vim)) ||
+      (listCurrentSite.SiteTypeID === newSiteType.BING && /^(maps)$/.test(CONST.vim)) ||
+      (listCurrentSite.SiteTypeID === newSiteType.BAIDU && /^(news|vsearch|baiduimagedetail)$/.test(CONST.vim)) ||
+      (listCurrentSite.SiteTypeID === newSiteType.SOGOU && /^(sogou)$/.test(CONST.vim)) ||
+      (listCurrentSite.SiteTypeID === newSiteType.DUCKDUCKGO && /^(maps)$/.test(getUrlParam("iaxm"))) ||
+      (listCurrentSite.SiteTypeID === newSiteType.YANDEX && location.pathname.includes("direct"))
     ) {
       CONST.isSecurityPolicy = true;
     }
 
-    /* insert Menus */
+    /* SYSTEM INFO */
 
-    function addActionConfigure() {
-      if (!qS(`.${Notice.noticejs} .${Notice.configuration}`)) {
-        GMnotification(
-          Notice.noticeHTML(
-            `<dt style="color:darkred">
-                搜索引擎跳转工具 设置
-                <span style="font:italic 14px/14px Candara,sans-serif!important">
-                  (Version ${defCon.curVersion})
-                <span>
-              </dt>
-              <dd>
-                <ul id="${Notice.fc}">
-                  <ol id="${Notice.fchk}">
-                    <div style="float:left">键盘快捷键功能开关</div>
-                    <div style="float:right;margin:-2px 2px 0 10px">
-                      <input type="checkbox" id="${Notice.hotkey}" class="${Notice.checkbox}" ${Hotkey ? "checked" : ""} />
-                      <label for="${Notice.hotkey}"></label>
-                    </div>
-                  </ol>
-                  <ol id="${Notice.fcGoogle}">
-                    <div style="float:left">Google 国际站跳转</div>
-                    <div style="float:right;margin:-2px 2px 0 10px">
-                      <input type="checkbox" id="${Notice.google}" class="${Notice.checkbox}" ${GoogleJump ? "checked" : ""} />
-                      <label for="${Notice.google}"></label>
-                    </div>
-                  </ol>
-                  <ol id="${Notice.localWindow}">
-                    <div style="float:left">在当前浏览器窗口跳转</div>
-                    <div style="float:right;margin:-2px 2px 0 10px">
-                      <input type="checkbox" id="${Notice.lw}" class="${Notice.checkbox}" ${localWindow ? "checked" : ""} />
-                      <label for="${Notice.lw}"></label>
-                    </div>
-                  </ol>
-                  <ol id="${Notice.fcKwhl}">
-                    <div style="float:left">搜索关键词高亮增强</div>
-                    <div style="float:right;margin:-2px 2px 0 10px">
-                      <input type="checkbox" id="${Notice.kwhl}" class="${Notice.checkbox}" ${keywordHighlight ? "checked" : ""} />
-                      <label for="${Notice.kwhl}"></label>
-                    </div>
-                  </ol>
-                  <ol id="${Notice.fcUpdate}">
-                    <div style="float:left">更新检测（默认：开）</div>
-                    <div style="float:right;margin:-2px 2px 0 10px">
-                      <input type="checkbox" id="${Notice.isUpdate}" class="${Notice.checkbox}" ${checkUpdate ? "checked" : ""} />
-                      <label for="${Notice.isUpdate}"></label>
-                    </div>
-                  </ol>
-                  <ol id="${Notice.fcExpire}">
-                    <div>更新频率（分/时/天/周）
-                      <input id="${Notice.Expire}" maxlength="3" placeholder="24" value="${timeNumber}"/>
-                      <select id="${Notice.timeUnit}" style="cursor:pointer">
-                        <option ${timeUnit === "m" ? "selected" : ""} value ="m">分钟</option>
-                        <option ${timeUnit === "h" ? "selected" : ""} value ="h">小时</option>
-                        <option ${timeUnit === "d" ? "selected" : ""} value="d">天</option>
-                        <option ${timeUnit === "w" ? "selected" : ""} value="w">周</option>
-                      </select>
-                    </div>
-                  </ol>
-                  <ol id="${Notice.fcFeedback}">
-                    <div class="${Notice.feedback}">\ud83e\udde1<span>\u0020如果您遇到问题，请向我反馈\u0020</span>\ud83e\udde1</div>
-                  </ol>
-                  <ol id="${Notice.fcSubmit}">
-                  <button class="${Notice.fcClose}">关闭</button>
-                  <button class="${Notice.fcSave}">保存</button>
-                  </ol>
-                </ul>
-              </dd>`
-          ),
-          `${Notice.configuration}`,
-          true,
-          600,
-          {},
-          "topRight"
-        );
-        if (!qS(`#${Notice.isUpdate}`).checked) {
-          qS(`#${Notice.Expire}`).setAttribute("disabled", "disabled");
-          qS(`#${Notice.timeUnit}`).setAttribute("disabled", "disabled");
-        }
-        qS(`#${Notice.isUpdate}`).addEventListener("change", function () {
-          if (this.checked) {
-            qS(`#${Notice.Expire}`).removeAttribute("disabled");
-            qS(`#${Notice.timeUnit}`).removeAttribute("disabled");
-          } else {
-            qS(`#${Notice.Expire}`).setAttribute("disabled", "disabled");
-            qS(`#${Notice.timeUnit}`).setAttribute("disabled", "disabled");
-          }
-        });
-        qS(`#${Notice.Expire}`).addEventListener("input", function () {
-          this.value = this.value.replace(/[^0-9]/g, "");
-        });
-        qS(`#${Notice.fcFeedback} .${Notice.feedback}`).addEventListener("click", () => {
-          GMopenInTab(`${defCon.support}`, defCon.options);
-        });
-        qS(`#${Notice.fcSubmit} .${Notice.fcClose}`).addEventListener("click", () => {
-          qS(`.${Notice.noticejs} .${Notice.configuration} .${Notice.close}`).click();
-        });
-        qS(`#${Notice.fcSubmit} .${Notice.fcSave}`).addEventListener("click", () => {
-          try {
-            const GoogleJump = qS(`#${Notice.google}`).checked;
-            const isHotkey = qS(`#${Notice.hotkey}`).checked;
-            const keywordHighlight = qS(`#${Notice.kwhl}`).checked;
-            const checkUpdate = qS(`#${Notice.isUpdate}`).checked;
-            const localWindow = qS(`#${Notice.lw}`).checked;
-            let timeNumber = qS(`#${Notice.Expire}`).value;
-            let timeUnit = qS(`#${Notice.timeUnit}`).value;
-            _data.checkUpdate = checkUpdate;
-            _data.timeNumber = timeNumber.length ? Number(timeNumber) : 24;
-            _data.timeUnit = timeUnit.length ? timeUnit : "h";
-            _data.GoogleJump = GoogleJump;
-            _data.Hotkey = isHotkey;
-            _data.keywordHighlight = keywordHighlight;
-            _data.localWindow = localWindow;
-            if (!checkUpdate) {
-              GMdeleteValue("_Check_Version_Expire_");
-            }
-            GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
-            qS(`.${Notice.noticejs} .${Notice.configuration} .${Notice.close}`).click();
-            GMnotification(
-              Notice.noticeHTML(`<dd class="${Notice.center}">设置数据已<kbd class="im">成功保存</kbd>，网页在<em>3</em>秒后刷新！</dd>`),
-              `${Notice.info}`,
-              true,
-              30,
-              callback_Countdown
-            );
-          } catch (e) {
-            error("configuration:", e);
-          }
-        });
-      }
+    if (CUR_WINDOW_TOP && listCurrentSite.SiteTypeID !== newSiteType.OTHERS) {
+      console.info(
+        `%c${defCon.scriptName}\n%cINTRO.URL:\u0020%s\n%cVersion:%c V%s\n%cExtension: %c%s\n%cCurrentEngine: %c%s\n%cSecurityPolicy: %c%s`,
+        "font:normal 700 16px/150% system-ui,-apple-system,BlinkMacSystemFont,sans-serif;color:crimson",
+        "line-height:180%;font-size:10px;color:#777;font-style:italic",
+        String(`https://f9y4ng.likes.fans/SearchEngine`),
+        "font-size:12px;font-weight:700;color:steelblue",
+        "color:slategrey;font:italic 16px/120% Candara,'Times New Roman'",
+        defCon.curVersion,
+        "font-size:12px;font-weight:700;color:steelblue",
+        "color:slategrey;font:italic 16px/120% Candara,'Times New Roman'",
+        GMscriptHandler,
+        "font-size:12px;font-weight:700;color:steelblue",
+        "color:crimson;font:italic 16px/120% Candara,'Times New Roman'",
+        titleUpperCase(defCon.curSiteName),
+        "font-size:12px;font-weight:700;color:steelblue",
+        "color:slategray;font:italic 16px/120% Candara,'Times New Roman'",
+        CONST.isSecurityPolicy ? "ON" : "OFF"
+      );
     }
 
-    const isMac = getNavigator.system().toLocaleLowerCase().startsWith("mac");
-    const menuManager = {
-      isUsedSwitcher: (_status, _data, Tips) => {
-        const info = x => {
-          return Notice.noticeHTML(`<dd class="${Notice.center}">${Tips}已<kbd class="im">${x}</kbd>，网页在<em>3</em>秒后刷新！</dd>`);
-        };
-        _data.useBing = !_status;
-        GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
-        if (_status) {
-          GMnotification(info("\u6e05\u9664"), `${Notice.info}`, true, 30, callback_Countdown);
-        } else {
-          GMnotification(info("\u6dfb\u52a0"), `${Notice.info}`, true, 30, callback_Countdown);
-        }
+    /* Menus insert */
+
+    const addAction = {
+      closeConfig: (noticePage = qS(`gb-notice.${Notice.noticejs} .${Notice.configuration}`)) => {
+        noticePage && closeItem(noticePage);
+        return !0;
       },
-      menuRemove: t => {
-        t && GMunregisterMenuCommand(t);
-      },
-      registerMenuCommand: function (e) {
-        let _Use_Bing__, in_Use_Configure, _use_Bing_ID, in_UpdateCheck_ID;
-        this.menuRemove(_use_Bing_ID);
-        this.menuRemove(in_Use_Configure);
-        this.menuRemove(in_UpdateCheck_ID);
-        in_Use_Configure = GMregisterMenuCommand(`\ufff0\ud83c\udfaf【脚本参数】功能设置开关${Hotkey ? "(" + String.fromCharCode(isMac ? 89 : 69) + ")" : ""}`, () => {
-          addActionConfigure();
-        });
-        _Use_Bing__ = e ? "\ufff2\u2714\ufe0f【已开启】" : "\ufff2\u274c【已关闭】";
-        _use_Bing_ID = GMregisterMenuCommand(`${_Use_Bing__}Bing 搜索跳转${Hotkey ? "(" + String.fromCharCode(66) + ")" : ""}`, () => {
-          if (Date.now() - defCon.timer > 4e3) {
-            this.isUsedSwitcher(e, _data, "Bing 按钮");
-            defCon.timer = Date.now();
+      listSearchEngine: currentSite => {
+        let returnHtml = "";
+        for (let site in listSite) {
+          if (oH.call(listSite, site) && listSite[site].SiteTypeID !== 0 && listSite[site].SiteTypeID !== currentSite.SiteTypeID) {
+            const imageURL = String(
+              currentSite.SiteTypeID === newSiteType.DUCKDUCKGO ? `${API_ICO_DDUCKGO}/${listSite[site].SiteURI}.ico` : `${API_ICO_YANDEX}/${listSite[site].SiteURI}?size=32`
+            );
+            returnHtml += String(
+              `<li>
+                <button class="${Notice.searchButton}" id="${listSite[site].SiteTypeID}" title="${selectedEngine.includes(listSite[site].SiteTypeID) ? `您常用的搜索引擎` : ``}">
+                  <img class="${Notice.favicon}" src="${imageURL}">${listSite[site].SiteNick}${selectedEngine.includes(listSite[site].SiteTypeID) ? "<sup>\u0020\u2726</sup>" : ""}
+                </button>
+              </li>`
+            );
           }
-        });
-        if (checkUpdate) {
-          if (CONST.isVDResult) {
-            in_UpdateCheck_ID = GMregisterMenuCommand(
-              `\ufff5\ud83e\udded【版本更新】从服务器实时检查${Hotkey ? "(" + String.fromCharCode(isMac ? 75 : 86) + ")" : ""}`,
-              async () => {
-                if (Date.now() - defCon.timer > 30e3) {
-                  GMdeleteValue("_Check_Version_Expire_");
-                  debug("//-> up-to-date? ", Boolean(await checkVersion(checkUpdate)));
-                  defCon.timer = Date.now();
+        }
+        return String(`<ul class="${Notice.searchList}">${returnHtml}</ul>`);
+      },
+      listSelectSearchEngine: () => {
+        let returnHtml = "";
+        for (let site in listSite) {
+          if (oH.call(listSite, site) && listSite[site].SiteTypeID !== 0) {
+            const imageURL = String(
+              listCurrentSite.SiteTypeID === newSiteType.DUCKDUCKGO ? `${API_ICO_DDUCKGO}/${listSite[site].SiteURI}.ico` : `${API_ICO_YANDEX}/${listSite[site].SiteURI}?size=32`
+            );
+            returnHtml += String(
+              `<label class="${Notice.card}">
+                <input class="${Notice.card}__input" type="checkbox" name="${Notice.card}_lists" data-sn="${listSite[site].SiteTypeID}"\
+                ${selectedEngine.includes(listSite[site].SiteTypeID) ? "checked" : "disabled"}>
+                <div class="${Notice.card}__body">
+                  <header class="${Notice.card}__body-header">
+                    <span class="${Notice.card}__body-cover-chackbox">
+                      <svg class="${Notice.card}__body-cover-chackbox--svg" viewBox="0 0 12 10">
+                        <polyline points="1.5 6 4.5 9 10.5 1"></polyline>
+                      </svg>
+                    </span>
+                    <span class="${Notice.card}__body-cover-image">
+                      <img src="${imageURL}">
+                    </span>
+                    <h2 class="${Notice.card}__body-header-title" fr-fix-stroke="true">${listSite[site].SiteNick}</h2>
+                    <p class="${Notice.card}__body-header-subtitle" style="margin:0;padding:0">${listSite[site].SiteURI}</p>
+                  </header>
+                </div>
+              </label>`
+            );
+          }
+        }
+        return returnHtml;
+      },
+      setConfigure: () => {
+        sleep(500)(addAction.closeConfig()).then(r => {
+          if (!qS(`.${Notice.noticejs} .${Notice.configuration}`) && r) {
+            GMnotification({
+              title: `${defCon.scriptName} v${defCon.curVersion}`,
+              text: String(
+                `<fieldset class="${Notice.fieldset}">
+                  <legend class="${Notice.legend}" title="Version ${defCon.curVersion}">
+                    高级功能参数设置
+                  </legend>
+                  <ur class="${Notice.settingList}">
+                    <li class="${Notice.random}__content">
+                      <div>请选择三个您最常用的搜索引擎：</div>
+                      <div class="${Notice.grid}">
+                      ${addAction.listSelectSearchEngine()}
+                      </div>
+                    </li>
+                    <li>
+                      <div>键盘快捷键功能开关</div>
+                      <div style="margin:-2px 2px 0 10px">
+                        <input type="checkbox" id="${Notice.hk}" class="${Notice.checkbox}" ${isHotkey ? "checked" : ""} />
+                        <label for="${Notice.hk}"></label>
+                      </div>
+                    </li>
+                    <li>
+                      <div>Google 国际站跳转</div>
+                      <div style="margin:-2px 2px 0 10px">
+                        <input type="checkbox" id="${Notice.gj}" class="${Notice.checkbox}" ${GoogleJump ? "checked" : ""} />
+                        <label for="${Notice.gj}"></label>
+                      </div>
+                    </li>
+                    <li>
+                      <div>在当前浏览器窗口跳转</div>
+                      <div style="margin:-2px 2px 0 10px">
+                        <input type="checkbox" id="${Notice.lw}" class="${Notice.checkbox}" ${localWindow ? "checked" : ""} />
+                        <label for="${Notice.lw}"></label>
+                      </div>
+                    </li>
+                    <li>
+                      <div>搜索关键词高亮增强</div>
+                      <div style="margin:-2px 2px 0 10px">
+                        <input type="checkbox" id="${Notice.kh}" class="${Notice.checkbox}" ${keywordHighlight ? "checked" : ""} />
+                        <label for="${Notice.kh}"></label>
+                      </div>
+                    </li>
+                    <li>
+                      <div>去除链接重定向跳转</div>
+                      <div style="margin:-2px 2px 0 10px">
+                        <input type="checkbox" id="${Notice.ar}" class="${Notice.checkbox}" ${antiLinkRedirect ? "checked" : ""} />
+                        <label for="${Notice.ar}"></label>
+                      </div>
+                    </li>
+                    <li>
+                      <div>更新检测（默认：开）</div>
+                      <div style="margin:-2px 2px 0 10px">
+                        <input type="checkbox" id="${Notice.au}" class="${Notice.checkbox}" ${isAutoUpdate ? "checked" : ""} />
+                        <label for="${Notice.au}"></label>
+                      </div>
+                    </li>
+                    <li style="float:right">
+                      <button id="${Notice.random}_help">使用帮助</button>
+                      <button id="${Notice.random}_cancel">取消</button>
+                      <button id="${Notice.random}_submit">保存</button>
+                    </li>
+                  </ul>
+                </fieldset>`
+              ),
+              type: `${Notice.configuration}`,
+              width: 330,
+              closeWith: ["button"],
+              scroll: { maxHeight: 680, showOnHover: true },
+              progressBar: false,
+              timeout: false,
+              callbacks: {},
+              position: "topRight",
+            });
+            qA(`input[name='${Notice.card}_lists']`).forEach(node => {
+              node.addEventListener("click", () => {
+                if (qA(`input[name='${Notice.card}_lists']:checked:enabled`).length < 3) {
+                  qA(`input[name='${Notice.card}_lists']:disabled`).forEach(item => {
+                    item.disabled = false;
+                  });
                 } else {
-                  const remainTimer = 30 - Math.floor((Date.now() - defCon.timer) / 1e3);
-                  GMnotification(Notice.noticeHTML(`<dd>更新检测过于频繁，服务器受不鸟啦，请${remainTimer}秒后重试！</dd>`), `${Notice.info}`, false, 15);
+                  qA(`input[name='${Notice.card}_lists']:not(:checked)`).forEach(item => {
+                    item.disabled = true;
+                  });
                 }
+              });
+            });
+
+            // help
+            qS(`#${Notice.random}_help`).addEventListener("click", () => {
+              GMopenInTab(`${HOST_URI}#guide`, defCon.options);
+            });
+
+            // cancel
+            qS(`#${Notice.random}_cancel`).addEventListener("click", () => {
+              closeItem(qS(`gb-notice.${Notice.noticejs} .${Notice.configuration}`));
+            });
+
+            // submit
+            qS(`#${Notice.random}_submit`).addEventListener("click", () => {
+              let selectEngineList = [];
+              qA(`input[name='${Notice.card}_lists']:checked`).forEach(item => {
+                selectEngineList.push(Number(item.dataset.sn));
+              });
+              if (selectEngineList.length < 3) {
+                GMnotification({
+                  text: Notice.noticeHTML(
+                    `<dd>
+                      <e style="font-size:24px;vertical-align:bottom">\ud83d\ude31</e>
+                      您需要选择「三个」搜索引擎，还少<em>${3 - selectEngineList.length}</em>个呢！
+                    </dd>`
+                  ),
+                  type: `${Notice.error}`,
+                  closeWith: ["click"],
+                  timeout: 18,
+                  callbacks: {},
+                });
+                return;
               }
-            );
-          } else {
-            in_UpdateCheck_ID = GMregisterMenuCommand(
-              `\ufff5\ud83d\udcdb【版本更新】已关闭 \u267b 重新开启${Hotkey ? "(" + String.fromCharCode(isMac ? 75 : 86) + ")" : ""}`,
-              () => {
-                if (Date.now() - defCon.timer > 4e3) {
-                  _data.VerDetAuto = true;
-                  GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
-                  GMdeleteValue("_Check_Version_Expire_");
-                  GMdeleteValue("_nCount_");
-                  debug("//-> Destroy cache & session when restart detection.");
-                  GMnotification(
-                    Notice.noticeHTML(`<dd class="${Notice.center}">更新检测已<kbd class="im">开启</kbd>，网页在<em>3</em>秒后刷新！</dd>`),
-                    `${Notice.info}`,
-                    true,
-                    30,
-                    callback_Countdown
-                  );
-                  defCon.timer = Date.now();
-                }
-              }
-            );
+              const refresh = () => {
+                location.reload(true);
+              };
+              selectedEngine = selectEngineList;
+              isHotkey = qS(`#${Notice.hk}`).checked;
+              GoogleJump = qS(`#${Notice.gj}`).checked;
+              localWindow = qS(`#${Notice.lw}`).checked;
+              keywordHighlight = qS(`#${Notice.kh}`).checked;
+              antiLinkRedirect = qS(`#${Notice.ar}`).checked;
+              isAutoUpdate = qS(`#${Notice.au}`).checked;
+              config_date = { isAutoUpdate, keywordHighlight, isHotkey, selectedEngine, localWindow, GoogleJump, antiLinkRedirect };
+              GMsetValue("_configure_", defCon.encrypt(JSON.stringify(config_date)));
+              GMnotification({
+                title: "保存成功！",
+                text: Notice.noticeHTML(`<dd>设置参数已成功保存，页面稍后自动刷新！</dd>`),
+                type: `${Notice.success}`,
+                closeWith: ["click"],
+                timeout: 10,
+                callbacks: { onClose: [refresh] },
+              });
+            });
           }
-        }
+        });
       },
-      menuDisplay: function () {
-        if (!CONST.isSecurityPolicy) {
-          this.registerMenuCommand(CONST.isUseBing);
-        }
-        if (CUR_WINDOW_TOP) {
-          console.log(
-            "%c[GB-Status]%c\nInsert the Bing Search Button: %c%s",
-            "font-weight:bold;color:darkorange",
-            "color:0",
-            "font-weight:bold;color:red",
-            defCon.titleCase(CONST.isUseBing && !CONST.isSecurityPolicy)
-          );
-        }
-      },
-      init: function () {
-        this.menuDisplay();
+      listEngine: () => {
+        sleep(500)(addAction.closeConfig()).then(r => {
+          if (!qS(`.${Notice.noticejs} .${Notice.configuration}`) && r) {
+            GMnotification({
+              title: "\ud83d\udc4b 你想去哪里吖？",
+              text: addAction.listSearchEngine(listCurrentSite),
+              type: `${Notice.configuration}`,
+              width: 180,
+              closeWith: ["button"],
+              scroll: { maxHeight: 500, showOnHover: false },
+              timeout: 100,
+              callbacks: {},
+              position: "topRight",
+            });
+            qA(`.${Notice.noticejs} .${Notice.configuration} .${Notice.searchButton}`).forEach(item => {
+              item.addEventListener(
+                "click",
+                function (listCurrentSite, localWindow) {
+                  let url;
+                  for (let type in newSiteType) {
+                    if (oH.call(newSiteType, type) && newSiteType[type] === Number(item.id)) {
+                      if (listCurrentSite.IMGType === getUrlParam(listCurrentSite.SplitName).trim()) {
+                        url = listSite[type.toLowerCase()].ImgURL;
+                      } else {
+                        url = listSite[type.toLowerCase()].WebURL;
+                      }
+                      break;
+                    }
+                  }
+                  if (localWindow) {
+                    top.location.href = decodeURI(url + getSearchValue());
+                  } else {
+                    GMopenInTab(decodeURI(url + getSearchValue()), defCon.options);
+                  }
+                }.bind(this, listCurrentSite, localWindow)
+              );
+            });
+          }
+        });
       },
     };
 
+    if (CUR_WINDOW_TOP) {
+      let Parameter_Set, Engine_List, Feed_Back;
+      Parameter_Set ? GMunregisterMenuCommand(Parameter_Set) : debug("\ud83d\udd33 %cInstalling Font_Set_Menu", "color:gray");
+      Parameter_Set = GMregisterMenuCommand(`\ufff0\u2699\ufe0f 搜索引擎助手参数设置${isHotkey ? "(" + String.fromCharCode(IS_MACOS ? 89 : 69) + ")" : ""}`, () => {
+        addAction.setConfigure();
+      });
+      Engine_List ? GMunregisterMenuCommand(Engine_List) : debug("\ud83d\udd33 %cInstalling Exclude_site_Menu", "color:gray");
+      Engine_List = GMregisterMenuCommand(`\ufff2\ud83d\udc4b 嗨，你想去哪里吖？${isHotkey ? "(" + String.fromCharCode(IS_MACOS ? 75 : 86) + ")" : ""}`, () => {
+        addAction.listEngine();
+      });
+      Feed_Back ? GMunregisterMenuCommand(Feed_Back) : debug("\ud83d\udd33 %cInstalling Feed_Back_Menu", "color:gray");
+      Feed_Back = GMregisterMenuCommand(`\ufff9\u2712\ufe0f 向作者提点儿建议${isHotkey ? "(" + String.fromCharCode(66) + ")" : ""}`, () => {
+        GMopenInTab(FEEDBACK_URI, defCon.options);
+      });
+    }
+
     /* hotkey setting */
 
-    if (Hotkey) {
-      document.addEventListener("keydown", async event => {
-        const e = event || window.Event;
-        const ekey = (isMac ? e.metaKey : e.altKey) && !e.ctrlKey && !e.shiftKey;
-        if (e.keyCode === (isMac ? 89 : 69) && ekey) {
+    if (isHotkey && CUR_WINDOW_TOP) {
+      document.addEventListener("keydown", e => {
+        const ekey = (IS_MACOS ? e.metaKey : e.altKey) && !e.ctrlKey && !e.shiftKey;
+        if (e.keyCode === (IS_MACOS ? 89 : 69) && ekey) {
           e.preventDefault();
-          if (Date.now() - defCon.timer > 1e3) {
-            defCon.timer = Date.now();
-            addActionConfigure();
+          if (Date.now() - defCon.clickTimer > 1e3) {
+            defCon.clickTimer = Date.now();
+            addAction.setConfigure();
+          }
+        }
+        if (e.keyCode === (IS_MACOS ? 75 : 86) && ekey) {
+          e.preventDefault();
+          if (Date.now() - defCon.clickTimer > 1e3) {
+            defCon.clickTimer = Date.now();
+            addAction.listEngine();
           }
         }
         if (e.keyCode === 66 && ekey) {
           e.preventDefault();
-          if (Date.now() - defCon.timer > 4e3) {
-            defCon.timer = Date.now();
-            menuManager.isUsedSwitcher(CONST.isUseBing, _data, "Bing 按钮");
-          }
-        }
-        if (e.keyCode === (isMac ? 75 : 86) && ekey && checkUpdate) {
-          e.preventDefault();
-          if (Date.now() - defCon.timer > 30e3) {
-            defCon.timer = Date.now();
-            if (CONST.isVDResult) {
-              GMdeleteValue("_Check_Version_Expire_");
-              debug("//-> up-to-date? ", Boolean(await checkVersion(checkUpdate)));
-            } else {
-              _data.VerDetAuto = true;
-              GMsetValue("_configuration_", defCon.encrypt(JSON.stringify(_data)));
-              GMdeleteValue("_Check_Version_Expire_");
-              GMdeleteValue("_nCount_");
-              debug("//-> Destroy cache & session when restart detection.");
-              GMnotification(
-                Notice.noticeHTML(`<dd class="${Notice.center}">更新检测已<kbd class="im">开启</kbd>，网页在<em>3</em>秒后刷新！</dd>`),
-                `${Notice.info}`,
-                true,
-                30,
-                callback_Countdown
-              );
-            }
-          } else {
-            const remainTimer = 30 - Math.floor((Date.now() - defCon.timer) / 1e3);
-            GMnotification(Notice.noticeHTML(`<dd>你的快捷键按得太快了，我受不鸟啦……请慢点儿！(${remainTimer})</dd>`), `${Notice.info}`, false, 20);
+          if (Date.now() - defCon.clickTimer > 5e3) {
+            defCon.clickTimer = Date.now();
+            GMopenInTab(FEEDBACK_URI, defCon.options);
           }
         }
       });
     }
 
-    /* Insert search Button */
+    /* Insert CSS & buttons */
 
-    const searchManager = {
-      insertCSS: () => {
-        try {
-          const doStyName = `${CONST.rndclassName}`;
-          const doStyle = CONST.noticeCss + curretSite.StyleCode + curretSite.keyStyle;
-          addStyle(doStyle, doStyName, document.head, "SS");
-        } catch (e) {
-          error("%csearchManager.insertCSS:\n%c%s", "font-weight:bold", "font-weight:normal", e);
+    if (CUR_WINDOW_TOP) {
+      preInsertContentsToDocument();
+      new MutationObserver(() => {
+        if (CONST.isSecurityPolicy ? !qS(`.${CONST.rndstyleName}`) : !qS(`.${CONST.rndclassName}`) || !qS(`#${CONST.rndID}`) || !qS(`.${CONST.rndstyleName}`)) {
+          preInsertContentsToDocument();
         }
-      },
-      insertSearchButton: () => {
-        try {
-          const getTarget = curretSite.MainType;
-          const doHtml = curretSite.HtmlCode;
-          const indexPage = location.pathname === "/";
-          const userSpan = cE("span");
-          userSpan.id = `${CONST.rndidName}`;
-          userSpan.innerHTML = doHtml;
-          const SpanID = `#${userSpan.id}`;
-          let Target = qS(getTarget);
-          if (!indexPage && Target) {
-            if (!qS(SpanID) && getSearchValue()) {
-              if (curretSite.SiteTypeID === newSiteType.BING) {
-                if (CONST.isUseBing) {
-                  Target.appendChild(userSpan);
-                  if (Target.parentNode.childNodes[0].tagName === "INPUT") {
-                    Target.parentNode.childNodes[0].style.width = "400px";
-                  }
-                  // Bing image fixed
-                  if (qS(".b_searchboxForm") && /^images$/.test(CONST.vim.trim())) {
-                    if (location.search.includes("view=detailV2") && CONST.isUseBing) {
-                      qS(".b_searchboxForm").setAttribute("style", "width:max-content!important;padding-right:5px!important");
-                      qA(`#${CONST.rndidName} input`).forEach(item => {
-                        item.style.cssText += "height:36px!important;border-radius:6px!important;padding:0 12px!important;margin:2px -2px 0 0!important;";
-                      });
-                    }
-                  }
-                }
-              } else {
+        antiLinkRedirect && listCurrentSite.SiteTypeID !== newSiteType.OTHERS && !CONST.indexPage() && listCurrentSite.antiRedirect();
+      }).observe(document, { childList: true, subtree: true });
+    }
+
+    /* important Functions */
+
+    function preInsertContentsToDocument() {
+      try {
+        setRAFInterval(
+          () => {
+            !qS(`.${CONST.rndstyleName}`) && insertStyle();
+            if (currentSite.SiteTypeID !== newSiteType.OTHERS && !CONST.isSecurityPolicy) {
+              !qS(`.${CONST.rndclassName}`) && insertCSS();
+              !qS(`#${CONST.rndID}`) && insertButtons();
+            }
+            return Boolean(CONST.isSecurityPolicy ? qS(`.${CONST.rndstyleName}`) : qS(`.${CONST.rndclassName}`) && qS(`#${CONST.rndID}`) && qS(`.${CONST.rndstyleName}`));
+          },
+          50,
+          { runNow: true }
+        );
+      } catch (e) {
+        error("InsertHTML:", e.message);
+      }
+    }
+
+    function insertCSS() {
+      try {
+        const buttonCss = currentSite.StyleCode;
+        addStyle(buttonCss, `${CONST.rndclassName}`, document.head, "SC");
+      } catch (e) {
+        error("insertCSS:", e.message);
+      }
+    }
+
+    function insertStyle() {
+      try {
+        const keywordHighlightCss = keywordHighlight ? listCurrentSite.keyStyle.concat(CONST.highlightCss) : "";
+        const noticeStyle = CONST.noticeCss + keywordHighlightCss;
+        addStyle(noticeStyle, `${CONST.rndstyleName}`, document.head, "SS");
+      } catch (e) {
+        error("insertStyle:", e.message);
+      }
+    }
+
+    async function insertButtons() {
+      try {
+        const getTarget = currentSite.MainType;
+        const userSpan = cE("span");
+        const indexPage = CONST.indexPage();
+        userSpan.id = `${CONST.rndID}`;
+        userSpan.innerHTML = CONST.buttonCode;
+        const SpanID = `#${userSpan.id}`;
+        let Target = qS(getTarget);
+        if (!indexPage && Target && getSearchValue() && !qS(SpanID)) {
+          return new Promise(resolve => {
+            switch (currentSite.SiteTypeID) {
+              case newSiteType.BAIDU:
                 insterAfter(userSpan, Target);
-                // Baidu image fixed
-                if (qS(SpanID) && /^baiduimage$/.test(CONST.vim.trim())) {
-                  qS(SpanID).setAttribute("style", "margin-left:16px");
-                  qS(`#${CONST.bbyx}`).setAttribute("style", "margin-left:2px");
+                if (qS(SpanID) && currentSite.IMGType === CONST.vim) {
+                  qS(SpanID).style.marginLeft = "16px";
+                  qS(`#${CONST.rightButton} input`).style.marginLeft = "3px";
                 }
-                // Google fixed
-                if (curretSite.SiteTypeID === newSiteType.GOOGLE) {
+                break;
+              case newSiteType.GOOGLE:
+                getGlobalGoogle("www.google.com", GoogleJump);
+                insterAfter(userSpan, Target);
+                if (qS(SpanID)) {
                   qS(SpanID).parentNode.style.width = "100%";
                   qS(SpanID).parentNode.style.minWidth = "100%";
-                  if (qS(SpanID) && getUrlParam("tbs").startsWith("sbi")) {
+                  if (getUrlParam("tbs").startsWith("sbi")) {
                     qS(SpanID).parentNode.parentNode.style.width = "fit-content";
                     qS(SpanID).parentNode.parentNode.parentNode.style.width = "fit-content";
                   } else {
@@ -1650,214 +1894,112 @@
                     qS(SpanID).parentNode.parentNode.parentNode.style.width = null;
                   }
                 }
-              }
-              debug(`//-> searchManager $(Target): ${Target}`);
-              qA(`#${CONST.ggyx}, #${CONST.bbyx}, #${CONST.bdyx}`).forEach(per => {
-                per.addEventListener("click", () => {
-                  let gotoUrl = "about:blank";
-                  switch (per.id) {
-                    case `${CONST.ggyx}`:
-                      if (/^(baiduimage|images)$/.test(CONST.vim.trim())) {
-                        gotoUrl = "https://www.google.com/search?hl=zh-CN&source=lnms&tbm=isch&sa=X&q=";
-                      } else {
-                        gotoUrl = "https://www.google.com/search?hl=zh-CN&source=hp&newwindow=1&q=";
-                      }
-                      break;
-                    case `${CONST.bbyx}`:
-                      if (/^(isch|baiduimage)$/.test(CONST.vim.trim())) {
-                        gotoUrl = "https://cn.bing.com/images/search?first=1&tsc=ImageBasicHover&q=";
-                      } else {
-                        gotoUrl = "https://cn.bing.com/search?q=";
-                      }
-                      break;
-                    case `${CONST.bdyx}`:
-                      if (/^(images|isch)$/.test(CONST.vim.trim())) {
-                        gotoUrl = "https://image.baidu.com/search/index?tn=baiduimage&ps=1&ie=utf-8&word=";
-                      } else {
-                        gotoUrl = "https://www.baidu.com/s?ie=utf-8&rqlang=cn&wd=";
-                      }
-                      break;
-                    default:
-                      break;
-                  }
-                  if (localWindow) {
-                    top.location.href = decodeURI(gotoUrl + getSearchValue());
+                break;
+              case newSiteType.BING:
+                Target.appendChild(userSpan);
+                if (Target.parentNode.firstElementChild.tagName === "INPUT") {
+                  Target.parentNode.firstElementChild.style.width = "400px";
+                }
+                if (qS(".b_searchboxForm") && location.search.includes("view=detailV2")) {
+                  qS(".b_searchboxForm").setAttribute("style", "width:max-content!important;padding-right:5px!important");
+                  qA(`#${CONST.rndID} input`).forEach(item => {
+                    item.style.cssText += "height:33px!important;border-radius:6px!important;padding:0 12px!important;margin:0 -2px 0 0!important;";
+                  });
+                }
+                break;
+              case newSiteType.SOGOU:
+                if (currentSite.IMGType === CONST.vim) {
+                  sleep(500, { useCachedSetTimeout: true }).then(() => {
+                    if (!qS(SpanID) && Target) {
+                      insterAfter(userSpan, Target);
+                      qS(SpanID).style.right = `-${qS(SpanID).getBoundingClientRect().width + 10}px`;
+                      addSearchButtonEvent(qA(`${SpanID} span[sn]:not([event-insert])`));
+                      scrollDetect(getTarget, indexPage);
+                    }
+                  });
+                } else {
+                  insterAfter(userSpan, Target);
+                  sleep(200, { useCachedSetTimeout: true }).then(() => {
+                    qS(SpanID).style.right = `-${qS(SpanID).getBoundingClientRect().width + 10}px`;
+                  });
+                }
+                break;
+              case newSiteType.SO360:
+                insterAfter(userSpan, Target);
+                if (currentSite.IMGType === CONST.vim) {
+                  qS(SpanID).style = "height:38px";
+                  qA(`${SpanID} input`).forEach(node => {
+                    node.style = "height:38px;border-radius:0;font-size:15px!important;margin:0 -2px 0 5px;";
+                  });
+                }
+                break;
+              case newSiteType.FSOU:
+                insterAfter(userSpan, Target);
+                break;
+              case newSiteType.DUCKDUCKGO:
+                Target.parentNode.appendChild(userSpan);
+                Target.parentNode.appendChild(Target.cloneNode(true));
+                Target.remove();
+                sleep(100).then(() => {
+                  qS(SpanID).style.right = `-${qS(SpanID).getBoundingClientRect().width + 8}px`;
+                });
+                break;
+              case newSiteType.TOUTIAO:
+                insterAfter(userSpan, Target);
+                sleep(100).then(() => {
+                  qS(SpanID).style.right = `-${qS(SpanID).getBoundingClientRect().width + 10}px`;
+                });
+                break;
+              case newSiteType.YANDEX:
+                insterAfter(userSpan, Target);
+                sleep(500, { useCachedSetTimeout: true })(qS(SpanID).getBoundingClientRect().width).then(width => {
+                  qS(SpanID).style.right = `-${width + 60}px`;
+                  if (currentSite.IMGType !== CONST.vim) {
+                    qS(`.input__settings`).style.right = `-${width + 273}px`;
+                    qS(`span.serp-header__voice-search-container`).style.right = `-${width + 273}px`;
                   } else {
-                    GMopenInTab(decodeURI(gotoUrl + getSearchValue()), defCon.options);
+                    qS(`button.button2[data-bem]`).style.right = `-${width + 268}px`;
                   }
                 });
-              });
+                break;
             }
-          }
-        } catch (e) {
-          error("%csearchManager.insertSearchButton:\n%c%s", "font-weight:bold", "font-weight:normal", e);
+            resolve({ SpanID, getTarget, indexPage });
+          })
+            .then(r => {
+              addSearchButtonEvent(qA(`${r.SpanID} span[sn]:not([event-insert])`));
+              scrollDetect(r.getTarget, r.indexPage);
+            })
+            .catch(e => {
+              error("insertHTML:", e);
+            });
         }
-      },
-      scrollDetect: () => {
-        let scrollbars, scrollspan, height, e;
-        const getTarget = curretSite.MainType;
-        const indexPage = location.pathname === "/";
-        if (!indexPage && qS(getTarget)) {
-          switch (curretSite.SiteTypeID) {
-            case newSiteType.GOOGLE:
-              // Google image fixed
-              e = /^isch$/.test(CONST.vim.trim());
-              scrollspan = e ? CONST.scrollspan2 : CONST.scrollspan;
-              scrollbars = e ? CONST.scrollbars2 : CONST.scrollbars;
-              height = e ? 0 : 35;
-              setScrollButton(`#${CONST.rndidName}`, scrollspan, height);
-              setScrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, scrollbars, height);
-              if (CONST.isUseBing) {
-                setScrollButton(`#${CONST.rndidName} #${CONST.bbyx} input`, scrollbars, height);
-              }
-              break;
-            case newSiteType.BING:
-              if (CONST.isUseBing) {
-                e = /^(images|videos)$/.test(CONST.vim.trim());
-                scrollspan = e ? CONST.scrollspan : CONST.scrollspan2;
-                scrollbars = e ? CONST.scrollbars : CONST.scrollbars2;
-                setScrollButton(`#${CONST.rndidName}`, scrollspan, 50);
-                setScrollButton(`#${CONST.rndidName} #${CONST.bdyx} input`, scrollbars, 50);
-                setScrollButton(`#${CONST.rndidName} #${CONST.ggyx} input`, scrollbars, 50);
-              } else {
-                debug(`//-> No scrolling detecting.`);
-              }
-              break;
-            default:
-              debug(`//-> No scrolling detecting.`);
-              break;
-          }
-        }
-      },
-      preInsertContentToHTML: function () {
-        setRAFInterval(
-          () => {
-            if (!qS(`.${CONST.rndclassName}`)) {
-              this.insertCSS();
-            }
-            if (!qS(`#${CONST.rndidName}`)) {
-              this.insertSearchButton();
-              this.scrollDetect();
-            }
-            return !!(qS(`.${CONST.rndclassName}`) && qS(`#${CONST.rndidName}`));
-          },
-          50,
-          true
-        );
-      },
-      doSwitch: function () {
-        try {
-          if (curretSite.SiteTypeID !== newSiteType.OTHERS) {
-            if (CONST.isSecurityPolicy) {
-              if (CUR_WINDOW_TOP) {
-                console.log(
-                  "%c[GB-Prohibit]%c\nBlocked By: %c%s Security Policy",
-                  "font-weight:bold;color:indigo",
-                  "color:0",
-                  "font-weight:bold;color:darkred",
-                  curretSite.SiteName
-                );
-              }
-              return;
-            } else {
-              this.preInsertContentToHTML();
-              const callback = mutations => {
-                mutations.forEach(mutation => {
-                  if (mutation.removedNodes.length > 0) {
-                    if (!(qS(`.${CONST.rndclassName}`) && qS(`#${CONST.rndidName}`))) {
-                      debug(
-                        "%c[GB-MutationObserver]\n%c(%c%s%c: %c%s%c)",
-                        "font-weight:bold;color:olive",
-                        "color:0",
-                        "color:olive",
-                        mutation.type,
-                        "color:0",
-                        "font-weight:bold;color:red",
-                        defCon.titleCase(!this.preInsertContentToHTML()),
-                        "color:0"
-                      );
-                    }
-                  }
-                });
-              };
-              const opts = { childList: true, subtree: true };
-              const observer = new MutationObserver(callback);
-              observer.observe(document, opts);
-              if (CUR_WINDOW_TOP) {
-                console.log(
-                  "%c[GB-Switch]%c\nWe are using The %c%s%c Search Engine.",
-                  "font-weight:bold;color:Green",
-                  "color:0",
-                  "font-weight:bold;color:darkcyan",
-                  curretSite.SiteName,
-                  "font-weight:normal;color:0"
-                );
-              }
-            }
-          }
-        } catch (e) {
-          error("%csearchManager.doSwitch:\n%c%s", "font-weight:bold", "font-weight:normal", e);
-        }
-      },
-      init: function () {
-        if (curretSite.SiteTypeID === newSiteType.GOOGLE) {
-          getGlobalGoogle("www.google.com", GoogleJump);
-        }
-        this.doSwitch();
-      },
-    };
-
-    /* important functions */
-
-    function getGlobalGoogle(google, checkGoogleJump) {
-      if (checkGoogleJump) {
-        if (getRealHostName() !== getRealHostName(google) && !sessionStorage.getItem("_global_google_")) {
-          sessionStorage.setItem("_global_google_", 1);
-          try {
-            raf.setTimeout(() => {
-              defCon.s = GMopenInTab(`https://${google}/ncr`, true);
-              GMnotification(Notice.noticeHTML(`<dd class="${Notice.center}"><span>智能跳转</span>即将跳转至Google国际站：<br/>${google}</dd>`), `${Notice.info}`, true, 20, {
-                onClose: [
-                  () => {
-                    if (defCon.s) {
-                      defCon.s.close();
-                    }
-                    location.href = top.location.href.replace(top.location.hostname, google);
-                  },
-                ],
-              });
-            }, 500);
-          } catch (e) {
-            error("getGlobalGoogle:", e);
-          }
-        }
+      } catch (e) {
+        error("insertButtons:", e.message);
       }
     }
 
-    function getRealHostName(_index) {
-      const index = _index || top.location.hostname;
-      return index.substring(index.indexOf("google"));
-    }
-
-    function setScrollButton(paraName, classNameIn, scrollSize) {
-      debug(`//-> ${curretSite.SiteName} Scrolling Detecting: ${paraName}`);
-      const oDiv = qS(paraName);
-      let H = 0;
-      let Y = oDiv;
-      if (Y !== null) {
-        while (Y) {
-          H += Y.offsetTop;
-          Y = Y.offsetParent;
+    function scrollDetect(getTarget, indexPage) {
+      let scrollbars, scrollspan, height, e;
+      if (!indexPage && qS(getTarget)) {
+        switch (currentSite.SiteTypeID) {
+          case newSiteType.GOOGLE:
+            e = /^isch$/.test(CONST.vim);
+            scrollspan = e ? CONST.scrollspan2 : CONST.scrollspan;
+            scrollbars = e ? CONST.scrollbars2 : CONST.scrollbars;
+            height = e ? 0 : 35;
+            setScrollButton(`#${CONST.rndID}`, scrollspan, height);
+            setScrollButton(`#${CONST.rndID} #${CONST.leftButton} input`, scrollbars, height);
+            setScrollButton(`#${CONST.rndID} #${CONST.rightButton} input`, scrollbars, height);
+            break;
+          case newSiteType.BING:
+            e = /^(images|videos)$/.test(CONST.vim);
+            scrollspan = e ? CONST.scrollspan : CONST.scrollspan2;
+            scrollbars = e ? CONST.scrollbars : CONST.scrollbars2;
+            setScrollButton(`#${CONST.rndID}`, scrollspan, 50);
+            setScrollButton(`#${CONST.rndID} #${CONST.leftButton} input`, scrollbars, 50);
+            setScrollButton(`#${CONST.rndID} #${CONST.rightButton} input`, scrollbars, 50);
+            break;
         }
-        document.addEventListener("scroll", () => {
-          const s = defCon.elCompat.scrollTop;
-          debug(`//-> H=${H} S=${s} (${s - H})`);
-          if (s > H + scrollSize) {
-            oDiv.setAttribute("class", classNameIn);
-          } else {
-            oDiv.removeAttribute("class");
-          }
-        });
       }
     }
 
@@ -1872,26 +2014,52 @@
       }
     }
 
+    function addSearchButtonEvent(nodes) {
+      let gotoUrl = "about:blank";
+      nodes.forEach(node => {
+        node.setAttribute("event-insert", true);
+        qS("input", node).addEventListener("click", () => {
+          CONST.vim = getUrlParam(currentSite.SplitName).trim();
+          switch (Number(node.getAttribute("sn"))) {
+            case selectedSite[0].SiteTypeID:
+              if (currentSite.IMGType === CONST.vim) {
+                gotoUrl = selectedSite[0].ImgURL;
+              } else {
+                gotoUrl = selectedSite[0].WebURL;
+              }
+              break;
+            case selectedSite[1].SiteTypeID:
+              if (currentSite.IMGType === CONST.vim) {
+                gotoUrl = selectedSite[1].ImgURL;
+              } else {
+                gotoUrl = selectedSite[1].WebURL;
+              }
+              break;
+          }
+          if (localWindow) {
+            top.location.href = decodeURI(gotoUrl + getSearchValue());
+          } else {
+            GMopenInTab(decodeURI(gotoUrl + getSearchValue()), defCon.options);
+          }
+        });
+      });
+    }
+
     function addStyle(css, className, addToTarget, T = "T", isReload = false, initType = "text/css") {
       setRAFInterval(
-        cssNode => {
+        () => {
           try {
             if (addToTarget && typeof addToTarget === "object") {
               if (className && typeof className === "string") {
                 if (isReload === true && addToTarget.querySelector(`.${className}`)) {
                   safeRemove(`.${className}`, addToTarget);
-                  debug(`\u27A4 style<c:${className}> View:%c %s`, "color:crimson", Boolean(addToTarget.querySelector(`.${className}`)));
-                  while (addToTarget.querySelectorAll(`style[id^="${T}"]`).length) {
-                    safeRemove(`style[id^="${T}"]`, addToTarget);
-                    debug(`\u27A4 style<i:${T}> Review:%c %s`, "color:crimson", !!addToTarget.querySelectorAll(`style[id^="${T}"]`).length);
-                  }
                 } else if (isReload === false && addToTarget.querySelector(`.${className}`)) {
                   return true;
                 }
               } else {
                 className = defCon.randString(10, "char");
               }
-              cssNode = cE("style");
+              let cssNode = cE("style");
               cssNode.className = className;
               cssNode.id = T + defCon.randString(null, "digit");
               cssNode.media = "screen";
@@ -1904,7 +2072,7 @@
               return true;
             }
           } catch (e) {
-            error("AddStyle:", e);
+            error("AddStyle:", e.message);
             return true;
           }
         },
@@ -1924,28 +2092,47 @@
       }
     }
 
-    function getSearchValue(val) {
-      qA('input[name="wd"], input[name="q"], input[name="word"]').forEach((item, index, arr) => {
-        val = arr[0].value;
-        if (val) {
-          debug(`//-> INPUT: ${val} - INDEX: ${index} - OLD: ${item.value}`);
+    function setScrollButton(paraName, classNameIn, scrollSize) {
+      const oDiv = qS(paraName);
+      let H = 0;
+      let Y = oDiv;
+      if (Y !== null) {
+        debug(`\ud83d\udd33 %s %O`, Y.nodeName, { Y });
+        while (Y) {
+          H += Y.offsetTop;
+          Y = Y.offsetParent;
         }
-      });
+        document.addEventListener("scroll", () => {
+          if (defCon.elCompat.scrollTop > H + scrollSize) {
+            oDiv.setAttribute("class", classNameIn);
+          } else {
+            oDiv.removeAttribute("class");
+          }
+        });
+      }
+    }
+
+    function getSearchValue(val) {
+      qA('input[name="wd"],input[name="q"][aria-label],input[name="word"],input[name="text"],input[name="query"][id="upquery"],input[name="keyword"]').forEach(
+        (item, index, arr) => {
+          val = item.value;
+          val && debug(`\ud83d\udd33 QueryString[INPUT]: %O`, { current_keyword: val, input_index: index, previous_keyword: arr[index].value });
+        }
+      );
       if (val === null || val === "" || typeof val === "undefined") {
         const kvl = location.search.substr(1).split("&");
         if (kvl) {
           for (let i = 0; i < kvl.length; i++) {
-            const value = kvl[i].replace(/^(wd|word|kw|query|q)=/, "");
+            const value = kvl[i].replace(/^(wd|word|query|q|text|keyword)=/, "");
             if (value !== kvl[i]) {
               val = value;
             }
           }
           if (val) {
             val = val.replace(/\+/g, " ");
-            debug(`//-> QUERY: ${val}`);
+            debug(`\ud83d\udd33 QueryString[URL]: %s`, val);
           } else {
             val = "";
-            debug(`//-> QUERY is null`);
           }
         } else {
           return "";
@@ -1953,46 +2140,38 @@
       }
       return encodeURIComponent(val);
     }
-
-    function setSecurityPolicy() {
-      if (window.trustedTypes && window.trustedTypes.createPolicy) {
-        window.trustedTypes.createPolicy("default", {
-          createHTML: string => {
-            return string;
-          },
-        });
-      }
-    }
-
-    function setRAFInterval(callback, interval, runNow) {
-      if (runNow === true) {
-        const shouldFinish = callback();
-        if (shouldFinish) {
-          return;
-        }
-      }
-      const tickId = raf.setInterval(shouldFinish => {
-        shouldFinish = callback() || false;
-        if (shouldFinish) {
-          raf.clearInterval(tickId);
-          return;
-        }
-      }, interval);
-    }
-
-    /* Let`s enjoy it! */
-
-    !(function () {
-      try {
-        debug("//-> Content-Security-Policy: trusted-types.");
-        setSecurityPolicy();
-        debug("//-> Insert Ext Menu.");
-        menuManager.init();
-        debug("//-> Insert Search Button.");
-        searchManager.init();
-      } catch (e) {
-        console.error("%c[GB-Error]%c\n%s", "font-weight:bold;color:red", "font-weight:bold;color:darkred", e);
-      }
-    })();
   })();
+
+  function getGlobalGoogle(google, checkGoogleJump) {
+    if (checkGoogleJump) {
+      const getRealHostName = hostname => {
+        const index = hostname || top.location.hostname;
+        return index.substring(index.indexOf("google"));
+      };
+      if (getRealHostName() !== getRealHostName(google) && !sessionStorage.getItem("_global_google_")) {
+        sessionStorage.setItem("_global_google_", 1);
+        const redirectNCR = () => {
+          defCon.s && defCon.s.close();
+          delete defCon.s;
+          sessionStorage.removeItem("_global_google_");
+          location.href = top.location.href.replace(top.location.hostname, google);
+        };
+        try {
+          sleep(500).then(() => {
+            defCon.s = GMopenInTab(`https://${google}/ncr`, true);
+            GMnotification({
+              title: `智能跳转`,
+              text: Notice.noticeHTML(`<dd class="${Notice.center}">当前页面即将跳转至 Google国际站（NCR）<br/><span>${google.toUpperCase()}</span></dd>`),
+              type: `${Notice.info}`,
+              closeWith: ["click"],
+              timeout: 20,
+              callbacks: { onClose: [redirectNCR] },
+            });
+          });
+        } catch (e) {
+          error("getGlobalGoogle:", e.message);
+        }
+      }
+    }
+  }
 })();

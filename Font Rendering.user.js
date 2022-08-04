@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.07.16.1
+// @version            2022.08.04.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -391,12 +391,14 @@
     }
     clearTimeout(timer) {
       window.cancelAnimationFrame(this._timerMap.timeout[timer]);
+      delete this._timerMap.timeout[timer];
     }
     setInterval(fn, interval) {
       return this._ticking(fn, "interval", interval);
     }
     clearInterval(timer) {
       window.cancelAnimationFrame(this._timerMap.interval[timer]);
+      delete this._timerMap.interval[timer];
     }
   }
 
@@ -554,9 +556,9 @@
           system = "Windows";
         } else if (/macintosh|macintel|mac os x/g.test(u)) {
           system = "macOS";
-        } else if (/linux|x11/gi.test(u)) {
+        } else if (/linux|x11/g.test(u)) {
           system = "Linux";
-        } else if (/android|adr/gi.test(u)) {
+        } else if (/android|adr/g.test(u)) {
           system = "Android";
         } else if (/ios|iphone|ipad|ipod|iwatch/g.test(u)) {
           system = "iOS";
@@ -1895,7 +1897,7 @@
     fontShadow: IS_REAL_GECKO ? 0.5 : 1.0,
     shadowColor: IS_REAL_GECKO ? "#7F7F7FAA" : "#7B7B7BCC",
     fontCSS: `:not(i):not([class*='glyph']):not([class*='icon']):not([class*='fa-']):not([class*='vjs-'])`,
-    fontEx: `input,select,button,textarea,kbd,pre,pre *,code,code *`,
+    fontEx: `input,select,button,textarea,samp,kbd,pre,pre *,code,code *`,
     monospacedFont: `'Operator Mono Lig','Fira Code','Source Code Pro','DejaVu Sans Mono','Anonymous Pro','Ubuntu Mono','Roboto Mono','JetBrains Mono','Droid Sans Mono','Mono','Monaco','Menlo','Inconsolata','Liberation Mono'`,
   };
   const IS_MACOS = getNavigator.system().startsWith("macOS");
@@ -2284,7 +2286,7 @@
       if (t.search(/\bpre\b|\bcode\b/gi) !== -1) {
         const pre = t.search(/\bpre\b/gi) > -1 ? ["pre", "pre *"] : [];
         const code = t.search(/\bcode\b/gi) > -1 ? ["code", "code *"] : [];
-        const elcode = ["[class~='code']", "[class~='code'] *", "[class~='blob-code']", "[class~='blob-code'] *"];
+        const elcode = ["samp", "kbd", "[class~='code']", "[class~='code'] *", "[class~='blob-code']", "[class~='blob-code'] *"];
         const codeSelector = pre.concat(code, elcode).join();
         const monospace = CONST_VALUES.monospacedFont || INITIAL_VALUES.monospacedFont;
         const strokeWidth = !isNaN(stroke_r) && stroke_r > 0 && stroke_r <= 1.0 ? stroke_r : 0;
@@ -2620,7 +2622,7 @@
         typeof defCon.exSitesIndex === "undefined" &&
           typeof mutationType !== "undefined" &&
           SHOULD_FIX_STROKE &&
-          (deBounce(correctBoldErrorIfStroke, 60, "fixstroke", false)(CONST_VALUES.fontStroke, { logger: true, action: mutationType }), (mutationType = null));
+          (deBounce(correctBoldErrorIfStroke, 100, "fixstroke", true)(CONST_VALUES.fontStroke, { logger: true, action: mutationType }), (mutationType = null));
       }).observe(document, { attributes: true, childList: true, subtree: true });
     } catch (e) {
       error("MutationObserver.InsertCSS:", e.message);
