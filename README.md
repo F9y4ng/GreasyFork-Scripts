@@ -62,20 +62,19 @@
 # 优雅的搜索引擎跳转助手 [**Google & Baidu Switcher.user.js**](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Google%20%26%20Baidu%20Switcher.user.js)
 简介：优雅的搜索引擎跳转助手，更美观、更便捷。新版本增加去重定向功能、自定义搜索引擎选取功能，提供可视化搜索参数设置，及自动更新检测等高级功能。
 
-`version 2022.08.04.2` 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+`version 2022.08.07.1` 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 [`!!! 重大版本更新，请使用前仔细查看脚本使用说明(WIKI) !!!`](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B) `New!`
 
 `!!! 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它 !!!`
 
 ```text
-! 重大功能性版本更新，变更版本号规则。
-+ 新增自定义搜索引擎的选取功能。
-+ 新增搜索结果链接去重定向功能。
-@ 修正一些已知的问题。
+@ 修正更新检测逻辑问题、优化操作体验。
+@ 优化搜索引擎网站favicon的抓取效率。
+@ 修正一些已知的问题，优化代码，优化样式。
 ```
 ## 最新功能介绍
-* 新增自定义搜索引擎选取功能（包含：百度、Google、Bing、Duckduckgo、搜狗、F搜、Yandex、360搜索、头条搜索）
+* 新增自定义搜索引擎选取功能（包含：百度、Google、Bing、Duckduckgo、搜狗、F搜、Yandex、360搜索、头条搜索等常见的搜索引擎）
 * 新增搜索结果链接去重定向功能。
 * 更智能的更新检测功能。
 
