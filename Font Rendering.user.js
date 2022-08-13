@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.08.04.1
+// @version            2022.08.13.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -920,8 +920,8 @@
         return;
       }
     }
-    const tickId = raf.setInterval(shouldFinish => {
-      shouldFinish = callback() || false;
+    const tickId = raf.setInterval(() => {
+      const shouldFinish = callback();
       if (shouldFinish) {
         raf.clearInterval(tickId);
         return;
@@ -1061,6 +1061,7 @@
         item.remove();
       }
     });
+    return !qA(s, t);
   }
 
   function addStyle(css, className, addToTarget, T = "T", { isReload } = {}, initType = "text/css") {
@@ -1509,59 +1510,51 @@
 
   class SupportFontFamily {
     constructor() {
-      const baseFonts = ["monospace", "Georgia", "Tahoma", "sans-serif"];
-      const testString = "这是测试、這是測試\uff1a1234567890, WWWwwwMMMmmmLlOoIi.";
-      const testSize = "72px";
-      const h = document.body;
-      const s = cE("fr-fontfamily");
-      s.classList.add(`glyphs-${RANDOM_ID}`, `fontTest-${RANDOM_ID}`);
-      s.id = `${defCon.id.fontTest}`;
-      s.innerHTML = trustedTypesPolicy.createHTML(testString);
-      let defaultWidth = {};
-      let defaultHeight = {};
-      for (let index in baseFonts) {
-        if (oH.call(baseFonts, index)) {
-          s.style.cssText = `font-size:${testSize}!important;font-family:${baseFonts[index]}!important;`;
-          try {
-            h.appendChild(s);
-            defaultWidth[baseFonts[index]] = s.offsetWidth;
-            defaultHeight[baseFonts[index]] = s.offsetHeight;
-            h.removeChild(s);
-          } catch (e) {
-            error("SupportFontFamily:", e.message);
-          }
-        }
+      this.canvasWidth = 200;
+      this.canvasHeight = 100;
+      this.fontSize = 80;
+      this.fontText = "Aa啊";
+      this.originFont = "'Courier New',Courier,monospace";
+      const canvas = cE("canvas");
+      canvas.width = this.canvasWidth;
+      canvas.height = this.canvasHeight;
+      this.canvasContext = canvas.getContext("2d");
+      this.canvasContext.textAlign = "center";
+      this.canvasContext.fillStyle = "black";
+      this.canvasContext.textBaseline = "middle";
+      this.originFontData = this._checkFont(this.originFont);
+      this.detectFontData = null;
+    }
+    _checkFont(fontName) {
+      try {
+        this.canvasContext.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        this.canvasContext.font = `${this.fontSize}px ${this.originFont.toUpperCase() === fontName.toUpperCase() ? this.originFont : `'${fontName}',${this.originFont}`}`;
+        this.canvasContext.fillText(this.fontText, this.canvasWidth / 2, this.canvasHeight / 2);
+        const fontData = this.canvasContext.getImageData(0, 0, this.canvasWidth, this.canvasHeight).data;
+        const fontDataValid = [].slice.call(fontData).filter(k => {
+          return k !== 0;
+        });
+        return JSON.stringify(fontDataValid);
+      } catch (e) {
+        error("SupportFontFamily.checkFont:", e.message);
+        return null;
       }
-      const detect = font => {
-        let detected = false;
-        try {
-          for (let index in baseFonts) {
-            if (oH.call(baseFonts, index)) {
-              s.style.cssText = `font-size:${testSize}!important;font-family:'${font}',${baseFonts[index]}!important;`;
-              h.appendChild(s);
-              const _offsetWidth = s.offsetWidth;
-              const _offsetHeight = s.offsetHeight;
-              const matched = _offsetWidth !== defaultWidth[baseFonts[index]] || _offsetHeight !== defaultHeight[baseFonts[index]];
-              h.removeChild(s);
-              detected = detected || matched;
-              if (detected) {
-                debug("\u27A4 detect Fonts: <matched> %O", {
-                  font: font,
-                  width: _offsetWidth,
-                  defwidth: defaultWidth[baseFonts[index]],
-                  height: _offsetHeight,
-                  defheihgt: defaultHeight[baseFonts[index]],
-                });
-                break;
-              }
-            }
-          }
-        } catch (e) {
-          error("FontFamily.Detect:", e.message);
-        }
-        return detected;
-      };
-      this.detect = detect;
+    }
+    detect(font) {
+      if (typeof font !== "string") {
+        return false;
+      }
+      if (this.originFont.toUpperCase().includes(font.toUpperCase())) {
+        return true;
+      }
+      this.detectFontData = this._checkFont(font);
+      const fontSupport = this.originFontData !== this.detectFontData;
+      fontSupport &&
+        debug("\u27A4 detect Fonts: <Detected> %O", {
+          data: JSON.parse(this.detectFontData),
+          font: unescape(font.replace(/\\/g, "%u")),
+        });
+      return fontSupport;
     }
   }
 
@@ -2167,8 +2160,8 @@
             <p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}
               <!-- START VERSION NOTICE -->
-              <li class="${RANDOM_ID}_fix">优化等宽字体渲染规则，修正部分网站的渲染问题。</li>
-              <li class="${RANDOM_ID}_info"><a target="_blank" href="${HOST_URI}#custommonofont">英文等宽字体的设置方法</a>、<a target="_blank" href="${FEEDBACK_URI}/83">中英文字体混编的设置方法</a></li>
+              <li class="${RANDOM_ID}_fix">优化冗余脚本执行的错误自检，可参阅排查清单 <a target="_blank" href="${FEEDBACK_URI}/117">#117</a>。</li>
+              <li class="${RANDOM_ID}_fix">优化本地字体检测功能，提升跨浏览器跨系统的识别率。</li>
               <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化代码。</li>
               <!-- END VERSION NOTICE -->
             </ul></p>
@@ -2634,21 +2627,29 @@
       setConfigure: () => {
         if (document.body) {
           if (!qS(`#${defCon.id.rndId}`)) {
-            insertHTML();
-            operateConfigure();
-            setAutoZoomFontSize(`#${defCon.id.rndId}`, defCon.tZoom);
-            sleep(100).then(() => {
-              qS(`#${defCon.id.container}`).style.opacity = 1;
-              debug("\u27A4 configure<errorCount>:", defCon.errors.length);
-              defCon.errors.length > 0 && reportErrorToAuthor(defCon.errors, true);
-            });
-            qS(`.${defCon.class.title} span.${defCon.class.guide}`).addEventListener("click", () => {
-              GMopenInTab(`${HOST_URI}#guide`, defCon.options);
-            });
-            qS(`#${defCon.id.field} #${RANDOM_ID}_scriptname`).addEventListener("dblclick", function () {
-              hintUpdateInfo(`${HOST_URI}#update`, _config_data_.curVersion);
-              this.style.userSelect = "none";
-            });
+            try {
+              insertHTML();
+              operateConfigure();
+              setAutoZoomFontSize(`#${defCon.id.rndId}`, defCon.tZoom);
+              sleep(100)
+                .then(() => {
+                  qS(`#${defCon.id.container}`).style.opacity = 1;
+                  debug("\u27A4 configure<errorCount>:", defCon.errors.length);
+                  defCon.errors.length > 0 && reportErrorToAuthor(defCon.errors, true);
+                })
+                .catch(e => {
+                  error("insertHTML.opacity:", e.message);
+                });
+              qS(`.${defCon.class.title} span.${defCon.class.guide}`).addEventListener("click", () => {
+                GMopenInTab(`${HOST_URI}#guide`, defCon.options);
+              });
+              qS(`#${defCon.id.field} #${RANDOM_ID}_scriptname`).addEventListener("dblclick", function () {
+                hintUpdateInfo(`${HOST_URI}#update`, _config_data_.curVersion);
+                this.style.userSelect = "none";
+              });
+            } catch (e) {
+              error("setConfigure:", e.message);
+            }
           } else {
             closeConfigurePage({ isReload: false });
           }
@@ -2858,30 +2859,30 @@
           debug("\u27A4 isFontReady:", Boolean(fontReady), parseInt(fontReady));
           return fontReady;
         })
-        .then(Font_Ready => {
-          let Font_Set, Exclude_site, Parameter_Set, Feed_Back;
+        .then(font_Ready => {
+          let font_Set, exclude_site, parameter_Set, feed_Back;
           loading ? GMunregisterMenuCommand(loading) : debug("\u27A4 %cNo Loading_Menu", "color:grey");
-          if (Font_Ready) {
+          if (font_Ready) {
             if (typeof defCon.exSitesIndex === "undefined") {
-              Font_Set ? GMunregisterMenuCommand(Font_Set) : debug("\u27A4 %cInstalling Font_Set_Menu", "color:gray");
-              Font_Set = GMregisterMenuCommand(`\ufff2\ud83c\udf13 字体渲染设置${isHotkey ? "(" + String.fromCharCode(IS_MACOS ? 69 : 80) + ")" : ""}`, () => {
+              font_Set ? GMunregisterMenuCommand(font_Set) : debug("\u27A4 %cInstalling Font_Set_Menu", "color:gray");
+              font_Set = GMregisterMenuCommand(`\ufff2\ud83c\udf13 字体渲染设置${isHotkey ? "(" + String.fromCharCode(IS_MACOS ? 69 : 80) + ")" : ""}`, () => {
                 addAction.setConfigure();
               });
-              Exclude_site ? GMunregisterMenuCommand(Exclude_site) : debug("\u27A4 %cInstalling Exclude_site_Menu", "color:gray");
-              Exclude_site = GMregisterMenuCommand(`\ufff3\u26d4 排除渲染 ${CUR_HOST_NAME} ${isHotkey ? "(" + String.fromCharCode(IS_MACOS ? 71 : 88) + ")" : ""}`, () => {
+              exclude_site ? GMunregisterMenuCommand(exclude_site) : debug("\u27A4 %cInstalling Exclude_site_Menu", "color:gray");
+              exclude_site = GMregisterMenuCommand(`\ufff3\u26d4 排除渲染 ${CUR_HOST_NAME} ${isHotkey ? "(" + String.fromCharCode(IS_MACOS ? 71 : 88) + ")" : ""}`, () => {
                 addAction.excludeSites();
               });
-              Parameter_Set ? GMunregisterMenuCommand(Parameter_Set) : debug("\u27A4 %cInstalling Parameter_Set_Menu", "color:gray");
-              Parameter_Set = GMregisterMenuCommand(`\ufff7\ud83d\udc8e 高级核心功能设置${isHotkey ? "(" + String.fromCharCode(IS_MACOS ? 74 : 71) + ")" : ""}`, () => {
+              parameter_Set ? GMunregisterMenuCommand(parameter_Set) : debug("\u27A4 %cInstalling Parameter_Set_Menu", "color:gray");
+              parameter_Set = GMregisterMenuCommand(`\ufff7\ud83d\udc8e 高级核心功能设置${isHotkey ? "(" + String.fromCharCode(IS_MACOS ? 74 : 71) + ")" : ""}`, () => {
                 addAction.vipConfigure();
               });
             } else {
-              Exclude_site ? GMunregisterMenuCommand(Exclude_site) : debug("\u27A4 %cInstalling Exclude_site_Menu", "color:gray");
-              Exclude_site = GMregisterMenuCommand(`\ufff2\ud83c\udf40 重新渲染 ${CUR_HOST_NAME} ${isHotkey ? "(" + String.fromCharCode(IS_MACOS ? 71 : 88) + ")" : ""}`, () => {
+              exclude_site ? GMunregisterMenuCommand(exclude_site) : debug("\u27A4 %cInstalling Exclude_site_Menu", "color:gray");
+              exclude_site = GMregisterMenuCommand(`\ufff2\ud83c\udf40 重新渲染 ${CUR_HOST_NAME} ${isHotkey ? "(" + String.fromCharCode(IS_MACOS ? 71 : 88) + ")" : ""}`, () => {
                 addAction.includeSites();
               });
-              Feed_Back ? GMunregisterMenuCommand(Feed_Back) : debug("\u27A4 %cInstalling Feed_Back_Menu", "color:gray");
-              Feed_Back = GMregisterMenuCommand(`\ufff9\ud83e\udde1 向作者反馈问题或建议${isHotkey ? "(" + String.fromCharCode(IS_MACOS ? 85 : 84) + ")" : ""}`, () => {
+              feed_Back ? GMunregisterMenuCommand(feed_Back) : debug("\u27A4 %cInstalling Feed_Back_Menu", "color:gray");
+              feed_Back = GMregisterMenuCommand(`\ufff9\ud83e\udde1 向作者反馈问题或建议${isHotkey ? "(" + String.fromCharCode(IS_MACOS ? 85 : 84) + ")" : ""}`, () => {
                 GMopenInTab(FEEDBACK_URI, defCon.options);
               });
             }
@@ -2997,13 +2998,17 @@
         if (isMutationObserver) {
           if (qA("style[id^='TC']", document.head).length > 1) {
             if (!defCon.scriptCount) {
-              defCon.scriptCount = true;
-              const info = `\u53d1\u73b0\u5197\u4f59\u5b89\u88c5\u7684\u201c${defCon.scriptName}\u201d\u811a\u672c\uff0c\u8bf7\u5220\u9664\u91cd\u590d\u811a\u672c\u4fdd\u7559\u5176\u4e00\u3002`;
-              defCon.errors.push(`[Redundant Scripts]: ${info}`);
-              reportErrorToAuthor(defCon.errors, true);
-              console.error("Redundant Scripts:", info);
+              console.error(`[Redundant Scripts]:\n发现冗余安装的『${defCon.scriptName}』，请访问 ${FEEDBACK_URI}/117 排查错误。`);
+              safeRemove("style[id^='TC']", document.head) && insertCSS();
+              sleep(5e2)((defCon.scriptCount = true)).then(r => {
+                if (qA("style[id^='TC']", document.head).length > 1) {
+                  defCon.errors.push(
+                    `[Redundant Scripts]: 发现冗余安装的『${defCon.scriptName}』，请按 <a target="_blank" href="${FEEDBACK_URI}/117" style="color:goldenrod">此清单#117</a> 排查错误。刷新页面后如问题依旧，向作者反馈错误！`
+                  );
+                  reportErrorToAuthor(defCon.errors, r);
+                }
+              });
             }
-            return;
           } else if (qA("style[id^='TS']", document.head).length > 0) {
             insertStyle({ isReload: true });
             count(`\u27A4 [MOVESTYLE][c:${getAsyncStyleNode(document.head).className}]`);
@@ -3832,23 +3837,23 @@
               });
             }
             if (await frDialog.respond()) {
-              const _fonts_set_ = await GMgetValue("_fonts_set_");
-              const _Exclude_site_ = await GMgetValue("_Exclude_site_");
-              const _domains_fonts_set_ = await GMgetValue("_domains_fonts_set_");
-              const _domains_fonts_set__ = _domains_fonts_set_ || defCon.encrypt(JSON.stringify(def));
-              const _Custom_fontlist_ = await GMgetValue("_Custom_fontlist_");
-              const _Custom_fontlist__ = _Custom_fontlist_ || defCon.encrypt(JSON.stringify(def));
-              const _monospaced_fontlist_ = await GMgetValue("_monospaced_fontlist_");
-              const _monospaced_fontlist__ = _monospaced_fontlist_ || "";
+              const _fonts_Set_ = await GMgetValue("_fonts_set_");
+              const _exclude_Site_ = await GMgetValue("_Exclude_site_");
+              const _domains_Fonts_Set_ = await GMgetValue("_domains_fonts_set_");
+              const _domains_Fonts_Set__ = _domains_Fonts_Set_ || defCon.encrypt(JSON.stringify(def));
+              const _custom_Fontlist_ = await GMgetValue("_Custom_fontlist_");
+              const _custom_Fontlist__ = _custom_Fontlist_ || defCon.encrypt(JSON.stringify(def));
+              const _monospaced_Fontlist_ = await GMgetValue("_monospaced_fontlist_");
+              const _monospaced_Fontlist__ = _monospaced_Fontlist_ || "";
               const _configure_ = await GMgetValue("_configure_");
               const db_R = "QXV0aGVyJUUyJTlBJUExRjl5NG5nJUYwJTlGJTkyJTk2JTQw".concat(defCon.encrypt(defCon.scriptName));
               const db_0 = defCon.encrypt(String(new Date()));
-              const db_1 = _fonts_set_;
-              const db_2 = _Exclude_site_;
-              const db_3 = _domains_fonts_set__;
-              const db_4 = _Custom_fontlist__;
+              const db_1 = _fonts_Set_;
+              const db_2 = _exclude_Site_;
+              const db_3 = _domains_Fonts_Set__;
+              const db_4 = _custom_Fontlist__;
               const db_5 = _configure_;
-              const db_6 = _monospaced_fontlist__;
+              const db_6 = _monospaced_Fontlist__;
               const db = { db_R, db_0, db_1, db_2, db_3, db_4, db_5, db_6 };
               const via = `${getNavigator.browser().toLowerCase()}`;
               const timeStamp = setDateFormat("yyyy-MM-ddTHH-mm-ssZ", new Date());
@@ -4210,11 +4215,10 @@
 
     function reportErrorToAuthor(e, show = IS_OPEN_DEBUG) {
       if (show) {
-        let errors = "";
         closeConfigurePage({ isReload: false });
-        sleep(1e3).then(async () => {
+        sleep(Math.floor(Math.random() * 2e3))("").then(async errors => {
           try {
-            if (!qS("fr-dialogbox[error='true']")) {
+            if (!qS("fr-dialogbox[error]")) {
               const br = e.length > 1 ? "\u3000<br/>" : "";
               for (let i in e) {
                 if (oH.call(e, i)) {
@@ -4225,7 +4229,7 @@
                 trueButtonText: "反馈问题",
                 falseButtonText: "刷新页面",
                 messageText: String(
-                  `<p style="font-size:14px!important;color:crimson">脚本在运行时发生了重大异常或错误，若在『刷新页面』后依然报错，请通过『反馈问题』及时告知作者，感谢您的反馈\uff01<br/><kbd style="display: inline-block;padding:3px 5px;font-size:14px!important;margin:4px 0 0 0;color:crimson;vertical-align:middle;background-color:#f6f8fa;border:solid 1px rgba(175,184,193,0.4);border-radius:6px;box-shadow:inset 0 -1px 0 rgba(175,184,193,0.2);">以下信息会自动保存至您的剪切板\uff1a</kbd></p>
+                  `<p style="font-size:14px!important;color:crimson">脚本在运行时发生了重大异常或错误，若在『刷新页面』后依然报错，请通过『反馈问题』及时告知作者，感谢您的反馈\uff01<br/><kbd style="display:inline-block;padding:3px 10px;font-size:14px!important;margin:4px 0 0 0;color:#666666;vertical-align:middle;background-color:#f6f8fa;border:solid 1px rgba(175,184,193,0.4);border-radius:6px">以下信息会自动保存至您的剪切板</kbd></p>
                   <p><ul id="${RANDOM_ID}_copy_to_author" style="list-style-position:outside;margin:0!important;padding:0!important;max-height:300px;overflow-y:auto">
                     <li>浏览器信息\uff1a${await getNavigator.getUA()}\u3000</li>
                     <li>脚本扩展信息\uff1a${GMscriptHandler} ${GMversion}\u3000</li>

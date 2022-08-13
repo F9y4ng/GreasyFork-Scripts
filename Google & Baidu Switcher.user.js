@@ -3,7 +3,7 @@
 // @name:zh-CN         优雅的搜索引擎跳转助手
 // @name:zh-TW         优雅的搜索引擎跳轉助手
 // @name:ja            検索エンジンジャンプアシスタント
-// @version            2022.08.07.1
+// @version            2022.08.13.1
 // @author             F9y4ng
 // @description        Graceful search engine Switch assistant, more beautiful and more convenient. The new version adds anti-redirect function, custom search engine selection function, visual search parameter setting, and automatic update detection and other advanced functions.
 // @description:zh-CN  优雅的搜索引擎跳转助手，更美观、更便捷。新版本增加去重定向功能、自定义搜索引擎选取功能，提供可视化搜索参数设置，及自动更新检测等高级功能。
@@ -28,13 +28,14 @@
 // @match              *://image.so.com/i*
 // @match              *://so.toutiao.com/search*
 // @match              *://yandex.com/*search*
-// @include            /^https?:\/\/(\w+\.)?google\.[a-z.]{2,6}\/search.*$/
-// @exclude-match      *://www.google.com/sorry*
-// @exclude-match      *://www.baidu.com/link*
-// @exclude-match      *://www.sogou.com/link*
-// @exclude-match      *://www.so.com/link*
-// @exclude-match      *://so.toutiao.com/search/jump*
+// @include            *://*.google.*/search*
+// @exclude            *://www.google.com/sorry*
+// @exclude            *://www.baidu.com/link*
+// @exclude            *://www.sogou.com/link*
+// @exclude            *://www.so.com/link*
+// @exclude            *://so.toutiao.com/search/jump*
 // @connect            baidu.com
+// @connect            bing.com
 // @connect            sogou.com
 // @connect            so.com
 // @connect            greasyfork.org
@@ -45,7 +46,7 @@
 // @compatible         Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible         Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible         Safari 兼容Tampermonkey • Safari
-// @note               修正更新检测逻辑问题、优化操作体验。\n优化搜索引擎网站favicon的抓取效率。\n修正一些已知的问题，优化代码，优化样式。
+// @note               优化反搜索结果链接重定向的功能。\n修正Meta-data的兼容性问题。\n修正Safari浏览器的一些样式问题。\n修正一些已知的问题，优化代码，优化样式。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -1042,6 +1043,7 @@
 
   const IS_MACOS = getNavigator.system().startsWith("macOS");
   const API_ICO_YANDEX = defCon.decrypt("aHR0cHMlM0ElMkYlMkZmYXZpY29uLnlhbmRleC5uZXQlMkZmYXZpY29uJTJGdjI=");
+  const API_ICO_BACKUP = defCon.decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjIlMkYwOCUyRjExJTJGdkdXVUc4LnBuZw==");
   const API_ICO_DDUCKGO = defCon.decrypt("aHR0cHMlM0ElMkYlMkZpY29ucy5kdWNrZHVja2dvLmNvbSUyRmlwMg==");
   const HOST_URI = defCon.decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkYxMjkwOQ==");
   const FEEDBACK_URI = GMinfo.scriptMetaStr.match(/(\u0040\u0073\u0075\u0070\u0070\u006f\u0072\u0074\u0055\u0052\u004c\s+)(\S+)/)[2];
@@ -1073,7 +1075,7 @@
     )
   );
 
-  /* antiRedirect Functions */
+  /* AntiRedirect Functions */
 
   function filterRegx(string, reg) {
     try {
@@ -1084,136 +1086,177 @@
     }
   }
 
+  function clearHrefEvents(node) {
+    node.removeAttribute("data-hveid");
+    node.removeAttribute("data-cthref");
+    node.removeAttribute("data-jsarwt");
+    node.removeAttribute("data-usg");
+    node.removeAttribute("data-ved");
+    node.removeAttribute("ping");
+    node.removeAttribute("onmouseover");
+    node.setAttribute("target", "_blank");
+    return !node.getAttribute("ping");
+  }
+
   function addTargetEvent(str, siteName) {
-    count(`\ud83d\udd33 [${siteName}-Anti-Redirect]`);
-    qA(str).forEach(node => {
+    const requestNodes = qA(str);
+    requestNodes.length && count(`\ud83d\udd33 [${siteName}-Anti-Redirect]`);
+    requestNodes.forEach(node => {
       node.setAttribute("target", "_blank");
+      node.removeAttribute("h");
     });
   }
 
-  function findRedirectLink(str, siteName) {
-    count(`\ud83d\udd33 [${siteName}-Anti-Redirect]`);
-    qA(str).forEach(node => {
-      switch (siteName) {
-        case "Baidu":
-          antiRedirect_Baidu(node);
-          break;
-        case "Sogou":
-          antiRedirect_Sogou(node);
-          break;
-      }
-    });
-  }
-
-  function antiRedirect_Baidu(node) {
-    count("\ud83d\udd33 [Baidu-Anti-Redirect]");
-    node.setAttribute("gd-antiredirect-status", "pending");
-    const url = node.href.replace(/http:/, "https:");
-    return new Promise((resolve, reject) => {
-      GMxmlhttpRequest({
-        url: url,
-        headers: { Accept: "*/*", Referer: location.href.replace(/^http:/, "https:") },
-        method: "GET",
-        timeout: 5e3,
-        onreadystatechange: response => {
-          if (response.status === 200 && response.readyState === 4) {
-            resolve(response.finalUrl);
-          }
-        },
-        onerror: e => {
-          if (e.error && e.error.indexOf("Request was redirected to a not whitelisted URL") >= 0) {
-            const rUrl = filterRegx(e.error, 'Refused to connect to "([^"]*)": Request was redirected to a not whitelisted URL');
-            if (typeof rUrl === "undefined" || rUrl === null || rUrl === "" || rUrl.indexOf("www.baidu.com/search/error") > 0) {
-              return;
-            }
-            resolve(rUrl);
-          } else if (e.responseHeaders && e.responseHeaders.match(/Location: ([\S]+)/)) {
-            resolve(e.responseHeaders.match(/Location: ([\S]+)/)[1]);
-          } else {
-            reject(new Error(`URLBrokenError`));
-          }
-        },
-        ontimeout: () => {
-          warn("\ud83d\udd33 Timeout Retrying: %o", { Node: node, Text: node.textContent, URL: node.href });
-          node.style.backgroundColor = "lemonchiffon";
-          GMxmlhttpRequest({
-            url: url,
-            headers: { Accept: "*/*", Referer: location.href.replace(/^http:/, "https:") },
-            method: "GET",
-            timeout: 1e4,
-            onload: response => {
+  function antiRedirect_Baidu(str) {
+    const requestNodes = qA(str);
+    requestNodes.length && count(`\ud83d\udd33 [Baidu-Anti-Redirect]`);
+    requestNodes.forEach(node => {
+      node.setAttribute("gd-antiredirect-status", "pending");
+      const url = node.href.replace(/http:/, "https:");
+      return new Promise((resolve, reject) => {
+        GMxmlhttpRequest({
+          url: url,
+          headers: { Accept: "*/*", Referer: location.href.replace(/^http:/, "https:") },
+          method: "GET",
+          timeout: 5e3,
+          onreadystatechange: response => {
+            if (response.status === 200 && response.readyState === 4) {
               resolve(response.finalUrl);
-            },
-            ontimeout: () => {
-              reject(new Error(`TimeoutError`));
-            },
-          });
-        },
-      });
-    })
-      .then(res => {
-        debug("\ud83d\udd33", res);
-        node.href = res;
-        node.style.backgroundColor = null;
-        node.setAttribute("gd-antiredirect-status", "success");
+            }
+          },
+          onerror: e => {
+            if (e.error && e.error.indexOf("Request was redirected to a not whitelisted URL") >= 0) {
+              const rUrl = filterRegx(e.error, 'Refused to connect to "([^"]*)": Request was redirected to a not whitelisted URL');
+              if (typeof rUrl === "undefined" || rUrl === null || rUrl === "" || rUrl.indexOf("www.baidu.com/search/error") > 0) {
+                return;
+              }
+              resolve(rUrl);
+            } else if (e.responseHeaders && e.responseHeaders.match(/Location: ([\S]+)/)) {
+              resolve(e.responseHeaders.match(/Location: ([\S]+)/)[1]);
+            } else {
+              reject(new Error(`URLBrokenError`));
+            }
+          },
+          ontimeout: () => {
+            warn("\ud83d\udd33 Timeout Retrying: %o", { Node: node, Text: node.textContent, URL: node.href });
+            node.style.backgroundColor = "lemonchiffon";
+            GMxmlhttpRequest({
+              url: url,
+              headers: { Accept: "*/*", Referer: location.href.replace(/^http:/, "https:") },
+              method: "GET",
+              timeout: 1e4,
+              onload: response => {
+                resolve(response.finalUrl);
+              },
+              ontimeout: () => {
+                reject(new Error(`TimeoutError`));
+              },
+            });
+          },
+        });
       })
-      .catch(e => {
-        node.style = "color:gray!important;text-decoration:line-through!important";
-        error("antiRedirect_Baidu: %s %O", e.message, { Node: node, Text: node.textContent, URL: node.href });
-      });
+        .then(res => {
+          debug("\ud83d\udd33", res);
+          node.href = res;
+          node.style.backgroundColor = null;
+          node.setAttribute("gd-antiredirect-status", "success");
+        })
+        .catch(e => {
+          node.style = "color:gray!important;text-decoration:line-through!important";
+          node.setAttribute("gd-antiredirect-status", "failure");
+          error("antiRedirect_Baidu: %s %O", e.message, { Node: node, Text: node.textContent, URL: node.href });
+        });
+    });
   }
 
-  function antiRedirect_Sogou(node) {
-    count("\ud83d\udd33 [Sogou-Anti-Redirect]");
-    node.setAttribute("gd-antiredirect-status", "pending");
-    const url = node.href;
-    return new Promise((resolve, reject) => {
-      GMxmlhttpRequest({
-        url: url,
-        headers: { Accept: "*/*", Referer: location.href },
-        method: "GET",
-        timeout: 8e3,
-        onreadystatechange: response => {
-          if (response.status === 200 && response.readyState === 4) {
-            const resText = response.responseText || response.response || "";
-            let res = resText.match(/(URL=')([^']*)(')/);
-            res = res ? res[2] : response.finalUrl || null;
-            resolve(res);
-          }
-        },
-        onerror: () => {
-          reject(new Error(`URLBrokenError`));
-        },
-        ontimeout: () => {
-          reject(new Error(`TimeoutError`));
-        },
-      });
-    })
-      .then(res => {
-        debug("\ud83d\udd33", res);
-        node.href = res || node.href;
-        node.setAttribute("gd-antiredirect-status", "success");
+  function antiRedirect_Sogou(str) {
+    const requestNodes = qA(str);
+    requestNodes.length && count(`\ud83d\udd33 [Sogou-Anti-Redirect]`);
+    requestNodes.forEach(node => {
+      node.setAttribute("gd-antiredirect-status", "pending");
+      const url = node.href;
+      return new Promise((resolve, reject) => {
+        GMxmlhttpRequest({
+          url: url,
+          headers: { Accept: "*/*", Referer: location.href },
+          method: "GET",
+          timeout: 8e3,
+          onreadystatechange: response => {
+            if (response.status === 200 && response.readyState === 4) {
+              const resText = response.responseText || response.response || "";
+              let res = resText.match(/(URL=')([^']*)(')/);
+              res = res ? res[2] : response.finalUrl || null;
+              resolve(res);
+            }
+          },
+          onerror: () => {
+            reject(new Error(`URLBrokenError`));
+          },
+          ontimeout: () => {
+            reject(new Error(`TimeoutError`));
+          },
+        });
       })
-      .catch(e => {
-        node.style = "color:gray!important;text-decoration:line-through!important";
-        error("antiRedirect_Sogou: %s %O", e.message, { Node: node, Text: node.textContent, URL: node.href });
-      });
+        .then(res => {
+          debug("\ud83d\udd33", res);
+          node.href = res || node.href;
+          node.setAttribute("gd-antiredirect-status", "success");
+        })
+        .catch(e => {
+          node.style = "color:gray!important;text-decoration:line-through!important";
+          node.setAttribute("gd-antiredirect-status", "failure");
+          error("antiRedirect_Sogou: %s %O", e.message, { Node: node, Text: node.textContent, URL: node.href });
+        });
+    });
+  }
+
+  function antiRedirect_Bing(str) {
+    const requestNodes = qA(str);
+    requestNodes.length && count("\ud83d\udd33 [Bing-Anti-Redirect]");
+    requestNodes.forEach(node => {
+      node.setAttribute("gd-antiredirect-status", "pending");
+      const url = node.href;
+      return new Promise((resolve, reject) => {
+        GMxmlhttpRequest({
+          url: url,
+          headers: { Accept: "*/*", Referer: location.href },
+          method: "GET",
+          timeout: 8e3,
+          onreadystatechange: response => {
+            if (response.status === 200 && response.readyState === 4) {
+              const resText = response.responseText || response.response || "";
+              let res = resText.match(/(var\s+u\s*=\s*")([^"]+)("\s*;\s*\r\n)/i);
+              res = res ? res[2] : response.finalUrl || null;
+              resolve(res);
+            }
+          },
+          onerror: () => {
+            reject(new Error(`URLBrokenError`));
+          },
+          ontimeout: () => {
+            reject(new Error(`TimeoutError`));
+          },
+        });
+      })
+        .then(res => {
+          debug("\ud83d\udd33", res);
+          node.href = res || node.href;
+          node.removeAttribute("h");
+          node.setAttribute("gd-antiredirect-status", "success");
+        })
+        .catch(e => {
+          node.style = "color:gray!important;text-decoration:line-through!important";
+          node.setAttribute("gd-antiredirect-status", "failure");
+          error("antiRedirect_Bing: %s %O", e.message, { Node: node, Text: node.textContent, URL: node.href });
+        });
+    });
+    addTargetEvent(".b_algo a[h]:not([gd-antiredirect-status])", "Bing.exp");
   }
 
   function antiRedirect_Goolge(str) {
-    const clearHrefEvents = node => {
-      node.removeAttribute("data-hveid");
-      node.removeAttribute("data-cthref");
-      node.removeAttribute("data-jsarwt");
-      node.removeAttribute("data-usg");
-      node.removeAttribute("data-ved");
-      node.removeAttribute("ping");
-      node.removeAttribute("onmouseover");
-      node.setAttribute("target", "_blank");
-      node.setAttribute("gd-antiredirect-status", "success");
-    };
-    count("\ud83d\udd33 [Google-Anti-Redirect]");
-    qA(str).forEach(node => {
+    const requestNodes = qA(str);
+    requestNodes.length && count("\ud83d\udd33 [Google-Anti-Redirect]");
+    requestNodes.forEach(node => {
       node.getAttribute("href") &&
         (node.getAttribute("data-hveid") ||
           node.getAttribute("data-usg") ||
@@ -1222,17 +1265,20 @@
           node.getAttribute("ping") ||
           node.getAttribute("data-jsarwt") ||
           node.getAttribute("onmouseover")) &&
-        clearHrefEvents(node);
+        clearHrefEvents(node) &&
+        node.setAttribute("gd-antiredirect-status", "success");
     });
   }
 
   function antiRedirect_So360(str) {
-    count("\ud83d\udd33 [So360-Anti-Redirect]");
-    qA(str).forEach(node => {
+    const requestNodes = qA(str);
+    requestNodes.length && count("\ud83d\udd33 [So360-Anti-Redirect]");
+    requestNodes.forEach(node => {
       if (node.getAttribute("data-mdurl")) {
         node.href = node.dataset.mdurl;
         node.setAttribute("gd-antiredirect-status", "success");
       } else {
+        node.setAttribute("gd-antiredirect-status", "pending");
         const url = node.href;
         return new Promise((resolve, reject) => {
           GMxmlhttpRequest({
@@ -1243,7 +1289,7 @@
             onreadystatechange: response => {
               if (response.status === 200 && response.readyState === 4) {
                 const resText = response.responseText || response.response || "";
-                let res = resText.match(/(URL=')([^']*)(')/);
+                let res = resText.match(/(URL=')([^']+)(')/);
                 res = res ? res[2] : response.finalUrl || null;
                 resolve(res);
               }
@@ -1263,6 +1309,7 @@
           })
           .catch(e => {
             node.style = "color:gray!important;text-decoration:line-through!important";
+            node.setAttribute("gd-antiredirect-status", "failure");
             error("antiRedirect_So360: %s %O", e.message, { Node: node, Text: node.textContent, URL: node.href });
           });
       }
@@ -1274,8 +1321,9 @@
   }
 
   function antiRedirect_Toutiao(str) {
-    count("\ud83d\udd33 [Toutiao-Anti-Redirect]");
-    qA(str).forEach(node => {
+    const requestNodes = qA(str);
+    requestNodes.length && count("\ud83d\udd33 [Toutiao-Anti-Redirect]");
+    requestNodes.forEach(node => {
       const localUrl = node.href || "#";
       const realUrl = localUrl.match(/(\/search\/jump\?url=)([^&]+)(&)/);
       node.href = realUrl ? decodeURI(decodeURIComponent(realUrl[2])) : localUrl;
@@ -1304,9 +1352,9 @@
         SplitName: "tn",
         MainType: ".s_btn_wr",
         StyleCode: `a,a em{text-decoration:none!important}a:hover{text-decoration:underline!important}#form{white-space:nowrap}#u{z-index:1!important}#${CONST.rndID}{z-index:1999999995;position:relative;margin-left:4px;height:40px;display:inline-block}#${CONST.rndID} #${CONST.leftButton}{display:inline-block;margin-left:2px;height:40px}#${CONST.rndID} #${CONST.rightButton}{display:inline-block;margin-left:-1px;height:40px}#${CONST.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#fff;min-width:80px;border:1px solid #3476d2;font-size:16px!important;vertical-align:top;font-weight:600}#${CONST.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#fff;min-width:80px;border:1px solid #3476d2;font-size:16px!important;vertical-align:top;font-weight:600}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background: #4662D9;border:1px solid #3476d2}`,
-        keyStyle: "#wrapper_wrapper em",
-        antiRedirect: () => {
-          deBounce(findRedirectLink, 200, "baidu", true)(".c-container a[href*='//www.baidu.com/link?url=']:not([gd-antiredirect-status])", "Baidu");
+        KeyStyle: "#wrapper_wrapper em",
+        AntiRedirect: () => {
+          deBounce(antiRedirect_Baidu, 200, "baidu", true)(".c-container a[href*='//www.baidu.com/link?url=']:not([gd-antiredirect-status])");
         },
       },
       google: {
@@ -1314,14 +1362,14 @@
         SiteName: "Google",
         SiteNick: "Google 搜索",
         SiteURI: "www.google.com",
-        WebURL: "https://www.google.com/search?hl=zh-CN&source=hp&newwindow=1&q=",
-        ImgURL: "https://www.google.com/search?hl=zh-CN&source=lnms&tbm=isch&sa=X&q=",
+        WebURL: "https://www.google.com/search?hl=zh-CN&source=hp&safe=off&newwindow=1&q=",
+        ImgURL: "https://www.google.com/search?hl=zh-CN&source=lnms&tbm=isch&sa=X&safe=off&q=",
         IMGType: "isch",
         SplitName: "tbm",
         MainType: "form button[type='submit']",
         StyleCode: `#${CONST.rndID}{z-index:100;position:relative;margin:0 4px 0 -5px;display:flex;justify-content:center;align-items:center}#${CONST.rndID} #${CONST.leftButton}{padding:0 2px 0 8px}.${CONST.scrollspan}{min-height:26px}.${CONST.scrollspan2}{min-height:26px;margin-top:0!important}.${CONST.scrollbars}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}.${CONST.scrollbars2}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}#${CONST.leftButton} input{margin:0;cursor:pointer;padding:1px 12px 1px 18px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;min-width:90px;height:38px;font-size:16px;font-weight:600;color:#fff;vertical-align:top;}#${CONST.rightButton} input{margin:0;cursor:pointer;padding:1px 18px 1px 12px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;min-width:90px;height:38px;font-size:16px;font-weight:600;color:#fff;vertical-align:top;}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background:#2b7de9;}`,
-        keyStyle: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
-        antiRedirect: () => {
+        KeyStyle: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
+        AntiRedirect: () => {
           deBounce(antiRedirect_Goolge, 500, "google", true)("#rcnt a:not([gd-antiredirect-ok])");
         },
       },
@@ -1336,13 +1384,13 @@
         SplitName: "/",
         MainType: "#sb_search",
         StyleCode: `#${CONST.rndID}{z-index:1500;position:relative;display:inline-flex;top:0;left:0;height:39px;min-width:160px;width:max-content;align-content:center;justify-content: center;margin:1px 0 0 8px;padding:0}#${CONST.leftButton}{padding:0 5px 0 0;}#${CONST.rndID} input{box-sizing:border-box;cursor:pointer;min-width:80px;height:38px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;font-weight:600;font-size:16px}#${CONST.leftButton} input{border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px;}#${CONST.rightButton} input{border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 -3px;padding:0 18px 0 12px;}.${CONST.scrollspan}{max-height:30px;padding:0 3px 0 8px!important;margin:0!important;top:3px!important;}.${CONST.scrollspan2}{max-height:30px;top:-1px!important;}.${CONST.scrollbars}{border-radius:4px!important;max-height:30px;padding:0 12px!important;margin-right:1px!important;vertical-align:bottom}.${CONST.scrollbars2}{max-height:30px}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border:2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7}`,
-        keyStyle: String(
+        KeyStyle: String(
           Number(getUrlParam("ensearch")) || Number(getCookie("ENSEARCH"))
             ? ".b_caption p strong, .b_caption .b_factrow strong, .b_secondaryText strong,th, h2 strong, h3 strong"
             : "#sp_requery strong, #sp_recourse strong, #tile_link_cn strong, .b_ad .ad_esltitle~div strong, h2 strong, .b_caption p strong, .b_snippetBigText strong, .recommendationsTableTitle+.b_slideexp strong, .recommendationsTableTitle+table strong, .recommendationsTableTitle+ul strong, .pageRecoContainer .b_module_expansion_control strong, .b_rs strong, .b_rrsr strong, #dict_ans strong, .b_listnav>.b_ans_stamp>strong, .adltwrnmsg strong"
         ),
-        antiRedirect: () => {
-          deBounce(addTargetEvent, 200, "bing", true)(".b_algo a:not([target]):not([gd-antiredirect-status])", "Bing");
+        AntiRedirect: () => {
+          deBounce(antiRedirect_Bing, 300, "bing", true)("#b_results a[href*='.bing.com/ck/a?']:not([gd-antiredirect-status])");
         },
       },
       duckduckgo: {
@@ -1356,8 +1404,8 @@
         SplitName: "ia",
         MainType: "#search_form",
         StyleCode: `#${CONST.rndID}{z-index:1999999995;position:absolute;top:0;right:-188px;height:44px;display:block;}#${CONST.leftButton}{display:inline-block;height:44px}#${CONST.rightButton}{margin:0 0 0 -2px;display:inline-block;height:44px}#${CONST.leftButton} input{margin:0;cursor:pointer;padding:1px 10px 1px 15px!important;border:1px solid #00000026;box-shadow:0 2px 3px rgb(0 0 0 / 6%);background:#fff;border-top-left-radius:8px;border-bottom-left-radius:8px;min-width:90px;height:44px;font-size:16px;font-weight:400;color:#888;vertical-align:top;}#${CONST.rightButton} input{margin:0;cursor:pointer;padding:1px 15px 1px 10px!important;border:1px solid #00000026;box-shadow:0 2px 3px rgb(0 0 0 / 6%);background:#fff;border-top-right-radius:8px;border-bottom-right-radius:8px;min-width:90px;height:44px;font-size:16px;font-weight:400;color:#888;vertical-align:top;}#${CONST.rndID}:hover #${CONST.leftButton} input,#${CONST.rndID}:hover #${CONST.rightButton} input{background:#3969ef;color:#fff;}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background-color:#2950bf!important;border:1px solid #00000026;color:#fff;}`,
-        keyStyle: "strong, b",
-        antiRedirect: () => {},
+        KeyStyle: "strong, b",
+        AntiRedirect: () => {},
       },
       sogou: {
         SiteTypeID: 5,
@@ -1370,9 +1418,9 @@
         SplitName: "/",
         MainType: "input[type='submit'].sbtn1",
         StyleCode: `#${CONST.rndID}{z-index:1999999995;position:absolute;right:0;top:0;width:auto;height:34px;margin:-1px 0 0 0;padding:0;cursor:pointer;-webkit-appearance:none}#${CONST.leftButton}{display:inline;height:34px}#${CONST.rightButton}{display:inline;height:34px}#${CONST.leftButton} input{padding:0 18px!important;background:#fafafa;border-radius:3px;cursor:pointer;height:34px;color:#000;min-width:80px;border:1px solid #ababab;font-size:14px!important;font-weight:400;vertical-align:top;margin:0}#${CONST.rightButton} input{padding:0 18px!important;background:#fafafa;border-radius:3px;cursor:pointer;height:34px;color:#000;min-width:80px;border:1px solid #ababab;font-size:14px!important;font-weight:400;vertical-align:top;margin:0}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background: #f2f2f2;border:1px solid #7a7a7a;}`,
-        keyStyle: "#wrapper em",
-        antiRedirect: () => {
-          deBounce(findRedirectLink, 200, "sogou", true)(".vrwrap a[href^='/link?url=']:not([gd-antiredirect-status])", "Sogou");
+        KeyStyle: "#wrapper em",
+        AntiRedirect: () => {
+          deBounce(antiRedirect_Sogou, 200, "sogou", true)(".vrwrap a[href^='/link?url=']:not([gd-antiredirect-status])");
         },
       },
       fsou: {
@@ -1386,8 +1434,8 @@
         SplitName: "tbn",
         MainType: ".input-group-container .search-icon",
         StyleCode: `#${CONST.rndID}{z-index:1999999995;position:relative;height:36px;margin:0 -17px 0 15px;z-index:100;display:inline-flex;justify-content:center;align-items:center}#${CONST.rightButton}{padding:0 0 0 2px}#${CONST.leftButton} input{cursor:pointer;padding:1px 12px 1px 18px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:22px;border-bottom-left-radius:22px;min-width:90px;height:36px;font-size:15px;font-weight:600;color:#fff;vertical-align:top;}#${CONST.rightButton} input{cursor:pointer;padding:1px 18px 1px 12px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:22px;border-bottom-right-radius:22px;min-width:90px;height:36px;font-size:15px;font-weight:600;color:#fff;vertical-align:top;}`,
-        keyStyle: ".highlight-style",
-        antiRedirect: () => {},
+        KeyStyle: ".highlight-style",
+        AntiRedirect: () => {},
       },
       yandex: {
         SiteTypeID: 7,
@@ -1400,8 +1448,8 @@
         SplitName: "/",
         MainType: "form>div.search2__input",
         StyleCode: `#${CONST.rndID}{z-index:1999999995;position:absolute;right:0;top:0;width:auto;height:40px;margin:0;padding:0;cursor:pointer;-webkit-appearance:none}#${CONST.leftButton}{display:inline-block;height:40px}#${CONST.rightButton}{margin:0 0 0 -2px;display:inline-block;height:40px}#${CONST.leftButton} input{cursor:pointer;padding:0 12px 0 18px!important;border:1px solid transparent;background:#fc0;box-shadow:none;border-top-left-radius:10px;border-bottom-left-radius:10px;min-width:90px;height:40px;font-size:15px;font-weight:400;color:#000;vertical-align:top;}#${CONST.rightButton} input{cursor:pointer;padding:0 18px 0 12px!important;border:1px solid transparent;background:#fc0;box-shadow:none;border-top-right-radius:10px;border-bottom-right-radius:10px;min-width:90px;height:40px;font-size:15px;font-weight:400;color:#000;vertical-align:top;}`,
-        keyStyle: ".OrganicTitleContentSpan b,.OrganicTextContentSpan b",
-        antiRedirect: () => {},
+        KeyStyle: ".OrganicTitleContentSpan b,.OrganicTextContentSpan b",
+        AntiRedirect: () => {},
       },
       so360: {
         SiteTypeID: 8,
@@ -1414,9 +1462,9 @@
         SplitName: "/",
         MainType: "input[type='submit'][value='搜索']",
         StyleCode: `#hd-rtools{z-index:1!important}#${CONST.rndID}{z-index:199999995;position:relative;left:0;top:0;width:auto;height:40px;margin:0 0 0 5px;padding:0;cursor:pointer;-webkit-appearance:none}#${CONST.leftButton}{padding:0 1px 0 0;height:40px;display:inline-block;vertical-align:top}#${CONST.rightButton}{height:40px;display:inline-block;vertical-align:top}#${CONST.leftButton} input{padding:0 18px!important;background:#0fb264;border:1px solid #0fb264;border-top-left-radius:8px;border-bottom-left-radius:8px;cursor:pointer;height:40px;color:#fff;min-width:80px;font-size:16px!important;font-weight:400;vertical-align:top;margin:0 -2px 0 0}#${CONST.rightButton} input{padding:0 18px!important;background:#0fb264;border:1px solid #0fb264;border-top-right-radius:8px;border-bottom-right-radius:8px;cursor:pointer;height:40px;color:#fff;min-width:80px;font-size:16px!important;font-weight:400;vertical-align:top;margin:0}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background: #109e5a;border:1px solid #109e5a;}`,
-        keyStyle: "em,#mohe-newdict_dict .mh-exsentence b",
-        antiRedirect: () => {
-          deBounce(antiRedirect_So360, 500, "so360", true)(".res-list a[href*='//www.so.com/link?m=']:not([gd-antiredirect-status])");
+        KeyStyle: "em,#mohe-newdict_dict .mh-exsentence b",
+        AntiRedirect: () => {
+          deBounce(antiRedirect_So360, 300, "so360", true)(".res-list a[href*='//www.so.com/link?m=']:not([gd-antiredirect-status])");
         },
       },
       toutiao: {
@@ -1430,8 +1478,8 @@
         SplitName: "pd",
         MainType: "div[class^='search'][data-log-click]",
         StyleCode: `#${CONST.rndID}{z-index:1999999995;position:absolute;right:-160px;top:0;width:auto;height:44px;margin:-1px;padding:0;cursor:pointer;-webkit-appearance:none}#${CONST.leftButton}{display:inline-block;height:44px}#${CONST.rightButton}{margin:0 0 0 -2px;display:inline-block;height:44px}#${CONST.leftButton} input{margin:0;cursor:pointer;padding:1px 10px 1px 15px!important;background:#f04142ff;border:1px solid transparent;border-top-left-radius:8px;border-bottom-left-radius:8px;min-width:90px;height:44px;font-size:18px;font-weight:500;color:#fff;vertical-align:top;}#${CONST.rightButton} input{margin:0;cursor:pointer;padding:1px 15px 1px 10px!important;background:#f04142ff;border:1px solid transparent;border-top-right-radius:8px;border-bottom-right-radius:8px;min-width:90px;height:44px;font-size:18px;font-weight:500;color:#fff;vertical-align:top;}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background-color:#f04142b3;color:#fff;}`,
-        keyStyle: "em",
-        antiRedirect: () => {
+        KeyStyle: "em",
+        AntiRedirect: () => {
           const keyString = ".main a[href*='/search/jump?url=']:not([gd-antiredirect-status]),.main a.cs-view-block[href*='/search/jump?url=']:not([gd-antiredirect-status])";
           deBounce(antiRedirect_Toutiao, 200, "toutiao", true)(keyString);
         },
@@ -1513,17 +1561,15 @@
         </span>`
     );
     CONST.highlightCss = String(
-      `${listCurrentSite.keyStyle} {
-        color:#f73131cd!important;
-        background-color:#ffff80ad!important;
-        font-weight:700!important
+      `${listCurrentSite.KeyStyle} {
+        background-color:#ffff80ad!important;color:#f73131cd!important;font-weight:700!important;
       }`
     );
     CONST.iconCss = String(
       `.${Notice.noticejs} .${Notice.configuration} span.${Notice.favicon},
         .${Notice.card}__body-cover-image span.${Notice.favicons} {
           background-color:#fff;
-          background-image:url('${API_ICO_YANDEX}/${CONST.allSiteURIs}?size=32&stub=1');
+          background-image:url('${API_ICO_YANDEX}/${CONST.allSiteURIs}?size=32&stub=1'),url('${API_ICO_BACKUP}');
           background-repeat:no-repeat;
         }`
     );
@@ -1605,7 +1651,7 @@
               listCurrentSite.SiteTypeID === newSiteType.DUCKDUCKGO
                 ? `background-image:url('${API_ICO_DDUCKGO}/${listSite[site].SiteURI}.ico')!important;`
                 : `background-position:0 ${(1 - listSite[site].SiteTypeID) * 32}px;`
-            ).concat(`background-attachment:fixed;background-size:32px auto;`);
+            ).concat(`background-attachment:local;background-size:32px auto;`);
             returnHtml += String(
               `<label class="${Notice.card}">
                 <input class="${Notice.card}__input" type="checkbox" name="${Notice.card}_lists" data-sn="${listSite[site].SiteTypeID}"\
@@ -1822,17 +1868,17 @@
     };
 
     if (CUR_WINDOW_TOP) {
-      let Parameter_Set, Engine_List, Feed_Back;
-      Parameter_Set ? GMunregisterMenuCommand(Parameter_Set) : debug("\ud83d\udd33 %cInstalling Font_Set_Menu", "color:gray");
-      Parameter_Set = GMregisterMenuCommand(`\ufff0\u2699\ufe0f 搜索引擎助手参数设置${isHotkey ? "(" + String.fromCharCode(IS_MACOS ? 89 : 69) + ")" : ""}`, () => {
+      let parameter_Set, engine_List, feed_Back;
+      parameter_Set ? GMunregisterMenuCommand(parameter_Set) : debug("\ud83d\udd33 %cInstalling Font_Set_Menu", "color:gray");
+      parameter_Set = GMregisterMenuCommand(`\ufff0\u2699\ufe0f 搜索引擎助手参数设置${isHotkey ? "(" + String.fromCharCode(IS_MACOS ? 89 : 69) + ")" : ""}`, () => {
         addAction.setConfigure();
       });
-      Engine_List ? GMunregisterMenuCommand(Engine_List) : debug("\ud83d\udd33 %cInstalling Exclude_site_Menu", "color:gray");
-      Engine_List = GMregisterMenuCommand(`\ufff2\ud83d\udc4b 嗨，你想去哪里吖？${isHotkey ? "(" + String.fromCharCode(IS_MACOS ? 75 : 86) + ")" : ""}`, () => {
+      engine_List ? GMunregisterMenuCommand(engine_List) : debug("\ud83d\udd33 %cInstalling Exclude_site_Menu", "color:gray");
+      engine_List = GMregisterMenuCommand(`\ufff2\ud83d\udc4b 嗨，你想去哪里吖？${isHotkey ? "(" + String.fromCharCode(IS_MACOS ? 75 : 86) + ")" : ""}`, () => {
         addAction.listEngine();
       });
-      Feed_Back ? GMunregisterMenuCommand(Feed_Back) : debug("\ud83d\udd33 %cInstalling Feed_Back_Menu", "color:gray");
-      Feed_Back = GMregisterMenuCommand(`\ufff9\u2712\ufe0f 向作者提点儿建议${isHotkey ? "(" + String.fromCharCode(66) + ")" : ""}`, () => {
+      feed_Back ? GMunregisterMenuCommand(feed_Back) : debug("\ud83d\udd33 %cInstalling Feed_Back_Menu", "color:gray");
+      feed_Back = GMregisterMenuCommand(`\ufff9\u2712\ufe0f 向作者提点儿建议${isHotkey ? "(" + String.fromCharCode(66) + ")" : ""}`, () => {
         GMopenInTab(FEEDBACK_URI, defCon.options);
       });
     }
@@ -1874,7 +1920,7 @@
         if (CONST.isSecurityPolicy ? !qS(`.${CONST.rndstyleName}`) : !qS(`.${CONST.rndclassName}`) || !qS(`#${CONST.rndID}`) || !qS(`.${CONST.rndstyleName}`)) {
           preInsertContentsToDocument();
         }
-        antiLinkRedirect && listCurrentSite.SiteTypeID !== newSiteType.OTHERS && !CONST.indexPage() && listCurrentSite.antiRedirect();
+        antiLinkRedirect && listCurrentSite.SiteTypeID !== newSiteType.OTHERS && !CONST.indexPage() && listCurrentSite.AntiRedirect();
       }).observe(document, { childList: true, subtree: true });
     }
 
@@ -1917,7 +1963,7 @@
       }
     }
 
-    async function insertButtons() {
+    function insertButtons() {
       try {
         const getTarget = currentSite.MainType;
         const userSpan = cE("span");
@@ -2196,38 +2242,38 @@
       }
       return encodeURIComponent(val);
     }
-  })();
 
-  function getGlobalGoogle(google, checkGoogleJump) {
-    if (checkGoogleJump) {
-      const getRealHostName = hostname => {
-        const index = hostname || top.location.hostname;
-        return index.substring(index.indexOf("google"));
-      };
-      if (getRealHostName() !== getRealHostName(google) && !sessionStorage.getItem("_global_google_")) {
-        sessionStorage.setItem("_global_google_", 1);
-        const redirectNCR = () => {
-          defCon.s && defCon.s.close();
-          delete defCon.s;
-          sessionStorage.removeItem("_global_google_");
-          location.href = top.location.href.replace(top.location.hostname, google);
+    function getGlobalGoogle(google, checkGoogleJump) {
+      if (checkGoogleJump) {
+        const getRealHostName = hostname => {
+          const index = hostname || top.location.hostname;
+          return index.substring(index.indexOf("google"));
         };
-        try {
-          sleep(500).then(() => {
-            defCon.s = GMopenInTab(`https://${google}/ncr`, true);
-            GMnotification({
-              title: `智能跳转`,
-              text: Notice.noticeHTML(`<dd class="${Notice.center}">当前页面即将跳转至 Google国际站（NCR）<br/><span>${google.toUpperCase()}</span></dd>`),
-              type: `${Notice.info}`,
-              closeWith: ["click"],
-              timeout: 20,
-              callbacks: { onClose: [redirectNCR] },
+        if (getRealHostName() !== getRealHostName(google) && !sessionStorage.getItem("_global_google_")) {
+          sessionStorage.setItem("_global_google_", 1);
+          const redirectNCR = () => {
+            defCon.s && defCon.s.close();
+            delete defCon.s;
+            sessionStorage.removeItem("_global_google_");
+            location.href = top.location.href.replace(top.location.hostname, google);
+          };
+          try {
+            sleep(500).then(() => {
+              defCon.s = GMopenInTab(`https://${google}/ncr`, true);
+              GMnotification({
+                title: `智能跳转`,
+                text: Notice.noticeHTML(`<dd class="${Notice.center}">当前页面即将跳转至 Google国际站（NCR）<br/><span>${google.toUpperCase()}</span></dd>`),
+                type: `${Notice.info}`,
+                closeWith: ["click"],
+                timeout: 20,
+                callbacks: { onClose: [redirectNCR] },
+              });
             });
-          });
-        } catch (e) {
-          error("getGlobalGoogle:", e.message);
+          } catch (e) {
+            error("getGlobalGoogle:", e.message);
+          }
         }
       }
     }
-  }
+  })();
 })();
