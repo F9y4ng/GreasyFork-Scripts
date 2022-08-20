@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.08.13.1
+// @version            2022.08.20.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -12,7 +12,7 @@
 // @description:ja     各ページの中国語フォントをテクスチャにしたり、デフォルトでMicrosoft Yaheiフォントを使用したり、複数の中国語フォントをカスタマイズしたり、フォントストローク、フォント書き換え、フォントシャドウ、フォントスムージング、特別なスタイル要素のフィルタリングやライセンスなどの効果を追加したり、スクリプトメニューで設定インターフェイスを使用してパラメータ設定を行ったり、ドメイン名の下にあるすべてのページを除外してレンダリングしたり、一般的なGreasemonkeyスクリプトやブラウザプラグインと互換性があります。
 // @description:en     Let each page of the Chinese font becomes texture, the default uses Microsoft YaHei font, and you can customize the set of Chinese fonts, additional font strokes, font rewriting, font shadows, smooth, and special Filtering and licensing of style elements, etc., you can use the setting interface to perform parameter settings in the script menu, or you can exclude all pages under a domain name, compatible with common Greasemonkey scripts and browser plugins.
 // @namespace          https://openuserjs.org/scripts/f9y4ng/Font_Rendering_(Customized)
-// @icon               https://img.icons8.com/ios-filled/50/26e07f/font-style-formatting.png
+// @icon               https://img.icons8.com/stickers/48/font-style-formatting.png
 // @homepage           https://f9y4ng.github.io/GreasyFork-Scripts/
 // @homepageURL        https://f9y4ng.github.io/GreasyFork-Scripts/
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
@@ -83,8 +83,8 @@
     domainCount: 0,
     successId: false,
     siteIndex: undefined,
-    curVersion: GMinfo.script.version,
     scriptName: getScriptNameViaLanguage(),
+    curVersion: GMinfo.script.version || GMinfo.scriptMetaStr.match(/@version\s+(\S+)/)[1],
     options: isGM ? false : { active: true, insert: true, setParent: true },
     elCompat: document.compatMode === "CSS1Compat" ? document.documentElement : document.body,
     getScreenCTM: SVGGraphicsElement.prototype.getScreenCTM,
@@ -2160,8 +2160,8 @@
             <p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}
               <!-- START VERSION NOTICE -->
-              <li class="${RANDOM_ID}_fix">优化冗余脚本执行的错误自检，可参阅排查清单 <a target="_blank" href="${FEEDBACK_URI}/117">#117</a>。</li>
-              <li class="${RANDOM_ID}_fix">优化本地字体检测功能，提升跨浏览器跨系统的识别率。</li>
+              <li class="${RANDOM_ID}_fix">修正某些网站字体缩放后页面居中的问题。</li>
+              <li class="${RANDOM_ID}_fix">更新一个美观的脚本icon图标。</li>
               <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化代码。</li>
               <!-- END VERSION NOTICE -->
             </ul></p>
@@ -2220,7 +2220,7 @@
     let bodyzoom = "";
     const fontsize_r = parseFloat(CONST_VALUES.fontSize);
     const funcFontsize = t => {
-      return `body{${IS_REAL_GECKO ? `transform:scale(${t});transform-origin:left top 0;width:${100 / t}%;height:${100 / t}%;` : `zoom:${t}!important;`}}`;
+      return `body{${IS_REAL_GECKO ? `transform:scale(${t});transform-origin:left top 0;width:${100 / t}%;height:${100 / t}%;` : `zoom:${t}!important;width:100%!important`}}`;
     };
     if (defCon.isFontsize && !isNaN(fontsize_r) && fontsize_r >= 0.8 && fontsize_r <= 1.5 && fontsize_r !== 1) {
       bodyzoom = funcFontsize(fontsize_r);
@@ -2484,7 +2484,7 @@
 
     if (CUR_WINDOW_TOP) {
       if (typeof defCon.exSitesIndex === "undefined") {
-        console.info(
+        console.log(
           `%c${defCon.scriptName}\n%cINTRO.URL:\u0020https://f9y4ng.likes.fans/FontRendering\n%c\u259e\u0020脚本版本\uff1a%cV%s%c%s%c\n\u259e\u0020个性化设置\uff1a%c%s%c/%s%s\n%c\u259e\u0020字体缩放\uff1a%s%s\n\u259e\u0020本地备份\uff1a%s\u3000\u259a\u0020保存预览\uff1a%s\n%c\u259e\u0020渲染字体\uff1a%s\n\u259e\u0020字体平滑\uff1a%s\u3000\u259a\u0020字体重写\uff1a%s\n\u259e\u0020字体描边\uff1a%s\u3000\u259a\u0020字体阴影\uff1a%s`,
           "font:normal 700 16px/150% system-ui,-apple-system,BlinkMacSystemFont,sans-serif;color:crimson",
           "line-height:180%;font-size:10px;color:#777;font-style:italic",
@@ -2516,7 +2516,7 @@
           CONST_VALUES.fontShadow ? "ON " : "OFF"
         );
       } else {
-        console.info(
+        console.log(
           `%c${defCon.scriptName}\n%c${CUR_HOST_NAME.toUpperCase()} 已在排除渲染列表内，若要重新渲染，请在脚本菜单中打开重新渲染。${
             isHotkey ? "(" + String(IS_MACOS ? "Command+" : "Alt+") + String.fromCharCode(IS_MACOS ? 71 : 88) + ")" : ""
           }`,
@@ -3426,7 +3426,7 @@
                 this.value = convertFullToHalf(this.value)
                   .replace(/"|`|·|“|”|‘|’/g, `'`)
                   .replace(/，/g, `,`)
-                  .replace(/'monospace',?/gi);
+                  .replace(/'monospace',?/gi, ``);
                 custom_monospacedFontlist = this.value.trim();
               });
               if (await frDialog.respond()) {
