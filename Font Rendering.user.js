@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.08.20.1
+// @version            2022.08.20.2
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -2220,7 +2220,9 @@
     let bodyzoom = "";
     const fontsize_r = parseFloat(CONST_VALUES.fontSize);
     const funcFontsize = t => {
-      return `body{${IS_REAL_GECKO ? `transform:scale(${t});transform-origin:left top 0;width:${100 / t}%;height:${100 / t}%;` : `zoom:${t}!important;width:100%!important`}}`;
+      return `body{${
+        IS_REAL_GECKO ? `transform:scale(${t});transform-origin:left top 0;width:${100 / t}%;height:${100 / t}%;` : `zoom:${t}!important;max-width:-webkit-fill-available;`
+      }}`;
     };
     if (defCon.isFontsize && !isNaN(fontsize_r) && fontsize_r >= 0.8 && fontsize_r <= 1.5 && fontsize_r !== 1) {
       bodyzoom = funcFontsize(fontsize_r);
