@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.08.20.2
+// @version            2022.08.27.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -81,8 +81,6 @@
     errors: [],
     clickTimer: 0,
     domainCount: 0,
-    successId: false,
-    siteIndex: undefined,
     scriptName: getScriptNameViaLanguage(),
     curVersion: GMinfo.script.version || GMinfo.scriptMetaStr.match(/@version\s+(\S+)/)[1],
     options: isGM ? false : { active: true, insert: true, setParent: true },
@@ -1894,6 +1892,7 @@
     monospacedFont: `'Operator Mono Lig','Fira Code','Source Code Pro','DejaVu Sans Mono','Anonymous Pro','Ubuntu Mono','Roboto Mono','JetBrains Mono','Droid Sans Mono','Mono','Monaco','Menlo','Inconsolata','Liberation Mono'`,
   };
   const IS_MACOS = getNavigator.system().startsWith("macOS");
+  const EXCLUDES_EDITORIAL_SITES = ["github.dev", "www.kdocs.cn"].includes(CUR_HOST_NAME);
   const SCRIPT_AUTHOR = GMinfo.scriptMetaStr.match(/(\u0040\u0061\u0075\u0074\u0068\u006f\u0072\s+)(\S+)/)[2];
   const FEEDBACK_URI = GMinfo.scriptMetaStr.match(/(\u0040\u0073\u0075\u0070\u0070\u006f\u0072\u0074\u0055\u0052\u004c\s+)(\S+)/)[2];
   const ROOT_SECRET_KEY = `\u8ab1\u004a\u0056\u0069\u0059\u7409\u67d3\u5b7a\u80ba\u0070\u0032\u004f\u64d3\u0030\u8151\u0074\u5c80\u5b9a\u81ba\u0065`;
@@ -2090,7 +2089,7 @@
         CONST_VALUES.fontStroke = Number(domainValue[domainValueIndex].fontStroke) || 0;
         CONST_VALUES.fixStroke = !IS_REAL_BLINK ? false : typeof domainValue[domainValueIndex].fixStroke === "undefined" ? true : Boolean(domainValue[domainValueIndex].fixStroke);
         CONST_VALUES.fontShadow = Number(domainValue[domainValueIndex].fontShadow) || 0;
-        CONST_VALUES.fontSize = defCon.isFontsize ? Number(domainValue[domainValueIndex].fontSize) || 1 : 1;
+        CONST_VALUES.fontSize = !defCon.isFontsize ? 1 : EXCLUDES_EDITORIAL_SITES ? 1 : Number(domainValue[domainValueIndex].fontSize) || 1;
         CONST_VALUES.shadowColor = filterHtmlToText(domainValue[domainValueIndex].shadowColor);
         CONST_VALUES.fontSmooth = Boolean(domainValue[domainValueIndex].fontSmooth);
         CONST_VALUES.fontCSS = filterHtmlToText(domainValue[domainValueIndex].fontCSS);
@@ -2101,7 +2100,7 @@
         CONST_VALUES.fontStroke = Number(fontValue.fontStroke) || 0;
         CONST_VALUES.fixStroke = !IS_REAL_BLINK ? false : typeof fontValue.fixStroke === "undefined" ? true : Boolean(fontValue.fixStroke);
         CONST_VALUES.fontShadow = Number(fontValue.fontShadow) || 0;
-        CONST_VALUES.fontSize = defCon.isFontsize ? Number(fontValue.fontSize) || 1 : 1;
+        CONST_VALUES.fontSize = !defCon.isFontsize ? 1 : EXCLUDES_EDITORIAL_SITES ? 1 : Number(fontValue.fontSize) || 1;
         CONST_VALUES.shadowColor = filterHtmlToText(fontValue.shadowColor);
         CONST_VALUES.fontSmooth = Boolean(fontValue.fontSmooth);
         CONST_VALUES.fontCSS = filterHtmlToText(fontValue.fontCSS);
@@ -2160,8 +2159,8 @@
             <p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}
               <!-- START VERSION NOTICE -->
-              <li class="${RANDOM_ID}_fix">修正某些网站字体缩放后页面居中的问题。</li>
-              <li class="${RANDOM_ID}_fix">更新一个美观的脚本icon图标。</li>
+              <li class="${RANDOM_ID}_fix">优化字体参数的设置规则，减少无效配置。</li>
+              <li class="${RANDOM_ID}_fix">优化字体缩放兼容性，排除代码、文档等在线编辑站点。</li>
               <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化代码。</li>
               <!-- END VERSION NOTICE -->
             </ul></p>
@@ -2221,7 +2220,7 @@
     const fontsize_r = parseFloat(CONST_VALUES.fontSize);
     const funcFontsize = t => {
       return `body{${
-        IS_REAL_GECKO ? `transform:scale(${t});transform-origin:left top 0;width:${100 / t}%;height:${100 / t}%;` : `zoom:${t}!important;max-width:-webkit-fill-available;`
+        IS_REAL_GECKO ? `transform:scale(${t});transform-origin:0 0;width:${100 / t}%;height:${100 / t}%;` : `zoom:${t}!important;max-width:-webkit-fill-available;`
       }}`;
     };
     if (defCon.isFontsize && !isNaN(fontsize_r) && fontsize_r >= 0.8 && fontsize_r <= 1.5 && fontsize_r !== 1) {
@@ -2284,12 +2283,11 @@
         const elcode = ["samp", "kbd", "[class~='code']", "[class~='code'] *", "[class~='blob-code']", "[class~='blob-code'] *"];
         const codeSelector = pre.concat(code, elcode).join();
         const monospace = CONST_VALUES.monospacedFont || INITIAL_VALUES.monospacedFont;
-        const strokeWidth = !isNaN(stroke_r) && stroke_r > 0 && stroke_r <= 1.0 ? stroke_r : 0;
         const mono = s ? r : INITIAL_VALUES.fontSelect.replace("'Microsoft YaHei',", "");
         return String(
           `${codeSelector}{` +
             `font-size:14px!important;line-height:150%!important;` +
-            `-webkit-text-stroke:${strokeWidth}px currentcolor;text-shadow:none!important;` +
+            `-webkit-text-stroke:initial!important;text-shadow:0 0 ${shadow_r * 0.8}px ${toColordepth(shadow_c, 1.65)}!important;` +
             `font-family:${monospace},ui-monospace,Consolas,'Lucida Console',${IS_REAL_GECKO ? "" : "monospace,"}` +
             `${IS_REAL_GECKO ? mono.replace("system-ui", "monospace,system-ui") : mono}!important;` +
             `font-feature-settings:"liga" 0,"tnum","zero"!important;user-select:text!important}`
@@ -2297,14 +2295,15 @@
       }
       return "";
     };
-    const exclude = cssexlude ? `${cssexlude}{-webkit-text-stroke:initial!important;text-shadow:none!important}` : "";
-    const codeFont = cssexlude ? funcCodefont(cssexlude, fontface_i, CONST_VALUES.fontSelect) : "";
+    const zeroConfigure = !fontface_i && !smooth_i && !shadow && !stroke && fontsize_r === 1;
+    const exclude = !cssexlude || (!shadow && !stroke) ? `` : `${cssexlude}{-webkit-text-stroke:initial!important;text-shadow:none!important}`;
+    const codeFont = !cssexlude || zeroConfigure ? `` : funcCodefont(cssexlude, fontface_i, CONST_VALUES.fontSelect);
     const cssfun = CONST_VALUES.fontCSS;
-    const textrender = "text-rendering:optimizeLegibility!important;";
-    const fixfontstroke = "[fr-fix-stroke]{-webkit-text-stroke:initial!important}";
+    const textrender = smooth_i ? "text-rendering:optimizeLegibility!important;" : "";
+    const fixfontstroke = CONST_VALUES.fixStroke ? "[fr-fix-stroke]{-webkit-text-stroke:initial!important}" : "";
     const fontStyle = String(
-      typeof defCon.exSitesIndex === "undefined"
-        ? `${fontfaces}${bodyzoom}${cssfun}{${fontfamily}${shadow}${stroke}${smoothing}${textrender}}${codeFont}${selection}${exclude}${fixfontstroke}`
+      typeof defCon.exSitesIndex === "undefined" && !zeroConfigure
+        ? `${fontfaces}${bodyzoom}${cssfun}{${fontfamily}${shadow}${stroke}${smoothing}${textrender}}${selection}${exclude}${codeFont}${fixfontstroke}`
         : ""
     );
     const fontTest = String(
@@ -2504,7 +2503,9 @@
           "line-height:180%;font-size:12px;color:steelblue",
           defCon.isFontsize ? "ON " : "OFF",
           defCon.isFontsize
-            ? CONST_VALUES.fontSize === 1
+            ? EXCLUDES_EDITORIAL_SITES
+              ? `\u3000\u259a\u0020\u7f29\u653e\u6bd4\u4f8b\uff1a(EXCLUDED WEBSITE)`
+              : CONST_VALUES.fontSize === 1
               ? "\u3000\u259a\u0020\u7f29\u653e\u6bd4\u4f8b\uff1a(WEBSITE DEFINED)"
               : `\u3000\u259a\u0020\u7f29\u653e\u6bd4\u4f8b\uff1a${Number(CONST_VALUES.fontSize * 100).toFixed(2) + "%"}`
             : "\u3000\u259a\u0020\u7f29\u653e\u6bd4\u4f8b\uff1a(BROWSER DEFINED)",
@@ -3327,8 +3328,16 @@
           let fixStrokeT;
           if (IS_REAL_BLINK) {
             fixStrokeT = qS(`#${defCon.id.fixStroke}`);
-            saveChangeStatus(fixStrokeT, CONST_VALUES.fixStroke, submitButton, defCon.values);
-            qS(`#${defCon.id.fstroke}`).style.visibility = stroke.value === "OFF" ? "hidden" : "visible";
+            try {
+              qS(`#${defCon.id.fstroke}`).style.visibility = stroke.value === "OFF" ? "hidden" : "visible";
+              stroke.addEventListener("change", function () {
+                qS(`#${defCon.id.fstroke}`).style.visibility = this.value === "OFF" ? "hidden" : "visible";
+              });
+            } catch (e) {
+              error("fixStroke:", e.message);
+            } finally {
+              saveChangeStatus(fixStrokeT, CONST_VALUES.fixStroke, submitButton, defCon.values);
+            }
           }
 
           /* Fonts shadow */
@@ -3338,9 +3347,12 @@
           try {
             drawShadow = qS(`#${defCon.id.shadow}`);
             shadows.value = CONST_VALUES.fontShadow === 0 ? "OFF" : CONST_VALUES.fontShadow.toFixed(2);
-            qS(`#${defCon.id.shadowColor}`).style.display = shadows.value === "OFF" ? "none" : "flex";
             rangeSliderWidget(drawShadow, shadows, 2);
             checkInputValue(shadows, drawShadow, /^[0-8](\.[0-9]{1,2})?$/, 2);
+            qS(`#${defCon.id.shadowColor}`).style.display = shadows.value === "OFF" ? "none" : "flex";
+            shadows.addEventListener("change", function () {
+              qS(`#${defCon.id.shadowColor}`).style.display = this.value === "OFF" ? "none" : "flex";
+            });
           } catch (e) {
             defCon.errors.push(`[Fonts shadow]: ${e}`);
             error("Fonts shadow:", e.message);
@@ -3568,7 +3580,7 @@
             const fontface = ffaceT.checked;
             const smooth = smoothT.checked;
             const prefzoom = !defCon.isFontsize ? 1 : /^[0-1](\.[0-9]{1,3})?$/.test(zoom.value) ? zoom.value : INITIAL_VALUES.fontSize;
-            const fzoom = prefzoom < 0.8 ? 0.8 : prefzoom > 1.5 ? 1.5 : Number(prefzoom);
+            const fzoom = EXCLUDES_EDITORIAL_SITES ? 1 : prefzoom < 0.8 ? 0.8 : prefzoom > 1.5 ? 1.5 : Number(prefzoom);
             const fstroke = /^[0-1](\.[0-9]{1,3})?$/.test(stroke.value) ? stroke.value : stroke.value === "OFF" ? 0 : INITIAL_VALUES.fontStroke;
             const fixfstroke = !IS_REAL_BLINK ? false : fstroke === 0 ? false : fixStrokeT.checked;
             const fshadow = /^[0-8](\.[0-9]{1,2})?$/.test(shadows.value) ? shadows.value : shadows.value === "OFF" ? 0 : INITIAL_VALUES.fontShadow;
@@ -3580,21 +3592,24 @@
             const fontex = fex ? fex.replace(/"|`/g, "'") : "";
             if (defCon.isPreview && this.getAttribute("v-Preview")) {
               try {
+                const _zeroConfigure = !fontface && !smooth && !fshadow && !fstroke && fzoom === 1;
                 const _bodyzoom = !defCon.isFontsize ? "" : fzoom >= 0.8 && fzoom <= 1.5 && fzoom !== 1 ? funcFontsize(fzoom) : "";
                 const _shadow = fshadow > 0 && fshadow <= 8 ? overlayColor(fshadow, fscolor) : "";
                 const _stroke = fstroke > 0 && fstroke <= 1.0 ? `-webkit-text-stroke:${fstroke}px currentcolor;` : "";
                 const _smoothing = smooth ? funcSmooth : "";
+                const _textrender = smooth ? "text-rendering:optimizeLegibility!important;" : "";
                 const _fontfamily = fontface ? `font-family:${fontselect};` : "";
                 const _prefont = fontselect.split(",")[0];
                 const _refont = _prefont.replace(/"|'/g, "");
                 const _fontfaces = !fontface ? "" : _refont ? await funcFontface(_refont) : "";
-                const _exclude = fontex ? `${filterHtmlToText(fontex)}{-webkit-text-stroke:initial!important;text-shadow:none!important}` : "";
-                const _codeFont = fontex ? funcCodefont(fontex, fontface, fontselect) : "";
+                const _exclude = !fontex || (!fshadow && !fstroke) ? `` : `${filterHtmlToText(fontex)}{-webkit-text-stroke:initial!important;text-shadow:none!important}`;
+                const _codeFont = !fontex || _zeroConfigure ? `` : funcCodefont(fontex, fontface, fontselect);
+                const _fixfontstroke = fixfstroke ? "[fr-fix-stroke]{-webkit-text-stroke:initial!important}" : "";
                 const _tshadow = `${_fontfaces}${_bodyzoom}`.concat(
-                  `${filterHtmlToText(cssfun)}{${_fontfamily}${_shadow}${_stroke}${_smoothing}${textrender}}`,
-                  `${_codeFont}${_exclude}${fixfontstroke}`
+                  `${filterHtmlToText(cssfun)}{${_fontfamily}${_shadow}${_stroke}${_smoothing}${_textrender}}`,
+                  `${_exclude}${_codeFont}${_fixfontstroke}`
                 );
-                const __tshadow = `@charset "UTF-8";${_tshadow}`;
+                const __tshadow = `@charset "UTF-8";${!_zeroConfigure ? _tshadow : ""}`;
                 defCon.oZoom.push(fzoom);
                 defCon.tZoom = fzoom;
                 this.textContent = "\u4fdd\u5b58";

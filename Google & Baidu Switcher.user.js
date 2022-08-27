@@ -3,7 +3,7 @@
 // @name:zh-CN         优雅的搜索引擎跳转助手
 // @name:zh-TW         优雅的搜索引擎跳轉助手
 // @name:ja            検索エンジンジャンプアシスタント
-// @version            2022.08.20.1
+// @version            2022.08.27.1
 // @author             F9y4ng
 // @description        Graceful search engine Switch assistant, more beautiful and more convenient. The new version adds anti-redirect function, custom search engine selection function, visual search parameter setting, and automatic update detection and other advanced functions.
 // @description:zh-CN  优雅的搜索引擎跳转助手，更美观、更便捷。新版本增加去重定向功能、自定义搜索引擎选取功能，提供可视化搜索参数设置，及自动更新检测等高级功能。
@@ -45,7 +45,7 @@
 // @compatible         Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible         Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible         Safari 兼容Tampermonkey • Safari
-// @note               新增去除搜索广告功能（实验性），默认关闭。\n修正Bing、Google、360搜索栏样式问题。\n更新一个美观的脚本icon图标。\n修正一些已知的问题，优化代码。
+// @note               修正Bing搜索结果去广告的bug。\n修正Google搜图搜索框样式问题。\n修正一些已知的问题，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -198,6 +198,7 @@
     au: defCon.randString(5, "mix"),
     grid: defCon.randString(7, "char"),
     card: defCon.randString(7, "char"),
+    me: defCon.decrypt("Zjl5NG5n"),
     noticeHTML: str => {
       return String(`<div class="${Notice.rName}"><dl>${str}</dl></div>`);
     },
@@ -478,28 +479,20 @@
   }
 
   function getUrlParam(paraName) {
-    let arr = "";
-    if (typeof paraName === "undefined" || paraName === null || paraName === "") {
-      return "";
-    } else if (paraName === "/") {
-      const parameter = document.location.pathname.toString();
-      arr = parameter.split("/");
-      return typeof arr[1] === "undefined" ? "" : arr[1];
-    } else {
-      const url = document.location.toString();
-      const arrObj = url.split("?");
-      if (arrObj.length > 1) {
-        const arrPara = arrObj[1].split("&");
-        for (let i = 0; i < arrPara.length; i++) {
-          arr = arrPara[i].split("=");
-          if (arr !== null && arr[0] === paraName) {
-            return arr[1];
-          }
-        }
-        return "";
-      } else {
-        return "";
+    try {
+      switch (paraName) {
+        case null:
+        case undefined:
+        case "":
+          return "";
+        case "/":
+          return document.location.pathname.split("/")[1] || "";
+        default:
+          return new URLSearchParams(document.location.search).get(paraName) || "";
       }
+    } catch (e) {
+      error("getUrlParam:", e.message);
+      return "";
     }
   }
 
@@ -872,7 +865,7 @@
     "use strict";
     await init_Config_Data();
     const cache_autoupdate = await cache.get("_autoupdate_");
-    if (CUR_WINDOW_TOP && isAutoUpdate && !cache_autoupdate) {
+    if (CUR_WINDOW_TOP && isAutoUpdate && (!cache_autoupdate || getUrlParam("whoami").endsWith(Notice.me))) {
       const isNeedUpdate = (current, compare) => {
         let updateFlag = false;
         const compare_array = compare.split(".");
@@ -1347,10 +1340,10 @@
     // Ads Deep Cleanup
     switch (siteName) {
       case "Bing":
-        if (qA("li.b_algo:not([style*='display:none']) .b_caption>p[class]").length > 0) {
+        if (qA("li.b_algo:not([style*='display:none']) .b_caption>div.b_attribution:not([u])+p[class]").length > 0) {
           count(`\ud83d\udd33 [${siteName}-Anti-Ads-Deep]`);
           qA("li.b_algo").forEach(node => {
-            if (qS(".b_caption>p[class]", node)) {
+            if (qS(".b_caption>div.b_attribution:not([u])+p[class]", node)) {
               node.style.display = "none";
               sleep(5e2)(node).then(r => {
                 r && r.remove();
@@ -1858,7 +1851,7 @@
               if (selectEngineList.length < 3) {
                 GMnotification({
                   text: Notice.noticeHTML(
-                    `<dd><e style="font-size:24px;vertical-align:bottom">\ud83d\ude31</e>您需要选择「三个」搜索引擎，还少<em>${3 - selectEngineList.length}</em>个呢！</dd>`
+                    `<dd><e style="font-size:24px;vertical-align:bottom">\ud83d\ude31</e>\u0020您需要选择「三个」搜索引擎，还少<em>${3 - selectEngineList.length}</em>个呢！</dd>`
                   ),
                   type: `${Notice.error}`,
                   closeWith: ["click"],
@@ -1922,9 +1915,9 @@
                     }
                   }
                   if (localWindow) {
-                    top.location.href = decodeURI(url + getSearchValue());
+                    top.location.href = decodeURI(url + getQueryString());
                   } else {
-                    GMopenInTab(decodeURI(url + getSearchValue()), defCon.options);
+                    GMopenInTab(decodeURI(url + getQueryString()), defCon.options);
                   }
                 }.bind(this, listCurrentSite, localWindow)
               );
@@ -2038,7 +2031,7 @@
         userSpan.innerHTML = CONST.buttonCode;
         const SpanID = `#${userSpan.id}`;
         let Target = qS(getTarget);
-        if (!indexPage && Target && getSearchValue() && !qS(SpanID)) {
+        if (!indexPage && Target && getQueryString() && !qS(SpanID)) {
           return new Promise(resolve => {
             switch (currentSite.SiteTypeID) {
               case newSiteType.BAIDU:
@@ -2064,7 +2057,7 @@
                 if (qS(SpanID)) {
                   qS(SpanID).parentNode.style.width = "100%";
                   qS(SpanID).parentNode.style.minWidth = "100%";
-                  qS(SpanID).parentNode.parentNode.style.width = "95%";
+                  qS(SpanID).parentNode.parentNode.style.width = "100%";
                   qS(SpanID).parentNode.parentNode.parentNode.style.width = "95%";
                   if (currentSite.IMGType.includes(CONST.vim)) {
                     qS(SpanID).parentNode.firstElementChild.style.width = "400px";
@@ -2101,6 +2094,7 @@
                   });
                 } else {
                   insterAfter(userSpan, Target);
+                  qS(`#searchBtn2[value="\u5168\u7f51\u641c\u7d22"]`) && qS(`#searchBtn2[value="\u5168\u7f51\u641c\u7d22"]`).remove();
                   sleep(200, { useCachedSetTimeout: true }).then(() => {
                     qS(SpanID).style.right = `-${qS(SpanID).getBoundingClientRect().width + 10}px`;
                     qS(`#searchBtn2`) && (qS(`#searchBtn2`).style.right = `-${qS(SpanID).getBoundingClientRect().width + 120}px`);
@@ -2220,9 +2214,9 @@
               break;
           }
           if (localWindow) {
-            top.location.href = decodeURI(gotoUrl + getSearchValue());
+            top.location.href = decodeURI(gotoUrl + getQueryString());
           } else {
-            GMopenInTab(decodeURI(gotoUrl + getSearchValue()), defCon.options);
+            GMopenInTab(decodeURI(gotoUrl + getQueryString()), defCon.options);
           }
         });
       });
@@ -2295,31 +2289,25 @@
       }
     }
 
-    function getSearchValue(val) {
-      qA('input[name="wd"],input[name="q"][aria-label],input[name="word"],input[name="text"],input[name="query"][id="upquery"],input[name="keyword"]').forEach(
-        (item, index, arr) => {
-          val = item.value;
-          val && debug(`\ud83d\udd33 QueryString[INPUT]: %O`, { current_keyword: val, input_index: index, previous_keyword: arr[index].value });
-        }
-      );
+    function getQueryString() {
+      let val = "";
+      qA(
+        `input[id="kw"][name^="w"],input[name="q"]:not([type="hidden"]),input[name="text"][type="text"],input[name="query"][class$="query"],input[name="keyword"],input[id="search-input"],input[type="search"][class^="input"]`
+      ).forEach((item, index, arr) => {
+        val = item.value;
+        val && debug(`\ud83d\udd33 QueryString[INPUT]: %O`, { current_keyword: val, input_index: index, previous_keyword: arr[index].value });
+      });
       if (val === null || val === "" || typeof val === "undefined") {
-        const kvl = location.search.substr(1).split("&");
-        if (kvl) {
-          for (let i = 0; i < kvl.length; i++) {
-            const value = kvl[i].replace(/^(wd|word|query|q|text|keyword)=/, "");
-            if (value !== kvl[i]) {
-              val = value;
-            }
-          }
-          if (val) {
-            val = val.replace(/\+/g, " ");
+        const keys = ["wd", "word", "query", "q", "text", "keyword"];
+        for (let i = 0; i < keys.length; i++) {
+          const queryString = getUrlParam(keys[i]);
+          if (queryString) {
+            val = queryString;
             debug(`\ud83d\udd33 QueryString[URL]: %s`, val);
-          } else {
-            val = "";
+            break;
           }
-        } else {
-          return "";
         }
+        val = val ? val.replace(/\+/g, " ") : "";
       }
       return encodeURIComponent(val);
     }
@@ -2336,7 +2324,7 @@
             defCon.s && defCon.s.close();
             delete defCon.s;
             sessionStorage.removeItem("_global_google_");
-            location.href = top.location.href.replace(top.location.hostname, google);
+            top.location.href = top.location.href.replace(top.location.hostname, google);
           };
           try {
             sleep(500).then(() => {
