@@ -3,7 +3,7 @@
 // @name:zh-CN         优雅的搜索引擎跳转助手
 // @name:zh-TW         优雅的搜索引擎跳轉助手
 // @name:ja            検索エンジンジャンプアシスタント
-// @version            2022.08.27.1
+// @version            2022.09.03.1
 // @author             F9y4ng
 // @description        Graceful search engine Switch assistant, more beautiful and more convenient. The new version adds anti-redirect function, custom search engine selection function, visual search parameter setting, and automatic update detection and other advanced functions.
 // @description:zh-CN  优雅的搜索引擎跳转助手，更美观、更便捷。新版本增加去重定向功能、自定义搜索引擎选取功能，提供可视化搜索参数设置，及自动更新检测等高级功能。
@@ -45,7 +45,7 @@
 // @compatible         Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible         Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible         Safari 兼容Tampermonkey • Safari
-// @note               修正Bing搜索结果去广告的bug。\n修正Google搜图搜索框样式问题。\n修正一些已知的问题，优化代码。
+// @note               修正一些已知的问题，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -1420,8 +1420,8 @@
         SiteName: "Bing ®",
         SiteNick: "Bing 搜索",
         SiteURI: "www.bing.com",
-        WebURL: "https://cn.bing.com/search?q=",
-        ImgURL: "https://cn.bing.com/images/search?first=1&tsc=ImageBasicHover&q=",
+        WebURL: "https://www.bing.com/search?q=",
+        ImgURL: "https://www.bing.com/images/search?first=1&tsc=ImageBasicHover&q=",
         IMGType: ["images"],
         SplitName: "/",
         MainType: "#sb_search",
