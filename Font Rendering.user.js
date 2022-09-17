@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.09.03.1
+// @version            2022.09.17.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -2158,6 +2158,7 @@
             <p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}
               <!-- START VERSION NOTICE -->
+              <li class="${RANDOM_ID}_fix">优化自定义代码提交的兼容性与容错性。</li>
               <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化代码。</li>
               <!-- END VERSION NOTICE -->
             </ul></p>
@@ -2216,7 +2217,7 @@
     let bodyzoom = "";
     const fontsize_r = parseFloat(CONST_VALUES.fontSize);
     const funcFontsize = t => {
-      return `body{${
+      return `:root body{${
         IS_REAL_GECKO ? `transform:scale(${t});transform-origin:0 0;width:${100 / t}%;height:${100 / t}%;` : `zoom:${t}!important;max-width:-webkit-fill-available;`
       }}`;
     };
@@ -2282,7 +2283,7 @@
         const monospace = CONST_VALUES.monospacedFont || INITIAL_VALUES.monospacedFont;
         const mono = s ? r : INITIAL_VALUES.fontSelect.replace("'Microsoft YaHei',", "");
         return String(
-          `${codeSelector}{` +
+          `:is(${codeSelector}){` +
             `font-size:14px!important;line-height:150%!important;` +
             `-webkit-text-stroke:initial!important;text-shadow:0 0 ${shadow_r * 0.8}px ${toColordepth(shadow_c, 1.65)}!important;` +
             `font-family:${monospace},ui-monospace,Consolas,'Lucida Console',${IS_REAL_GECKO ? "" : "monospace,"}` +
@@ -2293,14 +2294,14 @@
       return "";
     };
     const zeroConfigure = !fontface_i && !smooth_i && !shadow && !stroke && fontsize_r === 1;
-    const exclude = !cssexlude || (!shadow && !stroke) ? `` : `${cssexlude}{-webkit-text-stroke:initial!important;text-shadow:none!important}`;
+    const exclude = !cssexlude || (!shadow && !stroke) ? `` : `:is(${cssexlude}){-webkit-text-stroke:initial!important;text-shadow:none!important}`;
     const codeFont = !cssexlude || zeroConfigure ? `` : funcCodefont(cssexlude, fontface_i, CONST_VALUES.fontSelect);
     const cssfun = CONST_VALUES.fontCSS;
     const textrender = smooth_i ? "text-rendering:optimizeLegibility!important;" : "";
     const fixfontstroke = CONST_VALUES.fixStroke ? "[fr-fix-stroke]{-webkit-text-stroke:initial!important}" : "";
     const fontStyle = String(
       typeof defCon.exSitesIndex === "undefined" && !zeroConfigure
-        ? `${fontfaces}${bodyzoom}${cssfun}{${fontfamily}${shadow}${stroke}${smoothing}${textrender}}${selection}${exclude}${codeFont}${fixfontstroke}`
+        ? `${fontfaces}${bodyzoom}:is(${cssfun}){${fontfamily}${shadow}${stroke}${smoothing}${textrender}}${selection}${exclude}${codeFont}${fixfontstroke}`
         : ""
     );
     const fontStyle_db = String(
@@ -3596,11 +3597,11 @@
                 const _prefont = fontselect.split(",")[0];
                 const _refont = _prefont.replace(/"|'/g, "");
                 const _fontfaces = !fontface ? "" : _refont ? await funcFontface(_refont) : "";
-                const _exclude = !fontex || (!fshadow && !fstroke) ? `` : `${filterHtmlToText(fontex)}{-webkit-text-stroke:initial!important;text-shadow:none!important}`;
+                const _exclude = !fontex || (!fshadow && !fstroke) ? `` : `:is(${filterHtmlToText(fontex)}){-webkit-text-stroke:initial!important;text-shadow:none!important}`;
                 const _codeFont = !fontex || _zeroConfigure ? `` : funcCodefont(fontex, fontface, fontselect);
                 const _fixfontstroke = fixfstroke ? "[fr-fix-stroke]{-webkit-text-stroke:initial!important}" : "";
                 const _tshadow = `${_fontfaces}${_bodyzoom}`.concat(
-                  `${filterHtmlToText(cssfun)}{${_fontfamily}${_shadow}${_stroke}${_smoothing}${_textrender}}`,
+                  `:is(${filterHtmlToText(cssfun)}){${_fontfamily}${_shadow}${_stroke}${_smoothing}${_textrender}}`,
                   `${_exclude}${_codeFont}${_fixfontstroke}`
                 );
                 const __tshadow = `@charset "UTF-8";${!_zeroConfigure ? _tshadow : ""}`;

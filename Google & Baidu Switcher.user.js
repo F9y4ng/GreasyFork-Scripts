@@ -3,7 +3,7 @@
 // @name:zh-CN         优雅的搜索引擎跳转助手
 // @name:zh-TW         优雅的搜索引擎跳轉助手
 // @name:ja            検索エンジンジャンプアシスタント
-// @version            2022.09.03.1
+// @version            2022.09.17.1
 // @author             F9y4ng
 // @description        Graceful search engine Switch assistant, more beautiful and more convenient. The new version adds anti-redirect function, custom search engine selection function, visual search parameter setting, and automatic update detection and other advanced functions.
 // @description:zh-CN  优雅的搜索引擎跳转助手，更美观、更便捷。新版本增加去重定向功能、自定义搜索引擎选取功能，提供可视化搜索参数设置，及自动更新检测等高级功能。
@@ -45,7 +45,7 @@
 // @compatible         Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
 // @compatible         Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible         Safari 兼容Tampermonkey • Safari
-// @note               修正一些已知的问题，优化代码。
+// @note               修正低分辨率设置菜单被遮挡的bug。\n优化部分去广告规则。\n修正一些已知的问题。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -671,7 +671,7 @@
       element.appendChild(content);
       if (options.scroll !== null && options.scroll.maxHeight !== "") {
         element.style.overflowY = "auto";
-        element.style.maxHeight = options.scroll.maxHeight + "px";
+        element.style.maxHeight = `min(calc(100vh - 100px), ${options.scroll.maxHeight}px)`;
         if (options.scroll.showOnHover === true) {
           element.style.visibility = "hidden";
         }
@@ -1435,7 +1435,7 @@
           deBounce(antiRedirect_Bing, 300, "bing", true)("#b_results a[href*='.bing.com/ck/a?']:not([gd-antiredirect-status])");
         },
         AntiAds: () => {
-          deBounce(antiAds_RemoveNodes, 20, "ad_bing", true)("li.b_ad", "Bing");
+          deBounce(antiAds_RemoveNodes, 20, "ad_bing", true)("li.b_ad,#b_pole,#b_results li.b_ans", "Bing");
         },
       },
       duckduckgo: {
@@ -1493,8 +1493,8 @@
         SiteName: "Yandex",
         SiteNick: "Yandex 搜索",
         SiteURI: "yandex.com",
-        WebURL: "https://yandex.com/search/?text=",
-        ImgURL: "https://yandex.com/images/search?from=tabbar&text=",
+        WebURL: "https://yandex.com/search/?lang=en&text=",
+        ImgURL: "https://yandex.com/images/search?from=tabbar&family=no&text=",
         IMGType: ["images"],
         SplitName: "/",
         MainType: "form>div.search2__input",
