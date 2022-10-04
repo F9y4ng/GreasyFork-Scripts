@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.09.17.1
+// @version            2022.10.05.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -18,7 +18,7 @@
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.meta.js
 // @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
-// @require            https://greasyfork.org/scripts/437214-frcolorpicker/code/frColorPicker.js?version=1053073
+// @require            https://greasyfork.org/scripts/437214-frcolorpicker/code/frColorPicker.js?version=1099028
 // @match              *://*/*
 // @grant              GM_getValue
 // @grant              GM.getValue
@@ -56,9 +56,10 @@
   /* Perfectly Compatible For Greasemonkey4.0+, TamperMonkey, ViolentMonkey * F9y4ng * 20210609 */
 
   const GMinfo = GM_info;
-  const GMversion = GMinfo.version;
+  const GMversion = GMinfo.version || 0.0;
   const GMscriptHandler = GMinfo.scriptHandler;
   const isGM = GMscriptHandler.toLowerCase() === "greasemonkey";
+  const isTM = GMscriptHandler.toLowerCase() === "tampermonkey" && Number(GMversion.slice(2)) >= 18;
   const debug = IS_OPEN_DEBUG ? console.log.bind(console) : () => {};
   const error = IS_OPEN_DEBUG ? console.error.bind(console) : () => {};
   const count = IS_OPEN_DEBUG ? console.count.bind(console) : () => {};
@@ -71,7 +72,7 @@
   const GMlistValues = isGM ? GM.listValues : GM_listValues;
   const GMopenInTab = isGM ? GM.openInTab : GM_openInTab;
   const GMregisterMenuCommand = isGM ? GM.registerMenuCommand : GM_registerMenuCommand;
-  const GMunregisterMenuCommand = isGM ? () => {} : GM_unregisterMenuCommand;
+  const GMunregisterMenuCommand = isGM ? () => {} : isTM ? console.log("TamperMonkey v4.18.0 or beta issue#1607 cause an menu Error!") : GM_unregisterMenuCommand;
 
   /* default Const Values & Functions */
 
@@ -141,7 +142,7 @@
       let g = 0;
       let d = "";
       let o = "";
-      for (let i = 0; i < p.length; i += 1) {
+      for (let i = 0, l = p.length; i < l; i += 1) {
         d += p.charCodeAt(i).toString();
       }
       const s = Math.floor(d.length / 5);
@@ -158,7 +159,7 @@
           d = (parseInt(d.substring(0, 10)) + parseInt(d.substring(10, d.length))).toString();
         }
         d = (m * d + c) % u;
-        for (let i = 0, len = e.length; i < len; i += 1) {
+        for (let i = 0, l = e.length; i < l; i += 1) {
           g = parseInt(e.charCodeAt(i) ^ Math.floor((d / u) * 255));
           if (g < 16) {
             o += "0" + g.toString(16);
@@ -181,7 +182,7 @@
           d = (parseInt(d.substring(0, 10)) + parseInt(d.substring(10, d.length))).toString();
         }
         d = (m * d + c) % u;
-        for (let i = 0, len = e.length; i < len; i += 2) {
+        for (let i = 0, l = e.length; i < l; i += 2) {
           g = parseInt(parseInt(e.substring(i, i + 2), 16) ^ Math.floor((d / u) * 255));
           o += String.fromCharCode(g);
           d = (m * d + c) % u;
@@ -513,6 +514,14 @@
                 info = "Opera";
                 version = b.version;
                 break;
+              case "Brave Browser":
+                info = "Brave";
+                version = b.version;
+                break;
+              case "Chromium":
+                info = "Chromium";
+                version = b.version;
+                break;
             }
           });
         } else {
@@ -617,7 +626,6 @@
 
   /* New DefinePropertise */
 
-  let controller = IS_REAL_GECKO ? new AbortController() : null;
   const definePropertiesForZoom = (ratio, { deleteProperty }) => {
     const obj_Targets = new Set([
       {
@@ -708,7 +716,7 @@
           value: function () {
             const list = defCon.getClientRects.call(this);
             let newRectlist = new Set();
-            for (let i = 0; i !== list.length; i++) {
+            for (let i = 0, l = list.length; i < l; i++) {
               let newRect = new Proxy(list[i], {
                 get: function (target, proper) {
                   return Reflect.get(target, proper) / defCon.tZoom;
@@ -733,170 +741,25 @@
             return newValue;
           },
         }) && debug(`\u27A4 %O ${IS_FRAMES || "-"} getBoundingClientRect() [DOMRect] %csucceeded`, Element.prototype, "color:green");
-
-        /* Patch2022.2.Beta: Fixed Position:sticky/fixed while transform:scale() in Firefox. --START-- */
-
-        const { oScale, tScale } = getSacleMatrix();
-        const fixStyleHandler = (t, { preview }) => {
-          const el = [];
-          if (t && document.body) {
-            const checkPositionStatus = (type, target) => {
-              const rect = target.getBoundingClientRect();
-              return (
-                rect.right >= 0 &&
-                (rect.bottom >= 0 || (rect.bottom <= 0 && cP(target, "position") === "fixed")) &&
-                cP(target, "display") !== "none" &&
-                (cP(target, "height").match(/\d+/) > 0 || cP(target, "height") === "auto") &&
-                cP(target, "visibility") !== "hidden" &&
-                cP(target, "position") === type &&
-                !cP(target, `--${type}`)
-              );
-            };
-            const getFixedArray = item => {
-              const originHeight = Number(cP(item, "height").match(/\d+/)) || 0;
-              const originTop = Number(cP(item, "top").match(/-?\d+/)) || 0;
-              const originBottom = Number(cP(item, "bottom").match(/-?\d+/)) || 0;
-              const screenHeight = window.innerHeight;
-              const offset = originTop > screenHeight ? screenHeight / t - item.clientHeight * t - originBottom : originTop / t;
-              el.push({ item: item, type: "fixed", offset: offset, height: originHeight });
-            };
-            const getStickyArray = item => {
-              const originStyle = item.style.cssText;
-              const offset = Number(cP(item, "top").match(/-?\d+/)) || 0;
-              el.push({ item: item, type: "sticky", offset: offset, style: originStyle });
-            };
-            const runNodeIterator = (nodes, type) => {
-              return document.createNodeIterator(nodes, NodeFilter.SHOW_ELEMENT, {
-                acceptNode(node) {
-                  return checkPositionStatus(type, node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
-                },
-              });
-            };
-            const observer = new MutationObserver(mutations => {
-              oScale !== 1 && preview === true && (el.length = 0), (preview = false);
-              mutations.forEach(mutation => {
-                switch (mutation.type) {
-                  case "attributes":
-                    switch (mutation.attributeName) {
-                      case "style":
-                        checkPositionStatus("fixed", mutation.target) && getFixedArray(mutation.target);
-                        checkPositionStatus("sticky", mutation.target) && getStickyArray(mutation.target);
-                        break;
-                      case "class":
-                        if (!["HTML", "BODY"].includes(mutation.target.nodeName)) {
-                          let fixedNode, stickyNode;
-                          const fixedNodes = runNodeIterator(mutation.target, "fixed");
-                          while ((fixedNode = fixedNodes.nextNode())) {
-                            getFixedArray(fixedNode);
-                            break;
-                          }
-                          const stickyNodes = runNodeIterator(mutation.target, "sticky");
-                          while ((stickyNode = stickyNodes.nextNode())) {
-                            getStickyArray(stickyNode);
-                            break;
-                          }
-                        }
-                        break;
-                    }
-                    break;
-                  case "childList":
-                    for (const node of mutation.addedNodes) {
-                      if (node.nodeType === 1 && node.isConnected) {
-                        checkPositionStatus("fixed", node) && getFixedArray(node);
-                        checkPositionStatus("sticky", node) && getStickyArray(node);
-                      }
-                    }
-                    break;
-                }
-              });
-              for (let i = 0; i < el.length; i++) {
-                for (let j = i + 1; j < el.length, el[i], el[j]; j++) {
-                  if (el[i].item === el[j].item || !el[i].item.isConnected) {
-                    el.splice(i, 1);
-                    i = Math.max(0, i - 1);
-                  }
-                }
-              }
-            });
-            try {
-              qA(`:not(${defCon.queryString}),fr-dialogbox`).forEach(item => {
-                checkPositionStatus("fixed", item) && getFixedArray(item);
-                checkPositionStatus("sticky", item) && getStickyArray(item);
-              });
-              observer.observe(document.body, { childList: true, attributes: true, attributeFilter: ["style", "class"], subtree: true });
-              window.addEventListener(
-                "scroll",
-                () => {
-                  let s, r;
-                  window.requestAnimationFrame(async () => {
-                    for (let i = 0; i < el.length; i++) {
-                      switch (el[i].type) {
-                        case "sticky":
-                          s = defCon.elCompat.getBoundingClientRect().top * (defCon.tZoom - 1);
-                          r = parseFloat(s + el[i].offset);
-                          if (defCon.tZoom !== 1) {
-                            el[i].item.style.cssText += `top:var(--sticky)!important;--sticky:${r.toFixed(4)}px;`;
-                          } else {
-                            el[i].item.style.cssText = el[i].style;
-                          }
-                          break;
-                        case "fixed":
-                          s = defCon.elCompat.getBoundingClientRect().top;
-                          r = parseFloat(el[i].offset - s);
-                          if (defCon.tZoom !== 1) {
-                            if (["fr-configure", "fr-dialogbox"].includes(el[i].item.nodeName.toLowerCase())) {
-                              el[i].item.style.cssText += `top:var(--fixed)!important;--fixed:${r.toFixed(4)}px;`;
-                            } else if (["fr-colorpicker", "gb-notice"].includes(el[i].item.nodeName.toLowerCase())) {
-                              el[i].item.style.cssText += `--fixed:0px;`;
-                            } else {
-                              await sleep(10);
-                              el[i] &&
-                                (el[i].item.style.cssText += `height:${Math.min(el[i].height, window.innerHeight)}px;`.concat(
-                                  `max-height:fit-content;`,
-                                  `top:var(--fixed)!important;`,
-                                  `--fixed:${r.toFixed(4)}px;`
-                                ));
-                            }
-                          } else {
-                            if (["fr-colorpicker", "gb-notice"].includes(el[i].item.nodeName.toLowerCase())) {
-                              el[i].item.style.setProperty("--fixed", "");
-                            } else if (["fr-configure", "fr-dialogbox"].includes(el[i].item.nodeName.toLowerCase())) {
-                              el[i].item.removeAttribute("style");
-                            }
-                          }
-                          break;
-                      }
-                    }
-                    qA(`[style*="--fixed"]`).forEach(item => {
-                      if (cP(item, "position") !== "fixed") {
-                        item.style.setProperty("height", "");
-                        item.style.setProperty("max-height", "");
-                        item.style.setProperty("top", "");
-                        item.style.setProperty("--fixed", "");
-                      }
-                    });
-                  });
-                },
-                { signal: controller.signal }
-              );
-            } catch (e) {
-              error("FixStyleHandler:", e.message);
-            }
-          }
-        };
-        if (defCon.oZoom.length > 1 && oScale !== tScale) {
-          fixStyleHandler(ratio, { preview: true });
-        } else {
-          document.addEventListener("readystatechange", () => {
-            if (document.readyState !== "loading") {
-              fixStyleHandler(ratio, { preview: false });
-            }
-          });
-        }
-        // Patch2022.2.alhpa: Fixed Position:sticky/fixed while transform:scale() in Firefox. --END-- //
       } catch (e) {
         error("defineProperty.Firefox:", e.message);
       }
+    }
+  };
+
+  const rePositionForZoom = (item, dname) => {
+    if (!item) {
+      return;
+    }
+    let sT = -defCon.elCompat.getBoundingClientRect().top;
+    item.style.top = `${sT}px`;
+    window.scrollTo(0, (sT * defCon.tZoom || 2) - 1);
+    if (item.childNodes.length > 0) {
+      defCon[dname] = () => {
+        sT = -defCon.elCompat.getBoundingClientRect().top;
+        item.style.top = `${sT}px`;
+      };
+      document.addEventListener("scroll", defCon[dname]);
     }
   };
 
@@ -951,7 +814,7 @@
         const rStr = items.trim().split(/\s+|>|,/g);
         let rChild = [];
         let rParent = [target];
-        for (let i = 0; i < rStr.length; i++) {
+        for (let i = 0, l = rStr.length; i < l; i++) {
           rChild = getElementsByStr(rParent, rStr[i]) || [];
           rParent = rChild;
         }
@@ -966,7 +829,7 @@
   function getElementsByStr(aParent, str) {
     const aChild = [];
     const pushElemIntoNodelist = (a, b, c) => {
-      for (let j = 0; j < a.length; j++) {
+      for (let j = 0, l = a.length; j < l; j++) {
         const aValue = a[j].getAttribute(c[1]) || "";
         const rStr = c[2].replace(/"|'|`/g, "");
         if (
@@ -981,7 +844,7 @@
       }
     };
     try {
-      for (let i = 0; aParent && i < aParent.length; i++) {
+      for (let i = 0, l = aParent ? aParent.length : 0; i < l; i++) {
         switch (str.charAt(0)) {
           case "#":
             if (/^#[-\w]+\[[-\w]+[*^$~]?=["'`]?\w+["'`]?\]/g.test(str)) {
@@ -1001,7 +864,7 @@
                 pushElemIntoNodelist(aRes, aChild, aStr);
               } else {
                 let aRes = aParent[i].getElementsByClassName(str.substring(1));
-                for (let j = 0; j < aRes.length; j++) {
+                for (let j = 0, l = aRes.length; j < l; j++) {
                   aRes[j] && aChild.push(aRes[j]);
                 }
               }
@@ -1013,7 +876,7 @@
                 let aStr = str.split(".");
                 let aRes = aParent[i].getElementsByTagName(aStr[0]);
                 let reg = new RegExp("\\b" + aStr[1] + "\\b", "g");
-                for (let j = 0; j < aRes.length; j++) {
+                for (let j = 0, l = aRes.length; j < l; j++) {
                   if (aRes[j] && reg.test(aRes[j].className)) {
                     aChild.push(aRes[j]);
                   }
@@ -1024,7 +887,7 @@
                 pushElemIntoNodelist(aRes, aChild, aStr);
               } else {
                 let aRes = aParent[i].getElementsByTagName(str);
-                for (let j = 0; j < aRes.length; j++) {
+                for (let j = 0, l = aRes.length; j < l; j++) {
                   aRes[j] && aChild.push(aRes[j]);
                 }
               }
@@ -1106,8 +969,8 @@
   function framesInsertStyle({ items, condition, tstyle }) {
     const rect = items.getBoundingClientRect();
     if (rect.bottom >= 0 && rect.right >= 0 && rect.width > 4 && rect.height > 4 && cP(items, "display") !== "none" && cP(items, "visibility") !== "hidden") {
-      const ORIGIN_SANDBOX = items.getAttribute("sandbox");
-      ORIGIN_SANDBOX && items.removeAttribute("sandbox");
+      const origin_sandbox = items.getAttribute("sandbox");
+      origin_sandbox && items.removeAttribute("sandbox");
       const h = items.contentWindow;
       const sT = qA("style[id^='TS']", h.document.head);
       const bT = h.document.body.textContent.trim();
@@ -1132,7 +995,7 @@
           }
           break;
       }
-      ORIGIN_SANDBOX && items.setAttribute("sandbox", ORIGIN_SANDBOX);
+      origin_sandbox && items.setAttribute("sandbox", origin_sandbox);
       count(`\u27A4 [ASYNCFRAMES][i:${items.id || "<NULL>"}]`);
     }
   }
@@ -1184,7 +1047,7 @@
 
   function convertToUnicode(str) {
     let value = "";
-    for (let i = 0; i < str.length; i++) {
+    for (let i = 0, l = str.length; i < l; i++) {
       value += "\\" + ("00" + str.charCodeAt(i).toString(16)).slice(-4);
     }
     return value.toUpperCase();
@@ -1249,6 +1112,9 @@
   /* New SliderChecker */
 
   function setSliderProperty(a, b, c) {
+    if (!a) {
+      return;
+    }
     a.value = Number(b).toFixed(c);
     a.setAttribute("value", Number(b));
     a.parentNode.style.setProperty("--value", Number(b));
@@ -1256,6 +1122,9 @@
   }
 
   function checkInputValue(b, a, c, f, g = false) {
+    if (!b || !a) {
+      return;
+    }
     b.addEventListener("input", function () {
       this.value = this.value.replace(/[^0-9.]/, "");
     });
@@ -1401,7 +1270,6 @@
         if (IS_REAL_GECKO) {
           this.zoomText = `transform-origin:left top 0;transform:scale(${1 / zoom});width:99vw;height:99vh;top:0;`;
           this.container.style.cssText += this.zoomText;
-          window.scrollTo(0, defCon.elCompat.scrollTop * zoom - 1);
         } else {
           this.zoomText = `zoom:${1 / zoom}`;
           this.container.style.cssText += this.zoomText;
@@ -1584,6 +1452,9 @@
   }
 
   const ddRemove = item => {
+    if (!item) {
+      return;
+    }
     item.remove();
     const temp = item.nextElementSibling;
     if (temp && temp.nodeName === "DD") {
@@ -1641,7 +1512,7 @@
           const inputFont = qS(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`);
           if (ffaceT.checked) {
             const fontCheckList = await getMergedFontCheckList();
-            for (let i = 0; i < fontCheckList.length; i++) {
+            for (let i = 0, l = fontCheckList.length; i < l; i++) {
               if (fontCheckList[i].en === defCon.refont || convertToUnicode(fontCheckList[i].ch) === defCon.refont) {
                 defCon.curFont = fontCheckList[i].ch;
                 break;
@@ -1781,6 +1652,9 @@
         /* Internal list functions */
 
         function changeSelectorStatus(inputCheckedStatus, f, css) {
+          if (!f) {
+            return;
+          }
           if (inputCheckedStatus) {
             f.removeAttribute("disabled");
             f.classList.remove(css);
@@ -1891,7 +1765,7 @@
     monospacedFont: `'Operator Mono Lig','Fira Code','Source Code Pro','DejaVu Sans Mono','Anonymous Pro','Ubuntu Mono','Roboto Mono','JetBrains Mono','Droid Sans Mono','Mono','Monaco','Menlo','Inconsolata','Liberation Mono'`,
   };
   const IS_MACOS = getNavigator.system().startsWith("macOS");
-  const EXCLUDES_EDITORIAL_SITES = ["github.dev", "www.kdocs.cn"].includes(CUR_HOST_NAME);
+  const EXCLUDES_EDITORIAL_SITES = ["github.dev", "github1s.com", "www.kdocs.cn"].includes(CUR_HOST_NAME);
   const SCRIPT_AUTHOR = GMinfo.scriptMetaStr.match(/(\u0040\u0061\u0075\u0074\u0068\u006f\u0072\s+)(\S+)/)[2];
   const FEEDBACK_URI = GMinfo.scriptMetaStr.match(/(\u0040\u0073\u0075\u0070\u0070\u006f\u0072\u0074\u0055\u0052\u004c\s+)(\S+)/)[2];
   const ROOT_SECRET_KEY = `\u8ab1\u004a\u0056\u0069\u0059\u7409\u67d3\u5b7a\u80ba\u0070\u0032\u004f\u64d3\u0030\u8151\u0074\u5c80\u5b9a\u81ba\u0065`;
@@ -1954,7 +1828,8 @@
     /* eslint-disable no-alert */
     /* initialling Menus */
 
-    if (CUR_WINDOW_TOP && !isGM) {
+    //  Tampermonkey v4.18.0 or beta ISSUE#1607: GM_unregisterMenuCommand will cause all the script menus to disappear
+    if (CUR_WINDOW_TOP && !isGM && !isTM) {
       loading = GMregisterMenuCommand("\ufff0\ud83d\udd52 正在载入脚本菜单，请稍候…", () => {});
     }
 
@@ -1984,7 +1859,7 @@
       maxPersonalSites = Number(_config_data_.maxPersonalSites) || 100;
       isBackupFunction = Boolean(_config_data_.isBackupFunction);
       isPreview = Boolean(_config_data_.isPreview);
-      isFontsize = isGM ? false : Boolean(_config_data_.isFontsize);
+      isFontsize = Boolean(_config_data_.isFontsize);
       isHotkey = Boolean(typeof _config_data_.isHotkey !== "undefined" ? _config_data_.isHotkey : true);
       isCloseTip = Boolean(_config_data_.isCloseTip);
       rebuild = _config_data_.rebuild;
@@ -2003,7 +1878,7 @@
     let exSite, _exSite;
     const defExSite = ["workstation-xi"].sort();
     function updateExsitesIndex(e) {
-      for (let i = 0; i < e.length; i++) {
+      for (let i = 0, l = e.length; i < l; i++) {
         if (e[i] === CUR_HOST_NAME) {
           return i;
         }
@@ -2030,7 +1905,7 @@
     let domains = await GMgetValue("_domains_fonts_set_");
     const fonts = await GMgetValue("_fonts_set_");
     function updateDomainsIndex(s, t = CUR_HOST_NAME) {
-      for (let i = 0; i < s.length; i++) {
+      for (let i = 0, l = s.length; i < l; i++) {
         if (s[i].domain === t) {
           return i;
         }
@@ -2158,7 +2033,10 @@
             <p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}
               <!-- START VERSION NOTICE -->
-              <li class="${RANDOM_ID}_fix">优化自定义代码提交的兼容性与容错性。</li>
+              <li class="${RANDOM_ID}_fix">临时修正TM4.18.0的ISSUE<a target="_blank" href="https://github.com/Tampermonkey/tampermonkey/issues/1607">#1607</a>造成的菜单消失问题。</li>
+              <li class="${RANDOM_ID}_fix">修正拾色器在Firefox102以上版本的识别bug.</li>
+              <li class="${RANDOM_ID}_info">注意：在Firefox下如需字体缩放功能，强烈建议您使用浏览器缩放替代(ctrl++/ctrl+-)。<a href="${HOST_URI}#scale" target="_blank">#注意事项#</a></li>
+              <li class="${RANDOM_ID}_fix">精简及优化部分功能，提升代码执行效率。</li>
               <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化代码。</li>
               <!-- END VERSION NOTICE -->
             </ul></p>
@@ -2534,20 +2412,24 @@
       return new Promise(resolve => {
         if (should_fix_stroke) {
           const attrName = "fr-fix-stroke";
-          qA(`:not(${defCon.queryString},[${attrName}])`).forEach(item => {
-            if (cP(item, "display") !== "none" && cP(item, "font-weight") >= 600) {
-              item.setAttribute(attrName, true);
+          const nodes = qA(`:not(${defCon.queryString},[${attrName}])`);
+          for (let i = 0, l = nodes.length; i < l; i++) {
+            if (cP(nodes[i], "display") !== "none" && cP(nodes[i], "font-weight") >= 600) {
+              nodes[i].setAttribute(attrName, true);
             }
-          });
+          }
           resolve(attrName);
         }
       })
         .then(result => {
-          qA(`[${result}]`).forEach(item => {
-            if (cP(item, "font-weight") < 600) {
-              item.removeAttribute(result);
+          const nodes = qA(`[${result}]`);
+          for (let i = 0, l = nodes.length; i < l; i++) {
+            if (cP(nodes[i], "font-weight") < 600) {
+              nodes[i].removeAttribute(result);
             }
-          });
+          }
+        })
+        .then(() => {
           logger && count(`\u27A4 [FIXSTROKE]${IS_FRAMES}[t:${action}]`);
         })
         .catch(e => {
@@ -2560,8 +2442,7 @@
 
     try {
       let mutationType;
-      preInsertContentToHead();
-      new MutationObserver(mutations => {
+      const observer = new MutationObserver(mutations => {
         mutationType = undefined;
         mutations.forEach(mutation => {
           switch (mutation.type) {
@@ -2591,6 +2472,10 @@
                       shouldMoveStyle(node) &&
                       deBounce(moveStyleTolastChild, 40, "moveStyleTolastChild", false)({ isMutationObserver: true });
                     node.nodeName === "IFRAME" && deBounce(insertStyle_AsyncFrames, 200, "asyncframes", true)({ isMutationObserver: true });
+                    IS_REAL_GECKO &&
+                      defCon.tZoom !== 1 &&
+                      ["fr-configure", "fr-colorpicker", "fr-dialogbox"].includes(node.nodeName.toLowerCase()) &&
+                      rePositionForZoom(node, node.nodeName.toLowerCase());
                   }
                 }
               });
@@ -2614,7 +2499,9 @@
           typeof mutationType !== "undefined" &&
           SHOULD_FIX_STROKE &&
           (deBounce(correctBoldErrorIfStroke, 100, "fixstroke", true)(CONST_VALUES.fontStroke, { logger: true, action: mutationType }), (mutationType = null));
-      }).observe(document, { attributes: true, childList: true, subtree: true });
+      });
+      preInsertContentToHead();
+      observer.observe(document, { attributes: true, childList: true, subtree: true });
     } catch (e) {
       error("MutationObserver.InsertCSS:", e.message);
     }
@@ -2628,7 +2515,7 @@
             try {
               insertHTML();
               operateConfigure();
-              setAutoZoomFontSize(`#${defCon.id.rndId}`, defCon.tZoom);
+              setAutoZoomFontSize(qS(`#${defCon.id.rndId}`), defCon.tZoom);
               sleep(100)
                 .then(() => {
                   qS(`#${defCon.id.container}`).style.opacity = 1;
@@ -2685,7 +2572,7 @@
         }
         isBackupFunction = Boolean(_config_data_.isBackupFunction);
         isPreview = Boolean(_config_data_.isPreview);
-        isFontsize = isGM ? false : Boolean(_config_data_.isFontsize);
+        isFontsize = Boolean(_config_data_.isFontsize);
         isHotkey = Boolean(typeof _config_data_.isHotkey !== "undefined" ? _config_data_.isHotkey : true);
         isCloseTip = Boolean(_config_data_.isCloseTip);
         maxPersonalSites = Number(_config_data_.maxPersonalSites) || 100;
@@ -2763,18 +2650,18 @@
         qS(`#${defCon.id.maxps}`).addEventListener("input", function () {
           this.value = this.value.replace(/[^0-9]/g, "");
         });
-        IS_REAL_GECKO &&
-          confirmIfValueChange(
-            qS(`#${defCon.id.isfontsize}`),
-            `字体比例缩放（实验性功能）\n警告：Firefox因Gecko内核的兼容性，会对部分网站兼容不足而造成样式错乱、页面卡顿等问题，请根据需要酌情在特定站点内使用。\n(建议：如有必要的需求，请使用浏览器缩放替代。)${
-              isGM ? "\n\n扩展Greasemonkey不支持字体缩放功能！" : "\n\n请确认是否开启字体缩放功能？"
-            }`,
-            { useGM: false }
-          );
+        confirmIfValueChange(
+          qS(`#${defCon.id.isfontsize}`),
+          `字体比例缩放（实验性功能）\n\n`.concat(
+            IS_REAL_GECKO
+              ? `强烈建议您：使用Firefox的“浏览器缩放”替代(快捷键：ctrl+-/ctrl++)\n\n警告：在Firefox下由于Gecko内核的兼容性原因，会对部分网站样式、功能兼容不足，从而造成样式错乱、页面动作缺失等问题，请根据实际需求酌情使用。`
+              : `警告：由于样式兼容问题，在部分使用视窗单位(vw, vh, vm*)的网站应用字体缩放会造成页面元素居中异常的样式错误。我们建议您：在此类站点中暂停使用字体比例缩放功能(即：设置参数为1.000)，使用浏览器缩放替代(快捷键：ctrl+-/ctrl++)。`,
+            `\n\n请确认是否开启字体缩放功能？`
+          )
+        );
         confirmIfValueChange(
           qS(`#${defCon.id.isclosetip}`),
-          "关闭更新提示，您将不能在第一时间获取更新内容，或错过重要的使用提示和警示通告。如遇重大功能升级，忽略更新提示有几率影响正常使用。双击字体渲染设置窗口顶部的脚本名称，可查看历史更新提示。\n\n请确认是否关闭更新提示功能？",
-          { useGM: true }
+          "关闭更新提示，您将不能在第一时间获取更新内容，或错过重要的使用提示和警示通告。如遇重大功能升级，忽略更新提示有几率影响正常使用。双击字体渲染设置窗口顶部的脚本名称，可查看历史更新提示。\n\n请确认是否关闭更新提示功能？"
         );
         qS(`#${defCon.id.flcid}`).addEventListener("click", async () => {
           closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
@@ -3562,8 +3449,7 @@
               setEffectIntoSubmit(fontExT.value, CONST_VALUES.fontEx, defCon.values, fontExT, submitButton);
               await getCurrentFontName(ffaceT.checked, defCon.refont, DEFAULT_FONT);
               loadPreview(defCon.preview);
-              setAutoZoomFontSize(`#${defCon.id.rndId}`, defCon.tZoom);
-              abortController(defCon.tZoom);
+              setAutoZoomFontSize(qS(`#${defCon.id.rndId}`), defCon.tZoom);
             }
             frDialog = null;
           });
@@ -3618,8 +3504,7 @@
                     `display:inline-block;padding:5px 0`,
                     `display:inline-block;border:1px solid #eee;border-radius:4px;padding:5px 10px;background:${fscolor};color:${cl}`
                   );
-                  setAutoZoomFontSize(`#${defCon.id.rndId}`, fzoom);
-                  abortController(defCon.tZoom);
+                  setAutoZoomFontSize(qS(`#${defCon.id.rndId}`), fzoom);
                 });
                 await correctBoldErrorIfStroke(NEED_FIX_STROKE(fixfstroke && fstroke), { logger: false, action: "preview" });
               } catch (e) {
@@ -3787,7 +3672,6 @@
           defCon.oZoom.push(CONST_VALUES.fontSize);
           defCon.tZoom = CONST_VALUES.fontSize;
           loadPreview(defCon.isPreview);
-          abortController(defCon.tZoom);
         }
       }
       closeAllFrDialogBox("fr-dialogbox");
@@ -3800,7 +3684,7 @@
       defCon.curFont = def;
       if (_isfontface_) {
         const fontCheckList = await getMergedFontCheckList();
-        for (let i = 0; i < fontCheckList.length; i++) {
+        for (let i = 0, l = fontCheckList.length; i < l; i++) {
           if (fontCheckList[i].en === refont || convertToUnicode(fontCheckList[i].ch) === refont) {
             defCon.curFont = refont.includes("\\") ? "" : " (" + fontCheckList[i].en + ")";
             reFontFace = fontCheckList[i].ch + defCon.curFont;
@@ -3994,19 +3878,21 @@
     }
 
     function rangeSliderWidget(linstener, target, m, g = false) {
-      linstener.addEventListener("input", function () {
-        setSliderProperty(this, this.value, m);
-        target.value = Number(this.value) === (g ? 1 : 0) ? "OFF" : Number(this.value).toFixed(m);
-        target._value_ = Number(this.value).toFixed(m);
-        switch (linstener.id) {
-          case defCon.id.shadow:
-            qS(`#${defCon.id.shadowColor}`).style.setProperty("display", target.value === "OFF" ? "none" : "flex");
-            break;
-          case defCon.id.stroke:
-            IS_REAL_BLINK && qS(`#${defCon.id.fstroke}`).style.setProperty("visibility", target.value === "OFF" ? "hidden" : "visible");
-            break;
-        }
-      });
+      if (linstener && target) {
+        linstener.addEventListener("input", function () {
+          setSliderProperty(this, this.value, m);
+          target.value = Number(this.value) === (g ? 1 : 0) ? "OFF" : Number(this.value).toFixed(m);
+          target._value_ = Number(this.value).toFixed(m);
+          switch (linstener.id) {
+            case defCon.id.shadow:
+              qS(`#${defCon.id.shadowColor}`).style.setProperty("display", target.value === "OFF" ? "none" : "flex");
+              break;
+            case defCon.id.stroke:
+              IS_REAL_BLINK && qS(`#${defCon.id.fstroke}`).style.setProperty("visibility", target.value === "OFF" ? "hidden" : "visible");
+              break;
+          }
+        });
+      }
     }
 
     function saveChangeStatus(t, e, d, v, g = false) {
@@ -4084,7 +3970,7 @@
             d.removeAttribute("v-Preview");
             loadPreview(defCon.preview);
             defCon.tZoom = CONST_VALUES.fontSize;
-            setAutoZoomFontSize(`#${defCon.id.rndId}`, CONST_VALUES.fontSize);
+            setAutoZoomFontSize(qS(`#${defCon.id.rndId}`), defCon.tZoom);
           }
         }
       } catch (exp) {
@@ -4108,7 +3994,7 @@
           domainValue.length > 6
             ? `<p style="display:flex;justify-content:left;align-items:center"><input id="${RANDOM_ID}_d_s_" style="box-sizing:content-box;width:57%;height:22px;font:normal 16px/150% monospace,Consolas,system-ui,-apple-system,BlinkMacSystemFont,serif!important;border:2px solid #777;border-radius:4px;outline:none!important;margin:4px 6px;padding:2px 6px"><button id="${RANDOM_ID}_d_s_s_" style="box-sizing:border-box;background:#eee;color:#333!important;vertical-align:initial;padding:3px 10px;margin:0;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-width:60px;min-height:30px;letter-spacing:normal;text-align:center">查 询</button><button id="${RANDOM_ID}_d_s_c_" style="box-sizing:border-box;background:#eee;color:#333!important;vertical-align:initial;margin:0 0 0 4px;padding:3px 10px;cursor:pointer;font-size:12px!important;font-weight:normal;border:1px solid #777;border-radius:4px;width:max-content;height:max-content;min-width:60px;min-height:30px;letter-spacing:normal;text-align:center">清 除</button></p>`
             : ``;
-        for (let i = 0; i < domainValue.length; i++) {
+        for (let i = 0, l = domainValue.length; i < l; i++) {
           Contents += String(
             `<li id="${RANDOM_ID}_d_d_l_${i}"
               style="margin:0;padding:5px;list-style:none;-webkit-user-select:text!important;user-select:text!important;font:normal 400 14px/150% 'Microsoft YaHei UI',system-ui,-apple-system,sans-serif!important;color:#555;display:flex;justify-content:space-between;white-space:nowrap;max-width:364px;overflow:hidden">
@@ -4144,9 +4030,6 @@
             qS(`#${RANDOM_ID}_d_d_`).scrollTop = 0;
             qS(`#${RANDOM_ID}_d_s_`).focus();
           });
-          qS(`#${RANDOM_ID}_d_d_`).addEventListener("click", () => {
-            qS(`#${RANDOM_ID}_d_s_`).focus();
-          });
           qS(`#${RANDOM_ID}_d_s_s_`).addEventListener("click", () => {
             if (qS(`#${RANDOM_ID}_d_s_`).value) {
               if (window.find) {
@@ -4162,30 +4045,29 @@
             }
           });
         }
-        const items = qA(`#${RANDOM_ID}_d_d_ li span>a[id^="${RANDOM_ID}_d_d_l_s_"]`);
-        for (let j = 0; j < items.length; j++) {
-          items[j].addEventListener(
-            "click",
-            function (a, b) {
-              if (!this.getAttribute("data-del")) {
-                const _list_Id_ = Number(this && this.id.replace(`${RANDOM_ID}_d_d_l_s_`, "")) || 0;
-                a.push(b[_list_Id_].domain);
-                this.setAttribute("data-del", b[_list_Id_].domain);
-                this.textContent = "恢复";
-                this.style.cssText += "color:darkgreen";
-                this.parentNode.nextElementSibling.style.cssText += "text-decoration:line-through;font-style:italic";
-                this.parentNode.nextElementSibling.nextElementSibling.style.cssText += "text-decoration:line-through;font-style:italic";
-              } else {
-                a.splice(a.indexOf(this.getAttribute("data-del")), 1);
-                this.removeAttribute("data-del");
-                this.textContent = "删除";
-                this.style.cssText += "color:darkred";
-                this.parentNode.nextElementSibling.style.cssText += "text-decoration:none;font-style:normal";
-                this.parentNode.nextElementSibling.nextElementSibling.style.cssText += "text-decoration:none;font-style:normal";
-              }
-            }.bind(items[j], _temp_, domainValue)
-          );
-        }
+        qS(`#${RANDOM_ID}_d_d_`).addEventListener("click", event => {
+          const input = qS(`#${RANDOM_ID}_d_s_`);
+          const target = event.target;
+          input && input.focus();
+          if (target.nodeName === "A" && target.id.startsWith(`${RANDOM_ID}_d_d_l_s_`)) {
+            if (!target.getAttribute("data-del")) {
+              const _list_Id_ = Number(target.id.replace(`${RANDOM_ID}_d_d_l_s_`, "")) || 0;
+              _temp_.push(domainValue[_list_Id_].domain);
+              target.setAttribute("data-del", domainValue[_list_Id_].domain);
+              target.textContent = "恢复";
+              target.style.cssText += "color:darkgreen";
+              target.parentNode.nextElementSibling.style.cssText += "text-decoration:line-through;font-style:italic";
+              target.parentNode.nextElementSibling.nextElementSibling.style.cssText += "text-decoration:line-through;font-style:italic";
+            } else {
+              _temp_.splice(_temp_.indexOf(target.getAttribute("data-del")), 1);
+              target.removeAttribute("data-del");
+              target.textContent = "删除";
+              target.style.cssText += "color:darkred";
+              target.parentNode.nextElementSibling.style.cssText += "text-decoration:none;font-style:normal";
+              target.parentNode.nextElementSibling.nextElementSibling.style.cssText += "text-decoration:none;font-style:normal";
+            }
+          }
+        });
         if (await frDialog.respond()) {
           domains = await GMgetValue("_domains_fonts_set_");
           try {
@@ -4298,25 +4180,30 @@
     }
 
     function setAutoZoomFontSize(target, zoom) {
-      let curZoom = zoom || 1;
+      if (!target) {
+        return;
+      }
+      let curZoom = Number(zoom) || 1;
       const { oScale, tScale } = getSacleMatrix();
       try {
+        const tgName = target.nodeName.toLowerCase();
         if (IS_REAL_GECKO) {
           if (curZoom !== 1) {
-            qS(target).style.transformOrigin = "left top";
-            qS(target).style.transform = "scale(" + 1 / curZoom + ")";
-            qS(target).style.width = "99vw";
-            qS(target).style.height = "99vh";
+            target.style.transformOrigin = "left top";
+            target.style.transform = "scale(" + 1 / curZoom + ")";
+            target.style.width = `99vw`;
+            target.style.height = `99vh`;
+            tgName && defCon[tgName] === null && rePositionForZoom(target, tgName);
           } else {
-            qS(target).removeAttribute("style");
+            tgName && defCon[tgName] && document.removeEventListener("scroll", defCon[tgName]), (defCon[tgName] = null);
+            target.removeAttribute("style");
           }
-          window.scrollTo(0, (oScale === 1 || tScale === 1) && oScale !== tScale ? 0 : defCon.elCompat.scrollTop * curZoom - 1);
         } else {
           curZoom = Number(cP(document.body, "zoom")) || curZoom;
           if (curZoom !== 1) {
-            qS(target).style.cssText += "zoom:" + Number(1 / curZoom);
+            target.style.cssText += "zoom:" + Number(1 / curZoom);
           } else {
-            qS(target).removeAttribute("style");
+            target.removeAttribute("style");
           }
         }
       } catch (e) {
@@ -4336,34 +4223,18 @@
       }
     }
 
-    function abortController(scale) {
-      const { oScale, tScale } = getSacleMatrix();
-      if (defCon.isFontsize && IS_REAL_GECKO && scale === 1 && oScale !== tScale) {
-        controller.abort();
-        while (controller.signal.aborted) {
-          debug("\u27A4 Redeploy >> AbortSignal.aborted:%o", controller.signal.aborted);
-          controller = new AbortController();
-        }
-        qA(`[style*="--sticky"],[style*="--fixed"]`).forEach(item => {
-          item.style.setProperty("--fixed", "");
-          item.style.setProperty("--sticky", "");
-          item.style.setProperty("top", "");
+    function confirmIfValueChange(target, info) {
+      target &&
+        target.addEventListener("change", function () {
+          if (this.checked) {
+            this.checked = !!confirm(info);
+          }
         });
-      }
-    }
-
-    function confirmIfValueChange(target, info, { useGM }) {
-      target.addEventListener("change", function () {
-        if (this.checked) {
-          const rs = useGM ? confirm(info) : isGM ? alert(info) : confirm(info);
-          this.checked = !!rs;
-        }
-      });
     }
 
     function convertFullToHalf(str) {
       let tmp = "";
-      for (let i = 0; i < str.length; i++) {
+      for (let i = 0, l = str.length; i < l; i++) {
         if (str.charCodeAt(i) === 12288) {
           tmp += String.fromCharCode(str.charCodeAt(i) - 12256);
           continue;
