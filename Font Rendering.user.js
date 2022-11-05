@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.10.05.1
+// @version            2022.11.05.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
 // @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
@@ -18,7 +18,7 @@
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.meta.js
 // @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
-// @require            https://greasyfork.org/scripts/437214-frcolorpicker/code/frColorPicker.js?version=1099028
+// @require            https://greasyfork.org/scripts/437214-frcolorpicker/code/frColorPicker.js?version=1101891
 // @match              *://*/*
 // @grant              GM_getValue
 // @grant              GM.getValue
@@ -46,20 +46,20 @@
 
 /* jshint esversion: 9 */
 
-~(function (trustedTypesPolicy) {
+~(function (w, trustedTypesPolicy) {
   "use strict";
 
   /* customize */
 
-  const IS_OPEN_DEBUG = false; // set "true" to debug scripts, May cause script response slower.
+  const IS_OPEN_DEBUG = false; // set "true" to debug scripts, may cause script response slower.
 
-  /* Perfectly Compatible For Greasemonkey4.0+, TamperMonkey, ViolentMonkey * F9y4ng * 20210609 */
+  /* Perfectly Compatible For Greasemonkey4.0+, Tampermonkey, Violentmonkey * F9y4ng * 20210609 */
 
   const GMinfo = GM_info;
-  const GMversion = GMinfo.version || 0.0;
+  const GMversion = GMinfo.version || "0.00";
   const GMscriptHandler = GMinfo.scriptHandler;
   const isGM = GMscriptHandler.toLowerCase() === "greasemonkey";
-  const isTM = GMscriptHandler.toLowerCase() === "tampermonkey" && Number(GMversion.slice(2)) >= 18;
+  const isTM_418_Patch = GMscriptHandler.toLowerCase() === "tampermonkey" && GMversion.startsWith("4.18");
   const debug = IS_OPEN_DEBUG ? console.log.bind(console) : () => {};
   const error = IS_OPEN_DEBUG ? console.error.bind(console) : () => {};
   const count = IS_OPEN_DEBUG ? console.count.bind(console) : () => {};
@@ -72,7 +72,7 @@
   const GMlistValues = isGM ? GM.listValues : GM_listValues;
   const GMopenInTab = isGM ? GM.openInTab : GM_openInTab;
   const GMregisterMenuCommand = isGM ? GM.registerMenuCommand : GM_registerMenuCommand;
-  const GMunregisterMenuCommand = isGM ? () => {} : isTM ? console.log("TamperMonkey v4.18.0 or beta issue#1607 cause an menu Error!") : GM_unregisterMenuCommand;
+  const GMunregisterMenuCommand = isGM || isTM_418_Patch ? () => {} : GM_unregisterMenuCommand;
 
   /* default Const Values & Functions */
 
@@ -83,6 +83,12 @@
     clickTimer: 0,
     domainCount: 0,
     scriptName: getScriptNameViaLanguage(),
+    queryString: "html,head,head *,base,meta,style,link,script,".concat(
+      "noscript,body,iframe,img,br,hr,canvas,applet,source,svg,svg *,picture,",
+      "form,input,select,textarea,object,embed,audio,video,track,figure,progress,",
+      "fr-colorpicker,fr-colorpicker *,fr-configure,fr-configure *,fr-dialogbox,",
+      "fr-dialogbox *,gb-notice,gb-notice *"
+    ),
     curVersion: GMinfo.script.version || GMinfo.scriptMetaStr.match(/@version\s+(\S+)/)[1],
     options: isGM ? false : { active: true, insert: true, setParent: true },
     elCompat: document.compatMode === "CSS1Compat" ? document.documentElement : document.body,
@@ -91,7 +97,7 @@
     getBoundingClientRect: Element.prototype.getBoundingClientRect,
     encrypt: n => {
       try {
-        return window.btoa(encodeURIComponent(String(n)));
+        return w.btoa(encodeURIComponent(String(n)));
       } catch (e) {
         error("Encrypt.error:", e.message);
       }
@@ -99,7 +105,7 @@
     decrypt: n => {
       try {
         if (typeof n === "string") {
-          return decodeURIComponent(window.atob(n.replace(/[^A-Za-z0-9+/=]/g, "")));
+          return decodeURIComponent(w.atob(n.replace(/[^A-Za-z0-9+/=]/g, "")));
         } else {
           throw new Error("Non-string type");
         }
@@ -199,7 +205,7 @@
     },
     isWinTop: () => {
       try {
-        return window.self === window.top;
+        return w.self === w.top;
       } catch (e) {
         return !parent.frames.length;
       }
@@ -317,22 +323,15 @@
   const FONTLIST_IMG = defCon.decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjIlMkYwNCUyRjAyJTJGcW9SZldkLmdpZg==");
   const LOADING_IMG = defCon.decrypt("aHR0cHMlM0ElMkYlMkZpbWcuemNvb2wuY24lMkZjb21tdW5pdHklMkYwMzhkZGU0NThmOWE4NzRhODAxMjE2MGY3NDE3ZjZlLmdpZg==");
 
-  defCon.queryString = `html,head,head *,base,meta,style,link,script,`.concat(
-    `noscript,body,iframe,img,br,hr,canvas,applet,source,svg,svg *,picture,`,
-    `form,input,select,textarea,object,embed,audio,video,track,figure,progress,`,
-    `fr-colorpicker,fr-colorpicker *,fr-configure,fr-configure *,fr-dialogbox,`,
-    `fr-dialogbox *,gb-notice,gb-notice *`
-  );
-
   /* New RAF for setTimeout & setInterval */
 
-  window.requestAnimationFrame ||
+  w.requestAnimationFrame ||
     (function () {
       "use strict";
-      window.requestAnimationFrame =
-        window.msRequestAnimationFrame ||
-        window.mozRequestAnimationFrame ||
-        window.webkitRequestAnimationFrame ||
+      w.requestAnimationFrame =
+        w.msRequestAnimationFrame ||
+        w.mozRequestAnimationFrame ||
+        w.webkitRequestAnimationFrame ||
         (function () {
           const fps = 60;
           const delay = 1000 / fps;
@@ -343,20 +342,20 @@
             const timeout = Math.max(0, delay - (requestTime - previousCallTime));
             const timeToCall = requestTime + timeout;
             previousCallTime = timeToCall;
-            return window.setTimeout(function onAnimationFrame() {
+            return setTimeout(function onAnimationFrame() {
               callback(timeToCall - animationStartTime);
             }, timeout);
           };
         })();
-      window.cancelAnimationFrame =
-        window.mozCancelAnimationFrame ||
-        window.webkitCancelAnimationFrame ||
-        window.cancelRequestAnimationFrame ||
-        window.msCancelRequestAnimationFrame ||
-        window.mozCancelRequestAnimationFrame ||
-        window.webkitCancelRequestAnimationFrame ||
+      w.cancelAnimationFrame =
+        w.mozCancelAnimationFrame ||
+        w.webkitCancelAnimationFrame ||
+        w.cancelRequestAnimationFrame ||
+        w.msCancelRequestAnimationFrame ||
+        w.mozCancelRequestAnimationFrame ||
+        w.webkitCancelRequestAnimationFrame ||
         function cancelAnimationFrame(id) {
-          window.clearTimeout(id);
+          clearTimeout(id);
         };
     })();
 
@@ -381,21 +380,20 @@
       return timerSymbol;
     }
     _setTimerMap(timerSymbol, type, step) {
-      const stack = window.requestAnimationFrame(step);
-      this._timerMap[type][timerSymbol] = stack;
+      this._timerMap[type][timerSymbol] = w.requestAnimationFrame(step);
     }
     setTimeout(fn, interval) {
       return this._ticking(fn, "timeout", interval);
     }
     clearTimeout(timer) {
-      window.cancelAnimationFrame(this._timerMap.timeout[timer]);
+      w.cancelAnimationFrame(this._timerMap.timeout[timer]);
       delete this._timerMap.timeout[timer];
     }
     setInterval(fn, interval) {
       return this._ticking(fn, "interval", interval);
     }
     clearInterval(timer) {
-      window.cancelAnimationFrame(this._timerMap.interval[timer]);
+      w.cancelAnimationFrame(this._timerMap.interval[timer]);
       delete this._timerMap.interval[timer];
     }
   }
@@ -430,7 +428,7 @@
   const oH = Object.prototype.hasOwnProperty;
   const cP = (target, prop) => {
     try {
-      return window.getComputedStyle(target, null).getPropertyValue(prop);
+      return w.getComputedStyle(target, null).getPropertyValue(prop);
     } catch (e) {
       return target.style && target.style[prop];
     }
@@ -455,7 +453,7 @@
 
   /* Content-Security-Policy: trustedTypes */
 
-  if (window.trustedTypes && window.trustedTypes.createPolicy) {
+  if (w.trustedTypes && w.trustedTypes.createPolicy) {
     const wTcP = (wTrs = "fr#safeCreateHTML") => {
       const wT = new Set([
         { host: "teams.live.com", policy: "goog#html" },
@@ -469,23 +467,17 @@
       }
       return wTrs;
     };
-    trustedTypesPolicy = window.trustedTypes.createPolicy(wTcP(), {
+    trustedTypesPolicy = w.trustedTypes.createPolicy(wTcP(), {
       createHTML: string => {
         return string;
       },
     });
-  } else {
-    trustedTypesPolicy = {
-      createHTML: string => {
-        return string;
-      },
-    };
   }
 
   /* Get browser core & system parameters */
 
   const getNavigator = {
-    uaData: (navigator => {
+    uaData: (() => {
       try {
         // eslint-disable-next-line no-undef
         return Boolean(navigator.userAgentData && navigator.userAgentData instanceof NavigatorUAData);
@@ -493,7 +485,7 @@
         error("getNavigator.uaData:", e.message);
         return false;
       }
-    })(unsafeWindow.navigator),
+    })(),
     init: function (v = this.uaData) {
       return v ? navigator.userAgentData : navigator.userAgent.toLowerCase();
     },
@@ -527,7 +519,7 @@
         } else {
           brands.some(b => {
             if (b.brand === "Chromium") {
-              info = "WebKit";
+              info = "Blink";
               version = b.version;
             }
           });
@@ -546,11 +538,15 @@
         Blink: (u.includes("applewebkit") && (u.includes("chromium") || u.includes("chrome"))) || u.includes("Chromium"),
       };
     },
+    geckoVersion: function (u = this.init()) {
+      const m = u.match(/firefox\/(\d+)/i);
+      return m && m[1] ? m[1] : 0;
+    },
     chromiumVersion: function (u = this.init()) {
       if (this.uaData) {
         return this.getBrowser(u.brands, null).version;
       } else {
-        const m = u.match(/chrom[e|ium]\/([\d]+)/i);
+        const m = u.match(/chrom[e|ium]\/(\d+)/i);
         return m && m[1] ? m[1] : 0;
       }
     },
@@ -614,15 +610,14 @@
     },
     isCheatUA: function () {
       return (
-        (!this.uaData && !!navigator.userAgentData) ||
-        (!this.core().Gecko && !isNaN(parseFloat(unsafeWindow.mozInnerScreenX))) ||
-        (this.core().Gecko && isNaN(parseFloat(unsafeWindow.mozInnerScreenX)))
+        (!this.uaData && !!navigator.userAgentData) || (!this.core().Gecko && !isNaN(parseFloat(w.mozInnerScreenX))) || (this.core().Gecko && isNaN(parseFloat(w.mozInnerScreenX)))
       );
     },
   };
 
-  const IS_REAL_GECKO = (getNavigator.core().Gecko && !getNavigator.isCheatUA()) || !isNaN(parseFloat(unsafeWindow.mozInnerScreenX));
-  const IS_REAL_BLINK = (getNavigator.core().Blink && !getNavigator.isCheatUA()) || !!unsafeWindow.chrome;
+  const IS_REAL_GECKO = (getNavigator.core().Gecko && !getNavigator.isCheatUA()) || !isNaN(parseFloat(w.mozInnerScreenX));
+  const IS_REAL_BLINK = (getNavigator.core().Blink && !getNavigator.isCheatUA()) || !!w.chrome;
+  const CAN_I_USE = (IS_REAL_GECKO && getNavigator.geckoVersion() >= 82) || (IS_REAL_BLINK && Number(getNavigator.chromiumVersion()) >= 88);
 
   /* New DefinePropertise */
 
@@ -633,7 +628,7 @@
         props: ["clientX", "clientY", "pageX", "pageY", "layerX", "layerY", "offsetX", "offsetY", "screenX", "screenY", "movementX", "movementY", "x", "y"],
       },
       {
-        objs: [window, unsafeWindow],
+        objs: [w, unsafeWindow],
         props: ["pageXOffset", "pageYOffset", "scrollX", "scrollY"],
       },
       {
@@ -753,7 +748,7 @@
     }
     let sT = -defCon.elCompat.getBoundingClientRect().top;
     item.style.top = `${sT}px`;
-    window.scrollTo(0, (sT * defCon.tZoom || 2) - 1);
+    w.scrollTo(0, (sT * defCon.tZoom || 2) - 1);
     if (item.childNodes.length > 0) {
       defCon[dname] = () => {
         sT = -defCon.elCompat.getBoundingClientRect().top;
@@ -1383,7 +1378,7 @@
       const canvas = cE("canvas");
       canvas.width = this.canvasWidth;
       canvas.height = this.canvasHeight;
-      this.canvasContext = canvas.getContext("2d");
+      this.canvasContext = canvas.getContext("2d", { willReadFrequently: true });
       this.canvasContext.textAlign = "center";
       this.canvasContext.fillStyle = "black";
       this.canvasContext.textBaseline = "middle";
@@ -1760,7 +1755,7 @@
     fixStroke: IS_REAL_BLINK,
     fontShadow: IS_REAL_GECKO ? 0.5 : 1.0,
     shadowColor: IS_REAL_GECKO ? "#7F7F7FAA" : "#7B7B7BCC",
-    fontCSS: `:not(i):not([class*='glyph']):not([class*='icon']):not([class*='fa-']):not([class*='vjs-'])`,
+    fontCSS: `:not(i,head *):not([class*='glyph']):not([class*='icon']):not([class*='fa-']):not([class*='vjs-'])`,
     fontEx: `input,select,button,textarea,samp,kbd,pre,pre *,code,code *`,
     monospacedFont: `'Operator Mono Lig','Fira Code','Source Code Pro','DejaVu Sans Mono','Anonymous Pro','Ubuntu Mono','Roboto Mono','JetBrains Mono','Droid Sans Mono','Mono','Monaco','Menlo','Inconsolata','Liberation Mono'`,
   };
@@ -1786,9 +1781,9 @@
             document.readyState,
             "display:block;height:0",
             "display:inline-block;color:0;line-height:180%",
-            window.location.hostname,
+            w.location.hostname,
             "display:inline-block;color:grey;line-height:180%",
-            window.location.pathname
+            w.location.pathname
           );
         }
       } else {
@@ -1811,9 +1806,9 @@
           "display:inline-block;background-color:green;color:snow;font-style:italic;border-radius:0 4px 4px 0;padding:4px 8px 4px 0",
           "display:block;height:0",
           "display:inline-block;color:0;line-height:180%",
-          window.location.hostname,
+          w.location.hostname,
           "display:inline-block;color:grey;line-height:180%",
-          window.location.pathname
+          w.location.pathname
         );
         document.removeEventListener("readystatechange", onReadyStateChange);
       }
@@ -1828,8 +1823,7 @@
     /* eslint-disable no-alert */
     /* initialling Menus */
 
-    //  Tampermonkey v4.18.0 or beta ISSUE#1607: GM_unregisterMenuCommand will cause all the script menus to disappear
-    if (CUR_WINDOW_TOP && !isGM && !isTM) {
+    if (CUR_WINDOW_TOP && !isGM && !isTM_418_Patch) {
       loading = GMregisterMenuCommand("\ufff0\ud83d\udd52 正在载入脚本菜单，请稍候…", () => {});
     }
 
@@ -1859,7 +1853,7 @@
       maxPersonalSites = Number(_config_data_.maxPersonalSites) || 100;
       isBackupFunction = Boolean(_config_data_.isBackupFunction);
       isPreview = Boolean(_config_data_.isPreview);
-      isFontsize = Boolean(_config_data_.isFontsize);
+      isFontsize = isGM ? false : Boolean(_config_data_.isFontsize);
       isHotkey = Boolean(typeof _config_data_.isHotkey !== "undefined" ? _config_data_.isHotkey : true);
       isCloseTip = Boolean(_config_data_.isCloseTip);
       rebuild = _config_data_.rebuild;
@@ -2033,11 +2027,10 @@
             <p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}
               <!-- START VERSION NOTICE -->
-              <li class="${RANDOM_ID}_fix">临时修正TM4.18.0的ISSUE<a target="_blank" href="https://github.com/Tampermonkey/tampermonkey/issues/1607">#1607</a>造成的菜单消失问题。</li>
-              <li class="${RANDOM_ID}_fix">修正拾色器在Firefox102以上版本的识别bug.</li>
-              <li class="${RANDOM_ID}_info">注意：在Firefox下如需字体缩放功能，强烈建议您使用浏览器缩放替代(ctrl++/ctrl+-)。<a href="${HOST_URI}#scale" target="_blank">#注意事项#</a></li>
-              <li class="${RANDOM_ID}_fix">精简及优化部分功能，提升代码执行效率。</li>
-              <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化代码。</li>
+              <li class="${RANDOM_ID}_add">增加对低版本Chromium/Gecko内核浏览器的兼容。</li>
+              <li class="${RANDOM_ID}_fix">优化字体缩放功能对新版Gecko内核的兼容性判断。</li>
+              <li class="${RANDOM_ID}_fix">修正concept-canvas-will-read-frequently的问题。</li>
+              <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化样式，优化代码。</li>
               <!-- END VERSION NOTICE -->
             </ul></p>
             <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
@@ -2161,26 +2154,32 @@
         const monospace = CONST_VALUES.monospacedFont || INITIAL_VALUES.monospacedFont;
         const mono = s ? r : INITIAL_VALUES.fontSelect.replace("'Microsoft YaHei',", "");
         return String(
-          `:is(${codeSelector}){` +
-            `font-size:14px!important;line-height:150%!important;` +
-            `-webkit-text-stroke:initial!important;text-shadow:0 0 ${shadow_r * 0.8}px ${toColordepth(shadow_c, 1.65)}!important;` +
-            `font-family:${monospace},ui-monospace,Consolas,'Lucida Console',${IS_REAL_GECKO ? "" : "monospace,"}` +
-            `${IS_REAL_GECKO ? mono.replace("system-ui", "monospace,system-ui") : mono}!important;` +
+          (CAN_I_USE ? `:is(${codeSelector})` : `${codeSelector}`).concat(
+            `{font-size:14px!important;line-height:150%!important;`,
+            `-webkit-text-stroke:initial!important;text-shadow:0 0 ${shadow_r * 0.8}px ${toColordepth(shadow_c, 1.65)}!important;`,
+            `font-family:${monospace},ui-monospace,Consolas,'Lucida Console',${IS_REAL_GECKO ? "" : "monospace,"}`,
+            `${IS_REAL_GECKO ? mono.replace("system-ui", "monospace,system-ui") : mono}!important;`,
             `font-feature-settings:"liga" 0,"tnum","zero"!important;user-select:text!important}`
+          )
         );
       }
       return "";
     };
     const zeroConfigure = !fontface_i && !smooth_i && !shadow && !stroke && fontsize_r === 1;
-    const exclude = !cssexlude || (!shadow && !stroke) ? `` : `:is(${cssexlude}){-webkit-text-stroke:initial!important;text-shadow:none!important}`;
+    const exclude_Selector = CAN_I_USE ? `:is(${cssexlude})` : `${cssexlude}`;
+    const exclude = !cssexlude || (!shadow && !stroke) ? `` : exclude_Selector.concat(`{-webkit-text-stroke:initial!important;text-shadow:none!important}`);
     const codeFont = !cssexlude || zeroConfigure ? `` : funcCodefont(cssexlude, fontface_i, CONST_VALUES.fontSelect);
     const cssfun = CONST_VALUES.fontCSS;
     const textrender = smooth_i ? "text-rendering:optimizeLegibility!important;" : "";
     const fixfontstroke = CONST_VALUES.fixStroke ? "[fr-fix-stroke]{-webkit-text-stroke:initial!important}" : "";
     const fontStyle = String(
       typeof defCon.exSitesIndex === "undefined" && !zeroConfigure
-        ? `${fontfaces}${bodyzoom}:is(${cssfun}){${fontfamily}${shadow}${stroke}${smoothing}${textrender}}${selection}${exclude}${codeFont}${fixfontstroke}`
-        : ""
+        ? `${fontfaces}${bodyzoom}`.concat(
+            CAN_I_USE ? `:is(${cssfun})` : `${cssfun}`,
+            `{${fontfamily}${shadow}${stroke}${smoothing}${textrender}}`,
+            `${selection}${exclude}${codeFont}${fixfontstroke}`
+          )
+        : ``
     );
     const fontStyle_db = String(
       `#${defCon.id.dialogbox}{width:100%;height:100vh;background:transparent;position:fixed;top:0;left:0;z-index:1999999995}#${defCon.id.dialogbox} .${defCon.class.db}{box-sizing:content-box;max-width:420px;color:#444;border:2px solid #efefef}.${defCon.class.db}{display:block;overflow:hidden;position:absolute;top:200px;right:15px;border-radius:6px;width:100%;background:#fff;box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${defCon.class.db} *{line-height:1.5!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:initial!important;text-shadow:0 0 1px #777!important}.${defCon.class.dbt}{background:#efefef;margin-top:0;padding:12px;font-size:20px!important;font-weight:700;text-align:left;width:auto;font-family:Candara,"Times New Roman",system-ui,-apple-system,BlinkMacSystemFont!important}.${defCon.class.dbm}{color:#444;padding:10px;margin:5px;font-size:16px!important;font-weight:500;text-align:left}.${defCon.class.dbb}{display:inline-block;margin:2px 1%;border-radius:4px;padding:8px 12px;min-width:12%;font-weight:400;text-align:center;letter-spacing:0;cursor:pointer;text-decoration:none!important;box-sizing:content-box}.${defCon.class.dbb}:hover{color:#fff;opacity:.8;font-weight:900;text-decoration:none!important;box-sizing:content-box}.${defCon.class.db} .${defCon.class.dbt},.${defCon.class.dbb},.${defCon.class.dbb}:hover{text-shadow:none!important;-webkit-text-stroke:initial!important;-webkit-user-select:none;user-select:none}.${defCon.class.dbbf},.${defCon.class.dbbf}:hover{background:#d93223!important;color:#fff!important;border:1px solid #d93223!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${defCon.class.dbbt},.${defCon.class.dbbt}:hover{background:#038c5a!important;color:#fff!important;border:1px solid #038c5a!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${defCon.class.dbbn},.${defCon.class.dbbn}:hover{background:#777!important;color:#fff!important;border:1px solid #777!important;border-radius:6px;font-size:14px!important}.${defCon.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${defCon.class.dbbc}{text-align:right;padding:2.5%;background:#efefef;color:#fff}` +
@@ -2572,7 +2571,7 @@
         }
         isBackupFunction = Boolean(_config_data_.isBackupFunction);
         isPreview = Boolean(_config_data_.isPreview);
-        isFontsize = Boolean(_config_data_.isFontsize);
+        isFontsize = isGM ? false : Boolean(_config_data_.isFontsize);
         isHotkey = Boolean(typeof _config_data_.isHotkey !== "undefined" ? _config_data_.isHotkey : true);
         isCloseTip = Boolean(_config_data_.isCloseTip);
         maxPersonalSites = Number(_config_data_.maxPersonalSites) || 100;
@@ -2654,10 +2653,13 @@
           qS(`#${defCon.id.isfontsize}`),
           `字体比例缩放（实验性功能）\n\n`.concat(
             IS_REAL_GECKO
-              ? `强烈建议您：使用Firefox的“浏览器缩放”替代(快捷键：ctrl+-/ctrl++)\n\n警告：在Firefox下由于Gecko内核的兼容性原因，会对部分网站样式、功能兼容不足，从而造成样式错乱、页面动作缺失等问题，请根据实际需求酌情使用。`
+              ? isGM
+                ? `Greasemonkey4.0+在新版Gecko内核下不支持字体缩放功能，请更换Tampermonkey/Violentmonkey后再尝试。\n\n强烈建议您：使用Firefox的“浏览器缩放”替代(快捷键：ctrl+-/ctrl++)`
+                : `强烈建议您：使用Firefox的“浏览器缩放”替代(快捷键：ctrl+-/ctrl++)\n\n警告：在Firefox下由于Gecko内核的兼容性原因，会对部分网站样式、功能兼容不足，从而造成样式错乱、页面动作缺失等问题，请根据实际需求酌情使用。`
               : `警告：由于样式兼容问题，在部分使用视窗单位(vw, vh, vm*)的网站应用字体缩放会造成页面元素居中异常的样式错误。我们建议您：在此类站点中暂停使用字体比例缩放功能(即：设置参数为1.000)，使用浏览器缩放替代(快捷键：ctrl+-/ctrl++)。`,
-            `\n\n请确认是否开启字体缩放功能？`
-          )
+            isGM ? `` : `\n\n请确认是否开启字体缩放功能？`
+          ),
+          true
         );
         confirmIfValueChange(
           qS(`#${defCon.id.isclosetip}`),
@@ -2692,7 +2694,7 @@
         if (await frDialog.respond()) {
           _config_data_.isBackupFunction = _bk;
           _config_data_.isPreview = _pv;
-          _config_data_.isFontsize = _fs;
+          _config_data_.isFontsize = isGM ? false : _fs;
           _config_data_.isHotkey = _hk;
           _config_data_.isCloseTip = _ct;
           _config_data_.maxPersonalSites = _mps;
@@ -3248,7 +3250,7 @@
           const colorshow = qS(`#${defCon.id.color}`);
           const colorReg = /^#[0-9A-F]{8}$|^currentcolor$/i;
           try {
-            colorPicker = new window.frColorPicker(`#${defCon.id.color}`, {
+            colorPicker = new w.frColorPicker(`#${defCon.id.color}`, {
               value: CONST_VALUES.shadowColor,
               alpha: 1.0,
               format: "hexa",
@@ -3483,11 +3485,13 @@
                 const _prefont = fontselect.split(",")[0];
                 const _refont = _prefont.replace(/"|'/g, "");
                 const _fontfaces = !fontface ? "" : _refont ? await funcFontface(_refont) : "";
-                const _exclude = !fontex || (!fshadow && !fstroke) ? `` : `:is(${filterHtmlToText(fontex)}){-webkit-text-stroke:initial!important;text-shadow:none!important}`;
+                const _exclude_Selector = CAN_I_USE ? `:is(${filterHtmlToText(fontex)})` : `${filterHtmlToText(fontex)}`;
+                const _exclude = !fontex || (!fshadow && !fstroke) ? `` : _exclude_Selector.concat(`{-webkit-text-stroke:initial!important;text-shadow:none!important}`);
                 const _codeFont = !fontex || _zeroConfigure ? `` : funcCodefont(fontex, fontface, fontselect);
                 const _fixfontstroke = fixfstroke ? "[fr-fix-stroke]{-webkit-text-stroke:initial!important}" : "";
                 const _tshadow = `${_fontfaces}${_bodyzoom}`.concat(
-                  `:is(${filterHtmlToText(cssfun)}){${_fontfamily}${_shadow}${_stroke}${_smoothing}${_textrender}}`,
+                  CAN_I_USE ? `:is(${filterHtmlToText(cssfun)})` : `${filterHtmlToText(cssfun)}`,
+                  `{${_fontfamily}${_shadow}${_stroke}${_smoothing}${_textrender}}`,
                   `${_exclude}${_codeFont}${_fixfontstroke}`
                 );
                 const __tshadow = `@charset "UTF-8";${!_zeroConfigure ? _tshadow : ""}`;
@@ -4032,10 +4036,10 @@
           });
           qS(`#${RANDOM_ID}_d_s_s_`).addEventListener("click", () => {
             if (qS(`#${RANDOM_ID}_d_s_`).value) {
-              if (window.find) {
-                qS(`#${RANDOM_ID}_d_s_`).style.cssText += window.find(qS(`#${RANDOM_ID}_d_s_`).value, 0) ? "border-color:#777" : "border-color:red";
-                if (window.getSelection) {
-                  const _sTxt = window.getSelection();
+              if (w.find) {
+                qS(`#${RANDOM_ID}_d_s_`).style.cssText += w.find(qS(`#${RANDOM_ID}_d_s_`).value, 0) ? "border-color:#777" : "border-color:red";
+                if (w.getSelection) {
+                  const _sTxt = w.getSelection();
                   const _sNode = _sTxt.anchorNode && _sTxt.anchorNode.parentNode && _sTxt.anchorNode.parentNode.parentNode;
                   const _rows = Number(_sNode && _sNode.id.replace(`${RANDOM_ID}_d_d_l_`, "")) || 0;
                   const _offsetHeight = Number(_sTxt.anchorNode.parentNode.parentNode.offsetHeight) || 0;
@@ -4123,7 +4127,7 @@
                 trueButtonText: "反馈问题",
                 falseButtonText: "刷新页面",
                 messageText: String(
-                  `<p style="font-size:14px!important;color:crimson">脚本在运行时发生了重大异常或错误，若在『刷新页面』后依然报错，请通过『反馈问题』及时告知作者，感谢您的反馈\uff01<br/><kbd style="display:inline-block;padding:3px 10px;font-size:14px!important;margin:4px 0 0 0;color:#666666;vertical-align:middle;background-color:#f6f8fa;border:solid 1px rgba(175,184,193,0.4);border-radius:6px">以下信息会自动保存至您的剪切板</kbd></p>
+                  `<p style="font-size:14px!important;color:crimson">脚本在运行时发生了重大异常或错误，若在『刷新页面』后依然报错，请通过『反馈问题』及时告知作者，感谢您的反馈\uff01<br/><kbd style="box-sizing:content-box;display:inline-block;width:360px;padding:3px 10px;font-size:14px!important;margin:4px 0 0 0;color:#666666;text-align:center;vertical-align:middle;background-color:#f6f8fa;border:solid 1px rgba(175,184,193,0.4);border-radius:6px">以下信息会自动保存至您的剪切板</kbd></p>
                   <p><ul id="${RANDOM_ID}_copy_to_author" style="list-style-position:outside;margin:0!important;padding:0!important;max-height:300px;overflow-y:auto">
                     <li>浏览器信息\uff1a${await getNavigator.getUA()}\u3000</li>
                     <li>脚本扩展信息\uff1a${GMscriptHandler} ${GMversion}\u3000</li>
@@ -4223,13 +4227,12 @@
       }
     }
 
-    function confirmIfValueChange(target, info) {
-      target &&
-        target.addEventListener("change", function () {
-          if (this.checked) {
-            this.checked = !!confirm(info);
-          }
-        });
+    function confirmIfValueChange(target, info, cgm = false) {
+      target.addEventListener("change", function () {
+        if (this.checked) {
+          this.checked = !cgm ? !!confirm(info) : isGM ? !!alert(info) : !!confirm(info);
+        }
+      });
     }
 
     function convertFullToHalf(str) {
@@ -4294,4 +4297,8 @@
       }
     }
   })();
-})();
+})(window, {
+  createHTML: string => {
+    return string;
+  },
+});
