@@ -4,11 +4,11 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2022.11.05.1
+// @version            2022.11.17.1
 // @author             F9y4ng
-// @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
-// @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器插件。
-// @description:zh-TW  無需安裝MacType，優化浏覽器字體顯示，讓每個頁面的中文字體變得有質感，默認使用微軟雅黑字體，亦可自定義設置多種中文字體，附加字體描邊、字體重寫、字體陰影、字體平滑、對特殊樣式元素的過濾和許可等效果，腳本菜單中可使用設置界面進行參數設置，亦可對某域名下所有頁面進行排除渲染，兼容常用的Greasemonkey腳本和瀏覽器插件。
+// @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器扩展。
+// @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器扩展。
+// @description:zh-TW  無需安裝MacType，優化浏覽器字體顯示，讓每個頁面的中文字體變得有質感，默認使用微軟雅黑字體，亦可自定義設置多種中文字體，附加字體描邊、字體重寫、字體陰影、字體平滑、對特殊樣式元素的過濾和許可等效果，腳本菜單中可使用設置界面進行參數設置，亦可對某域名下所有頁面進行排除渲染，兼容常用的Greasemonkey腳本和瀏覽器扩展。
 // @description:ja     各ページの中国語フォントをテクスチャにしたり、デフォルトでMicrosoft Yaheiフォントを使用したり、複数の中国語フォントをカスタマイズしたり、フォントストローク、フォント書き換え、フォントシャドウ、フォントスムージング、特別なスタイル要素のフィルタリングやライセンスなどの効果を追加したり、スクリプトメニューで設定インターフェイスを使用してパラメータ設定を行ったり、ドメイン名の下にあるすべてのページを除外してレンダリングしたり、一般的なGreasemonkeyスクリプトやブラウザプラグインと互換性があります。
 // @description:en     Let each page of the Chinese font becomes texture, the default uses Microsoft YaHei font, and you can customize the set of Chinese fonts, additional font strokes, font rewriting, font shadows, smooth, and special Filtering and licensing of style elements, etc., you can use the setting interface to perform parameter settings in the script menu, or you can exclude all pages under a domain name, compatible with common Greasemonkey scripts and browser plugins.
 // @namespace          https://openuserjs.org/scripts/f9y4ng/Font_Rendering_(Customized)
@@ -59,7 +59,7 @@
   const GMversion = GMinfo.version || "0.00";
   const GMscriptHandler = GMinfo.scriptHandler;
   const isGM = GMscriptHandler.toLowerCase() === "greasemonkey";
-  const isTM_418_Patch = GMscriptHandler.toLowerCase() === "tampermonkey" && GMversion.startsWith("4.18");
+  const isTM_418_Patch = GMscriptHandler.toLowerCase() === "tampermonkey" && GMversion.startsWith("4.18") && !GMversion.endsWith(".1");
   const debug = IS_OPEN_DEBUG ? console.log.bind(console) : () => {};
   const error = IS_OPEN_DEBUG ? console.error.bind(console) : () => {};
   const count = IS_OPEN_DEBUG ? console.count.bind(console) : () => {};
@@ -82,16 +82,16 @@
     errors: [],
     clickTimer: 0,
     domainCount: 0,
-    scriptName: getScriptNameViaLanguage(),
     queryString: "html,head,head *,base,meta,style,link,script,".concat(
       "noscript,body,iframe,img,br,hr,canvas,applet,source,svg,svg *,picture,",
       "form,input,select,textarea,object,embed,audio,video,track,figure,progress,",
       "fr-colorpicker,fr-colorpicker *,fr-configure,fr-configure *,fr-dialogbox,",
       "fr-dialogbox *,gb-notice,gb-notice *"
     ),
-    curVersion: GMinfo.script.version || GMinfo.scriptMetaStr.match(/@version\s+(\S+)/)[1],
+    curVersion: GMinfo.script.version || getMetaValue("version"),
     options: isGM ? false : { active: true, insert: true, setParent: true },
     elCompat: document.compatMode === "CSS1Compat" ? document.documentElement : document.body,
+    scriptName: getMetaValue(`name:${navigator.language || "zh-CN"}`) || GMinfo.script.name || "Font Rendering",
     getScreenCTM: SVGGraphicsElement.prototype.getScreenCTM,
     getClientRects: Element.prototype.getClientRects,
     getBoundingClientRect: Element.prototype.getBoundingClientRect,
@@ -104,11 +104,7 @@
     },
     decrypt: n => {
       try {
-        if (typeof n === "string") {
-          return decodeURIComponent(w.atob(n.replace(/[^A-Za-z0-9+/=]/g, "")));
-        } else {
-          throw new Error("Non-string type");
-        }
+        return decodeURIComponent(w.atob(String(n).replace(/[^A-Za-z0-9+/=]/g, "")));
       } catch (e) {
         error("Decrypt.error:", e.message);
       }
@@ -506,13 +502,15 @@
                 info = "Opera";
                 version = b.version;
                 break;
-              case "Brave Browser":
+              case "Brave":
                 info = "Brave";
                 version = b.version;
                 break;
               case "Chromium":
-                info = "Chromium";
-                version = b.version;
+                if (info === "Other") {
+                  info = "Chromium";
+                  version = b.version;
+                }
                 break;
             }
           });
@@ -760,12 +758,10 @@
 
   /* Initialized important functions */
 
-  function getScriptNameViaLanguage() {
-    const language = navigator.language || "zh-CN";
-    const name_i18n = new RegExp(`(@name:${language}\\s+)(\\S+)`);
-    const languageString = GMinfo.scriptMetaStr.match(name_i18n);
-    const scriptName = languageString ? languageString[2] : GMinfo.script.name;
-    return String(scriptName || "Font Rendering");
+  function getMetaValue(str) {
+    const queryReg = new RegExp(`//\\s+@${str}\\s+(\\S+)`);
+    const metaValue = GMinfo.scriptMetaStr.match(queryReg);
+    return metaValue ? metaValue[1] : "";
   }
 
   function setRAFInterval(callback, interval, { runNow }) {
@@ -1760,9 +1756,9 @@
     monospacedFont: `'Operator Mono Lig','Fira Code','Source Code Pro','DejaVu Sans Mono','Anonymous Pro','Ubuntu Mono','Roboto Mono','JetBrains Mono','Droid Sans Mono','Mono','Monaco','Menlo','Inconsolata','Liberation Mono'`,
   };
   const IS_MACOS = getNavigator.system().startsWith("macOS");
+  const SCRIPT_AUTHOR = getMetaValue("\u0061\u0075\u0074\u0068\u006f\u0072");
+  const FEEDBACK_URI = getMetaValue("\u0073\u0075\u0070\u0070\u006f\u0072\u0074\u0055\u0052\u004c");
   const EXCLUDES_EDITORIAL_SITES = ["github.dev", "github1s.com", "www.kdocs.cn"].includes(CUR_HOST_NAME);
-  const SCRIPT_AUTHOR = GMinfo.scriptMetaStr.match(/(\u0040\u0061\u0075\u0074\u0068\u006f\u0072\s+)(\S+)/)[2];
-  const FEEDBACK_URI = GMinfo.scriptMetaStr.match(/(\u0040\u0073\u0075\u0070\u0070\u006f\u0072\u0074\u0055\u0052\u004c\s+)(\S+)/)[2];
   const ROOT_SECRET_KEY = `\u8ab1\u004a\u0056\u0069\u0059\u7409\u67d3\u5b7a\u80ba\u0070\u0032\u004f\u64d3\u0030\u8151\u0074\u5c80\u5b9a\u81ba\u0065`;
   const CONST_VALUES = {};
 
@@ -1781,9 +1777,9 @@
             document.readyState,
             "display:block;height:0",
             "display:inline-block;color:0;line-height:180%",
-            w.location.hostname,
+            location.hostname,
             "display:inline-block;color:grey;line-height:180%",
-            w.location.pathname
+            location.pathname
           );
         }
       } else {
@@ -1806,9 +1802,9 @@
           "display:inline-block;background-color:green;color:snow;font-style:italic;border-radius:0 4px 4px 0;padding:4px 8px 4px 0",
           "display:block;height:0",
           "display:inline-block;color:0;line-height:180%",
-          w.location.hostname,
+          location.hostname,
           "display:inline-block;color:grey;line-height:180%",
-          w.location.pathname
+          location.pathname
         );
         document.removeEventListener("readystatechange", onReadyStateChange);
       }
@@ -1827,7 +1823,7 @@
       loading = GMregisterMenuCommand("\ufff0\ud83d\udd52 正在载入脚本菜单，请稍候…", () => {});
     }
 
-    /* get promise value */
+    /* get configure value */
 
     let maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, isCloseTip, rebuild, curVersion, _config_data_;
     let configure = await GMgetValue("_configure_");
@@ -2019,21 +2015,23 @@
           ? `<li class="${RANDOM_ID}_warn"><strong>警告</strong>：检测到存储数据解析异常或被非法篡改，确保程序正常运行，数据已初始化，请手动还原正确的备份数据！</li>`
           : ``;
       closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
+      const TM_418_ISSUE_NOTICE = isTM_418_Patch
+        ? `<li class="${RANDOM_ID}_warn">请尽快升级至Tampermonkey v4.18.1（<a target="_blank" href="https://www.tampermonkey.net/changelog.php?version=4.18.1">正式版</a>）</li>`
+        : ``;
       frDialog = new FrDialogBox({
         trueButtonText: "好，去看看",
         falseButtonText: "不，算了吧",
         messageText: String(
           `<p><span style="font-style:italic;font-weight:700;font-size:20px;color:tomato">您好\uff01</span>这是${CANDIDATE_FIELD}<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本<span style="font:italic 900 22px/150% Candara,'Times New Roman'!important;color:tomato;margin-left:3px">V${defCon.curVersion}</span>, 以下为更新内容\uff1a</p>
             <p><ul id="${RANDOM_ID}_update">
-              ${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}
+              ${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}${TM_418_ISSUE_NOTICE}
               <!-- START VERSION NOTICE -->
-              <li class="${RANDOM_ID}_add">增加对低版本Chromium/Gecko内核浏览器的兼容。</li>
-              <li class="${RANDOM_ID}_fix">优化字体缩放功能对新版Gecko内核的兼容性判断。</li>
-              <li class="${RANDOM_ID}_fix">修正concept-canvas-will-read-frequently的问题。</li>
-              <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化样式，优化代码。</li>
+              <li class="${RANDOM_ID}_info">持续对TMv4.18.0及Beta进行兼容，次月更新将取消之。</li>
+              <li class="${RANDOM_ID}_fix">修正对Brave及其他Chromium浏览器的识别问题。</li>
+              <li class="${RANDOM_ID}_fix">修正一些已知的问题，优化代码。</li>
               <!-- END VERSION NOTICE -->
             </ul></p>
-            <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
+          <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
         ),
         titleText: "脚本更新 - 温馨提示",
       });
@@ -2156,7 +2154,7 @@
         return String(
           (CAN_I_USE ? `:is(${codeSelector})` : `${codeSelector}`).concat(
             `{font-size:14px!important;line-height:150%!important;`,
-            `-webkit-text-stroke:initial!important;text-shadow:0 0 ${shadow_r * 0.8}px ${toColordepth(shadow_c, 1.65)}!important;`,
+            `-webkit-text-stroke:initial!important;text-shadow:0 0 ${(shadow_r * 0.8).toFixed(2)}px ${toColordepth(shadow_c, 1.65)}!important;`,
             `font-family:${monospace},ui-monospace,Consolas,'Lucida Console',${IS_REAL_GECKO ? "" : "monospace,"}`,
             `${IS_REAL_GECKO ? mono.replace("system-ui", "monospace,system-ui") : mono}!important;`,
             `font-feature-settings:"liga" 0,"tnum","zero"!important;user-select:text!important}`
@@ -2226,7 +2224,7 @@
     );
     const tFixStrokeHTML = String(
       `<span id="${defCon.id.fstroke}" style="width:auto;font-size:12px;color:#666">
-        (<label title="修正文字粗体附加描边时的样式错误 (Chrome)">粗体修正</label>
+        (<label title="修正文字粗体附加描边时的样式错误 (Chrome96+)">粗体修正</label>
         <input type="checkbox" id="${defCon.id.fixStroke}" ${CONST_VALUES.fixStroke ? "checked" : ""}/>)
       </span>`
     );
@@ -2440,9 +2438,8 @@
     /* Insert CSS */
 
     try {
-      let mutationType;
       const observer = new MutationObserver(mutations => {
-        mutationType = undefined;
+        let mutationType;
         mutations.forEach(mutation => {
           switch (mutation.type) {
             case "childList":
@@ -2515,11 +2512,11 @@
               insertHTML();
               operateConfigure();
               setAutoZoomFontSize(qS(`#${defCon.id.rndId}`), defCon.tZoom);
-              sleep(100)
-                .then(() => {
+              sleep(100)(defCon.errors.length)
+                .then(l => {
                   qS(`#${defCon.id.container}`).style.opacity = 1;
-                  debug("\u27A4 configure<errorCount>:", defCon.errors.length);
-                  defCon.errors.length > 0 && reportErrorToAuthor(defCon.errors, true);
+                  debug("\u27A4 configure<errorCount>:", l);
+                  l > 0 && reportErrorToAuthor(defCon.errors, true);
                 })
                 .catch(e => {
                   error("insertHTML.opacity:", e.message);
@@ -2656,7 +2653,7 @@
               ? isGM
                 ? `Greasemonkey4.0+在新版Gecko内核下不支持字体缩放功能，请更换Tampermonkey/Violentmonkey后再尝试。\n\n强烈建议您：使用Firefox的“浏览器缩放”替代(快捷键：ctrl+-/ctrl++)`
                 : `强烈建议您：使用Firefox的“浏览器缩放”替代(快捷键：ctrl+-/ctrl++)\n\n警告：在Firefox下由于Gecko内核的兼容性原因，会对部分网站样式、功能兼容不足，从而造成样式错乱、页面动作缺失等问题，请根据实际需求酌情使用。`
-              : `警告：由于样式兼容问题，在部分使用视窗单位(vw, vh, vm*)的网站应用字体缩放会造成页面元素居中异常的样式错误。我们建议您：在此类站点中暂停使用字体比例缩放功能(即：设置参数为1.000)，使用浏览器缩放替代(快捷键：ctrl+-/ctrl++)。`,
+              : `警告：由于样式兼容问题，在部分使用视窗单位(vw, vh, vm*)的网站应用字体缩放会造成页面元素排版异常的样式错误。我们建议您：在此类站点中暂停使用字体比例缩放功能(即：设置参数为1.000)，使用浏览器缩放替代(快捷键：ctrl+-/ctrl++)。`,
             isGM ? `` : `\n\n请确认是否开启字体缩放功能？`
           ),
           true
@@ -2945,7 +2942,7 @@
       );
     }
 
-    async function isFontReady(t = 1e3) {
+    function isFontReady(t = 1e3) {
       if (typeof defCon.fontReady !== "undefined") {
         delete defCon.fontReady;
         return true;
@@ -3006,7 +3003,7 @@
               cache.set("_FontCheckList_", fontData);
             }
           } catch (e) {
-            error("Fontlist With Cache:", e.message);
+            error("FontCheckList with cache:", e.message);
             cache.remove("_FontCheckList_");
             fontData = await fontCheck_DetectOnce();
             cache.set("_FontCheckList_", fontData);
@@ -3114,7 +3111,7 @@
                     closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
                     frDialog = new FrDialogBox({
                       trueButtonText: "确 定",
-                      messageText: `<p style="color:darkgreen">您所提交的自定义字体已保存成功\uff01<p><p>字体列表全局缓存已自动重建，当前页面即将刷新。</p>`,
+                      messageText: `<p style="color:darkgreen">您所提交的自定义字体已保存成功\uff01<p><p>字体列表全局缓存已自动重建，当前页面即将刷新。</p><p style="color:red;font-size:12px!important">注：格式错误或重复的字体代码将被自动过滤。</p>`,
                       titleText: "自定义字体数据保存",
                     });
                     cache.remove("_FontCheckList_");
@@ -3309,6 +3306,12 @@
           }
           saveChangeStatus(fontCssT, CONST_VALUES.fontCSS, submitButton, defCon.values);
           saveChangeStatus(fontExT, CONST_VALUES.fontEx, submitButton, defCon.values);
+          // Expand & Collapse
+          expandOrCollapse(qS(`#${defCon.id.cSwitch}`), fontCssT, qS(`#${defCon.id.fontCSS}`));
+          expandOrCollapse(qS(`#${defCon.id.eSwitch}`), fontExT, qS(`#${defCon.id.fontEx}`));
+
+          /* Customized monospaced fontlist */
+
           qS(`#${defCon.id.mono}`).addEventListener("dblclick", async () => {
             try {
               const monospacedFont = CONST_VALUES.monospacedFont;
@@ -3342,11 +3345,12 @@
                   }
                   frDialog = null;
                 } else if (Array.isArray(monospaced_fontListArray) && monospaced_fontListArray.length > 0) {
-                  saveData("_monospaced_fontlist_", monospaced_fontListArray.join(","));
+                  const monospaced_fontList = [...new Set(monospaced_fontListArray)].join(",");
+                  saveData("_monospaced_fontlist_", monospaced_fontList);
                   closeAllFrDialogBox(`#${defCon.id.dialogbox}`);
                   frDialog = new FrDialogBox({
                     trueButtonText: "确 定",
-                    messageText: `<p style="color:darkgreen">您所提交的自定义等宽字体已保存成功\uff01</p><p>当前页面将在您确认后自动刷新。</p>`,
+                    messageText: `<p style="color:darkgreen">您所提交的自定义等宽字体已保存成功\uff01</p><p>当前页面将在您确认后自动刷新。</p><p style="color:red;font-size:12px!important">注：格式错误或重复的字体名称将被自动过滤。</p>`,
                     titleText: "自定义等宽字体数据保存",
                   });
                   if (await frDialog.respond()) {
@@ -3373,9 +3377,6 @@
               error("Monospaced Set:", e.message);
             }
           });
-          // Expand & Collapse
-          expandOrCollapse(qS(`#${defCon.id.cSwitch}`), fontCssT, qS(`#${defCon.id.fontCSS}`));
-          expandOrCollapse(qS(`#${defCon.id.eSwitch}`), fontExT, qS(`#${defCon.id.fontEx}`));
 
           /* Buttons control */
 
