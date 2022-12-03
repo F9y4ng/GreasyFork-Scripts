@@ -2,12 +2,14 @@
 // @name               Google & baidu Switcher (ALL in One)
 // @name:zh-CN         优雅的搜索引擎跳转助手
 // @name:zh-TW         优雅的搜索引擎跳轉助手
+// @name:ru            элегантный помощник
 // @name:ja            検索エンジンジャンプアシスタント
-// @version            2022.11.17.1
+// @version            2022.12.03.1
 // @author             F9y4ng
 // @description        Graceful search engine Switch assistant, more beautiful and more convenient. The new version adds anti-redirect function, custom search engine selection function, visual search parameter setting, and automatic update detection and other advanced functions.
 // @description:zh-CN  优雅的搜索引擎跳转助手，更美观、更便捷。新版本增加去重定向功能、自定义搜索引擎选取功能，提供可视化搜索参数设置，及自动更新检测等高级功能。
 // @description:zh-TW  優雅的搜尋引擎跳轉助手，更美觀、更便捷。新版本增加去重定向功能、自定義搜尋引擎選取功能，提供可視化搜索參數設置，及自動更新檢測等高級功能。
+// @description:ru     элегантный поисковый двигатель прыгает ассистент, красивее и удобнее.  новая версия добавляет функцию перенаправления, пользовательскую функцию выбора поисковой машины, предоставляет визуальные параметры поиска, а также такие дополнительные функции, как автоматическое обновление тестов.
 // @description:ja     エレガントな検索エンジンジャンプアシスタントは、より美しく、より便利です。 新しいバージョンは、リダイレクト機能、カスタム検索エンジン選択機能、ビジュアル検索パラメータ設定、自動更新検出などの高度な機能を追加します。
 // @namespace          https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
 // @icon               https://img.icons8.com/stickers/48/search-in-cloud.png
@@ -28,6 +30,7 @@
 // @match              *://image.so.com/*
 // @match              *://so.toutiao.com/search*
 // @match              *://yandex.com/*search*
+// @match              *://yandex.ru/*search*
 // @match              *://www.ecosia.org/*
 // @include            *://*.google.*/search*
 // @exclude            *://www.google.com/sorry*
@@ -44,10 +47,10 @@
 // @connect            githubusercontent.com
 // @compatible         edge 兼容TamperMonkey, ViolentMonkey
 // @compatible         Chrome 兼容TamperMonkey, ViolentMonkey
-// @compatible         Firefox 兼容Greasemonkey4.0+, TamperMonkey, ViolentMonkey
+// @compatible         Firefox 兼容Greasemonkey, TamperMonkey, ViolentMonkey
 // @compatible         Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible         Safari 兼容Tampermonkey • Safari
-// @note               持续对TamperMonkey_v4.18.0及Beta版本进行兼容，次月更新将取消。\n修正一些已知的问题，优化样式，优化代码。
+// @note               增加对yandex.ru域的支持。\n新增对yandex搜索结果的广告过滤。\n修正一些已知的问题，优化样式，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -81,10 +84,8 @@
   /* Perfectly Compatible For Greasemonkey4.0+, Tampermonkey, Violentmonkey * F9y4ng * 20210609 */
 
   const GMinfo = GM_info;
-  const GMversion = GMinfo.version || "0.00";
   const GMscriptHandler = GMinfo.scriptHandler;
   const isGM = GMscriptHandler.toLowerCase() === "greasemonkey";
-  const isTM_418_Patch = GMscriptHandler.toLowerCase() === "tampermonkey" && GMversion.startsWith("4.18") && !GMversion.endsWith(".1");
   const debug = IS_OPEN_DEBUG ? console.log.bind(console) : () => {};
   const error = IS_OPEN_DEBUG ? console.error.bind(console) : () => {};
   const warn = IS_OPEN_DEBUG ? console.warn.bind(console) : () => {};
@@ -99,7 +100,7 @@
   const GMopenInTab = isGM ? GM.openInTab : GM_openInTab;
   const GMxmlhttpRequest = isGM ? GM.xmlHttpRequest : GM_xmlhttpRequest;
   const GMregisterMenuCommand = isGM ? GM.registerMenuCommand : GM_registerMenuCommand;
-  const GMunregisterMenuCommand = isGM || isTM_418_Patch ? () => {} : GM_unregisterMenuCommand;
+  const GMunregisterMenuCommand = isGM ? () => {} : GM_unregisterMenuCommand;
 
   /* default CONST Values */
 
@@ -343,6 +344,48 @@
     init: function (v = this.uaData) {
       return v ? navigator.userAgentData : navigator.userAgent.toLowerCase();
     },
+    getBrowser: (brands, getBrand, info = "Other", version = "0") => {
+      try {
+        if (getBrand) {
+          brands.some(b => {
+            switch (b.brand) {
+              case "Microsoft Edge":
+                info = "Edge";
+                version = b.version;
+                break;
+              case "Google Chrome":
+                info = "Chrome";
+                version = b.version;
+                break;
+              case "Opera":
+                info = "Opera";
+                version = b.version;
+                break;
+              case "Brave":
+                info = "Brave";
+                version = b.version;
+                break;
+              case "Chromium":
+                if (info === "Other") {
+                  info = "Chromium";
+                  version = b.version;
+                }
+                break;
+            }
+          });
+        } else {
+          brands.some(b => {
+            if (b.brand === "Chromium") {
+              info = "Blink";
+              version = b.version;
+            }
+          });
+        }
+      } catch (e) {
+        error("Navigator.getBrowser:", e.message);
+      }
+      return { info, version };
+    },
     core: function (u = JSON.stringify(this.init())) {
       return {
         Trident: u.includes("trident") || u.includes("compatible"),
@@ -370,6 +413,34 @@
       }
       return system;
     },
+    browser: function (u = this.init(), browserInfo = "Other") {
+      if (this.uaData) {
+        browserInfo = this.getBrowser(u.brands, "browser").info;
+      } else {
+        const browserArray = {
+          IE: u.includes("msie") || u.includes("trident") || u.includes("compatible"),
+          Chromium: u.includes("chromium"),
+          Chrome: u.includes("chrome") && !u.includes("edg") && !u.includes("chromium"),
+          Firefox: u.includes("firefox") && u.includes("gecko"),
+          Opera: u.includes("presto") || u.includes("opr") || u.includes("opera"),
+          Safari: u.includes("safari") && u.includes("version") && !u.includes("chrome"),
+          Edge: u.includes("edg"),
+          QQBrowser: /qqbrowser/g.test(u),
+          Wechat: /micromessenger/g.test(u),
+          UCBrowser: /ubrowser/g.test(u),
+          Sougou: /metasr|sogou/g.test(u),
+          Maxthon: /maxthon/g.test(u),
+          CentBrowser: /cent/g.test(u),
+          Vivaldi: /vivaldi/g.test(u),
+        };
+        for (let i in browserArray) {
+          if (oH.call(browserArray, i) && browserArray[i]) {
+            browserInfo = i;
+          }
+        }
+      }
+      return browserInfo;
+    },
     isCheatUA: function () {
       return (
         (!this.uaData && !!navigator.userAgentData) || (!this.core().Gecko && !isNaN(parseFloat(w.mozInnerScreenX))) || (this.core().Gecko && isNaN(parseFloat(w.mozInnerScreenX)))
@@ -379,6 +450,7 @@
 
   const CUR_WINDOW_TOP = defCon.isWinTop();
   const IS_REAL_GECKO = (getNavigator.core().Gecko && !getNavigator.isCheatUA()) || !isNaN(parseFloat(w.mozInnerScreenX));
+  const IS_REAL_EDGE = getNavigator.browser().includes("Edge") && !getNavigator.isCheatUA() && !!w.chrome;
 
   /* expire for fontlist cache */
 
@@ -1002,8 +1074,8 @@
                   });
                 })
                 .then(cache.set("_autoupdate_", version))
-                .then(() => {
-                  console.log(`%c[GB-Update]%c\nCurretVersion: %c${defCon.curVersion}%c is up-to-date!`, "font-weight:bold;color:darkcyan", "color:0", "color:crimson", "color:0");
+                .then((r = defCon.curVersion) => {
+                  console.log(`%c[GB-Update]%c\nCurretVersion: %c${r}%c is up-to-date!`, "font-weight:bold;color:darkcyan", "color:0", "color:crimson", "color:0");
                 });
             }
           }
@@ -1346,6 +1418,38 @@
           });
         }
         break;
+      case "Yandex":
+        const rightside_Ads_Counter = qS(".serp-adv__counter");
+        if (rightside_Ads_Counter) {
+          const rightside_Ads = rightside_Ads_Counter.nextElementSibling;
+          count(`\ud83d\udd33 [${siteName}-Anti-Ads-Deep-exp]`);
+          rightside_Ads_Counter.remove();
+          rightside_Ads && rightside_Ads.className !== "serp-adv__found" && rightside_Ads.remove();
+        }
+        if (qA("li.serp-item.serp-item_card div.TextContainer>span.OrganicTextContentSpan>span,li.serp-item.serp-item_card div.Label.Label_theme_direct").length > 0) {
+          const match_Ads_Style_Yandex = str => {
+            const ad_Selector = qS(str);
+            const ad_Match_Filter = ad_Selector && ad_Selector.textContent.match(/\.Label\.DirectLabel_[a-z]+\[class\]\[class\]\s*{\s*background-image:\s*url\(([^)]+)\);?\s*}/);
+            return ad_Match_Filter ? ad_Match_Filter[1] : "no-ads-icon";
+          };
+          const ad_Matched = match_Ads_Style_Yandex(`body>style[nonce][data-stylesheet="bundles-assets"]`);
+          const ad_Matcded_II = match_Ads_Style_Yandex(`#search-result-aside>style[nonce][data-stylesheet="progressive"]`);
+          count(`\ud83d\udd33 [${siteName}-Anti-Ads-Deep]`);
+          qA("li.serp-item.serp-item_card").forEach(node => {
+            const ads_Detect = qS("div.TextContainer>span.OrganicTextContentSpan>span", node);
+            const ads_Detect_II = qS("div.Label.Label_theme_direct", node);
+            if (
+              (ads_Detect && (ads_Detect.textContent.includes("\u0420\u0435\u043a\u043b\u0430\u043c\u0430") || ads_Detect.textContent.toLowerCase().includes("ad"))) ||
+              (ads_Detect_II &&
+                (ads_Detect_II.textContent.toLowerCase().includes("ad") ||
+                  w.getComputedStyle(ads_Detect_II, null).getPropertyValue("background-image").includes(ad_Matched) ||
+                  w.getComputedStyle(ads_Detect_II, null).getPropertyValue("background-image").includes(ad_Matcded_II)))
+            ) {
+              node && node.remove();
+            }
+          });
+        }
+        break;
       case "So360":
         if (qA("ul.section>li span[class='txt']>s,ul.result>li>div[class~='res-recommend-tag']").length > 0) {
           count(`\ud83d\udd33 [${siteName}-Anti-Ads-Deep]`);
@@ -1487,15 +1591,17 @@
         SiteName: "Yandex",
         SiteNick: "Yandex 搜索",
         SiteURI: "yandex.com",
-        WebURL: "https://yandex.com/search/?lang=en&text=",
-        ImgURL: "https://yandex.com/images/search?from=tabbar&family=no&text=",
+        WebURL: `https://yandex.${navigator.language === "ru" ? "ru" : "com"}/search/?text=`,
+        ImgURL: `https://yandex.${navigator.language === "ru" ? "ru" : "com"}/images/search?from=tabbar&family=no&text=`,
         IMGType: ["images"],
         SplitName: "/",
         MainType: "form>div.search2__input",
-        StyleCode: `#${CONST.rndID}{z-index:1999999995;position:absolute;right:0;top:0;width:auto;height:40px;margin:0;padding:0;cursor:pointer;-webkit-appearance:none}#${CONST.leftButton}{display:inline-block;height:40px}#${CONST.rightButton}{margin:0 0 0 -2px;display:inline-block;height:40px}#${CONST.leftButton} input{cursor:pointer;padding:0 12px 0 18px!important;border:1px solid transparent;background:#fc0;box-shadow:none;border-top-left-radius:10px;border-bottom-left-radius:10px;min-width:90px;height:40px;font-size:15px;font-weight:400;color:#000;vertical-align:top;}#${CONST.rightButton} input{cursor:pointer;padding:0 18px 0 12px!important;border:1px solid transparent;background:#fc0;box-shadow:none;border-top-right-radius:10px;border-bottom-right-radius:10px;min-width:90px;height:40px;font-size:15px;font-weight:400;color:#000;vertical-align:top;}`,
+        StyleCode: `#${CONST.rndID}{z-index:1999999995;position:absolute;right:0;top:0;width:auto;height:40px;margin:0;padding:0;cursor:pointer;opacity:0;-webkit-appearance:none;transition:opacity 0.5s ease-in}#${CONST.leftButton}{display:inline-block;height:40px}#${CONST.rightButton}{margin:0 0 0 -2px;display:inline-block;height:40px}#${CONST.leftButton} input{cursor:pointer;padding:1px 12px 0 18px!important;border:1px solid transparent;background:#fc0;box-shadow:none;border-top-left-radius:10px;border-bottom-left-radius:10px;min-width:90px;height:40px;font-size:16px;font-weight:400;color:#000;vertical-align:top;}#${CONST.rightButton} input{cursor:pointer;padding:1px 18px 0 12px!important;border:1px solid transparent;background:#fc0;box-shadow:none;border-top-right-radius:10px;border-bottom-right-radius:10px;min-width:90px;height:40px;font-size:16px;font-weight:400;color:#000;vertical-align:top;}`,
         KeyStyle: ".OrganicTitleContentSpan b,.OrganicTextContentSpan b",
         AntiRedirect: () => {},
-        AntiAds: () => {},
+        AntiAds: () => {
+          deBounce(antiAds_RemoveNodes, 100, "ad_yandex", true)(null, "Yandex");
+        },
       },
       so360: {
         SiteTypeID: 8,
@@ -1609,7 +1715,7 @@
     } else if (location.host.endsWith("fsoufsou.com")) {
       currentSite = selectedEngine.includes(newSiteType.FSOU) ? listSite.fsou : listSite.other;
       listCurrentSite = listSite.fsou;
-    } else if (location.host.endsWith("yandex.com")) {
+    } else if (location.host.endsWith("yandex.com") || location.host.endsWith("yandex.ru")) {
       currentSite = selectedEngine.includes(newSiteType.YANDEX) ? listSite.yandex : listSite.other;
       listCurrentSite = listSite.yandex;
     } else if (location.host.endsWith(".so.com")) {
@@ -1723,7 +1829,7 @@
               listCurrentSite.SiteTypeID === newSiteType.DUCKDUCKGO
                 ? `background-image:url('${API_ICO_DDUCKGO}/${listSite[site].SiteURI}.ico')!important;`
                 : listCurrentSite.SiteTypeID === newSiteType.ECOSIA
-                ? `background-image:url(${API_ICO_NOICON})!important;background-position:0 0;`
+                ? `background-image:url(${API_ICO_NOICON})!important;filter:opacity(0.65);background-position:0 0;`
                 : `background-position:0 ${(1 - listSite[site].SiteTypeID) * 24}px;`
             ).concat(`background-attachment:local;background-size:cover;`);
             returnHtml += String(
@@ -1746,7 +1852,7 @@
               listCurrentSite.SiteTypeID === newSiteType.DUCKDUCKGO
                 ? `background-image:url('${API_ICO_DDUCKGO}/${listSite[site].SiteURI}.ico')!important;`
                 : listCurrentSite.SiteTypeID === newSiteType.ECOSIA
-                ? `background-image:url(${API_ICO_NOICON})!important;background-position:0 0;`
+                ? `background-image:url(${API_ICO_NOICON})!important;filter:opacity(0.85);background-position:0 0;`
                 : `background-position:0 ${(1 - listSite[site].SiteTypeID) * 32}px;`
             ).concat(`background-attachment:local;background-size:32px auto;`);
             returnHtml += String(
@@ -1895,11 +2001,11 @@
               };
               const colorReg =
                 /^#[0-9a-f]{3}$|^#[0-9a-f]{6}$|^#[0-9a-f]{8}$|^rgba\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*((?!1.[1-9])[0-1]?(\.[0-9]{1,3})?)\)$|^rgb\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))\)$|^transparent$|^currentcolor$/i;
-              foregroundColor = prompt("请输入关键词前景色（字体颜色），默认为“#F73131CD”，支持HEX, HEXA, RGB, RGBA, currentcolor等颜色格式。", customColor.foregroundColor);
+              foregroundColor = prompt("请输入关键词前景色（字体颜色），默认为“#F73131CD”，支持HEX, HEXA, RGB, RGBA, currentcolor的颜色格式。", customColor.foregroundColor);
               if (foregroundColor === null) {
                 return;
               } else if (colorReg.test(foregroundColor.trim())) {
-                backgroundColor = prompt("请输入关键词背景色，默认为“#FFFF80AD”，支持HEX, HEXA, RGB, RGBA, transparent等颜色格式。", customColor.backgroundColor);
+                backgroundColor = prompt("请输入关键词背景色，默认为“#FFFF80AD”，支持HEX, HEXA, RGB, RGBA, transparent的颜色格式。", customColor.backgroundColor);
                 if (backgroundColor === null) {
                   return;
                 } else if (colorReg.test(backgroundColor.trim())) {
@@ -2221,15 +2327,26 @@
               break;
             case newSiteType.YANDEX:
               insterAfter(userSpan, Target);
-              sleep(500, { useCachedSetTimeout: true })(Number(qS(SpanID).getBoundingClientRect().width)).then(width => {
-                qS(SpanID).style.right = `-${width + 60}px`;
-                if (currentSite.IMGType !== CONST.vim) {
-                  qS(`.input__settings`) && (qS(`.input__settings`).style.right = `-${width + 273}px`);
-                  qS(`span.serp-header__voice-search-container`) && (qS(`span.serp-header__voice-search-container`).style.right = `-${width + 273}px`);
-                } else {
-                  qS(`button.button2[data-bem]`) && (qS(`button.button2[data-bem]`).style.right = `-${width + 268}px`);
-                }
-              });
+              sleep(500, { useCachedSetTimeout: true })
+                .then(() => {
+                  const width = Number(qS(SpanID).getBoundingClientRect().width) || 182;
+                  const isRU = location.host.endsWith(".ru");
+                  if (currentSite.IMGType.includes(CONST.vim)) {
+                    qS(SpanID).style.right = `-${isRU ? (IS_REAL_GECKO || IS_REAL_EDGE ? width - 60 : width - 130) : width - 60}px`;
+                    qS(`button.button2[data-bem]`) && (qS(`button.button2[data-bem]`).style.right = `-${width + 144}px`);
+                  } else if (CONST.vim === "products") {
+                    qS(SpanID).style.right = `-${width - 60}px`;
+                  } else {
+                    qS(SpanID).style.right = `-${isRU ? ((IS_REAL_EDGE || IS_REAL_GECKO) && CONST.vim === "video" ? width - 60 : width - 110) : width - 60}px`;
+                    qS(`.input__settings`) && (qS(`.input__settings`).style.right = `-${width + 144}px`);
+                    qS(`span.serp-header__voice-search-container`) && (qS(`span.serp-header__voice-search-container`).style.right = `-${width + 190}px`);
+                    qS(`button.voice-search-button`) && (qS(`button.voice-search-button`).style.right = `-${width + 190}px`);
+                  }
+                  qS(`span.input__voice-search`) && (qS(`span.input__voice-search`).style.right = `-${width + 184}px`);
+                })
+                .then(() => {
+                  qS(SpanID).style.opacity = 1;
+                });
               break;
             case newSiteType.KAIFA:
               Target.appendChild(userSpan);
