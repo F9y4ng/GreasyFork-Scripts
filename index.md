@@ -20,9 +20,11 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2022.12.03.1 - 更新日志：
+## version 2022.12.17.1 - 更新日志：
 ```
-@ 修正在某些站点的框架页面内样式渲染预览时的错误。
+# 升级预告：次月更新将有重大功能升级，所有设置数据将会重建，您仍可通过备份还原之前的配置，但强烈建议您届时重新设置参数，以使用最新参数功能！
+@ 优化程序开启更新数据重建选项时数据的重建逻辑。
+@ 修正配置数据异常时重置数据造成的数据格式错误。
 @ 修正一些已知的问题，优化样式，优化代码。
 ```
 
