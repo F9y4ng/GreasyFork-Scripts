@@ -20,12 +20,22 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2022.12.17.1 - 更新日志：
+## version 2023.01.01.1 - 更新日志：
 ```
-# 升级预告：次月更新将有重大功能升级，所有设置数据将会重建，您仍可通过备份还原之前的配置，但强烈建议您届时重新设置参数，以使用最新参数功能！
-@ 优化程序开启更新数据重建选项时数据的重建逻辑。
-@ 修正配置数据异常时重置数据造成的数据格式错误。
-@ 修正一些已知的问题，优化样式，优化代码。
+！ 本次更新为重大版本升级，因数据优化及新增功能，升级后将重建数据，请知悉！
+```
+```
+# 恭祝大家2023年新年快乐，万事如意，财源滚滚！
++ 新增等宽字体自定义应用根域及元素选择器的功能。
++ 新增对Tampermonkey•Safari的兼容优化。
+@ 优化对Chromium(BLINK)新内核字体粗体的渲染效果。
+@ 优化设置数据的备份功能，可完整备份所有设置数据。
+@ 优化设置数据结构，大幅减少个性化设置数据的体积。
+@ 优化Chromium内核(v96+)对粗体描边渲染修正的效率。
+@ 修正在Firefox下字体缩放预览时窗口坐标重置的错误。
+@ 修正冗余脚本检测在iframe框架内无限循环检测的问题。
+@ 修正在特定条件下iframe框架页面重复载入样式的错误。
+@ 修正一些已知的小问题，优化样式，优化代码。
 ```
 
 ## 关于问题反馈
@@ -35,15 +45,16 @@
 
 * [关于个别网站样式错误修正的设置分享，不定期更新，自取自用。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42)
 * [分享：关于分别设置英文字体和中文字体的方法。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83)
-* 字体表字体及其他中文字体分享：[点这里下载字体包](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/46)
+* [如何正确地对不同显示器、浏览器设定字体渲染参数？](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160)
 
 > ### 如何提供脚本错误日志？ `New`
 > 1. 先打开脚本调试开关：将代码第54行 `const IS_OPEN_DEBUG = false` 改为 `true`，并保存。
 > 2. 在浏览器中按F12打开console(控制台)面板，刷新页面，进行操作直至复现你遇到的问题，然后在控制台中右键菜单选择 **另存为...**。
 > 3. 将保存好的日志文件上传至[Github ISSUES](https://github.com/F9y4ng/GreasyFork-Scripts/issues)，进行错误报告(Bug report)。
+> 4. 日常使用时，请勿将脚本调试开关开启，会造成脚本执行缓慢或页面卡顿等情况。
 
 ## 关于字体的添加
-**如果您需要向字体表添加自定义字体，请按[帮助说明的指引](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/64)进行操作。**
+**如果您需要向字体表添加自定义字体，请按[帮助说明](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/64)进行操作。** 字体表字体及其他中文字体分享：[点这里下载](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/46)
 
 如果您需要增加新的字体进入代码字体表，请将 **完整且准确** 的字体 **中英文全称** 及 **PostScript名称** 按 **预设格式** 添加进自定义字体列表。
 
@@ -77,16 +88,17 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2022.12.03.1 - 更新日志：
+## version 2023.01.01.1 - 更新日志：
 ```
-+ 增加对yandex.ru域的支持。
-+ 新增对yandex搜索结果的广告过滤。
++ 新增neeva.com域的搜索跳转支持。
+@ 优化搜索跳转图标样式的加载效率。
+@ 优化对Tampermonkey•Safari的兼容性。
 @ 修正一些已知的问题，优化样式，优化代码。
 ```
 
 ## 最新功能介绍
 * 新增去除搜索结果及侧栏广告功能。`New!`
-* 新增自定义搜索引擎选取功能。（包含：百度、Google、Bing、Duckduckgo、搜狗、F搜、Yandex、360搜索、头条搜索、百度开发者、Ecosia搜索）
+* 新增自定义搜索引擎选取功能。（包含：百度、Google、Bing、Duckduckgo、搜狗、F搜、Yandex、360搜索、头条搜索、百度开发者、Ecosia、Neeva搜索）
 * 新增搜索结果链接去重定向功能。
 * 更智能的更新检测功能。
 
