@@ -4,7 +4,7 @@
 // @name:zh-TW         优雅的搜索引擎跳轉助手
 // @name:ru            элегантный помощник
 // @name:ja            検索エンジンジャンプアシスタント
-// @version            2023.01.01.1
+// @version            2023.01.03.1
 // @author             F9y4ng
 // @description        Graceful search engine Switch assistant, more beautiful and more convenient. The new version adds anti-redirect function, custom search engine selection function, visual search parameter setting, and automatic update detection and other advanced functions.
 // @description:zh-CN  优雅的搜索引擎跳转助手，更美观、更便捷。新版本增加去重定向功能、自定义搜索引擎选取功能，提供可视化搜索参数设置，及自动更新检测等高级功能。
@@ -23,6 +23,8 @@
 // @match              *://ipv6.baidu.com/*
 // @match              *://image.baidu.com/*
 // @match              *://*.bing.com/*
+// @match              *://*.you.com/*
+// @match              *://you.com/*
 // @match              *://duckduckgo.com/*
 // @match              *://*.sogou.com/*
 // @match              *://fsoufsou.com/search*
@@ -1655,6 +1657,28 @@
         AntiRedirect: () => deBounce(antiRedirect_Neeva, 200, "neeva", false)(`a[href][data-neeva-log][rel="nofollow"]:not([gd-antiredirect-status])`),
         AntiAds: () => {},
       },
+      you: {
+        SiteTypeID: 13,
+        SiteName: 'You',
+        SiteNick: 'You 搜索',
+        SiteURI: 'you.com',
+        WebURL: 'https://you.com/search?fromSearchBar=true&q=',
+        ImgURL: 'https://you.com/search?fromSearchBar=true&tbm=isch&q=',
+        IMGType: ['isch'],
+        SplitName: 'tbm',
+        MainType: '.hhbXxG',
+        StyleCode: `a,a em{text-decoration:none!important}
+        a:hover{text-decoration:underline!important}
+        #form{white-space:nowrap}#u{z-index:1!important}
+        #${CONST.rndID}{z-index:1999999995;position:relative;margin-left:4px;height:40px;display:inline-block}
+        #${CONST.rndID} #${CONST.leftButton}{display:inline-block;margin-left:2px;height:40px}#${CONST.rndID} #${CONST.rightButton}{display:inline-block;margin-left:-1px;height:40px}
+        #${CONST.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#fff;min-width:90px;border:1px solid #3476d2;font-size:16px!important;vertical-align:top;font-weight:600}
+        #${CONST.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#fff;min-width:90px;border:1px solid #3476d2;font-size:16px!important;vertical-align:top;font-weight:600}
+        #${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background: #4662D9;border:1px solid #3476d2}`,
+        KeyStyle: 'strong, b',
+        AntiRedirect: () => {},
+        AntiAds: () => {},
+      },
       other: { SiteTypeID: 0 },
     };
 
@@ -1671,6 +1695,7 @@
       KAIFA: listSite.kaifa.SiteTypeID,
       ECOSIA: listSite.ecosia.SiteTypeID,
       NEEVA: listSite.neeva.SiteTypeID,
+      YOU: listSite.you.SiteTypeID,
       OTHERS: listSite.other.SiteTypeID,
     };
 
@@ -1711,6 +1736,11 @@
     } else if (location.host.endsWith("neeva.com")) {
       currentSite = selectedEngine.includes(newSiteType.NEEVA) ? listSite.neeva : listSite.other;
       listCurrentSite = listSite.neeva;
+    } else if (location.host.endsWith('you.com')) {
+      currentSite = selectedEngine.includes(newSiteType.YOU)
+        ? listSite.you
+        : listSite.other;
+      listCurrentSite = listSite.you;
     } else {
       currentSite = listSite.other;
       listCurrentSite = listSite.other;
@@ -2354,6 +2384,9 @@
               });
               break;
             case newSiteType.NEEVA:
+              insterAfter(userSpan, Target);
+              break;            
+            case newSiteType.YOU:
               insterAfter(userSpan, Target);
               break;
           }
