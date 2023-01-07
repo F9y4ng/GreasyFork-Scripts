@@ -15,21 +15,12 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2023.01.01.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2023.01.07.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 ```
-！ 本次更新为重大版本升级，因数据优化及新增功能，升级后将重建数据，请知悉！
-```
-```
-# 恭祝大家2023年新年快乐，万事如意，财源滚滚！
-+ 新增等宽字体自定义应用根域及元素选择器的功能。
-+ 新增对Tampermonkey•Safari的兼容优化。
-@ 优化对Chromium(BLINK)新内核字体粗体的渲染效果。
-@ 优化设置数据的备份功能，可完整备份所有设置数据。
-@ 优化设置数据结构，大幅减少个性化设置数据的体积。
-@ 优化Chromium内核(v96+)对粗体描边渲染修正的效率。
-@ 修正在Firefox下字体缩放预览时窗口坐标重置的错误。
-@ 修正冗余脚本检测在iframe框架内无限循环检测的问题。
-@ 修正在特定条件下iframe框架页面重复载入样式的错误。
++ 新增高级功能『禁用全局数据』可设置仅在指定域名渲染。
+@ 优化对话框程序，排除内存泄漏的隐患。
+@ 优化针对弹幕型网站海量弹幕渲染修正的效率。
+@ 修正safari及Tampermonkey的兼容性问题。
 @ 修正一些已知的小问题，优化样式，优化代码。
 ```
 
@@ -81,17 +72,16 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2023.01.01.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2023.01.07.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 ```
-+ 新增neeva.com域的搜索跳转支持。
-@ 优化搜索跳转图标样式的加载效率。
-@ 优化对Tampermonkey•Safari的兼容性。
++ 新增you.com域的搜索跳转支持。
+@ 修正Bing.com广告过滤的bug.
 @ 修正一些已知的问题，优化样式，优化代码。
 ```
 
 ## 最新功能介绍
 * 新增去除搜索结果及侧栏广告功能。
-* 新增自定义搜索引擎选取功能（包含：百度、Google、Bing、Duckduckgo、搜狗、F搜、Yandex、360搜索、头条搜索、百度开发者、Ecosia、Neeva搜索等常见的搜索引擎）
+* 新增自定义搜索引擎选取功能（包含：百度、Google、Bing、Duckduckgo、搜狗、F搜、Yandex、360搜索、头条搜索、百度开发者、Ecosia、Neeva、You搜索等常见的搜索引擎）
 * 新增搜索结果链接去重定向功能。
 * 更智能的更新检测功能。
 

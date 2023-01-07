@@ -4,7 +4,7 @@
 // @name:zh-TW         优雅的搜索引擎跳轉助手
 // @name:ru            элегантный помощник
 // @name:ja            検索エンジンジャンプアシスタント
-// @version            2023.01.01.1
+// @version            2023.01.07.1
 // @author             F9y4ng
 // @description        Graceful search engine Switch assistant, more beautiful and more convenient. The new version adds anti-redirect function, custom search engine selection function, visual search parameter setting, and automatic update detection and other advanced functions.
 // @description:zh-CN  优雅的搜索引擎跳转助手，更美观、更便捷。新版本增加去重定向功能、自定义搜索引擎选取功能，提供可视化搜索参数设置，及自动更新检测等高级功能。
@@ -33,6 +33,7 @@
 // @match              *://yandex.ru/*search*
 // @match              *://www.ecosia.org/*
 // @match              *://neeva.com/search*
+// @match              *://*.you.com/search*
 // @include            *://*.google.*/search*
 // @exclude            *://www.google.com/sorry*
 // @exclude            *://www.baidu.com/link*
@@ -51,7 +52,7 @@
 // @compatible         Firefox 兼容Greasemonkey, TamperMonkey, ViolentMonkey
 // @compatible         Opera 兼容TamperMonkey, ViolentMonkey
 // @compatible         Safari 兼容Tampermonkey • Safari
-// @note               新增neeva.com域的搜索跳转支持。\n优化搜索跳转图标样式的加载效率。\n优化对Tampermonkey•Safari的兼容性。\n修正一些已知的问题，优化样式，优化代码。
+// @note               新增you.com域的搜索跳转支持。\n修正Bing.com广告过滤的bug.\n修正一些已知的问题，优化样式，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -156,9 +157,7 @@
       }
       return z ? s : c[Math.floor(Math.random() * c.length)].concat(s);
     },
-    refresh: () => {
-      location.reload(true);
-    },
+    refresh: () => location.reload(true),
     isWinTop: () => {
       try {
         return w.self === w.top;
@@ -212,14 +211,14 @@
       this.timerMap = { timeout: {}, interval: {} };
       this.setTimeout = this.setTimeout.bind(this);
     }
-    static __init() {
-      (w.requestAnimationFrame && w.cancelAnimationFrame) ||
+    static __init(w) {
+      w.requestAnimationFrame ||
         (function () {
           "use strict";
           w.requestAnimationFrame =
-            w.msRequestAnimationFrame ||
-            w.mozRequestAnimationFrame ||
             w.webkitRequestAnimationFrame ||
+            w.mozRequestAnimationFrame ||
+            w.oRequestAnimationFrame ||
             (function () {
               const fps = 60;
               const delay = 1000 / fps;
@@ -235,19 +234,24 @@
                 }, timeout);
               };
             })();
+        })();
+      w.cancelAnimationFrame ||
+        (function () {
+          "use strict";
           w.cancelAnimationFrame =
-            w.mozCancelAnimationFrame ||
             w.webkitCancelAnimationFrame ||
+            w.mozCancelAnimationFrame ||
+            w.oCancelAnimationFrame ||
             w.cancelRequestAnimationFrame ||
-            w.msCancelRequestAnimationFrame ||
-            w.mozCancelRequestAnimationFrame ||
             w.webkitCancelRequestAnimationFrame ||
+            w.mozCancelRequestAnimationFrame ||
+            w.oCancelRequestAnimationFrame ||
             function cancelAnimationFrame(id) {
               clearTimeout(id);
             };
         })();
     }
-    __deploy() {
+    __deploy(w) {
       return w.requestAnimationFrame.bind(w);
     }
     _ticking(fn, type, interval, lastTime = Date.now()) {
@@ -267,25 +271,25 @@
       return timerSymbol;
     }
     _setTimerMap(timerSymbol, type, step) {
-      this.timerMap[type][timerSymbol] = w.requestAnimationFrame(step);
+      this.timerMap[type][timerSymbol] = unsafeWindow.requestAnimationFrame(step);
     }
     setTimeout(fn, interval) {
       return this._ticking(fn, "timeout", interval);
     }
     clearTimeout(timer) {
-      w.cancelAnimationFrame(this.timerMap.timeout[timer]);
+      unsafeWindow.cancelAnimationFrame(this.timerMap.timeout[timer]);
       delete this.timerMap.timeout[timer];
     }
     setInterval(fn, interval) {
       return this._ticking(fn, "interval", interval);
     }
     clearInterval(timer) {
-      w.cancelAnimationFrame(this.timerMap.interval[timer]);
+      unsafeWindow.cancelAnimationFrame(this.timerMap.interval[timer]);
       delete this.timerMap.interval[timer];
     }
   }
 
-  RAF.__init();
+  RAF.__init(unsafeWindow);
 
   class FDM extends RAF {
     constructor() {
@@ -293,7 +297,7 @@
       const self = this;
       self.reads = [];
       self.writes = [];
-      self.rAF = self.__deploy();
+      self.rAF = self.__deploy(unsafeWindow);
     }
     _schedule(context) {
       if (!context.scheduled) {
@@ -308,7 +312,7 @@
         context._run(reads);
         context._run(writes);
       } catch (e) {
-        error("FD.error:", e.message);
+        error("FDM.Uncaught Error:", e.message);
       }
       context.scheduled = false;
       if (reads.length || writes.length) context._schedule(context);
@@ -436,7 +440,7 @@
       return {
         Trident: u.includes("trident") || u.includes("compatible"),
         Presto: u.includes("presto"),
-        WebKit: u.includes("applewebkit") || u.includes("Chromium"),
+        WebKit: u.includes("applewebkit") && u.includes("safari"),
         Gecko: u.includes("gecko") && !u.includes("khtml") && !u.includes("trident") && !u.includes("compatible"),
         Blink: (u.includes("applewebkit") && (u.includes("chromium") || u.includes("chrome"))) || u.includes("Chromium"),
       };
@@ -489,7 +493,9 @@
       return (
         (!this.uaData && !!navigator.userAgentData) ||
         (!this.core().Gecko && !isNaN(parseFloat(unsafeWindow.mozInnerScreenX))) ||
-        (this.core().Gecko && isNaN(parseFloat(unsafeWindow.mozInnerScreenX)))
+        (this.core().Gecko && isNaN(parseFloat(unsafeWindow.mozInnerScreenX))) ||
+        (getNavigator.core().WebKit && !window.safari) ||
+        (!getNavigator.core().WebKit && !!window.safari)
       );
     },
   };
@@ -501,17 +507,17 @@
   /* pushState & replaceState */
 
   const historyWrap = function (type) {
-    const orig = history[type];
-    const e = new Event(type);
+    const orig = w.history[type];
+    const event = new Event(type);
     return function () {
       const fn = orig.apply(this, arguments);
-      e.arguments = arguments;
-      window.dispatchEvent(e);
+      event.arguments = arguments;
+      w.dispatchEvent(event);
       return fn;
     };
   };
-  history.pushState = historyWrap("pushState");
-  history.replaceState = historyWrap("replaceState");
+  w.history.pushState = historyWrap("pushState");
+  w.history.replaceState = historyWrap("replaceState");
 
   /* expire for fontlist cache */
 
@@ -555,7 +561,7 @@
 
   function getMetaValue(str) {
     const queryReg = new RegExp(`//\\s+@${str}\\s+(\\S+)`);
-    const metaValue = GMinfo.scriptMetaStr.match(queryReg);
+    const metaValue = GMinfo.scriptMetaStr?.match(queryReg);
     return metaValue ? metaValue[1] : "";
   }
 
@@ -617,7 +623,7 @@
   const Defaults = {
     title: "",
     text: "",
-    type: `${Notice.success}`,
+    type: Notice.success,
     position: "bottomRight",
     newestOnTop: false,
     timeout: 30,
@@ -663,7 +669,7 @@
       sleep(500).then(() => qS(`.${Notice.noticejs}-modal`).remove());
     }
     const closetNode = item.closest(`.${Notice.noticejs}`);
-    const closetNodeCName = closetNode ? closetNode.className.replace(`${Notice.noticejs}`, "").trim() : `${Notice.noticejs}-bottomRight`;
+    const closetNodeCName = closetNode?.className?.replace(Notice.noticejs, "").trim() ?? `${Notice.noticejs}-bottomRight`;
     const position = "." + closetNodeCName;
     sleep(500).then(() => {
       if (qA(position + ` .${Notice.item}`).length <= 0) {
@@ -680,13 +686,13 @@
     if (options.closeWith.includes("click")) {
       item.style.cursor = "pointer";
       item.addEventListener("click", e => {
-        if (e.target.className !== `${Notice.close}`) {
+        if (e.target.className !== Notice.close) {
           getCallback(options, "onClick");
           closeItem(item);
         }
       });
     } else {
-      item.addEventListener("click", e => e.target.className !== `${Notice.close}` && getCallback(options, "onClick"));
+      item.addEventListener("click", e => e.target.className !== Notice.close && getCallback(options, "onClick"));
     }
     item.addEventListener("mouseover", () => getCallback(options, "onHover"));
   };
@@ -694,7 +700,7 @@
   const appendNoticeJs = (noticeJsHeader, noticeJsBody, noticeJsProgressBar) => {
     const target_class = `.${Notice.noticejs}-` + options.position;
     const noticeJsItem = cE("div");
-    noticeJsItem.classList.add(`${Notice.item}`);
+    noticeJsItem.classList.add(Notice.item);
     noticeJsItem.classList.add(options.type);
     if (options.rtl === true) noticeJsItem.classList.add(`${Notice.noticejs}-rtl`);
     if (options.width !== "" && Number.isInteger(options.width)) fdm.write(() => (noticeJsItem.style.width = options.width + "px"));
@@ -723,7 +729,7 @@
     createContainer() {
       const element_class = `${Notice.noticejs}-${options.position}`;
       const element = cE("gb-notice");
-      element.classList.add(`${Notice.noticejs}`);
+      element.classList.add(Notice.noticejs);
       element.classList.add(element_class);
       element.id = element_class;
       return element;
@@ -737,7 +743,7 @@
       }
       if (options.closeWith.includes("button")) {
         const close = cE("div");
-        close.setAttribute("class", `${Notice.close}`);
+        close.setAttribute("class", Notice.close);
         close.innerHTML = trustedTypesPolicy.createHTML("&times;");
         if (element) {
           element.appendChild(close);
@@ -805,7 +811,7 @@
     }
     show() {
       let container = this.component.createContainer();
-      if (document.body && qS(`.${Notice.noticejs}-` + this.options.position) === null) {
+      if (document.body && qS(`.${Notice.noticejs}-${this.options.position}`) === null) {
         document.body.appendChild(container);
       }
       let noticeJsHeader, noticeJsBody, noticeJsProgressBar;
@@ -873,12 +879,12 @@
       new NoticeJs({
         title: title || "",
         text: text,
-        type: type || `${Notice.success}`,
+        type: type || Notice.success,
         width: width || 400,
         newestOnTop: newestOnTop || false,
         closeWith: closeWith || ["button"],
-        progressBar: typeof progressBar === "undefined" ? true : progressBar,
-        timeout: typeof timeout === "undefined" ? 30 : timeout,
+        progressBar: progressBar ?? true,
+        timeout: timeout ?? 30,
         scroll: scroll || { maxHeight: 400, showOnHover: true },
         callbacks: { ...callbacks },
         position: position || "bottomRight",
@@ -1022,7 +1028,7 @@
                         `<dd id="${Notice.random}_loading">${IS_REAL_GECKO ? "已经在新窗口打开脚本升级页面！" : "正在申请脚本更新安装页面，请稍后……"}</dd>
                           <dd>请点击<strong>这里</strong>刷新页面，以使新版本脚本生效！</dd>`
                       ),
-                      type: `${Notice.info}`,
+                      type: Notice.info,
                       closeWith: ["click"],
                       timeout: false,
                       position: "topRight",
@@ -1040,7 +1046,7 @@
                     text: Notice.noticeHTML(
                       `<dd><span>发现新版本</span><i>V${version}</i>，点击可自动更新。</dd>${updateInfo}<dd id="${Notice.stopUpdate}"><input type="checkbox">一周内不再提醒</dd>`
                     ),
-                    type: `${Notice.warning}`,
+                    type: Notice.warning,
                     closeWith: ["click"],
                     timeout: 60,
                     callbacks: { onClick: [preInstall] },
@@ -1070,7 +1076,7 @@
                   GMnotification({
                     title: "更新检测",
                     text: Notice.noticeHTML(`<dd style="margin: 10px 0"><span>恭喜您！</span>当前版本 <i>${defCon.curVersion}</i> 已为最新！</dd>`),
-                    type: `${Notice.success}`,
+                    type: Notice.success,
                     closeWith: ["click"],
                     timeout: 5,
                   });
@@ -1082,7 +1088,7 @@
             }
           }
         })
-        .catch(e => error("CheckUpdate:", e));
+        .catch(e => error("CheckUpdate:", e.message));
     }
   })();
 
@@ -1090,7 +1096,7 @@
 
   const IS_MACOS = getNavigator.system().startsWith("macOS");
   const API_ICO_YANDEX = defCon.decrypt("aHR0cHMlM0ElMkYlMkZmYXZpY29uLnlhbmRleC5uZXQlMkZmYXZpY29uJTJGdjI=");
-  const API_ICO_BACKUP = defCon.decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjMlMkYwMSUyRjAxJTJGcFNDZHFJSy5wbmc=");
+  const API_ICO_BACKUP = defCon.decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjMlMkYwMSUyRjA3JTJGcFNWUHhCai5wbmc=");
   const API_ICO_DDUCKGO = defCon.decrypt("aHR0cHMlM0ElMkYlMkZpY29ucy5kdWNrZHVja2dvLmNvbSUyRmlwMg==");
   const API_ICO_NOICON = defCon.decrypt(
     "ZGF0YSUzQWltYWdlJTJGcG5nJTNCYmFzZTY0JTJDaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQUNBQUFBQWdDQVlBQUFCemVucjBBQUFBQm1KTFIwUUElMkZ3RCUyRkFQJTJCZ3ZhZVRBQUFFRWtsRVFWUlloY1hYV1loWGRSUUg4SSUyRkxaS0pwdG94TG1VdHBHQmd0NWtNbWtWa2twR1MyUGdRJTJCdElCR1VCQkV2WmhCRHdVbVFRJTJCRkVKR1JXUThGcFMxRHVHUkZDbTVNTW8xbFpXcU9tbWlibWpvOW5IT2JPM2YlMkJUak5XOW9YTCUyRmQzenUlMkZkM3ZyOXp6dSUyQmNjJTJGbWYwYU9iNzQlMkZBTkl6RU1BekFIdXpFbDFpT2clMkY4MmdUcmNpJTJGdHhXU3Byd2c3OGpIb015Yms2Zkl4bjglMkY2UE1SMWZwYUpuTUxGRXVtZmwzamZmWDRyaldJYXhKNnU0QiUyQmJqR0Y0UXV6d0hZM0wlMkJVYnllNHlaTXlmR1ZPQTBUc0FyN2NkUEpLRiUyQk1YekJMN0d3JTJCTnFBZm5rYXI4TGNjSDA0U1YlMkJCcjNJN2VXSWlqbU4wZEFrJTJCbThva2k2RGFra2h0eHJiQktsVUFyZnNCQUxNam5sOUZIV09zd0puZEYlMkJmUlVNQXZEYzlGV2JCU1clMkJhU2tzRXFnRlU4azZUJTJGeSUyQmQyMHhDSzBZSEJWWWZrVTFLRVJIMkd1OE9mb25OdUNac3dvdmY4alZndHpGOWlQQmt6Rm9KUjlLbzdxNXB5Yld5YlFxelIlMkJBRE56OTVNeFR2aSUyRkx6NUkyWGtsMlNGc3hUVWwyU0FjeU4yT1Q5bFklMkZJcE5JbjZXNEtlcUpXQzlPR3BEOEpzMnMyN0wlMkJiWGFtN3VXQzFyeEZDNnV5TllJYTI5T0VoMHdRcHpkcSUyRkJZNWVNM2NpZEh1a2lnSVpYdHI4Z3Z4VHpoNXI5UUpKRnB3cWZyUkNDVzBTek1XRmVMZVEyTVM0WGZWT1F6OEE0dXlRMjNJekJTQkZwUGtVVEsyS05HOUhhQyUyQmx5bnBTS2ZtRHBhTWFvUTlzNzdNT3dTeFdWVjVjTkc0WjZHaW54OTNxdHlJbUd0S3ExUDFJNURJZ0NIVlQ5NFc2VGNVNEZtUEZnOEZDNW9FYVk3VzhlZ21vMDdhc2hQRklSRjRxcksxdVQ3WjRqaTFvN0FMZ3pGUGhHOVpaeUwzZDNZNGU4aUpWZlJqUDY1MGUlMkJyQkJwRlBlOHIwbTBaZzVOZ1YxRzh1MWo3NW1RbHJzN3hwaXFCOThVeG15cnFlUm5qUllYcmFxZFRCT2RxWEklMkI5JTJCZHdnWExsV1dMb2RnWU9pZzdrSGIySjdhY0VKNGhSODBVVUNuNVhHNjBRRjNTRXNjb3RJeFRVeEpSVmRLZnclMkJ1blQxckNFYmt0JTJCTnJsejk4SzFvNFFxTUVuV2pWVnRUZzQ0OTRUSVJLRk9FTzJhbWZDWGVFclclMkJ5SWlOZUI0dmxyN2ZJcHFRN2FJbXZGU2FHNG9QUlFHOElhM1NBV1BGS1Znb1dxdjNrdlZ1bkk1WGRINE03OEtrSEpjdFVPQXNmQzRLM0lXMUNCQTkzRkhSeVJSdDFYR1JQSVpyS3pKVkFpdUVxNWFmZ01CY1lhM1hjcjJkb2dUVXhHelJSaTFLUzB3Uzdya0lONHV6WGlhd05jbmRtVXBha2tBdmJZVm5oVGdSUyUyRk5hNG0lMkI2NXNtNVVCTnVFJTJGSFNQJTJCY21wSVdJT0tqUGNUJTJCUlMzWmlUaW82akF0d2E0N1A3MHhwRmZXaVJod1J6Y1E4WEM3aW9Zd0J1QTdQaWVwWnhNMCUyQjRlOEZ3ajFONHFlbDJ4Z2pPcGxHYlQ3Zkt4TFVidUhUWXlMSlBDeXk0VDdScHQ4bjhzeVpvdTA3b0pTcXUlMkZ0dlNQaDBwRERsUU5HJTJCZlNmU2E1SGg1b2ppczFGWWF4dGVGVEh4Q083V1NVTDZMJTJGQzR0djd5SWZHJTJGY0VyUlIlMkZ6WTlLNU8lMkZBa2NYemk1R1ElMkJMendBQUFBQkpSVTVFcmtKZ2dnJTNEJTNE"
@@ -1147,11 +1153,11 @@
     requestNodes.length && count(`\ud83d\udd33 [Baidu-Anti-Redirect]`);
     requestNodes.forEach(node => {
       node.setAttribute("gd-antiredirect-status", "pending");
-      const url = node.href.replace(/http:/, "https:");
+      const url = node.href.replace(/^http:/i, "https:");
       return new Promise((resolve, reject) => {
         GMxmlhttpRequest({
           url: url,
-          headers: { Accept: "*/*", Referer: location.href.replace(/^http:/, "https:") },
+          headers: { Accept: "*/*", Referer: location.href.replace(/^http:/i, "https:") },
           method: "GET",
           timeout: 5e3,
           onreadystatechange: response => {
@@ -1361,9 +1367,9 @@
     });
   }
 
-  function antiRedirect_Neeva(str) {
+  function antiRedirect_Global(str, siteName) {
     const requestNodes = qA(str);
-    requestNodes.length && count("\ud83d\udd33 [Neeva-Anti-Redirect]");
+    requestNodes.length && count(`\ud83d\udd33 [${siteName}-Anti-Redirect]`);
     requestNodes.forEach(node => {
       clearHrefEvents(node) && node.setAttribute("gd-antiredirect-status", "success");
     });
@@ -1399,19 +1405,18 @@
         }
         break;
       case "Yandex":
-        const rightside_Ads_Counter = qS(".serp-adv__counter");
-        if (rightside_Ads_Counter) {
-          const rightside_Ads = rightside_Ads_Counter.nextElementSibling;
+        if (qS(".serp-adv__counter")) {
+          const rightside_Ads = qS(".serp-adv__counter").nextElementSibling;
           count(`\ud83d\udd33 [${siteName}-Anti-Ads-Deep-exp]`);
           fdm.write(() => {
-            rightside_Ads_Counter.remove();
+            qS(".serp-adv__counter").remove();
             rightside_Ads?.className !== "serp-adv__found" && rightside_Ads.remove();
           });
         }
         if (qA("li.serp-item.serp-item_card div.TextContainer>span.OrganicTextContentSpan>span,li.serp-item.serp-item_card div.Label.Label_theme_direct").length > 0) {
           const match_Ads_Style_Yandex = str => {
             const ad_Selector = qS(str);
-            const ad_Match_Filter = ad_Selector?.textContent.match(/\.Label\.DirectLabel_[a-z]+\[class\]\[class\]\s*{\s*background-image:\s*url\(([^)]+)\);?\s*}/);
+            const ad_Match_Filter = ad_Selector?.textContent?.match(/\.Label\.DirectLabel_[a-z]+\[class\]\[class\]\s*{\s*background-image:\s*url\(([^)]+)\);?\s*}/);
             return ad_Match_Filter ? ad_Match_Filter[1] : "no-ads-icon";
           };
           const ad_Matched = match_Ads_Style_Yandex(`body>style[nonce][data-stylesheet="bundles-assets"]`);
@@ -1423,9 +1428,9 @@
               const ads_Detect_II = qS("div.Label.Label_theme_direct", node);
               const styleState = w.getComputedStyle(ads_Detect_II, null).getPropertyValue("background-image");
               if (
-                ads_Detect?.textContent.includes("\u0420\u0435\u043a\u043b\u0430\u043c\u0430") ||
-                ads_Detect?.textContent.toLowerCase().includes("ad") ||
-                ads_Detect_II?.textContent.toLowerCase().includes("ad") ||
+                ads_Detect?.textContent?.includes("\u0420\u0435\u043a\u043b\u0430\u043c\u0430") ||
+                ads_Detect?.textContent?.toLowerCase().includes("ad") ||
+                ads_Detect_II?.textContent?.toLowerCase().includes("ad") ||
                 styleState.includes(ad_Matched) ||
                 styleState.includes(ad_Matcded_II)
               ) {
@@ -1440,7 +1445,7 @@
           count(`\ud83d\udd33 [${siteName}-Anti-Ads-Deep]`);
           qA("ul.section>li,ul.result>li").forEach(node => {
             const ads = qS("span[class='txt']>s", node);
-            if (ads?.textContent.includes("\u5e7f\u544a") || qS("div[class~='res-recommend-tag']", node)) {
+            if (ads?.textContent?.includes("\u5e7f\u544a") || qS("div[class~='res-recommend-tag']", node)) {
               fdm.write(() => node?.remove());
             }
           });
@@ -1509,7 +1514,7 @@
             : "#sp_requery strong, #sp_recourse strong, #tile_link_cn strong, .b_ad .ad_esltitle~div strong, h2 strong, .b_caption p strong, .b_snippetBigText strong, .recommendationsTableTitle+.b_slideexp strong, .recommendationsTableTitle+table strong, .recommendationsTableTitle+ul strong, .pageRecoContainer .b_module_expansion_control strong, .b_rs strong, .b_rrsr strong, #dict_ans strong, .b_listnav>.b_ans_stamp>strong, .adltwrnmsg strong"
         ),
         AntiRedirect: () => deBounce(antiRedirect_Bing, 300, "bing", true)("#b_results a[href*='.bing.com/ck/a?']:not([gd-antiredirect-status])"),
-        AntiAds: () => deBounce(antiAds_RemoveNodes, 20, "ad_bing", true)("li.b_ad,#b_pole,#b_results li.b_ans", "Bing"),
+        AntiAds: () => deBounce(antiAds_RemoveNodes, 20, "ad_bing", true)("li.b_ad,#b_pole", "Bing"),
       },
       duckduckgo: {
         SiteTypeID: 4,
@@ -1652,8 +1657,23 @@
         MainType: "input[name='q'][data-tid='search-bar-input']",
         StyleCode: `#${CONST.rndID}{z-index:1999999995;position:relative;margin-left:4px;width:max-content;height:48px;position:absolute;display:inline-block}#${CONST.rndID} #${CONST.leftButton}{display:inline-block;margin-left:2px;height:48px}#${CONST.rndID} #${CONST.rightButton}{display:inline-block;margin-left:-2px;height:48px}#${CONST.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;background:#415aff;border-top-left-radius:100px;border-bottom-left-radius:100px;cursor:pointer;height:48px;color:#ffffff;min-width:90px;border:2px solid transparent;font-size:16px!important;vertical-align:top;font-weight:600}#${CONST.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;background:#415aff;border-top-right-radius:100px;border-bottom-right-radius:100px;cursor:pointer;height:48px;color:#ffffff;min-width:90px;border:2px solid transparent;font-size:16px!important;vertical-align:top;font-weight:600}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{color:#fff;background: #4078fb;border::2px solid transparent;}`,
         KeyStyle: "strong",
-        AntiRedirect: () => deBounce(antiRedirect_Neeva, 200, "neeva", false)(`a[href][data-neeva-log][rel="nofollow"]:not([gd-antiredirect-status])`),
+        AntiRedirect: () => deBounce(antiRedirect_Global, 200, "neeva", false)(`a[href][data-neeva-log][rel="nofollow"]:not([gd-antiredirect-status])`, "Neeva"),
         AntiAds: () => {},
+      },
+      you: {
+        SiteTypeID: 13,
+        SiteName: "You",
+        SiteNick: "You 搜索",
+        SiteURI: "you.com",
+        WebURL: "https://you.com/search?fromSearchBar=true&q=",
+        ImgURL: "https://you.com/search?fromSearchBar=true&tbm=isch&q=",
+        IMGType: ["isch"],
+        SplitName: "tbm",
+        MainType: "span.hhbXxG",
+        StyleCode: `#${CONST.rndID}{z-index:999;position:relative;height:48px;display:inline-block}#${CONST.rndID} #${CONST.leftButton}{display:inline-block;height:48px}#${CONST.rndID} #${CONST.rightButton}{display:inline-block;margin-left:-2px;height:48px}#${CONST.leftButton} input{margin:0;padding:1px 10px 1px 20px!important;background:linear-gradient(98.89deg, rgb(107, 176, 255) 0%, rgb(50, 50, 253) 100%);border-top-left-radius:100px;border-bottom-left-radius:100px;cursor:pointer;height:46px;color:#fff;min-width:110px;border:0px solid transparent;font-size:16px!important;vertical-align:top;font-weight:600}#${CONST.rightButton} input{margin:0;padding:1px 20px 1px 10px!important;background:linear-gradient(98.89deg, rgb(50, 50, 253) 0%, rgb(107, 176, 255) 100%);border-top-right-radius:100px;border-bottom-right-radius:100px;cursor:pointer;height:46px;color:#fff;min-width:110px;border:0px solid transparent;font-size:16px!important;vertical-align:top;font-weight:600}#${CONST.leftButton} input:hover{background:linear-gradient(90deg, rgb(0, 178, 250) 0%, rgb(0, 0, 252) 100%)}#${CONST.rightButton} input:hover{background:linear-gradient(90deg, rgb(0, 0, 252) 0%, rgb(0, 178, 250) 100%)}`,
+        KeyStyle: `div[data-testid="app-mainline"] p strong,div[data-testid="app-mainline"] p b`,
+        AntiRedirect: () => localStorage.setItem("openLinksInNewTabs", true),
+        AntiAds: () => deBounce(antiAds_RemoveNodes, 20, "you", true)(`div[data-testid="extension-button"]`, "You"),
       },
       other: { SiteTypeID: 0 },
     };
@@ -1671,6 +1691,7 @@
       KAIFA: listSite.kaifa.SiteTypeID,
       ECOSIA: listSite.ecosia.SiteTypeID,
       NEEVA: listSite.neeva.SiteTypeID,
+      YOU: listSite.you.SiteTypeID,
       OTHERS: listSite.other.SiteTypeID,
     };
 
@@ -1711,6 +1732,9 @@
     } else if (location.host.endsWith("neeva.com")) {
       currentSite = selectedEngine.includes(newSiteType.NEEVA) ? listSite.neeva : listSite.other;
       listCurrentSite = listSite.neeva;
+    } else if (location.host.endsWith("you.com")) {
+      currentSite = selectedEngine.includes(newSiteType.YOU) ? listSite.you : listSite.other;
+      listCurrentSite = listSite.you;
     } else {
       currentSite = listSite.other;
       listCurrentSite = listSite.other;
@@ -1745,15 +1769,9 @@
     };
 
     getGlobalparameter();
-    window.addEventListener("pushState", function (e) {
-      getGlobalparameter();
-    });
-    window.addEventListener("replaceState", function (e) {
-      getGlobalparameter();
-    });
-    window.addEventListener("popstate", function (e) {
-      getGlobalparameter();
-    });
+    window.addEventListener("pushState", () => getGlobalparameter());
+    window.addEventListener("replaceState", () => getGlobalparameter());
+    window.addEventListener("popstate", () => getGlobalparameter());
 
     CONST.googleSplitLine = currentSite.SiteTypeID === newSiteType.GOOGLE ? `<span jsname="s1VaRe" class="ACRAdd M2vV3"></span>` : ``;
     CONST.fsouSplitLine = currentSite.SiteTypeID === newSiteType.FSOU ? `<div class="divider"></div>` : ``;
@@ -1948,7 +1966,7 @@
                   </ul>
                 </fieldset>`
               ),
-              type: `${Notice.configuration}`,
+              type: Notice.configuration,
               width: 330,
               closeWith: ["button"],
               scroll: { maxHeight: 680, showOnHover: true },
@@ -2003,7 +2021,7 @@
                     GMnotification({
                       title: "自定义颜色保存",
                       text: Notice.noticeHTML(`<dd>搜索关键词自定义颜色已保存，当前页面即将刷新！</dd>`),
-                      type: `${Notice.success}`,
+                      type: Notice.success,
                       closeWith: ["button"],
                       timeout: 10,
                       callbacks: {
@@ -2038,7 +2056,7 @@
                   text: Notice.noticeHTML(
                     `<dd><e style="font-size:24px;vertical-align:bottom">\ud83d\ude31</e>\u0020您需要选择「三个」搜索引擎，还少<em>${3 - selectEngineList.length}</em>个呢！</dd>`
                   ),
-                  type: `${Notice.error}`,
+                  type: Notice.error,
                   closeWith: ["click"],
                   timeout: 18,
                   callbacks: {},
@@ -2059,7 +2077,7 @@
               GMnotification({
                 title: "保存成功！",
                 text: Notice.noticeHTML(`<dd>设置参数已成功保存，页面稍后自动刷新！</dd>`),
-                type: `${Notice.success}`,
+                type: Notice.success,
                 closeWith: ["button"],
                 timeout: 10,
                 callbacks: { onClose: [defCon.refresh] },
@@ -2074,7 +2092,7 @@
             GMnotification({
               title: "\ud83d\udc4b 你想去哪里吖？",
               text: addAction.listSearchEngine(listCurrentSite),
-              type: `${Notice.configuration}`,
+              type: Notice.configuration,
               width: 200,
               closeWith: ["button"],
               scroll: { maxHeight: 465, showOnHover: true },
@@ -2089,11 +2107,9 @@
                   let url;
                   for (let type in newSiteType) {
                     if (oH.call(newSiteType, type) && newSiteType[type] === Number(item.id)) {
-                      if (listCurrentSite.IMGType.includes(getUrlParam(listCurrentSite.SplitName).trim())) {
-                        url = listSite[type.toLowerCase()].ImgURL;
-                      } else {
-                        url = listSite[type.toLowerCase()].WebURL;
-                      }
+                      url = listCurrentSite.IMGType.includes(getUrlParam(listCurrentSite.SplitName).trim())
+                        ? listSite[type.toLowerCase()].ImgURL
+                        : listSite[type.toLowerCase()].WebURL;
                       break;
                     }
                   }
@@ -2190,7 +2206,7 @@
     function insertCSS() {
       try {
         const buttonCss = `@charset "UTF-8";` + currentSite.StyleCode;
-        addStyle(buttonCss, `${CONST.rndclassName}`, document.head, "SC");
+        addStyle(buttonCss, CONST.rndclassName, document.head, "SC");
       } catch (e) {
         error("insertCSS:", e.message);
       }
@@ -2199,7 +2215,7 @@
     function insertStyle() {
       try {
         const noticeStyle = `@charset "UTF-8";` + CONST.noticeCss + CONST.iconCss + String(keywordHighlight ? CONST.highlightCss : "");
-        addStyle(noticeStyle, `${CONST.rndstyleName}`, document.head, "SS");
+        addStyle(noticeStyle, CONST.rndstyleName, document.head, "SS");
       } catch (e) {
         error("insertStyle:", e.message);
       }
@@ -2256,7 +2272,7 @@
             case newSiteType.BING:
               Target.appendChild(userSpan);
               fdm.write(() => {
-                if (Target.parentNode.firstElementChild.tagName === "INPUT") {
+                if (Target.parentNode.firstElementChild.tagName === "INPUT" || Target.parentNode.firstElementChild.tagName === "TEXTAREA") {
                   Target.parentNode.firstElementChild.style.width = "400px";
                 }
                 if (qS(".b_searchboxForm") && location.search.includes("view=detailV2")) {
@@ -2356,6 +2372,9 @@
             case newSiteType.NEEVA:
               insterAfter(userSpan, Target);
               break;
+            case newSiteType.YOU:
+              insterAfter(userSpan, Target);
+              break;
           }
           resolve({ SpanID, Selector, indexPage });
         })
@@ -2363,7 +2382,7 @@
             addSearchButtonEvent(qA(`${r.SpanID} span[sn]:not([event-insert])`));
             scrollDetect(qS(r.Selector), r.indexPage);
           })
-          .catch(e => error("insertHTML:", e));
+          .catch(e => error("insertHTML:", e.message));
       } catch (e) {
         error("insertButtons:", e.message);
       }
@@ -2411,7 +2430,7 @@
       nodes.forEach(node => {
         node.setAttribute("event-insert", true);
         qS("input", node).addEventListener("click", () => {
-          CONST.vim = getUrlParam(currentSite.SplitName).trim();
+          CONST.vim = getUrlParam(currentSite.SplitName)?.trim();
           switch (Number(node.getAttribute("sn"))) {
             case selectedSite[0].SiteTypeID:
               gotoUrl = currentSite.IMGType.includes(CONST.vim) ? selectedSite[0].ImgURL : selectedSite[0].WebURL;
@@ -2451,7 +2470,7 @@
               cssNode.textContent = css;
               addToTarget.appendChild(cssNode);
               cssNode = null;
-              return Boolean(addToTarget.querySelector(`.${className}`));
+              return !!addToTarget.querySelector(`.${className}`);
             } else {
               return true;
             }
@@ -2476,7 +2495,7 @@
       }
     }
 
-    function setScrollButton(paraName, classNameIn, scrollSize) {
+    function setScrollButton(paraName, className, scrollSize) {
       const oDiv = qS(paraName);
       let H = 0;
       let Y = oDiv;
@@ -2488,9 +2507,9 @@
         }
         document.addEventListener("scroll", () => {
           if (defCon.elCompat.scrollTop > H + scrollSize) {
-            oDiv.classList.add(classNameIn);
+            oDiv.classList.add(className);
           } else {
-            oDiv.classList.remove(classNameIn);
+            oDiv.classList.remove(className);
           }
         });
       }
@@ -2514,7 +2533,7 @@
             break;
           }
         }
-        val = val ? val.replace(/\+/g, " ") : "";
+        val = val?.replace(/\+/g, " ") ?? "";
       }
       return encodeURIComponent(val);
     }
@@ -2539,7 +2558,7 @@
               GMnotification({
                 title: "智能跳转",
                 text: Notice.noticeHTML(`<dd class="${Notice.center}">当前页面即将跳转至 Google国际站（NCR）<br/><span>${google.toUpperCase()}</span></dd>`),
-                type: `${Notice.info}`,
+                type: Notice.info,
                 closeWith: ["click"],
                 timeout: 20,
                 callbacks: { onClose: [redirectNCR] },
