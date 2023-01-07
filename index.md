@@ -88,7 +88,7 @@
 
 ## 最新功能介绍
 * 新增去除搜索结果及侧栏广告功能。`New!`
-* 新增自定义搜索引擎选取功能。（包含：百度、Google、Bing、Duckduckgo、搜狗、F搜、Yandex、360搜索、头条搜索、百度开发者、Ecosia、Neeva搜索）
+* 新增自定义搜索引擎选取功能。（包含：百度、Google、Bing、Duckduckgo、搜狗、F搜、Yandex、360搜索、头条搜索、百度开发者、Ecosia、Neeva、You搜索等）
 * 新增搜索结果链接去重定向功能。
 * 更智能的更新检测功能。
 
