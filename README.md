@@ -15,12 +15,12 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2023.01.07.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2023.01.17.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 ```
-+ 新增高级功能『禁用全局数据』可设置仅在指定域名渲染。
-@ 优化对话框程序，排除内存泄漏的隐患。
-@ 优化针对弹幕型网站海量弹幕渲染修正的效率。
-@ 修正safari及Tampermonkey的兼容性问题。
+# 虎尾系金拢财气，兔首摇铃荡福音，癸卯兔年迎吉祥！
+@ 优化新Gecko内核下Greasemonkey执行脚本的兼容性。
+@ 优化冗余脚本检测的错误报告机制，让检测更准确。
+@ 修正Safari因某些特殊字符未转义造成的日志错误。
 @ 修正一些已知的小问题，优化样式，优化代码。
 ```
 
@@ -58,7 +58,6 @@
 字体比例缩放（实验性功能）Beta版，默认关闭，请在 **高级核心功能设置** 中打开字体缩放功能。
 * **已知问题一：** Firefox/Gecko内核下，仅修正了坐标偏移问题，针对 `Position:fixed/sticky` 的样式修正因性能问题已终止。**强烈建议**：Firefox用户使用浏览器缩放替代(`Ctrl++`, `Ctrl+-`)。
 * **已知问题二：** 针对视窗单位 `vw, vh, vm*` 的全局修正因性能问题及跨域问题已终止，会对部分网站在字体缩放时造成样式排版错误，建议在此类网站中停用字体缩放（即：设置参数为1.000），使用浏览器缩放替代(`Ctrl++`, `Ctrl+-`)。
-* **注意：** 脚本管理器Greasemonkey4.0+在新版Gecko内核下已不支持字体缩放功能，请悉知！
 * **未知情况：** 如遇到非以上情况的样式异常或坐标偏移，请及时向我[反馈](https://github.com/F9y4ng/GreasyFork-Scripts/issues)。
 
 ## 字体渲染（自用脚本）新版本，使用前请注意以下事项：
@@ -72,10 +71,10 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2023.01.07.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2023.01.17.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 ```
-+ 新增you.com域的搜索跳转支持。
-@ 修正Bing.com广告过滤的bug.
+# 🐯尾系金拢财气，🐰首摇铃荡福音。
+@ 优化Greasemonkey执行脚本的兼容性。
 @ 修正一些已知的问题，优化样式，优化代码。
 ```
 

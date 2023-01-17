@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2023.01.07.1
+// @version            2023.01.17.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体显示，让每个页面的中文字体变得有质感，默认使用微软雅黑字体，亦可自定义设置多种中文字体，附加字体描边、字体重写、字体阴影、字体平滑、对特殊样式元素的过滤和许可等效果，脚本菜单中可使用设置界面进行参数设置，亦可对某域名下所有页面进行排除渲染，兼容常用的Greasemonkey脚本和浏览器扩展。
@@ -53,7 +53,7 @@
 
   const IS_OPEN_DEBUG = false; // Set "true" to debug scripts, may cause script response slower.
 
-  /* Perfectly Compatible For Greasemonkey, Tampermonkey, Violentmonkey * F9y4ng * 20210609 */
+  /* Perfectly Compatible For Greasemonkey, Tampermonkey, Violentmonkey * F9y4ng * 20230117 */
 
   const GMinfo = GM_info;
   const GMversion = GMinfo.version || "0.00";
@@ -66,13 +66,54 @@
 
   /* GM selector */
 
-  const GMsetValue = isGM ? GM.setValue : GM_setValue;
-  const GMgetValue = isGM ? GM.getValue : GM_getValue;
-  const GMdeleteValue = isGM ? GM.deleteValue : GM_deleteValue;
-  const GMlistValues = isGM ? GM.listValues : GM_listValues;
-  const GMopenInTab = isGM ? GM.openInTab : GM_openInTab;
-  const GMregisterMenuCommand = isGM ? GM.registerMenuCommand : GM_registerMenuCommand;
-  const GMunregisterMenuCommand = isGM ? () => {} : GM_unregisterMenuCommand;
+  const GMsetValue = GMselector("setValue");
+  const GMgetValue = GMselector("getValue");
+  const GMdeleteValue = GMselector("deleteValue");
+  const GMlistValues = GMselector("listValues");
+  const GMopenInTab = GMselector("openInTab");
+  const GMregisterMenuCommand = GMselector("registerMenuCommand");
+  const GMunregisterMenuCommand = GMselector("unregisterMenuCommand");
+
+  function GMselector(rec) {
+    switch (rec) {
+      case "setValue":
+        return typeof GM_setValue !== "undefined"
+          ? GM_setValue
+          : typeof GM !== "undefined" && typeof GM.setValue !== "undefined"
+          ? GM.setValue
+          : localStorage.setItem.bind(localStorage);
+      case "getValue":
+        return typeof GM_getValue !== "undefined"
+          ? GM_getValue
+          : typeof GM !== "undefined" && typeof GM.getValue !== "undefined"
+          ? GM.getValue
+          : localStorage.getItem.bind(localStorage);
+      case "deleteValue":
+        return typeof GM_deleteValue !== "undefined"
+          ? GM_deleteValue
+          : typeof GM !== "undefined" && typeof GM.deleteValue !== "undefined"
+          ? GM.deleteValue
+          : localStorage.removeItem.bind(localStorage);
+      case "listValues":
+        return typeof GM_listValues !== "undefined" ? GM_listValues : typeof GM !== "undefined" && typeof GM.listValues !== "undefined" ? GM.listValues : () => [];
+      case "openInTab":
+        return typeof GM_openInTab !== "undefined" ? GM_openInTab : typeof GM !== "undefined" && typeof GM.openInTab !== "undefined" ? GM.openInTab : w.open;
+      case "registerMenuCommand":
+        return typeof GM_registerMenuCommand !== "undefined"
+          ? GM_registerMenuCommand
+          : typeof GM !== "undefined" && typeof GM.registerMenuCommand !== "undefined"
+          ? GM.registerMenuCommand
+          : () => {};
+      case "unregisterMenuCommand":
+        return typeof GM_unregisterMenuCommand !== "undefined"
+          ? GM_unregisterMenuCommand
+          : typeof GM !== "undefined" && typeof GM.unregisterMenuCommand !== "undefined"
+          ? GM.unregisterMenuCommand
+          : () => {};
+      default:
+        return () => {};
+    }
+  }
 
   /* default Const Values & Functions */
 
@@ -134,9 +175,9 @@
           break;
       }
       for (; m > 0; --m) {
-        s += r[Math.floor(Math.random() * r.length)];
+        s += r[random(r.length, "floor")];
       }
-      return z ? s : c[Math.floor(Math.random() * c.length)].concat(s);
+      return z ? s : c[random(c.length, "floor")].concat(s);
     },
     sqliteDB: (e, t, p) => {
       let g = 0;
@@ -151,7 +192,7 @@
       const u = Math.pow(2, 31) - 1;
       if (t) {
         if (m < 2) return "";
-        let l = Math.round(Math.random() * 1e9) % 1e8;
+        let l = random(1e9) % 1e8;
         d += l;
         while (d.length > 10) {
           d = (parseInt(d.substring(0, 10)) + parseInt(d.substring(10, d.length))).toString();
@@ -320,14 +361,26 @@
   const TOP_HOST_NAME = defCon.getParentHostName();
   const FIX_STROKE_ATTRNAME = "fr-fix-stroke";
   const IS_FRAMES = CUR_WINDOW_TOP ? "" : "[FRAMES]";
+  const UNSAFE_WINDOW = typeof unsafeWindow !== "undefined" ? unsafeWindow : w;
   const RANDOM_ID = defCon.randString(2).concat(defCon.randString(4, "digit"));
   const QUERY_ARRAY = defCon.queryString.split(",").filter(x => x.indexOf("*") === -1);
+  const FEEDBACK_URI = getMetaValue("\u0073\u0075\u0070\u0070\u006f\u0072\u0074\u0055\u0052\u004c");
   const HOST_URI = defCon.decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkY0MTY2ODg=");
   const FONTLIST_IMG = defCon.decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjIlMkYwNCUyRjAyJTJGcW9SZldkLmdpZg==");
   const LOADING_IMG = defCon.decrypt("aHR0cHMlM0ElMkYlMkZpbWcuemNvb2wuY24lMkZjb21tdW5pdHklMkYwMzhkZGU0NThmOWE4NzRhODAxMjE2MGY3NDE3ZjZlLmdpZg==");
 
+  /* Detect Redundant Scripts */
+
+  if (UNSAFE_WINDOW.FRInitialization) {
+    GMregisterMenuCommand("\ufff9\ud83d\uded1 发现冗余安装的脚本，点这里排查！", () => GMopenInTab(`${FEEDBACK_URI}/117`, defCon.options));
+    console.error(`\ud83d\udea9 [Redundant Scripts]:\r\n发现冗余安装的『${defCon.scriptName}』，请访问 ${FEEDBACK_URI}/117 排查错误。`);
+    return;
+  }
+  UNSAFE_WINDOW.FRInitialization = true;
+
   /* New RAF & FDM */
 
+  const nW = isGM ? w : UNSAFE_WINDOW;
   class RAF {
     constructor() {
       this.timerMap = { timeout: {}, interval: {} };
@@ -393,25 +446,25 @@
       return timerSymbol;
     }
     _setTimerMap(timerSymbol, type, step) {
-      this.timerMap[type][timerSymbol] = unsafeWindow.requestAnimationFrame(step);
+      this.timerMap[type][timerSymbol] = nW.requestAnimationFrame(step);
     }
     setTimeout(fn, interval) {
       return this._ticking(fn, "timeout", interval);
     }
     clearTimeout(timer) {
-      unsafeWindow.cancelAnimationFrame(this.timerMap.timeout[timer]);
+      nW.cancelAnimationFrame(this.timerMap.timeout[timer]);
       delete this.timerMap.timeout[timer];
     }
     setInterval(fn, interval) {
       return this._ticking(fn, "interval", interval);
     }
     clearInterval(timer) {
-      unsafeWindow.cancelAnimationFrame(this.timerMap.interval[timer]);
+      nW.cancelAnimationFrame(this.timerMap.interval[timer]);
       delete this.timerMap.interval[timer];
     }
   }
 
-  RAF.__init(unsafeWindow);
+  RAF.__init(nW);
 
   class FDM extends RAF {
     constructor() {
@@ -419,7 +472,7 @@
       const self = this;
       self.reads = [];
       self.writes = [];
-      self.rAF = self.__deploy(unsafeWindow);
+      self.rAF = self.__deploy(nW);
     }
     _schedule(context) {
       if (!context.scheduled) {
@@ -576,26 +629,26 @@
       return {
         Trident: u.includes("trident") || u.includes("compatible"),
         Presto: u.includes("presto"),
-        WebKit: u.includes("applewebkit") && u.includes("safari"),
+        WebKit: u.includes("applewebkit") && u.includes("safari") && u.includes("version"),
         Gecko: u.includes("gecko") && !u.includes("khtml") && !u.includes("trident") && !u.includes("compatible"),
         Blink: (u.includes("applewebkit") && (u.includes("chromium") || u.includes("chrome"))) || u.includes("Chromium"),
       };
     },
     geckoVersion: function (u = this.init()) {
       const m = u.match(/firefox\/(\d+)/i);
-      return m && (m[1] ?? 0);
+      return m?.[1] ?? 0;
     },
     chromiumVersion: function (u = this.init()) {
       if (this.uaData) {
         return this.getBrowser(u.brands, null).version;
       } else {
         const m = u.match(/chrom[e|ium]\/(\d+)/i);
-        return m && (m[1] ?? 0);
+        return m?.[1] ?? 0;
       }
     },
     system: function (u = this.init(), system = "Unknown") {
       if (this.uaData) {
-        system = u.platform ? u.platform.toString() : system;
+        system = u.platform?.toString() || system;
       } else {
         if (/windows|win32|win64|wow32|wow64/g.test(u)) {
           system = "Windows";
@@ -623,13 +676,15 @@
           Opera: u.includes("presto") || u.includes("opr") || u.includes("opera"),
           Safari: u.includes("safari") && u.includes("version") && !u.includes("chrome"),
           Edge: u.includes("edg"),
-          QQBrowser: /qqbrowser/g.test(u),
-          Wechat: /micromessenger/g.test(u),
-          UCBrowser: /ubrowser/g.test(u),
-          Sougou: /metasr|sogou/g.test(u),
-          Maxthon: /maxthon/g.test(u),
-          CentBrowser: /cent/g.test(u),
-          Vivaldi: /vivaldi/g.test(u),
+          QQBrowser: /qqbrowser/i.test(u),
+          Wechat: /micromessenger/i.test(u),
+          UCBrowser: /ubrowser/i.test(u),
+          Sougou: /metasr|sogou/i.test(u),
+          Maxthon: /maxthon/i.test(u),
+          CentBrowser: /cent/i.test(u),
+          Vivaldi: /vivaldi/i.test(u),
+          Brave: /brave/i.test(u),
+          Yandex: /yabrowser/i.test(u),
         };
         for (let i in browserArray) {
           if (oH.call(browserArray, i) && browserArray[i]) browserInfo = i;
@@ -640,7 +695,7 @@
     getUA: async function (u = this.init()) {
       try {
         return this.uaData
-          ? JSON.stringify(await u.getHighEntropyValues(["architecture", "bitness", "model", "platform", "platformVersion", "uaFullVersion"]))
+          ? JSON.stringify(await u.getHighEntropyValues(["architecture", "bitness", "model", "platformVersion", "fullVersionList"]))
           : this.isCheatUA()
           ? "(CHEAT-UA) ".concat(u)
           : u;
@@ -652,17 +707,19 @@
     isCheatUA: function () {
       return (
         (!this.uaData && !!navigator.userAgentData) ||
-        (!this.core().Gecko && !isNaN(parseFloat(unsafeWindow.mozInnerScreenX))) ||
-        (this.core().Gecko && isNaN(parseFloat(unsafeWindow.mozInnerScreenX))) ||
-        (getNavigator.core().WebKit && !window.safari) ||
-        (!getNavigator.core().WebKit && !!window.safari)
+        (this.core().Blink && !UNSAFE_WINDOW.chrome) ||
+        (!this.core().Blink && !!UNSAFE_WINDOW.chrome) ||
+        (this.core().WebKit && !UNSAFE_WINDOW.safari) ||
+        (!this.core().WebKit && !!UNSAFE_WINDOW.safari) ||
+        (!this.core().Gecko && !isNaN(parseFloat(UNSAFE_WINDOW.mozInnerScreenX))) ||
+        (this.core().Gecko && isNaN(parseFloat(UNSAFE_WINDOW.mozInnerScreenX)))
       );
     },
   };
 
-  const IS_REAL_WEBKIT = (getNavigator.core().WebKit && !getNavigator.isCheatUA()) || !!window.safari;
-  const IS_REAL_GECKO = (getNavigator.core().Gecko && !getNavigator.isCheatUA()) || !isNaN(parseFloat(unsafeWindow.mozInnerScreenX));
-  const IS_REAL_BLINK = (getNavigator.core().Blink && !getNavigator.isCheatUA()) || !!unsafeWindow.chrome;
+  const IS_REAL_WEBKIT = (getNavigator.core().WebKit && !getNavigator.isCheatUA()) || !!UNSAFE_WINDOW.safari;
+  const IS_REAL_BLINK = (getNavigator.core().Blink && !getNavigator.isCheatUA()) || !!UNSAFE_WINDOW.chrome;
+  const IS_REAL_GECKO = (getNavigator.core().Gecko && !getNavigator.isCheatUA()) || !isNaN(parseFloat(UNSAFE_WINDOW.mozInnerScreenX));
   const CAN_I_USE = (IS_REAL_GECKO && getNavigator.geckoVersion() >= 82) || (IS_REAL_BLINK && Number(getNavigator.chromiumVersion()) >= 88);
 
   /* New DefinePropertise */
@@ -678,7 +735,7 @@
         props: ["clientX", "clientY", "pageX", "pageY", "layerX", "layerY", "offsetX", "offsetY", "screenX", "screenY", "movementX", "movementY", "x", "y"],
       },
       {
-        objs: [w, unsafeWindow],
+        objs: [...new Set([w, UNSAFE_WINDOW])],
         props: ["pageXOffset", "pageYOffset", "scrollX", "scrollY"],
       },
       {
@@ -789,25 +846,27 @@
     debug(`[REFLECT.DP]${IS_FRAMES} %O %csucceeded`, Reflect_Result, "color:green");
   };
 
-  const rePositionForScale = (item, dname) => {
-    if (!item) return;
+  const rePositionForScale = (node, dname) => {
+    if (!node) return;
+    const { oScale, tScale } = getSacleMatrix();
+    if (oScale === 1 && tScale === 1) return;
     fdm.read(() => {
-      const { oScale, tScale } = getSacleMatrix();
-      if (oScale === 1 && tScale === 1) return;
-      let sT = tScale === 1 ? 0 : -defCon.elCompat.getBoundingClientRect().top;
+      const sT = tScale === 1 ? 0 : -defCon.elCompat.getBoundingClientRect().top;
       oScale !== tScale && oScale !== 1 && tScale !== 1 && w.scrollTo(0, sT * tScale - 1);
-      dname !== "fr-colorpicker" && fdm.write(() => (item.style.top = `${sT}px`));
-      const reposition = () => {
-        const { tScale } = getSacleMatrix();
-        if (tScale === 1) {
-          document.removeEventListener("scroll", reposition);
-        } else {
-          sT = -defCon.elCompat.getBoundingClientRect().top;
-          dname !== "fr-colorpicker" && fdm.write(() => (item.style.top = `${sT}px`));
-        }
-      };
-      document.addEventListener("scroll", reposition);
+      dname !== "fr-colorpicker" && fdm.write(() => (node.style.transform = tScale === 1 ? null : `scale(${1 / tScale}) translateY(${sT * tScale}px)`));
     });
+    const reposition = () => {
+      const { tScale } = getSacleMatrix();
+      if (tScale === 1) {
+        document.removeEventListener("scroll", reposition);
+      } else {
+        fdm.read(() => {
+          const sT = -defCon.elCompat.getBoundingClientRect().top;
+          dname !== "fr-colorpicker" && fdm.write(() => (node.style.transform = `scale(${1 / tScale}) translateY(${sT * tScale}px)`));
+        });
+      }
+    };
+    document.addEventListener("scroll", reposition);
   };
 
   /* pushState & replaceState */
@@ -841,6 +900,10 @@
       case "count":
         return console[act](`\u27A4 ${arg0}`);
     }
+  }
+
+  function random(range, type = "round") {
+    return Math[type]((w.crypto.getRandomValues(new Uint32Array(1))[0] / (0xffffffff + 1)) * range);
   }
 
   function getMetaValue(str) {
@@ -878,8 +941,8 @@
   }
 
   function getAsyncStyleNode(target) {
-    let el = qA("style,link[rel*='stylesheet' i]:not([disabled])", target).slice(-1)[0] || target.lastElementChild;
-    const styleSheets = target.parentNode?.parentNode?.styleSheets || document.styleSheets;
+    let el = qA("style,link[rel*='stylesheet' i]:not([disabled])", target).slice(-1)[0] || target?.lastElementChild;
+    const styleSheets = target?.ownerDocument?.styleSheets || document.styleSheets;
     for (let i = styleSheets.length - 1; i >= 0; i--) {
       if (styleSheets[i].ownerNode?.parentNode === target) {
         el = styleSheets[i].ownerNode;
@@ -949,7 +1012,7 @@
       const rect = items.getBoundingClientRect();
       const styleState = gS(items);
       const rectView = rect.bottom >= 0 && rect.right >= 0 && rect.width > 4 && rect.height > 4;
-      const styleStateView = styleState.display !== "none" && styleState.visibility === "visible";
+      const styleStateView = styleState.display !== "none" && styleState.visibility !== "hidden";
       if (rectView && styleStateView) {
         try {
           const h = items.contentWindow;
@@ -1034,8 +1097,7 @@
 
   function insertStyle_AsyncFrames(isMO = false) {
     qA("iframe").forEach(item => {
-      sleep(2e2)
-        .then(() => count(`detect.Autoload.Frames<i:${item.id || "NULL"}>`))
+      sleep(2e2, { useCachedSetTimeout: true })
         .then(() => framesInsertStyle({ items: item, condition: "Autoload", tstyle: defCon.tStyle }))
         .catch(e => !isMO && error("InsertStyle_AsyncFrames:", e.message));
     });
@@ -1405,8 +1467,8 @@
 
   const fontSet = function (s) {
     return {
-      hide: () => qA(s).forEach(item => fdm.write(() => (item.style.cssText += "display:none"))),
-      show: () => qA(s).forEach(item => fdm.write(() => (item.style.cssText += "display:block"))),
+      hide: () => qA(s).forEach(item => fdm.write(() => (item.style.display = "none"))),
+      show: () => qA(s).forEach(item => fdm.write(() => (item.style.display = "block"))),
       cloze: async (item, fontData) => {
         ddRemove(item.parentNode);
         const value = item.parentNode.children[1].value;
@@ -1437,7 +1499,7 @@
               submitButton.setAttribute("v-Preview", "true");
             }
           }
-          qS(`#${defCon.id.selector}`).style.cssText += "display:none;";
+          qS(`#${defCon.id.selector}`).style.display = "none";
           const ffaceT = qS(`#${defCon.id.fface}`);
           const inputFont = qS(`#${defCon.id.fontList} .${defCon.class.selectFontId} input`);
           if (ffaceT.checked) {
@@ -1477,7 +1539,7 @@
             `<a class="${defCon.class.label}"><span style="border-bottom-left-radius:4px;border-top-left-radius:4px;font-family:'Microsoft YaHei'!important">微软雅黑</span><input type="hidden" name="${defCon.id.fontName}" sort="1" value="Microsoft YaHei"/><span class="${defCon.class.close}" style="border-bottom-right-radius:4px;border-top-right-radius:4px;cursor:pointer;font-family:system-ui,-apple-system,BlinkMacSystemFont,serif!important">\u0026\u0023\u0032\u0031\u0035\u003b</span></a>`
           )
         );
-        fontlistSelectorNode.parentNode.style.cssText += "display:block;";
+        fontlistSelectorNode.parentNode.style.display = "block";
         for (let i = 0; i < fontData.length; i++) {
           if (fontData[i].en === "Microsoft YaHei") {
             fontData.splice(i, 1);
@@ -1534,7 +1596,7 @@
           changeSelectorStatus(ffaceT.checked, fselectorT, defCon.class.readonly);
           ffaceT.addEventListener("change", () => changeSelectorStatus(ffaceT.checked, fselectorT, defCon.class.readonly));
         }
-        qS(`#${defCon.id.selector}`).style.cssText += "display:none;";
+        qS(`#${defCon.id.selector}`).style.display = "none";
         fselectorT.addEventListener("input", () => searchEvents(fselectorT.value));
         fselectorT.addEventListener("click", function (e) {
           if (this.value.length === 0) {
@@ -1618,7 +1680,7 @@
                     `<a class="${defCon.class.label}"><span style="border-bottom-left-radius:4px;border-top-left-radius:4px;font-family:'${value}'!important">${this.textContent}</span><input type="hidden" name="${defCon.id.fontName}" sort="${sort}" value="${value}"/><span class="${defCon.class.close}" style="border-bottom-right-radius:4px;border-top-right-radius:4px;cursor:pointer;font-family:system-ui,-apple-system,BlinkMacSystemFont,serif!important">\u0026\u0023\u0032\u0031\u0035\u003b</span></a>`
                   )
                 );
-                selector.parentNode.style.cssText += "display:block;";
+                selector.parentNode.style.display = "block";
                 fontData = getUniqueValues(fontData);
                 for (let i = 0; i < fontData.length; i++) {
                   if (fontData[i].en === value) {
@@ -1668,15 +1730,14 @@
   const IS_MACOS = getNavigator.system().startsWith("macOS");
   const DONOT_SCALE = matchEditorialDomain(INITIAL_VALUES.editorialSites);
   const SCRIPT_KEY = getMetaValue("\u0061\u0075\u0074\u0068\u006f\u0072");
-  const FEEDBACK_URI = getMetaValue("\u0073\u0075\u0070\u0070\u006f\u0072\u0074\u0055\u0052\u004c");
   const ROOT_SECRET_KEY = "\u8ab1\u004a\u0056\u0069\u0059\u7409\u67d3\u5b7a\u80ba\u0070\u0032\u004f\u64d3\u0030\u8151\u0074\u5c80\u5b9a\u81ba\u0065";
   const CONST_VALUES = {};
 
   /* Determine whether the DOM is loaded */
 
   const fullStyle = (b, c) => `display:inline-block;background-color:${b};color:${c};font-family:monospace;border-radius:4px;padding:4px 8px;`;
-  const leftStyle = b => `display:inline-block;background-color:${b};color:snow;font-family:monospace;border-radius:4px 0 0 4px;padding:4px 0 4px 8px`;
-  const rightStyle = b => `display:inline-block;background-color:${b};color:snow;font-family:monospace;font-style:italic;border-radius:0 4px 4px 0;padding:4px 8px`;
+  const leftStyle = b => `display:inline-block;background-color:${b};color:snow;font-family:monospace;border-radius:4px 0 0 4px;padding:4px 2px 4px 8px`;
+  const rightStyle = b => `display:inline-block;background-color:${b};color:snow;font-family:monospace;font-style:italic;border-radius:0 4px 4px 0;padding:4px 8px 4px 2px`;
   const remarkStyle = c => `display:inline-block;color:${c};font-family:monospace;line-height:180%`;
   function addLoadEvents(fn, result = false) {
     const onReadyStateChange = () => {
@@ -1701,7 +1762,7 @@
       if (document.readyState === "complete" && result) {
         insertStyle_AsyncFrames();
         info(
-          `%c[DOM][READYSTATE]:%cLoad complete!%c\r\n%c \u3000\u27A6${IS_FRAMES} ${CUR_HOST_NAME} %c${CUR_HOST_PATH}`,
+          `%c[DOM][READYSTATE]:%ccomplete!%c\r\n%c \u3000\u27A6${IS_FRAMES} ${CUR_HOST_NAME} %c${CUR_HOST_PATH}`,
           leftStyle("green"),
           rightStyle("green"),
           "display:block;height:0",
@@ -1751,7 +1812,7 @@
       maxPersonalSites = Number(_config_data_.maxPersonalSites) || 100;
       isBackupFunction = Boolean(_config_data_.isBackupFunction ?? true);
       isPreview = Boolean(_config_data_.isPreview);
-      isFontsize = isGM ? false : Boolean(_config_data_.isFontsize);
+      isFontsize = Boolean(_config_data_.isFontsize);
       isHotkey = Boolean(_config_data_.isHotkey ?? true);
       isCloseTip = Boolean(_config_data_.isCloseTip);
       rebuild = _config_data_.rebuild;
@@ -1925,15 +1986,22 @@
         }
         curVersion = null;
         saveData("_CONFIGURE_", _config_data_);
-        debug("%cData has been rebuilt: %s", "font-style:italic;background-color:red;color:snow", curVersion === null);
+        debug("%cData has been rebuilt: true", "display:inline-block;padding:4px 8px;font-family:monospace;font-style:italic;background-color:red;color:snow");
       } else if (typeof rebuild === "undefined") {
         _config_data_.rebuild = !SET_BOOL_FOR_UPDATE;
         saveData("_CONFIGURE_", _config_data_);
         !!curVersion && cache.remove("_FONTCHECKLIST_");
-        debug(`%c${!curVersion ? "Configdata was undefined, has being rebuilt!" : "Data has been restored!"}`, `font-style:italic;color:${!curVersion ? "crimson" : "dodgerblue"}`);
+        debug(
+          `%c${!curVersion ? "Configuration is undefined, rebuild complete!" : "Data has been restored!"}`,
+          `font-family:monospace;font-style:italic;color:${!curVersion ? "crimson" : "dodgerblue"}`
+        );
       } else {
         const dataStatus = curVersion === defCon.curVersion;
-        debug("%cGood Data Status: %c%s", "font-style:italic;color:green", `font-style:italic;${dataStatus ? "color:teal" : "color:red"}`, dataStatus);
+        debug(
+          `%cGood Data Status: %c${dataStatus}`,
+          "font-family:monospace;font-style:italic;color:teal",
+          `font-family:monospace;font-style:italic;${dataStatus ? "color:green" : "color:red"}`
+        );
       }
     }
 
@@ -1957,16 +2025,16 @@
         falseButtonText: "不，算了吧",
         messageText: String(
           `<p><span style="font-style:italic;font-weight:700;font-size:20px;color:tomato">您好\uff01</span>` +
-            `这是${CANDIDATE_FIELD}<span style="margin-left:3px;font-weight:700">${defCon.scriptName}</span>的更新版本` +
-            `<span style="font:italic 900 22px/150% Candara,'Times New Roman'!important;color:tomato;margin-left:3px">` +
+            `这是${CANDIDATE_FIELD}<span style="padding-left:4px;font-weight:700">${defCon.scriptName}</span>的更新版本` +
+            `<span style="font:italic 900 22px/150% Candara,'Times New Roman'!important;color:tomato;padding-left:4px">` +
             `V${defCon.curVersion}</span>，更新内容如下\uff1a</p>` +
             `<p><ul id="${RANDOM_ID}_update">
               ${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}
               <!-- START VERSION NOTICE -->
-              <li class="${RANDOM_ID}_add">新增高级功能『禁用全局数据』可设置仅在指定域名渲染。</li>
-              <li class="${RANDOM_ID}_fix">优化对话框程序，排除内存泄漏的隐患。</li>
-              <li class="${RANDOM_ID}_fix">优化针对弹幕型网站海量弹幕渲染修正的效率【<a target="_blank" href="${FEEDBACK_URI}/42">设置</a>】</li>
-              <li class="${RANDOM_ID}_fix">修正safari及Tampermonkey的兼容性问题。</li>
+              <li class="${RANDOM_ID}_info">虎尾系金拢财气，兔首摇铃荡福音，癸卯兔年迎吉祥！</li>
+              <li class="${RANDOM_ID}_fix">优化新Gecko内核下Greasemonkey执行脚本的兼容性。</li>
+              <li class="${RANDOM_ID}_fix">优化冗余脚本检测的错误报告机制，让检测更准确。</li>
+              <li class="${RANDOM_ID}_fix">修正Safari因某些特殊字符未转义造成的日志错误。</li>
               <li class="${RANDOM_ID}_fix">修正一些已知的小问题，优化样式，优化代码。</li>
               <!-- END VERSION NOTICE -->
             </ul></p>
@@ -1984,7 +2052,10 @@
         (!isCloseTip || curVersion === null) && hintUpdateInfo(`${HOST_URI}#update`, curVersion);
         _config_data_.curVersion = defCon.curVersion;
         saveData("_CONFIGURE_", _config_data_);
-        debug("%cThe script has been upgraded to V%s", "font-style:italic;background-color:yellow;color:crimson", defCon.curVersion);
+        debug(
+          `%cThe script has been ${!curVersion ? "deployed" : "updated"} to V${defCon.curVersion}`,
+          "display:inline-block;padding:4px 8px;font-style:italic;font-family:monospace;background-color:yellow;color:crimson"
+        );
         return true;
       });
     }
@@ -2094,7 +2165,7 @@
     const codefont = !cssexlude ? `` : funcCodefont(cssexlude, fontface_i, CONST_VALUES.fontSelect);
     const cssfun = CONST_VALUES.fontCSS;
     const textrender = smooth_i ? "text-rendering:optimizeLegibility!important;" : "";
-    const fixfontstroke = CONST_VALUES.fixStroke ? `[${FIX_STROKE_ATTRNAME}='true']{-webkit-text-stroke:0px transparent!important}` : ``;
+    const fixfontstroke = CONST_VALUES.fixStroke ? `[${FIX_STROKE_ATTRNAME}],[${FIX_STROKE_ATTRNAME}] *{-webkit-text-stroke:0px transparent!important}` : ``;
     const fontStyle = String(
       typeof defCon.exSitesIndex === "undefined"
         ? `${fontfaces}${bodyscale}`.concat(
@@ -2111,7 +2182,7 @@
         `.${defCon.class.dbm} a{color:#0969da;text-decoration:none!important;font-style:inherit}.${defCon.class.dbm} a:hover{color:crimson;text-decoration:underline}.${defCon.class.dbm} #${defCon.id.feedback}{padding:2px 10px;height:22px;width:max-content;min-width:auto}.${defCon.class.dbm} #${defCon.id.files}{display:none}.${defCon.class.dbm} #${defCon.id.feedback}:hover{color:crimson!important}.${defCon.class.dbm} #${defCon.id.feedback}:after{width:0;height:0;content:"";background:url('${LOADING_IMG}') no-repeat -400px -300px}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist:placeholder-shown{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#aaa!important}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-webkit-input-placeholder{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#aaa!important}.${defCon.class.dbm} #${RANDOM_ID}_custom_Fontlist::-moz-placeholder{font:normal 400 14px/150% monospace,Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:#555!important}.${defCon.class.dbm} #${RANDOM_ID}_update li{margin:0;padding:0;font:italic 400 14px/150% Consolas,'Microsoft YaHei UI',system-ui,-apple-system,BlinkMacSystemFont!important;color:gray}.${defCon.class.dbm} .${RANDOM_ID}_add:before{content:"+";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_del:before{content:"-";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_fix:before{content:"@";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_info{color:#daa520!important}.${defCon.class.dbm} .${RANDOM_ID}_info:before{content:"#";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_warn{color:#e90000!important}.${defCon.class.dbm} .${RANDOM_ID}_warn:before{content:"!";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} .${RANDOM_ID}_init{color:#65a16a!important}.${defCon.class.dbm} .${RANDOM_ID}_init:before{content:"$";display:inline;margin:0 4px 0 -10px}.${defCon.class.dbm} input:focus,.${defCon.class.dbm} textarea:focus{box-shadow:inset 0 1px 3px rgb(0 0 0 / 10%),0 0 4px rgb(110 111 112 / 60%)!important}`
     );
     const fontCss_container = String(
-      `#${defCon.id.rndId}{width:100%;height:100vh;background:transparent;position:fixed;top:0;left:0;z-index:1999999991}body #${defCon.id.container}{position:absolute;top:10px;right:24px;border-radius:12px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;min-height:10%;max-height:calc(100% - 50px);z-index:999999;padding:4px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container} *{line-height:1.5!important;text-shadow:none!important;-webkit-text-stroke:0px transparent!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Android Emoji",EmojiSymbols!important;font-size:16px;font-weight:700}` +
+      `#${defCon.id.rndId}{width:100%;height:100vh;background:transparent;position:fixed;top:0;left:0;z-index:1999999991}body #${defCon.id.container}{position:absolute;top:10px;right:24px;border-radius:12px;background:#f0f6ff!important;box-sizing:content-box;opacity:0;transition:opacity .5s}#${defCon.id.container}{transform:scale3d(1,1,1);width:auto;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;min-height:10%;max-height:calc(100% - 40px);z-index:999999;padding:4px;text-align:left;color:#333;font-size:16px!important;font-weight:900;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.container}::-webkit-scrollbar{width:10px;height:1px}#${defCon.id.container}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.container} *{line-height:1.5!important;text-shadow:none!important;-webkit-text-stroke:0px transparent!important;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","Android Emoji",EmojiSymbols!important;font-size:16px;font-weight:700}` +
         `#${defCon.id.container} fieldset{border:2px groove #67a5df!important;border-radius:10px;padding:4px 6px;margin:2px;background:#f0f6ff!important;display:block;width:auto;height:auto;min-height:475px}#${defCon.id.container} legend{float:none!important;line-height:inherit;padding:0 8px;border:0!important;margin-bottom:0;font-size:16px!important;font-weight:700;font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;background:#f0f6ff!important;box-sizing:content-box;width:auto!important;min-width:185px!important;display:block!important;position:initial!important;height:auto!important;visibility:unset!important}#${defCon.id.container} fieldset ul{padding:0;margin:0;background:#f0f6ff!important}#${defCon.id.container} ul li{display:inherit;list-style:none;margin:3px 0;box-sizing:content-box;border:none;float:none;background:#f0f6ff!important;cursor:default;min-width:-webkit-fill-available;min-width:-moz-available;-webkit-user-select:none;user-select:none}#${defCon.id.container} ul li:before{display:none}#${defCon.id.container} .${defCon.class.help}{width:24px;height:24px;fill:#67a5df;overflow:hidden;visibility:visible!important;vertical-align:initial!important}#${defCon.id.container} .${defCon.class.help}:hover{cursor:help}#${RANDOM_ID}_scriptname{font-weight:900!important;-webkit-user-select:all;user-select:all;display:inline-block}#${defCon.id.container} .${defCon.class.title} .${defCon.class.guide}{display:inline-block;position:absolute;cursor:pointer}@keyframes rotation{from{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(360deg)}}.${defCon.class.title} .${defCon.class.rotation}{padding:0;margin:0;width:24px;height:24px;top:auto;right:auto;bottom:auto;left:auto;transform-origin:center 50% 0;-webkit-transform:rotate(360deg);animation:rotation 5s linear infinite}` +
         `#${defCon.id.container} input:not([type="range"],[type="checkbox"]):focus,#${defCon.id.container} textarea:focus{box-shadow:inset 0 1px 3px rgb(0 0 0 / 10%),0 0 6px rgb(82 168 236 / 60%)!important}#${defCon.id.fontList}{padding:2px 10px 0 10px;min-height:73px}#${defCon.id.fontFace},#${defCon.id.fontSmooth}{padding:2px 10px;height:40px;width:calc(100% - 18px);min-width:auto;display:flex!important;align-items:center;justify-content:space-between}#${defCon.id.fontSize}{padding:2px 10px;height:60px}#${defCon.id.fontStroke}{padding:2px 10px;height:60px}#${defCon.id.fontShadow}{padding:2px 10px;height:60px}#${defCon.id.shadowColor}{display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row;padding:2px 10px;min-height:45px;margin:4px;width:auto}#${defCon.id.fontCSS},#${defCon.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${defCon.id.submit}{padding:2px 10px;height:40px}` +
         `#${defCon.id.fontList} .${defCon.class.selector} a{font-weight:400;text-decoration:none}#${defCon.id.fontList} .${defCon.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${defCon.id.fontList} .${defCon.class.label} span{box-sizing:border-box;color:#fff;font-size:16px!important;font-weight:400;height:max-content;width:max-content;min-width:12px;max-width:200px;padding:5px;background:#67a5df;text-overflow:ellipsis;overflow:hidden;display:inline-block;white-space:nowrap}#${defCon.id.fontList} .${defCon.class.close}{width:12px}#${defCon.id.fontList} .${defCon.class.close}:hover{color:tomato;background-color:#2d7dca;border-radius:2px}#${defCon.id.selector}{width:100%;max-width:100%}#${defCon.id.selector} label{display:block;cursor:initial;margin:0 0 4px 0;color:#333}#${defCon.id.selector} #${defCon.id.cleaner}{margin-left:5px;cursor:pointer}#${defCon.id.selector} #${defCon.id.cleaner}:hover{color:red}#${defCon.id.fontList} .${defCon.class.selector}{overflow-x:hidden;box-sizing:border-box;overscroll-behavior:contain;border:2px solid #67a5df!important;border-radius:6px;padding:6px 6px 0 6px;margin:0 0 6px 0;width:100%;min-width:100%;max-width:min-content;max-width:-moz-min-content;max-height:90px;min-height:45px;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar{width:6px;height:1px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-thumb{box-shadow:inset 0 0 2px #67a5df;background:#487baf;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selector}::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 2px #67a5df;background:#efefef;border-radius:10px}#${defCon.id.fontList} .${defCon.class.selectFontId} span.${defCon.class.spanlabel},#${defCon.id.selector} span.${defCon.class.spanlabel}{margin:0!important;width:auto;display:block!important;padding:0 0 4px 0;color:#333;border:0;text-align:left!important;background-color:transparent!important}` +
@@ -2123,11 +2194,11 @@
         `.${defCon.class.dbm} textarea{scrollbar-width:thin;overscroll-behavior:contain;cursor:auto}.${defCon.class.dbm} textarea::-webkit-scrollbar{width:8px;height:8px}.${defCon.class.dbm} textarea::-webkit-scrollbar-corner{box-shadow:inset 0 0 3px #aaa;background:#efefef;border-radius:2px}.${defCon.class.dbm} textarea::-webkit-scrollbar-thumb{box-shadow:inset 0 0 5px #999;background:#cfcfcf;border-radius:2px}.${defCon.class.dbm} textarea::-webkit-scrollbar-track{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:2px}.${defCon.class.dbm} textarea::-webkit-scrollbar-track-piece{box-shadow:inset 0 0 5px #aaa;background:#efefef;border-radius:2px}` +
         `#${defCon.id.submit} button{box-sizing:border-box;background-image:none;background-color:#67a5df;color:#fff!important;margin:0;padding:5px 10px;cursor:pointer;border:2px solid #6ba7e0;border-radius:6px;width:auto;min-width:min-content;min-height:35px;height:35px;font:normal 600 14px/150% "Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${defCon.id.submit} button:hover{box-shadow:0 0 5px rgba(0,0,0,.4)!important}#${defCon.id.submit} .${defCon.class.cancel},#${defCon.id.submit} .${defCon.class.reset}{float:left;margin-right:10px}#${defCon.id.submit} .${defCon.class.submit}{float:right}#${defCon.id.submit} #${defCon.id.backup}{margin:0 10px 0 0;display:none}.${defCon.class.anim}{animation:jiggle 1.8s ease-in infinite;border:2px solid crimson!important;background:crimson!important}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}`
     );
-    const _left_ = IS_REAL_WEBKIT ? "left:-72px" : "left:auto";
-    const _right_ = IS_REAL_WEBKIT ? "right:-64px" : "left:auto";
-    const _right__ = IS_REAL_WEBKIT ? "right:-54px" : "left:auto";
+    const _left_ps3_ = IS_REAL_WEBKIT ? "left:-72px" : "left:auto";
+    const _right_ps4_ = IS_REAL_WEBKIT ? "right:-64px" : "left:auto";
+    const _right_ps5_ = IS_REAL_WEBKIT ? "right:-54px" : "left:auto";
     const fontCss_tooltip = String(
-      `.${defCon.class.tooltip}{position:relative;cursor:help;-webkit-user-select:none;user-select:none}.${defCon.class.tooltip} span.${defCon.class.emoji}{font-weight:400!important}.${defCon.class.tooltip}:active .${defCon.class.tooltip}{display:block}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;box-sizing:content-box;position:absolute;z-index:999999;border:2px solid #b8c4ce;border-radius:6px;padding:10px;width:234px;max-width:234px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9;word-break:break-all}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:14px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} em{font-style:normal!important}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:150%;text-indent:0!important}.${defCon.class.ps1}{position:relative;top:-33px;height:0;width:24px;margin:0;padding:0;right:5px;float:right}.${defCon.class.ps2}{top:35px;right:-7px}.${defCon.class.ps3}{top:-197px;${_left_}}.${defCon.class.ps4}{top:-197px;${_right_}}.${defCon.class.ps5}{top:-322px;${_right__}}`
+      `.${defCon.class.tooltip}{position:relative;cursor:help;-webkit-user-select:none;user-select:none}.${defCon.class.tooltip} span.${defCon.class.emoji}{font-weight:400!important}.${defCon.class.tooltip}:active .${defCon.class.tooltip}{display:block}.${defCon.class.tooltip} .${defCon.class.tooltip}{display:none;box-sizing:content-box;position:absolute;z-index:999999;border:2px solid #b8c4ce;border-radius:6px;padding:10px;width:234px;max-width:234px;font-weight:400;color:#fff;background-color:#54a2ec;opacity:.9;word-break:break-all}.${defCon.class.tooltip} .${defCon.class.tooltip} *{font-family:"Microsoft YaHei UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;font-size:14px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} em{font-style:normal!important}.${defCon.class.tooltip} .${defCon.class.tooltip} strong{color:darkorange;font-size:18px!important}.${defCon.class.tooltip} .${defCon.class.tooltip} p{color:#fff;display:block;margin:0 0 10px 0;line-height:150%;text-indent:0!important}.${defCon.class.ps1}{position:relative;top:-33px;height:0;width:24px;margin:0;padding:0;right:5px;float:right}.${defCon.class.ps2}{top:35px;right:-7px}.${defCon.class.ps3}{top:-197px;${_left_ps3_}}.${defCon.class.ps4}{top:-197px;${_right_ps4_}}.${defCon.class.ps5}{top:-322px;${_right_ps5_}}`
     );
     const fontCss_Progress = String(
       `.${defCon.class.range}{--primary-color:#67a5df;--value-offset-y:var(--ticks-gap);--value-active-color:white;--value-background:transparent;--value-background-hover:var(--primary-color);--value-font:italic bold 14px/14px monospace,serif;--fill-color:var(--primary-color);--progress-background:rgb(223, 223, 223);--progress-radius:20px;--show-min-max:none;--track-height:calc(var(--thumb-size) / 2);--min-max-font:12px serif;--min-max-opacity:0.5;--min-max-x-offset:10%;--thumb-size:22px;--thumb-color:white;--thumb-shadow:0 0 3px rgba(0, 0, 0, 0.4),0 0 1px rgba(0, 0, 0, 0.5) inset,0 0 0 99px var(--thumb-color) inset;--thumb-shadow-active:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px var(--primary-color) inset,0 0 3px rgba(0, 0, 0, 0.4);--thumb-shadow-hover:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px darkorange inset,0 0 3px rgba(0, 0, 0, 0.4);--ticks-thickness:1px;--ticks-height:5px;--ticks-gap:var(--ticks-height, 0);--ticks-color:transparent;--step:1;--ticks-count:(var(--max) - var(--min))/var(--step);--maxTicksAllowed:1000;--too-many-ticks:Min(1, Max(var(--ticks-count) - var(--maxTicksAllowed), 0));--x-step:Max(var(--step), var(--too-many-ticks) * (var(--max) - var(--min)));--tickIntervalPerc_1:Calc((var(--max) - var(--min)) / var(--x-step));--tickIntervalPerc:calc((100% - var(--thumb-size)) / var(--tickIntervalPerc_1) * var(--tickEvery, 1));--value-a:Clamp(var(--min), var(--value, 0), var(--max));--value-b:var(--value, 0);--text-value-a:var(--text-value, "");--completed-a:calc((var(--value-a) - var(--min)) / (var(--max) - var(--min)) * 100);--completed-b:calc((var(--value-b) - var(--min)) / (var(--max) - var(--min)) * 100);--ca:Min(var(--completed-a), var(--completed-b));--cb:Max(var(--completed-a), var(--completed-b));--thumbs-too-close:Clamp(-1, 1000 * (Min(1, Max(var(--cb) - var(--ca) - 5, -1)) + 0.001), 1);--thumb-close-to-min:Min(1, Max(var(--ca) - 5, 0));--thumb-close-to-max:Min(1, Max(95 - var(--cb), 0))}` +
@@ -2328,7 +2399,7 @@
       info(
         `%c${getNavigator.browser()} BROWSER WARNING%c\r\n%cThis script (fully functional version) only supports desktop browsers with versions Edge>=80, Chrome>=80, Firefox>=74, Opera>=67, Safari>=13.1`,
         fullStyle("crimson", "snow") + "width:max-content;text-transform:uppercase",
-        "display:block;height:0;width:0",
+        "display:block;height:0",
         "display:block;padding:4px 0 4px 18px;line-height:150%;font-family:monospace;color:0"
       );
     }
@@ -2350,28 +2421,32 @@
             const styleState = gS(nodes[i]);
             const weight = styleState.fontWeight;
             if (weight >= 600) {
-              nodes[i].setAttribute(setup.attr, true);
-              setup.bool = true;
-              setup.act = "Bold";
+              fdm.write(() => {
+                nodes[i].setAttribute(setup.attr, true);
+                setup.bool = true;
+                setup.act = "Bold";
+              });
             }
           }
-          resolve(setup);
+          fdm.write(() => resolve(setup));
         });
       })
         .then(res => {
-          let { attr, bool, act } = res;
+          let { attr, bool } = res;
           fdm.read(() => {
             const nodes = qA(`[${attr}]`);
             for (let i = 0, l = nodes.length; i < l; i++) {
               const styleState = gS(nodes[i]);
               const weight = styleState.fontWeight;
               if (weight < 600) {
-                nodes[i].removeAttribute(attr);
-                bool = true;
-                act = "Normal";
+                fdm.write(() => {
+                  nodes[i].removeAttribute(attr);
+                  res.act = bool ? "Merge" : "Normal";
+                  res.bool = true;
+                });
               }
             }
-            bool && count(`[FIXSTROKE]${IS_FRAMES}[t:${type}][a:${act}]`);
+            fdm.write(() => res.bool && count(`[FIXSTROKE]${IS_FRAMES}[t:${type}][a:${res.act}]`));
           });
         })
         .catch(e => error("<Font-Fix-Stroke>", e.message));
@@ -2400,19 +2475,19 @@
 
     try {
       let mutationType, rndStyleNode, rndClassNode;
-      const schedulerPostTask = (fn, priority = "user-blocking") => (w.scheduler?.postTask ? w.scheduler.postTask(fn, { priority }) : fn());
+      const schedulerPostTask = (fn, priority) => (w.scheduler?.postTask ? w.scheduler.postTask(fn, { priority }) : fn());
       const reinsertStyleAct = (mu, node) =>
         mu.target === document.head &&
         node.nodeName === "STYLE" &&
         ((CUR_WINDOW_TOP && !rndClassNode) || (typeof defCon.exSitesIndex !== "undefined" && !rndStyleNode)) &&
-        info(`%c[MO][REMOVEDNODES]:%c<style> ${!preInsertContentToHead(true)}`, leftStyle("brown"), rightStyle("brown"));
+        info(`%c[MO][REINSERTCSS]:%c<style> ${!preInsertContentToHead(true)}`, leftStyle("brown"), rightStyle("brown"));
       const removeNodesAct = mu => mu.removedNodes.forEach(node => reinsertStyleAct(mu, node));
       const moveStyleAct = (mu, node) =>
         mu.target === document.head &&
         ["STYLE", "LINK"].includes(node.nodeName) &&
         rndStyleNode?.nextElementSibling &&
         shouldMoveStyle(node) &&
-        deBounce(moveStyleToLastPosition, 5e2, "moveStyleToLastPosition", false)({ isMO: true });
+        deBounce(moveStyleToLastPosition, 5e2, "moveStyleToLastPosition", false)(node.nodeType);
       const asyncFramesAct = node => node.nodeName === "IFRAME" && node.style.display !== "none" && deBounce(insertStyle_AsyncFrames, 1e2, "asyncFramesAct", true)(true);
       const repostionAct = node => IS_REAL_GECKO && defCon.frContainers.includes(node.nodeName.toLowerCase()) && rePositionForScale(node, node.nodeName.toLowerCase());
       const fixStrokeAct = (mu, node) => SHOULD_FIX_STROKE && typeof mutationType === "undefined" && (mutationType = detectNodeFixStroke(mutationType, node, mu));
@@ -2439,14 +2514,16 @@
         let safeReg, curCssText, curClassName;
         switch (mu.attributeName) {
           case "style":
-            safeReg = new RegExp(
-              "\\b(".concat(
-                IS_REAL_WEBKIT ? "" : "(?<!\\btransition:\\s*transform\\b.+)",
-                "translateX?(?!.+\\btransition:\\s*transform\\b)|visibility:\\s*hidden|display:\\s*none)\\b"
-              ),
-              "i"
-            );
-            curCssText = mu.target.style?.cssText ?? "";
+            try {
+              safeReg = new RegExp(
+                `\\b(${IS_REAL_WEBKIT ? "" : "(?<!\\btransition:\\s*transform\\b.+)"}` +
+                  `translateX?(?!.+\\btransition:\\s*transform\\b)|visibility:\\s*hidden|display:\\s*none)\\b`,
+                "i"
+              );
+            } catch (e) {
+              return false;
+            }
+            curCssText = mu.target?.style?.cssText ?? "";
             return !curCssText.match(safeReg);
           case "class":
             curClassName = mu.target.className;
@@ -2483,7 +2560,7 @@
                 break;
             }
           });
-          schedulerPostTask(() => dealWithFixStroke(CONST_VALUES.fontStroke));
+          schedulerPostTask(() => dealWithFixStroke(CONST_VALUES.fontStroke), "user-blocking");
         });
       });
       preInsertContentToHead();
@@ -2502,19 +2579,23 @@
             insertHTML();
             operateConfigure();
             setAutoScaleValue(qS(`#${defCon.id.rndId}`), defCon.curScale);
-            sleep(100)
-              .then(() => defCon.elCompat.clientHeight <= (defCon.isFontsize ? 780 : 715) && qA(`#${defCon.id.cSwitch},#${defCon.id.eSwitch}`).forEach(item => item?.click()))
-              .then(() => defCon.ioe)
-              .then(s => {
-                qS(`#${defCon.id.container}`).style.opacity = 1;
-                debug("configure<errorCount>:", s.length);
-                s.length > 0 && reportErrorToAuthor(s, true);
+            sleep(1e2)
+              .then(() => {
+                if (defCon.elCompat.clientHeight <= (defCon.isFontsize ? 780 : 715)) {
+                  qA(`#${defCon.id.cSwitch},#${defCon.id.eSwitch}`).forEach(item => item.click());
+                }
+                return { e: defCon.ioe, n: qS(`#${defCon.id.container}`) };
+              })
+              .then(r => {
+                r.n && (r.n.style.opacity = 1);
+                debug("configure<errorCount>:", r.e.length);
+                r.e.length > 0 && reportErrorToAuthor(r.e, true);
               });
             qS(`.${defCon.class.title} span.${defCon.class.guide}`).addEventListener("click", () => {
               GMopenInTab(`${HOST_URI}#guide`, defCon.options);
             });
             qS(`#${defCon.id.field} #${RANDOM_ID}_scriptname`).addEventListener("dblclick", function () {
-              hintUpdateInfo(`${HOST_URI}#update`, _config_data_.curVersion);
+              hintUpdateInfo(`${HOST_URI}#update`, defCon.curVersion);
               this.style.userSelect = "none";
             });
           } catch (e) {
@@ -2555,7 +2636,7 @@
         }
         isBackupFunction = Boolean(_config_data_.isBackupFunction ?? true);
         isPreview = Boolean(_config_data_.isPreview);
-        isFontsize = isGM ? false : Boolean(_config_data_.isFontsize);
+        isFontsize = Boolean(_config_data_.isFontsize);
         isHotkey = Boolean(_config_data_.isHotkey ?? true);
         isCloseTip = Boolean(_config_data_.isCloseTip);
         maxPersonalSites = Number(_config_data_.maxPersonalSites) || 100;
@@ -2639,15 +2720,12 @@
         });
         confirmIfValueChange(
           qS(`#${defCon.id.isfontsize}`),
-          "字体比例缩放（实验性功能）\r\n\r\n".concat(
+          "字体比例缩放（实验性功能）\r\n\r\n警告：".concat(
             IS_REAL_GECKO
-              ? isGM
-                ? "Greasemonkey4.0+在新版Gecko内核下不支持字体缩放功能，请更换Tampermonkey/Violentmonkey后再尝试。\r\n\r\n强烈建议您：使用Firefox的“浏览器缩放”替代(快捷键：ctrl+-/ctrl++)"
-                : "强烈建议您：使用Firefox的“浏览器缩放”替代(快捷键：ctrl+-/ctrl++)\r\n\r\n警告：在Firefox下由于Gecko内核的兼容性原因，会对部分网站样式、功能兼容不足，从而造成样式错乱、页面动作缺失等问题，请根据实际需求酌情使用。"
-              : "警告：由于样式兼容问题，在部分使用视窗单位(vw, vh, vm*)的网站应用字体缩放会造成页面元素排版异常的样式错误。我们建议您：在此类站点中暂停使用字体比例缩放功能(即：设置参数为1.000)，使用浏览器缩放替代(快捷键：ctrl+-/ctrl++)。",
-            isGM ? "" : "\r\n\r\n请确认是否开启字体缩放功能？"
-          ),
-          true
+              ? "由于Firefox(Gecko内核)的兼容性原因，会对部分网站样式、功能兼容不足，从而造成样式错乱、页面动作缺失等问题，请根据实际需求酌情使用。\r\n\r\n强烈建议您：使用“浏览器缩放”替代(快捷键：ctrl+-/ctrl++)"
+              : "由于样式兼容问题，在部分使用视窗单位(vw, vh, vm*)的网站应用字体缩放会造成页面元素排版异常的样式错误。我们建议您：在此类站点中暂停使用字体比例缩放功能(即：设置参数为1.000)，使用浏览器缩放替代(快捷键：ctrl+-/ctrl++)。",
+            "\r\n\r\n请确认是否开启字体缩放功能？"
+          )
         );
         confirmIfValueChange(
           qS(`#${defCon.id.isclosetip}`),
@@ -2703,7 +2781,7 @@
         if (await frDialog.respond()) {
           _config_data_.isBackupFunction = _bk;
           _config_data_.isPreview = _pv;
-          _config_data_.isFontsize = isGM ? false : _fs;
+          _config_data_.isFontsize = _fs;
           _config_data_.isHotkey = _hk;
           _config_data_.isCloseTip = _ct;
           _config_data_.maxPersonalSites = _mps;
@@ -2877,32 +2955,21 @@
     }
 
     function shouldMoveStyle(element) {
+      if (!element) return false;
       return (
         (element instanceof HTMLStyleElement || (element instanceof HTMLLinkElement && element.rel?.toLowerCase().includes("stylesheet") && !element.disabled)) &&
-        element.media.toLowerCase() !== "print" &&
+        element.media?.toLowerCase() !== "print" &&
         !element.classList.contains(defCon.class.rndStyle) &&
         !element.classList.contains("darkreader")
       );
     }
 
-    function moveStyleToLastPosition({ isMO }) {
+    function moveStyleToLastPosition(isMO) {
       try {
         if (clearconfiguration) return;
-        if (isMO) {
-          if (qA("style[id^='TC']", document.head).length > 1) {
-            if (!defCon.scriptCount) {
-              console.error(`[Redundant Scripts]:\n发现冗余安装的『${defCon.scriptName}』，请访问 ${FEEDBACK_URI}/117 排查错误。`);
-              CUR_WINDOW_TOP && !safeRemove("style[id^='TC']", document.head) && insertCSS();
-              sleep(2e2)((defCon.scriptCount = true)).then(r => {
-                if (qA("style[id^='TC']", document.head).length > 1) {
-                  defCon.ioe.push(
-                    `[Redundant Scripts]: 发现冗余安装的『${defCon.scriptName}』，请按 <a target="_blank" href="${FEEDBACK_URI}/117" style="color:goldenrod">此清单#117</a> 排查错误。刷新页面后如问题依旧，向作者反馈错误！`
-                  );
-                  reportErrorToAuthor(defCon.ioe, r);
-                  return;
-                }
-              });
-            }
+        if (typeof isMO !== "undefined") {
+          if (qA("style[id^='TC']", document.head).length > 1 && !defCon.scriptCount) {
+            defCon.scriptCount = CUR_WINDOW_TOP && !safeRemove("style[id^='TC']", document.head);
           } else if (qA("style[id^='TS']", document.head).length > 0) {
             if (!CUR_WINDOW_TOP && qA("style[id^='TS']", document.head).length === 1) return;
             insertStyle({ isReload: true });
@@ -2915,7 +2982,7 @@
                 insertStyle({ isReload: !!rndStyleNode?.nextElementSibling && shouldMoveStyle(getAsyncStyleNode(document.head)) });
                 return getAsyncStyleNode(document.head)?.className || "<NULL>";
               })
-              .then(r => debug(`lastStyle${IS_FRAMES}.className: %c%s`, "color:teal;font-weight:700", r))
+              .then(r => debug(`lastStyle${IS_FRAMES}.className: %c%s`, "font-family:monospace;font-weight:700;color:teal", r))
               .catch(e => error("MoveStyleToLastPosition.addLoadEvents:", e.message));
             return true;
           });
@@ -2937,7 +3004,7 @@
               const styleName = insertStyle({ isReload: false });
               styleName && count(`[INSERTSTYLE]${IS_FRAMES}[c:${styleName}]`);
             } else {
-              moveStyleToLastPosition({ isMO: false });
+              moveStyleToLastPosition();
               isStyleReady = true;
             }
           } else {
@@ -3209,6 +3276,7 @@
               qS(`#${defCon.id.fstroke}`).style.visibility = this.value === "OFF" ? "hidden" : "visible";
             });
           } catch (e) {
+            defCon.ioe.push(`[Fix Stroke]: ${e}`);
             error("Fix Stroke:", e.message);
           } finally {
             saveChangeStatus(fixStrokeT, CONST_VALUES.fixStroke, submitButton, defCon.values);
@@ -3494,7 +3562,7 @@
               const _exclude_selector = CAN_I_USE ? `:is(${filterHtmlToText(fontex)})` : filterHtmlToText(fontex);
               const _exclude = !fontex || _no_shadow_stroke ? "" : _exclude_selector.concat("{-webkit-text-stroke:0px transparent!important;text-shadow:none!important}");
               const _codefont = !fontex ? "" : funcCodefont(fontex, fontface, fontselect);
-              const _fixfontstroke = fixfstroke ? `[${FIX_STROKE_ATTRNAME}='true']{-webkit-text-stroke:0px transparent!important}` : ``;
+              const _fixfontstroke = fixfstroke ? `[${FIX_STROKE_ATTRNAME}],[${FIX_STROKE_ATTRNAME}] *{-webkit-text-stroke:0px transparent!important}` : ``;
               const _tshadow = `${_fontfaces}${_bodyscale}`.concat(
                 CAN_I_USE ? `:is(${filterHtmlToText(cssfun)})` : filterHtmlToText(cssfun),
                 `{${_fontfamily}${_shadow}${_stroke}${_smoothing}${_textrender}}`,
@@ -3538,7 +3606,7 @@
               }
               const _awdl = qS(`#${RANDOM_ID}_a_w_d_l_`);
               if (_awdl) {
-                _awdl.style.cssText += domainValue.length > 0 ? "display:line-block" : "display:none";
+                _awdl.style.display = domainValue.length > 0 ? "line-block" : "none";
                 _awdl.addEventListener("click", async () => await manageDomainsList());
               }
               domainValueIndex = updateDomainsIndex(domainValue);
@@ -3954,6 +4022,7 @@
             d.removeAttribute("v-Preview");
             loadPreview(defCon.preview);
             defCon.curScale = CONST_VALUES.fontSize;
+            defCon.sacleMatrix.push(defCon.curScale);
             setAutoScaleValue(qS(`#${defCon.id.rndId}`), defCon.curScale);
           }
         }
@@ -4013,14 +4082,14 @@
           });
           dscNode.addEventListener("click", () => {
             dsNode.value = "";
-            dsNode.style.cssText += "border-color:#777";
+            dsNode.style.borderColor = "#777";
             ddNode.scrollTop = 0;
             dsNode.focus();
           });
           dssNode.addEventListener("click", () => {
             if (dsNode.value) {
               if (w.find) {
-                dsNode.style.cssText += w.find(dsNode.value, 0) ? "border-color:#777" : "border-color:red";
+                dsNode.style.borderColor = w.find(dsNode.value, 0) ? "#777" : "red";
                 if (w.getSelection) {
                   fdm.read(() => {
                     const _sTxt = w.getSelection();
@@ -4045,7 +4114,7 @@
               fdm.write(() => {
                 target.setAttribute("data-del", domainValue[_list_Id_].domain);
                 target.textContent = "恢复";
-                target.style.cssText += "color:darkgreen";
+                target.style.color = "darkgreen";
                 target.parentNode.nextElementSibling.style.cssText += "text-decoration:line-through;font-style:italic";
                 target.parentNode.nextElementSibling.nextElementSibling.style.cssText += "text-decoration:line-through;font-style:italic";
               });
@@ -4055,7 +4124,7 @@
               fdm.write(() => {
                 target.removeAttribute("data-del");
                 target.textContent = "删除";
-                target.style.cssText += "color:darkred";
+                target.style.color = "darkred";
                 target.parentNode.nextElementSibling.style.cssText += "text-decoration:none;font-style:normal";
                 target.parentNode.nextElementSibling.nextElementSibling.style.cssText += "text-decoration:none;font-style:normal";
               });
@@ -4096,18 +4165,17 @@
       }
     }
 
-    function reportErrorToAuthor(illegalOperationErrors, show = IS_OPEN_DEBUG, ioeReport = "") {
+    function reportErrorToAuthor(illegalOperationErrors, show = IS_OPEN_DEBUG) {
       if (show) {
         closeConfigurePage({ isReload: false });
-        sleep(Math.round(200 + Math.random() * 2e3))
-          .then(() => illegalOperationErrors)
+        sleep(1e2 + random(2e3))
+          .then(() => [...illegalOperationErrors])
           .then(async ioes => {
             try {
-              if (!Array.isArray(ioes)) return;
+              let ioeReport = "";
               if (qS("fr-dialogbox[error]")) return;
-              const br = ioes.length > 1 ? "\u3000<br/>" : "";
-              for (let i in ioes) {
-                if (oH.call(ioes, i)) ioeReport += ioes[i] + br;
+              for (let i = 0; i < ioes.length; i++) {
+                ioeReport += `${i + 1}、${ioes[i]}${i + 1 !== ioes.length ? "\u3000<br/>" : ""}`;
               }
               let frDialog = new FrDialogBox({
                 trueButtonText: "反馈问题",
@@ -4118,7 +4186,7 @@
                     <li>脚本扩展信息\uff1a${GMscriptHandler} ${GMversion}\u3000</li>
                     <li>脚本版本信息\uff1a${defCon.curVersion}\u3000</li>
                     <li>当前访问域名\uff1a${CUR_HOST_NAME}<span hidden>\u0020${CUR_HOST_PATH}</span>\u3000</li>
-                    <li>错误信息\uff1a<span style="color:tan">${ioeReport}</span></li>
+                    <li>错误信息列表\uff1a\u3000<span style="color:tan;display:block">${ioeReport}</span></li>
                   </ul></p>`,
                 titleText: defCon.scriptName + "错误报告",
               });
@@ -4131,7 +4199,7 @@
               defCon.ioe.length = 0;
               if (await frDialog.respond()) {
                 copyToClipboard(copyText);
-                GMopenInTab(FEEDBACK_URI, defCon.options);
+                GMopenInTab(`${FEEDBACK_URI}/new?assignees=F9y4ng&template=bug_report.md`, defCon.options);
               } else {
                 location.reload(true);
               }
@@ -4177,7 +4245,7 @@
         } else {
           fdm.read(() => {
             curScale = Number(gS(document.body).zoom) || curScale;
-            curScale !== 1 ? fdm.write(() => (target.style.cssText += "zoom:" + Number(1 / curScale))) : target.removeAttribute("style");
+            curScale !== 1 ? fdm.write(() => (target.style.zoom = Number(1 / curScale))) : target.removeAttribute("style");
           });
         }
       } catch (e) {
@@ -4186,22 +4254,20 @@
       } finally {
         if (curScale !== 1 && defCon.preview && oScale !== tScale) {
           debug(
-            "fontSize<Scale>: save [%s%]\r\n\u3000 \u27A5 current [%c%s% %c%s%]",
-            (CONST_VALUES.fontSize * 100).toFixed(2),
+            "fontSize<Scale>: saved [%s]\r\n\u3000 \u27A5 current [%c%s %c%s]",
+            (CONST_VALUES.fontSize * 100).toFixed(2) + "%",
             "color:teal;padding:5px 0",
-            (curScale * 100).toFixed(2),
+            (curScale * 100).toFixed(2) + "%",
             "color:indigo;padding:5px 0",
-            ((1 / curScale) * 100).toFixed(2)
+            ((1 / curScale) * 100).toFixed(2) + "%"
           );
         }
       }
     }
 
-    function confirmIfValueChange(target, info, cgm = false) {
-      target.addEventListener("change", function () {
-        if (this.checked) {
-          this.checked = !cgm ? !!confirm(info) : isGM ? !!alert(info) : !!confirm(info);
-        }
+    function confirmIfValueChange(target, info) {
+      target?.addEventListener("change", function () {
+        if (this.checked) this.checked = !!confirm(info);
       });
     }
 
