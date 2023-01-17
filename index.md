@@ -20,7 +20,7 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2023.01.17.1 - 更新日志：
+## version 2023.01.17.2 - 更新日志：
 ```
 # 虎尾系金拢财气，兔首摇铃荡福音，癸卯兔年迎吉祥！
 @ 优化新Gecko内核下Greasemonkey执行脚本的兼容性。
