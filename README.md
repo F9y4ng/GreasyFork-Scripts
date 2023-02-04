@@ -15,12 +15,13 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2023.01.17.2 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2023.02.04.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 ```
-# 虎尾系金拢财气，兔首摇铃荡福音，癸卯兔年迎吉祥！
-@ 优化新Gecko内核下Greasemonkey执行脚本的兼容性。
-@ 优化冗余脚本检测的错误报告机制，让检测更准确。
-@ 修正Safari因某些特殊字符未转义造成的日志错误。
+- 直播平台海量弹幕造成播放中断的减配处理方法 #160(comment)
++ 新增对shadow-root(open)中的粗体样式错误的修正。
+@ 优化父级页面及iframe页面中动态样式的监测逻辑。
+@ 修正Gecko内核浏览器对个别英文等宽字体解析的错误。
+@ 修正拾色器在Firefox脚本缩放时windowScroll的bug.
 @ 修正一些已知的小问题，优化样式，优化代码。
 ```
 
@@ -71,10 +72,10 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2023.01.17.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2023.02.04.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 ```
-# 🐯尾系金拢财气，🐰首摇铃荡福音。
-@ 优化Greasemonkey执行脚本的兼容性。
+@ 优化部分搜索引擎站点的去广告规则。
+@ 修正Bing.com中跳转按钮的样式问题。
 @ 修正一些已知的问题，优化样式，优化代码。
 ```
 
