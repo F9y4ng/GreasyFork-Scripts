@@ -73,10 +73,11 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2023.02.18.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2023.02.18.2 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 ```
 + 新增对Userscripts扩展的支持(+快捷键)。(键值参阅脚本说明)
 @ 变更MacOS快捷键为“option+字母”，键值与Win相同。
+@ 修正Bing搜索提示超宽样式的问题。
 @ 修正Bing.com多行输入框及跳转按钮的样式问题。
 @ 修正Safari下搜索链接重定向的错误。
 @ 优化搜索结果及推荐的广告过滤规则。

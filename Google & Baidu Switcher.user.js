@@ -4,7 +4,7 @@
 // @name:zh-TW         優雅的搜索引擎跳轉助手
 // @name:ru            скачок поисковой системы
 // @name:ja            優雅な検索エンジンジャンプ助手
-// @version            2023.02.18.1
+// @version            2023.02.18.2
 // @author             F9y4ng
 // @description        "Elegant Search Engine Jump Assistant" makes it easy for users to jump from a specific search engine to another one to achieve a more elegant search experience; it supports customizing common search engines and optimizing the keyword rendering effect of search results. In addition, the script also provides the removal of search link redirection, blocking ads in search results, visual search parameter settings, and automatic update detection, and is compatible with more than ten well-known search engines in the world, such as Baidu, Google, Bing, Duckduckgo, Yandex, You, etc.
 // @description:zh-CN  “优雅的搜索引擎跳转助手”方便用户从特定的搜索引擎跳转到另一个搜索引擎，以实现更优雅的搜索体验；并支持自定义常用搜索引擎、优化搜索结果关键词渲染效果。此外，该脚本还提供了去除搜索链接重定向、屏蔽搜索结果中的广告、可视化搜索参数设置、以及自动更新检测等高级功能，并兼容世界上十多个知名搜索引擎，如Baidu, Google, Bing, Duckduckgo, Yandex, You等。
@@ -52,7 +52,7 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               新增对Userscripts扩展的支持(+快捷键)。\n变更MacOS快捷键为option+字母，键值与Win相同。\n修正Bing.com多行输入框及跳转按钮的样式问题。\n修正Safari下搜索链接重定向的错误。\n优化搜索结果及推荐的广告过滤规则。\n优化浏览器内核判断及伪造UA的识别率。\n修正一些已知的问题，优化样式，优化代码。
+// @note               新增对Userscripts扩展的支持(+快捷键)。\n变更MacOS快捷键为option，键值与Win相同。\n修正Bing搜索提示超宽样式的问题。\n修正Bing.com多行输入框及跳转按钮的样式问题。\n修正Safari下搜索链接重定向的错误。\n优化搜索结果及推荐的广告过滤规则。\n优化浏览器内核判断及伪造UA的识别率。\n修正一些已知的问题，优化样式，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -2342,6 +2342,7 @@
             case newSiteType.BING:
               insterAfter(userSpan, Target);
               fdm.write(() => {
+                qA(`#b_header .b_searchbox`).forEach(item => (item.style.maxWidth = "666px"));
                 const textareaNode = qS(`textarea.b_searchbox[name="q"]`, Target.parentNode);
                 textareaNode?.getAttribute("rows") >= 2 &&
                   qA(`#${CONST.rndID} input`).forEach(node => {
@@ -2477,7 +2478,6 @@
           e = /^(images|videos)$/.test(CONST.vim);
           scrollspan = e ? CONST.scrollspan2 : CONST.scrollspan;
           scrollbars = e ? CONST.scrollbars2 : CONST.scrollbars;
-          !e && setScrollButton(`#sb_form_q`, `${Notice.random}_input`, 200); // fixed bing searchbar scroll style (new A/B Testing). 2022.08.16
           setScrollButton(`#${CONST.rndID}`, scrollspan, 50);
           setScrollButton(`#${CONST.rndID} #${CONST.leftButton} input`, scrollbars, 50);
           setScrollButton(`#${CONST.rndID} #${CONST.rightButton} input`, scrollbars, 50);
