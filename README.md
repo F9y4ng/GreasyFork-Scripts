@@ -16,7 +16,7 @@
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
 ## version 2023.03.04.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
-```
+```log
 @ 优化针对Safari:Userscripts API的兼容性。
 @ 优化<ShadowRoot:open>粗体描边样式的动态修正。
 @ 修正部分网站因字体缩放造成偏移量误差的错误。
@@ -73,7 +73,7 @@
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
 ## version 2023.03.04.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
-```
+```log
 + 新增startpage.com搜索引擎跳转。
 @ 修正Bing.com搜索跳转按钮的样式问题。
 @ 修正Bing图片滚动框及预览样式问题。
