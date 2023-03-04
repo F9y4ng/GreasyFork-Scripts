@@ -12,17 +12,16 @@
 简介：无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的Greasemonkey脚本和浏览器扩展。
 
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89)
-* 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
+* 脚本错误、异常请反馈至{[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)}, 字体、渲染样式、乱码问题请反馈至{[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)}。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2023.02.18.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2023.03.04.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 ```
-+ 新增对"Content Context Mode"的兼容性支持。
-+ 新增window.unescape的polyfill，修正已废弃的功能。
-+ 新增对Userscripts扩展的支持，脚本菜单请使用快捷键。(键值参阅脚本说明)
-@ 变更MacOS快捷键为“option+字母”，键值与Win相同。
-@ 优化全局禁用及排除渲染时样式加载逻辑，提升效率。
-@ 修正对浏览器内核的判断问题、以及伪造UA的识别率。
+@ 优化针对Safari:Userscripts API的兼容性。
+@ 优化<ShadowRoot:open>粗体描边样式的动态修正。
+@ 修正部分网站因字体缩放造成偏移量误差的错误。
+@ 修正字体缩放时哔哩哔哩动态无法滚动加载的问题。
+@ 修正微信读书正文字体渲染错误的bug.（保存后刷新页面生效）
 @ 修正一些已知的问题，优化样式，优化代码。
 ```
 
@@ -39,7 +38,7 @@
 > 1. 先打开脚本调试开关：将代码第54行 `const IS_OPEN_DEBUG = false` 改为 `true`，并保存。
 > 2. 在浏览器中按F12打开console(控制台)面板，刷新页面，进行操作直至复现你遇到的问题，然后在控制台中右键菜单选择 **另存为...**。
 > 3. 将保存好的日志文件上传至[Github ISSUES](https://github.com/F9y4ng/GreasyFork-Scripts/issues)，进行错误报告(Bug report)。
-> 4. 日常使用时，请勿将脚本调试开关开启，会造成脚本执行缓慢或页面卡顿等情况。
+> 4. _日常使用时，请勿将脚本调试开关开启，会造成脚本执行缓慢或页面卡顿等情况。_
 
 ## 关于字体的添加
 **如果您需要向字体表添加自定义字体，请按[帮助说明](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/64)进行操作。** 字体表字体及其他中文字体分享：[点这里下载](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/46)
@@ -73,21 +72,17 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2023.02.18.2 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2023.03.04.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 ```
-+ 新增对Userscripts扩展的支持(+快捷键)。(键值参阅脚本说明)
-@ 变更MacOS快捷键为“option+字母”，键值与Win相同。
-@ 修正Bing搜索提示超宽样式的问题。
-@ 修正Bing.com多行输入框及跳转按钮的样式问题。
-@ 修正Safari下搜索链接重定向的错误。
-@ 优化搜索结果及推荐的广告过滤规则。
-@ 优化浏览器内核判断及伪造UA的识别率。
-@ 修正一些已知的问题，优化样式，优化代码。
++ 新增startpage.com搜索引擎跳转。
+@ 修正Bing.com搜索跳转按钮的样式问题。
+@ 修正Bing图片滚动框及预览样式问题。
+@ 修正一些小问题，优化样式，优化代码。
 ```
 
 ## 最新功能介绍
 * 新增去除搜索结果及侧栏广告功能。
-* 新增自定义搜索引擎选取功能（包含：百度、Google、Bing、Duckduckgo、搜狗、F搜、Yandex、360搜索、头条搜索、百度开发者、Ecosia、Neeva、You搜索等常见的搜索引擎）
+* 新增自定义搜索引擎选取功能（包含：百度、Google、Bing、Duckduckgo、搜狗、F搜、Yandex、360搜索、头条搜索、百度开发者、Ecosia、Neeva、You、Startpage搜索等常见的搜索引擎）
 * 新增搜索结果链接去重定向功能。
 * 更智能的更新检测功能。
 

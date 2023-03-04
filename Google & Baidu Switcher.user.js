@@ -4,7 +4,7 @@
 // @name:zh-TW         優雅的搜索引擎跳轉助手
 // @name:ru            скачок поисковой системы
 // @name:ja            優雅な検索エンジンジャンプ助手
-// @version            2023.02.18.2
+// @version            2023.03.04.1
 // @author             F9y4ng
 // @description        "Elegant Search Engine Jump Assistant" provides a search experience for users to jump from a specific search engine to another. Support custom common search engines, optimize keyword effect. It also offers removal of search link redirects, blocking of ads in search results and automatic update detection. Compatible with many search engines in the world, such as Baidu, Google, Bing, Duckduckgo, Yandex, You, etc.
 // @description:zh-CN  “优雅的搜索引擎跳转助手”方便用户从特定的搜索引擎跳转到另一个搜索引擎，以实现更优雅的搜索体验；并支持自定义常用搜索引擎、优化搜索结果关键词渲染效果。此外，该脚本还提供了去除搜索链接重定向、屏蔽搜索结果中的广告、可视化搜索参数设置、以及自动更新检测等高级功能，并兼容世界上十多个知名搜索引擎，如Baidu, Google, Bing, Duckduckgo, Yandex, You等。
@@ -18,6 +18,7 @@
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.meta.js
 // @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js
+// @require            https://greasyfork.org/scripts/460897-gbcookies/code/gbCookies.js?version=1155350#sha256-tPcmrrZrxDx4nZQVrx2fQzJjAlMmScX0yFSaT3/T/Ss=
 // @match              *://www.baidu.com/*
 // @match              *://kaifa.baidu.com/searchPage*
 // @match              *://ipv6.baidu.com/*
@@ -34,6 +35,7 @@
 // @match              *://www.ecosia.org/*
 // @match              *://neeva.com/search*
 // @match              *://*.you.com/search*
+// @match              *://www.startpage.com/*
 // @include            *://*.google.*/search*
 // @exclude            *://www.google.com/sorry*
 // @exclude            *://www.baidu.com/link*
@@ -52,7 +54,7 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               新增对Userscripts扩展的支持(+快捷键)。\n变更MacOS快捷键为option，键值与Win相同。\n修正Bing搜索提示超宽样式的问题。\n修正Bing.com多行输入框及跳转按钮的样式问题。\n修正Safari下搜索链接重定向的错误。\n优化搜索结果及推荐的广告过滤规则。\n优化浏览器内核判断及伪造UA的识别率。\n修正一些已知的问题，优化样式，优化代码。
+// @note               新增startpage.com搜索引擎跳转。\n修正Bing.com搜索跳转按钮的样式问题。\n修正Bing图片滚动框及预览样式问题。\n修正一些小问题，优化样式，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -630,13 +632,6 @@
     return Math[type]((w.crypto.getRandomValues(new Uint32Array(1))[0] / (0xffffffff + 1)) * range);
   }
 
-  function getCookie(sKey) {
-    const cookies = decodeURIComponent(
-      document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[-.+*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")
-    );
-    return cookies ? cookies.replace(/[a-z=]+/gi, "") : 0;
-  }
-
   function setRAFInterval(callback, interval, { runNow }) {
     if (runNow === true) {
       const shouldFinish = callback();
@@ -1167,7 +1162,7 @@
   /* init CONST values */
 
   const API_ICO_YANDEX = defCon.decrypt("aHR0cHMlM0ElMkYlMkZmYXZpY29uLnlhbmRleC5uZXQlMkZmYXZpY29uJTJGdjI=");
-  const API_ICO_BACKUP = defCon.decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjMlMkYwMSUyRjA3JTJGcFNWUHhCai5wbmc=");
+  const API_ICO_BACKUP = defCon.decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjMlMkYwMyUyRjAzJTJGcHBBRXhQTy5wbmc=");
   const API_ICO_DDUCKGO = defCon.decrypt("aHR0cHMlM0ElMkYlMkZpY29ucy5kdWNrZHVja2dvLmNvbSUyRmlwMg==");
   const API_ICO_NOICON = defCon.decrypt(
     "ZGF0YSUzQWltYWdlJTJGcG5nJTNCYmFzZTY0JTJDaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQUNBQUFBQWdDQVlBQUFCemVucjBBQUFBQm1KTFIwUUElMkZ3RCUyRkFQJTJCZ3ZhZVRBQUFFRWtsRVFWUlloY1hYV1loWGRSUUg4SSUyRkxaS0pwdG94TG1VdHBHQmd0NWtNbWtWa2twR1MyUGdRJTJCdElCR1VCQkV2WmhCRHdVbVFRJTJCRkVKR1JXUThGcFMxRHVHUkZDbTVNTW8xbFpXcU9tbWlibWpvOW5IT2JPM2YlMkJUak5XOW9YTCUyRmQzenUlMkZkM3ZyOXp6dSUyQmNjJTJGbWYwYU9iNzQlMkZBTkl6RU1BekFIdXpFbDFpT2clMkY4MmdUcmNpJTJGdHhXU3Byd2c3OGpIb015Yms2Zkl4bjglMkY2UE1SMWZwYUpuTUxGRXVtZmwzamZmWDRyaldJYXhKNnU0QiUyQmJqR0Y0UXV6d0hZM0wlMkJVYnllNHlaTXlmR1ZPQTBUc0FyN2NkUEpLRiUyQk1YekJMN0d3JTJCTnFBZm5rYXI4TGNjSDA0U1YlMkJCcjNJN2VXSWlqbU4wZEFrJTJCbThva2k2RGFra2h0eHJiQktsVUFyZnNCQUxNam5sOUZIV09zd0puZEYlMkJmUlVNQXZEYzlGV2JCU1clMkJhU2tzRXFnRlU4azZUJTJGeSUyQmQyMHhDSzBZSEJWWWZrVTFLRVJIMkd1OE9mb25OdUNac3dvdmY4alZndHpGOWlQQmt6Rm9KUjlLbzdxNXB5Yld5YlFxelIlMkJBRE56OTVNeFR2aSUyRkx6NUkyWGtsMlNGc3hUVWwyU0FjeU4yT1Q5bFklMkZJcE5JbjZXNEtlcUpXQzlPR3BEOEpzMnMyN0wlMkJiWGFtN3VXQzFyeEZDNnV5TllJYTI5T0VoMHdRcHpkcSUyRkJZNWVNM2NpZEh1a2lnSVpYdHI4Z3Z4VHpoNXI5UUpKRnB3cWZyUkNDVzBTek1XRmVMZVEyTVM0WGZWT1F6OEE0dXlRMjNJekJTQkZwUGtVVEsyS05HOUhhQyUyQmx5bnBTS2ZtRHBhTWFvUTlzNzdNT3dTeFdWVjVjTkc0WjZHaW54OTNxdHlJbUd0S3ExUDFJNURJZ0NIVlQ5NFc2VGNVNEZtUEZnOEZDNW9FYVk3VzhlZ21vMDdhc2hQRklSRjRxcksxdVQ3WjRqaTFvN0FMZ3pGUGhHOVpaeUwzZDNZNGU4aUpWZlJqUDY1MGUlMkJyQkJwRlBlOHIwbTBaZzVOZ1YxRzh1MWo3NW1RbHJzN3hwaXFCOThVeG15cnFlUm5qUllYcmFxZFRCT2RxWEklMkI5JTJCZHdnWExsV1dMb2RnWU9pZzdrSGIySjdhY0VKNGhSODBVVUNuNVhHNjBRRjNTRXNjb3RJeFRVeEpSVmRLZnclMkJ1blQxckNFYmt0JTJCTnJsejk4SzFvNFFxTUVuV2pWVnRUZzQ0OTRUSVJLRk9FTzJhbWZDWGVFclclMkJ5SWlOZUI0dmxyN2ZJcHFRN2FJbXZGU2FHNG9QUlFHOElhM1NBV1BGS1Znb1dxdjNrdlZ1bkk1WGRINE03OEtrSEpjdFVPQXNmQzRLM0lXMUNCQTkzRkhSeVJSdDFYR1JQSVpyS3pKVkFpdUVxNWFmZ01CY1lhM1hjcjJkb2dUVXhHelJSaTFLUzB3Uzdya0lONHV6WGlhd05jbmRtVXBha2tBdmJZVm5oVGdSUyUyRk5hNG0lMkI2NXNtNVVCTnVFJTJGSFNQJTJCY21wSVdJT0tqUGNUJTJCUlMzWmlUaW82akF0d2E0N1A3MHhwRmZXaVJod1J6Y1E4WEM3aW9Zd0J1QTdQaWVwWnhNMCUyQjRlOEZ3ajFONHFlbDJ4Z2pPcGxHYlQ3Zkt4TFVidUhUWXlMSlBDeXk0VDdScHQ4bjhzeVpvdTA3b0pTcXUlMkZ0dlNQaDBwRERsUU5HJTJCZlNmU2E1SGg1b2ppczFGWWF4dGVGVEh4Q083V1NVTDZMJTJGQzR0djd5SWZHJTJGY0VyUlIlMkZ6WTlLNU8lMkZBa2NYemk1R1ElMkJMendBQUFBQkpSVTVFcmtKZ2dnJTNEJTNE"
@@ -1583,9 +1578,10 @@
         IMGType: ["images"],
         SplitName: "/",
         MainType: `.b_searchboxForm>input[type="hidden"][name="form"]`,
-        StyleCode: `#b_header .b_searchboxForm{z-index:3!important}#${CONST.rndID}{z-index:3;position:relative;display:inline-flex;height:38px;min-width:180px;width:auto;margin:0;padding:0 6px 0 0;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${CONST.leftButton},#${CONST.rightButton}{width:auto;margin:0;padding:0}#${CONST.rndID} input{box-sizing:border-box;cursor:pointer;min-width:90px;height:38px;background-color:#f7faff;border:1px solid #0095B7;color:#0095B7;font-weight:600;font-size:16px}#${CONST.leftButton} input{border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px;}#${CONST.rightButton} input{border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 2px;padding:0 18px 0 12px;}.${CONST.scrollspan}{}.${CONST.scrollbars}{}.${CONST.scrollspan2}{max-height:30px;padding:4px 4px 0 8px!important;margin:0!important;vertical-align:top!important}.${CONST.scrollbars2}{border-radius:4px!important;max-height:30px;padding:0 12px!important;margin-right:0!important;vertical-align:top!important}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #08748D;border:2px solid #0095B7;text-shadow:0 0 1px #0095B7!important;color:#0095B7}.${Notice.random}_input{width:300px!important}`,
+        StyleCode: `#miniheader #miniheader_searchbox #sb_form_q{width:400px}#b_header .b_searchboxForm{z-index:3!important}#${CONST.rndID}{z-index:3;position:relative;display:inline-flex;height:38px;min-width:180px;width:auto;margin:0;padding:0 6px 0 0;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${CONST.leftButton},#${CONST.rightButton}{width:auto;margin:0;padding:0}#${CONST.rndID} input{box-sizing:border-box;cursor:pointer;min-width:90px;height:38px;background-color:#f7faff;border:1px solid #106ebe;color:#106ebe;font-weight:600;font-size:16px}#${CONST.leftButton} input{border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px;}#${CONST.rightButton} input{border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 2px;padding:0 18px 0 12px;}.${CONST.scrollspan}{}.${CONST.scrollbars}{}.${CONST.scrollspan2}{max-height:30px;padding:4px 4px 0 8px!important;margin:0!important;vertical-align:top!important}.${CONST.scrollbars2}{border-radius:4px!important;max-height:30px;padding:0 12px!important;margin-right:0!important;vertical-align:top!important}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #106ebe;border:2px solid #106ebe;text-shadow:0 0 1px #106ebe!important;color:#106ebe}.${Notice.random}_input{width:300px!important}`,
         KeyStyle: String(
-          Number(getUrlParam("ensearch")) || Number(getCookie("ENSEARCH"))
+          // eslint-disable-next-line no-undef
+          Number(getUrlParam("ensearch")) || Number(gbCookies.getItem("ENSEARCH")?.match(/\d/)?.[0]) || 0
             ? ".b_caption p strong, .b_caption .b_factrow strong, .b_secondaryText strong,th, h2 strong, h3 strong"
             : "#sp_requery strong, #sp_recourse strong, #tile_link_cn strong, .b_ad .ad_esltitle~div strong, h2 strong, .b_caption p strong, .b_snippetBigText strong, .recommendationsTableTitle+.b_slideexp strong, .recommendationsTableTitle+table strong, .recommendationsTableTitle+ul strong, .pageRecoContainer .b_module_expansion_control strong, .b_rs strong, .b_rrsr strong, #dict_ans strong, .b_listnav>.b_ans_stamp>strong, .adltwrnmsg strong,.b_imgcap_altitle p strong, .b_imgcap_altitle .b_factrow strong,.richrsrailsuggestion_text strong"
         ),
@@ -1754,6 +1750,27 @@
         AntiRedirect: () => localStorage.setItem("openLinksInNewTabs", true),
         AntiAds: () => deBounce(antiAds_RemoveNodes, 20, "you", true)(`div[data-testid="extension-button"]`, "You"),
       },
+      startpage: {
+        SiteTypeID: 14,
+        SiteName: "Startpage",
+        SiteNick: "Startpage 搜索",
+        SiteURI: "www.startpage.com",
+        WebURL: "https://www.startpage.com/sp/search?t=device&query=",
+        ImgURL: "https://www.startpage.com/sp/search?t=device&cat=images&query=",
+        IMGType: ["images"],
+        SplitName: "cat",
+        MainType: "#search-btn",
+        StyleCode: `#${CONST.rndID}{z-index:999;position:relative;height:20px;display:inline-block;margin:-11px 4px 0 0.5rem}#${CONST.rndID} #${CONST.leftButton}{display:inline-block;height:30px}#${CONST.rndID} #${CONST.rightButton}{display:inline-block;margin-left:0px;height:30px}#${CONST.leftButton} input{margin:0;padding:1px 10px 1px 20px!important;background:#f1f3ff;border-top-left-radius:2rem;border-bottom-left-radius:2rem;cursor:pointer;height:30px;color:#2e39b3;min-width:85px;border:0px solid transparent;font-size:14px!important;vertical-align:top;font-weight:600;box-shadow:rgb(164 165 187) 0px 0px 2px;}#${CONST.rightButton} input{margin:0;padding:1px 20px 1px 10px!important;background:#f1f3ff;border-top-right-radius:2rem;border-bottom-right-radius:2rem;cursor:pointer;height:30px;color:#2e39b3;min-width:85px;border:0px solid transparent;font-size:14px!important;vertical-align:top;font-weight:600;box-shadow:rgb(164 165 187) 0px 0px 2px;}#${CONST.leftButton} input:hover{background:#6573ff;color:#fff}#${CONST.rightButton} input:hover{background:#6573ff;color:#fff}`,
+        KeyStyle: `.w-gl__result b`,
+        AntiRedirect: () =>
+          // eslint-disable-next-line no-undef
+          gbCookies.setItem(
+            "preferences",
+            "date_timeEEEworldN1Ndisable_family_filterEEE1N1Ndisable_open_in_new_windowEEE0N1Nenable_post_methodEEE0N1Nenable_proxy_safety_suggestEEE1N1Nenable_stay_controlEEE1N1Ninstant_answersEEE1N1Nlang_homepageEEEs%2Fdevice%2FenN1NlanguageEEEjiantizhongwenN1Nlanguage_uiEEEenglishN1Nnum_of_resultsEEE10N1Nsearch_results_regionEEEallN1NsuggestionsEEE1N1Nwt_unitEEEcelsius",
+            Infinity
+          ),
+        AntiAds: () => listSite.startpage.AntiRedirect(),
+      },
       other: { SiteTypeID: 0 },
     };
 
@@ -1771,6 +1788,7 @@
       ECOSIA: listSite.ecosia.SiteTypeID,
       NEEVA: listSite.neeva.SiteTypeID,
       YOU: listSite.you.SiteTypeID,
+      STARTPAGE: listSite.startpage.SiteTypeID,
       OTHERS: listSite.other.SiteTypeID,
     };
 
@@ -1814,6 +1832,9 @@
     } else if (location.host.endsWith("you.com")) {
       currentSite = selectedEngine.includes(newSiteType.YOU) ? listSite.you : listSite.other;
       listCurrentSite = listSite.you;
+    } else if (location.host.endsWith("startpage.com")) {
+      currentSite = selectedEngine.includes(newSiteType.STARTPAGE) ? listSite.startpage : listSite.other;
+      listCurrentSite = listSite.startpage;
     } else {
       currentSite = listSite.other;
       listCurrentSite = listSite.other;
@@ -1864,7 +1885,7 @@
         </span>`
     );
     CONST.highlightCss = listCurrentSite.KeyStyle
-      ? `${listCurrentSite.KeyStyle}{background-color:${customColor.backgroundColor}!important;color:${customColor.foregroundColor}!important;font-weight:700!important}`
+      ? `${listCurrentSite.KeyStyle}{background-color:${customColor.backgroundColor}!important;color:${customColor.foregroundColor}!important;font-weight:600!important}`
       : ``;
     CONST.iconCss = String(
       `.${Notice.noticejs} .${Notice.configuration} span.${Notice.favicon},
@@ -2305,53 +2326,54 @@
           switch (currentSite.SiteTypeID) {
             case newSiteType.BAIDU:
               insterAfter(userSpan, Target);
-              if (qS(SpanID)) {
-                switch (CONST.vim) {
-                  case currentSite.IMGType[0]:
-                    fdm.write(() => {
-                      qS(SpanID).style.marginLeft = "16px";
-                      qS(`#${CONST.rightButton} input`).style.marginLeft = "3px";
-                    });
-                    break;
-                  case currentSite.IMGType[1]:
-                    fdm.write(() => (qS(SpanID).style.height = "34px"));
+              if (!qS(SpanID)) return;
+              switch (CONST.vim) {
+                case currentSite.IMGType[0]:
+                  fdm.write(() => {
+                    qS(SpanID).style.marginLeft = "16px";
+                    qS(`#${CONST.rightButton} input`).style.marginLeft = "3px";
+                    document.body.style.overflowX = "clip";
+                  });
+                  break;
+                case currentSite.IMGType[1]:
+                  fdm.write(() => {
+                    qS(SpanID).style.height = "34px";
                     qA(`${SpanID} input`).forEach(node => {
-                      fdm.write(() => {
-                        node.style.cssText = "min-width:90px;height:34px;padding:0 5px!important;color:#fff;background:#38f;border-radius:0;border:1px solid #2d78f4";
-                      });
+                      node.style.cssText = "min-width:90px;height:34px;padding:0 5px!important;color:#fff;background:#38f;border-radius:0;border:1px solid #2d78f4";
                     });
-                    break;
-                }
+                    document.body.style.overflowX = "clip";
+                  });
+                  break;
               }
               break;
             case newSiteType.GOOGLE:
               getGlobalGoogle("www.google.com", googleJump);
               insterAfter(userSpan, Target);
-              if (qS(SpanID)) {
-                fdm.write(() => {
-                  qS(SpanID).parentNode.style.width = "100%";
-                  qS(SpanID).parentNode.style.minWidth = "100%";
-                  qS(SpanID).parentNode.parentNode.style.width = "100%";
-                  qS(SpanID).parentNode.parentNode.parentNode.style.width = "95%";
-                  if (currentSite.IMGType.includes(CONST.vim)) {
-                    qS(SpanID).parentNode.firstElementChild.style.width = "400px";
-                  }
-                });
-              }
+              if (!qS(SpanID)) return;
+              fdm.write(() => {
+                qS(SpanID).parentNode.style.width = "100%";
+                qS(SpanID).parentNode.style.minWidth = "100%";
+                qS(SpanID).parentNode.parentNode.style.width = "100%";
+                qS(SpanID).parentNode.parentNode.parentNode.style.width = "95%";
+                if (currentSite.IMGType.includes(CONST.vim)) {
+                  qS(SpanID).parentNode.firstElementChild.style.width = "400px";
+                }
+              });
               break;
             case newSiteType.BING:
               insterAfter(userSpan, Target);
               fdm.write(() => {
                 qA(`#b_header .b_searchbox`).forEach(item => (item.style.maxWidth = "666px"));
                 const textareaNode = qS(`textarea.b_searchbox[name="q"]`, Target.parentNode);
+                const viewBoxNode = qS(".b_searchboxForm");
                 textareaNode?.getAttribute("rows") >= 2 &&
                   qA(`#${CONST.rndID} input`).forEach(node => {
                     node.style.cssText += "border-radius:8px";
                   });
-                if (qS(".b_searchboxForm") && location.search.includes("view=detailV2")) {
-                  qS(".b_searchboxForm").style.cssText += "width:max-content!important;padding-right:5px!important";
+                if (viewBoxNode && location.search.includes("view=detailV2")) {
+                  viewBoxNode.style.cssText += "width:max-content!important;";
                   qA(`#${CONST.rndID} input`).forEach(node => {
-                    node.style.cssText += "height:36px!important;border-radius:6px!important;padding:0 12px!important;margin:0 -2px 0 0!important;";
+                    node.style.cssText += "height:34px!important;border-radius:6px!important;padding:0 12px!important;margin:0 0 0 2px!important;";
                   });
                 }
               });
@@ -2447,6 +2469,10 @@
               break;
             case newSiteType.YOU:
               insterAfter(userSpan, Target);
+              break;
+            case newSiteType.STARTPAGE:
+              insterAfter(userSpan, Target);
+              qS("#search").parentNode.style.maxWidth = `${630 + (qS(SpanID)?.getBoundingClientRect().width ?? 170)}px`;
               break;
           }
           resolve({ SpanID, Selector, indexPage });
