@@ -4,7 +4,7 @@
 // @name:zh-TW         優雅的搜索引擎跳轉助手
 // @name:ru            скачок поисковой системы
 // @name:ja            優雅な検索エンジンジャンプ助手
-// @version            2023.03.04.1
+// @version            2023.03.18.1
 // @author             F9y4ng
 // @description        "Elegant Search Engine Jump Assistant" provides a search experience for users to jump from a specific search engine to another. Support custom common search engines, optimize keyword effect. It also offers removal of search link redirects, blocking of ads in search results and automatic update detection. Compatible with many search engines in the world, such as Baidu, Google, Bing, Duckduckgo, Yandex, You, etc.
 // @description:zh-CN  “优雅的搜索引擎跳转助手”方便用户从特定的搜索引擎跳转到另一个搜索引擎，以实现更优雅的搜索体验；并支持自定义常用搜索引擎、优化搜索结果关键词渲染效果。此外，该脚本还提供了去除搜索链接重定向、屏蔽搜索结果中的广告、可视化搜索参数设置、以及自动更新检测等高级功能，并兼容世界上十多个知名搜索引擎，如Baidu, Google, Bing, Duckduckgo, Yandex, You等。
@@ -36,6 +36,7 @@
 // @match              *://neeva.com/search*
 // @match              *://*.you.com/search*
 // @match              *://www.startpage.com/*
+// @match              *://search.brave.com/*
 // @include            *://*.google.*/search*
 // @exclude            *://www.google.com/sorry*
 // @exclude            *://www.baidu.com/link*
@@ -54,7 +55,7 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               新增startpage.com搜索引擎跳转。\n修正Bing.com搜索跳转按钮的样式问题。\n修正Bing图片滚动框及预览样式问题。\n修正一些小问题，优化样式，优化代码。
+// @note               新增search.brave.com搜索引擎跳转。\n修正Bing搜索的链接访问样式。\n修正一些小问题，优化样式，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -551,11 +552,11 @@
     },
     isCheatUA: function () {
       return (
-        (!this.uaData && !!navigator.userAgentData) ||
+        (!this.uaData && Boolean(navigator.userAgentData)) ||
         (this.core().WebKit && !UNSAFE_WINDOW.GestureEvent) ||
-        (!this.core().WebKit && !!UNSAFE_WINDOW.GestureEvent) ||
+        (!this.core().WebKit && Boolean(UNSAFE_WINDOW.GestureEvent)) ||
         (this.core().Blink && !UNSAFE_WINDOW.webkitRequestFileSystem) ||
-        (!this.core().Blink && !!UNSAFE_WINDOW.webkitRequestFileSystem) ||
+        (!this.core().Blink && Boolean(UNSAFE_WINDOW.webkitRequestFileSystem)) ||
         (!this.core().Gecko && !isNaN(parseFloat(UNSAFE_WINDOW.mozInnerScreenX))) ||
         (this.core().Gecko && isNaN(parseFloat(UNSAFE_WINDOW.mozInnerScreenX)))
       );
@@ -563,7 +564,7 @@
   };
 
   const CUR_WINDOW_TOP = defCon.isWinTop();
-  const IS_REAL_BLINK = (getNavigator.core().Blink && !getNavigator.isCheatUA()) || !!UNSAFE_WINDOW.webkitRequestFileSystem;
+  const IS_REAL_BLINK = (getNavigator.core().Blink && !getNavigator.isCheatUA()) || Boolean(UNSAFE_WINDOW.webkitRequestFileSystem);
   const IS_REAL_GECKO = (getNavigator.core().Gecko && !getNavigator.isCheatUA()) || !isNaN(parseFloat(UNSAFE_WINDOW.mozInnerScreenX));
   const IS_REAL_EDGE = IS_REAL_BLINK && getNavigator.browser().includes("Edge");
 
@@ -1162,7 +1163,7 @@
   /* init CONST values */
 
   const API_ICO_YANDEX = defCon.decrypt("aHR0cHMlM0ElMkYlMkZmYXZpY29uLnlhbmRleC5uZXQlMkZmYXZpY29uJTJGdjI=");
-  const API_ICO_BACKUP = defCon.decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjMlMkYwMyUyRjAzJTJGcHBBRXhQTy5wbmc=");
+  const API_ICO_BACKUP = defCon.decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjMlMkYwMyUyRjE4JTJGcHBKM0lwai5wbmc=");
   const API_ICO_DDUCKGO = defCon.decrypt("aHR0cHMlM0ElMkYlMkZpY29ucy5kdWNrZHVja2dvLmNvbSUyRmlwMg==");
   const API_ICO_NOICON = defCon.decrypt(
     "ZGF0YSUzQWltYWdlJTJGcG5nJTNCYmFzZTY0JTJDaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQUNBQUFBQWdDQVlBQUFCemVucjBBQUFBQm1KTFIwUUElMkZ3RCUyRkFQJTJCZ3ZhZVRBQUFFRWtsRVFWUlloY1hYV1loWGRSUUg4SSUyRkxaS0pwdG94TG1VdHBHQmd0NWtNbWtWa2twR1MyUGdRJTJCdElCR1VCQkV2WmhCRHdVbVFRJTJCRkVKR1JXUThGcFMxRHVHUkZDbTVNTW8xbFpXcU9tbWlibWpvOW5IT2JPM2YlMkJUak5XOW9YTCUyRmQzenUlMkZkM3ZyOXp6dSUyQmNjJTJGbWYwYU9iNzQlMkZBTkl6RU1BekFIdXpFbDFpT2clMkY4MmdUcmNpJTJGdHhXU3Byd2c3OGpIb015Yms2Zkl4bjglMkY2UE1SMWZwYUpuTUxGRXVtZmwzamZmWDRyaldJYXhKNnU0QiUyQmJqR0Y0UXV6d0hZM0wlMkJVYnllNHlaTXlmR1ZPQTBUc0FyN2NkUEpLRiUyQk1YekJMN0d3JTJCTnFBZm5rYXI4TGNjSDA0U1YlMkJCcjNJN2VXSWlqbU4wZEFrJTJCbThva2k2RGFra2h0eHJiQktsVUFyZnNCQUxNam5sOUZIV09zd0puZEYlMkJmUlVNQXZEYzlGV2JCU1clMkJhU2tzRXFnRlU4azZUJTJGeSUyQmQyMHhDSzBZSEJWWWZrVTFLRVJIMkd1OE9mb25OdUNac3dvdmY4alZndHpGOWlQQmt6Rm9KUjlLbzdxNXB5Yld5YlFxelIlMkJBRE56OTVNeFR2aSUyRkx6NUkyWGtsMlNGc3hUVWwyU0FjeU4yT1Q5bFklMkZJcE5JbjZXNEtlcUpXQzlPR3BEOEpzMnMyN0wlMkJiWGFtN3VXQzFyeEZDNnV5TllJYTI5T0VoMHdRcHpkcSUyRkJZNWVNM2NpZEh1a2lnSVpYdHI4Z3Z4VHpoNXI5UUpKRnB3cWZyUkNDVzBTek1XRmVMZVEyTVM0WGZWT1F6OEE0dXlRMjNJekJTQkZwUGtVVEsyS05HOUhhQyUyQmx5bnBTS2ZtRHBhTWFvUTlzNzdNT3dTeFdWVjVjTkc0WjZHaW54OTNxdHlJbUd0S3ExUDFJNURJZ0NIVlQ5NFc2VGNVNEZtUEZnOEZDNW9FYVk3VzhlZ21vMDdhc2hQRklSRjRxcksxdVQ3WjRqaTFvN0FMZ3pGUGhHOVpaeUwzZDNZNGU4aUpWZlJqUDY1MGUlMkJyQkJwRlBlOHIwbTBaZzVOZ1YxRzh1MWo3NW1RbHJzN3hwaXFCOThVeG15cnFlUm5qUllYcmFxZFRCT2RxWEklMkI5JTJCZHdnWExsV1dMb2RnWU9pZzdrSGIySjdhY0VKNGhSODBVVUNuNVhHNjBRRjNTRXNjb3RJeFRVeEpSVmRLZnclMkJ1blQxckNFYmt0JTJCTnJsejk4SzFvNFFxTUVuV2pWVnRUZzQ0OTRUSVJLRk9FTzJhbWZDWGVFclclMkJ5SWlOZUI0dmxyN2ZJcHFRN2FJbXZGU2FHNG9QUlFHOElhM1NBV1BGS1Znb1dxdjNrdlZ1bkk1WGRINE03OEtrSEpjdFVPQXNmQzRLM0lXMUNCQTkzRkhSeVJSdDFYR1JQSVpyS3pKVkFpdUVxNWFmZ01CY1lhM1hjcjJkb2dUVXhHelJSaTFLUzB3Uzdya0lONHV6WGlhd05jbmRtVXBha2tBdmJZVm5oVGdSUyUyRk5hNG0lMkI2NXNtNVVCTnVFJTJGSFNQJTJCY21wSVdJT0tqUGNUJTJCUlMzWmlUaW82akF0d2E0N1A3MHhwRmZXaVJod1J6Y1E4WEM3aW9Zd0J1QTdQaWVwWnhNMCUyQjRlOEZ3ajFONHFlbDJ4Z2pPcGxHYlQ3Zkt4TFVidUhUWXlMSlBDeXk0VDdScHQ4bjhzeVpvdTA3b0pTcXUlMkZ0dlNQaDBwRERsUU5HJTJCZlNmU2E1SGg1b2ppczFGWWF4dGVGVEh4Q083V1NVTDZMJTJGQzR0djd5SWZHJTJGY0VyUlIlMkZ6WTlLNU8lMkZBa2NYemk1R1ElMkJMendBQUFBQkpSVTVFcmtKZ2dnJTNEJTNE"
@@ -1201,7 +1202,7 @@
       .concat(
         ["data-click", "data-hveid", "data-cthref", "data-jsarwt", "data-ver"],
         ["data-usg", "data-ved", "ping", "onmouseover", "data-md", "data-type"],
-        ["referrerpolicy", "data-neeva-log", "data-showurl-highlight"]
+        ["referrerpolicy", "data-neeva-log", "data-showurl-highlight", "h"]
       )
       .forEach(item => {
         node?.removeAttribute(item);
@@ -1213,10 +1214,7 @@
   function addTargetEvent(str, siteName) {
     const requestNodes = qA(str);
     requestNodes.length && count(`\ud83d\udd33 [${siteName}-Anti-Redirect]`);
-    requestNodes.forEach(node => {
-      node.setAttribute("target", "_blank");
-      node.removeAttribute("h");
-    });
+    requestNodes.forEach(node => clearHrefEvents(node));
   }
 
   function antiRedirect_Baidu(str) {
@@ -1545,7 +1543,7 @@
         IMGType: ["baiduimage", "baiduimagedetail"],
         SplitName: "tn",
         MainType: ".s_btn_wr,#sugOut",
-        StyleCode: `a,a em{text-decoration:none!important}a:hover{text-decoration:underline!important}#form{white-space:nowrap}#u{z-index:1!important}#${CONST.rndID}{z-index:1999999995;position:relative;margin:0 0 0 4px;height:40px;display:inline-block}#${CONST.rndID} #${CONST.leftButton}{display:inline-block;margin-left:2px;height:40px}#${CONST.rndID} #${CONST.rightButton}{display:inline-block;margin-left:-1px;height:40px}#${CONST.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#fff;min-width:90px;border:1px solid #3476d2;font-size:16px!important;vertical-align:top;font-weight:600}#${CONST.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#fff;min-width:90px;border:1px solid #3476d2;font-size:16px!important;vertical-align:top;font-weight:600}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background: #4662D9;border:1px solid #3476d2}`,
+        StyleCode: `a,a em{text-decoration:none!important}a:hover{text-decoration:underline!important}#form{white-space:nowrap}#u{z-index:1!important}#${CONST.rndID}{z-index:1999999995;position:relative;margin:0 0 0 4px;height:40px;display:inline-block;line-height:40px;vertical-align:top;padding:0}#${CONST.rndID} #${CONST.leftButton}{display:inline-block;margin-left:2px;height:40px}#${CONST.rndID} #${CONST.rightButton}{display:inline-block;margin-left:-1px;height:40px}#${CONST.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#fff;min-width:90px;border:1px solid #3476d2;font-size:16px!important;vertical-align:top;font-weight:600}#${CONST.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#fff;min-width:90px;border:1px solid #3476d2;font-size:16px!important;vertical-align:top;font-weight:600}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background: #4662D9;border:1px solid #3476d2}`,
         KeyStyle: "#wrapper_wrapper em",
         AntiRedirect: () => deBounce(antiRedirect_Baidu, 200, "baidu", true)(".c-container a[href*='//www.baidu.com/link?url=']:not([gd-antiredirect-status])"),
         AntiAds: () => {
@@ -1578,7 +1576,7 @@
         IMGType: ["images"],
         SplitName: "/",
         MainType: `.b_searchboxForm>input[type="hidden"][name="form"]`,
-        StyleCode: `#miniheader #miniheader_searchbox #sb_form_q{width:400px}#b_header .b_searchboxForm{z-index:3!important}#${CONST.rndID}{z-index:3;position:relative;display:inline-flex;height:38px;min-width:180px;width:auto;margin:0;padding:0 6px 0 0;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${CONST.leftButton},#${CONST.rightButton}{width:auto;margin:0;padding:0}#${CONST.rndID} input{box-sizing:border-box;cursor:pointer;min-width:90px;height:38px;background-color:#f7faff;border:1px solid #106ebe;color:#106ebe;font-weight:600;font-size:16px}#${CONST.leftButton} input{border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px;}#${CONST.rightButton} input{border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 2px;padding:0 18px 0 12px;}.${CONST.scrollspan}{}.${CONST.scrollbars}{}.${CONST.scrollspan2}{max-height:30px;padding:4px 4px 0 8px!important;margin:0!important;vertical-align:top!important}.${CONST.scrollbars2}{border-radius:4px!important;max-height:30px;padding:0 12px!important;margin-right:0!important;vertical-align:top!important}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:1px 1px 8px #106ebe;border:2px solid #106ebe;text-shadow:0 0 1px #106ebe!important;color:#106ebe}.${Notice.random}_input{width:300px!important}`,
+        StyleCode: `#miniheader #miniheader_searchbox #sb_form_q{width:400px}#b_header .b_searchboxForm{z-index:3!important}a,#b_results>li a,#b_results .b_no a{color:#106ebe;}#b_results>li a:visited{cololr:#4007a2;}#${CONST.rndID}{z-index:3;position:relative;display:inline-flex;height:38px;min-width:180px;width:auto;margin:0;padding:0 6px 0 0;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${CONST.leftButton},#${CONST.rightButton}{width:auto;margin:0;padding:0}#${CONST.rndID} input{box-sizing:border-box;cursor:pointer;min-width:90px;height:38px;background-color:#f7faff;border:1px solid #174ae4;color:#174ae4;font-weight:600;font-size:16px}#${CONST.leftButton} input{border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px;}#${CONST.rightButton} input{border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 2px;padding:0 18px 0 12px;}.${CONST.scrollspan}{}.${CONST.scrollbars}{}.${CONST.scrollspan2}{max-height:30px;padding:4px 4px 0 8px!important;margin:0!important;vertical-align:top!important}.${CONST.scrollbars2}{border-radius:4px!important;max-height:30px;padding:0 12px!important;margin-right:0!important;vertical-align:top!important}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background-color:#fff;transition:border linear .1s,box-shadow linear .3s;box-shadow:0px 0px 4px #174ae4;color:#174ae4;background-color:#f0f3f6;}.${Notice.random}_input{width:300px!important}`,
         KeyStyle: String(
           // eslint-disable-next-line no-undef
           Number(getUrlParam("ensearch")) || Number(gbCookies.getItem("ENSEARCH")?.match(/\d/)?.[0]) || 0
@@ -1771,6 +1769,21 @@
           ),
         AntiAds: () => listSite.startpage.AntiRedirect(),
       },
+      brave: {
+        SiteTypeID: 15,
+        SiteName: "Brave",
+        SiteNick: "Brave 搜索",
+        SiteURI: "search.brave.com",
+        WebURL: "https://search.brave.com/search?source=web&q=",
+        ImgURL: "https://search.brave.com/images?source=web&q=",
+        IMGType: ["images"],
+        SplitName: "/",
+        MainType: "#submit-button",
+        StyleCode: `#${CONST.rndID}{order:6;z-index:999;position:relative;height:100%;display:inline;margin:0;padding:5px 6px}#${CONST.rndID} #${CONST.leftButton}{display:inline-block;height:38px}#${CONST.rndID} #${CONST.rightButton}{display:inline-block;margin-left:0px;height:38px}#${CONST.leftButton} input{margin:0;padding:1px 10px 1px 20px!important;background:#F9FAFD;border-top-left-radius:6px;border-bottom-left-radius:6px;cursor:pointer;height:35px;color:#495057;min-width:85px;border:0px solid transparent;font-size:14px!important;vertical-align:top;font-weight:600;box-shadow:rgb(164 165 187) 0px 0px 2px;}#${CONST.rightButton} input{margin:0;padding:1px 20px 1px 10px!important;background:#F9FAFD;border-top-right-radius:6px;border-bottom-right-radius:6px;cursor:pointer;height:35px;color:#495057;min-width:85px;border:0px solid transparent;font-size:14px!important;vertical-align:top;font-weight:600;box-shadow:rgb(164 165 187) 0px 0px 2px;}#${CONST.leftButton} input:hover{background:#a0a5eb29;color:#5755d9}#${CONST.rightButton} input:hover{background:#a0a5eb29;color:#5755d9}`,
+        KeyStyle: `.snippet-content strong`,
+        AntiRedirect: () => deBounce(addTargetEvent, 200, "brave", true)("#results .snippet a.result-header", "Brave"),
+        AntiAds: () => {},
+      },
       other: { SiteTypeID: 0 },
     };
 
@@ -1789,6 +1802,7 @@
       NEEVA: listSite.neeva.SiteTypeID,
       YOU: listSite.you.SiteTypeID,
       STARTPAGE: listSite.startpage.SiteTypeID,
+      BRAVE: listSite.brave.SiteTypeID,
       OTHERS: listSite.other.SiteTypeID,
     };
 
@@ -1835,6 +1849,9 @@
     } else if (location.host.endsWith("startpage.com")) {
       currentSite = selectedEngine.includes(newSiteType.STARTPAGE) ? listSite.startpage : listSite.other;
       listCurrentSite = listSite.startpage;
+    } else if (location.host.endsWith("search.brave.com")) {
+      currentSite = selectedEngine.includes(newSiteType.BRAVE) ? listSite.brave : listSite.other;
+      listCurrentSite = listSite.brave;
     } else {
       currentSite = listSite.other;
       listCurrentSite = listSite.other;
@@ -2472,7 +2489,17 @@
               break;
             case newSiteType.STARTPAGE:
               insterAfter(userSpan, Target);
-              qS("#search").parentNode.style.maxWidth = `${630 + (qS(SpanID)?.getBoundingClientRect().width ?? 170)}px`;
+              fdm.write(() => (qS("#search").parentNode.style.maxWidth = `${630 + (qS(SpanID)?.getBoundingClientRect().width ?? 170)}px`));
+              break;
+            case newSiteType.BRAVE:
+              Target.parentNode.insertBefore(userSpan, Target);
+              fdm.write(() => qS("div.searchform-container").style.setProperty("--search-form-width", `${700 + (qS(SpanID)?.getBoundingClientRect().width / 2 ?? 80)}px`));
+              qS("#submit-button").addEventListener("mouseover", function () {
+                fdm.write(() => (this.style.cssText = "border-radius:10px;transform:scale(0.9)"));
+              });
+              qS("#submit-button").addEventListener("mouseout", function () {
+                fdm.write(() => (this.style.cssText = ""));
+              });
               break;
           }
           resolve({ SpanID, Selector, indexPage });
@@ -2568,7 +2595,7 @@
               cssNode.textContent = css;
               addToTarget.appendChild(cssNode);
               cssNode = null;
-              return !!addToTarget.querySelector(`.${className}`);
+              return Boolean(addToTarget.querySelector(`.${className}`));
             } else {
               return true;
             }
