@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2023.04.08.1
+// @version            2023.04.10.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的Greasemonkey脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的Greasemonkey脚本和浏览器扩展。
@@ -797,14 +797,10 @@
     /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
     const UPDATE_VERSION_NOTICE = String(
-      `<li class="${def.const.seed}_warn">敬告：本次升级为重大版本更新，所有旧数据将被重置！</li>
-        <li class="${def.const.seed}_info">完全重构脚本，针对中低端电脑大幅优化脚本性能。</li>
-        <li class="${def.const.seed}_add">新增字体缩放时对视口单位的修正。&lt;<a target="_blank" href="${def.const.gfHost}#viewport">必看的注意事项</a>&gt;</li>
-        <li class="${def.const.seed}_fix">优化客户端信息及浏览器信息的检测与处理机制。</li>
-        <li class="${def.const.seed}_fix">优化字体样式载入的逻辑，减少样式加载失败的机率。</li>
-        <li class="${def.const.seed}_fix">优化字体粗体描边样式的修正效率，杜绝卡顿、延迟。</li>
-        <li class="${def.const.seed}_fix">优化不同脚本运行模式下冗余脚本的检测逻辑。</li>
-        <li class="${def.const.seed}_fix">修正一些已知的问题，优化样式，优化代码。</li>`
+      `<li class="${def.const.seed}_info">本次紧急修复性更新，解决#191、#193、#198的问题。</li>
+        <li class="${def.const.seed}_fix">修正adoptedStyleSheets在特殊环境下的兼容性问题。</li>
+        <li class="${def.const.seed}_fix">修正粗体描边样式修正功能在某些站点中无限循环冲突。</li>
+        <li class="${def.const.seed}_fix">修正一些已知的小问题，优化样式，优化代码。</li>`
     );
 
     /* INITIALIZE_FONT_LIBRARY */
@@ -861,7 +857,7 @@
       fontEx: `progress,meter,datalist,samp,kbd,pre,pre *,code,code *`,
       monospacedFont: `'Operator Mono Lig','Fira Code','Source Code Pro','DejaVu Sans Mono','Anonymous Pro','Ubuntu Mono','Roboto Mono','JetBrains Mono','Droid Sans Mono','Mono','Monaco','Menlo','Inconsolata','Liberation Mono'`,
       monospacedFeature: `"liga" 0,"tnum","zero"`,
-      editorialSites: `vscode.dev|github.dev|github1s.com|kdocs.cn|docs.qq.com|cdn.addon.tencentsuite.com|yuque.com|xiezuocat.com|wolai.com|shimo.im|note.youdao.com|feishu.cn|docs.google.com|mail.google.com|newassets.hcaptcha.com|image.baidu.com|weread.qq.com`,
+      editorialSites: `vscode.dev|github.dev|github1s.com|kdocs.cn|docs.qq.com|cdn.addon.tencentsuite.com|yuque.com|xiezuocat.com|wolai.com|shimo.im|note.youdao.com|feishu.cn|docs.google.com|mail.google.com|newassets.hcaptcha.com|image.baidu.com|weread.qq.com|www.notion.so`,
     };
 
     /* INITIALIZE_SHADOWROOT_STYLE */
@@ -1091,7 +1087,7 @@
       const geckoCompatible = IS_REAL_GECKO && parseFloat(brandversion) >= 101 && !IS_GREASEMONKEY && !GMcontextMode;
       try {
         let sheet, style, hostSheet, existSheet;
-        if (!IS_CHEAT_UA && (webkitCompatible || blinkCompatible || geckoCompatible)) {
+        if (!IS_CHEAT_UA && shadow.adoptedStyleSheets && (webkitCompatible || blinkCompatible || geckoCompatible)) {
           sheet = new CSSStyleSheet();
           sheet.id = id;
           sheet.replaceSync(css);
@@ -1620,10 +1616,9 @@
       );
       const monoFontText = `${monoFontList || INITIAL_VALUES.monospacedFont},ui-monospace${IS_REAL_GECKO ? "" : ",monospace"}`;
       const monoFeatureText = `${monoFeature || INITIAL_VALUES.monospacedFeature}`;
-      const monoShadowCssText = `0 0 ${(shadow_r * 0.75).toFixed(2)}px ${toColordepth(shadow_c, 1.65)}`;
       const rootPseudoClass = String(
         currentSiteAuthorization
-          ? `:root{--fr-init-basefont:${INITIAL_VALUES.fontBase};--fr-init-fontscale:${fontScale};--fr-font-family:${CONST_VALUES.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-font-feature:"liga" 0,"zero";--fr-mono-font:${monoFontText};--fr-mono-feature:${monoFeatureText};--fr-mono-text-shadow:${monoShadowCssText};--fr-no-stroke:0px transparent;}`
+          ? `:root{--fr-init-basefont:${INITIAL_VALUES.fontBase};--fr-init-fontscale:${fontScale};--fr-font-family:${CONST_VALUES.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-font-feature:"liga" 0,"zero";--fr-mono-font:${monoFontText};--fr-mono-feature:${monoFeatureText};--fr-no-stroke:0px transparent;}`
           : ``
       );
       const tStyle = `@charset "UTF-8";${rootPseudoClass}${def.const.style.global}${fontStyle}`;
@@ -2934,7 +2929,7 @@
           const base = s ? "var(--fr-font-family),var(--fr-init-basefont)" : "var(--fr-init-basefont)";
           return String(
             codeSelector.concat(
-              `{font-size:14px!important;line-height:150%!important;-webkit-text-stroke:var(--fr-no-stroke)!important;text-shadow:var(--fr-mono-text-shadow)!important;font-family:var(--fr-mono-font),${base}!important;font-feature-settings:var(--fr-mono-feature)!important;`,
+              `{font-size:14px!important;line-height:150%!important;-webkit-text-stroke:var(--fr-no-stroke)!important;text-shadow:none!important;font-family:var(--fr-mono-font),${base}!important;font-feature-settings:var(--fr-mono-feature)!important;`,
               `${IS_REAL_WEBKIT ? "-webkit-user-select" : "user-select"}:text!important;}`
             )
           );
@@ -3547,7 +3542,7 @@
                   `{${_fontfamily}${_shadow}${_stroke}${_smoothing}${_textrender}}`,
                   `${_exclude}${_codefont}${_fixfontstroke}`
                 );
-                const _rootpseudoclass = `:root{--fr-init-basefont:${INITIAL_VALUES.fontBase};--fr-init-fontscale:${fscale};--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-font-feature:"liga" 0,"zero";--fr-mono-font:${monoFontText};--fr-mono-feature:${monoFeatureText};--fr-mono-text-shadow:${monoShadowCssText};--fr-no-stroke:0px transparent;}`;
+                const _rootpseudoclass = `:root{--fr-init-basefont:${INITIAL_VALUES.fontBase};--fr-init-fontscale:${fscale};--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-font-feature:"liga" 0,"zero";--fr-mono-font:${monoFontText};--fr-mono-feature:${monoFeatureText};--fr-no-stroke:0px transparent;}`;
                 const __tshadow = `@charset "UTF-8";` + (_curEmptyConfig ? `${def.const.style.global}` : `${_rootpseudoclass}${def.const.style.global}${_tshadow}`);
                 def.array.scaleValueMatrix.push(fscale);
                 def.const.curScale = fscale;
@@ -4293,7 +4288,7 @@
         }
 
         let fixBoldObserver = new MutationObserver(fixBoldProcess);
-        let config = { attributes: true, childList: true, subtree: true };
+        let config = { attributeOldValue: true, childList: true, subtree: true };
         const exclusionElements = def.const.exQueryString
           .toUpperCase()
           .split(",")
@@ -4301,10 +4296,10 @@
         const styleMap = new WeakMap();
         const changeAttribute = {
           add: element => {
-            element.setAttribute(def.const.boldAttrName, "bold");
+            w[def.const.raf](() => element.setAttribute(def.const.boldAttrName, "bold"));
           },
           del: element => {
-            element.removeAttribute(def.const.boldAttrName);
+            w[def.const.raf](() => element.removeAttribute(def.const.boldAttrName));
           },
         };
 
@@ -4396,36 +4391,56 @@
 
         function fixBoldProcess(mutationsList, observer) {
           let subtrees = [];
+          let element, oldValue, newValue, attrNodes, boldItems;
           for (let mutation of mutationsList) {
+            element = mutation.target;
+            subtrees.push(element);
             switch (mutation.type) {
               case "childList":
                 for (let node of mutation.addedNodes) {
-                  if (node.nodeType === 1 && !exclusionElements.includes(node.nodeName)) {
-                    getAndProcessBoldStyles(node);
-                  }
+                  if (node.nodeType === 1 && !exclusionElements.includes(node.nodeName)) getAndProcessBoldStyles(node);
                 }
                 for (let node of mutation.removedNodes) {
-                  if (node.nodeType === 1) styleMap.delete(node);
+                  if (node.nodeType === 1 && !exclusionElements.includes(node.nodeName)) styleMap.delete(node);
                 }
                 break;
               case "attributes":
-                if (mutation.attributeName !== def.const.boldAttrName) {
-                  let element = mutation.target;
-                  if (exclusionElements.includes(mutation.target.nodeName)) return;
-                  const nodes = getSuitableElements(`:not(${def.const.exQueryString})`, element);
-                  const items = getBoldStyles(nodes);
-                  for (let i = 0; i < items.length; i++) {
-                    if (items[i].isbold) {
-                      changeAttribute.add(items[i].node);
-                    } else {
-                      changeAttribute.del(items[i].node);
+                if (exclusionElements.includes(element.nodeName)) continue;
+                switch (mutation.attributeName) {
+                  case def.const.boldAttrName:
+                    continue;
+                  case "style":
+                    oldValue = mutation.oldValue?.replace(/\s/g, "") ?? "";
+                    newValue = element.style.cssText.replace(/\s/g, "");
+                    if (newValue !== oldValue) {
+                      const oldArray = uniq(oldValue.split(";"));
+                      const newArray = uniq(newValue.split(";"));
+                      const retValue = oldArray.filter(x => !newArray.includes(x)).toString();
+                      if (!/font:|font-weight:/gi.test(retValue)) continue;
                     }
-                  }
-                  element = null;
+                    break;
+                  case "class":
+                    oldValue = mutation.oldValue;
+                    newValue = element.className;
+                    break;
+                  default:
+                    oldValue = mutation.oldValue;
+                    newValue = element.getAttribute(mutation.attributeName);
+                    break;
                 }
+                if (newValue === oldValue) continue;
+                attrNodes = getSuitableElements(`:not(${def.const.exQueryString})`, element);
+                boldItems = getBoldStyles(attrNodes);
+                for (let i = 0; i < boldItems.length; i++) {
+                  if (boldItems[i].isbold) {
+                    changeAttribute.add(boldItems[i].node);
+                  } else {
+                    changeAttribute.del(boldItems[i].node);
+                  }
+                }
+                element = null;
                 break;
             }
-            subtrees.push(mutation.target);
           }
           shadowRootMonitor(subtrees, observer);
         }
@@ -4446,7 +4461,6 @@
           document.removeEventListener("visibilitychange", visibilitychangeHandler);
         }
 
-        addLoadEvents.addFinalFn(observeBoldElements);
         w.addEventListener("pushState", observeBoldElements);
         w.addEventListener("replaceState", observeBoldElements);
 
