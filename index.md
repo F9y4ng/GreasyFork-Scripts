@@ -20,21 +20,13 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2023.04.08.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2023.04.10.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-! 本次升级为重大版本更新，所有数据将被重置，您仍可使用旧备份还原数据。
-  (由于新增功能，变更默认参数及过滤规则，强烈建议您重新配置参数后使用。)
-# 完全重构脚本，针对中低端电脑大幅优化脚本性能。
-+ 新增字体缩放时对视口单位的修正，解决部分网站页面样式错位问题。
-  (因CORS造成报错，可在扩展商店安装并开启Allow CORS: Access-Control-Allow-origin)
-  (因CSP造成报错或样式问题，可在扩展商店安装并开启Allow CSP: Content-Security-Policy)
-@ 优化客户端信息及浏览器信息的检测与处理机制。
-  (请特别注意：伪造UserAgent信息可能造成脚本部分功能失效！)
-@ 优化字体样式载入的逻辑，减少样式加载失败的机率。
-@ 优化字体粗体描边样式的修正效率，杜绝卡顿、延迟。
-@ 优化不同脚本运行模式下冗余脚本的检测逻辑。
-@ 修正一些已知的问题，优化样式，优化代码。
+# 本次紧急修复性更新，解决#191、#193、#198的问题。
+@ 修正adoptedStyleSheets在特殊环境下的兼容性问题。
+@ 修正粗体描边样式修正功能在某些站点中无限循环冲突。
+@ 修正一些已知的小问题，优化样式，优化代码。
 ```
 
 ## **字体渲染** 新版本，使用前请注意以下事项：
