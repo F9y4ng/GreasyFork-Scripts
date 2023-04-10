@@ -4394,7 +4394,6 @@
           let element, oldValue, newValue, attrNodes, boldItems;
           for (let mutation of mutationsList) {
             element = mutation.target;
-            subtrees.push(element);
             switch (mutation.type) {
               case "childList":
                 for (let node of mutation.addedNodes) {
@@ -4441,6 +4440,7 @@
                 element = null;
                 break;
             }
+            subtrees.push(element);
           }
           shadowRootMonitor(subtrees, observer);
         }
