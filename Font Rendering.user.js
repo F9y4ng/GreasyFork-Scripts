@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2023.04.10.1
+// @version            2023.04.10.2
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的Greasemonkey脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的Greasemonkey脚本和浏览器扩展。
@@ -797,7 +797,8 @@
     /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
     const UPDATE_VERSION_NOTICE = String(
-      `<li class="${def.const.seed}_info">本次紧急修复性更新，解决#191、#193、#198的问题。</li>
+      `<li class="${def.const.seed}_fix">修正默认过滤规则，样式异常的可重置数据使用新规则。</li>
+        <li class="${def.const.seed}_info">本次紧急修复性更新，解决#191、#193、#198的问题。</li>
         <li class="${def.const.seed}_fix">修正adoptedStyleSheets在特殊环境下的兼容性问题。</li>
         <li class="${def.const.seed}_fix">修正粗体描边样式修正功能在某些站点中无限循环冲突。</li>
         <li class="${def.const.seed}_fix">修正一些已知的小问题，优化样式，优化代码。</li>`
@@ -853,7 +854,7 @@
       fixStroke: IS_REAL_BLINK,
       fontShadow: IS_REAL_GECKO ? 0.36 : 0.75,
       shadowColor: IS_REAL_GECKO ? "#7C7C7C70" : "#7C7C7CDD",
-      fontCSS: `:not(i,head *):not([class*='glyph'],[class*='icon'],[class*='fa-'],[class*='vjs-'],[class*='mu-'])`,
+      fontCSS: `:not(i,head *):not([class*='glyph']):not([class*='icon']):not([class*='fa-']):not([class*='vjs-']):not([class*='mu-'])`,
       fontEx: `progress,meter,datalist,samp,kbd,pre,pre *,code,code *`,
       monospacedFont: `'Operator Mono Lig','Fira Code','Source Code Pro','DejaVu Sans Mono','Anonymous Pro','Ubuntu Mono','Roboto Mono','JetBrains Mono','Droid Sans Mono','Mono','Monaco','Menlo','Inconsolata','Liberation Mono'`,
       monospacedFeature: `"liga" 0,"tnum","zero"`,
@@ -1618,7 +1619,7 @@
       const monoFeatureText = `${monoFeature || INITIAL_VALUES.monospacedFeature}`;
       const rootPseudoClass = String(
         currentSiteAuthorization
-          ? `:root{--fr-init-basefont:${INITIAL_VALUES.fontBase};--fr-init-fontscale:${fontScale};--fr-font-family:${CONST_VALUES.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-font-feature:"liga" 0,"zero";--fr-mono-font:${monoFontText};--fr-mono-feature:${monoFeatureText};--fr-no-stroke:0px transparent;}`
+          ? `:root{--fr-init-basefont:${INITIAL_VALUES.fontBase};--fr-init-fontscale:${fontScale};--fr-font-family:${CONST_VALUES.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-font-feature:"liga" 0,"zero";--fr-mono-font:${monoFontText};--fr-mono-stroke:${stroke_r}px currentcolor;--fr-mono-feature:${monoFeatureText};--fr-no-stroke:0px transparent;}`
           : ``
       );
       const tStyle = `@charset "UTF-8";${rootPseudoClass}${def.const.style.global}${fontStyle}`;
@@ -2929,7 +2930,7 @@
           const base = s ? "var(--fr-font-family),var(--fr-init-basefont)" : "var(--fr-init-basefont)";
           return String(
             codeSelector.concat(
-              `{font-size:14px!important;line-height:150%!important;-webkit-text-stroke:var(--fr-no-stroke)!important;text-shadow:none!important;font-family:var(--fr-mono-font),${base}!important;font-feature-settings:var(--fr-mono-feature)!important;`,
+              `{font-size:14px!important;line-height:150%!important;-webkit-text-stroke:var(--fr-mono-stroke)!important;text-shadow:none!important;font-family:var(--fr-mono-font),${base}!important;font-feature-settings:var(--fr-mono-feature)!important;`,
               `${IS_REAL_WEBKIT ? "-webkit-user-select" : "user-select"}:text!important;}`
             )
           );
@@ -3542,7 +3543,7 @@
                   `{${_fontfamily}${_shadow}${_stroke}${_smoothing}${_textrender}}`,
                   `${_exclude}${_codefont}${_fixfontstroke}`
                 );
-                const _rootpseudoclass = `:root{--fr-init-basefont:${INITIAL_VALUES.fontBase};--fr-init-fontscale:${fscale};--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-font-feature:"liga" 0,"zero";--fr-mono-font:${monoFontText};--fr-mono-feature:${monoFeatureText};--fr-no-stroke:0px transparent;}`;
+                const _rootpseudoclass = `:root{--fr-init-basefont:${INITIAL_VALUES.fontBase};--fr-init-fontscale:${fscale};--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-font-feature:"liga" 0,"zero";--fr-mono-font:${monoFontText};--fr-mono-stroke:${stroke_r}px currentcolor;--fr-mono-feature:${monoFeatureText};--fr-no-stroke:0px transparent;}`;
                 const __tshadow = `@charset "UTF-8";` + (_curEmptyConfig ? `${def.const.style.global}` : `${_rootpseudoclass}${def.const.style.global}${_tshadow}`);
                 def.array.scaleValueMatrix.push(fscale);
                 def.const.curScale = fscale;
