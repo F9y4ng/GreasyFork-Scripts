@@ -1,12 +1,14 @@
 // ==UserScript==
 // @name               Google & baidu Switcher (ALL in One)
+// @name:en            SearchEngine Assistant
 // @name:zh-CN         优雅的搜索引擎跳转助手
 // @name:zh-TW         優雅的搜索引擎跳轉助手
 // @name:ru            скачок поисковой системы
 // @name:ja            優雅な検索エンジンジャンプ助手
-// @version            2023.04.08.1
+// @version            2023.04.22.1
 // @author             F9y4ng
-// @description        "Elegant Search Engine Jump Assistant" provides a search experience for users to jump from a specific search engine to another. Support custom common search engines, optimize keyword effect. It also offers removal of search link redirects, blocking of ads in search results and automatic update detection. Compatible with many search engines in the world, such as Baidu, Google, Bing, Duckduckgo, Yandex, You, etc.
+// @description        "elegant Search Engine Jump Assistant" permet aux utilisateurs de passer facilement d'un moteur de recherche spécifique à un autre; prend en charge la suppression de la redirection des liens, le blocage de la publicité, la détection automatique des mises à jour, etc., compatible avec plus d'une douzaine de moteurs de recherche, tels que Baidu, Google, Bing, Duckduckgo, Yandex, you, etc.
+// @description:en     "Elegant Search Engine Jump Assistant" provides a search experience for users to jump from a specific search engine to another. Support custom common search engines, optimize keyword effect. It also offers removal of search link redirects, blocking of ads in search results and automatic update detection. Compatible with many search engines in the world, such as Baidu, Google, Bing, Duckduckgo, Yandex, You, etc.
 // @description:zh-CN  “优雅的搜索引擎跳转助手”方便用户从特定的搜索引擎跳转到另一个搜索引擎，以实现更优雅的搜索体验；并支持自定义常用搜索引擎、优化搜索结果关键词渲染效果。此外，该脚本还提供了去除搜索链接重定向、屏蔽搜索结果中的广告、可视化搜索参数设置、以及自动更新检测等高级功能，并兼容世界上十多个知名搜索引擎，如Baidu, Google, Bing, Duckduckgo, Yandex, You等。
 // @description:zh-TW  「優雅的搜索引擎跳轉助手」方便用戶從特定的搜索引擎跳轉到另一個搜索引擎，以實現更優雅的搜索體驗；並支持自定義常用搜索引擎、優化搜索結果關鍵詞渲染效果。此外，該腳本還提供了去除搜索鏈接重定向、屏蔽搜索結果中的廣告、可視化搜索參數設置、以及自動更新檢測等高級功能，並兼容世界上十多個知名搜索引擎，如Baidu, Google, Bing, Duckduckgo, Yandex, You等。
 // @description:ru     "скачок поисковой системы" предоставляет пользователям возможность поиска с одной поисковой системы на другую. Поддержка пользовательских общих поисковых систем, оптимизация эффекта ключевых слов. Он также предлагает удаление перенаправлений поисковых ссылок, блокировку рекламы в результатах поиска и автоматическое обнаружение обновлений. Совместим со многими поисковыми системами по всему миру, такими как Baidu, Google, Bing, Duckduckgo, Yandex, You и т. д.
@@ -55,7 +57,7 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               优化Bing搜索结果链接的默认颜色。\n修正Bing搜索建议下拉框遮挡问题。\n修正一些小问题，优化样式，优化代码。
+// @note               修正You.com的跳转按钮的样式问题。\n优化更新检测升级流程。\n修正一些小问题，优化样式，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -800,6 +802,7 @@
       element.classList.add(Notice.noticejs);
       element.classList.add(element_class);
       element.id = element_class;
+      element.style.display = "block";
       return element;
     }
     createHeader() {
@@ -1083,7 +1086,7 @@
                 sleep(5e2)(value.source.replace(".meta.", ".user."))
                   .then(url => {
                     if (IS_REAL_GECKO) {
-                      GMopenInTab(isGM ? url.replace(/\?\d+/g, "") : url, false);
+                      defCon.u = GMopenInTab(isGM ? url.replace(/\?\d+/g, "") : url, true);
                     } else {
                       location.href = url;
                     }
@@ -1094,6 +1097,7 @@
                       title: "升级提示",
                       text: Notice.noticeHTML(
                         `<dd id="${Notice.random}_loading">${IS_REAL_GECKO ? "已经在新窗口打开脚本升级页面！" : "正在申请脚本更新安装页面，请稍后……"}</dd>
+                          <dd id="${Notice.random}_error"></dd>
                           <dd>请点击<strong>这里</strong>刷新页面，以使新版本脚本生效！</dd>`
                       ),
                       type: Notice.info,
@@ -1102,9 +1106,17 @@
                       position: "topRight",
                       callbacks: { onClose: [defCon.refresh] },
                     });
+                    defCon.u &&
+                      sleep(6e3).then(() => {
+                        defCon.u.close();
+                        delete defCon.u;
+                        qS(`#${Notice.random}_error`).innerHTML = tTP.createHTML(
+                          `<gb-error style="display:block;margin:0 0 4px -6px;padding:6px;width:max-content;border:1px dashed #ffb78c;border-radius:4px;color:#ffb78c">如果升级窗口没有出现（网络问题），请点此重试！</gb-error>`
+                        );
+                      });
                     return qS(`#${Notice.random}_loading`);
                   })
-                  .then(r => sleep(2e3, { useCachedSetTimeout: true })(r).then(s => s?.remove()))
+                  .then(r => sleep(4e3, { useCachedSetTimeout: true })(r).then(s => s?.remove()))
                   .catch(e => error("preInstall:", e.message));
               };
               sleep(5e2, { useCachedSetTimeout: true })
@@ -1585,7 +1597,7 @@
         ),
         AntiRedirect: () => deBounce(antiRedirect_Bing, 300, "bing", true)("#b_content a[href*='.bing.com/ck/a?']:not([gd-antiredirect-status])"),
         AntiAds: () => {
-          const ads = `li.b_ans>#relatedSearchesLGWContainer,li.b_ans>.b_rs,li.b_ad,#b_pole,#b_content .b_underSearchbox`;
+          const ads = `li.b_ans>#relatedSearchesLGWContainer,li.b_ans>.b_rs,li.b_ad,#b_pole,#b_content .b_underSearchbox,#b_header>div[id^='bnp.nid'][data-vertical]`;
           deBounce(antiAds_RemoveNodes, 20, "ad_bing", true)(ads, "Bing");
         },
       },
@@ -1742,8 +1754,8 @@
         ImgURL: "https://you.com/search?fromSearchBar=true&tbm=isch&q=",
         IMGType: ["isch"],
         SplitName: "tbm",
-        MainType: "span.hhbXxG",
-        StyleCode: `#${CONST.rndID}{z-index:999;position:relative;height:48px;display:inline-block}#${CONST.rndID} #${CONST.leftButton}{display:inline-block;height:48px}#${CONST.rndID} #${CONST.rightButton}{display:inline-block;margin-left:-2px;height:48px}#${CONST.leftButton} input{margin:0;padding:1px 10px 1px 20px!important;background:linear-gradient(98.89deg, rgb(107, 176, 255) 0%, rgb(50, 50, 253) 100%);border-top-left-radius:100px;border-bottom-left-radius:100px;cursor:pointer;height:46px;color:#fff;min-width:110px;border:0px solid transparent;font-size:16px!important;vertical-align:top;font-weight:600}#${CONST.rightButton} input{margin:0;padding:1px 20px 1px 10px!important;background:linear-gradient(98.89deg, rgb(50, 50, 253) 0%, rgb(107, 176, 255) 100%);border-top-right-radius:100px;border-bottom-right-radius:100px;cursor:pointer;height:46px;color:#fff;min-width:110px;border:0px solid transparent;font-size:16px!important;vertical-align:top;font-weight:600}#${CONST.leftButton} input:hover{background:linear-gradient(90deg, rgb(0, 178, 250) 0%, rgb(0, 0, 252) 100%)}#${CONST.rightButton} input:hover{background:linear-gradient(90deg, rgb(0, 0, 252) 0%, rgb(0, 178, 250) 100%)}`,
+        MainType: "div.hUtaxr",
+        StyleCode: `#${CONST.rndID}{z-index:999;position:relative;height:48px;display:inline-block}#${CONST.rndID} #${CONST.leftButton}{display:inline-block;height:48px}#${CONST.rndID} #${CONST.rightButton}{display:inline-block;margin-left:-2px;height:48px}#${CONST.leftButton} input{margin:0;padding:1px 10px 1px 20px!important;background-color:rgb(255, 255, 255);border-top-left-radius:100px;border-bottom-left-radius:100px;cursor:pointer;height:46px;color:rgb(74, 114, 245);min-width:110px;border:1px solid rgb(74, 114, 245);font-size:17px!important;vertical-align:top;font-weight:600}#${CONST.rightButton} input{margin:0;padding:1px 20px 1px 10px!important;background-color:rgb(255, 255, 255);border-top-right-radius:100px;border-bottom-right-radius:100px;cursor:pointer;height:46px;color:rgb(74, 114, 245);min-width:110px;border:1px solid rgb(74, 114, 245);font-size:17px!important;vertical-align:top;font-weight:600}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background-color:rgb(74, 114, 245);color:rgb(255, 255, 255);}`,
         KeyStyle: `div[data-testid="app-mainline"] p strong,div[data-testid="app-mainline"] p b`,
         AntiRedirect: () => localStorage.setItem("openLinksInNewTabs", true),
         AntiAds: () => deBounce(antiAds_RemoveNodes, 20, "you", true)(`div[data-testid="extension-button"]`, "You"),

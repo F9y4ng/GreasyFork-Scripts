@@ -16,14 +16,12 @@
 - 脚本错误、异常请反馈至{[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)}, 字体、渲染样式、乱码问题请反馈至{[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)}。
 - 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2023.04.10.2 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2023.04.22.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 修正默认过滤规则，样式异常的可重置数据使用新规则。
-
-# 本次紧急修复性更新，解决#191、#193、#198的问题。
-@ 修正adoptedStyleSheets在特殊环境下的兼容性问题。
-@ 修正粗体描边样式修正功能在某些站点中无限循环冲突。
++ 新增视口修正的站点开关，在指定站点关闭视口修正功能。
+@ 优化Blink/Gecko内核v111.0以上版本的字体渲染效果。
+@ 修正视口单位修正功能造成某些站点内容加载失败的问题。
 @ 修正一些已知的小问题，优化样式，优化代码。
 ```
 
@@ -92,11 +90,11 @@
 - [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B)
 - 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2023.04.08.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2023.04.22.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ 优化Bing搜索结果链接的默认颜色。
-@ 修正Bing搜索建议下拉框遮挡问题。
+@ 修正You.com的跳转按钮的样式问题。
+@ 优化更新检测升级流程。
 @ 修正一些小问题，优化样式，优化代码。
 ```
 
