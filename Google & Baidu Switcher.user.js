@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜索引擎跳轉助手
 // @name:ru            скачок поисковой системы
 // @name:ja            優雅な検索エンジンジャンプ助手
-// @version            2023.04.22.1
+// @version            2023.04.22.2
 // @author             F9y4ng
 // @description        "elegant Search Engine Jump Assistant" permet aux utilisateurs de passer facilement d'un moteur de recherche spécifique à un autre; prend en charge la suppression de la redirection des liens, le blocage de la publicité, la détection automatique des mises à jour, etc., compatible avec plus d'une douzaine de moteurs de recherche, tels que Baidu, Google, Bing, Duckduckgo, Yandex, you, etc.
 // @description:en     "Elegant Search Engine Jump Assistant" provides a search experience for users to jump from a specific search engine to another. Support custom common search engines, optimize keyword effect. It also offers removal of search link redirects, blocking of ads in search results and automatic update detection. Compatible with many search engines in the world, such as Baidu, Google, Bing, Duckduckgo, Yandex, You, etc.
@@ -1754,7 +1754,7 @@
         ImgURL: "https://you.com/search?fromSearchBar=true&tbm=isch&q=",
         IMGType: ["isch"],
         SplitName: "tbm",
-        MainType: "#section>main>div>div:nth-child(3)",
+        MainType: "#section>main>div>div:last-child,#section>main>section~div,#section>main>ul>li~div",
         StyleCode: `#${CONST.rndID}{z-index:999;position:relative;margin-left:10px;height:46px;display:inline-block}#${CONST.rndID} #${CONST.leftButton}{display:inline-block;height:46px}#${CONST.rndID} #${CONST.rightButton}{display:inline-block;margin-left:-2px;height:46px}#${CONST.leftButton} input{margin:0;padding:1px 10px 1px 20px!important;background-color:rgb(255, 255, 255);border-top-left-radius:100px;border-bottom-left-radius:100px;cursor:pointer;height:46px;color:rgb(74, 114, 245);min-width:110px;border:1px solid rgb(74, 114, 245);font-size:17px!important;vertical-align:top;font-weight:600}#${CONST.rightButton} input{margin:0;padding:1px 20px 1px 10px!important;background-color:rgb(255, 255, 255);border-top-right-radius:100px;border-bottom-right-radius:100px;cursor:pointer;height:46px;color:rgb(74, 114, 245);min-width:110px;border:1px solid rgb(74, 114, 245);font-size:17px!important;vertical-align:top;font-weight:600}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background-color:rgb(74, 114, 245);color:rgb(255, 255, 255);}`,
         KeyStyle: `div[data-testid="app-mainline"] p strong,div[data-testid="app-mainline"] p b`,
         AntiRedirect: () => localStorage.setItem("openLinksInNewTabs", true),
@@ -1892,7 +1892,8 @@
           (listCurrentSite.SiteTypeID === newSiteType.SOGOU && (/^(kexue)$/.test(CONST.vim) || /^(fanyi|hanyu|gouwu|as|map)/.test(location.hostname))) ||
           (listCurrentSite.SiteTypeID === newSiteType.DUCKDUCKGO && /^(maps)$/.test(getUrlParam("iaxm"))) ||
           (listCurrentSite.SiteTypeID === newSiteType.YANDEX && location.pathname.includes("/direct")) ||
-          (listCurrentSite.SiteTypeID === newSiteType.NEEVA && /^(Maps)$/.test(CONST.vim))
+          (listCurrentSite.SiteTypeID === newSiteType.NEEVA && /^(Maps)$/.test(CONST.vim)) ||
+          (listCurrentSite.SiteTypeID === newSiteType.YOU && /^(youchat)$/.test(CONST.vim))
       );
       CONST.indexPage = () => (currentSite.SiteTypeID === newSiteType.DUCKDUCKGO ? !location.search.includes("q=") : location.pathname === "/");
     };
@@ -2498,7 +2499,7 @@
               break;
             case newSiteType.YOU:
               Target.appendChild(userSpan);
-              Target.style.cssText += "display:inline-flex;justify-content:flex-start;";
+              Target.style.cssText += "display:flex;justify-content:flex-start;align-items:center;";
               break;
             case newSiteType.STARTPAGE:
               insterAfter(userSpan, Target);
