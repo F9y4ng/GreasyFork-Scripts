@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2023.04.10.2
+// @version            2023.04.22.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的Greasemonkey脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的Greasemonkey脚本和浏览器扩展。
@@ -46,7 +46,7 @@
 
 /* jshint esversion: 11 */
 
-(function (w) {
+~(function (w) {
   "use strict";
 
   /**
@@ -108,9 +108,9 @@
       },
       lisence: generateRandomString(64, "attr"),
       feedback: getMetaValue("supportURL") ?? "",
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.04.08.0",
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.04.22.0",
       scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? "F9y4ng",
-      scriptName: getMetaValue(`name:${navigator.language || "zh-CN"}`) ?? GMinfo.script.name ?? "Font Rendering",
+      scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? GMinfo.script.name ?? "Font Rendering",
     },
     dialog: {
       alert: alert.bind(w),
@@ -179,6 +179,8 @@
       fontSize: generateRandomString(8, "char"),
       fontScale: generateRandomString(8, "char"),
       scaleSize: generateRandomString(8, "char"),
+      fviewport: generateRandomString(8, "mix"),
+      fixViewport: generateRandomString(8, "mix"),
       strokeSize: generateRandomString(8, "mix"),
       stroke: generateRandomString(8, "char"),
       fstroke: generateRandomString(8, "mix"),
@@ -554,12 +556,12 @@
         platform: capitalize(uad.os),
         bitness: archs[1] ?? "unknown",
         architecture: archs[0] ?? "unknown",
-        credit: GMinfo.scriptHandler,
+        credit: GMscriptHandler,
       };
     })(GMinfo.platform);
     const tmuad = (uad => {
       if (!uad) return;
-      uad.credit = GMinfo.scriptHandler;
+      uad.credit = GMscriptHandler;
       return uad;
     })(GMinfo.userAgentData);
     const uad = vmuad ?? tmuad ?? navigator.userAgentData;
@@ -685,7 +687,7 @@
   }
 
   function getMetaValue(str) {
-    const queryReg = new RegExp(`//\\s+@${str}\\s+(\\S+)`);
+    const queryReg = new RegExp(`//\\s+@${str}\\s+(.+)`);
     const metaValue = (GMinfo.scriptMetaStr || GMinfo.scriptSource)?.match(queryReg);
     return metaValue?.[1];
   }
@@ -777,7 +779,7 @@
 
   /* ENVIRONMENT_VARIABLE_PREPROCESSING */
 
-  (function (tTP, requestEnvironmentConstants) {
+  ~(function (tTP, requestEnvironmentConstants) {
     "use strict";
 
     const SET_BOOL_FOR_UPDATE = true; // DON'T TOUCH IT! MUST BE BOOLEAN TYPE. RECONSTRUCTION DATE: 2023.04.08
@@ -797,10 +799,9 @@
     /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
     const UPDATE_VERSION_NOTICE = String(
-      `<li class="${def.const.seed}_fix">修正默认过滤规则，样式异常的可重置数据使用新规则。</li>
-        <li class="${def.const.seed}_info">本次紧急修复性更新，解决#191、#193、#198的问题。</li>
-        <li class="${def.const.seed}_fix">修正adoptedStyleSheets在特殊环境下的兼容性问题。</li>
-        <li class="${def.const.seed}_fix">修正粗体描边样式修正功能在某些站点中无限循环冲突。</li>
+      `<li class="${def.const.seed}_add">新增视口修正的站点开关，在指定站点关闭视口修正功能。</li>
+        <li class="${def.const.seed}_fix">优化Blink/Gecko内核v111.0以上版本的字体渲染效果。</li>
+        <li class="${def.const.seed}_fix">修正视口单位修正功能造成某些站点内容加载失败的问题。</li>
         <li class="${def.const.seed}_fix">修正一些已知的小问题，优化样式，优化代码。</li>`
     );
 
@@ -850,6 +851,7 @@
       fontFace: true,
       fontSmooth: true,
       fontSize: 1.0,
+      fixViewport: true,
       fontStroke: IS_REAL_GECKO ? 0.08 : IS_REAL_BLINK ? 0.015 : 0.0,
       fixStroke: IS_REAL_BLINK,
       fontShadow: IS_REAL_GECKO ? 0.36 : 0.75,
@@ -870,8 +872,12 @@
       rightStyle: b => `${def.const.style.mainStyle};background-color:${b};color:snow;font-style:italic;border-radius:0 4px 4px 0;padding:4px 8px 4px 4px;margin:0 0 0 -2px`,
       remarkStyle: c => `${def.const.style.mainStyle};color:${c};padding:4px 0;line-height:180%`,
       global: String(
-        `:root body>#${def.id.dialogbox},:root body>#${def.id.rndId}{position:fixed;top:0;left:0;width:100%;height:100%;background:0 0;pointer-events:none}#${def.id.dialogbox}{z-index:1999999995}#${def.id.rndId}{z-index:1999999991}` +
-          `${IS_REAL_GECKO ? "input:is([type='text'],[type='password'],[type='search']){font-family:'Microsoft YaHei UI',sans-serif!important}" : ""}`
+        `:root body>#${def.id.dialogbox},:root body>#${def.id.rndId}{display:block;position:fixed;top:0;left:0;width:100%;height:100%;background:0 0;pointer-events:none}#${def.id.dialogbox}{z-index:1999999995}#${def.id.rndId}{z-index:1999999991}` +
+          `${
+            IS_REAL_GECKO
+              ? "input:is([type='text'],[type='password'],[type='search'],[type='email'],[type='tel'],[type='url'],[type='number']),input:not([type]){font-family:initial !important}"
+              : ""
+          }`
       ),
       frDialogBox: String(
         `div.${def.class.db}{z-index:99999;box-sizing:content-box;max-width:420px;border:2px solid #efefef;color:#444;pointer-events:auto}.${def.class.db}{position:absolute;top:calc(12% + 10px);right:15px;display:block;overflow:hidden;width:100%;border-radius:6px;background:#fff;box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${def.class.db} *{text-shadow:0 0 1px #777!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}.${def.class.dbt}{margin-top:0;padding:10px 12px;width:auto;background:#efefef;text-align:left;font-weight:700;font-size:18px!important;font-family:Candara,'Times New Roman',${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm}{margin:5px;padding:10px;color:#444;text-align:left;font-weight:500;font-size:16px!important}.${def.class.dbb}{display:inline-block;box-sizing:content-box;margin:2px 1%;padding:8px 12px;min-width:12%;border-radius:4px;text-align:center;text-decoration:none!important;letter-spacing:0;font-weight:400;cursor:pointer}` +
@@ -891,8 +897,8 @@
             `#${def.id.fontList} .${def.class.selectFontId}{width:auto}#${def.id.fontList} .${def.class.selectFontId} input{overflow:hidden;box-sizing:border-box;margin:0;padding:1px 23px 1px 2px;width:230px;height:42px!important;max-width:100%;min-width:100%;outline:none!important;outline-color:#67a5df;border:2px solid #67a5df!important;border-radius:6px;background:#fafafa;text-indent:8px;text-overflow:ellipsis;font-weight:700;font-size:16px!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.fontList} .${def.class.selectFontId} input[disabled]{pointer-events:none!important}#${def.id.fontList} .${def.class.selectFontId} input::-webkit-search-cancel-button{margin:0 7px}.${def.class.placeholder}:placeholder-shown{color:#369!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.95!important}.${def.class.placeholder}::-webkit-input-placeholder{color:#369!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}.${def.class.placeholder}::-moz-placeholder{color:#369!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}#${def.id.fontList} .${def.class.selectFontId} dl{position:absolute;z-index:1000;overflow-x:hidden;box-sizing:content-box;margin:4px 0 0;padding:4px 8px;width:auto;max-width:calc(100% - 68px);max-height:298px;min-width:60%;border:2px solid #67a5df!important;border-radius:6px;background-color:#fff;white-space:nowrap;font-size:18px!important;overscroll-behavior:contain;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}` +
             `#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontId} dl dd{display:block;overflow-x:hidden;box-sizing:content-box;margin:1px 8px;padding:5px 0;width:-moz-available;width:-webkit-fill-available;max-width:100%;min-width:100%;text-overflow:ellipsis;font-weight:400;font-size:21px!important}#${def.id.fontList} .${def.class.selectFontId} dl dd:hover{overflow-x:hidden;box-sizing:content-box;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff;text-overflow:ellipsis}` +
             `.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);color:#fff;content:" "}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#fff;content:"OFF";font-weight:700;font-style:normal;font-size:16px}.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4);cursor:pointer}.${def.class.checkbox}:checked+label::after{left:10px;content:"ON"}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}#${def.id.fface} label,#${def.id.fface}+label::after,#${def.id.fface}+label::before,#${def.id.smooth} label,#${def.id.smooth}+label::after,#${def.id.smooth}+label::before{-webkit-transition:all .3s ease-in;transition:all .3s ease-in}` +
-            `#${def.id.fontShadow} div.${def.class.flex}:before,#${def.id.fontShadow} div.${def.class.flex}:after,#${def.id.fontStroke} div.${def.class.flex}:before,#${def.id.fontStroke} div.${def.class.flex}:after,#${def.id.fontSize} div.${def.class.flex}:before,#${def.id.fontSize} div.${def.class.flex}:after{display:none}#${def.id.fontShadow} #${def.id.shadowSize},#${def.id.fontStroke} #${def.id.strokeSize},#${def.id.fontSize} #${def.id.fontScale}{box-sizing:content-box;margin:0 10px 0 0!important;padding:0;width:56px!important;height:32px!important;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:#fafafa!important;color:#111!important;text-align:center;text-indent:0;font-weight:400!important;font-size:17px!important;font-family:Impact,Times,serif!important}#${def.id.fontSize} #${def.id.fontScale}[disabled]{background-color:rgba(228,231,237,.82)!important;color:#555!important;filter:grayscale(.9)}#${def.id.fontStroke} #${def.id.fstroke}>label{float:none!important;display:inline!important;margin:0!important;padding:0 0 0 2px!important;color:#666!important;font-size:12px!important;cursor:help!important}#${def.id.fixStroke}{display:inline-block;margin:0 2px 0 0!important;width:14px!important;height:14px!important;vertical-align:text-bottom;cursor:pointer;-webkit-appearance:checkbox!important}` +
-            `#${def.id.fixStroke}::after{position:relative;top:0;display:inline-block;margin:0;padding:0;width:14px;height:14px;border-radius:3px;background-color:#aaa;color:#fff;content:"\u2717";vertical-align:top;text-align:center;font-weight:700;font-size:12px;line-height:14px}#${def.id.fixStroke}:checked::after{border:0!important;background-color:#65a0db;color:#fff;content:"\u2713";font-weight:700;font-size:12px;line-height:14px}.${def.class.flex}{display:flex;width:auto;min-width:100%;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}.${def.class.slider} input{visibility:hidden}#${def.id.shadowColor} *{box-sizing:content-box}#${def.id.shadowColor} .${def.class.frColorPicker}{margin:0;padding:0;width:auto}#${def.id.shadowColor} .${def.class.frColorPicker} #${def.id.color}{box-sizing:border-box;margin:0;padding:0 8px 0 0;width:160px!important;height:35px!important;min-width:160px;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:rgba(253,253,255,.69);color:#333!important;text-align:center;text-indent:0;font-weight:400!important;font-size:18px!important;font-family:Impact,Times,serif!important;cursor:pointer}` +
+            `#${def.id.fontShadow} div.${def.class.flex}:before,#${def.id.fontShadow} div.${def.class.flex}:after,#${def.id.fontStroke} div.${def.class.flex}:before,#${def.id.fontStroke} div.${def.class.flex}:after,#${def.id.fontSize} div.${def.class.flex}:before,#${def.id.fontSize} div.${def.class.flex}:after{display:none}#${def.id.fontShadow} #${def.id.shadowSize},#${def.id.fontStroke} #${def.id.strokeSize},#${def.id.fontSize} #${def.id.fontScale}{box-sizing:content-box;margin:0 10px 0 0!important;padding:0;width:56px!important;height:32px!important;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:#fafafa!important;color:#111!important;text-align:center;text-indent:0;font-weight:400!important;font-size:17px!important;font-family:Impact,Times,serif!important}#${def.id.fontSize} #${def.id.fontScale}[disabled]{background-color:rgba(228,231,237,.82)!important;color:#555!important;filter:grayscale(.9)}#${def.id.fontSize} #${def.id.fviewport}>label,#${def.id.fontStroke} #${def.id.fstroke}>label{float:none!important;display:inline!important;margin:0!important;padding:0 0 0 2px!important;color:#666!important;font-size:12px!important;cursor:help!important}#${def.id.fixViewport},#${def.id.fixStroke}{display:inline-block;margin:0 2px 0 0!important;width:14px!important;height:14px!important;vertical-align:text-bottom;cursor:pointer;-webkit-appearance:checkbox!important}` +
+            `#${def.id.fixViewport}::after,#${def.id.fixStroke}::after{position:relative;top:0;display:inline-block;margin:0;padding:0;width:14px;height:14px;border-radius:3px;background-color:#aaa;color:#fff;content:"\u2717";vertical-align:top;text-align:center;font-weight:700;font-size:12px;line-height:14px}#${def.id.fixViewport}:checked::after,#${def.id.fixStroke}:checked::after{border:0!important;background-color:#65a0db;color:#fff;content:"\u2713";font-weight:700;font-size:12px;line-height:14px}.${def.class.flex}{display:flex;width:auto;min-width:100%;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}.${def.class.slider} input{visibility:hidden}#${def.id.shadowColor} *{box-sizing:content-box}#${def.id.shadowColor} .${def.class.frColorPicker}{margin:0;padding:0;width:auto}#${def.id.shadowColor} .${def.class.frColorPicker} #${def.id.color}{box-sizing:border-box;margin:0;padding:0 8px 0 0;width:160px!important;height:35px!important;min-width:160px;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:rgba(253,253,255,.69);color:#333!important;text-align:center;text-indent:0;font-weight:400!important;font-size:18px!important;font-family:Impact,Times,serif!important;cursor:pointer}` +
             `#${def.id.fontCss} textarea,#${def.id.fontEx} textarea{box-sizing:border-box;margin:0;padding:5px;width:calc(100% - 2px)!important;height:78px;max-width:calc(100% - 2px);max-height:78px;min-width:calc(100% - 2px);min-height:78px;outline:none!important;border:2px solid #67a5df!important;border-radius:6px;color:#0b5b9c!important;font:700 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;resize:none;cursor:auto;word-break:break-all;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin;overscroll-behavior:contain}#${def.id.fontCss} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontCss} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontCss} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px rgba(0,0,0,.2);}#${def.id.fontCss} textarea::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontEx} textarea{background:#fafafa!important}#${def.id.fontEx} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontEx} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontEx} textarea::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df}.${def.class.switch}{float:right;box-sizing:border-box;margin:-2px 4px 0 0;padding:0 6px;border:2px double #67a5df;border-radius:4px;color:#0a68c1}#${def.id.cSwitch}:hover,#${def.id.eSwitch}:hover{cursor:pointer;-webkit-user-select:none;user-select:none}.${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}.${def.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9,#e9ffe9 25%,transparent 0,transparent 50%,#e9ffe9 0,#e9ffe9 75%,transparent 0,transparent)!important;background-color:#f7fff7!important;background-size:50px 50px}` +
             `.${def.class.dbm} textarea{cursor:auto;scrollbar-width:thin;overscroll-behavior:contain}.${def.class.dbm} textarea::-webkit-scrollbar{width:8px;height:8px}.${def.class.dbm} textarea::-webkit-scrollbar-corner{border-radius:2px;background:#efefef;box-shadow:inset 0 0 3px #aaa;}.${def.class.dbm} textarea::-webkit-scrollbar-thumb{border-radius:2px;background:#cfcfcf;box-shadow:inset 0 0 5px #999;}.${def.class.dbm} textarea::-webkit-scrollbar-track{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}.${def.class.dbm} textarea::-webkit-scrollbar-track-piece{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}` +
             `#${def.id.submit} button{box-sizing:border-box;margin:0;padding:5px 10px;width:auto;height:35px;min-width:min-content;min-height:35px;border:2px solid #6ba7e0;border-radius:6px;background-color:#67a5df;background-image:none;color:#fff!important;font:normal 600 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;cursor:pointer}#${def.id.submit} button:hover{box-shadow:0 0 5px rgba(0,0,0,.4)!important}#${def.id.submit} .${def.class.cancel},#${def.id.submit} .${def.class.reset}{float:left;margin-right:10px}#${def.id.submit} .${def.class.submit}{float:right}#${def.id.submit} #${def.id.backup}{display:none;margin:0 10px 0 0}.${def.class.anim}{border:2px solid #dc143c!important;background:#dc143c!important;animation:jiggle 1.8s ease-in infinite}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}`
@@ -1551,15 +1557,15 @@
 
     /* FONT_RENDERING_PREPROCESSING */
 
-    (async function (ROOT_SECRET_KEY, configData, customMonoData, exSiteData, fontSetData) {
+    ~(async function (ROOT_SECRET_KEY, configData, customMonoData, exSiteData, fontSetData) {
       "use strict";
 
       const addLoadEvents = new RegisterEvents();
 
+      let exSite = await exSiteData();
       let _config_data_ = await configData();
       let { maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, isFixViewport, isCloseTip, rebuild, curVersion, globalDisable } = _config_data_;
       let { monoSiteRules, monoFontList, monoFeature } = await customMonoData();
-      let { exSite, defExSite } = await exSiteData();
 
       const CONST_VALUES = await fontSetData();
 
@@ -1619,17 +1625,24 @@
       const monoFeatureText = `${monoFeature || INITIAL_VALUES.monospacedFeature}`;
       const rootPseudoClass = String(
         currentSiteAuthorization
-          ? `:root{--fr-init-basefont:${INITIAL_VALUES.fontBase};--fr-init-fontscale:${fontScale};--fr-font-family:${CONST_VALUES.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-font-feature:"liga" 0,"zero";--fr-mono-font:${monoFontText};--fr-mono-stroke:${stroke_r}px currentcolor;--fr-mono-feature:${monoFeatureText};--fr-no-stroke:0px transparent;}`
+          ? `:root{--fr-init-basefont:${INITIAL_VALUES.fontBase};--fr-init-fontscale:${fontScale};--fr-font-family:${CONST_VALUES.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-font-feature:"liga" 0,"zero";--fr-mono-font:${monoFontText};--fr-mono-shadow:0 0 0px currentcolor;--fr-mono-feature:${monoFeatureText};--fr-no-stroke:0px transparent;}`
           : ``
       );
       const tStyle = `@charset "UTF-8";${rootPseudoClass}${def.const.style.global}${fontStyle}`;
 
       /* FR_CONFIGURE_SHADOWROOT_CONTENT */
 
+      const tFixViewport = String(
+        `<span id="${def.id.fviewport}" style="width:auto;color:#666;font-size:12px">
+          (<label title="如果开启它后出现网页加载或样式问题，请关闭之。">视口修正</label>
+          <input type="checkbox" id="${def.id.fixViewport}" ${CONST_VALUES.fixViewport ? "checked" : ""}/>)
+        </span>`
+      );
       const tFontSizeHTML = String(
         `<li id="${def.id.fontSize}">
         <div class="${def.class.flex}">
           <span style="margin:0;padding:0">字体比例缩放</span>
+          ${isFixViewport ? tFixViewport : ""}
           <input id="${def.id.fontScale}" type="text" v="number" maxlength="5" ${getImageAndTextProperties()}/>
         </div>
         <div class="${def.class.range}" data-ticks-position="top" ${getImageAndTextProperties()}
@@ -1642,9 +1655,9 @@
       );
       const tFixStrokeHTML = String(
         `<span id="${def.id.fstroke}" style="width:auto;color:#666;font-size:12px">
-        (<label title="如果开启它后出现明显的卡顿现象，请关闭之。">粗体修正</label>
-        <input type="checkbox" id="${def.id.fixStroke}" ${CONST_VALUES.fixStroke ? "checked" : ""}/>)
-      </span>`
+          (<label title="如果开启它后出现明显的卡顿现象，请关闭之。">粗体修正</label>
+          <input type="checkbox" id="${def.id.fixStroke}" ${CONST_VALUES.fixStroke ? "checked" : ""}/>)
+        </span>`
       );
       const tHTML = String(
         `<div id="${def.id.container}">
@@ -1940,34 +1953,6 @@
         });
       }
 
-      function toColordepth(hexa, s) {
-        hexa = /^#[0-9A-F]{8}$/.test(hexa) ? hexa.substring(1) : "FFFFFFFF";
-        const rgbaToHexa = rgba => {
-          const { r, g, b, a } = rgba;
-          return (
-            Math.floor(r).toString(16).padStart(2, "0") +
-            Math.floor(g).toString(16).padStart(2, "0") +
-            Math.floor(b).toString(16).padStart(2, "0") +
-            Math.floor(a).toString(16).padStart(2, "0")
-          );
-        };
-        const hexaToRgba = hexa => {
-          return {
-            r: parseInt(hexa.substr(0, 2), 16),
-            g: parseInt(hexa.substr(2, 2), 16),
-            b: parseInt(hexa.substr(4, 2), 16),
-            a: parseInt(hexa.substr(6, 2) || "FF", 16),
-          };
-        };
-        const setBrightness = rgba => {
-          const { r, g, b, a } = rgba;
-          return { r: 0.992 * r, g: 0.967 * g, b: 0.928 * b, a: a * 0.853 };
-        };
-        const tl = x => Math.min(255, Math.floor(x * s));
-        const { r, g, b, a } = hexaToRgba(hexa);
-        return `#${rgbaToHexa(setBrightness({ r: tl(r), g: tl(g), b: tl(b), a: tl(a) }))}`;
-      }
-
       function getBrightness(hexa) {
         const { r, g, b, a } = {
           r: parseInt(hexa.substr(0, 2), 16),
@@ -2187,13 +2172,7 @@
             titleText: "禁止字体渲染",
           });
           if (await frDialog.respond()) {
-            exSite = await GMgetValue("_EXCLUDE_SITES_");
-            try {
-              exSite = exSite ? [...JSON.parse(decrypt(exSite))] : defExSite;
-            } catch (e) {
-              ERROR("ExSite.JSON.parse:", e.message);
-              exSite = defExSite;
-            }
+            exSite = await exSiteData();
             exSite.push(TOP_HOST_NAME);
             saveData("_EXCLUDE_SITES_", exSite);
             closeConfigurePage({ isReload: true });
@@ -2201,13 +2180,7 @@
           frDialog = null;
         },
         vipConfigure: async () => {
-          const configure = await GMgetValue("_CONFIGURE_");
-          try {
-            _config_data_ = JSON.parse(decrypt(configure));
-          } catch (e) {
-            ERROR("_config_data_.JSON.parse:", e.message);
-            _config_data_ = {};
-          }
+          const _config_data_ = await configData();
           isBackupFunction = Boolean(_config_data_.isBackupFunction ?? true);
           isPreview = Boolean(_config_data_.isPreview);
           isFontsize = Boolean(_config_data_.isFontsize);
@@ -2407,13 +2380,7 @@
             titleText: "恢复字体渲染",
           });
           if (await frDialog.respond()) {
-            exSite = await GMgetValue("_EXCLUDE_SITES_");
-            try {
-              exSite = exSite ? [...JSON.parse(decrypt(exSite))] : defExSite;
-            } catch (e) {
-              ERROR("ExSite.JSON.parse:", e.message);
-              exSite = defExSite;
-            }
+            exSite = await exSiteData();
             def.const.exSitesIndex = updateExsitesIndex(exSite);
             typeof def.const.exSitesIndex !== "undefined" && exSite.splice(def.const.exSitesIndex, 1);
             saveData("_EXCLUDE_SITES_", exSite);
@@ -2890,9 +2857,7 @@
       }
 
       function overlayColor(r, c) {
-        const specialColor = `0 0 ${(r * 1.15).toFixed(2)}px ${toColordepth(c, 0.4)},0 0 ${r}px ${c},0 0 ${(r * 0.7).toFixed(2)}px ${toColordepth(c, 2.05)}`;
-        const currentColor = `0 0 ${r}px ${toColordepth(c, 1.15)},0 0 ${(r * 0.8).toFixed(2)}px ${toColordepth(c, 0.35)},0 0 ${(r * 0.5).toFixed(2)}px currentcolor`;
-        return c.substring(1) !== "FFFFFFFF" ? specialColor : currentColor;
+        return c.substring(1) !== "FFFFFFFF" ? `0 0 ${r}px ${c}` : `0 0 ${r}px currentcolor`;
       }
 
       function fixScaleOffset(scaleValue) {
@@ -2919,18 +2884,18 @@
           const pre = t.search(/\bpre\b/gi) > -1 ? ["pre", "pre *"] : [];
           const code = t.search(/\bcode\b/gi) > -1 ? ["code", "code *"] : [];
           const elcode = ["samp", "kbd", ".code", ".code *"];
-          const siterules = ["@github.com##[class*='blob-'],[class*='blob-'] *,.react-code-text *"].concat(monoSiteRules);
+          const siterules = ["@github.com##.blob-num,.blob-num *,.blob-code,.blob-code *,textarea,.react-line-numbers *,.react-code-lines *", ...monoSiteRules];
           const regex = /@([\w\-.]+)##(?!.*(?<sp>[#])\k<sp>{1})([\w\-*.#:+>()~[\]=^$|,' ]+)/;
           siterules.forEach(siterule => {
             const rule = regex.exec(siterule);
-            if (CUR_HOST_NAME.endsWith(rule[1])) customMonoRules = [...customMonoRules, ...rule[3].split(",")];
+            if (CUR_HOST_NAME.endsWith(rule[1])) customMonoRules.push(...rule[3].split(","));
           });
           const code_text = pre.concat(code, elcode, uniq(customMonoRules)).join();
           const codeSelector = CAN_I_USE ? `:is(${code_text})` : code_text;
           const base = s ? "var(--fr-font-family),var(--fr-init-basefont)" : "var(--fr-init-basefont)";
           return String(
             codeSelector.concat(
-              `{font-size:14px!important;line-height:150%!important;-webkit-text-stroke:var(--fr-mono-stroke)!important;text-shadow:none!important;font-family:var(--fr-mono-font),${base}!important;font-feature-settings:var(--fr-mono-feature)!important;`,
+              `{font-size:14px!important;line-height:150%!important;-webkit-text-stroke:var(--fr-no-stroke)!important;text-shadow:var(--fr-mono-shadow)!important;font-family:var(--fr-mono-font),${base}!important;font-feature-settings:var(--fr-mono-feature)!important;`,
               `${IS_REAL_WEBKIT ? "-webkit-user-select" : "user-select"}:text!important;}`
             )
           );
@@ -2995,8 +2960,10 @@
           const smoothT = qS(`#${def.id.smooth}`, def.const.configIf);
           saveChangeStatus(smoothT, CONST_VALUES.fontSmooth, submitButton, def.array.values);
           // FontSize Scale
-          const scale = qS(`#${def.id.fontScale}`, def.const.configIf);
-          let drawScale = getFontSizeScale(scale, submitButton) ?? {};
+          const fontScale = qS(`#${def.id.fontScale}`, def.const.configIf);
+          let drawScale = getFontSizeScale(fontScale, submitButton) ?? {};
+          // Fix Viewport
+          let fixViewportT = getFixViewportBool(fontScale, submitButton) ?? {};
           // Fonts stroke
           const stroke = qS(`#${def.id.strokeSize}`, def.const.configIf);
           let drawStrock = getFontsStroke(stroke, submitButton);
@@ -3026,12 +2993,12 @@
           const resetButtonNode = qS(`#${def.id.submit} .${def.class.reset}`, def.const.configIf);
           controlResetButton(
             resetButtonNode,
-            { ffaceT, smoothT, scale, stroke, fixStrokeT, shadows, colorPicker, colorshow, fontCssT, fontExT },
+            { ffaceT, smoothT, fontScale, fixViewportT, stroke, fixStrokeT, shadows, colorPicker, colorshow, fontCssT, fontExT },
             { fontData, drawScale, drawStrock, drawShadow, submitButton }
           );
           // Submit Button control
           const submitButtonNode = qS(`#${def.id.submit} .${def.class.submit}`, def.const.configIf);
-          controlSubmitButton(submitButtonNode, { ffaceT, smoothT, scale, stroke, fixStrokeT, shadows, colorshow, colorReg, fontCssT, fontExT });
+          controlSubmitButton(submitButtonNode, { ffaceT, smoothT, fontScale, fixViewportT, stroke, fixStrokeT, shadows, colorshow, colorReg, fontCssT, fontExT });
           // Backup Button control
           const backupButtonNode = qS(`#${def.id.backup}`, def.const.configIf);
           controlBackupButton(backupButtonNode, isBackupFunction);
@@ -3202,19 +3169,39 @@
           });
         }
 
-        function getFontSizeScale(scale, submitButton) {
-          if (!def.const.isFontsize || !scale) return null;
+        function getFontSizeScale(fontScale, submitButton) {
+          if (!def.const.isFontsize || !fontScale) return null;
           try {
             let drawScale = qS(`#${def.id.scaleSize}`, def.const.configIf);
-            scale.value = CONST_VALUES.fontSize === 1 ? "OFF" : CONST_VALUES.fontSize.toFixed(3);
-            rangeSliderWidget(drawScale, scale, 3, true);
-            checkInputValue(scale, drawScale, /^[0-1](\.[0-9]{1,3})?$/, 3, true);
+            fontScale.value = CONST_VALUES.fontSize === 1 ? "OFF" : CONST_VALUES.fontSize.toFixed(3);
+            rangeSliderWidget(drawScale, fontScale, 3, true);
+            checkInputValue(fontScale, drawScale, /^[0-1](\.[0-9]{1,3})?$/, 3, true);
             return drawScale;
           } catch (e) {
             ERROR("FontSize Scale:", e.message);
             def.array.exps.push(`[FontSize Scale]: ${e}`);
           } finally {
-            saveChangeStatus(scale, CONST_VALUES.fontSize, submitButton, def.array.values, true);
+            saveChangeStatus(fontScale, CONST_VALUES.fontSize, submitButton, def.array.values, true);
+          }
+        }
+
+        function getFixViewportBool(fontScale, submitButton) {
+          if (!def.const.isFontsize || !isFixViewport || !fontScale) return null;
+          let fixViewportT = qS(`#${def.id.fixViewport}`, def.const.configIf);
+          try {
+            const fviewportNode = qS(`#${def.id.fviewport}`, def.const.configIf);
+            if (fviewportNode) {
+              fviewportNode.style.visibility = fontScale.value === "OFF" ? "hidden" : "visible";
+              fontScale.addEventListener("change", function () {
+                fviewportNode.style.visibility = this.value === "OFF" ? "hidden" : "visible";
+              });
+            }
+            return fixViewportT;
+          } catch (e) {
+            ERROR("Fix Viewport:", e.message);
+            def.array.exps.push(`[Fix Viewport]: ${e}`);
+          } finally {
+            saveChangeStatus(fixViewportT, CONST_VALUES.fixViewport, submitButton, def.array.values);
           }
         }
 
@@ -3324,6 +3311,7 @@
           if (!monoT) return;
           monoT.addEventListener("dblclick", async () => {
             try {
+              const { monoSiteRules: siteRule, monoFontList: fontlist, monoFeature: feature } = await customMonoData();
               const monospacedsiterules = siteRule.join("\r\n").trim();
               const monospacedfont = fontlist.trim();
               const monospacedfeature = feature.trim();
@@ -3418,7 +3406,7 @@
 
         function controlResetButton(
           resetT,
-          { smoothT, ffaceT, scale, stroke, fixStrokeT, shadows, colorPicker, colorshow, fontCssT, fontExT },
+          { smoothT, ffaceT, fontScale, fixViewportT, stroke, fixStrokeT, shadows, colorPicker, colorshow, fontCssT, fontExT },
           { fontData, drawScale, drawStrock, drawShadow, submitButton }
         ) {
           if (!resetT) return;
@@ -3435,10 +3423,15 @@
               ffaceT.checked !== INITIAL_VALUES.fontFace ? ffaceT.click() : DEBUG("<fontFace> NOT MODIFIED");
               CONST_VALUES.fontSelect.split(",")[0] !== INITIAL_VALUES.fontSelect ? fontSet().fresetList(fontData) : fontSet().fdeleteList(fontData);
               if (def.const.isFontsize) {
-                scale.value = INITIAL_VALUES.fontSize === 1 ? "OFF" : INITIAL_VALUES.fontSize.toFixed(3);
-                scale._value_ = INITIAL_VALUES.fontSize;
+                fontScale.value = INITIAL_VALUES.fontSize === 1 ? "OFF" : INITIAL_VALUES.fontSize.toFixed(3);
+                fontScale._value_ = INITIAL_VALUES.fontSize;
                 setSliderProperty(drawScale, INITIAL_VALUES.fontSize, 3);
                 def.const.curScale = INITIAL_VALUES.fontSize;
+                if (isFixViewport) {
+                  fixViewportT.checked !== INITIAL_VALUES.fixViewport ? fixViewportT.click() : DEBUG("<fixViewport> NOT MODIFIED");
+                  const fviewportNode = qS(`#${def.id.fviewport}`, def.const.configIf);
+                  fviewportNode && (fviewportNode.style.visibility = fontScale.value === "OFF" ? "hidden" : "visible");
+                }
               }
               stroke.value = INITIAL_VALUES.fontStroke === 0 ? "OFF" : INITIAL_VALUES.fontStroke.toFixed(3);
               stroke._value_ = INITIAL_VALUES.fontStroke;
@@ -3468,11 +3461,16 @@
               ffaceT.checked !== CONST_VALUES.fontFace ? ffaceT.click() : DEBUG("<fontFace> NOT MODIFIED");
               fontSet().fdeleteList(fontData);
               if (def.const.isFontsize) {
-                scale.value = CONST_VALUES.fontSize === 1 ? "OFF" : CONST_VALUES.fontSize.toFixed(3);
-                scale._value_ = CONST_VALUES.fontSize;
+                fontScale.value = CONST_VALUES.fontSize === 1 ? "OFF" : CONST_VALUES.fontSize.toFixed(3);
+                fontScale._value_ = CONST_VALUES.fontSize;
                 setSliderProperty(drawScale, CONST_VALUES.fontSize, 3);
                 def.array.scaleValueMatrix.push(CONST_VALUES.fontSize);
                 def.const.curScale = CONST_VALUES.fontSize;
+                if (isFixViewport) {
+                  fixViewportT.checked !== CONST_VALUES.fixViewport ? fixViewportT.click() : DEBUG("<fixViewport> NOT MODIFIED");
+                  const fviewportNode = qS(`#${def.id.fviewport}`, def.const.configIf);
+                  fviewportNode && (fviewportNode.style.visibility = fontScale.value === "OFF" ? "hidden" : "visible");
+                }
               }
               stroke.value = CONST_VALUES.fontStroke === 0 ? "OFF" : CONST_VALUES.fontStroke.toFixed(3);
               stroke._value_ = CONST_VALUES.fontStroke;
@@ -3503,15 +3501,16 @@
           });
         }
 
-        function controlSubmitButton(submitT, { ffaceT, smoothT, scale, stroke, fixStrokeT, shadows, colorshow, colorReg, fontCssT, fontExT }) {
+        function controlSubmitButton(submitT, { ffaceT, smoothT, fontScale, fixViewportT, stroke, fixStrokeT, shadows, colorshow, colorReg, fontCssT, fontExT }) {
           if (!submitT) return;
           submitT.addEventListener("click", async function () {
             const fontlists = fontSet().fsearchList(def.id.fontName);
             const fontselect = fontlists.length > 0 ? addSingleQuoteToArray(fontlists) : CONST_VALUES.fontSelect;
             const fontface = ffaceT.checked;
             const smooth = smoothT.checked;
-            const prefscale = !def.const.isFontsize ? 1 : /^[0-1](\.[0-9]{1,3})?$/.test(scale.value) ? Number(scale.value) : INITIAL_VALUES.fontSize;
+            const prefscale = !def.const.isFontsize ? 1 : /^[0-1](\.[0-9]{1,3})?$/.test(fontScale.value) ? Number(fontScale.value) : INITIAL_VALUES.fontSize;
             const fscale = CONST_VALUES.isMatchEditorialSite ? 1 : prefscale < 0.8 ? 0.8 : prefscale > 1.5 ? 1.5 : prefscale;
+            const fixfviewport = isFixViewport && fscale !== 1 && fixViewportT.checked;
             const fstroke = /^[0-1](\.[0-9]{1,3})?$/.test(stroke.value) ? Number(stroke.value) : stroke.value === "OFF" ? 0 : INITIAL_VALUES.fontStroke;
             const fixfstroke = IS_REAL_BLINK && fstroke && fixStrokeT.checked;
             const fshadow = /^[0-8](\.[0-9]{1,2})?$/.test(shadows.value) ? Number(shadows.value) : shadows.value === "OFF" ? 0 : INITIAL_VALUES.fontShadow;
@@ -3543,7 +3542,7 @@
                   `{${_fontfamily}${_shadow}${_stroke}${_smoothing}${_textrender}}`,
                   `${_exclude}${_codefont}${_fixfontstroke}`
                 );
-                const _rootpseudoclass = `:root{--fr-init-basefont:${INITIAL_VALUES.fontBase};--fr-init-fontscale:${fscale};--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-font-feature:"liga" 0,"zero";--fr-mono-font:${monoFontText};--fr-mono-stroke:${stroke_r}px currentcolor;--fr-mono-feature:${monoFeatureText};--fr-no-stroke:0px transparent;}`;
+                const _rootpseudoclass = `:root{--fr-init-basefont:${INITIAL_VALUES.fontBase};--fr-init-fontscale:${fscale};--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-font-feature:"liga" 0,"zero";--fr-mono-font:${monoFontText};--fr-mono-shadow:0 0 0px currentcolor;--fr-mono-feature:${monoFeatureText};--fr-no-stroke:0px transparent;}`;
                 const __tshadow = `@charset "UTF-8";` + (_curEmptyConfig ? `${def.const.style.global}` : `${_rootpseudoclass}${def.const.style.global}${_tshadow}`);
                 def.array.scaleValueMatrix.push(fscale);
                 def.const.curScale = fscale;
@@ -3611,6 +3610,7 @@
                     fontFace: Boolean(fontface),
                     fontSmooth: Boolean(smooth),
                     fontSize: Number(fscale),
+                    fixViewport: Boolean(fixfviewport),
                     fontStroke: Number(fstroke),
                     fixStroke: Boolean(fixfstroke),
                     fontShadow: Number(fshadow),
@@ -3635,6 +3635,7 @@
                     fontFace: Boolean(fontface),
                     fontSmooth: Boolean(smooth),
                     fontSize: Number(fscale),
+                    fixViewport: Boolean(fixfviewport),
                     fontStroke: Number(fstroke),
                     fixStroke: Boolean(fixfstroke),
                     fontShadow: Number(fshadow),
@@ -3934,6 +3935,10 @@
               queryNode = qS(`#${def.id.shadowColor}`, def.const.configIf);
               queryNode && queryNode.style.setProperty("display", target.value === "OFF" ? "none" : "flex");
               break;
+            case def.id.scaleSize:
+              queryNode = qS(`#${def.id.fviewport}`, def.const.configIf);
+              isFixViewport && queryNode && queryNode.style.setProperty("visibility", target.value === "OFF" ? "hidden" : "visible");
+              break;
             case def.id.stroke:
               queryNode = qS(`#${def.id.fstroke}`, def.const.configIf);
               IS_REAL_BLINK && queryNode && queryNode.style.setProperty("visibility", target.value === "OFF" ? "hidden" : "visible");
@@ -4158,12 +4163,18 @@
       /* FIX_VIEWPORT_ZOOM_STYLE_ERRORS 2023-04-08 F9Y4NG */
 
       function runFixViewportUnits() {
-        if (!isFixViewport || def.const.curScale === 1) return;
+        if (!isFixViewport || !CONST_VALUES.fixViewport || def.const.curScale === 1) return;
         fixViewportCssStyle(null, def.const.curScale);
+        w.addEventListener("pushState", historyStateFix);
+        w.addEventListener("replaceState", historyStateFix);
+      }
+
+      function historyStateFix() {
+        sleep(1e2)(def.const.curScale).then(r => fixViewportCssStyle(null, r));
       }
 
       function fixViewportCssStyle(node, scaleValue) {
-        if (typeof node === "undefined" || scaleValue === 1) return;
+        if (!CONST_VALUES.fixViewport || typeof node === "undefined" || scaleValue === 1) return;
         const fixReg = /(?:\b)(\d+(?:\.\d+)?)(v[wh]|vmin|vmax)(?:\b)/g;
         const base64Reg = /(?:;base64,)((?:[a-zA-Z0-9/+]+\b)\d+(v[wh]|vmin|vmax))+(?:\b)/g;
         const triggerNode = node === null ? "DOM" : node.nodeName;
@@ -4200,14 +4211,24 @@
                   let style = document.createElement("style");
                   style.textContent = "/*# sourceURL=" + url + " */\r\n" + cssText;
                   if (node.media) style.media = node.media;
-                  if (node.id) style.id = node.id;
-                  if (node.className) style.id = node.className;
                   if (node.disabled) style.disabled = node.disabled;
+                  for (let ds in node.dataset) {
+                    if (node.dataset.hasOwnProperty(ds)) style.dataset[ds] = node.dataset[ds];
+                  }
                   style.setAttribute("data-href", node.getAttribute("href"));
                   style.setAttribute("data-seed", Date.now());
                   style.setAttribute("data-processed", true);
                   style.setAttribute("type", "text/css");
-                  parent.replaceChild(style, node);
+                  if (node.className) {
+                    style.className = node.className;
+                    node.removeAttribute("href");
+                    node.removeAttribute("data-processed");
+                    safeRemove(`style[class="${node.className}"]`, document.head);
+                    insertAfter(document.head, style, node);
+                  } else {
+                    if (node.id) style.id = node.id;
+                    parent.replaceChild(style, node);
+                  }
                   DEBUG("viewport.Link Fixed: %O", style);
                 }
               };
@@ -4296,12 +4317,8 @@
           .filter(x => x.indexOf("*") === -1);
         const styleMap = new WeakMap();
         const changeAttribute = {
-          add: element => {
-            w[def.const.raf](() => element.setAttribute(def.const.boldAttrName, "bold"));
-          },
-          del: element => {
-            w[def.const.raf](() => element.removeAttribute(def.const.boldAttrName));
-          },
+          add: element => w[def.const.raf](() => element?.setAttribute(def.const.boldAttrName, "bold")),
+          del: element => w[def.const.raf](() => element?.removeAttribute(def.const.boldAttrName)),
         };
 
         function isBold(element) {
@@ -4516,7 +4533,7 @@
 
       /* FONT_RENDERING_MAIN_PROCESS */
 
-      (async function FontRendering(initMenus) {
+      !(async function FontRendering(initMenus) {
         "use strict";
         if (CUR_WINDOW_TOP) {
           // DATA_AND_UPDATE
@@ -4528,7 +4545,7 @@
           showSystemInfo.system();
           showSystemInfo.compat(IS_CHEAT_UA);
           // MENUS
-          globalDisableNotice(globalDisable, currentSiteAuthorization);
+          globalDisableNotice(globalDisable, !currentSiteAuthorization);
           insertMenus(initMenus());
           insertHotkey();
         }
@@ -4616,14 +4633,15 @@
       },
       async () => {
         "use strict";
-        const defautlExSite = ["workstation-xi"].sort();
-        let exSite = await GMgetValue("_EXCLUDE_SITES_");
-        if (!exSite) {
+        let exSite;
+        const defautlExSite = ["workstation-xi", "127.0.0.1"].sort();
+        const exSiteSave = await GMgetValue("_EXCLUDE_SITES_");
+        if (!exSiteSave) {
           saveData("_EXCLUDE_SITES_", defautlExSite);
           exSite = defautlExSite;
         } else {
           try {
-            exSite = [...JSON.parse(decrypt(exSite))];
+            exSite = [...JSON.parse(decrypt(exSiteSave))];
           } catch (e) {
             ERROR("ExSite.JSON.parse:", e.message);
             def.const.structureError = true;
@@ -4631,11 +4649,11 @@
           }
         }
         def.const.exSitesIndex = updateExsitesIndex(exSite);
-        return { exSite, defautlExSite };
+        return exSite;
       },
       async () => {
         "use strict";
-        let fontValue, domainValue, domainValueIndex, fontSelect, fontFace, fontSmooth, fontSize, fontStroke, fixStroke, fontShadow, shadowColor, fontCSS, fontEx;
+        let fontValue, domainValue, domainValueIndex, fontSelect, fontFace, fontSmooth, fontSize, fixViewport, fontStroke, fixStroke, fontShadow, shadowColor, fontCSS, fontEx;
         const domains = await GMgetValue("_DOMAINS_FONTS_SET_");
         const fonts = await GMgetValue("_FONTS_SET_");
         const isMatchEditorialSite = matchEditorialSites(INITIAL_VALUES.editorialSites);
@@ -4659,6 +4677,7 @@
             fontFace: INITIAL_VALUES.fontFace,
             fontSmooth: INITIAL_VALUES.fontSmooth,
             fontSize: INITIAL_VALUES.fontSize,
+            fixViewport: INITIAL_VALUES.fixViewport,
             fontStroke: INITIAL_VALUES.fontStroke,
             fixStroke: INITIAL_VALUES.fixStroke,
             fontShadow: INITIAL_VALUES.fontShadow,
@@ -4670,6 +4689,7 @@
           fontFace = INITIAL_VALUES.fontFace;
           fontSmooth = INITIAL_VALUES.fontSmooth;
           fontSize = INITIAL_VALUES.fontSize;
+          fixViewport = INITIAL_VALUES.fixViewport;
           fontStroke = INITIAL_VALUES.fontStroke;
           fixStroke = INITIAL_VALUES.fixStroke;
           fontShadow = INITIAL_VALUES.fontShadow;
@@ -4689,6 +4709,7 @@
             fontFace = Boolean(domainValue[domainValueIndex].fontFace);
             fontSmooth = Boolean(domainValue[domainValueIndex].fontSmooth);
             fontSize = !def.const.isFontsize ? 1 : isMatchEditorialSite ? 1 : Number(domainValue[domainValueIndex].fontSize) || 1;
+            fixViewport = Boolean(domainValue[domainValueIndex].fixViewport ?? true);
             fontStroke = Number(domainValue[domainValueIndex].fontStroke) || 0;
             fixStroke = Boolean(IS_REAL_BLINK && fontStroke && (domainValue[domainValueIndex].fixStroke ?? true));
             fontShadow = Number(domainValue[domainValueIndex].fontShadow) || 0;
@@ -4700,6 +4721,7 @@
             fontFace = Boolean(fontValue.fontFace);
             fontSmooth = Boolean(fontValue.fontSmooth);
             fontSize = !def.const.isFontsize ? 1 : isMatchEditorialSite ? 1 : Number(fontValue.fontSize) || 1;
+            fixViewport = Boolean(fontValue.fixViewport ?? true);
             fontStroke = Number(fontValue.fontStroke) || 0;
             fixStroke = Boolean(IS_REAL_BLINK && fontStroke && (fontValue.fixStroke ?? true));
             fontShadow = Number(fontValue.fontShadow) || 0;
@@ -4708,7 +4730,7 @@
             fontEx = convertHtmlToText(fontValue.fontEx) || "";
           }
         }
-        return { fontSelect, fontFace, fontSmooth, fontSize, fontStroke, fixStroke, fontShadow, shadowColor, fontCSS, fontEx, isMatchEditorialSite };
+        return { fontSelect, fontFace, fontSmooth, fontSize, fixViewport, fontStroke, fixStroke, fontShadow, shadowColor, fontCSS, fontEx, isMatchEditorialSite };
       }
     );
   })(createTrustedTypePolicy(), () => {
