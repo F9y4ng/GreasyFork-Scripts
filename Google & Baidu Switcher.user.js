@@ -1754,8 +1754,8 @@
         ImgURL: "https://you.com/search?fromSearchBar=true&tbm=isch&q=",
         IMGType: ["isch"],
         SplitName: "tbm",
-        MainType: "div.hUtaxr",
-        StyleCode: `#${CONST.rndID}{z-index:999;position:relative;height:48px;display:inline-block}#${CONST.rndID} #${CONST.leftButton}{display:inline-block;height:48px}#${CONST.rndID} #${CONST.rightButton}{display:inline-block;margin-left:-2px;height:48px}#${CONST.leftButton} input{margin:0;padding:1px 10px 1px 20px!important;background-color:rgb(255, 255, 255);border-top-left-radius:100px;border-bottom-left-radius:100px;cursor:pointer;height:46px;color:rgb(74, 114, 245);min-width:110px;border:1px solid rgb(74, 114, 245);font-size:17px!important;vertical-align:top;font-weight:600}#${CONST.rightButton} input{margin:0;padding:1px 20px 1px 10px!important;background-color:rgb(255, 255, 255);border-top-right-radius:100px;border-bottom-right-radius:100px;cursor:pointer;height:46px;color:rgb(74, 114, 245);min-width:110px;border:1px solid rgb(74, 114, 245);font-size:17px!important;vertical-align:top;font-weight:600}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background-color:rgb(74, 114, 245);color:rgb(255, 255, 255);}`,
+        MainType: "#section>main>div>div:nth-child(3)",
+        StyleCode: `#${CONST.rndID}{z-index:999;position:relative;margin-left:10px;height:46px;display:inline-block}#${CONST.rndID} #${CONST.leftButton}{display:inline-block;height:46px}#${CONST.rndID} #${CONST.rightButton}{display:inline-block;margin-left:-2px;height:46px}#${CONST.leftButton} input{margin:0;padding:1px 10px 1px 20px!important;background-color:rgb(255, 255, 255);border-top-left-radius:100px;border-bottom-left-radius:100px;cursor:pointer;height:46px;color:rgb(74, 114, 245);min-width:110px;border:1px solid rgb(74, 114, 245);font-size:17px!important;vertical-align:top;font-weight:600}#${CONST.rightButton} input{margin:0;padding:1px 20px 1px 10px!important;background-color:rgb(255, 255, 255);border-top-right-radius:100px;border-bottom-right-radius:100px;cursor:pointer;height:46px;color:rgb(74, 114, 245);min-width:110px;border:1px solid rgb(74, 114, 245);font-size:17px!important;vertical-align:top;font-weight:600}#${CONST.leftButton} input:hover,#${CONST.rightButton} input:hover{background-color:rgb(74, 114, 245);color:rgb(255, 255, 255);}`,
         KeyStyle: `div[data-testid="app-mainline"] p strong,div[data-testid="app-mainline"] p b`,
         AntiRedirect: () => localStorage.setItem("openLinksInNewTabs", true),
         AntiAds: () => deBounce(antiAds_RemoveNodes, 20, "you", true)(`div[data-testid="extension-button"]`, "You"),
@@ -2497,7 +2497,8 @@
               insterAfter(userSpan, Target);
               break;
             case newSiteType.YOU:
-              insterAfter(userSpan, Target);
+              Target.appendChild(userSpan);
+              Target.style.cssText += "display:inline-flex;justify-content:flex-start;";
               break;
             case newSiteType.STARTPAGE:
               insterAfter(userSpan, Target);
