@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2023.04.22.1
+// @version            2023.05.06.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的Greasemonkey脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的Greasemonkey脚本和浏览器扩展。
@@ -18,7 +18,7 @@
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.meta.js
 // @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
-// @require            https://greasyfork.org/scripts/437214/code/frColorPicker.js?version=1167998#sha256-h43kKiwkTzM1MeblM1cGzIUn4NjUxMlGdJgxrhSbyLE=
+// @require            https://greasyfork.org/scripts/437214/code/frColorPicker.js?version=1178663#sha256-76Z8Zc/y04xxvKypwwibFTkDpem4N9IGWxL3Eq7qXNY=
 // @match              *://*/*
 // @grant              GM_getValue
 // @grant              GM.getValue
@@ -85,8 +85,8 @@
   /* INITIALIZE_COMMON_CONSTANTS */
 
   const def = {
-    array: { exps: [], props: { Element: [], HTMLElement: [] }, values: [], scaleValueMatrix: [], frContainer: ["fr-configure", "fr-dialogbox"] },
-    count: { domainCount: 0, clickTimer: 0 },
+    array: { exps: [], values: [], scaleValueMatrix: [], props: { Element: [], HTMLElement: [] }, frcontainer: ["fr-configure", "fr-dialogbox"] },
+    count: { domainCount: 0, clickTimer: 0, exsiteSearch: 0, domainSearch: 0 },
     const: {
       seed: generateRandomString(6, "mix"),
       raf: `__FR_rAF_${generateRandomString(24, "attr")}`,
@@ -94,8 +94,8 @@
       boldAttrName: `fr-fix-${generateRandomString(8, "attr")}`,
       cssAttrName: `fr-css-${generateRandomString(8, "attr")}`,
       frameAttrName: `fr-frames-${generateRandomString(8, "attr")}`,
-      defaultFont: "\u7f51\u7ad9\u9ed8\u8ba4\u5b57\u4f53",
       gfHost: decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkY0MTY2ODg="),
+      defaultFont: decrypt("JUU3JUJEJTkxJUU3JUFCJTk5JUU5JUJCJTk4JUU4JUFFJUE0JUU1JUFEJTk3JUU0JUJEJTkz"),
       fontlistImg: decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjIlMkYwNCUyRjAyJTJGcW9SZldkLmdpZg=="),
       loadImg: decrypt("aHR0cHMlM0ElMkYlMkZpbWcuemNvb2wuY24lMkZjb21tdW5pdHklMkYwMzhkZGU0NThmOWE4NzRhODAxMjE2MGY3NDE3ZjZlLmdpZg=="),
       exQueryString: `html,head,head *,base,meta,style,link,script,noscript,iframe,img,br,hr,wbr,map,area,meter,canvas,svg,svg *,picture,form,object,param,embed,audio,video,source,track,progress,fr-colorpicker,fr-colorpicker *,fr-configure,fr-configure *,fr-dialogbox,fr-dialogbox *,gb-notice,gb-notice *`,
@@ -160,9 +160,9 @@
       rangeProgress: generateRandomString(9, "mix"),
     },
     id: {
-      rndId: generateRandomString(12, "char"),
       rndStyle: generateRandomString(12, "char"),
-      dialogbox: generateRandomString(10, "char"),
+      configure: generateRandomString(12, "char"),
+      dialogbox: generateRandomString(12, "char"),
       container: generateRandomString(10, "char"),
       field: generateRandomString(10, "char"),
       fontList: generateRandomString(8, "char"),
@@ -191,6 +191,8 @@
       cssinclued: generateRandomString(8, "char"),
       cssexclude: generateRandomString(8, "char"),
       mono: generateRandomString(8, "char"),
+      cm: generateRandomString(8, "mix"),
+      iscusmono: generateRandomString(6, "char"),
       selector: generateRandomString(8, "char"),
       cleaner: generateRandomString(6, "char"),
       fonttooltip: generateRandomString(9, "char"),
@@ -289,7 +291,7 @@
   }
 
   function __console(act) {
-    const __this = this?.console ?? this ?? console;
+    const __this = console;
     const __arguments = [...arguments];
     const [argm = "", ...args] = __arguments.slice(1);
     switch (__arguments[0]) {
@@ -368,6 +370,7 @@
 
   function qS(expr, target = document) {
     try {
+      if (/^#\w+$/.test(expr)) return target.getElementById(expr.slice(1));
       return target.querySelector(expr);
     } catch (e) {
       return null;
@@ -516,12 +519,10 @@
     const { isTop: CUR_WINDOW_TOP } = getLocationInfo();
     // PAGE_MODE
     const redundantScripts = global["fr-init-redundantscripts"];
-    if (redundantScripts === true) {
-      return scriptRedundancyWarning();
-    }
+    if (redundantScripts === true) return scriptRedundancyWarning();
     global["fr-init-redundantscripts"] = true;
     // CONTEXT_MODE
-    try {
+    if (storageAvailable("__storage_test__")) {
       if (GMcontextMode) {
         let redundantScriptsJSON = JSON.parse(sessionStorage.getItem("fr-init-redundantscripts"));
         if (redundantScriptsJSON?.check === true && redundantScriptsJSON?.lisence !== def.variable.lisence) {
@@ -533,17 +534,25 @@
       }
       sessionStorage.setItem("fr-init-redundantscripts", JSON.stringify({ check: true, lisence: def.variable.lisence }));
       w.addEventListener("beforeunload", () => sessionStorage.removeItem("fr-init-redundantscripts"));
-    } catch (e) {
-      ERROR("BLocking third-party cookies cause error:", CUR_WINDOW_TOP ? "" : "[FRAMES]", e.message);
     }
     return false;
 
     function scriptRedundancyWarning() {
       if (CUR_WINDOW_TOP) {
-        __console("error", `\ud83d\udea9 [Redundant Scripts]:\r\n发现冗余安装的${def.variable.scriptName}，请访问 ${def.variable.feedback}/117 排查错误。`);
-        GMregisterMenuCommand("\ufff8\ud83d\uded1 发现冗余脚本，点这里排查！", () => GMopenInTab(`${def.variable.feedback}/117`, false));
+        __console("error", `\ud83d\udea9 [Redundant Scripts]:\r\n发现冗余安装的脚本：${def.variable.scriptName}，如刷新后问题依旧，请访问 ${def.variable.feedback}/117 排查错误。`);
+        GMregisterMenuCommand("\ufff8\ud83d\uded1 发现冗余安装的脚本，点击刷新！", () => GMopenInTab(`${def.variable.feedback}/117`, false));
       }
       return true;
+    }
+
+    function storageAvailable(v) {
+      try {
+        sessionStorage.setItem(v, v);
+        sessionStorage.removeItem(v);
+        return true;
+      } catch (e) {
+        return false;
+      }
     }
   }
 
@@ -565,95 +574,95 @@
       return uad;
     })(GMinfo.userAgentData);
     const uad = vmuad ?? tmuad ?? navigator.userAgentData;
-    const trustcore = w.webkitRequestFileSystem ? "Blink" : !isNaN(parseFloat(w.mozInnerScreenX)) ? "Gecko" : w.GestureEvent ? "WebKit" : "Unknown";
-    let core = "Unknown";
+    const trustengine = w.webkitRequestFileSystem ? "Blink" : !isNaN(parseFloat(w.mozInnerScreenX)) ? "Gecko" : w.GestureEvent ? "WebKit" : "Unknown";
+    let engine = "Unknown";
     let brand = "Unknown";
     let brandversion = "0.00";
     if (uad) {
       const os = capitalize(uad.platform);
       const brandMap = {
-        IE: { core: "Trident", brand: "IE" },
-        SAFARI: { core: "WebKit", brand: "Safari" },
-        FIREFOX: { core: "Gecko", brand: "Firefox" },
-        EDGE: { core: "Blink", brand: "Edge" },
-        CHROME: { core: "Blink", brand: "Chrome" },
-        OPERA: { core: "Blink", brand: "Opera" },
-        BRAVE: { core: "Blink", brand: "Brave" },
-        YANDEX: { core: "Blink", brand: "Yandex" },
-        "MICROSOFT EDGE": { core: "Blink", brand: "Edge" },
-        "GOOGLE CHROME": { core: "Blink", brand: "Chrome" },
+        IE: { engine: "Trident", brand: "IE" },
+        SAFARI: { engine: "WebKit", brand: "Safari" },
+        FIREFOX: { engine: "Gecko", brand: "Firefox" },
+        EDGE: { engine: "Blink", brand: "Edge" },
+        CHROME: { engine: "Blink", brand: "Chrome" },
+        OPERA: { engine: "Blink", brand: "Opera" },
+        BRAVE: { engine: "Blink", brand: "Brave" },
+        YANDEX: { engine: "Blink", brand: "Yandex" },
+        "MICROSOFT EDGE": { engine: "Blink", brand: "Edge" },
+        "GOOGLE CHROME": { engine: "Blink", brand: "Chrome" },
       };
       uad.brands.some(b => {
         const reqBrand = b.brand.toUpperCase();
         const brandInfo = brandMap[reqBrand];
         if (brandInfo) {
-          core = brandInfo.core;
+          engine = brandInfo.engine;
           brand = brandInfo.brand;
           brandversion = b.version;
           return true;
         } else if (reqBrand === "CHROMIUM") {
-          core = "Blink";
+          engine = "Blink";
           brand = "Chromium";
           brandversion = b.version;
         }
       });
-      return { core, brand, brandversion, os, trustcore, credit: uad.credit ?? null };
+      return { engine, brand, brandversion, os, "trust-engine": trustengine, credit: uad.credit ?? null };
     } else {
       const ua = navigator.userAgent;
       let nameOffset, verOffset, ix;
       if ((verOffset = ua.indexOf("OPR")) !== -1) {
         brand = "Opera";
-        core = "Blink";
+        engine = "Blink";
         brandversion = ua.substring(verOffset + 4);
         if ((verOffset = ua.indexOf("Version")) !== -1) brandversion = ua.substring(verOffset + 8);
       } else if ((verOffset = ua.indexOf("UBrowser")) !== -1) {
         brand = "UCBrowser";
-        core = "Blink";
+        engine = "Blink";
         brandversion = ua.substring(verOffset + 9);
       } else if ((verOffset = ua.indexOf("YaBrowser")) !== -1) {
         brand = "Yandex";
-        core = "Blink";
+        engine = "Blink";
         brandversion = ua.substring(verOffset + 10);
       } else if ((verOffset = ua.indexOf("Brave")) !== -1) {
         brand = "Brave";
-        core = "Blink";
+        engine = "Blink";
         brandversion = ua.substring(verOffset + 6);
       } else if ((verOffset = ua.indexOf("Edg")) !== -1) {
         brand = "Edge";
-        core = "Blink";
+        engine = "Blink";
         brandversion = ua.substring(verOffset + 4);
       } else if ((verOffset = ua.indexOf("Chromium")) !== -1) {
         brand = "Chromium";
-        core = "Blink";
+        engine = "Blink";
         brandversion = ua.substring(verOffset + 9);
       } else if ((verOffset = ua.indexOf("Maxthon")) !== -1) {
         brand = "Maxthon";
-        core = "Blink";
+        engine = "Blink";
         brandversion = ua.substring(verOffset + 8);
       } else if ((verOffset = ua.indexOf("Chrome")) !== -1) {
         brand = "Chrome";
-        core = "Blink";
+        engine = "Blink";
         brandversion = ua.substring(verOffset + 7);
       } else if ((verOffset = ua.indexOf("Safari")) !== -1) {
         brand = "Safari";
-        core = "WebKit";
+        engine = "WebKit";
         brandversion = ua.substring(verOffset + 7);
         if ((verOffset = ua.indexOf("Version")) !== -1) brandversion = ua.substring(verOffset + 8);
       } else if ((verOffset = ua.indexOf("Waterfox")) !== -1) {
         brand = "Waterfox";
-        core = "Gecko";
+        engine = "Gecko";
         brandversion = ua.substring(verOffset + 9);
       } else if ((verOffset = ua.indexOf("Firefox")) !== -1) {
         brand = "Firefox";
-        core = "Gecko";
+        engine = "Gecko";
         brandversion = ua.substring(verOffset + 8);
       } else if ((verOffset = ua.indexOf("Trident")) !== -1) {
         brand = "IE";
-        core = "Trident";
+        engine = "Trident";
         brandversion = String(parseFloat(ua.substring(ua.indexOf("MSIE") + 5)) || parseFloat(ua.substring(ua.indexOf("rv") + 3)));
       } else if ((nameOffset = ua.lastIndexOf(" ") + 1) < (verOffset = ua.lastIndexOf("/"))) {
         brand = ua.substring(nameOffset, verOffset);
-        core = trustcore;
+        engine = trustengine;
         brandversion = ua.substring(verOffset + 1);
         if (brand.toLowerCase() === brand.toUpperCase()) {
           brand = navigator.appName;
@@ -667,7 +676,7 @@
       if (ua.indexOf("Linux") !== -1) os = "Linux";
       if (ua.indexOf("Android") !== -1) os = "Android";
       if (ua.indexOf("like Mac") !== -1) os = "iOS";
-      return { core, brand, brandversion, os, trustcore, credit: null };
+      return { engine, brand, brandversion, os, "trust-engine": trustengine, credit: null };
     }
   }
 
@@ -785,13 +794,13 @@
     const SET_BOOL_FOR_UPDATE = true; // DON'T TOUCH IT! MUST BE BOOLEAN TYPE. RECONSTRUCTION DATE: 2023.04.08
 
     const { navigatorInfo, locationInfo } = requestEnvironmentConstants();
-    const { core, brand, brandversion, os, trustcore, credit } = navigatorInfo;
+    const { engine, brand, brandversion, os, "trust-engine": trustengine, credit } = navigatorInfo;
     const { cHN: CUR_HOST_NAME, cPN: CUR_HOST_PATH, cP: CUR_PROTOCOL, pHN: TOP_HOST_NAME, isTop: CUR_WINDOW_TOP } = locationInfo;
 
-    const IS_REAL_BLINK = trustcore === "Blink";
-    const IS_REAL_GECKO = trustcore === "Gecko";
-    const IS_REAL_WEBKIT = trustcore === "WebKit";
-    const IS_CHEAT_UA = !credit && (core !== trustcore || checkBlinkCheatingUA());
+    const IS_REAL_BLINK = trustengine === "Blink";
+    const IS_REAL_GECKO = trustengine === "Gecko";
+    const IS_REAL_WEBKIT = trustengine === "WebKit";
+    const IS_CHEAT_UA = !credit && (engine !== trustengine || checkBlinkCheatingUA());
     const IS_IN_FRAMES = CUR_WINDOW_TOP ? "" : "[FRAMES]";
     const IS_GREASEMONKEY = GMscriptHandler === "Greasemonkey";
     const CAN_I_USE = detectBrowserCompatibility();
@@ -799,10 +808,12 @@
     /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
     const UPDATE_VERSION_NOTICE = String(
-      `<li class="${def.const.seed}_add">新增视口修正的站点开关，在指定站点关闭视口修正功能。</li>
-        <li class="${def.const.seed}_fix">优化Blink/Gecko内核v111.0以上版本的字体渲染效果。</li>
-        <li class="${def.const.seed}_fix">修正视口单位修正功能造成某些站点内容加载失败的问题。</li>
-        <li class="${def.const.seed}_fix">修正一些已知的小问题，优化样式，优化代码。</li>`
+      `<li class="${def.const.seed}_add">新增自定义排除渲染网址的管理功能，请查阅[<a target="_blank" href="${def.const.gfHost}#ex">使用说明</a>]</li>
+        <li class="${def.const.seed}_add">新增自定义等宽字体开关，默认关闭需手动开启[<a target="_blank" href="${def.const.gfHost}#custommonofont">看图</a>]</li>
+        <li class="${def.const.seed}_fix">优化全局样式的预定义内容及样式加载的逻辑与效率。</li>
+        <li class="${def.const.seed}_fix">修正window.find()非标方法在ShadowRoot中无效的Bug.</li>
+        <li class="${def.const.seed}_fix">修正Github:Feature preview中代码预览功能的样式Bug.</li>
+        <li class="${def.const.seed}_fix">修正一些已知的问题，优化样式，优化代码。</li>`
     );
 
     /* INITIALIZE_FONT_LIBRARY */
@@ -866,57 +877,50 @@
     /* INITIALIZE_SHADOWROOT_STYLE */
 
     def.const.style = {
-      mainStyle: `display:inline-block;font-family:monospace,${INITIAL_VALUES.fontSelect}`,
-      fullStyle: (b, c) => `${def.const.style.mainStyle};background-color:${b};color:${c};border-radius:4px;padding:4px 8px;`,
-      leftStyle: b => `${def.const.style.mainStyle};background-color:${b};color:snow;border-radius:4px 0 0 4px;padding:4px 2px 4px 8px`,
-      rightStyle: b => `${def.const.style.mainStyle};background-color:${b};color:snow;font-style:italic;border-radius:0 4px 4px 0;padding:4px 8px 4px 4px;margin:0 0 0 -2px`,
-      remarkStyle: c => `${def.const.style.mainStyle};color:${c};padding:4px 0;line-height:180%`,
-      global: String(
-        `:root body>#${def.id.dialogbox},:root body>#${def.id.rndId}{display:block;position:fixed;top:0;left:0;width:100%;height:100%;background:0 0;pointer-events:none}#${def.id.dialogbox}{z-index:1999999995}#${def.id.rndId}{z-index:1999999991}` +
-          `${
-            IS_REAL_GECKO
-              ? "input:is([type='text'],[type='password'],[type='search'],[type='email'],[type='tel'],[type='url'],[type='number']),input:not([type]){font-family:initial !important}"
-              : ""
-          }`
-      ),
+      mainStyle: `display:inline-block;font-family:monospace,${INITIAL_VALUES.fontSelect},sans-serif`,
+      global: "input:is([type='text'],[type='password'],[type='search']),input:not([type]){font-family:initial!important}",
       frDialogBox: String(
-        `div.${def.class.db}{z-index:99999;box-sizing:content-box;max-width:420px;border:2px solid #efefef;color:#444;pointer-events:auto}.${def.class.db}{position:absolute;top:calc(12% + 10px);right:15px;display:block;overflow:hidden;width:100%;border-radius:6px;background:#fff;box-shadow:0 0 10px 0 rgba(0,0,0,.3);transition:opacity .5s}.${def.class.db} *{text-shadow:0 0 1px #777!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}.${def.class.dbt}{margin-top:0;padding:10px 12px;width:auto;background:#efefef;text-align:left;font-weight:700;font-size:18px!important;font-family:Candara,'Times New Roman',${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm}{margin:5px;padding:10px;color:#444;text-align:left;font-weight:500;font-size:16px!important}.${def.class.dbb}{display:inline-block;box-sizing:content-box;margin:2px 1%;padding:8px 12px;min-width:12%;border-radius:4px;text-align:center;text-decoration:none!important;letter-spacing:0;font-weight:400;cursor:pointer}` +
-          `.${def.class.dbb}:hover{box-sizing:content-box;color:#fff;text-decoration:none!important;font-weight:700;opacity:.8}.${def.class.db} .${def.class.dbt},.${def.class.dbb},.${def.class.dbb}:hover{text-shadow:none!important;-webkit-text-stroke:0 transparent!important;-webkit-user-select:none;user-select:none}.${def.class.dbbf},.${def.class.dbbf}:hover{border:1px solid #d93223!important;border-radius:6px;background:#d93223!important;color:#fff!important;font-size:14px!important}.${def.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${def.class.dbbt},.${def.class.dbbt}:hover{border:1px solid #038c5a!important;border-radius:6px;background:#038c5a!important;color:#fff!important;font-size:14px!important}.${def.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${def.class.dbbn},.${def.class.dbbn}:hover{border:1px solid #777!important;border-radius:6px;background:#777!important;color:#fff!important;font-size:14px!important}.${def.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${def.class.dbbc}{padding:2.5%;background:#efefef;color:#fff;text-align:right}.${def.class.dbm} textarea{cursor:auto;scrollbar-width:thin;overscroll-behavior:contain}.${def.class.dbm} textarea::-webkit-scrollbar{width:8px;height:8px}.${def.class.dbm} textarea::-webkit-scrollbar-corner{border-radius:2px;background:#efefef;box-shadow:inset 0 0 3px #aaa;}.${def.class.dbm} textarea::-webkit-scrollbar-thumb{border-radius:2px;background:#cfcfcf;box-shadow:inset 0 0 5px #999;}.${def.class.dbm} textarea::-webkit-scrollbar-track{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}.${def.class.dbm} textarea::-webkit-scrollbar-track-piece{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}` +
-          `.${def.class.dbm} button:hover{background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important;cursor:pointer}.${def.class.dbm} p{margin:5px 0!important;text-align:left;text-indent:0!important;font-weight:400;font-size:16px!important;line-height:1.5!important;-webkit-user-select:none;user-select:none}.${def.class.dbm} ul{margin:0 0 0 10px!important;padding:2px;color:gray;list-style:none;font:italic 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;scrollbar-width:thin}.${def.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${def.class.dbm} ul::-webkit-scrollbar-thumb{border-radius:10px;background:#cfcfcf;box-shadow:inset 0 0 5px #999;}.${def.class.dbm} ul::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}.${def.class.dbm} ul::-webkit-scrollbar-track-piece{border-radius:6px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}.${def.class.dbm} ul li{display:list-item;list-style-type:none;-webkit-user-select:none;user-select:none;word-break:break-all}.${def.class.dbm} li:before{display:none}.${def.class.dbm} #${def.id.bk},.${def.class.dbm} #${def.id.pv},.${def.class.dbm} #${def.id.fs},.${def.class.dbm} #${def.id.fvp},.${def.class.dbm} #${def.id.hk},.${def.class.dbm} #${def.id.ct},.${def.class.dbm} #${def.id.mps},.${def.class.dbm} #${def.id.flc},.${def.class.dbm} #${def.id.gc}{display:flex;box-sizing:content-box;margin:0;padding:2px 4px!important;width:calc(96% - 10px);height:max-content;min-width:auto;min-height:40px;list-style:none;font-style:normal;justify-content:space-between;align-items:flex-start;word-break:break-word}` +
-          `.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);color:#fff;content:' '}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#fff;content:'OFF';font-weight:700;font-style:normal;font-size:16px}.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4);cursor:pointer}.${def.class.checkbox}:checked+label::after{left:10px;content:'ON'}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:' '}` +
-          `.${def.class.dbm} .${def.const.seed}_VIP{margin:2px 0 0 0;color:#b8860b!important;font:normal 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${def.class.dbm} #${def.id.flc} button,.${def.class.dbm} #${def.id.gc} button{box-sizing:border-box!important;margin:0 5px 0 0!important;padding:2px 5px!important;border:1px solid #999!important;border-radius:4px!important;background-color:#eee;color:#444!important;letter-spacing:normal!important;font-weight:400!important;font-size:14px!important}#${def.const.seed}_monospaced_siterules:placeholder-shown{color:#555!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}#${def.const.seed}_monospaced_siterules::-webkit-input-placeholder,#${def.const.seed}_monospaced_siterules::-moz-placeholder,#${def.const.seed}_monospaced_font::-moz-placeholder{color:#555!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} a{color:#0969da;text-decoration:none!important;font-style:inherit}.${def.class.dbm} a:hover{color:#dc143c;text-decoration:underline}.${def.class.dbm} #${def.id.feedback}{padding:2px 10px;width:max-content;height:22px;min-width:auto}.${def.class.dbm} #${def.id.files}{display:none}.${def.class.dbm} #${def.id.feedback}:hover{color:crimson!important}` +
+        `:host(#${def.id.dialogbox}){position:fixed;top:0;left:0;width:100%;height:100%;background:0 0;pointer-events:none;z-index:1999999995}div.${def.class.db}{z-index:99999;box-sizing:content-box;max-width:420px;border:2px solid #efefef;color:#444444;pointer-events:auto}.${def.class.db}{position:absolute;top:calc(12% + 10px);right:15px;display:block;overflow:hidden;width:100%;border-radius:6px;background:#ffffff;box-shadow:0 0 10px 0 rgba(0, 0, 0, 0.3);transition:opacity .5s}.${def.class.db} *{text-shadow:0 0 1px #777!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}.${def.class.dbt}{margin-top:0;padding:10px 12px;width:auto;background:#efefef;text-align:left;font-weight:700;font-size:18px!important;font-family:Candara,'Times New Roman',${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm}{margin:5px;padding:10px;color:#444444;text-align:left;font-weight:500;font-size:16px!important}.${def.class.dbb}{display:inline-block;box-sizing:content-box;margin:2px 1%;padding:8px 12px;min-width:12%;border-radius:4px;text-align:center;text-decoration:none!important;letter-spacing:0;font-weight:400;cursor:pointer}.${def.class.db} .${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}.${def.class.db} .gradient-bg{background:#e7ffd9;animation:gradient 2s ease-in-out forwards}@keyframes gradient{0%{background:#e7ffd9}to{background:transparent}}` +
+          `.${def.class.dbb}:hover{box-sizing:content-box;color:#ffffff;text-decoration:none!important;font-weight:700;opacity:.8}.${def.class.db} .${def.class.dbt},.${def.class.dbb},.${def.class.dbb}:hover{text-shadow:none!important;-webkit-text-stroke:0 transparent!important;-webkit-user-select:none;user-select:none}.${def.class.dbbf},.${def.class.dbbf}:hover{border:1px solid #d93223!important;border-radius:6px;background:#d93223!important;color:#ffffff!important;font-size:14px!important}.${def.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${def.class.dbbt},.${def.class.dbbt}:hover{border:1px solid #038c5a!important;border-radius:6px;background:#038c5a!important;color:#ffffff!important;font-size:14px!important}.${def.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${def.class.dbbn},.${def.class.dbbn}:hover{border:1px solid #777777!important;border-radius:6px;background:#777777!important;color:#ffffff!important;font-size:14px!important}.${def.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${def.class.dbbc}{padding:2.5%;background:#efefef;color:#ffffff;text-align:right}.${def.class.dbm} textarea{cursor:auto;scrollbar-width:thin;overscroll-behavior:contain}.${def.class.dbm} textarea::-webkit-scrollbar{width:8px;height:8px}.${def.class.dbm} textarea::-webkit-scrollbar-corner{border-radius:2px;background:#efefef;box-shadow:inset 0 0 3px #aaaaaa;}.${def.class.dbm} textarea::-webkit-scrollbar-thumb{border-radius:2px;background:#cfcfcf;box-shadow:inset 0 0 5px #999;}.${def.class.dbm} textarea::-webkit-scrollbar-track{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaaaaa;}.${def.class.dbm} textarea::-webkit-scrollbar-track-piece{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaaaaa;}` +
+          `.${def.class.dbm} button:hover{background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important;cursor:pointer}.${def.class.dbm} p{margin:5px 0!important;text-align:left;text-indent:0!important;font-weight:400;font-size:16px!important;line-height:1.5!important;-webkit-user-select:none;user-select:none}.${def.class.dbm} ul{margin:0 0 0 10px!important;padding:2px;color:gray;list-style:none;font:italic 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-user-select:none;user-select:none;scrollbar-width:thin}.${def.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${def.class.dbm} ul::-webkit-scrollbar-thumb{border-radius:10px;background:#cfcfcf;box-shadow:inset 0 0 5px #999999;}.${def.class.dbm} ul::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #aaaaaa;}.${def.class.dbm} ul::-webkit-scrollbar-track-piece{border-radius:6px;background:#efefef;box-shadow:inset 0 0 5px #aaaaaa;}.${def.class.dbm} ul li{display:list-item;list-style-type:none;word-break:break-all}.${def.class.dbm} li:before{display:none}.${def.class.dbm} #${def.id.bk},.${def.class.dbm} #${def.id.pv},.${def.class.dbm} #${def.id.fs},.${def.class.dbm} #${def.id.fvp},.${def.class.dbm} #${def.id.hk},.${def.class.dbm} #${def.id.ct},.${def.class.dbm} #${def.id.mps},.${def.class.dbm} #${def.id.flc},.${def.class.dbm} #${def.id.gc},.${def.class.dbm} #${def.id.cm}{display:flex;box-sizing:content-box;margin:0;padding:2px 4px!important;width:calc(96% - 10px);height:max-content;min-width:auto;min-height:40px;list-style:none;font-style:normal;justify-content:space-between;align-items:flex-start;word-break:break-word}.${def.class.dbm} ul#${def.const.seed}_d_d_ li:hover{background-color:#fdf6eccc!important}` +
+          `.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#ffffff;box-shadow:0 0 1px rgba(0,0,0,.6);color:#ffffff;content:' '}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#ffffff;content:'OFF';font-weight:700;font-style:normal;font-size:16px}.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4);cursor:pointer}.${def.class.checkbox}:checked+label::after{left:10px;content:'ON'}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:' '}` +
+          `.${def.class.dbm} .${def.const.seed}_VIP,.${def.class.dbm} .${def.const.seed}_cusmono{margin:2px 0 0 0;color:#b8860b!important;font:normal 400 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${def.class.dbm} #${def.id.flc} button,.${def.class.dbm} #${def.id.gc} button{box-sizing:border-box!important;margin:0 5px 0 0!important;padding:2px 5px!important;border:1px solid #999!important;border-radius:4px!important;background-color:#eeeeee;color:#444444!important;letter-spacing:normal!important;font-weight:400!important;font-size:14px!important}#${def.const.seed}_monospaced_siterules:placeholder-shown{color:#555555!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}#${def.const.seed}_monospaced_siterules::-webkit-input-placeholder,#${def.const.seed}_monospaced_siterules::-moz-placeholder,#${def.const.seed}_monospaced_font::-moz-placeholder{color:#555555!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} a{color:#0969da;text-decoration:none!important;font-style:inherit}.${def.class.dbm} a:hover{color:#dc143c;text-decoration:underline}.${def.class.dbm} #${def.id.feedback}{padding:2px 10px;width:max-content;height:22px;min-width:auto}.${def.class.dbm} #${def.id.files}{display:none}.${def.class.dbm} #${def.id.feedback}:hover{color:crimson!important}` +
           `.${def.class.dbm} #${def.id.feedback}:after{width:0;height:0;background:url('${def.const.loadImg}') no-repeat -400px -300px;content:""}` +
-          `.${def.class.dbm} #${def.const.seed}_custom_Fontlist:placeholder-shown{color:#aaa!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} #${def.const.seed}_custom_Fontlist::-webkit-input-placeholder{color:#aaa!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;word-break:break-all!important}.${def.class.dbm} #${def.const.seed}_custom_Fontlist::-moz-placeholder{color:#555!important;white-space:pre-line;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} #${def.const.seed}_update li{margin:0;padding:0;color:gray;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} .${def.const.seed}_add:before{display:inline;margin:0 4px 0 -10px;content:'+'}.${def.class.dbm} .${def.const.seed}_del:before{display:inline;margin:0 4px 0 -10px;content:'-'}.${def.class.dbm} .${def.const.seed}_fix:before{display:inline;margin:0 4px 0 -10px;content:'@'}.${def.class.dbm} .${def.const.seed}_info{color:#daa520!important}.${def.class.dbm} .${def.const.seed}_info:before{display:inline;margin:0 4px 0 -10px;content:'#'}.${def.class.dbm} .${def.const.seed}_warn{color:#e90000!important}.${def.class.dbm} .${def.const.seed}_warn:before{display:inline;margin:0 4px 0 -10px;content:'!'}.${def.class.dbm} .${def.const.seed}_init{color:#65a16a!important}.${def.class.dbm} .${def.const.seed}_init:before{display:inline;margin:0 4px 0 -10px;content:'$'}.${def.class.dbm} input:focus,.${def.class.dbm} textarea:focus{box-shadow:inset 0 1px 3px rgb(0 0 0/10%),0 0 4px rgb(110 111 112/60%)!important}`
+          `.${def.class.dbm} #${def.const.seed}_custom_Fontlist:placeholder-shown{color:#aaaaaa!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} #${def.const.seed}_custom_Fontlist::-webkit-input-placeholder{color:#aaaaaa!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;word-break:break-all!important}.${def.class.dbm} #${def.const.seed}_custom_Fontlist::-moz-placeholder{color:#555555!important;white-space:pre-line;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} #${def.const.seed}_update li{margin:0;padding:1px 0;color:gray;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} .${def.const.seed}_add:before{display:inline;margin:0 4px 0 -10px;content:'+'}.${def.class.dbm} .${def.const.seed}_del:before{display:inline;margin:0 4px 0 -10px;content:'-'}.${def.class.dbm} .${def.const.seed}_fix:before{display:inline;margin:0 4px 0 -10px;content:'@'}.${def.class.dbm} .${def.const.seed}_info{color:#daa520!important}.${def.class.dbm} .${def.const.seed}_info:before{display:inline;margin:0 4px 0 -10px;content:'#'}.${def.class.dbm} .${def.const.seed}_warn{color:#e90000!important}.${def.class.dbm} .${def.const.seed}_warn:before{display:inline;margin:0 4px 0 -10px;content:'!'}.${def.class.dbm} .${def.const.seed}_init{color:#65a16a!important}.${def.class.dbm} .${def.const.seed}_init:before{display:inline;margin:0 4px 0 -10px;content:'$'}.${def.class.dbm} input:focus,.${def.class.dbm} textarea:focus{box-shadow:inset 0 1px 3px rgb(0 0 0/10%),0 0 4px rgb(110 111 112/60%)!important}`
       ),
       frConfigure:
         String(
-          `#${def.id.container}{position:absolute;top:10px;right:24px;z-index:99999;overflow-x:hidden;overflow-y:auto;box-sizing:content-box;padding:4px;max-height:calc(100% - 40px);min-height:10%;border-radius:12px;background:#f0f6ff!important;box-shadow:0 0 4px 0 rgb(0 0 0/30%);color:#333;text-align:left;font-weight:700;font-size:16px!important;opacity:0;transition:opacity .5s;width:auto;overscroll-behavior:contain;scrollbar-color:rgb(51 102 153/85%) rgb(0 0 0/25%);scrollbar-width:thin;pointer-events:auto}#${def.id.container}::-webkit-scrollbar{width:10px;height:1px}#${def.id.container}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container}::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container} *{text-shadow:none!important;font-weight:700;font-size:16px;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji,Android Emoji,EmojiSymbols!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}` +
-            `#${def.id.container} fieldset{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;min-height:475px;border:2px groove #67a5df!important;border-radius:10px;background:#f0f6ff!important}#${def.id.container} legend{position:relative!important;float:none!important;display:block!important;visibility:visible!important;box-sizing:content-box;margin:0;padding:0 8px;width:auto!important;height:auto!important;min-width:185px!important;border:none!important;background:#f0f6ff!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.container} fieldset ul{margin:0;padding:0;background:#f0f6ff!important}#${def.id.container} ul li{float:none;display:inherit;box-sizing:content-box;margin:3px 0;min-width:-webkit-fill-available;min-width:-moz-available;border:none;background:#f0f6ff!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none}#${def.id.container} ul li:before{display:none}#${def.id.container} .${def.class.rotation} svg{visibility:visible!important;overflow:hidden;width:24px;height:24px;vertical-align:initial!important;fill:#67a5df;}#${def.id.container} .${def.class.rotation} svg:hover{cursor:help}#${def.const.seed}_scriptname{display:inline-block;font-weight:700!important;-webkit-user-select:all;user-select:all}#${def.id.container} .${def.class.title} .${def.class.guide}{position:absolute;display:inline-block;cursor:pointer}@keyframes rotation{0%{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(1turn)}}.${def.class.title} .${def.class.rotation}{top:auto;right:auto;bottom:auto;left:auto;margin:0;padding:0;width:24px;height:24px;-webkit-transform:rotate(1turn);transform-origin:center 50% 0;animation:rotation 5s linear infinite}` +
+          `:host(#${def.id.configure}){position:fixed;top:0;left:0;width:100%;height:100%;background:0 0;pointer-events:none;z-index:1999999991}#${def.id.container}{position:absolute;top:10px;right:24px;z-index:99999;overflow-x:hidden;overflow-y:auto;box-sizing:content-box;padding:4px;max-height:calc(100% - 40px);min-height:10%;border-radius:12px;background:#f0f6ff!important;box-shadow:0 0 4px 0 rgb(0 0 0/30%);color:#333333;text-align:left;font-weight:700;font-size:16px!important;opacity:0;transition:opacity .5s;width:auto;overscroll-behavior:contain;scrollbar-color:rgb(51 102 153/85%) rgb(0 0 0/25%);scrollbar-width:thin;pointer-events:auto}#${def.id.container}::-webkit-scrollbar{width:10px;height:1px}#${def.id.container}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container}::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container} *{text-shadow:none!important;font-weight:700;font-size:16px;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji,Android Emoji,EmojiSymbols!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}` +
+            `#${def.id.container} fieldset{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;min-height:475px;border:2px groove #67a5df!important;border-radius:10px;background:#f0f6ff!important}#${def.id.container} legend{position:relative!important;float:none!important;display:block!important;visibility:visible!important;box-sizing:content-box;margin:0;padding:0 32px 0 8px;width:auto!important;height:auto!important;border:none!important;background:#f0f6ff!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.container} fieldset ul{margin:0;padding:0;background:#f0f6ff!important}#${def.id.container} ul li{float:none;display:inherit;box-sizing:content-box;margin:3px 0;min-width:-webkit-fill-available;min-width:-moz-available;border:none;background:#f0f6ff!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none}#${def.id.container} ul li:before{display:none}#${def.id.container} .${def.class.rotation} svg{visibility:visible!important;overflow:hidden;width:24px;height:24px;vertical-align:initial!important;fill:#67a5df;}#${def.id.container} .${def.class.rotation} svg:hover{cursor:help}#${def.const.seed}_scriptname{display:inline-block;vertical-align:bottom;overflow:hidden;max-width:225px;text-overflow:ellipsis;white-space:nowrap;font-weight:700!important;-webkit-user-select:all;user-select:all}#${def.id.container} .${def.class.title} .${def.class.guide}{position:absolute;display:inline-block;cursor:pointer}@keyframes rotation{0%{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(1turn)}}.${def.class.title} .${def.class.rotation}{top:auto;right:auto;bottom:auto;left:auto;margin:0;padding:0;width:24px;height:24px;-webkit-transform:rotate(1turn);transform-origin:center 50% 0;animation:rotation 5s linear infinite}` +
             `#${def.id.container} input:not([type='range'],[type='checkbox']):focus,#${def.id.container} textarea:focus{box-shadow:inset 0 1px 3px rgb(0 0 0/10%),0 0 6px rgb(82 168 236/60%)!important}#${def.id.fontList}{padding:2px 10px 0;min-height:73px}#${def.id.fontFace},#${def.id.fontSmooth}{display:flex!important;padding:2px 10px;width:calc(100% - 18px);height:40px;min-width:auto;align-items:center;justify-content:space-between}#${def.id.fontSize}{padding:2px 10px;height:60px}#${def.id.fontStroke}{padding:2px 10px;height:60px}#${def.id.fontShadow}{padding:2px 10px;height:60px}#${def.id.shadowColor}{display:flex;margin:4px;padding:2px 10px;width:auto;min-height:45px;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}#${def.id.fontCss},#${def.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${def.id.submit}{padding:2px 10px;height:40px}` +
-            `#${def.id.fontList} .${def.class.selector} a{text-decoration:none;font-weight:400}#${def.id.fontList} .${def.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${def.id.fontList} .${def.class.label} span{display:inline-block;overflow:hidden;box-sizing:border-box;padding:5px;width:max-content;height:max-content;max-width:200px;min-width:12px;background:#67a5df;color:#fff;text-overflow:ellipsis;white-space:nowrap;font-weight:400;font-size:16px!important}#${def.id.fontList} .${def.class.close}{width:12px}#${def.id.fontList} .${def.class.close}:hover{border-radius:2px;background-color:#2d7dca;color:tomato}#${def.id.selector}{width:100%;max-width:100%}#${def.id.selector} label{display:block;margin:0 0 4px;color:#333;cursor:auto}#${def.id.selector} #${def.id.cleaner}{margin-left:5px;cursor:pointer}#${def.id.selector} #${def.id.cleaner}:hover{color:red}#${def.id.fontList} .${def.class.selector}{overflow-x:hidden;box-sizing:border-box;margin:0 0 6px;padding:6px 6px 0;width:100%;max-width:min-content;max-width:-moz-min-content;max-height:90px;min-width:100%;min-height:45px;border:2px solid #67a5df!important;border-radius:6px;overscroll-behavior:contain;scrollbar-color:#369 rgba(0,0,0,.25);scrollbar-width:thin}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontList} .${def.class.selectFontId} span.${def.class.spanlabel},#${def.id.selector} span.${def.class.spanlabel}{display:block!important;margin:0!important;padding:0 0 4px;width:auto;border:0;background-color:transparent!important;color:#333;text-align:left!important}` +
-            `#${def.id.fontList} .${def.class.selectFontId}{width:auto}#${def.id.fontList} .${def.class.selectFontId} input{overflow:hidden;box-sizing:border-box;margin:0;padding:1px 23px 1px 2px;width:230px;height:42px!important;max-width:100%;min-width:100%;outline:none!important;outline-color:#67a5df;border:2px solid #67a5df!important;border-radius:6px;background:#fafafa;text-indent:8px;text-overflow:ellipsis;font-weight:700;font-size:16px!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.fontList} .${def.class.selectFontId} input[disabled]{pointer-events:none!important}#${def.id.fontList} .${def.class.selectFontId} input::-webkit-search-cancel-button{margin:0 7px}.${def.class.placeholder}:placeholder-shown{color:#369!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.95!important}.${def.class.placeholder}::-webkit-input-placeholder{color:#369!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}.${def.class.placeholder}::-moz-placeholder{color:#369!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}#${def.id.fontList} .${def.class.selectFontId} dl{position:absolute;z-index:1000;overflow-x:hidden;box-sizing:content-box;margin:4px 0 0;padding:4px 8px;width:auto;max-width:calc(100% - 68px);max-height:298px;min-width:60%;border:2px solid #67a5df!important;border-radius:6px;background-color:#fff;white-space:nowrap;font-size:18px!important;overscroll-behavior:contain;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}` +
-            `#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontId} dl dd{display:block;overflow-x:hidden;box-sizing:content-box;margin:1px 8px;padding:5px 0;width:-moz-available;width:-webkit-fill-available;max-width:100%;min-width:100%;text-overflow:ellipsis;font-weight:400;font-size:21px!important}#${def.id.fontList} .${def.class.selectFontId} dl dd:hover{overflow-x:hidden;box-sizing:content-box;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff;text-overflow:ellipsis}` +
-            `.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);color:#fff;content:" "}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#fff;content:"OFF";font-weight:700;font-style:normal;font-size:16px}.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4);cursor:pointer}.${def.class.checkbox}:checked+label::after{left:10px;content:"ON"}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}#${def.id.fface} label,#${def.id.fface}+label::after,#${def.id.fface}+label::before,#${def.id.smooth} label,#${def.id.smooth}+label::after,#${def.id.smooth}+label::before{-webkit-transition:all .3s ease-in;transition:all .3s ease-in}` +
-            `#${def.id.fontShadow} div.${def.class.flex}:before,#${def.id.fontShadow} div.${def.class.flex}:after,#${def.id.fontStroke} div.${def.class.flex}:before,#${def.id.fontStroke} div.${def.class.flex}:after,#${def.id.fontSize} div.${def.class.flex}:before,#${def.id.fontSize} div.${def.class.flex}:after{display:none}#${def.id.fontShadow} #${def.id.shadowSize},#${def.id.fontStroke} #${def.id.strokeSize},#${def.id.fontSize} #${def.id.fontScale}{box-sizing:content-box;margin:0 10px 0 0!important;padding:0;width:56px!important;height:32px!important;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:#fafafa!important;color:#111!important;text-align:center;text-indent:0;font-weight:400!important;font-size:17px!important;font-family:Impact,Times,serif!important}#${def.id.fontSize} #${def.id.fontScale}[disabled]{background-color:rgba(228,231,237,.82)!important;color:#555!important;filter:grayscale(.9)}#${def.id.fontSize} #${def.id.fviewport}>label,#${def.id.fontStroke} #${def.id.fstroke}>label{float:none!important;display:inline!important;margin:0!important;padding:0 0 0 2px!important;color:#666!important;font-size:12px!important;cursor:help!important}#${def.id.fixViewport},#${def.id.fixStroke}{display:inline-block;margin:0 2px 0 0!important;width:14px!important;height:14px!important;vertical-align:text-bottom;cursor:pointer;-webkit-appearance:checkbox!important}` +
-            `#${def.id.fixViewport}::after,#${def.id.fixStroke}::after{position:relative;top:0;display:inline-block;margin:0;padding:0;width:14px;height:14px;border-radius:3px;background-color:#aaa;color:#fff;content:"\u2717";vertical-align:top;text-align:center;font-weight:700;font-size:12px;line-height:14px}#${def.id.fixViewport}:checked::after,#${def.id.fixStroke}:checked::after{border:0!important;background-color:#65a0db;color:#fff;content:"\u2713";font-weight:700;font-size:12px;line-height:14px}.${def.class.flex}{display:flex;width:auto;min-width:100%;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}.${def.class.slider} input{visibility:hidden}#${def.id.shadowColor} *{box-sizing:content-box}#${def.id.shadowColor} .${def.class.frColorPicker}{margin:0;padding:0;width:auto}#${def.id.shadowColor} .${def.class.frColorPicker} #${def.id.color}{box-sizing:border-box;margin:0;padding:0 8px 0 0;width:160px!important;height:35px!important;min-width:160px;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:rgba(253,253,255,.69);color:#333!important;text-align:center;text-indent:0;font-weight:400!important;font-size:18px!important;font-family:Impact,Times,serif!important;cursor:pointer}` +
-            `#${def.id.fontCss} textarea,#${def.id.fontEx} textarea{box-sizing:border-box;margin:0;padding:5px;width:calc(100% - 2px)!important;height:78px;max-width:calc(100% - 2px);max-height:78px;min-width:calc(100% - 2px);min-height:78px;outline:none!important;border:2px solid #67a5df!important;border-radius:6px;color:#0b5b9c!important;font:700 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;resize:none;cursor:auto;word-break:break-all;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin;overscroll-behavior:contain}#${def.id.fontCss} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontCss} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontCss} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px rgba(0,0,0,.2);}#${def.id.fontCss} textarea::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontEx} textarea{background:#fafafa!important}#${def.id.fontEx} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontEx} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontEx} textarea::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df}.${def.class.switch}{float:right;box-sizing:border-box;margin:-2px 4px 0 0;padding:0 6px;border:2px double #67a5df;border-radius:4px;color:#0a68c1}#${def.id.cSwitch}:hover,#${def.id.eSwitch}:hover{cursor:pointer;-webkit-user-select:none;user-select:none}.${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}.${def.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9,#e9ffe9 25%,transparent 0,transparent 50%,#e9ffe9 0,#e9ffe9 75%,transparent 0,transparent)!important;background-color:#f7fff7!important;background-size:50px 50px}` +
-            `.${def.class.dbm} textarea{cursor:auto;scrollbar-width:thin;overscroll-behavior:contain}.${def.class.dbm} textarea::-webkit-scrollbar{width:8px;height:8px}.${def.class.dbm} textarea::-webkit-scrollbar-corner{border-radius:2px;background:#efefef;box-shadow:inset 0 0 3px #aaa;}.${def.class.dbm} textarea::-webkit-scrollbar-thumb{border-radius:2px;background:#cfcfcf;box-shadow:inset 0 0 5px #999;}.${def.class.dbm} textarea::-webkit-scrollbar-track{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}.${def.class.dbm} textarea::-webkit-scrollbar-track-piece{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}` +
-            `#${def.id.submit} button{box-sizing:border-box;margin:0;padding:5px 10px;width:auto;height:35px;min-width:min-content;min-height:35px;border:2px solid #6ba7e0;border-radius:6px;background-color:#67a5df;background-image:none;color:#fff!important;font:normal 600 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;cursor:pointer}#${def.id.submit} button:hover{box-shadow:0 0 5px rgba(0,0,0,.4)!important}#${def.id.submit} .${def.class.cancel},#${def.id.submit} .${def.class.reset}{float:left;margin-right:10px}#${def.id.submit} .${def.class.submit}{float:right}#${def.id.submit} #${def.id.backup}{display:none;margin:0 10px 0 0}.${def.class.anim}{border:2px solid #dc143c!important;background:#dc143c!important;animation:jiggle 1.8s ease-in infinite}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}`
+            `#${def.id.fontList} .${def.class.selector} a{text-decoration:none;font-weight:400}#${def.id.fontList} .${def.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${def.id.fontList} .${def.class.label} span{display:inline-block;overflow:hidden;box-sizing:border-box;padding:5px;width:max-content;height:max-content;max-width:200px;min-width:12px;background:#67a5df;color:#ffffff;text-overflow:ellipsis;white-space:nowrap;font-weight:400;font-size:16px!important}#${def.id.fontList} .${def.class.close}{width:12px}#${def.id.fontList} .${def.class.close}:hover{border-radius:2px;background-color:#2d7dca;color:tomato}#${def.id.selector}{width:100%;max-width:100%}#${def.id.selector} label{display:block;margin:0 0 4px;color:#333333;cursor:auto}#${def.id.selector} #${def.id.cleaner}{margin-left:5px;cursor:pointer}#${def.id.selector} #${def.id.cleaner}:hover{color:#ff0000;}#${def.id.fontList} .${def.class.selector}{overflow-x:hidden;box-sizing:border-box;margin:0 0 6px;padding:6px 6px 0;width:100%;max-width:min-content;max-width:-moz-min-content;max-height:90px;min-width:100%;min-height:45px;border:2px solid #67a5df!important;border-radius:6px;overscroll-behavior:contain;scrollbar-color:#336699 rgba(0,0,0,.25);scrollbar-width:thin}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontList} .${def.class.selectFontId} span.${def.class.spanlabel},#${def.id.selector} span.${def.class.spanlabel}{display:block!important;margin:0!important;padding:0 0 4px;width:auto;border:0;background-color:transparent!important;color:#333333;text-align:left!important}` +
+            `#${def.id.fontList} .${def.class.selectFontId}{width:auto}#${def.id.fontList} .${def.class.selectFontId} input{overflow:hidden;box-sizing:border-box;margin:0;padding:1px 23px 1px 2px;width:230px;height:42px!important;max-width:100%;min-width:100%;outline:none!important;outline-color:#67a5df;border:2px solid #67a5df!important;border-radius:6px;background:#fafafa;text-indent:8px;text-overflow:ellipsis;font-weight:700;font-size:16px!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.fontList} .${def.class.selectFontId} input[disabled]{pointer-events:none!important}#${def.id.fontList} .${def.class.selectFontId} input::-webkit-search-cancel-button{margin:0 7px}.${def.class.placeholder}:placeholder-shown{color:#336699!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.95!important}.${def.class.placeholder}::-webkit-input-placeholder{color:#336699!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}.${def.class.placeholder}::-moz-placeholder{color:#336699!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}#${def.id.fontList} .${def.class.selectFontId} dl{position:absolute;z-index:1000;overflow-x:hidden;box-sizing:content-box;margin:4px 0 0;padding:4px 8px;width:auto;max-width:calc(100% - 68px);max-height:298px;min-width:60%;border:2px solid #67a5df!important;border-radius:6px;background-color:#ffffff;white-space:nowrap;font-size:18px!important;overscroll-behavior:contain;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}` +
+            `#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontId} dl dd{display:block;overflow-x:hidden;box-sizing:content-box;margin:1px 8px;padding:5px 0;width:-moz-available;width:-webkit-fill-available;max-width:100%;min-width:100%;text-overflow:ellipsis;font-weight:400;font-size:21px!important}#${def.id.fontList} .${def.class.selectFontId} dl dd:hover{overflow-x:hidden;box-sizing:content-box;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#ffffff;text-overflow:ellipsis}` +
+            `.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#ffffff;box-shadow:0 0 1px rgba(0,0,0,.6);color:#ffffff;content:" "}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#ffffff;content:"OFF";font-weight:700;font-style:normal;font-size:16px}.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4);cursor:pointer}.${def.class.checkbox}:checked+label::after{left:10px;content:"ON"}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}#${def.id.fface} label,#${def.id.fface}+label::after,#${def.id.fface}+label::before,#${def.id.smooth} label,#${def.id.smooth}+label::after,#${def.id.smooth}+label::before{-webkit-transition:all .3s ease-in;transition:all .3s ease-in}` +
+            `#${def.id.fontShadow} div.${def.class.flex}:before,#${def.id.fontShadow} div.${def.class.flex}:after,#${def.id.fontStroke} div.${def.class.flex}:before,#${def.id.fontStroke} div.${def.class.flex}:after,#${def.id.fontSize} div.${def.class.flex}:before,#${def.id.fontSize} div.${def.class.flex}:after{display:none}#${def.id.fontShadow} #${def.id.shadowSize},#${def.id.fontStroke} #${def.id.strokeSize},#${def.id.fontSize} #${def.id.fontScale}{box-sizing:content-box;margin:0 10px 0 0!important;padding:0;width:56px!important;height:32px!important;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:#fafafa!important;color:#111111!important;text-align:center;text-indent:0;font-weight:400!important;font-size:17px!important;font-family:Impact,Times,serif!important}#${def.id.fontSize} #${def.id.fontScale}[disabled]{background-color:rgba(228,231,237,.82)!important;color:#555555!important;filter:grayscale(.9)}#${def.id.fontSize} #${def.id.fviewport}>label,#${def.id.fontStroke} #${def.id.fstroke}>label{float:none!important;display:inline!important;margin:0!important;padding:0 0 0 2px!important;color:#666666!important;font-size:12px!important;cursor:help!important}#${def.id.fixViewport},#${def.id.fixStroke}{display:inline-block;margin:0 2px 0 0!important;width:14px!important;height:14px!important;vertical-align:text-bottom;cursor:pointer;-webkit-appearance:checkbox!important}` +
+            `#${def.id.fixViewport}::after,#${def.id.fixStroke}::after{position:relative;top:0;display:inline-block;margin:0;padding:0;width:14px;height:14px;border-radius:3px;background-color:#aaaaaa;color:#ffffff;content:"\u2717";vertical-align:top;text-align:center;font-weight:700;font-size:12px;line-height:14px}#${def.id.fixViewport}:checked::after,#${def.id.fixStroke}:checked::after{border:0!important;background-color:#65a0db;color:#ffffff;content:"\u2713";font-weight:700;font-size:12px;line-height:14px}.${def.class.flex}{display:flex;width:auto;min-width:100%;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}.${def.class.slider} input{visibility:hidden}#${def.id.shadowColor} *{box-sizing:content-box}#${def.id.shadowColor} .${def.class.frColorPicker}{margin:0;padding:0;width:auto}#${def.id.shadowColor} .${def.class.frColorPicker} #${def.id.color}{box-sizing:border-box;margin:0;padding:0 8px 0 0;width:160px!important;height:35px!important;min-width:160px;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:rgba(253,253,255,.69);color:#333333!important;text-align:center;text-indent:0;font-weight:400!important;font-size:18px!important;font-family:Impact,Times,serif!important;cursor:pointer}` +
+            `#${def.id.fontCss} textarea,#${def.id.fontEx} textarea{box-sizing:border-box;margin:0;padding:5px;width:calc(100% - 2px)!important;height:78px;max-width:calc(100% - 2px);max-height:78px;min-width:calc(100% - 2px);min-height:78px;outline:none!important;border:2px solid #67a5df!important;border-radius:6px;color:#0b5b9c!important;font:normal 700 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;resize:none;cursor:auto;word-break:break-all;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin;overscroll-behavior:contain}#${def.id.fontCss} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontCss} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontCss} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px rgba(0,0,0,.2);}#${def.id.fontCss} textarea::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontEx} textarea{background:#fafafa!important}#${def.id.fontEx} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontEx} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontEx} textarea::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}.${def.class.switch}{float:right;box-sizing:border-box;margin:-2px 4px 0 0;padding:0 6px;border:2px double #67a5df;border-radius:4px;color:#0a68c1;}#${def.id.cSwitch}:hover,#${def.id.eSwitch}:hover{cursor:pointer;-webkit-user-select:none;user-select:none}.${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}.${def.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9,#e9ffe9 25%,transparent 0,transparent 50%,#e9ffe9 0,#e9ffe9 75%,transparent 0,transparent)!important;background-color:#f7fff7!important;background-size:50px 50px}` +
+            `.${def.class.dbm} textarea{cursor:auto;scrollbar-width:thin;overscroll-behavior:contain}.${def.class.dbm} textarea::-webkit-scrollbar{width:8px;height:8px}.${def.class.dbm} textarea::-webkit-scrollbar-corner{border-radius:2px;background:#efefef;box-shadow:inset 0 0 3px #aaaaaa;}.${def.class.dbm} textarea::-webkit-scrollbar-thumb{border-radius:2px;background:#cfcfcf;box-shadow:inset 0 0 5px #999999;}.${def.class.dbm} textarea::-webkit-scrollbar-track{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaaaaa;}.${def.class.dbm} textarea::-webkit-scrollbar-track-piece{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaaaaa;}` +
+            `#${def.id.submit} button{box-sizing:border-box;margin:0;padding:5px 10px;width:auto;height:35px;min-width:min-content;min-height:35px;border:2px solid #6ba7e0;border-radius:6px;background-color:#67a5df;background-image:none;color:#ffffff!important;font:normal 600 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;cursor:pointer}#${def.id.submit} button:hover{box-shadow:0 0 5px rgba(0,0,0,.4)!important}#${def.id.submit} .${def.class.cancel},#${def.id.submit} .${def.class.reset}{float:left;margin-right:10px}#${def.id.submit} .${def.class.submit}{float:right}#${def.id.submit} #${def.id.backup}{display:none;margin:0 10px 0 0}.${def.class.anim}{border:2px solid #dc143c!important;background:#dc143c!important;animation:jiggle 1.8s ease-in infinite}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}`
         ) +
         String(
-          `.${def.class.tooltip}{position:relative;cursor:help;-webkit-user-select:none;user-select:none}.${def.class.tooltip} span.${def.class.emoji}{font-weight:400!important}.${def.class.tooltip}:active .${def.class.tooltip}{display:block}.${def.class.tooltip} .${def.class.tooltip}{position:absolute;z-index:999999;display:none;box-sizing:content-box;padding:10px;width:234px;max-width:234px;border:2px solid #b8c4ce;border-radius:6px;background-color:#54a2ec;color:#fff;font-weight:400;opacity:.9;word-break:break-all}.${def.class.tooltip} .${def.class.tooltip} *{font-size:14px!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${def.class.tooltip} .${def.class.tooltip} em{font-style:normal!important}.${def.class.tooltip} .${def.class.tooltip} strong{color:darkorange;font-size:18px!important}.${def.class.tooltip} .${def.class.tooltip} p{display:block;margin:0 0 10px;color:#fff;text-indent:0!important;line-height:150%}.${def.class.ps1}{position:relative;top:-33px;right:5px;float:right;margin:0;padding:0;width:24px;height:0}.${def.class.ps2}{top:35px;right:-7px}` +
+          `.${def.class.tooltip}{position:relative;cursor:help;-webkit-user-select:none;user-select:none}.${def.class.tooltip} span.${def.class.emoji}{font-weight:400!important}.${def.class.tooltip}:active .${def.class.tooltip}{display:block}.${def.class.tooltip} .${def.class.tooltip}{position:absolute;z-index:999999;display:none;box-sizing:content-box;padding:10px;width:234px;max-width:234px;border:2px solid #b8c4ce;border-radius:6px;background-color:#54a2ec;color:#ffffff;font-weight:400;opacity:.9;word-break:break-all}.${def.class.tooltip} .${def.class.tooltip} *{font-size:14px!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${def.class.tooltip} .${def.class.tooltip} em{font-style:normal!important}.${def.class.tooltip} .${def.class.tooltip} strong{color:darkorange;font-size:18px!important}.${def.class.tooltip} .${def.class.tooltip} p{display:block;margin:0 0 10px;color:#ffffff;text-indent:0!important;line-height:150%}.${def.class.ps1}{position:relative;top:-33px;right:5px;float:right;margin:0;padding:0;width:24px;height:0}.${def.class.ps2}{top:35px;right:-7px}` +
             `.${def.class.ps3}{top:-197px;${IS_REAL_WEBKIT ? "left:-72px" : "left:auto"}}` +
             `.${def.class.ps4}{top:-197px;${IS_REAL_WEBKIT ? "right:-64px" : "left:auto"}}` +
             `.${def.class.ps5}{top:-322px;${IS_REAL_WEBKIT ? "right:-54px" : "left:auto"}}`
         ) +
         String(
-          `.${def.class.range}{--primary-color:#67a5df;--value-offset-y:var(--ticks-gap);--value-active-color:white;--value-background:transparent;--value-background-hover:var(--primary-color);--value-font:italic bold 14px/14px monospace,serif;--fill-color:var(--primary-color);--progress-background:rgb(223, 223, 223);--progress-radius:20px;--show-min-max:none;--track-height:calc(var(--thumb-size) / 2);--min-max-font:12px serif;--min-max-opacity:0.5;--min-max-x-offset:10%;--thumb-size:22px;--thumb-color:white;--thumb-shadow:0 0 3px rgba(0, 0, 0, 0.4),0 0 1px rgba(0, 0, 0, 0.5) inset,0 0 0 99px var(--thumb-color) inset;--thumb-shadow-active:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px var(--primary-color) inset,0 0 3px rgba(0, 0, 0, 0.4);--thumb-shadow-hover:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px darkorange inset,0 0 3px rgba(0, 0, 0, 0.4);--ticks-thickness:1px;--ticks-height:5px;--ticks-gap:var(--ticks-height, 0);--ticks-color:transparent;--step:1;--ticks-count:(var(--max) - var(--min))/var(--step);--maxTicksAllowed:1000;--too-many-ticks:Min(1, Max(var(--ticks-count) - var(--maxTicksAllowed), 0));--x-step:Max(var(--step), var(--too-many-ticks) * (var(--max) - var(--min)));--tickIntervalPerc_1:Calc((var(--max) - var(--min)) / var(--x-step));--tickIntervalPerc:calc((100% - var(--thumb-size)) / var(--tickIntervalPerc_1) * var(--tickEvery, 1));--value-a:Clamp(var(--min), var(--value, 0), var(--max));--value-b:var(--value, 0);--text-value-a:var(--text-value, '');--completed-a:calc((var(--value-a) - var(--min)) / (var(--max) - var(--min)) * 100);--completed-b:calc((var(--value-b) - var(--min)) / (var(--max) - var(--min)) * 100);--ca:Min(var(--completed-a), var(--completed-b));--cb:Max(var(--completed-a), var(--completed-b));--thumbs-too-close:Clamp(-1, 1000 * (Min(1, Max(var(--cb) - var(--ca) - 5, -1)) + 0.001), 1);--thumb-close-to-min:Min(1, Max(var(--ca) - 5, 0));--thumb-close-to-max:Min(1, Max(95 - var(--cb), 0))}` +
-            `.${def.class.range}{position:relative;z-index:1;display:inline-block;box-sizing:content-box;margin:-3px 0 0 -7px;padding-top:calc(var(--flip-y)*var(--ticks-gap));padding-bottom:var(--flip-y,var(--ticks-gap));width:auto;height:Max(var(--track-height),var(--thumb-size));min-width:105%!important;background:linear-gradient(90deg,var(--ticks-color) var(--ticks-thickness),transparent 1px) repeat-x;background-size:var(--tickIntervalPerc) var(--ticks-height);background-position-x:calc(var(--thumb-size) - var(--ticks-thickness));background-position-y:var(--flip-y,bottom)}.${def.class.range}[disabled]{filter:grayscale(0.9);}.${def.class.range}[data-ticks-position=top]{--flip-y:1}.${def.class.range}::after,.${def.class.range}::before{position:absolute;top:calc(-2.5ch*var(--flip-y));bottom:var(--flip-y,-2.5ch);display:var(--show-min-max,block);content:counter(x);font:var(--min-max-font);opacity:Clamp(0,var(--at-edge),var(--min-max-opacity));transform:translateX(calc(var(--min-max-x-offset)*var(--before,-1)*-1)) scale(var(--at-edge));--offset:calc(var(--thumb-size)/2);pointer-events:none}.${def.class.range}::before{left:var(--offset);counter-reset:x var(--min);--before:1;--at-edge:var(--thumb-close-to-min)}.${def.class.range}::after{right:var(--offset);counter-reset:x var(--max);--at-edge:var(--thumb-close-to-max)}` +
-            `.${def.class.rangeProgress}{position:absolute;top:calc(var(--ticks-gap)*var(--flip-y,0) + var(--thumb-size)/2 - var(--track-height)/2);right:var(--start-end);left:var(--start-end);z-index:-1;height:calc(var(--track-height));border-radius:var(--progress-radius);background:var(--progress-background,#eee);--start-end:calc(var(--thumb-size)/2);--clip-end:calc(100% - var(--cb)*1%);--clip-start:calc(var(--ca)*1%);--clip:inset(-20px var(--clip-end) -20px var(--clip-start));pointer-events:none}.${def.class.rangeProgress}::before{position:absolute;top:0;right:0;bottom:0;left:0;z-index:1;border-radius:inherit;background:var(--fill-color,#000);box-shadow:var(--progress-flll-shadow);content:"";clip-path:var(--clip)}.${def.class.rangeProgress}::after{position:absolute;top:0;right:0;bottom:0;left:0;border-radius:inherit;box-shadow:var(--progress-shadow);content:"";pointer-events:none}.${def.class.range}>input:only-of-type~.${def.class.rangeProgress}{--clip-start:0}` +
-            `.${def.class.range}>input::-webkit-slider-runnable-track{border:none!important;background:transparent!important;box-shadow:none!important}.${def.class.range}>input{position:absolute!important;top:calc(50% + var(--flip-y,-1))!important;left:0;margin:0!important;padding:0!important;width:100%;height:var(--thumb-size)!important;outline:0!important;border:0!important;background:0 0!important;box-shadow:none!important;cursor:grab;-webkit-appearance:none;--thumb-shadow:var(--thumb-shadow-active)}.${def.class.range}>input:not(:only-of-type){pointer-events:none}.${def.class.range}>input::-webkit-slider-thumb{width:var(--thumb-size);height:var(--thumb-size);border:none;border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);transition:.1s;transform:var(--thumb-transform);appearance:none;pointer-events:auto}.${def.class.range}>input::-moz-range-thumb{width:var(--thumb-size);height:var(--thumb-size);border:none;border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);transition:.1s;transform:var(--thumb-transform);appearance:none;pointer-events:auto}.${def.class.range}>input::-ms-thumb{width:var(--thumb-size);height:var(--thumb-size);border:none;border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);transition:.1s;transform:var(--thumb-transform);appearance:none;pointer-events:auto}` +
-            `.${def.class.range}>input:hover{--thumb-shadow:var(--thumb-shadow-active)}.${def.class.range}>input:hover+output{box-shadow:0 0 0 3px var(--value-background);color:var(--value-active-color);--value-background:var(--value-background-hover);--y-offset:-1px}.${def.class.range}>input:active{z-index:2;cursor:grabbing;--thumb-shadow:var(--thumb-shadow-hover)}.${def.class.range}>input:active+output{display:-webkit-box;opacity:.9;transition:0s;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;-moz-box-orient:horizontal;-moz-box-pack:center;-moz-box-align:center}.${def.class.range}>input:nth-of-type(1){--is-left-most:Clamp(0, (var(--value-a) - var(--value-b)) * 99999, 1)}.${def.class.range}>input:nth-of-type(1)+output{--value:var(--value-a);--x-offset:calc(var(--completed-a) * -1%)}.${def.class.range}>input:nth-of-type(1)+output:not(:only-of-type){--flip:calc(var(--thumbs-too-close) * -1)}.${def.class.range}>input:nth-of-type(1)+output::after{content:var(--prefix, '') var(--text-value-a) var(--suffix, '')}.${def.class.range}>input:nth-of-type(2){--is-left-most:Clamp(0, (var(--value-b) - var(--value-a)) * 99999, 1)}.${def.class.range}>input:nth-of-type(2)+output{--value:var(--value-b)}.${def.class.range}>input+output{position:absolute;left:var(--pos);z-index:5;box-sizing:content-box;padding:0 6px;width:auto;height:24px;min-width:40px;min-height:24px;border-radius:4px;background:var(--value-background);text-align:center;opacity:0;transition:all .12s ease-out,left 0s;transform:translate(var(--x-offset),calc(150% - var(--y-offset,0) - var(--value-offset-y)));--flip:-1;--x-offset:calc(var(--completed-b)*-1%);--pos:calc((var(--value) - var(--min))/(var(--max) - var(--min))*100%);pointer-events:none}.${def.class.range}>input+output::after{content:var(--prefix,"") var(--text-value-b) var(--suffix,"");font:var(--value-font)}`
+          `.${def.class.range}{--primary-color:#67a5df;--value-offset-y:var(--ticks-gap);--value-active-color:white;--value-background:transparent;--value-background-hover:var(--primary-color);--value-font:italic 700 14px/14px monospace,serif;--fill-color:var(--primary-color);--progress-background:rgb(223, 223, 223);--progress-radius:20px;--show-min-max:none;--track-height:calc(var(--thumb-size) / 2);--min-max-font:12px serif;--min-max-opacity:0.5;--min-max-x-offset:10%;--thumb-size:22px;--thumb-color:white;--thumb-shadow:0 0 3px rgba(0, 0, 0, 0.4),0 0 1px rgba(0, 0, 0, 0.5) inset,0 0 0 99px var(--thumb-color) inset;--thumb-shadow-active:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px var(--primary-color) inset,0 0 3px rgba(0, 0, 0, 0.4);--thumb-shadow-hover:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px darkorange inset,0 0 3px rgba(0, 0, 0, 0.4);--ticks-thickness:1px;--ticks-height:5px;--ticks-gap:var(--ticks-height, 0);--ticks-color:transparent;--step:1;--ticks-count:(var(--max) - var(--min))/var(--step);--maxTicksAllowed:1000;--too-many-ticks:Min(1, Max(var(--ticks-count) - var(--maxTicksAllowed), 0));--x-step:Max(var(--step), var(--too-many-ticks) * (var(--max) - var(--min)));--tickIntervalPerc_1:Calc((var(--max) - var(--min)) / var(--x-step));--tickIntervalPerc:calc((100% - var(--thumb-size)) / var(--tickIntervalPerc_1) * var(--tickEvery, 1));--value-a:Clamp(var(--min), var(--value, 0), var(--max));--value-b:var(--value, 0);--text-value-a:var(--text-value, "");--completed-a:calc((var(--value-a) - var(--min)) / (var(--max) - var(--min)) * 100);--completed-b:calc((var(--value-b) - var(--min)) / (var(--max) - var(--min)) * 100);--ca:Min(var(--completed-a), var(--completed-b));--cb:Max(var(--completed-a), var(--completed-b));--thumbs-too-close:Clamp(-1, 1000 * (Min(1, Max(var(--cb) - var(--ca) - 5, -1)) + 0.001), 1);--thumb-close-to-min:Min(1, Max(var(--ca) - 5, 0));--thumb-close-to-max:Min(1, Max(95 - var(--cb), 0))}` +
+            `.${def.class.range}{width:auto;min-width:105%!important;margin:-3px 0 0 -7px;box-sizing:content-box;display:inline-block;height:Max(var(--track-height),var(--thumb-size));background:linear-gradient(to right,var(--ticks-color) var(--ticks-thickness),transparent 1px) repeat-x;background-size:var(--tickIntervalPerc) var(--ticks-height);background-position-x:calc(var(--thumb-size)/ 2 - var(--ticks-thickness)/ 2);background-position-y:var(--flip-y,bottom);padding-bottom:var(--flip-y,var(--ticks-gap));padding-top:calc(var(--flip-y) * var(--ticks-gap));position:relative;z-index:1}.${def.class.range}[disabled]{filter:grayscale(0.9);}.${def.class.range}[data-ticks-position=top]{--flip-y:1}.${def.class.range}::after,.${def.class.range}::before{--offset:calc(var(--thumb-size) / 2);content:counter(x);display:var(--show-min-max,block);font:var(--min-max-font);position:absolute;bottom:var(--flip-y,-2.5ch);top:calc(-2.5ch * var(--flip-y));opacity:Clamp(0,var(--at-edge),var(--min-max-opacity));transform:translateX(calc(var(--min-max-x-offset) * var(--before,-1) * -1)) scale(var(--at-edge));pointer-events:none}.${def.class.range}::before{--before:1;--at-edge:var(--thumb-close-to-min);counter-reset:x var(--min);left:var(--offset)}.${def.class.range}::after{--at-edge:var(--thumb-close-to-max);counter-reset:x var(--max);right:var(--offset)}` +
+            `.${def.class.rangeProgress}{--start-end:calc(var(--thumb-size) / 2);--clip-end:calc(100% - (var(--cb)) * 1%);--clip-start:calc(var(--ca) * 1%);--clip:inset(-20px var(--clip-end) -20px var(--clip-start));position:absolute;left:var(--start-end);right:var(--start-end);top:calc(var(--ticks-gap) * var(--flip-y,0) + var(--thumb-size)/ 2 - var(--track-height)/ 2);height:calc(var(--track-height));background:var(--progress-background,#eee);pointer-events:none;z-index:-1;border-radius:var(--progress-radius)}.${def.class.rangeProgress}::before{content:"";position:absolute;left:0;right:0;clip-path:var(--clip);top:0;bottom:0;background:var(--fill-color,#000);box-shadow:var(--progress-flll-shadow);z-index:1;border-radius:inherit}.${def.class.rangeProgress}::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;box-shadow:var(--progress-shadow);pointer-events:none;border-radius:inherit}.${def.class.range}>input:only-of-type~.${def.class.rangeProgress}{--clip-start:0}` +
+            `.${def.class.range}>input::-webkit-slider-runnable-track{background:transparent!important;box-shadow:none!important;border:none!important}.${def.class.range}>input{-webkit-appearance:none;box-shadow:none!important;width:100%;height:var(--thumb-size)!important;margin:0!important;padding:0!important;position:absolute!important;left:0;top:calc(50% - Max(var(--track-height),var(--thumb-size))/ 2 + calc(var(--ticks-gap)/ 2 * var(--flip-y,-1)))!important;border:0!important;cursor:grab;outline:0!important;background:0 0!important;--thumb-shadow:var(--thumb-shadow-active)}.${def.class.range}>input:not(:only-of-type){pointer-events:none}.${def.class.range}>input::-webkit-slider-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${def.class.range}>input::-moz-range-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${def.class.range}>input::-ms-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}` +
+            `.${def.class.range}>input:hover{--thumb-shadow:var(--thumb-shadow-active)}.${def.class.range}>input:hover+output{--value-background:var(--value-background-hover);--y-offset:-1px;color:var(--value-active-color);box-shadow:0 0 0 3px var(--value-background)}.${def.class.range}>input:active{--thumb-shadow:var(--thumb-shadow-hover);cursor:grabbing;z-index:2}.${def.class.range}>input:active+output{transition:0s;opacity:0.9;display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;-moz-box-orient:horizontal;-moz-box-pack:center;-moz-box-align:center}.${def.class.range}>input:nth-of-type(1){--is-left-most:Clamp(0, (var(--value-a) - var(--value-b)) * 99999, 1)}.${def.class.range}>input:nth-of-type(1)+output{--value:var(--value-a);--x-offset:calc(var(--completed-a) * -1%)}.${def.class.range}>input:nth-of-type(1)+output:not(:only-of-type){--flip:calc(var(--thumbs-too-close) * -1)}.${def.class.range}>input:nth-of-type(1)+output::after{content:var(--prefix, "") var(--text-value-a) var(--suffix, "")}.${def.class.range}>input:nth-of-type(2){--is-left-most:Clamp(0, (var(--value-b) - var(--value-a)) * 99999, 1)}.${def.class.range}>input:nth-of-type(2)+output{--value:var(--value-b)}.${def.class.range}>input+output{--flip:-1;--x-offset:calc(var(--completed-b) * -1%);--pos:calc(((var(--value) - var(--min)) / (var(--max) - var(--min))) * 100%);pointer-events:none;width:auto;min-width:40px;height:24px;min-height:24px;text-align:center;position:absolute;z-index:5;background:var(--value-background);border-radius:4px;padding:0 6px;left:var(--pos);transform:translate(var(--x-offset),calc(150% * var(--flip) - (var(--y-offset,0) + var(--value-offset-y)) * var(--flip)));transition:all .12s ease-out,left 0s;opacity:0;box-sizing:content-box}.${def.class.range}>input+output::after{content:var(--prefix, "") var(--text-value-b) var(--suffix, "");font:var(--value-font)}`
         ),
     };
+    const fullStyle = (b, c) => `${def.const.style.mainStyle};background-color:${b};color:${c};border-radius:4px;padding:4px 8px`;
+    const leftStyle = b => `${def.const.style.mainStyle};background-color:${b};color:snow;border-radius:4px 0 0 4px;padding:4px 2px 4px 8px`;
+    const rightStyle = b => `${def.const.style.mainStyle};background-color:${b};color:snow;font-style:italic;border-radius:0 4px 4px 0;padding:4px 8px 4px 4px;margin:0 0 0 -2px`;
+    const remarkStyle = c => `${def.const.style.mainStyle};color:${c};padding:4px 0;line-height:120%`;
 
     /* REGISTER_LOAD_EVENT_CLASS */
 
@@ -925,21 +929,10 @@
         this.fns = [];
         this.finalfns = [];
         this.done = false;
-        this.register();
-        document.addEventListener("readystatechange", () => this.checkReadyState());
+        this.__register();
+        document.addEventListener("readystatechange", () => this.__checkReadyState());
       }
-
-      addFn(fn) {
-        if (typeof fn !== "function") return;
-        this.fns.push(fn);
-      }
-
-      addFinalFn(fn) {
-        if (typeof fn !== "function") return;
-        this.finalfns.push(fn);
-      }
-
-      runFns(fns, background) {
+      __runFns(fns, background) {
         let run = 0;
         let err = 0;
         for (let fn of fns) {
@@ -951,10 +944,9 @@
             err++;
           }
         }
-        this._onReady(background, run, err, document.readyState);
+        this.__onReady(background, run, err, document.readyState);
       }
-
-      register() {
+      __register() {
         if (this.done) return;
         if (IS_GREASEMONKEY) {
           w.onload = () => this.runFns(this.fns, "darkorange");
@@ -962,27 +954,27 @@
           return;
         }
         if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", () => this.runFns(this.fns, "slateblue"));
+          document.addEventListener("DOMContentLoaded", () => this.__runFns(this.fns, "slateblue"));
         } else {
-          w.addEventListener("load", () => this.runFns(this.fns, "darkorange"));
+          w.addEventListener("load", () => this.__runFns(this.fns, "darkorange"));
         }
         this.done = true;
       }
-
-      checkReadyState() {
+      __checkReadyState() {
         if (!this.done || document.readyState !== "complete") return;
-        this.runFns(this.finalfns, "green");
+        this.__runFns(this.finalfns, "green");
       }
-
-      _onReady(background, ...logs) {
-        const args = [
-          def.const.style.leftStyle(background),
-          def.const.style.rightStyle(background),
-          "display:block;height:0",
-          def.const.style.remarkStyle("0"),
-          def.const.style.remarkStyle("grey"),
-        ];
+      __onReady(background, ...logs) {
+        const args = [leftStyle(background), rightStyle(background), "display:block;height:0", remarkStyle("0"), remarkStyle("grey")];
         INFO(`%c[DOM.STATE]:%c${logs}!%c\r\n%c \u3000\u27A6${IS_IN_FRAMES} ${CUR_HOST_NAME} %c${CUR_HOST_PATH}`, ...args);
+      }
+      addFn(fn) {
+        if (typeof fn !== "function") return;
+        this.fns.push(fn);
+      }
+      addFinalFn(fn) {
+        if (typeof fn !== "function") return;
+        this.finalfns.push(fn);
       }
     }
 
@@ -990,7 +982,7 @@
 
     class FrDialogBox {
       constructor({ titleText = "Test", messageText = "Test message.", trueButtonText = "OK", falseButtonText = null, neutralButtonText = null } = {}) {
-        this.css = def.const.style.frDialogBox;
+        this.css = def.const.zoomCssText("fr-dialogbox") + def.const.style.frDialogBox;
         this.titleText = titleText;
         this.messageText = messageText;
         this.trueButtonText = trueButtonText;
@@ -1005,7 +997,6 @@
         this.parent = document.body;
         this.__create(this);
         this.__append();
-        this.__rescale();
       }
       __create(context) {
         this.container = cE("fr-dialogbox");
@@ -1056,17 +1047,10 @@
           sleep(1e2)(this.frDialog).then(d => d && (d.style.opacity = 1));
         }
       }
-      __rescale() {
-        const scale = gS(this.parent, "zoom") || def.const.curScale || 1;
-        if (scale === 1) return;
-        IS_REAL_GECKO
-          ? (this.container.style.cssText += `transform-origin:left top 0;transform:scale(${1 / scale});width:99vw;height:99vh;top:0;`)
-          : (this.container.style.cssText += `zoom:${1 / scale};`);
-      }
       __destroy() {
         if (this.container) {
           this.parent.removeChild(this.container);
-          DEBUG("FrDialogBox.Destroy.status: %o", delete this);
+          DEBUG("FrDialogBox.Destroy.status: %o", delete this.container);
         }
       }
       static closure(s) {
@@ -1102,7 +1086,7 @@
           existSheet = hostSheet.find(s => s.id === sheet.id);
           if (!existSheet) shadow.adoptedStyleSheets = [...hostSheet, sheet];
         } else {
-          style = document.createElement("style");
+          style = cE("style");
           style.id = id;
           style.type = "text/css";
           style.media = "screen";
@@ -1155,7 +1139,7 @@
     }
 
     function insertStyle({ target, styleId, styleContent, isOverwrite }) {
-      if (!target) return;
+      if (!target || !styleId || !styleContent) return;
       let styleElement = getMainStyleElements({ currentScope: false, target });
       if (styleElement.length && isOverwrite) {
         styleElement.forEach(item => {
@@ -1165,12 +1149,12 @@
         styleElement.length = 0;
       }
       if (!styleElement.length) {
-        styleElement = document.createElement("style");
+        styleElement = cE("style");
         styleElement.setAttribute(def.const.cssAttrName, isOverwrite);
         styleElement.id = styleId;
         styleElement.media = "screen";
         styleElement.type = "text/css";
-        styleElement.textContent = styleContent ?? "";
+        styleElement.textContent = styleContent;
         let el = getLastStyleNode(target);
         insertAfter(target, styleElement, el);
         styleElement = null;
@@ -1317,11 +1301,7 @@
               }
               return newSVGMatrix;
             },
-          }) &&
-            ret_Results.add({
-              obj: `${SVGGraphicsElement.prototype}`,
-              prop: "getScreenCTM()",
-            });
+          }) && ret_Results.add({ obj: `${SVGGraphicsElement.prototype}`, prop: "getScreenCTM()" });
         }
 
         if (IS_REAL_GECKO) {
@@ -1342,11 +1322,7 @@
               }
               return newRectlist;
             },
-          }) &&
-            ret_Results.add({
-              obj: `${Element.prototype}`,
-              prop: "getClientRects()",
-            });
+          }) && ret_Results.add({ obj: `${Element.prototype}`, prop: "getClientRects()" });
           deleteOriginal && Reflect.deleteProperty(Element.prototype, "getBoundingClientRect");
           Reflect.defineProperty(Element.prototype, "getBoundingClientRect", {
             configurable: true,
@@ -1360,11 +1336,7 @@
               });
               return newValue;
             },
-          }) &&
-            ret_Results.add({
-              obj: `${Element.prototype}`,
-              prop: "getBoundingClientRect()",
-            });
+          }) && ret_Results.add({ obj: `${Element.prototype}`, prop: "getBoundingClientRect()" });
         }
       } catch (e) {
         ERROR("correctCoordinateOffset:", e.message);
@@ -1372,29 +1344,16 @@
       DEBUG(`[FONTSCALE] %O %csucceeded!`, ret_Results, "color:green");
     }
 
-    function repositionForGeckoScaling(node) {
-      if (!node) return;
-      const { oScale, tScale } = getscaleValueMatrix();
-      if (oScale === 1 && tScale === 1) return;
+    function repositionForGeckoScaling(node, tScale) {
+      if (!def.array.frcontainer.includes(node?.nodeName?.toLowerCase())) return;
       const elCompat = document.compatMode === "CSS1Compat" ? document.documentElement : document.body;
-      const sT = -elCompat.getBoundingClientRect().top;
-      tScale !== 1 && w.scrollTo(0, sT * tScale - 1);
-      if (tScale === 1) {
-        node.style.willChange = null;
-        node.style.transform = null;
-      } else {
-        node.style.willChange = "transform";
-        node.style.transform = `scale(${1 / tScale}) translateY(${sT * tScale}px)`;
-      }
-      document.addEventListener("scroll", reposition);
+      node.style.willChange = "transform";
+      w.scrollTo(0, -elCompat.getBoundingClientRect().top * tScale - 1);
+      w.addEventListener("scroll", reposition);
 
       function reposition() {
-        if (tScale === 1) {
-          document.removeEventListener("scroll", reposition);
-        } else {
-          const sT = -elCompat.getBoundingClientRect().top;
-          node.style.transform = `scale(${1 / tScale}) translateY(${sT * tScale}px)`;
-        }
+        const sT = -elCompat.getBoundingClientRect().top;
+        node.style.transform = `scale(var(--fr-font-antiscale)) translateY(${parseInt(sT * tScale)}px)`;
       }
     }
 
@@ -1403,10 +1362,7 @@
     const cache = {
       value: (data, eT = 6048e5) => {
         DEBUG("cache Expiration: %c%s hrs", "color:green;font-weight:700", eT / 36e5);
-        return {
-          data: data,
-          expired: Date.now() + eT,
-        };
+        return { data: data, expired: Date.now() + eT };
       },
       set: (key, ...options) => GMsetValue(key, encrypt(JSON.stringify(cache.value(...options)))),
       get: async key => {
@@ -1490,20 +1446,20 @@
 
     function getUniqueFontlist(arr) {
       if (!Array.isArray(arr)) return [];
+      const uniqList = [];
       for (let i = 0; i < arr.length; i++) {
-        for (let j = i + 1; j < arr.length; j++) {
-          if (arr[i] && arr[j] && (arr[i].ch === arr[j].ch || arr[i].en === arr[j].en)) {
-            if (!arr[i].ps) {
-              arr.splice(i, 1);
-              i = Math.max(0, i - 1);
-            } else {
-              arr.splice(j, 1);
-              j = j - 1;
-            }
+        if (!arr[i]) continue;
+        let isDuplicate = false;
+        for (let j = 0; j < uniqList.length; j++) {
+          if (arr[i].ch === uniqList[j].ch || arr[i].en === uniqList[j].en) {
+            if (arr[i].ps && !uniqList[j].ps) uniqList[j] = arr[i];
+            isDuplicate = true;
+            break;
           }
         }
+        if (!isDuplicate) uniqList.push(arr[i]);
       }
-      return arr;
+      return uniqList;
     }
 
     function getDeduplicatedValues(arra, arrb) {
@@ -1517,13 +1473,17 @@
     }
 
     function updateExsitesIndex(sites) {
+      let regexArr = sites.map(site => !site.indexOf("*") && new RegExp(`^[a-z0-9][-a-z0-9]{0,62}${site.slice(1).replace(/\./g, "\\.")}$`));
       for (let i = 0, l = sites.length; i < l; i++) {
+        if (sites[i].indexOf("*") === 0 && regexArr[i].test(CUR_HOST_NAME)) return i;
         if (sites[i] === CUR_HOST_NAME) return i;
       }
+      regexArr = null;
     }
 
     function removeDuplicateFonts(stra, strb) {
-      return String(uniq(stra.split(",")).filter(x => !uniq(strb.split(",")).some(y => y.replace(/'/g, "") === x.replace(/'/g, ""))));
+      const fontsArray = uniq(stra.split(",")).filter(x => !uniq(strb.split(",")).some(y => y.replace(/'/g, ``) === x.replace(/'/g, ``)));
+      return String(fontsArray.map(font => (font.startsWith("'") ? font : `'${font}'`)));
     }
 
     function saveData(key, data) {
@@ -1537,7 +1497,7 @@
     function convertHtmlToText(htmlString) {
       if (typeof htmlString !== "string") return "";
       htmlString = htmlString.replace(/expression|\\u|`|{|}/gi, "");
-      const tempElement = document.createElement("fr-filterhtml");
+      const tempElement = cE("fr-filterhtml");
       tempElement.innerHTML = tTP.createHTML(htmlString);
       htmlString = tempElement.innerText?.trim() || tempElement.textContent?.trim() || "";
       while (htmlString.endsWith(",")) {
@@ -1564,7 +1524,7 @@
 
       let exSite = await exSiteData();
       let _config_data_ = await configData();
-      let { maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, isFixViewport, isCloseTip, rebuild, curVersion, globalDisable } = _config_data_;
+      let { maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, isFixViewport, isCloseTip, isCustomMono, rebuild, curVersion, globalDisable } = _config_data_;
       let { monoSiteRules, monoFontList, monoFeature } = await customMonoData();
 
       const CONST_VALUES = await fontSetData();
@@ -1573,7 +1533,7 @@
 
       const refont = CONST_VALUES.fontSelect?.split(",")[0]?.replace(/"|'/g, "") ?? "";
       const fontface_i = CONST_VALUES.fontFace;
-      const fontFamily = fontface_i ? `font-family:var(--fr-font-family),var(--fr-init-basefont);` : ``;
+      const fontFamily = fontface_i ? `font-family:var(--fr-font-family),var(--fr-font-basefont);` : ``;
       const fontFaces = fontface_i ? (refont ? await funcFontface(refont) : "") : "";
       let bodyScale = "";
       const fontScale = parseFloat(CONST_VALUES.fontSize);
@@ -1584,11 +1544,9 @@
         def.array.scaleValueMatrix.push(1);
       }
       const smooth_i = CONST_VALUES.fontSmooth;
-      const funcSmooth = String(
-        `font-feature-settings:var(--fr-font-feature);font-variant:normal;font-optical-sizing:auto;font-kerning:auto;${
-          IS_REAL_WEBKIT ? "-webkit-font-smoothing:antialiased!important;" : IS_REAL_GECKO && capitalize(os).startsWith("Mac") ? "-moz-osx-font-smoothing:grayscale!important;" : ""
-        }`
-      );
+      const funcSmooth = `font-feature-settings:var(--fr-font-feature);font-variant:normal;font-optical-sizing:auto;font-kerning:auto;${
+        IS_REAL_WEBKIT ? "-webkit-font-smoothing:antialiased!important;" : IS_REAL_GECKO && capitalize(os).startsWith("Mac") ? "-moz-osx-font-smoothing:grayscale!important;" : ""
+      }`;
       const smoothing = smooth_i ? funcSmooth : "";
       const textrender = smooth_i ? "text-rendering:optimizeLegibility;" : "";
       const stroke_r = parseFloat(CONST_VALUES.fontStroke);
@@ -1611,29 +1569,32 @@
       const fixBoldTextStyle = CONST_VALUES.fixStroke ? `[${def.const.boldAttrName}]{-webkit-text-stroke:var(--fr-no-stroke)!important;}` : ``;
       const curEmptyConfig = !fontface_i && !smooth_i && !textShadow && !textStroke && fontScale === 1;
       const currentSiteAuthorization = typeof def.const.exSitesIndex === "undefined" && !curEmptyConfig;
-      def.const.curScale = currentSiteAuthorization ? CONST_VALUES.fontSize : INITIAL_VALUES.fontSize;
-      const fontStyle = String(
-        currentSiteAuthorization
-          ? `${fontFaces}${bodyScale}`.concat(
-              CAN_I_USE ? `:is(${inText})` : inText,
-              `{${fontFamily}${textShadow}${textStroke}${smoothing}${textrender}}`,
-              `${selection}${cssExclude}${codeFonts}${fixBoldTextStyle}`
-            )
-          : ``
+      def.const.curScale = currentSiteAuthorization ? fontScale : INITIAL_VALUES.fontSize;
+      def.const.zoomCssText = selector =>
+        `:host(${selector}){display:block!important;${
+          def.const.isFontsize
+            ? IS_REAL_GECKO
+              ? def.const.curScale !== 1
+                ? "transform:scale(var(--fr-font-antiscale));transform-origin:left top 0!important;width:99vw!important;height:99vh!important;"
+                : ""
+              : "zoom:var(--fr-font-antiscale);"
+            : ""
+        }}`;
+      const antiScale = parseFloat(1 / def.const.curScale);
+      const fontStyle = `${fontFaces}${bodyScale}`.concat(
+        CAN_I_USE ? `:is(${inText})` : inText,
+        `{${fontFamily}${textShadow}${textStroke}${smoothing}${textrender}}${selection}${cssExclude}${codeFonts}${fixBoldTextStyle}`
       );
-      const monoFontText = `${monoFontList || INITIAL_VALUES.monospacedFont},ui-monospace${IS_REAL_GECKO ? "" : ",monospace"}`;
+      const globalCssText = IS_REAL_GECKO && fontface_i ? def.const.style.global : "";
+      const monoFontText = `${monoFontList || INITIAL_VALUES.monospacedFont},ui-monospace,${IS_REAL_GECKO ? "consolas" : "monospace"}`;
       const monoFeatureText = `${monoFeature || INITIAL_VALUES.monospacedFeature}`;
-      const rootPseudoClass = String(
-        currentSiteAuthorization
-          ? `:root{--fr-init-basefont:${INITIAL_VALUES.fontBase};--fr-init-fontscale:${fontScale};--fr-font-family:${CONST_VALUES.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-font-feature:"liga" 0,"zero";--fr-mono-font:${monoFontText};--fr-mono-shadow:0 0 0px currentcolor;--fr-mono-feature:${monoFeatureText};--fr-no-stroke:0px transparent;}`
-          : ``
-      );
-      const tStyle = `@charset "UTF-8";${rootPseudoClass}${def.const.style.global}${fontStyle}`;
+      const rootPseudoClass = `:root{--fr-font-basefont:${INITIAL_VALUES.fontBase};--fr-font-fontscale:${fontScale};--fr-font-antiscale:${antiScale};--fr-font-family:${CONST_VALUES.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-font-feature:"liga" 0,"zero";--fr-mono-font:${monoFontText};--fr-mono-shadow:0 0 0 currentcolor;--fr-mono-feature:${monoFeatureText};--fr-no-stroke:0px transparent;}`;
+      const tStyle = currentSiteAuthorization ? `@charset "UTF-8";${rootPseudoClass}${globalCssText}${fontStyle}` : ``;
 
       /* FR_CONFIGURE_SHADOWROOT_CONTENT */
 
       const tFixViewport = String(
-        `<span id="${def.id.fviewport}" style="width:auto;color:#666;font-size:12px">
+        `<span id="${def.id.fviewport}" style="width:auto;color:#666666;font-size:12px">
           (<label title="如果开启它后出现网页加载或样式问题，请关闭之。">视口修正</label>
           <input type="checkbox" id="${def.id.fixViewport}" ${CONST_VALUES.fixViewport ? "checked" : ""}/>)
         </span>`
@@ -1643,7 +1604,7 @@
         <div class="${def.class.flex}">
           <span style="margin:0;padding:0">字体比例缩放</span>
           ${isFixViewport ? tFixViewport : ""}
-          <input id="${def.id.fontScale}" type="text" v="number" maxlength="5" ${getImageAndTextProperties()}/>
+          <input id="${def.id.fontScale}" type="text" data-fr-type="number" maxlength="5" ${getImageAndTextProperties()}/>
         </div>
         <div class="${def.class.range}" data-ticks-position="top" ${getImageAndTextProperties()}
           style="--min:.8;--max:1.5;--step:.001;--value:${CONST_VALUES.fontSize};--text-value:'${String(CONST_VALUES.fontSize.toFixed(3))}'">
@@ -1654,7 +1615,7 @@
       </li>`
       );
       const tFixStrokeHTML = String(
-        `<span id="${def.id.fstroke}" style="width:auto;color:#666;font-size:12px">
+        `<span id="${def.id.fstroke}" style="width:auto;color:#666666;font-size:12px">
           (<label title="如果开启它后出现明显的卡顿现象，请关闭之。">粗体修正</label>
           <input type="checkbox" id="${def.id.fixStroke}" ${CONST_VALUES.fixStroke ? "checked" : ""}/>)
         </span>`
@@ -1663,7 +1624,7 @@
         `<div id="${def.id.container}">
         <fieldset id="${def.id.field}" style="display:block">
           <legend class="${def.class.title}">
-            <span id="${def.const.seed}_scriptname" title="Version ${curVersion}" style="color:#8b0000!important">${def.variable.scriptName}</span>
+            <span id="${def.const.seed}_scriptname" title="${def.variable.scriptName} v${curVersion}" style="color:#8b0000!important">${def.variable.scriptName}</span>
             <span class="${def.class.guide}">
               <div class="${def.class.rotation}" title="打开脚本使用帮助文档" height="24" width="24"/>
                 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0,0,255.99431,255.99431"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="0" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode:normal"><g transform="scale(0.5,0.5)"><path d="M504.1,256c0,-137 -111.1,-248.1 -248.1,-248.1c-137,0 -248.1,111.1 -248.1,248.1c0,137 111.1,248.1 248.1,248.1c137,0 248.1,-111.1 248.1,-248.1z" fill="#67a5df"></path><path d="M146.1,181.5c0,-13.9 4.5,-28 13.4,-42.3c8.9,-14.3 22,-26.1 39.1,-35.5c17.1,-9.4 37.1,-14.1 60,-14.1c21.2,0 40,3.9 56.2,11.8c16.3,7.8 28.8,18.5 37.7,32c8.9,13.5 13.3,28.1 13.3,43.9c0,12.5 -2.5,23.4 -7.6,32.7c-5.1,9.4 -11.1,17.5 -18,24.3c-7,6.8 -19.4,18.3 -37.5,34.4c-5,4.5 -9,8.5 -12,12c-3,3.4 -5.2,6.6 -6.7,9.4c-1.5,2.9 -2.6,5.7 -3.4,8.6c-0.8,2.9 -2,7.9 -3.6,15.1c-2.8,15.2 -11.5,22.9 -26.1,22.9c-7.6,0 -14,-2.5 -19.2,-7.5c-5.2,-5 -7.8,-12.4 -7.8,-22.2c0,-12.3 1.9,-23 5.7,-32c3.8,-9 8.9,-16.9 15.2,-23.7c6.3,-6.8 14.8,-14.9 25.5,-24.3c9.4,-8.2 16.1,-14.4 20.3,-18.6c4.2,-4.2 7.7,-8.8 10.5,-14c2.9,-5.1 4.3,-10.7 4.3,-16.7c0,-11.7 -4.4,-21.6 -13.1,-29.7c-8.7,-8.1 -20,-12.1 -33.7,-12.1c-16.1,0 -28,4.1 -35.6,12.2c-7.6,8.1 -14.1,20.1 -19.3,35.9c-5,16.6 -14.4,24.8 -28.3,24.8c-8.2,0 -15.1,-2.9 -20.8,-8.7c-5.6,-5.6 -8.5,-11.8 -8.5,-18.6zM253.4,422.3c-8.9,0 -16.7,-2.9 -23.4,-8.7c-6.7,-5.8 -10,-13.9 -10,-24.3c0,-9.2 3.2,-17 9.7,-23.3c6.4,-6.3 14.4,-9.4 23.7,-9.4c9.2,0 17,3.2 23.3,9.4c6.3,6.3 9.4,14.1 9.4,23.3c0,10.3 -3.3,18.3 -9.9,24.2c-6.6,5.9 -14.2,8.8 -22.8,8.8z" fill="#ffffff"></path></g></g></svg>
@@ -1693,7 +1654,7 @@
               <div class="${def.class.flex}">
                 <span style="margin:0;padding:0">字体描边尺寸</span>
                 ${IS_REAL_BLINK ? tFixStrokeHTML : ""}
-                <input id="${def.id.strokeSize}" type="text" v="number" maxlength="5" />
+                <input id="${def.id.strokeSize}" type="text" data-fr-type="number" maxlength="5" />
               </div>
               <div class="${def.class.range}" data-ticks-position="top"
                 style="--step:.001;--min:0;--max:1;--value:${CONST_VALUES.fontStroke};--text-value:'${String(CONST_VALUES.fontStroke.toFixed(3))}'">
@@ -1705,7 +1666,7 @@
             <li id="${def.id.fontShadow}">
               <div class="${def.class.flex}">
                 <span style="margin:0;padding:0">字体阴影尺寸</span>
-                <input id="${def.id.shadowSize}" type="text" v="number" maxlength="4" />
+                <input id="${def.id.shadowSize}" type="text" data-fr-type="number" maxlength="4" />
               </div>
               <div class="${def.class.range}" data-ticks-position="top"
                 style="--step:.01;--min:0;--max:4;--value:${CONST_VALUES.fontShadow};--text-value:'${String(CONST_VALUES.fontShadow.toFixed(2))}'">
@@ -1751,7 +1712,7 @@
                     <p>该选项排除渲染字体描边、字体阴影效果，请将排除渲染的HTML标签用逗号分隔。具体规则请点击顶部旋转的帮助文件图标。</p>
                     <p><em style="color:darkred">编辑该选项需要CSS知识，如需要排除复杂的样式或标签可通过这里进行添加，样式若混乱请重置。</em></p>
                     <p>双击\ud83d\udd14可打开自定义等宽字体添加工具，设置您需要的等宽字体。</p>
-                    <p><em style="color:darkred">注意：如需使用自定义等宽字体，请勿清除该文本域中相关的关键代码：『 <em style="color:#cecece">pre,pre *,code,code *</em> 』</em></p>
+                    <p><em style="color:darkred">请注意：使用自定义等宽字体时，请谨慎删除该文本域中的重要代码：<br/>『 <em style="color:#ededed">pre,pre *,code,code *</em> 』</em></p>
                   </span>
                 </span>
                 <div id="${def.id.eSwitch}" class="${def.class.switch}" fr-button-switch="ON">\u2227</div>
@@ -1772,17 +1733,17 @@
       /* SHOW_SCRIPT_PACKAGE_INFORMATION */
 
       const showSystemInfo = {
-        system: function () {
+        system: () => {
           if (typeof def.const.exSitesIndex === "undefined") {
             __console(
               "shown-system-info",
               `%c${def.variable.scriptName}\r\n%cINTRO.URL:\u0020https://f9y4ng.likes.fans/FontRendering\r\n%c\u259e\u0020脚本版本\uff1a%cV%s%c%s%c\r\n\u259e\u0020个性化设置\uff1a%c%s%c/%s（当前设置：%s）\r\n%c\u259e\u0020本地备份\uff1a%s\u3000\u259a\u0020字体缩放\uff1a%s\r\n\u259e\u0020保存预览\uff1a%s\u3000\u259a\u0020视口修正\uff1a%s\r\n%c\u259e\u0020渲染字体\uff1a%s\r\n\u259e\u0020字体平滑\uff1a%s\u3000\u259a\u0020字体重写\uff1a%s\r\n\u259e\u0020字体描边\uff1a%s\u3000\u259a\u0020字体阴影\uff1a%s`,
               "color:#dc143c;font:normal 700 16px/150% system-ui,-apple-system,BlinkMacSystemFont,sans-serif",
-              "color:#777;font:italic 400 10px/180% monospace",
+              "color:#777777;font:italic 400 10px/180% monospace",
               "color:#708090;font-size:12px;line-height:180%",
-              "color:#708090;font:italic Infinityrem/150% Candara,Times New Roman",
+              "color:#708090;font:italic 600 14px/150% Candara,Times New Roman",
               def.variable.curVersion,
-              "color:#8b0000;font:italic 11px/150% Candara,Times New Roman",
+              "color:#8b0000;font:italic 400 11px/150% Candara,Times New Roman",
               IS_CHEAT_UA ? "\u3000(CHEAT-UA)" : "",
               "color:#4682b4;font-size:12px;line-height:180%",
               def.count.domainCount > maxPersonalSites ? "color:#dc143c" : "color:#4682b4",
@@ -1821,18 +1782,18 @@
         },
         compat: isCheatUA => {
           navigatorInfo["cheat-ua"] = isCheatUA;
+          const trim = IS_REAL_GECKO ? "" : "\r\n";
           INFO(
-            `%c${brand.toUpperCase()} BROWSER WARNING%c%sThis script (fully functional) only supports desktop browsers ` +
-              `(Version: Edge>=88, Chrome>=88, Opera>=75, Firefox>=84, Safari>=14) %c${JSON.stringify(navigatorInfo)}`,
-            def.const.style.fullStyle("crimson", "snow") + "text-transform:uppercase",
+            `%c${brand.toUpperCase()} BROWSER WARNING%c${trim}This script (fully functional) only supports desktop browsers ` +
+              `(Version: Edge>=88, Chrome>=88, Opera>=75, Firefox>=84, Safari>=14) %c${trim}${JSON.stringify(navigatorInfo)}`,
+            `${fullStyle("crimson", "snow")};text-transform:uppercase`,
             "display:block;margin:4px 0;color:0;font-family:monospace;line-height:150%",
-            IS_REAL_WEBKIT ? "\r\n" : "",
-            "color:grey;font:italic normal 12px/150% monospace"
+            "color:grey;font:italic 400 12px/150% monospace"
           );
           isCheatUA &&
             __console(
               "warn",
-              "%c浏览器UA异常检测警告：%c伪造userAgent信息会造成脚本部分功能失效，如需全功能请恢复浏览器默认userAgent信息。",
+              `%c浏览器UA异常检测警告：%c${trim}伪造userAgent信息会造成脚本部分功能失效，如需全功能请恢复浏览器默认userAgent信息。`,
               "display:inline-block;padding:4px 0;font-weight:700",
               "display:inline-block;line-height:150%"
             );
@@ -1840,7 +1801,7 @@
       };
 
       function globalDisableNotice(global, current) {
-        global && current && DEBUG("%cNOTICE%c Global rendering is disabled!", def.const.style.fullStyle("dimgray", "snow"), "font-style:italic;font-family:monospace");
+        global && current && DEBUG("%cNOTICE%c Global rendering is disabled!", fullStyle("dimgray", "snow"), "font-style:italic;font-family:monospace");
       }
 
       async function framesInsertStyle({ node, condition, tstyle }) {
@@ -1912,13 +1873,14 @@
 
       function insertHTML(htmlText) {
         try {
-          if (!qS(`#${def.id.rndId}`)) {
+          if (!qS(`#${def.id.configure}`)) {
             let section = cE("fr-configure");
-            section.id = def.id.rndId;
+            section.id = def.id.configure;
             const shadow = aS(section);
             def.const.configIf = shadow;
             shadow.innerHTML = tTP.createHTML(htmlText);
-            compatibleWithAdoptedStyleSheets(shadow, def.const.style.frConfigure, `${def.const.seed}-configure`);
+            const cssText = def.const.zoomCssText("fr-configure") + def.const.style.frConfigure;
+            compatibleWithAdoptedStyleSheets(shadow, cssText, `${def.const.seed}-configure`);
             document.body.appendChild(section);
             section = null;
           }
@@ -1927,28 +1889,28 @@
         }
       }
 
-      function setSliderProperty(a, b, c) {
-        if (!a) return;
-        a.value = Number(b).toFixed(c);
-        a.setAttribute("value", Number(b));
-        a.parentNode.style.setProperty("--value", Number(b));
-        a.parentNode.style.setProperty("--text-value", JSON.stringify(Number(b).toFixed(c)));
+      function setSliderProperty(slider, thisValue, bits) {
+        if (!slider) return;
+        slider.value = Number(thisValue).toFixed(bits);
+        slider.setAttribute("value", Number(thisValue));
+        slider.parentNode.style.setProperty("--value", Number(thisValue));
+        slider.parentNode.style.setProperty("--text-value", JSON.stringify(Number(thisValue).toFixed(bits)));
       }
 
-      function checkInputValue(b, a, c, f, g = false) {
-        if (!b || !a) return;
-        b.addEventListener("input", () => (b.value = b.value.replace(/[^0-9.]/, "")));
-        b.addEventListener("change", function () {
-          const thatValue = this.value === "OFF" ? (g ? 1 : 0) : this.value ? Number(this.value) : null;
-          const d = Number(a.parentNode.style.getPropertyValue("--value"));
-          if (!c.test(thatValue) || thatValue < a.parentNode.style.getPropertyValue("--min") || thatValue > a.parentNode.style.getPropertyValue("--max")) {
-            setSliderProperty(a, d, f);
-            b.value = d === (g ? 1 : 0) ? "OFF" : d.toFixed(f);
-            b._value_ = d;
+      function checkInputValue(input, slider, regex, bits, isOne = false) {
+        if (!input || !slider) return;
+        input.addEventListener("input", () => (input.value = input.value.replace(/[^0-9.]/, "")));
+        input.addEventListener("change", function () {
+          const inputValue = this.value === "OFF" ? (isOne ? 1 : 0) : this.value ? Number(this.value) : null;
+          const sliderValue = Number(slider.parentNode.style.getPropertyValue("--value"));
+          if (!regex.test(inputValue) || inputValue < slider.parentNode.style.getPropertyValue("--min") || inputValue > slider.parentNode.style.getPropertyValue("--max")) {
+            setSliderProperty(slider, sliderValue, bits);
+            input.value = sliderValue === (isOne ? 1 : 0) ? "OFF" : sliderValue.toFixed(bits);
+            input._value_ = sliderValue;
           } else {
-            setSliderProperty(a, thatValue, f);
-            b.value = g ? (thatValue === 1 ? "OFF" : thatValue.toFixed(f)) : thatValue === 0 ? "OFF" : thatValue.toFixed(f);
-            b._value_ = thatValue;
+            setSliderProperty(slider, inputValue, bits);
+            input.value = isOne ? (inputValue === 1 ? "OFF" : inputValue.toFixed(bits)) : inputValue === 0 ? "OFF" : inputValue.toFixed(bits);
+            input._value_ = inputValue;
           }
         });
       }
@@ -1965,11 +1927,10 @@
 
       function isFontReady(t = 1e3) {
         if (typeof def.const.fontReady !== "undefined") {
-          delete def.const.fontReady;
-          return true;
+          return delete def.const.fontReady;
         } else {
           const timeReady = new Promise(resolve => {
-            sleep(t, { useCachedSetTimeout: true }).then(() => resolve(t));
+            sleep(t, { useCachedSetTimeout: true }).then(() => resolve({ status: "timeout", t }));
           });
           const fontReady = document.fonts.ready;
           def.const.fontReady = Promise.race([timeReady, fontReady]).then(value => value);
@@ -2096,19 +2057,7 @@
         let frDialog = new FrDialogBox({
           trueButtonText: "好，去看看",
           falseButtonText: "不，算了吧",
-          messageText: String(
-            `<p><span style="color:tomato;font-weight:700;font-style:italic;font-size:20px">您好\uff01</span>` +
-              `这是${CANDIDATE_FIELD}<span><strong>${def.variable.scriptName}</strong></span>的更新版本` +
-              `<span style="padding-left:4px;color:tomato;font:italic 700 22px/150% Candara,Times New Roman!important">` +
-              `V${def.variable.curVersion}</span>，更新内容如下\uff1a</p>` +
-              `<p><ul id="${def.const.seed}_update">
-              ${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}
-              <!-- START VERSION NOTICE -->
-              ${UPDATE_VERSION_NOTICE}
-              <!-- END VERSION NOTICE -->
-            </ul></p>
-          <p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`
-          ),
+          messageText: `<p style="word-break:break-all;"><span style="color:tomato;font-weight:700;font-style:italic;font-size:20px">您好\uff01</span>这是${CANDIDATE_FIELD}<span><strong>${def.variable.scriptName}</strong></span>的更新版本<span style="padding-left:4px;color:tomato;font:italic 700 22px/150% Candara,Times New Roman!important">V${def.variable.curVersion}</span>，更新内容如下\uff1a</p><p><ul id="${def.const.seed}_update">${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}${UPDATE_VERSION_NOTICE}</ul></p><p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`,
           titleText: "脚本更新 - 温馨提示",
         });
         if (await frDialog.respond()) GMopenInTab(url, false);
@@ -2133,11 +2082,10 @@
       const addAction = {
         setConfigure: () => {
           if (!document.body) return;
-          if (!qS(`#${def.id.rndId}`)) {
+          if (!qS(`#${def.id.configure}`)) {
             try {
               insertHTML(tHTML);
               operateConfigure();
-              setAutoScaleValue(qS(`#${def.id.rndId}`), def.const.curScale);
               sleep(1e2)
                 .then(() => {
                   if (w.innerHeight <= (def.const.isFontsize ? 786 : 719)) {
@@ -2167,15 +2115,18 @@
         excludeSites: async () => {
           let frDialog = new FrDialogBox({
             trueButtonText: "确 定",
+            falseButtonText: "自定义排除",
             neutralButtonText: "取 消",
-            messageText: `<p style="font:700 italic 24px/150% Candara,Times New Roman!important;word-break:break-all">${TOP_HOST_NAME}</p><p style="color:#8b0000">该域名下所有页面将被禁止字体渲染\uff01</p><p>确定后当前页面将自动刷新，请确认是否排除？</p>`,
+            messageText: `<p style="font:italic 700 24px/150% Candara,Times New Roman!important;word-break:break-all">${TOP_HOST_NAME}</p><p style="color:#8b0000">该域名下所有页面将被禁止字体渲染\uff01</p><p>确定后当前页面将自动刷新，请确认是否排除？</p>`,
             titleText: "禁止字体渲染",
           });
           if (await frDialog.respond()) {
             exSite = await exSiteData();
             exSite.push(TOP_HOST_NAME);
-            saveData("_EXCLUDE_SITES_", exSite);
+            saveData("_EXCLUDE_SITES_", uniq(exSite.sort()));
             closeConfigurePage({ isReload: true });
+          } else {
+            addAction.customExsite();
           }
           frDialog = null;
         },
@@ -2241,7 +2192,7 @@
                 <div class="${def.const.seed}_VIP" title="防止页面加载缓慢，不建议设置过高的数值\uff01">\u2466 个性化设置总数（默认\uff1a100）</div>
                 <div style="margin:0 5px 0 0;padding:0">
                   <input maxlength="4" id="${def.id.maxps}" placeholder="100" value="${maxPersonalSites}"
-                    style="box-sizing:border-box;padding:4px 5px;width:70px;min-width:70px;border:2px solid #b8860b;border-radius:4px;color:#333;text-align:center;font:normal 500 16px/150% Impact,Times,serif!important" />
+                    style="box-sizing:border-box;padding:4px 5px;width:70px;min-width:70px;border:2px solid #b8860b;border-radius:4px;color:#333333;text-align:center;font:normal 500 16px/150% Impact,Times,serif!important" />
                 </div>
               </li>
               <li id="${def.id.flc}">
@@ -2258,7 +2209,7 @@
               }
             </ul>
             <div id="${def.id.feedback}" title="遇到问题，建议先看看脚本帮助文件。"
-              style="box-sizing:content-box;margin:0 0 0 5px;padding:4px 0;width:auto;height:auto;color:#333;font-style:normal;font-size:16px;cursor:help">
+              style="box-sizing:content-box;margin:0 0 0 5px;padding:4px 0;width:auto;height:auto;color:#333333;font-style:normal;font-size:16px;cursor:help">
                 \ud83e\udde1<span style="font-weight:700">\u0020如果您遇到错误或提建议，请及时向我反馈\u0020</span>\ud83e\udde1
             </div>`
             ),
@@ -2301,7 +2252,7 @@
             let frDialog = new FrDialogBox({
               trueButtonText: "确 定",
               neutralButtonText: "取 消",
-              messageText: `<p style="color:darkgoldenrod">下一步操作将关闭默认的全局设置数据，您可以仅在指定的域名保存需要渲染的站点独享数据。请注意，全局数据禁用后，您需要重新配置并保存为全局数据才能启用默认全局渲染规则。</p><p>请确认您是否要禁用全局设置？</p>`,
+              messageText: `<p style="color:darkred">下一步操作将关闭默认的全局设置数据，您可以仅在指定的域名保存需要渲染的站点独享数据。请注意，全局数据禁用后，您需要重新配置并保存为全局数据才能启用默认全局渲染规则。</p><p>请确认您是否要禁用全局设置？</p>`,
               titleText: "禁用全局设置数据",
             });
             if (await frDialog.respond()) {
@@ -2326,9 +2277,7 @@
           qS(`#${def.id.flcid}`, def.const.dialogIf)?.addEventListener("click", async () => {
             let frDialog = new FrDialogBox({
               trueButtonText: "确 定",
-              messageText: String(
-                `<p style="padding-bottom:6px;color:#b8860b;text-align:center;font-size:18px!important">字体列表全局缓存已重建，当前页面即将刷新\uff01</p><p style="text-align:center"><a style="display:inline-block;overflow:hidden;width:302px;height:237px;border:2px solid #b8860b;border-radius:8px;background:url('${def.const.loadImg}') 50% 50% no-repeat"><img src='${def.const.fontlistImg}' alt="字体列表全局缓存已重建"/></a></p>`
-              ),
+              messageText: `<p style="padding-bottom:6px;color:#b8860b;text-align:center;font-size:18px!important">字体列表全局缓存已重建，当前页面即将刷新\uff01</p><p style="text-align:center"><a style="display:inline-block;overflow:hidden;width:302px;height:237px;border:2px solid #b8860b;border-radius:8px;background:url('${def.const.loadImg}') 50% 50% no-repeat"><img src='${def.const.fontlistImg}' alt="字体列表全局缓存已重建"/></a></p>`,
               titleText: "字体列表全局缓存已重建",
             });
             cache.remove("_FONTCHECKLIST_");
@@ -2375,49 +2324,212 @@
         includeSites: async () => {
           let frDialog = new FrDialogBox({
             trueButtonText: "确 定",
+            falseButtonText: "自定义排除",
             neutralButtonText: "取 消",
-            messageText: `<p style="font:italic bold 22px/150% Candara,'Times New Roman'!important">${TOP_HOST_NAME}</p><p style="color:darkgreen">该域名下所有页面将重新进行字体渲染\uff01</p><p>确定后当前页面将自动刷新，请确认是否恢复？</p>`,
+            messageText: `<p style="font:italic 700 24px/150% Candara,'Times New Roman'!important">${TOP_HOST_NAME}</p><p style="color:darkgreen">该域名下所有页面将重新进行字体渲染\uff01</p><p>确定后当前页面将自动刷新，请确认是否恢复？</p>`,
             titleText: "恢复字体渲染",
           });
           if (await frDialog.respond()) {
+            let panDomain;
             exSite = await exSiteData();
-            def.const.exSitesIndex = updateExsitesIndex(exSite);
-            typeof def.const.exSitesIndex !== "undefined" && exSite.splice(def.const.exSitesIndex, 1);
-            saveData("_EXCLUDE_SITES_", exSite);
-            closeConfigurePage({ isReload: true });
+            let regexArr = exSite.map(site => !site.indexOf("*") && new RegExp(`^[a-z0-9][-a-z0-9]{0,62}${site.slice(1).replace(/\./g, "\\.")}$`));
+            for (let i = 0, l = exSite.length; i < l; i++) {
+              if (exSite[i].indexOf("*") === 0 && regexArr[i].test(CUR_HOST_NAME)) {
+                panDomain = exSite[i];
+                break;
+              }
+            }
+            regexArr = null;
+            if (!panDomain) {
+              def.const.exSitesIndex = updateExsitesIndex(exSite);
+              typeof def.const.exSitesIndex !== "undefined" && exSite.splice(def.const.exSitesIndex, 1);
+              saveData("_EXCLUDE_SITES_", uniq(exSite.sort()));
+              closeConfigurePage({ isReload: true });
+            } else {
+              let frDialog = new FrDialogBox({
+                trueButtonText: "确 定",
+                falseButtonText: "管 理",
+                neutralButtonText: "取 消",
+                messageText: `<p style="font:italic 700 24px/150% Candara,'Times New Roman'!important">${panDomain}</p><p style="color:darkred">该网站是被以上包含通配符的泛域名所排除渲染的。</p><p>『确定』将自动取消该泛域名下所有的排除项。</p><p>『管理』您将进入自定义排除站点列表手动处理。</p>`,
+                titleText: "恢复泛域名下的字体渲染",
+              });
+              if (await frDialog.respond()) {
+                exSite = await exSiteData();
+                for (let i = exSite.length - 1; i >= 0; i--) {
+                  if (exSite[i].endsWith(panDomain.slice(1))) exSite.splice(i, 1);
+                }
+                saveData("_EXCLUDE_SITES_", uniq(exSite.sort()));
+                closeConfigurePage({ isReload: true });
+              } else {
+                addAction.customExsite();
+              }
+            }
+          } else {
+            addAction.customExsite();
+          }
+          frDialog = null;
+        },
+        customExsite: async () => {
+          exSite = await exSiteData();
+          let Contents = "";
+          let _temp_ = exSite.sort();
+          let exSiteLength = _temp_.length;
+          for (let i = 0; i < exSiteLength; i++) {
+            Contents += String(
+              `<li id="${def.const.seed}_d_d_l_${i}" style="display:flex;overflow:hidden;margin:0;padding:5px;max-width:364px;color:#555555;list-style:none;white-space:nowrap;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,sans-serif!important;justify-content:space-between">` +
+                `<span>${i + 1 > 9 ? i + 1 : "0".concat(i + 1)}. </span>` +
+                `<span style="overflow:hidden;margin-right:auto;padding-left:5px;width:85%;text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all">` +
+                `${convertHtmlToText(_temp_[i])}</span><span>[<a id="${def.const.seed}_d_d_l_s_${i}" data-fr-domain="${convertHtmlToText(_temp_[i])}" ` +
+                `style="padding:2px;background:transparent;color:#8b0000;font-size:14px!important;cursor:pointer">删除</a>]</span></li>`
+            );
+          }
+          let frDialog = new FrDialogBox({
+            trueButtonText: "保存数据",
+            neutralButtonText: "取 消",
+            messageText: `<p style="color:#555555;font-size:14px!important"><b style="color:#8b0000">添加自定义排除站点</b>：在文本框中输入正确的域名，点击添加按钮，支持首位通配符的泛域名，如：*.example.com</p><p style="color:#555555;font-size:14px!important"><b style="color:#8b0000">数据保存</b>：完成所有添加、删除操作后需点击保存按钮才会使数据保存生效，保存数据后不能撤回，请谨慎操作。</p><p style="display:flex;justify-content:left;align-items:center"><input id="${def.const.seed}_d_s_" style="box-sizing:content-box;margin:4px 6px;padding:2px 6px;width:57%;height:22px;outline:none!important;border:2px solid #777777;border-radius:4px;font:normal 400 16px/150% monospace,Courier New,system-ui,-apple-system,BlinkMacSystemFont,serif!important"><button id="${def.const.seed}_d_s_s_" style="box-sizing:border-box;margin:0;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777777;border-radius:4px;background:#eeeeee;color:#333333!important;outline:none!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer">查 询</button><button id="${def.const.seed}_d_s_a_" style="box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777777;border-radius:4px;background:#eeeeee;color:#8b0000!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer">添 加</button></p><ul id="${def.const.seed}_d_d_" style="overflow-x:hidden;margin:0!important;padding:0!important;max-height:190px;list-style:none!important;overscroll-behavior:contain">${Contents}</ul>`,
+            titleText: "自定义排除站点管理",
+          });
+          const dsNode = qS(`#${def.const.seed}_d_s_`, def.const.dialogIf);
+          const dssNode = qS(`#${def.const.seed}_d_s_s_`, def.const.dialogIf);
+          const dsaNode = qS(`#${def.const.seed}_d_s_a_`, def.const.dialogIf);
+          const ddNode = qS(`#${def.const.seed}_d_d_`, def.const.dialogIf);
+          if (ddNode && dsNode && dssNode && dsaNode) {
+            dsNode.addEventListener("keydown", e => {
+              if (e.keyCode === 13) {
+                e.preventDefault();
+                dssNode.focus();
+                dssNode.click();
+              }
+            });
+            dsNode.addEventListener("input", () => {
+              dsNode.value = dsNode.value.replace(/[^-a-z0-9.*]|^https?:\/\//gi, "").toLowerCase();
+            });
+            dsNode.addEventListener("focus", () => {
+              dsNode.style.borderColor = "#777777";
+            });
+            dsaNode.addEventListener("click", () => {
+              const exDomain = dsNode.value.trim().toLowerCase();
+              const domainRegex = /^(?=^.{3,255}$)(\*\.)?[a-z0-9][-a-z0-9]{0,62}(\.[a-z0-9][-a-z0-9]{0,62})+$/;
+              if (!domainRegex.test(exDomain) || _temp_.includes(exDomain)) {
+                dsNode.style.borderColor = "#ff0000";
+                return;
+              }
+              exSiteLength++;
+              const newNode = cE("li");
+              newNode.id = `${def.const.seed}_d_d_l_${exSiteLength - 1}`;
+              newNode.className = "gradient-bg";
+              newNode.style = `display:flex;overflow:hidden;margin:0;padding:5px;max-width:364px;color:#555555;list-style:none;white-space:nowrap;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,sans-serif!important;justify-content:space-between`;
+              newNode.innerHTML = String(
+                `<span>${exSiteLength > 9 ? exSiteLength : "0".concat(exSiteLength)}. </span>` +
+                  `<span style="overflow:hidden;margin-right:auto;padding-left:5px;width:85%;text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all">` +
+                  `${convertHtmlToText(exDomain)}</span><span>[<a id="${def.const.seed}_d_d_l_s_${exSiteLength - 1}" data-fr-domain="${convertHtmlToText(exDomain)}" ` +
+                  `style="padding:2px;background:transparent;color:#8b0000;font-size:14px!important;cursor:pointer">删除</a>]</span>`
+              );
+              ddNode.appendChild(newNode);
+              _temp_.push(exDomain);
+              dsNode.value = "";
+              ddNode.scrollTop = ddNode.scrollHeight;
+            });
+            dssNode.addEventListener("click", () => searchTextAndSelect(dsNode, ddNode, "exsite", "li>:nth-child(2)"));
+          }
+          ddNode.addEventListener("click", event => {
+            const target = event.target;
+            if (target.nodeName === "A" && target.id.startsWith(`${def.const.seed}_d_d_l_s_`)) {
+              const _list_Id_ = Number(target.id.replace(`${def.const.seed}_d_d_l_s_`, "")) || -1;
+              const nodeDomain = target.dataset.frDomain;
+              if (!target.hasAttribute("data-del")) {
+                const _index_ = _temp_.indexOf(nodeDomain);
+                Boolean(~_index_) && _temp_.splice(_index_, 1);
+                target.setAttribute("data-del", _list_Id_);
+                target.textContent = "恢复";
+                target.style.color = "darkgreen";
+                target.parentNode.previousElementSibling.style.cssText += "text-decoration:line-through;font-style:italic";
+              } else {
+                !_temp_.includes(nodeDomain) && _temp_.push(nodeDomain);
+                target.removeAttribute("data-del");
+                target.textContent = "删除";
+                target.style.color = "darkred";
+                target.parentNode.previousElementSibling.style.cssText += "text-decoration:none;font-style:normal";
+              }
+            }
+          });
+          if (await frDialog.respond()) {
+            saveData("_EXCLUDE_SITES_", uniq(_temp_.sort()));
+            let frDialog = new FrDialogBox({
+              trueButtonText: "感谢使用",
+              messageText: `<p style="color:darkgreen">自定义排除网站数据已成功保存\uff01</p><p>页面将在您确认后自动刷新。</p>`,
+              titleText: "自定义排除网站数据保存",
+            });
+            if (await frDialog.respond()) closeConfigurePage({ isReload: true });
+            frDialog = null;
           }
           frDialog = null;
         },
       };
 
+      function searchTextAndSelect(input, target, counter, searchStr) {
+        const keyword = input?.value?.trim().replace(/([.*])/g, "\\$1");
+        if (!keyword) return;
+        if (def.const[`${counter}Keyword`] !== keyword) def.count[`${counter}Search`] = 0;
+        let match, textNode;
+        const reg = new RegExp(keyword, "i");
+        const textNodes = qA(searchStr, target);
+        def.const[`${counter}Keyword`] = keyword;
+        while (!match) {
+          textNode = textNodes[def.count[`${counter}Search`]].firstChild;
+          match = reg.exec(textNode.data);
+          if (def.count[`${counter}Search`] >= textNodes.length - 1) {
+            def.count[`${counter}Search`] = 0;
+            break;
+          } else {
+            def.count[`${counter}Search`]++;
+          }
+        }
+        if (match) {
+          const range = document.createRange();
+          range.setStart(textNode, 0);
+          range.setEnd(textNode, textNode.data.length);
+          if (w.getSelection) {
+            const _sTxt = w.getSelection();
+            _sTxt.removeAllRanges();
+            _sTxt.addRange(range);
+            const _sNode = _sTxt.anchorNode?.parentNode?.parentNode;
+            const _rows = Number(_sNode?.id?.replace(`${def.const.seed}_d_d_l_`, ``)) || 0;
+            const _offsetHeight = Number(_sNode?.offsetHeight) || 0;
+            target.scrollTop = _rows * _offsetHeight;
+          }
+          input.style.borderColor = "#777777";
+        } else {
+          input.style.borderColor = "darkorange";
+        }
+      }
+
       function insertMenus(loading) {
         sleep(1e3, { useCachedSetTimeout: true })(2e3)
           .then(async r => {
             const fontReady = await isFontReady(r);
-            DEBUG("isFontReady: %c%s %c%s", "color:red", Boolean(fontReady), "color:blue", parseInt(fontReady));
+            DEBUG("isFontReady:", { status: fontReady?.status, delay: parseInt(fontReady?.t) });
             return fontReady;
           })
           .then(font_Ready => {
-            let font_Set, exclude_site, parameter_Set, feed_Back;
+            let font_Set, exclude_site, parameter_Set, include_site, feed_Back;
             loading ? GMunregisterMenuCommand(loading) : DEBUG("%cNo Loading_Menu", "color:grey");
             if (font_Ready) {
               if (typeof def.const.exSitesIndex === "undefined") {
                 font_Set ? GMunregisterMenuCommand(font_Set) : DEBUG("%cInstalling Font_Set_Menu", "color:gray");
-                font_Set = GMregisterMenuCommand(`\ufff1\ud83c\udf13 字体渲染设置${isHotkey ? `(P)` : ""}`, addAction.setConfigure);
-                exclude_site ? GMunregisterMenuCommand(exclude_site) : DEBUG("%cInstalling Exclude_site_Menu", "color:gray");
-                exclude_site = GMregisterMenuCommand(`\ufff2\u26d4 排除渲染 ${TOP_HOST_NAME} ${isHotkey ? `(X)` : ""}`, addAction.excludeSites);
+                font_Set = GMregisterMenuCommand(`\ufff1\ud83c\udf13 字体渲染设置${isHotkey ? "(P)" : ""}`, addAction.setConfigure);
+                exclude_site ? GMunregisterMenuCommand(exclude_site) : DEBUG("%cInstalling Exclude_Site_Menu", "color:gray");
+                exclude_site = GMregisterMenuCommand(`\ufff2\u26d4 排除渲染 ${TOP_HOST_NAME} ${isHotkey ? "(X)" : ""}`, addAction.excludeSites);
                 parameter_Set ? GMunregisterMenuCommand(parameter_Set) : DEBUG("%cInstalling Parameter_Set_Menu", "color:gray");
-                parameter_Set = GMregisterMenuCommand(`\ufff3\ud83d\udc8e 高级核心功能设置${isHotkey ? `(G)` : ""}`, addAction.vipConfigure);
+                parameter_Set = GMregisterMenuCommand(`\ufff3\ud83d\udc8e 高级核心功能设置${isHotkey ? "(G)" : ""}`, addAction.vipConfigure);
               } else {
-                exclude_site ? GMunregisterMenuCommand(exclude_site) : DEBUG("%cInstalling Exclude_site_Menu", "color:gray");
-                exclude_site = GMregisterMenuCommand(`\ufff4\ud83c\udf40 重新渲染 ${TOP_HOST_NAME} ${isHotkey ? `(X)` : ""}`, addAction.includeSites);
+                include_site ? GMunregisterMenuCommand(include_site) : DEBUG("%cInstalling Include_Site_Menu", "color:gray");
+                include_site = GMregisterMenuCommand(`\ufff4\ud83c\udf40 重新渲染 ${TOP_HOST_NAME} ${isHotkey ? "(X)" : ""}`, addAction.includeSites);
                 feed_Back ? GMunregisterMenuCommand(feed_Back) : DEBUG("%cInstalling Feed_Back_Menu", "color:gray");
-                feed_Back = GMregisterMenuCommand(`\ufff5\ud83e\udde1 向作者反馈问题或建议${isHotkey ? `(T)` : ""}`, () => GMopenInTab(def.variable.feedback, false));
+                feed_Back = GMregisterMenuCommand(`\ufff5\ud83e\udde1 向作者反馈问题或建议${isHotkey ? "(T)" : ""}`, () => GMopenInTab(def.variable.feedback, false));
               }
             } else {
-              loading = GMregisterMenuCommand(`\ufff0\ud83c\udf13 单击重新载入脚本菜单`, () => {
-                location.reload(true);
-              });
+              loading = GMregisterMenuCommand("\ufff0\ud83c\udf13 重新装载脚本菜单！", () => location.reload(true));
             }
           })
           .catch(e => ERROR("MenusInsert:", e.message));
@@ -2434,33 +2546,21 @@
                 e.preventDefault();
                 if (Date.now() - def.count.clickTimer > 1e3) {
                   def.count.clickTimer = Date.now();
-                  if (typeof def.const.exSitesIndex === "undefined") {
-                    addAction.setConfigure();
-                  } else {
-                    addAction.includeSites();
-                  }
+                  addAction[typeof def.const.exSitesIndex === "undefined" ? "setConfigure" : "includeSites"]();
                 }
               }
               if (e.keyCode === 88 && ekey) {
                 e.preventDefault();
                 if (Date.now() - def.count.clickTimer > 1e3) {
                   def.count.clickTimer = Date.now();
-                  if (typeof def.const.exSitesIndex === "undefined") {
-                    addAction.excludeSites();
-                  } else {
-                    addAction.includeSites();
-                  }
+                  addAction[typeof def.const.exSitesIndex === "undefined" ? "excludeSites" : "includeSites"]();
                 }
               }
               if (e.keyCode === 71 && ekey) {
                 e.preventDefault();
                 if (Date.now() - def.count.clickTimer > 1e3) {
                   def.count.clickTimer = Date.now();
-                  if (typeof def.const.exSitesIndex === "undefined") {
-                    addAction.vipConfigure();
-                  } else {
-                    addAction.includeSites();
-                  }
+                  addAction[typeof def.const.exSitesIndex === "undefined" ? "vipConfigure" : "includeSites"]();
                 }
               }
               if (e.keyCode === 84 && ekey) {
@@ -2488,19 +2588,16 @@
           }
           const _data_search_ =
             domainValue.length > 6
-              ? `<p style="display:flex;justify-content:left;align-items:center"><input id="${def.const.seed}_d_s_" style="box-sizing:content-box;margin:4px 6px;padding:2px 6px;width:57%;height:22px;outline:none!important;border:2px solid #777;border-radius:4px;font:normal 16px/150% monospace,Courier New,system-ui,-apple-system,BlinkMacSystemFont,serif!important"><button id="${def.const.seed}_d_s_s_" style="box-sizing:border-box;margin:0;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#333!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer">查 询</button><button id="${def.const.seed}_d_s_c_" style="box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#333!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer">清 除</button></p>`
+              ? `<p style="display:flex;justify-content:left;align-items:center"><input id="${def.const.seed}_d_s_" style="box-sizing:content-box;margin:4px 6px;padding:2px 6px;width:57%;height:22px;outline:none!important;border:2px solid #777777;border-radius:4px;font:normal 400 16px/150% monospace,Courier New,system-ui,-apple-system,BlinkMacSystemFont,serif!important"><button id="${def.const.seed}_d_s_s_" style="box-sizing:border-box;margin:0;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777777;border-radius:4px;background:#eeeeee;color:#333333!important;outline:none!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer">查 询</button><button id="${def.const.seed}_d_s_c_" style="box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777777;border-radius:4px;background:#eeeeee;color:#333333!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer">清 除</button></p>`
               : ``;
           for (let i = 0, l = domainValue.length; i < l; i++) {
             Contents += String(
-              `<li id="${def.const.seed}_d_d_l_${i}" style="display:flex;overflow:hidden;margin:0;padding:5px;max-width:364px;color:#555;list-style:none;` +
+              `<li id="${def.const.seed}_d_d_l_${i}" style="display:flex;overflow:hidden;margin:0;padding:5px;max-width:364px;color:#555555;list-style:none;` +
                 `white-space:nowrap;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,sans-serif!important;justify-content:space-between">` +
-                `<span>
-                [<a id="${def.const.seed}_d_d_l_s_${i}" style="display:inline;padding:2px;background:transparent;color:#8b0000;font-size:14px!important;cursor:pointer">删除</a>]
-                <span>${i + 1 > 9 ? i + 1 : "0".concat(i + 1)}.</span>
-              </span>
-              <span style="margin-left:5px;font-weight:700">${convertHtmlToText(domainValue[i].domain)}</span>
-              <span style="margin:0 5px">${setDateFormat("yyyy/MM/dd HH:mm:ss", new Date(domainValue[i].fontDate))}</span>
-            </li>`
+                `<span>[<a id="${def.const.seed}_d_d_l_s_${i}" style="display:inline;padding:2px;background:transparent;color:#8b0000;font-size:14px!important;` +
+                `cursor:pointer">删除</a>]<span>\u0020${i + 1 > 9 ? i + 1 : "0".concat(i + 1)}.</span></span><span style="overflow:hidden;margin-left:5px;width:57%;` +
+                `text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all">${convertHtmlToText(domainValue[i].domain)}</span>` +
+                `<span style="margin:0 5px">${setDateFormat("yyyy-MM-dd", new Date(domainValue[i].fontDate))}</span></li>`
             );
           }
           let frDialog = new FrDialogBox({
@@ -2513,41 +2610,25 @@
           const dscNode = qS(`#${def.const.seed}_d_s_c_`, def.const.dialogIf);
           const dssNode = qS(`#${def.const.seed}_d_s_s_`, def.const.dialogIf);
           const ddNode = qS(`#${def.const.seed}_d_d_`, def.const.dialogIf);
-          if (dsNode && dscNode && dssNode) {
+          if (ddNode && dsNode && dscNode && dssNode) {
             dsNode.addEventListener("keydown", e => {
               if (e.keyCode === 13) {
                 e.preventDefault();
+                dssNode.focus();
                 dssNode.click();
               }
             });
-            dsNode.addEventListener("input", () => {
-              dsNode.value = dsNode.value.replace(/[^\w.-]/gi, "");
-            });
+            dsNode.addEventListener("input", () => (dsNode.value = dsNode.value.replace(/[^-a-z0-9.]/gi, "").toLowerCase()));
             dscNode.addEventListener("click", () => {
               dsNode.value = "";
-              dsNode.style.borderColor = "#777";
+              dsNode.style.borderColor = "#777777";
               ddNode.scrollTop = 0;
               dsNode.focus();
             });
-            dssNode.addEventListener("click", () => {
-              if (dsNode.value) {
-                if (w.find) {
-                  dsNode.style.borderColor = w.find(dsNode.value, 0) ? "#777" : "red";
-                  if (w.getSelection) {
-                    const _sTxt = def.const.dialogIf.getSelection();
-                    const _sNode = _sTxt.anchorNode?.parentNode?.parentNode ?? 0;
-                    const _rows = Number(_sNode.id.replace(`${def.const.seed}_d_d_l_`, ""));
-                    const _offsetHeight = Number(_sTxt.anchorNode?.parentNode?.parentNode?.offsetHeight) || 0;
-                    ddNode.scrollTop = (_rows * _offsetHeight) / def.const.curScale;
-                  }
-                }
-              }
-            });
+            dssNode.addEventListener("click", () => searchTextAndSelect(dsNode, ddNode, "domain", "li>:nth-child(2)"));
           }
           ddNode.addEventListener("click", event => {
-            const input = qS(`#${def.const.seed}_d_s_`, def.const.dialogIf);
             const target = event.target;
-            input?.focus();
             if (target.nodeName === "A" && target.id.startsWith(`${def.const.seed}_d_d_l_s_`)) {
               if (!target.hasAttribute("data-del")) {
                 const _list_Id_ = Number(target.id.replace(`${def.const.seed}_d_d_l_s_`, "")) || 0;
@@ -2584,11 +2665,9 @@
             saveData("_DOMAINS_FONTS_SET_", domainValue);
             let frDialog = new FrDialogBox({
               trueButtonText: "感谢使用",
-              messageText: String(
-                `<p style="color:darkgreen">网站个性化设置数据已成功保存\uff01</p><p>${
-                  def.const.equal ? "当前网站数据有变动，页面将在您确认后自动刷新。" : "提示：您可继续留在当前页面进行其他操作。"
-                }</p>`
-              ),
+              messageText: `<p style="color:darkgreen">网站个性化设置数据已成功保存\uff01</p><p>${
+                def.const.equal ? "当前网站数据有变动，页面将在您确认后自动刷新。" : "提示：您可继续留在当前页面进行其他操作。"
+              }</p>`,
               titleText: "个性化数据保存",
             });
             if (await frDialog.respond()) closeConfigurePage({ isReload: Boolean(def.const.equal) });
@@ -2742,15 +2821,15 @@
             });
             document.addEventListener("click", selectorHidden);
 
-            function changeSelectorStatus(inputCheckedStatus, f, cssName) {
-              if (!f) return;
+            function changeSelectorStatus(inputCheckedStatus, target, cssName) {
+              if (!target) return;
               if (inputCheckedStatus) {
-                f.removeAttribute("disabled");
-                f.classList.remove(cssName);
+                target.removeAttribute("disabled");
+                target.classList.remove(cssName);
               } else {
                 fontSet().fdeleteList(fontData);
-                f.setAttribute("disabled", "disabled");
-                f.classList.add(cssName);
+                target.setAttribute("disabled", "disabled");
+                target.classList.add(cssName);
               }
             }
 
@@ -2766,7 +2845,7 @@
               fontSet(selector).hide();
               if (fontData.length > 0 && selectFontNode) {
                 fontSet(selector).show();
-                const sText = t.replace(/[.:?*+^$[\](){}\\/|]/g, "\u2717");
+                const sText = t.replace(/([.:?*+^$[\-=\](){}\\/|])/g, "\\$1");
                 const sRegExp = new RegExp(sText, "i");
                 let sMatched = false;
                 selectFontNode.textContent = "";
@@ -2851,8 +2930,8 @@
       }
 
       function funcFontsize(t) {
-        const GKText = `transform:scale(var(--fr-init-fontscale));transform-origin:0 0;width:${100 / t}%;height:${100 / t}%;`;
-        const WKtext = `zoom:var(--fr-init-fontscale)!important;overflow-x:clip;`;
+        const GKText = `transform:scale(var(--fr-font-fontscale));transform-origin:0 0;width:${100 / t}%;height:${100 / t}%;`;
+        const WKtext = `zoom:var(--fr-font-fontscale)!important;overflow-x:clip;`;
         return `:root body{${IS_REAL_GECKO ? GKText : WKtext}}`;
       }
 
@@ -2879,28 +2958,28 @@
       }
 
       function funcCodefont(t, s) {
-        if (t.search(/\bpre\b|\bcode\b/gi) !== -1) {
-          let customMonoRules = [];
-          const pre = t.search(/\bpre\b/gi) > -1 ? ["pre", "pre *"] : [];
-          const code = t.search(/\bcode\b/gi) > -1 ? ["code", "code *"] : [];
-          const elcode = ["samp", "kbd", ".code", ".code *"];
-          const siterules = ["@github.com##.blob-num,.blob-num *,.blob-code,.blob-code *,textarea,.react-line-numbers *,.react-code-lines *", ...monoSiteRules];
-          const regex = /@([\w\-.]+)##(?!.*(?<sp>[#])\k<sp>{1})([\w\-*.#:+>()~[\]=^$|,' ]+)/;
-          siterules.forEach(siterule => {
-            const rule = regex.exec(siterule);
-            if (CUR_HOST_NAME.endsWith(rule[1])) customMonoRules.push(...rule[3].split(","));
-          });
-          const code_text = pre.concat(code, elcode, uniq(customMonoRules)).join();
-          const codeSelector = CAN_I_USE ? `:is(${code_text})` : code_text;
-          const base = s ? "var(--fr-font-family),var(--fr-init-basefont)" : "var(--fr-init-basefont)";
-          return String(
-            codeSelector.concat(
-              `{font-size:14px!important;line-height:150%!important;-webkit-text-stroke:var(--fr-no-stroke)!important;text-shadow:var(--fr-mono-shadow)!important;font-family:var(--fr-mono-font),${base}!important;font-feature-settings:var(--fr-mono-feature)!important;`,
-              `${IS_REAL_WEBKIT ? "-webkit-user-select" : "user-select"}:text!important;}`
-            )
-          );
-        }
-        return "";
+        if (!isCustomMono) return "";
+        let customMonoRules = [];
+        const pre = t.search(/\bpre\b/gi) > -1 ? ["pre", "pre *"] : [];
+        const code = t.search(/\bcode\b/gi) > -1 ? ["code", "code *"] : [];
+        const elcode = ["samp", "kbd", ".code", ".code *"];
+        const siterules = ["@github.com##.blob-num,.blob-num *,.blob-code,.blob-code *,textarea,.react-line-numbers *,.react-code-lines *", ...monoSiteRules];
+        const regex = /@([\w\-.]+)##(?!.*(?<sp>[#])\k<sp>{1})([\w\-*.#:+>()~[\]=^$|,' ]+)/;
+        siterules.forEach(siterule => {
+          const rule = regex.exec(siterule);
+          if (CUR_HOST_NAME.endsWith(rule[1])) customMonoRules.push(...rule[3].split(","));
+        });
+        const code_text = pre.concat(code, elcode, uniq(customMonoRules)).join();
+        const codeSelector = CAN_I_USE ? `:is(${code_text})` : code_text;
+        const base = s ? "var(--fr-font-family),var(--fr-font-basefont)" : "var(--fr-font-basefont)";
+        const monoTextShadow = IS_REAL_GECKO ? "" : "text-shadow:var(--fr-mono-shadow)!important;";
+        return codeSelector.concat(
+          `{line-height:${CUR_HOST_NAME.endsWith("github.com") ? "inherit" : "150%"}!important;font-size:14px!important;`,
+          `-webkit-text-stroke:var(--fr-no-stroke)!important;${monoTextShadow}font-family:var(--fr-mono-font),${base}!important;`,
+          `font-feature-settings:var(--fr-mono-feature)!important;${IS_REAL_WEBKIT ? "-webkit-user-select" : "user-select"}:text!important;}${
+            CUR_HOST_NAME.endsWith("github.com") ? `${codeSelector}::selection{color:currentcolor!important;background:#71bbff6e!important}` : ``
+          }`
+        );
       }
 
       function insertMainStyleElement({ overwrite } = {}) {
@@ -2946,7 +3025,7 @@
         if (!CUR_WINDOW_TOP) return;
         try {
           // set fontData with cache expires
-          let fontData = await detectFontData([]);
+          let fontData = await detectFontData();
           // Fonts selection
           fontSelectionAndCustomFonts(fontData);
           // selector placeholder style
@@ -2988,7 +3067,7 @@
           expandOrCollapse(qS(`#${def.id.eSwitch}`, def.const.configIf), fontExT, qS(`#${def.id.fontEx}`, def.const.configIf));
           // Customized monospaced fontlist
           const customMonoNode = qS(`#${def.id.mono}`, def.const.configIf);
-          customMonospceFont(customMonoNode, monoSiteRules, monoFontList, monoFeature);
+          customMonospceFont(customMonoNode);
           // Reset Button control
           const resetButtonNode = qS(`#${def.id.submit} .${def.class.reset}`, def.const.configIf);
           controlResetButton(
@@ -3021,7 +3100,7 @@
               FontCheckList = await fontCheck_DetectOnce();
               cache.set("_FONTCHECKLIST_", FontCheckList);
             }
-            return [...FontCheckList];
+            return uniq(FontCheckList);
           } catch (e) {
             ERROR("FontCheckList with cache:", e.message);
             cache.remove("_FONTCHECKLIST_");
@@ -3053,10 +3132,7 @@
                 trueButtonText: "保 存",
                 falseButtonText: "帮助文档",
                 neutralButtonText: "取 消",
-                messageText:
-                  `<p style="color:#555;font-size:14px!important">以下文本域可按预定格式增加自定义字体。请用小贴士或按样例填写，输入有误将被自动过滤。` +
-                  `与『<a href="${def.const.gfHost}#fontlist" title="查看内置字体表" target="_blank">内置字体表</a>』重复的字体将被自动剔除。` +
-                  `【功能小贴士\uff1a<span id="${def.const.seed}_addTools" title="点击开启工具" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${def.const.seed}_custom_Fontlist" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下\uff1a\r\n{ "ch":"中文字体名一","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"中文字体名二","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n（注一\uff1a“ps:”该项为字体PostScript名称，可选填写）\r\n（注二\uff1a\u21b2为换行符号，输入(Enter)回车即可）'>${received_Fontlist}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`,
+                messageText: `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式增加自定义字体。请用小贴士或按样例填写，输入有误将被自动过滤。与『<a href="${def.const.gfHost}#fontlist" title="查看内置字体表" target="_blank">内置字体表</a>』重复的字体将被自动剔除。【功能小贴士\uff1a<span id="${def.const.seed}_addTools" title="点击开启工具" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${def.const.seed}_custom_Fontlist" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下\uff1a\r\n{ "ch":"中文字体名一","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"中文字体名二","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n（注一\uff1a“ps:”该项为字体PostScript名称，可选填写）\r\n（注二\uff1a\u21b2为换行符号，输入(Enter)回车即可）'>${received_Fontlist}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`,
                 titleText: "自定义字体表",
               });
               custom_Fontlist = qS(`#${def.const.seed}_custom_Fontlist`, def.const.dialogIf)?.value.trim() ?? "";
@@ -3170,7 +3246,7 @@
         }
 
         function getFontSizeScale(fontScale, submitButton) {
-          if (!def.const.isFontsize || !fontScale) return null;
+          if (!def.const.isFontsize || !fontScale) return;
           try {
             let drawScale = qS(`#${def.id.scaleSize}`, def.const.configIf);
             fontScale.value = CONST_VALUES.fontSize === 1 ? "OFF" : CONST_VALUES.fontSize.toFixed(3);
@@ -3186,8 +3262,8 @@
         }
 
         function getFixViewportBool(fontScale, submitButton) {
-          if (!def.const.isFontsize || !isFixViewport || !fontScale) return null;
           let fixViewportT = qS(`#${def.id.fixViewport}`, def.const.configIf);
+          if (!def.const.isFontsize || !isFixViewport || !fontScale || !fixViewportT) return;
           try {
             const fviewportNode = qS(`#${def.id.fviewport}`, def.const.configIf);
             if (fviewportNode) {
@@ -3206,6 +3282,7 @@
         }
 
         function getFontsStroke(stroke, submitButton) {
+          if (!stroke) return;
           try {
             let drawStrock = qS(`#${def.id.stroke}`, def.const.configIf);
             stroke.value = CONST_VALUES.fontStroke === 0 ? "OFF" : CONST_VALUES.fontStroke.toFixed(3);
@@ -3221,7 +3298,7 @@
         }
 
         function getFixStrokeBool(stroke, submitButton) {
-          if (!IS_REAL_BLINK || !stroke) return null;
+          if (!IS_REAL_BLINK || !stroke) return;
           let fixStrokeT = qS(`#${def.id.fixStroke}`, def.const.configIf);
           try {
             const fstrokeNode = qS(`#${def.id.fstroke}`, def.const.configIf);
@@ -3241,8 +3318,8 @@
         }
 
         function getFontShadow(shadows, shadowColorNode, submitButton) {
+          if (!shadows || !shadowColorNode) return;
           try {
-            if (!shadows || !shadowColorNode) return null;
             let drawShadow = qS(`#${def.id.shadow}`, def.const.configIf);
             shadows.value = CONST_VALUES.fontShadow === 0 ? "OFF" : CONST_VALUES.fontShadow.toFixed(2);
             rangeSliderWidget(drawShadow, shadows, 2);
@@ -3261,8 +3338,8 @@
         }
 
         function getColorAndColorPicker(colorshow, submitButton) {
+          if (!colorshow) return {};
           try {
-            if (!colorshow) return {};
             let colorPicker = new w.frColorPicker(`#${def.id.color}`, {
               value: CONST_VALUES.shadowColor,
               alpha: 1.0,
@@ -3286,9 +3363,9 @@
             });
             colorPicker.fromString(CONST_VALUES.shadowColor);
             const cp = colorPicker.toHEXAString();
-            const cl = getBrightness(cp.substring(1)) > 182 ? "#333" : "#eee";
+            const cl = getBrightness(cp.substring(1)) > 182 ? "#333333" : "#eeeeee";
             colorshow.value = cp === "#FFFFFFFF" ? "currentcolor" : cp;
-            DEBUG(`frColorPicker: %c${cp}`, def.const.style.fullStyle(cp, cl) + "border:1px solid #eee");
+            DEBUG(`frColorPicker: %c${cp}`, `${fullStyle(cp, cl)};border:1px solid #eeeeee`);
             return colorPicker;
           } catch (e) {
             ERROR("Fonts shadowColor:", e.message);
@@ -3307,23 +3384,47 @@
           });
         }
 
-        function customMonospceFont(monoT, siteRule, fontlist, feature) {
+        function customMonospceFont(monoT) {
           if (!monoT) return;
           monoT.addEventListener("dblclick", async () => {
             try {
               const { monoSiteRules: siteRule, monoFontList: fontlist, monoFeature: feature } = await customMonoData();
+              const _config_data_ = await configData();
               const monospacedsiterules = siteRule.join("\r\n").trim();
               const monospacedfont = fontlist.trim();
               const monospacedfeature = feature.trim();
               let frDialog = new FrDialogBox({
                 trueButtonText: "保存数据",
                 neutralButtonText: "取 消",
-                messageText: `<p style="display:block;color:#555;font-size:14px!important">\u2474 以下文本域可设置需应用等宽字体的根域及元素选择器。<br><em style="color:#dc143c">如果您不熟悉CSS语法规则，请保持留空，避免样式失效。</em></p><p><textarea id="${def.const.seed}_monospaced_siterules" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:140px!important;outline:0!important;border:1px solid #999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain;word-break:keep-all!important" placeholder="每行只能允许一条规则，相同站点不同规则可重复添加。\r\n格式如：@网站域名##元素选择器1,元素选择器2,……\r\n例如：\r\n@github.com##[class~='blob-code'] *\r\n@github.com##.example,#abc,div:not(.test)\r\n@github.dev###test:not([class*='test'])">${monospacedsiterules}\r\n</textarea></p><p style="display:block;margin-top:10px!important;color:#555;font-size:14px!important">\u2475 以下可设置自定义英文等宽字体，请按示例格式填写。<br><em style="color:#dc143c">请注意：monospace字体族已程序内置，无需重复添加。</em></p><p><input id="${def.const.seed}_monospaced_font" style="box-sizing:border-box;padding:5px;width:380px;outline:0!important;border:1px solid #999;border-radius:6px;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important" placeholder="例如：'Source Code Pro','Mono','Monaco'" value="${monospacedfont}"></p><p style="display:block;margin-top:10px!important;color:#555;font-size:14px!important">\u2476 以下可设置OpenType字体font-feature-settings属性。<br><em style="color:#dc143c">如果您不了解该属性，请保持留空，以免造成样式错误。</em></p><p><input id="${def.const.seed}_monospaced_feature" style="box-sizing:border-box;padding:5px;width:380px;outline:0!important;border:1px solid #999;border-radius:6px;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important" placeholder='例如："liga" 0,"tnum","zero"' value='${monospacedfeature}'></p>`,
+                messageText:
+                  `<div id="${def.id.cm}" style="margin:0 0 8px;border-bottom:1px groove #cccccc;width:97%!important">
+                    <span class="${def.const.seed}_cusmono" style="color:#555555!important;font-weight:700!important">开启自定义等宽字体（默认：关闭）</span>
+                    <input type="checkbox" id="${def.id.iscusmono}" class="${def.class.checkbox}" ${_config_data_.isCustomMono ? "checked" : ""} />
+                    <label for="${def.id.iscusmono}"></label>
+                  </div>` +
+                  `<p style="display:block;color:#555555;font-size:14px!important">\u2474 以下文本域可设置需应用等宽字体的根域及元素选择器。<br><em style="color:#dc143c">如果您不熟悉CSS语法规则，请保持留空，避免样式失效。</em></p><p><textarea id="${def.const.seed}_monospaced_siterules" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:140px!important;outline:0!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain;word-break:keep-all!important" placeholder="每行只能允许一条规则，相同站点不同规则可重复添加。\r\n格式如：@网站域名##元素选择器1,元素选择器2,……\r\n例如：\r\n@github.com##[class~='blob-code'] *\r\n@github.com##.example,#abc,div:not(.test)\r\n@github.dev###test:not([class*='test'])">${monospacedsiterules}\r\n</textarea></p><p style="display:block;margin-top:10px!important;color:#555555;font-size:14px!important">\u2475 以下可设置自定义英文等宽字体，请按示例格式填写。<br><em style="color:#dc143c">请注意：monospace字体族已程序内置，无需重复添加。</em></p><p><input id="${def.const.seed}_monospaced_font" style="box-sizing:border-box;padding:5px;width:380px;outline:0!important;border:1px solid #999999;border-radius:6px;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important" placeholder="例如：'Source Code Pro','Mono','Monaco'" value="${monospacedfont}"></p><p style="display:block;margin-top:10px!important;color:#555555;font-size:14px!important">\u2476 以下可设置OpenType字体font-feature-settings属性。<br><em style="color:#dc143c">如果您不了解该属性，请保持留空，以免造成样式错误。</em></p><p><input id="${def.const.seed}_monospaced_feature" style="box-sizing:border-box;padding:5px;width:380px;outline:0!important;border:1px solid #999999;border-radius:6px;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important" placeholder='例如："liga" 0,"tnum","zero"' value='${monospacedfeature}'></p>`,
                 titleText: "设置自定义等宽字体",
               });
               const monospacedSiteRulesNode = qS(`#${def.const.seed}_monospaced_siterules`, def.const.dialogIf);
               const monospacedFontNode = qS(`#${def.const.seed}_monospaced_font`, def.const.dialogIf);
               const monospacedFeatureNode = qS(`#${def.const.seed}_monospaced_feature`, def.const.dialogIf);
+              const customMonoSwitch = qS(`#${def.id.iscusmono}`, def.const.dialogIf);
+              const changeDisabledStatus = (listenerCheck, nodes, cssName) => {
+                nodes.forEach(node => {
+                  if (listenerCheck) {
+                    node.removeAttribute("disabled");
+                    node.classList.remove(cssName);
+                  } else {
+                    node.setAttribute("disabled", "disabled");
+                    node.classList.add(cssName);
+                  }
+                });
+              };
+              const monoNodes = [monospacedSiteRulesNode, monospacedFontNode, monospacedFeatureNode];
+              changeDisabledStatus(customMonoSwitch.checked, monoNodes, def.class.readonly);
+              customMonoSwitch.addEventListener("change", function () {
+                changeDisabledStatus(this.checked, monoNodes, def.class.readonly);
+              });
               let custom_MonospacedSiteRules = convertHtmlToText(monospacedSiteRulesNode.value.trim());
               let custom_MonospacedFontList = convertHtmlToText(monospacedFontNode.value.trim());
               let custom_MonospacedFontFeature = convertHtmlToText(monospacedFeatureNode.value.trim());
@@ -3384,10 +3485,12 @@
                   (!custom_MonospacedSiteRules || (Array.isArray(monospaced_SiteRulesArray) && monospaced_SiteRulesArray.length > 0)) &&
                   (!custom_MonospacedFontList || (Array.isArray(monospaced_FontListArray) && monospaced_FontListArray.length > 0))
                 ) {
-                  const monospaced_fontListString = [...new Set(monospaced_FontListArray)].join();
-                  !custom_MonospacedSiteRules ? GMdeleteValue("_MONOSPACED_SITERULES_") : saveData("_MONOSPACED_SITERULES_", monospaced_SiteRulesArray);
+                  const monospaced_fontListString = uniq(monospaced_FontListArray).join();
+                  !custom_MonospacedSiteRules ? GMdeleteValue("_MONOSPACED_SITERULES_") : saveData("_MONOSPACED_SITERULES_", uniq(monospaced_SiteRulesArray));
                   !custom_MonospacedFontList ? GMdeleteValue("_MONOSPACED_FONTLIST_") : saveData("_MONOSPACED_FONTLIST_", monospaced_fontListString);
                   !custom_MonospacedFontFeature ? GMdeleteValue("_MONOSPACED_FEATURE_") : saveData("_MONOSPACED_FEATURE_", custom_MonospacedFontFeature);
+                  _config_data_.isCustomMono = Boolean(qS(`#${def.id.iscusmono}`, def.const.dialogIf).checked);
+                  saveData("_CONFIGURE_", _config_data_);
                   let frDialog = new FrDialogBox({
                     trueButtonText: "确 定",
                     messageText: `<p style="color:darkgreen">您提交的自定义等宽字体相关数据已保存成功\uff01</p><p>当前页面将在您确认后自动刷新。</p><p style="color:coral;font-size:12px!important">注：格式错误的输入内容将被自动过滤。</p>`,
@@ -3494,7 +3597,6 @@
               setEffectIntoSubmit(fontExT.value, CONST_VALUES.fontEx, def.array.values, fontExT, submitButton);
               await getCurrentFontName(ffaceT.checked, refont, def.const.defaultFont);
               loadPreview(def.const.preview);
-              setAutoScaleValue(qS(`#${def.id.rndId}`), def.const.curScale);
               delete def.const.preview;
             }
             frDialog = null;
@@ -3527,34 +3629,35 @@
                 const _shadowcsstext = overlayColor(fshadow, fscolor.toLowerCase());
                 const _shadow = fshadow > 0 && fshadow <= 4 ? "text-shadow:var(--fr-font-shadow);" : "";
                 const _strokecsstext = `${fstroke}px currentcolor`;
-                const _stroke = fstroke > 0 && fstroke <= 1.0 ? `-webkit-text-stroke:var(--fr-font-stroke);` : ``;
+                const _stroke = fstroke > 0 && fstroke <= 1.0 ? "-webkit-text-stroke:var(--fr-font-stroke);" : "";
                 const _smoothing = smooth ? funcSmooth : "";
                 const _textrender = smooth ? "text-rendering:optimizeLegibility;" : "";
-                const _fontfamily = fontface ? `font-family:var(--fr-font-family),var(--fr-init-basefont);` : ``;
+                const _fontfamily = fontface ? "font-family:var(--fr-font-family),var(--fr-font-basefont);" : "";
                 const _refont = fontselect?.split(",")[0].replace(/"|'/g, "") ?? "";
                 const _fontfaces = !fontface ? "" : _refont ? await funcFontface(_refont) : "";
                 const _exselector = CAN_I_USE ? `:is(${convertHtmlToText(fontex)})` : convertHtmlToText(fontex);
                 const _exclude = !fontex || (!fshadow && !fstroke) ? "" : _exselector.concat("{-webkit-text-stroke:var(--fr-no-stroke)!important;text-shadow:none!important}");
                 const _codefont = !fontex ? "" : funcCodefont(fontex, fontface);
+                const _antiscale = parseFloat(1 / fscale);
                 const _fixfontstroke = fixfstroke ? `[${def.const.boldAttrName}]{-webkit-text-stroke:var(--fr-no-stroke)!important}` : ``;
                 const _tshadow = `${_fontfaces}${_bodyscale}`.concat(
                   CAN_I_USE ? `:is(${convertHtmlToText(fontcss)})` : convertHtmlToText(fontcss),
                   `{${_fontfamily}${_shadow}${_stroke}${_smoothing}${_textrender}}`,
                   `${_exclude}${_codefont}${_fixfontstroke}`
                 );
-                const _rootpseudoclass = `:root{--fr-init-basefont:${INITIAL_VALUES.fontBase};--fr-init-fontscale:${fscale};--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-font-feature:"liga" 0,"zero";--fr-mono-font:${monoFontText};--fr-mono-shadow:0 0 0px currentcolor;--fr-mono-feature:${monoFeatureText};--fr-no-stroke:0px transparent;}`;
-                const __tshadow = `@charset "UTF-8";` + (_curEmptyConfig ? `${def.const.style.global}` : `${_rootpseudoclass}${def.const.style.global}${_tshadow}`);
-                def.array.scaleValueMatrix.push(fscale);
-                def.const.curScale = fscale;
+                const _globalCssText = IS_REAL_GECKO && fontface ? def.const.style.global : "";
+                const _rootpseudoclass = `:root{--fr-font-basefont:${INITIAL_VALUES.fontBase};--fr-font-fontscale:${fscale};--fr-font-antiscale:${_antiscale};--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-font-feature:"liga" 0,"zero";--fr-mono-font:${monoFontText};--fr-mono-shadow:0 0 0 currentcolor;--fr-mono-feature:${monoFeatureText};--fr-no-stroke:0px transparent;}`;
+                const __tshadow = _curEmptyConfig ? `/* BLANK_STYLE_SHEET */` : `@charset "UTF-8";${_rootpseudoclass}${_globalCssText}${_tshadow}`;
                 this.textContent = "\u4fdd\u5b58";
                 this.removeAttribute("style");
                 this.removeAttribute("v-Preview");
+                def.const.curScale = fscale;
+                def.array.scaleValueMatrix.push(fscale);
                 loadPreview(def.const.isPreview, __tshadow, false);
                 await getCurrentFontName(fontface, _refont, def.const.defaultFont)
                   .then(() => {
                     const cl = getBrightness(fscolor.substring(1)) > 182 ? "#333" : "#eee";
-                    DEBUG(`frColorPicker<Preview>: %c${fscolor}`, def.const.style.fullStyle(fscolor, cl) + "border:1px solid #eee");
-                    setAutoScaleValue(qS(`#${def.id.rndId}`), fscale);
+                    DEBUG(`frColorPicker<Preview>: %c${fscolor}`, `${fullStyle(fscolor, cl)};border:1px solid #eee`);
                   })
                   .then(() => fixFontStrokeStyleErrors(_fixfontstroke, { permit: isFixStrokeTask(fstroke && fixfstroke) }))
                   .catch(e => ERROR("Preview:", e.message));
@@ -3590,7 +3693,7 @@
                 if (typeof domainValueIndex !== "undefined" && cwdNode) {
                   const fontDate = setDateFormat("yyyy-MM-dd HH:mm:ss", new Date(domainValue[domainValueIndex].fontDate));
                   cwdNode.innerHTML = tTP.createHTML(
-                    `<p style="display:flex;height:30px;align-items:center"><span style="color:indigo"><strong>上次保存\uff1a</strong>${fontDate} </span><button id="${def.const.seed}_c_w_d_d_" style="box-sizing:border-box;margin-left:15px;padding:3px 5px;width:max-content;height:max-content;max-width:120px;min-height:30px;border:1px solid #777;border-radius:4px;background-color:#eee;color:#333!important;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer" title="删除数据后将刷新页面">删除当前网站数据</button></p>`
+                    `<p style="display:flex;height:30px;align-items:center"><span style="color:indigo"><strong>上次保存\uff1a</strong>${fontDate} </span><button id="${def.const.seed}_c_w_d_d_" style="box-sizing:border-box;margin-left:15px;padding:3px 5px;width:max-content;height:max-content;max-width:120px;min-height:30px;border:1px solid #777777;border-radius:4px;background-color:#eeeeee;color:#333333!important;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer" title="删除数据后将刷新页面">删除当前网站数据</button></p>`
                   );
                   qS(`#${def.const.seed}_c_w_d_d_`, def.const.dialogIf).addEventListener("click", async () => {
                     typeof domainValueIndex !== "undefined" && domainValue.splice(domainValueIndex, 1);
@@ -3845,9 +3948,7 @@
 
         function controlCancelButton(cancelT) {
           if (!cancelT) return;
-          cancelT.addEventListener("click", () => {
-            closeConfigurePage({ isReload: false });
-          });
+          cancelT.addEventListener("click", () => closeConfigurePage({ isReload: false }));
         }
       }
 
@@ -3897,12 +3998,8 @@
         }
         if (inputFont) {
           inputFont.setAttribute("placeholder", `\u5f53\u524d\u5b57\u4f53\uff1a${def.const.curFont}`);
-          inputFont.addEventListener("mouseover", () => {
-            inputFont.setAttribute("placeholder", "\u8f93\u5165\u5173\u952e\u5b57\u53ef\u68c0\u7d22\u5b57\u4f53");
-          });
-          inputFont.addEventListener("mouseout", () => {
-            inputFont.setAttribute("placeholder", `\u5f53\u524d\u5b57\u4f53\uff1a${def.const.curFont}`);
-          });
+          inputFont.addEventListener("mouseover", () => inputFont.setAttribute("placeholder", "\u8f93\u5165\u5173\u952e\u5b57\u53ef\u68c0\u7d22\u5b57\u4f53"));
+          inputFont.addEventListener("mouseout", () => inputFont.setAttribute("placeholder", `\u5f53\u524d\u5b57\u4f53\uff1a${def.const.curFont}`));
         }
       }
 
@@ -3923,14 +4020,14 @@
         isReload === true && location.reload();
       }
 
-      function rangeSliderWidget(linstener, target, m, g = false) {
-        if (!linstener || !target) return;
-        linstener.addEventListener("input", function () {
-          setSliderProperty(this, this.value, m);
-          target.value = Number(this.value) === (g ? 1 : 0) ? "OFF" : Number(this.value).toFixed(m);
-          target._value_ = Number(this.value).toFixed(m);
+      function rangeSliderWidget(listener, target, bits, isOne = false) {
+        if (!listener || !target) return;
+        listener.addEventListener("input", function () {
+          setSliderProperty(this, this.value, bits);
+          target.value = Number(this.value) === (isOne ? 1 : 0) ? "OFF" : Number(this.value).toFixed(bits);
+          target._value_ = Number(this.value).toFixed(bits);
           let queryNode;
-          switch (linstener.id) {
+          switch (listener.id) {
             case def.id.shadow:
               queryNode = qS(`#${def.id.shadowColor}`, def.const.configIf);
               queryNode && queryNode.style.setProperty("display", target.value === "OFF" ? "none" : "flex");
@@ -3948,42 +4045,42 @@
         });
       }
 
-      function expandOrCollapse(a, b, c) {
-        if (!a || !b || !c) return;
-        const at = a.attributes["fr-button-switch"];
-        a.addEventListener("click", () => {
+      function expandOrCollapse(button, textarea, node) {
+        if (!button || !textarea || !node) return;
+        const at = button.attributes["fr-button-switch"];
+        button.addEventListener("click", () => {
           if (at.value === "ON") {
-            b.style = "display:none";
-            a.textContent = "\u2228";
-            c.style.cssText += "height:35px;min-height:35px";
+            textarea.style = "display:none";
+            button.textContent = "\u2228";
+            node.style.cssText += "height:35px;min-height:35px";
             at.value = "OFF";
           } else {
-            b.style = "display:block";
-            a.textContent = "\u2227";
-            c.style.cssText += "height:110px;min-height:110px";
+            textarea.style = "display:block";
+            button.textContent = "\u2227";
+            node.style.cssText += "height:110px;min-height:110px";
             at.value = "ON";
           }
         });
       }
 
-      function saveChangeStatus(t, e, d, v, g = false) {
+      function saveChangeStatus(input, initVal, button, arr, isOne = false) {
         try {
-          if (!t) return;
-          if (t.type !== "text") {
-            const method = t.type === "textarea" ? "input" : "change";
-            t.addEventListener(method, () => {
-              const value = t.type === "checkbox" ? t.checked : t.value;
-              setEffectIntoSubmit(value, e, v, t, d);
+          if (!input) return;
+          if (input.type !== "text") {
+            const method = input.type === "textarea" ? "input" : "change";
+            input.addEventListener(method, () => {
+              const newVal = input.type === "checkbox" ? input.checked : input.value;
+              setEffectIntoSubmit(newVal, initVal, arr, input, button);
             });
           } else {
-            Object.defineProperty(t, "_value_", {
+            Object.defineProperty(input, "_value_", {
               enumerable: true,
               configurable: true,
               get: function () {
                 return this.value;
               },
               set: newVal => {
-                deBounce({ fn: setEffectIntoSubmit, delay: 1e2, timer: t.id })(newVal, e, v, t, d, g);
+                deBounce({ fn: setEffectIntoSubmit, delay: 1e2, timer: input.id })(newVal, initVal, arr, input, button, isOne);
               },
             });
           }
@@ -3993,42 +4090,37 @@
         }
       }
 
-      function setEffectIntoSubmit(value, e, v, t, d, h = false) {
+      function setEffectIntoSubmit(newVal, initVal, arr, input, button, isOne = false) {
         try {
-          if (!d || !t) return;
-          const _thatoffvalue = h ? 1 : 0;
+          if (!button || !input) return;
+          const _thatoffvalue = isOne ? 1 : 0;
           const _value =
-            typeof t.attributes.v !== "undefined"
-              ? value === "OFF"
+            typeof input.dataset.frType !== "undefined"
+              ? newVal === "OFF"
                 ? _thatoffvalue
-                : Number(value)
-              : typeof value === "string" && value.toLowerCase() === "currentcolor"
+                : Number(newVal)
+              : typeof newVal === "string" && newVal.toLowerCase() === "currentcolor"
               ? "#FFFFFFFF"
-              : value;
-          if (_value !== e) {
-            !v.includes(t.id) && v.push(t.id);
-            if (def.const.isPreview) changePreviewButtonStyle(d, v);
+              : newVal;
+          if (_value !== initVal) {
+            !arr.includes(input.id) && arr.push(input.id);
+            if (def.const.isPreview) changePreviewButtonStyle(button, arr);
           } else {
-            const vI = v.indexOf(t.id);
-            Boolean(~vI) && v.splice(vI, 1);
+            const vI = arr.indexOf(input.id);
+            Boolean(~vI) && arr.splice(vI, 1);
           }
-          DEBUG("changed Element IDs:\r\n", (def.array.values = v));
-          if (v.length > 0) {
-            if (!d.classList.contains(def.class.anim)) {
-              d.classList.add(def.class.anim);
-            }
+          DEBUG("changed Element IDs:\r\n", (def.array.values = arr));
+          if (arr.length > 0) {
+            if (!button.classList.contains(def.class.anim)) button.classList.add(def.class.anim);
           } else {
-            if (d.classList.contains(def.class.anim)) {
-              d.classList.remove(def.class.anim);
-            }
+            if (button.classList.contains(def.class.anim)) button.classList.remove(def.class.anim);
             if (def.const.isPreview) {
-              d.textContent = "\u4fdd\u5b58";
-              d.removeAttribute("style");
-              d.removeAttribute("v-Preview");
+              button.textContent = "\u4fdd\u5b58";
+              button.removeAttribute("style");
+              button.removeAttribute("v-Preview");
               loadPreview(def.const.preview);
               def.const.curScale = CONST_VALUES.fontSize;
               def.array.scaleValueMatrix.push(def.const.curScale);
-              setAutoScaleValue(qS(`#${def.id.rndId}`), def.const.curScale);
             }
           }
         } catch (exp) {
@@ -4036,48 +4128,15 @@
         }
       }
 
-      function changePreviewButtonStyle(t, v) {
-        if (IS_REAL_GECKO && v.includes(def.id.fontScale)) {
-          t.textContent = "\u4fdd\u5b58";
-          t.removeAttribute("style");
-          t.removeAttribute("v-Preview");
+      function changePreviewButtonStyle(button, arr) {
+        if (IS_REAL_GECKO && arr.includes(def.id.fontScale)) {
+          button.textContent = "\u4fdd\u5b58";
+          button.removeAttribute("style");
+          button.removeAttribute("v-Preview");
         } else {
-          t.textContent = "\u9884\u89c8";
-          t.setAttribute("style", "background-color:coral!important;border-color:coral!important");
-          t.setAttribute("v-Preview", "true");
-        }
-      }
-
-      function setAutoScaleValue(target, scale) {
-        if (!target) return;
-        let curScale = Number(scale) || 1;
-        try {
-          if (IS_REAL_GECKO) {
-            repositionForGeckoScaling(target);
-            if (curScale !== 1) {
-              target.style.cssText += `transform:scale(${1 / curScale});transform-origin:left top 0;width:99vw;height:99vh;`;
-            } else {
-              target.removeAttribute("style");
-            }
-          } else {
-            curScale = Number(gS(document.body, "zoom")) || curScale;
-            curScale !== 1 ? (target.style.zoom = Number(1 / curScale)) : target.removeAttribute("style");
-          }
-        } catch (e) {
-          ERROR("setAutoScaleValue:", e.message);
-          def.array.exps.push(`[setAutoScaleValue]: ${e}`);
-        } finally {
-          const { oScale, tScale } = getscaleValueMatrix();
-          if (curScale !== 1 && def.const.preview && oScale !== tScale) {
-            DEBUG(
-              "fontSize<Scale>: saved [%s]\r\n\u3000 \u27A5 current [%c%s %c%s]",
-              (CONST_VALUES.fontSize * 100).toFixed(2) + "%",
-              "padding:5px 0;color:teal",
-              (curScale * 100).toFixed(2) + "%",
-              "padding:5px 0;color:indigo",
-              ((1 / curScale) * 100).toFixed(2) + "%"
-            );
-          }
+          button.textContent = "\u9884\u89c8";
+          button.setAttribute("style", "background-color:coral!important;border-color:coral!important");
+          button.setAttribute("v-Preview", "true");
         }
       }
 
@@ -4109,7 +4168,7 @@
       function reportErrorToAuthor(exps, showDialogBox = IS_DEBUG) {
         if (!showDialogBox || !Array.isArray(exps)) return;
         closeConfigurePage({ isReload: false });
-        sleep(1e2 + random(2e3)).then(async (expReport = "") => {
+        sleep(1e2 + random(1e3))("").then(async expReport => {
           try {
             if (qS("fr-dialogbox[fr-error]")) return;
             for (let i = 0; i < exps.length; i++) {
@@ -4118,14 +4177,12 @@
             let frDialog = new FrDialogBox({
               trueButtonText: "反馈问题",
               falseButtonText: "刷新页面",
-              messageText: `<p style="color:#dc143c;font-size:14px!important">脚本在运行时发生了重大异常或错误，若在『刷新页面』后依然报错，请通过『反馈问题』及时告知作者，感谢您的反馈\uff01<br/><kbd style="display:inline-block;box-sizing:content-box;margin:4px 0 0;padding:3px 10px;width:94%;border:1px solid rgba(175,184,193,.4);border-radius:6px;background-color:#f6f8fa;color:#666;vertical-align:middle;text-align:center;font-size:14px!important">以下信息会自动保存至您的剪切板</kbd></p>
-                  <p><ul id="${def.const.seed}_copy_to_author" style="overflow-y:auto;margin:0!important;padding:0!important;max-height:300px;list-style-position:outside">
-                    <li>浏览器信息\uff1a${JSON.stringify(navigatorInfo)}\u3000</li>
-                    <li>脚本扩展信息\uff1a${GMscriptHandler} ${GMversion}\u3000</li>
-                    <li>脚本版本信息\uff1a${def.variable.curVersion}\u3000</li>
-                    <li>当前访问域名\uff1a${CUR_HOST_NAME}<span hidden>\u0020${CUR_HOST_PATH}</span>\u3000</li>
-                    <li>错误信息列表\uff1a\u3000<span style="display:block;color:tan">${expReport}</span></li>
-                  </ul></p>`,
+              messageText:
+                `<p style="color:#dc143c;font-size:14px!important">脚本在运行时发生了重大异常或错误，若在『刷新页面』后依然报错，请通过『反馈问题』及时告知作者，感谢您的反馈\uff01<br/><kbd style="display:inline-block;box-sizing:content-box;margin:4px 0 0;padding:3px 10px;width:94%;border:1px solid rgba(175, 184, 193, 0.4);border-radius:6px;background-color:#f6f8fa;color:#666666;vertical-align:middle;text-align:center;font-size:14px!important">以下信息会自动保存至您的剪切板</kbd></p>` +
+                `<p><ul id="${def.const.seed}_copy_to_author" style="overflow-y:auto;margin:0!important;padding:0!important;max-height:300px;list-style-position:outside">` +
+                `<li>浏览器信息\uff1a${JSON.stringify(navigatorInfo)}\u3000</li><li>脚本扩展信息\uff1a${GMscriptHandler} ${GMversion}\u3000</li>` +
+                `<li>脚本版本信息\uff1a${def.variable.curVersion}\u3000</li><li>当前访问域名\uff1a${CUR_HOST_NAME}<span hidden>\u0020${CUR_HOST_PATH}</span>\u3000</li>` +
+                `<li>错误信息列表\uff1a\u3000<span style="display:block;color:tan">${expReport}</span></li></ul></p>`,
               titleText: def.variable.scriptName + "错误报告",
             });
             frDialog.container.setAttribute("fr-error", true);
@@ -4136,7 +4193,7 @@
               .trim();
             def.array.exps.length = 0;
             if (await frDialog.respond()) {
-              copyToClipboard(copyText);
+              copyToClipboard("```log\n" + copyText + "\n```");
               GMopenInTab(`${def.variable.feedback}/new?assignees=F9y4ng&template=bug_report.md`, false);
             } else {
               location.reload(true);
@@ -4175,8 +4232,8 @@
 
       function fixViewportCssStyle(node, scaleValue) {
         if (!CONST_VALUES.fixViewport || typeof node === "undefined" || scaleValue === 1) return;
-        const fixReg = /(?:\b)(\d+(?:\.\d+)?)(v[wh]|vmin|vmax)(?:\b)/g;
-        const base64Reg = /(?:;base64,)((?:[a-zA-Z0-9/+]+\b)\d+(v[wh]|vmin|vmax))+(?:\b)/g;
+        const fixRegex = /\b(\d+(?:\.\d+)?)(v[wh]|vmin|vmax)\b(?!\\)/g;
+        const base64Regex = /(?:;base64,)((?:[a-zA-Z0-9/+]+)\b\d+(v[wh]|vmin|vmax)\b)+/g;
         const triggerNode = node === null ? "DOM" : node.nodeName;
         switch (triggerNode) {
           case "LINK":
@@ -4199,20 +4256,20 @@
             node.setAttribute("data-processed", false);
             debugOnce("fixlinks", "detect viewport.Links:", true);
             return new Promise(() => {
-              let xhr = new XMLHttpRequest();
+              const xhr = new XMLHttpRequest();
               xhr.timeout = 5e3;
               xhr.onreadystatechange = () => {
                 if (xhr.status === 200 && xhr.readyState === 4) {
                   let cssText = xhr.responseText ?? xhr.response ?? "";
-                  let parent = node.parentNode ?? document.head;
-                  if (!cssText || !parent || !detectMatchingResults(cssText, fixReg)) return;
-                  cssText = replaceStyle(cssText, fixReg, scaleValue);
+                  const parent = node.parentNode ?? document.head;
+                  if (!cssText || !parent || !detectMatchingResults(cssText, fixRegex)) return;
+                  cssText = replaceStyle(cssText, fixRegex, scaleValue);
                   cssText = replaceBaseURL(cssText, url);
-                  let style = document.createElement("style");
+                  const style = cE("style");
                   style.textContent = "/*# sourceURL=" + url + " */\r\n" + cssText;
                   if (node.media) style.media = node.media;
                   if (node.disabled) style.disabled = node.disabled;
-                  for (let ds in node.dataset) {
+                  for (const ds in node.dataset) {
                     if (node.dataset.hasOwnProperty(ds)) style.dataset[ds] = node.dataset[ds];
                   }
                   style.setAttribute("data-href", node.getAttribute("href"));
@@ -4232,7 +4289,7 @@
                   DEBUG("viewport.Link Fixed: %O", style);
                 }
               };
-              xhr.onerror = e => ERROR("Network Error: Probably blocked by CORS policy");
+              xhr.onerror = e => ERROR("Network Error: Blocked by CORS/CSP.");
               try {
                 xhr.open("GET", url, true);
                 xhr.send(null);
@@ -4250,10 +4307,10 @@
             let cssText = node.textContent;
             node.setAttribute("data-processed", false);
             debugOnce("fixstyles", "detect viewport.Styles:", true);
-            if (!detectMatchingResults(cssText, fixReg)) return;
+            if (!detectMatchingResults(cssText, fixRegex)) return;
             return new Promise(() => {
               try {
-                cssText = replaceStyle(cssText, fixReg, scaleValue);
+                cssText = replaceStyle(cssText, fixRegex, scaleValue);
                 node.textContent = cssText;
                 node.setAttribute("data-seed", Date.now());
                 node.setAttribute("data-processed", true);
@@ -4267,7 +4324,7 @@
         }
 
         function detectMatchingResults(txt, reg) {
-          const getBase64Eigenvalue = JSON.stringify(txt.match(base64Reg));
+          const getBase64Eigenvalue = JSON.stringify(txt.match(base64Regex));
           const matching = txt.match(reg);
           if (matching) {
             const matchingResults = matching.filter(match => !getBase64Eigenvalue.includes(match));
@@ -4277,7 +4334,7 @@
         }
 
         function replaceStyle(txt, reg, scale) {
-          const getBase64Eigenvalue = JSON.stringify(txt.match(base64Reg));
+          const getBase64Eigenvalue = JSON.stringify(txt.match(base64Regex));
           return txt.replace(reg, function (match, num, unit) {
             if (getBase64Eigenvalue.includes(match)) {
               return match;
@@ -4362,7 +4419,7 @@
           if (host instanceof ShadowRoot) {
             const needInsertHostStyle = getAndProcessBoldStyles(host);
             if (needInsertHostStyle) {
-              const curSyncStyle = `:host{--fr-no-stroke:0px transparent}` + syncStyle;
+              const curSyncStyle = `:host(${host.host.nodeName.toLowerCase()}){--fr-no-stroke:0px transparent}` + syncStyle;
               compatibleWithAdoptedStyleSheets(host, curSyncStyle, `${def.const.seed}-fixboldstroke`);
             }
           }
@@ -4428,7 +4485,7 @@
                     continue;
                   case "style":
                     oldValue = mutation.oldValue?.replace(/\s/g, "") ?? "";
-                    newValue = element.style.cssText.replace(/\s/g, "");
+                    newValue = element.style?.cssText?.replace(/\s/g, "") ?? "";
                     if (newValue !== oldValue) {
                       const oldArray = uniq(oldValue.split(";"));
                       const newArray = uniq(newValue.split(";"));
@@ -4505,7 +4562,7 @@
                   if (node.nodeType !== Node.ELEMENT_NODE) continue;
                   deBounce({ fn: insertMainStyleElement, delay: 1e2, timer: "repeatcheck", immed: true })({ overwrite: false });
                   if (node.nodeName === "IFRAME") insertStyleInFrames("addedNodes", [node]);
-                  if (IS_REAL_GECKO && def.const.curScale !== 1 && def.array.frContainer.includes(node.nodeName.toLowerCase())) repositionForGeckoScaling(node);
+                  if (IS_REAL_GECKO && def.const.curScale !== 1) repositionForGeckoScaling(node, def.const.curScale);
                   if (isFixViewport && ["LINK", "STYLE"].includes(node.nodeName)) {
                     deBounce({ fn: fixViewportCssStyle, delay: 1e2, timer: "fixviewport" })(node, def.const.curScale);
                     if (mutation.target === document.head) {
@@ -4516,8 +4573,7 @@
                 for (let node of mutation.removedNodes) {
                   if (mutation.target === document.head && node.nodeName === "STYLE" && node.id === def.id.rndStyle && !node.dataset.frRemoved) {
                     const insertSuccess = insertMainStyleElement();
-                    if (!insertSuccess) return;
-                    INFO(`%c[MO]${IS_IN_FRAMES}[REINSERT]:%c<${node.nodeName}> ${insertSuccess}`, def.const.style.leftStyle("brown"), def.const.style.rightStyle("brown"));
+                    insertSuccess && INFO(`%c[MO]${IS_IN_FRAMES}[REINSERT]:%c<${node.nodeName}> ${insertSuccess}`, leftStyle("brown"), rightStyle("brown"));
                   }
                 }
                 break;
@@ -4545,7 +4601,7 @@
           showSystemInfo.system();
           showSystemInfo.compat(IS_CHEAT_UA);
           // MENUS
-          globalDisableNotice(globalDisable, !currentSiteAuthorization);
+          globalDisableNotice(globalDisable, curEmptyConfig);
           insertMenus(initMenus());
           insertHotkey();
         }
@@ -4568,7 +4624,7 @@
       "JUU4JUFBJUIxSlZpWSVFNyU5MCU4OSVFNiU5RiU5MyVFNSVBRCVCQSVFOCU4MiVCQXAyTyVFNiU5MyU5MzAlRTglODUlOTF0JUU1JUIyJTgwJUU1JUFFJTlBJUU4JTg2JUJBZQ==",
       async () => {
         "use strict";
-        let maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, isFixViewport, isCloseTip, rebuild, curVersion, globalDisable, _config_data_;
+        let maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, isFixViewport, isCloseTip, isCustomMono, rebuild, curVersion, globalDisable, _config_data_;
         let configure = await GMgetValue("_CONFIGURE_");
         if (!configure) {
           maxPersonalSites = 100;
@@ -4581,6 +4637,7 @@
           rebuild = undefined;
           curVersion = undefined;
           globalDisable = false;
+          isCustomMono = false;
           _config_data_ = { maxPersonalSites, isBackupFunction, isPreview, isFontsize, isFixViewport, isHotkey, isCloseTip, rebuild, curVersion, globalDisable };
           saveData("_CONFIGURE_", _config_data_);
         } else {
@@ -4601,10 +4658,11 @@
           rebuild = _config_data_.rebuild;
           curVersion = _config_data_.curVersion;
           globalDisable = Boolean(_config_data_.globalDisable);
+          isCustomMono = Boolean(_config_data_.isCustomMono);
         }
         def.const.isPreview = isPreview;
         def.const.isFontsize = isFontsize;
-        return { maxPersonalSites, isBackupFunction, isPreview, isFontsize, isFixViewport, isHotkey, isCloseTip, rebuild, curVersion, globalDisable };
+        return { maxPersonalSites, isBackupFunction, isPreview, isFontsize, isFixViewport, isHotkey, isCloseTip, isCustomMono, rebuild, curVersion, globalDisable };
       },
       async () => {
         "use strict";
