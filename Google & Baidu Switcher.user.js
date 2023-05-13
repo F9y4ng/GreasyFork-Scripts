@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜索引擎跳轉助手
 // @name:ru            скачок поисковой системы
 // @name:ja            優雅な検索エンジンジャンプ助手
-// @version            2023.05.06.1
+// @version            2023.05.13.1
 // @author             F9y4ng
 // @description        "elegant Search Engine Jump Assistant" permet aux utilisateurs de passer facilement d'un moteur de recherche spécifique à un autre; prend en charge la suppression de la redirection des liens, le blocage de la publicité, la détection automatique des mises à jour, etc., compatible avec plus d'une douzaine de moteurs de recherche, tels que Baidu, Google, Bing, Duckduckgo, Yandex, you, etc.
 // @description:en     "Elegant Search Engine Jump Assistant" provides a search experience for users to jump from a specific search engine to another. Support custom common search engines, optimize keyword effect. It also offers removal of search link redirects, blocking of ads in search results and automatic update detection. Compatible with many search engines in the world, such as Baidu, Google, Bing, Duckduckgo, Yandex, You, etc.
@@ -57,7 +57,7 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               完全重构代码，优化脚本执行效率。\nAdd English interface for non-Chinese users.\n优化去除重定向方法，提高真实链接获取成功率。\n修正safari下部分样式的兼容性问题。\n修正部分站点因CSP造成icon不显示的问题。\n修正一些小问题，优化样式，优化代码。
+// @note               优化Bing.com的链接属性颜色。\n更新Yandex.com/Yandex.ru的广告过滤规则。\n修正一些小问题，优化样式，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -125,7 +125,7 @@
       refresh: () => location.reload(true),
       lisence: generateRandomString(64, "attr"),
       feedback: getMetaValue("supportURL") ?? "",
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.05.06.0",
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.05.13.0",
       scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? "SearchEngine Assistant",
     },
     dialog: {
@@ -154,6 +154,7 @@
       rName: generateRandomString(8, "char"),
       random: generateRandomString(5, "char"),
       noticejs: generateRandomString(7, "char"),
+      linkerror: generateRandomString(7, "mix"),
       item: generateRandomString(6, "mix"),
       close: generateRandomString(6, "mix"),
       center: generateRandomString(6, "mix"),
@@ -710,7 +711,7 @@
         `.${def.notice.noticejs} .${def.notice.configuration} button.${def.notice.searchButton}{display:flex;margin:0 0 10px;padding:6px 0;width:162px;height:25px;border:2px solid #eeeeee;border-radius:6px;background:#ffffff;box-shadow:1px 1px 0 1px #aaaaaa;font-size:14px!important;cursor:pointer;align-content:center;justify-content:center;align-items:center}.${def.notice.noticejs} .${def.notice.configuration} button.${def.notice.searchButton}:hover{box-shadow:1px 1px 3px 0 #888888;color:red}.${def.notice.noticejs} .${def.notice.configuration} span.${def.notice.favicon}{margin:0 6px 0 0;width:24px;height:24px}.${def.notice.noticejs} .${def.notice.configuration} ul.${def.notice.searchList}{margin:5px;padding:2px;list-style:none}.${def.notice.noticejs} .${def.notice.configuration} ul.${def.notice.searchList} li{margin:0;list-style:none;font-style:normal}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.fieldset}{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;border:2px dashed #dfdfdf;border-radius:10px;background:transparent!important;text-align:left}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.legend}{display:block;margin:0;padding:0 8px;width:auto;color:#8b0000!important;font-weight:900!important;font-size:14px!important;-webkit-user-select:all;user-select:all}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.settingList}{margin:0;padding:0;background:transparent!important}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.settingList} li{float:none;display:flex;margin:3px 0;padding:2px 8px 2px 12px;height:36px;border:none;background:transparent!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none;align-content:center;justify-content:space-between}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.settingList} li>div{font:normal 700 14px/150% Microsoft YaHei UI,Helvetica Neue,sans-serif!important}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.settingList} button{box-sizing:border-box;margin:0 0 0 8px;padding:4px 8px;height:36px;min-width:65px;border:1px solid #cccccc;border-radius:8px;background:#fafafa;box-shadow:1px 1px 1px 0 #cccccc;color:#5e5e5e;font-weight:700;font-size:14px!important}` +
         `.${def.notice.noticejs} .${def.notice.configuration} #${def.notice.random}_customColor{margin:0;cursor:pointer}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.settingList} button:hover{background:#ffffff;cursor:pointer}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}__content{display:block;margin:0;height:268px}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{overflow-x:hidden;overflow-y:auto;box-sizing:border-box;margin:4px 0 3px;padding:8px;width:266px;max-height:237px;overscroll-behavior:contain}.${def.notice.card} h2{margin:0;padding:0;border:0;vertical-align:baseline;font:inherit;font-size:100%}.${def.notice.card}{margin:0;padding:0;--background:#ffffff;--background-chackbox:#0082ff;--background-image:#ffffff,rgba(0,107,175,0.2);--text-color:#666666;--text-headline:#000000;--card-shadow:#0082ff;--card-height:48px;--card-witght:240px;--card-radius:12px;--header-height:47px;--blend-mode:overlay;--transition:0.15s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.${def.notice.card}__input{position:absolute;display:block;margin:0;padding:0;outline:none;border:none;background:none;-webkit-appearance:none}.${def.notice.card}__input:checked ~ .${def.notice.card}__body{--shadow:0 0 0 3px var(--card-shadow);}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox{--chack-bg:var(--background-chackbox);--chack-border:#ffffff;--chack-scale:1;--chack-opacity:1;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox--svg{--stroke-color:#ffffff;--stroke-dashoffset:0;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover:after{--opacity-bg:0;}.${def.notice.random}_iconText{color:#333333;}.${def.notice.random}_iconText:hover{color:crimson}` +
         `.${def.notice.card}__input:disabled ~ .${def.notice.card}__body{cursor:not-allowed;opacity:0.5;}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body:active{--scale:1;}.${def.notice.card}__body{position:relative;display:grid;overflow:hidden;width:var(--card-witght);height:var(--card-height);border-radius:var(--card-radius);background:var(--background);box-shadow:var(--shadow,1px 1px 3px 1px #ccc);cursor:pointer;-webkit-transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:transform var(--transition),box-shadow var(--transition);transition:transform var(--transition),box-shadow var(--transition),-webkit-transform var(--transition);-webkit-transform:scale(var(--scale,1)) translateZ(0);transform:scale(var(--scale,1)) translateZ(0);grid-auto-rows:calc(var(--card-height) - var(--header-height)) auto}.${def.notice.card}__body:active{--scale:0.96;}.${def.notice.card}__body-cover-image{position:absolute;top:8px;left:10px;z-index:100;width:32px;height:32px}.${def.notice.card}__body-cover-image span.${def.notice.favicons}{display:block;width:32px;height:32px}.${def.notice.card}__body-cover-chackbox{position:absolute;top:10px;right:10px;z-index:1;width:28px;height:28px;border:2px solid var(--chack-border,#fff);border-radius:50%;background:var(--chack-bg,var(--background-chackbox));opacity:var(--chack-opacity,0);transition:transform var(--transition),opacity calc(var(--transition)*1.2) linear,-webkit-transform var(--transition) ease;-webkit-transform:scale(var(--chack-scale,0));transform:scale(var(--chack-scale,0))}.${def.notice.card}__body-cover-chackbox--svg{display:inline-block;visibility:visible!important;margin:8px 0 0 7px;width:13px;height:11px;vertical-align:top;-webkit-transition:stroke-dashoffset .4s ease var(--transition);transition:stroke-dashoffset .4s ease var(--transition);fill:none;stroke:var(--stroke-color,#fff);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16px;stroke-dashoffset:var(--stroke-dashoffset,16px)}` +
-        `.${def.notice.card}__body-header{padding:4px 10px 6px 50px;height:var(--header-height);background:var(--background)}.${def.notice.card}__body-header-title{margin-bottom:0!important;color:var(--text-headline);font-weight:700!important;font-size:15px!important}.${def.notice.card}__body-header-subtitle{color:var(--text-color);font-weight:500;font-size:13px!important}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{display:grid;grid-template-columns:repeat(1, 1fr);grid-gap:10px;}#${def.notice.random}_help{position:relative;right:16%;padding:4px 15px!important;border:1px solid transparent;background:#f07f6a;box-shadow:0 0 6px 0 #f5846f;color:#ffffff;cursor:help}#${def.notice.random}_help:hover{background:#ed6248;box-shadow:0 0 6px 0 #f34525;}#${def.notice.random}_clear{margin:0 0 0 10px;color:#666666;font-weight:500;cursor:pointer}#${def.notice.random}_clear:hover{color:red}#${def.notice.random}_clear u{padding:0 2px;text-decoration:none}`
+        `.${def.notice.card}__body-header{padding:4px 10px 6px 50px;height:var(--header-height);background:var(--background)}.${def.notice.card}__body-header-title{margin-bottom:0!important;color:var(--text-headline);font-weight:700!important;font-size:15px!important}.${def.notice.card}__body-header-subtitle{color:var(--text-color);font-weight:500;font-size:13px!important}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{display:grid;grid-template-columns:repeat(1, 1fr);grid-gap:10px;}#${def.notice.random}_help{position:relative;right:16%;padding:4px 15px!important;border:1px solid transparent;background:#f07f6a;box-shadow:0 0 6px 0 #f5846f;color:#ffffff;cursor:help}#${def.notice.random}_help:hover{background:#ed6248;box-shadow:0 0 6px 0 #f34525;}#${def.notice.random}_clear{margin:0 0 0 10px;color:#666666;font-weight:500;cursor:pointer}#${def.notice.random}_clear:hover{color:red}#${def.notice.random}_clear u{padding:0 2px;text-decoration:none}.${def.notice.linkerror},.${def.notice.linkerror}:hover,.${def.notice.linkerror} *,.${def.notice.linkerror} *:hover{color:gray!important;text-decoration-line:line-through!important;text-decoration-color:red!important;text-decoration-style:wavy!important;}`
     );
 
     /* INITIALIZE_GMNOTIFICATION_FUNCTION */
@@ -1134,7 +1135,7 @@
             node.setAttribute("gd-antiredirect-status", "success");
           })
           .catch(e => {
-            node.style.cssText += "color:gray!important;text-decoration-line:line-through!important;text-decoration-color:red!important;text-decoration-style:wavy!important;";
+            node.classList.add(def.notice.linkerror);
             node.setAttribute("gd-antiredirect-status", "failed");
             ERROR("antiRedirect_%s: %s %O", name, e.message, { Node: node, Text: node.textContent, URL: node.href });
           });
@@ -1251,7 +1252,7 @@
             if (qA("div[class='Z26q7c UK95Uc']:not([data-content-feature])>div[id^='eob']").length > 0) {
               COUNT(`[${siteName}-Anti-Ads-Deep]`);
               qA("div[class='Z26q7c UK95Uc']:not([data-content-feature])").forEach(node => {
-                if (qS("div[id^='eob']", node)) node?.remove();
+                if (qS("div[id^='eob']", node)) node.remove();
               });
             }
             break;
@@ -1269,30 +1270,31 @@
 
             break;
           case "Yandex":
+            qA("button.DistrSplashscreen-DeclineButton,button.MessageBox-Close,button.PromotionIncut-Close,span.popup2__close-icon").forEach(item => item.click());
             if (qS(".serp-adv__counter")) {
               const rightside_Ads = qS(".serp-adv__counter").nextElementSibling;
               COUNT(`[${siteName}-Anti-Ads-Deep-exp]`);
-              qS(".serp-adv__counter")?.remove();
+              qS(".serp-adv__counter").remove();
               rightside_Ads?.className !== "serp-adv__found" && rightside_Ads?.remove();
             }
-            if (qA("li.serp-item.serp-item_card div.TextContainer>span.OrganicTextContentSpan>span,li.serp-item.serp-item_card div.Label.Label_theme_direct").length > 0) {
+            if (qA("li.serp-item.serp-item_card div.Organic-Subtitle>span.LabelDirect,li.serp-item.serp-item_card span.LabelDirect.DirectLabel").length > 0) {
               const match_Ads_Style_Yandex = str => {
                 const ad_Selector = qS(str);
-                const ad_Match_Filter = ad_Selector?.textContent?.match(/\.Label\.DirectLabel_[a-z]+\[class\]\[class\]\s*{\s*background-image:\s*url\(([^)]+)\);?\s*}/);
+                const ad_Match_Filter = ad_Selector?.textContent?.match(/\.LabelDirect\.DirectLabel_[a-z]+\[class\]\[class\]\s*{\s*background-image:\s*url\(([^)]+)\);?\s*}/);
                 return ad_Match_Filter ? ad_Match_Filter[1] : "no-ads-icon";
               };
-              const ad_Matched = match_Ads_Style_Yandex(`body>style[nonce][data-stylesheet="bundles-assets"]`);
+              // const ad_Matched = match_Ads_Style_Yandex(`body>style[nonce][data-stylesheet="bundles-assets"]`);
               const ad_Matcded_II = match_Ads_Style_Yandex(`#search-result-aside>style[nonce][data-stylesheet="progressive"]`);
               COUNT(`[${siteName}-Anti-Ads-Deep]`);
               qA("li.serp-item.serp-item_card").forEach(node => {
-                const ads_Detect = qS("div.TextContainer>span.OrganicTextContentSpan>span", node);
-                const ads_Detect_II = qS("div.Label.Label_theme_direct", node);
+                const ads_Detect = qS("div.Organic-Subtitle>span.LabelDirect", node);
+                const ads_Detect_II = qS("span.LabelDirect.DirectLabel", node);
                 const styleState = ads_Detect_II && gS(ads_Detect_II, "background-image");
                 if (
                   ads_Detect?.textContent?.includes("\u0420\u0435\u043a\u043b\u0430\u043c\u0430") ||
                   ads_Detect?.textContent?.toLowerCase().includes("ad") ||
                   ads_Detect_II?.textContent?.toLowerCase().includes("ad") ||
-                  styleState?.includes(ad_Matched) ||
+                  // styleState?.includes(ad_Matched) ||
                   styleState?.includes(ad_Matcded_II)
                 ) {
                   node?.remove();
@@ -1339,7 +1341,7 @@
             IMGType: ["baiduimage", "baiduimagedetail"],
             SplitName: "tn",
             MainType: ".s_btn_wr,#sugOut",
-            StyleCode: `a,a em{text-decoration:none!important}a:hover{text-decoration:underline!important}#form{white-space:nowrap}#u{z-index:1!important}#${def.const.rndID}{z-index:1999999995;position:relative;margin:0 0 0 4px;height:40px;display:inline-block;line-height:40px;vertical-align:top;padding:0}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:40px}#${def.const.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#ffffff;min-width:90px;border:1px solid #3476d2;font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#ffffff;min-width:90px;border:1px solid #3476d2;font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background: #4662D9;border:1px solid #3476d2;}`,
+            StyleCode: `a,a em{text-decoration:none!important}:not([class^="page-inner"])>a:hover{text-decoration:underline!important}#form{white-space:nowrap}#u{z-index:1!important}#${def.const.rndID}{z-index:1999999995;position:relative;margin:0 0 0 4px;height:40px;display:inline-block;line-height:40px;vertical-align:top;padding:0}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:40px}#${def.const.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#ffffff;min-width:90px;border:1px solid #3476d2;font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#ffffff;min-width:90px;border:1px solid #3476d2;font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background: #4662D9;border:1px solid #3476d2;}`,
             KeyStyle: "#wrapper_wrapper em",
             AntiRedirect: () => {
               deBounce({ fn: antiRedirectFunc, delay: 2e2, timer: "baidu", immed: true })(
@@ -1375,7 +1377,10 @@
                 "Google"
               ),
             AntiAds: () =>
-              deBounce({ fn: antiAds_RemoveNodes, delay: 20, timer: "ad_google", immed: true })("div[aria-label='\u5e7f\u544a'],div[aria-label='Ads'],#bottomads", "Google"),
+              deBounce({ fn: antiAds_RemoveNodes, delay: 20, timer: "ad_google", immed: true })(
+                "div[aria-label='\u5e7f\u544a'],div[aria-label='Ads' i],#bottomads,#tvcap",
+                "Google"
+              ),
           },
           bing: {
             SiteTypeID: 3,
@@ -1387,17 +1392,17 @@
             IMGType: ["images"],
             SplitName: "/",
             MainType: `.b_searchboxForm>input[type="hidden"][name="form"]`,
-            StyleCode: `#sw_as{z-index:1051!important}.scs_c.scs_ini{z-index:1049!important}#miniheader #miniheader_searchbox #sb_form_q{width:400px}#b_header .b_searchboxForm{z-index:1048!important}#b_results>li a,#b_results .b_no a{color:#001ba0!important;}#b_results>li a:visited{cololr:#4007a2!important;}#${def.const.rndID}{z-index:1048;position:relative;display:inline-flex;height:38px;min-width:180px;width:auto;margin:0;padding:0 6px 0 0;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{width:auto;margin:0;padding:0}#${def.const.rndID} input{box-sizing:border-box;cursor:pointer;min-width:90px;height:38px;background-color:#f7faff;border:1px solid #174ae4;color:#174ae4;font-weight:600;font-size:16px}#${def.const.leftButton} input{border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px;}#${def.const.rightButton} input{border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 2px;padding:0 18px 0 12px;}.${def.const.scrollspan}{}.${def.const.scrollbars}{}.${def.const.scrollspan2}{max-height:30px;padding:4px 4px 0 8px!important;margin:0!important;vertical-align:top!important}.${def.const.scrollbars2}{border-radius:4px!important;max-height:30px;padding:0 12px!important;margin-right:0!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#ffffff;transition:border linear .1s,box-shadow linear .3s;box-shadow:0px 0px 4px #174ae4;color:#174ae4;background-color:#f0f3f6;}.${def.notice.random}_input{width:300px!important}`,
+            StyleCode: `#sw_as{z-index:1051}.scs_c.scs_ini{z-index:1049}#miniheader #miniheader_searchbox #sb_form_q{width:400px}#b_header .b_searchboxForm{z-index:1048}a,#b_results>li a,#b_results .b_no a{color:#001ba0;}#b_results>li a:visited{cololr:#4007a2;}#${def.const.rndID}{z-index:1048;position:relative;display:inline-flex;height:38px;min-width:180px;width:auto;margin:0;padding:0 6px 0 0;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{width:auto;margin:0;padding:0}#${def.const.rndID} input{box-sizing:border-box;cursor:pointer;min-width:90px;height:38px;background-color:#f7faff;border:1px solid #174ae4;color:#174ae4;font-weight:600;font-size:16px}#${def.const.leftButton} input{border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px;}#${def.const.rightButton} input{border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 2px;padding:0 18px 0 12px;}.${def.const.scrollspan}{}.${def.const.scrollbars}{}.${def.const.scrollspan2}{max-height:30px;padding:4px 4px 0 8px!important;margin:0!important;vertical-align:top!important}.${def.const.scrollbars2}{border-radius:4px!important;max-height:30px;padding:0 12px!important;margin-right:0!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#ffffff;transition:border linear .1s,box-shadow linear .3s;box-shadow:0px 0px 4px #174ae4;color:#174ae4;background-color:#f0f3f6;}.${def.notice.random}_input{width:300px!important}`,
             KeyStyle: String(
               // eslint-disable-next-line no-undef
               Number(getUrlParam("ensearch")) || Number(gbCookies.getItem("ENSEARCH")?.match(/\d/)?.[0]) || 0
                 ? ".b_caption p strong, .b_caption .b_factrow strong, .b_secondaryText strong,th, h2 strong, h3 strong"
-                : "#sp_requery strong, #sp_recourse strong, #tile_link_cn strong, .b_ad .ad_esltitle~div strong, h2 strong, .b_caption p strong, .b_snippetBigText strong, .recommendationsTableTitle+.b_slideexp strong, .recommendationsTableTitle+table strong, .recommendationsTableTitle+ul strong, .pageRecoContainer .b_module_expansion_control strong, .b_rs strong, .b_rrsr strong, #dict_ans strong, .b_listnav>.b_ans_stamp>strong, .adltwrnmsg strong,.b_imgcap_altitle p strong, .b_imgcap_altitle .b_factrow strong,.richrsrailsuggestion_text strong"
+                : "#sp_requery strong, #sp_recourse strong, #tile_link_cn strong, .b_ad .ad_esltitle~div strong, h2 strong, #b_results .b_algo p strong, .b_caption p strong, .b_snippetBigText strong, .recommendationsTableTitle+.b_slideexp strong, .recommendationsTableTitle+table strong, .recommendationsTableTitle+ul strong, .pageRecoContainer .b_module_expansion_control strong, .pageRecoContainer .b_title>strong, .b_rs strong, .b_rrsr strong, .richrswrapper strong, #dict_ans strong, .b_listnav>.b_ans_stamp>strong, #b_content #ans_nws .na_cnt strong, .b_vidAns strong, .adltwrnmsg strong"
             ),
             AntiRedirect: () => {
               deBounce({ fn: antiRedirectFunc, delay: 5e2, timer: "bing", immed: true })("#b_content a[href*='.bing.com/ck/a?']:not([gd-antiredirect-status])", "Bing");
               deBounce({ fn: addTargetEvent, delay: 1e2, timer: "bing_c", immed: false })(
-                "#b_results a:not([href^='javascript:']):not(.sb_bp):not([gd-attributeclean-status]),#b_context a:not([data-partnertag]):not([gd-attributeclean-status]),#b_context li[data-priority]>a[h]",
+                "#b_results a:not([href^='javascript:']):not(.sb_bp):not([gd-attributeclean-status]),#b_context a:not([data-partnertag]):not([id='ht_toggle']):not([gd-attributeclean-status]),#b_context li[data-priority]>a[h]",
                 "Bing"
               );
             },
@@ -1479,7 +1484,11 @@
                 ".main__content a:not([href^='javascript:']):not([gd-attributeclean-status]):not(.Pager-Item)",
                 "Yandex"
               ),
-            AntiAds: () => deBounce({ fn: antiAds_RemoveNodes, delay: 50, timer: "ad_yandex", immed: true })(`div[tabindex][class*='location_right-bottom']`, "Yandex"),
+            AntiAds: () =>
+              deBounce({ fn: antiAds_RemoveNodes, delay: 50, timer: "ad_yandex", immed: true })(
+                `div[tabindex][class*='location_right-bottom'],a.HeaderDesktopActions-MarketCart,span.distr-nav,div.market-cart`,
+                "Yandex"
+              ),
           },
           so360: {
             SiteTypeID: 8,
@@ -2212,10 +2221,16 @@
             }
           }
 
-          function insertCSS() {
+          function moveCssToLastChild() {
+            document.addEventListener("readystatechange", () => {
+              if (document.readyState !== "loading") insertCSS(true);
+            });
+          }
+
+          function insertCSS(isOverwrite = false) {
             try {
               const buttonCss = `@charset "UTF-8";` + currentSite.StyleCode;
-              addStyle({ target: document.head, styleId: def.const.rndclassName, media: "all", styleContent: buttonCss, isOverwrite: false });
+              addStyle({ target: document.head, styleId: def.const.rndclassName, media: "all", styleContent: buttonCss, isOverwrite });
             } catch (e) {
               ERROR("insertCSS:", e.message);
             }
@@ -2339,11 +2354,12 @@
                         } else if (def.const.vim === "products") {
                           qS(buttonID).style.right = `-${width - 60}px`;
                         } else {
-                          qS(buttonID).style.right = `-${width + 5}px`;
+                          qS(buttonID).style.right = `-${width}px`;
                           qS("form.search2") && (qS("form.search2").style.cssText += "padding-right:0px!important");
-                          qS(`.input__settings`) && (qS(`.input__settings`).style.right = `-${width + 144}px`);
+                          qS("button.input__settings") && (qS(`button.input__settings`).style.right = `-${width + 144}px`);
+                          qS(`div.HeaderDesktopActions`) && (qS(`div.HeaderDesktopActions`).style.cssText = `position:relative;right:-${width - 10}px`);
                           qS(`span.serp-header__voice-search-container`) && (qS(`span.serp-header__voice-search-container`).style.right = `-${width + 190}px`);
-                          qS(`button.voice-search-button`) && (qS(`button.voice-search-button`).style.right = `-${width + 190}px`);
+                          qS(`button.voice-search-button.input__voice-search`) && (qS(`button.voice-search-button.input__voice-search`).style.right = `-${width + 190}px`);
                         }
                         qS(`span.input__voice-search`) && (qS(`span.input__voice-search`).style.right = `-${width + 184}px`);
                       })
@@ -2533,6 +2549,7 @@
             // INSERT_JUMP_BUTTON
             insertSearchButtonAndStyle();
             searchButtonObserve();
+            moveCssToLastChild();
             // REQUEST_UPDATE
           })(async () => await checkAutoUpdate());
         })(value => {
@@ -2684,11 +2701,11 @@
               nocache: true,
               headers: { Accept: "*/*", Referer: url },
               method: "GET",
-              timeout: 8e3,
+              timeout: 1e4,
               onreadystatechange: response => {
                 if (response.status === 200 && response.readyState === 4) {
                   const res = response.responseText || response.response || "";
-                  res && resolve({ res: res, source: url });
+                  res && resolve({ res, source: url });
                 }
               },
               ontimeout: () => reject(new Error("Timeout Error")),
