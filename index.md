@@ -20,14 +20,14 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2023.05.06.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2023.05.20.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-+ 新增自定义排除渲染网址的管理功能，具体功能请查阅脚本使用说明。
-+ 新增自定义等宽字体开关，默认关闭需手动在自定义等宽字体界面开启。
-@ 优化全局样式的预定义内容及样式加载的逻辑与效率。
-@ 修正window.find()非标方法在ShadowRoot中无效的Bug.
-@ 修正Github:Feature preview中代码预览功能的样式Bug.
+@ 优化样式加载逻辑，修正复合条件样式加载监测的问题。
+@ 修正粗体修正造成的文本闪烁，关闭编辑型站点的修正。
+@ 修正字体列表在字体选取后去除时字体排序错误的问题。
+@ 修正某些站点在特定条件下出现死循环造成的加载错误。
+@ 修正因CSP策略阻止造成的样式重复尝试加载的问题。
 @ 修正一些已知的小问题，优化样式，优化代码。
 ```
 
