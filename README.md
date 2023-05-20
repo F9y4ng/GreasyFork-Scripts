@@ -16,14 +16,14 @@
 - 脚本错误、异常请反馈至{[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)}, 字体、渲染样式、乱码问题请反馈至{[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)}。
 - 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2023.05.06.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2023.05.20.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-+ 新增自定义排除渲染网址的管理功能，具体功能请查阅脚本使用说明。
-+ 新增自定义等宽字体开关，默认关闭需手动在自定义等宽字体界面开启。
-@ 优化全局样式的预定义内容及样式加载的逻辑与效率。
-@ 修正window.find()非标方法在ShadowRoot中无效的Bug.
-@ 修正Github:Feature preview中代码预览功能的样式Bug.
+@ 优化样式加载逻辑，修正复合条件样式加载监测的问题。
+@ 修正粗体修正造成的文本闪烁，关闭编辑型站点的修正。
+@ 修正字体列表在字体选取后去除时字体排序错误的问题。
+@ 修正某些站点在特定条件下出现死循环造成的加载错误。
+@ 修正因CSP策略阻止造成的样式重复尝试加载的问题。
 @ 修正一些已知的小问题，优化样式，优化代码。
 ```
 
@@ -78,7 +78,7 @@
 
 - **已知问题一：** 由于 Firefox(Gecko 内核)的兼容性原因，仅修正了脚本内部坐标偏移问题，但会对部分网站样式、功能兼容不足，造成样式错乱、页面动作缺失等问题，请根据实际需求酌情使用。**强烈建议您**：使用 Firefox 浏览器自身缩放功能替代(`Ctrl++`, `Ctrl+-`)。
 - **已知问题二：** 针对视口单位 `vw, vh, vmin, vmax` 的修正已完成，解决了在字体缩放后视口单位长度不准确的问题。该功能为**实验性功能**，在核心高级功能中默认开启。在日常使用时，遇到以下特殊情况的处理方法：
-  1. 部分站点由于未配置 CORS 策略，会使浏览器阻止对外部样式的获取（控制台 console 会看到相应报错，如：`No 'Access-Control-Allow-Origin' header is present on the requested resource.`），此时，可在扩展商店安装并开启 [Allow CORS: Access-Control-Allow-origin](https://chrome.google.com/webstore/detail/allow-cors-access-control/lhobafahddgcelffkeicbaginigeejlf)。
+  1. 部分站点因配置相关 CORS 策略，会使浏览器阻止对外部样式的获取（控制台 console 会看到相应报错，如：`No 'Access-Control-Allow-Origin' header is present on the requested resource.`），此时，可在扩展商店安装并开启 [Allow CORS: Access-Control-Allow-origin](https://chrome.google.com/webstore/detail/allow-cors-access-control/lhobafahddgcelffkeicbaginigeejlf)。
   2. 在部分应用了 CSP 策略的站点，浏览器可能会阻止内部样式的加载和解析（控制台 console 会看到相应的报错，如：`Refused to apply inline style because it violates the following Content Security Policy directive: "default-src 'self'".`），此时，可在扩展商店安装并开启 [Allow CSP: Content-Security-Policy](https://chrome.google.com/webstore/detail/allow-csp-content-securit/hnojoemndpdjofcdaonbefcfecpjfflh)
   3. 使用其他同类扩展也可解决以上问题，如介意安全问题、或有其他顾虑、或不想使用该功能，请在高级核心功能设置中关闭**视口单位修正选项**或**字体缩放功能选项**，或将字体缩放设置为 `1.0` 后保存为站点独享数据。
 - **未知情况：** 如遇到其他状况下的样式异常、坐标偏移，或其他相关问题，请及时向我[反馈](https://github.com/F9y4ng/GreasyFork-Scripts/issues)。
