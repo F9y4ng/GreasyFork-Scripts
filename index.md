@@ -41,7 +41,7 @@
 
 ## 关于Manifest V3
 
-脚本管理器 **Tampermonkey v4.19+、Violentmonkey v2.14+** 都已开始对 **Manifest V3** 进行兼容和代码的重构，在新API的影响下，会造成脚本脚本加载延迟的问题（尤其在 `@run-at` 为 `document-start` 时最为明显）。针对以上两个脚本管理器的处理办法：
+脚本管理器 **Tampermonkey v4.19+、Violentmonkey v2.14+** 都已开始对 **Manifest V3** 进行兼容和代码的重构，在新API的影响下，访问应用CSP策略的站点会造成脚本脚本加载延迟的问题（尤其在 `@run-at` 为 `document-start` 时最为明显）。针对以上两个脚本管理器的处理办法：
 
 * 针对**Tampermonkey v4.19+**：进入脚本管理器管理面板，进入设置标签页，下拉至“实验”，将注入模式改为“即时”。
 
