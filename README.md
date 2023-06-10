@@ -16,14 +16,14 @@
 - 脚本错误、异常请反馈至{[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)}, 字体、渲染样式、乱码问题请反馈至{[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)}。
 - 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2023.05.20.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2023.06.10.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 优化样式加载逻辑，修正复合条件样式加载监测的问题。
-@ 修正粗体修正造成的文本闪烁，关闭编辑型站点的修正。
-@ 修正字体列表在字体选取后去除时字体排序错误的问题。
-@ 修正某些站点在特定条件下出现死循环造成的加载错误。
-@ 修正因CSP策略阻止造成的样式重复尝试加载的问题。
+# 升级至TM4.19.0、VM2.14.0正式版后，如出现脚本加载延迟、或未正确加载样式的临时处理办法，详见`关于脚本加载延迟的处理办法`。
+@ 优化脚本设置界面及对话框的兼容性，提升操作体验。
+@ 优化中文双引号、单引号的大引号统一化样式。
+@ 优化粗体修正功能的修复方式、执行效率与兼容性。
+@ 修正字体缩放在渲染预览时坐标修正的错误。
 @ 修正一些已知的小问题，优化样式，优化代码。
 ```
 
@@ -34,6 +34,14 @@
 - 如在使用过程中遇到错误或使用问题，请及时向我[反馈](https://github.com/F9y4ng/GreasyFork-Scripts/issues)。
 
 > ##### 注：在 WIN10 系统下，不论高分屏或低分屏，系统或浏览器应用 150%以上的缩放率可获得最佳的渲染效果，这是 WIN10 默认字体渲染所导致的。
+
+## 关于脚本加载延迟的处理办法
+
+**升级至TM4.19.0、VM2.14.0正式版后，如出现脚本加载延迟、或未正确加载样式的临时处理办法：**
+
+* 针对**Tampermonkey**：进入**管理面板**，进入**设置**标签页，下拉至“**实验**”，将注入模式改为“**即时**”。
+* 针对**Violentmonkey**：进入**控制台界面**，进入**设置**标签页，在**高级-通用**中勾选“**同步 page 模式**”。
+* 若以上设置仍不起作用，请将TM、VM扩展删除后重新安装，再重启浏览器后重试。
 
 ## 关于问题反馈
 
@@ -92,18 +100,19 @@
 - [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B)
 - 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2023.05.13.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2023.06.10.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ 优化Bing.com的链接属性颜色。
-@ 更新Yandex.com/Yandex.ru的广告过滤规则。
++ 新增Yahoo.com搜索引擎，删除Neeva搜索。
+@ 修正Google search labs界面的按钮问题。
+@ 优化脚本操作界面的兼容性，提升操作体验。
 @ 修正一些小问题，优化样式，优化代码。
 ```
 
 ## 最新功能介绍
 
 - 新增去除搜索结果及侧栏广告功能。
-- 新增自定义搜索引擎选取功能（包含：百度、Google、Bing、Duckduckgo、搜狗、F 搜、Yandex、360 搜索、头条搜索、百度开发者、Ecosia、Neeva、You、Startpage 搜索等常见的搜索引擎）
+- 新增自定义搜索引擎选取功能（包含：百度、Google、Bing、Duckduckgo、搜狗、F 搜、Yandex、360 搜索、头条搜索、百度开发者、Ecosia、Yahoo、You、Startpage、Brave搜索等常见的搜索引擎）
 - 新增搜索结果链接去重定向功能。
 - 更智能的更新检测功能。
 
