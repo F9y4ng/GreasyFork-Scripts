@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2023.06.10.1
+// @version            2023.06.17.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的Greasemonkey脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的Greasemonkey脚本和浏览器扩展。
@@ -95,7 +95,6 @@
       boldAttrName: `fr-fix-${generateRandomString(8, "attr")}`,
       cssAttrName: `fr-css-${generateRandomString(8, "attr")}`,
       frameAttrName: `fr-frames-${generateRandomString(8, "attr")}`,
-      chineseQuote: generateRandomString(12, "char"),
       gfHost: decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkY0MTY2ODg="),
       defaultFont: decrypt("JUU3JUJEJTkxJUU3JUFCJTk5JUU5JUJCJTk4JUU4JUFFJUE0JUU1JUFEJTk3JUU0JUJEJTkz"),
       fontlistImg: decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjIlMkYwNCUyRjAyJTJGcW9SZldkLmdpZg=="),
@@ -110,7 +109,7 @@
       },
       lisence: generateRandomString(64, "attr"),
       feedback: getMetaValue("supportURL") ?? "",
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.06.10.0",
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.06.17.0",
       scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? "F9y4ng",
       scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? GMinfo.script.name ?? "Font Rendering",
     },
@@ -813,11 +812,9 @@
     /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
     const UPDATE_VERSION_NOTICE = String(
-      `<li class="${def.const.seed}_info">升级至TM4.19.0、VM2.14.0正式版后，如出现脚本加载延迟、或未正确加载样式的临时处理办法【<a href="${def.const.gfHost}#delay" target="_blank">查看</a>】</li>
-        <li class="${def.const.seed}_fix">优化脚本设置界面及对话框的兼容性，提升操作体验。</li>
-        <li class="${def.const.seed}_fix">优化中文双引号、单引号的大引号统一化样式。</li>
-        <li class="${def.const.seed}_fix">优化粗体修正功能的修复方式、执行效率与兼容性。</li>
-        <li class="${def.const.seed}_fix">修正字体缩放在渲染预览时坐标修正的错误。</li>
+      `<li class="${def.const.seed}_del">由于字体热替换的兼容性问题，删除中文引号的样式。</li>
+        <li class="${def.const.seed}_fix">尝试修复粗体修正功能因未知条件造成无限循环的问题。</li>
+        <li class="${def.const.seed}_fix">优化对扩展Darkreader的兼容性，提升页面加载速度。</li>
         <li class="${def.const.seed}_fix">修正一些已知的问题，优化样式，优化代码。</li>`
     );
 
@@ -885,7 +882,7 @@
       mainStyle: `display:inline-block;font-family:monospace,${INITIAL_VALUES.fontSelect},sans-serif`,
       global: "input:is([type='text'],[type='password'],[type='search']),input:not([type]){font-family:initial!important}",
       frDialogBox: String(
-        `:host(#${def.id.dialogbox}){position:fixed;top:0;left:0;width:100%;height:100%;background:0 0;pointer-events:none;z-index:2147483647}div.${def.class.db}{z-index:99999;box-sizing:content-box;max-width:420px;border:2px solid #efefef;color:#444444;pointer-events:auto}.${def.class.db}{position:absolute;top:calc(12% + 10px);right:15px;display:block;overflow:hidden;width:100%;border-radius:6px;background:#ffffff;box-shadow:0 0 10px 0 rgba(0, 0, 0, 0.3);transition:opacity .5s}.${def.class.db} *{text-shadow:0 0 1px #777!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}.${def.class.dbt}{display:flex;margin-top:0;padding:10px 15px;width:auto;background:#efefef;text-align:left;font-weight:700;font-size:18px!important;flex-wrap:wrap;justify-content:space-between;align-items:center;align-content:center}.${def.class.dbt},.${def.class.dbt} *{font-weight:700;font-size:18px!important;font-family:Candara,'Times New Roman',${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm}{margin:5px;padding:10px;color:#444444;text-align:left;font-weight:500;font-size:16px!important}.${def.class.dbb}{display:inline-block;box-sizing:content-box;margin:2px 1%;padding:8px 12px;min-width:12%;border-radius:4px;text-align:center;text-decoration:none!important;letter-spacing:0;font-weight:400;cursor:pointer}.${def.class.db} .${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}.${def.class.db} .gradient-bg{background:#e7ffd9;animation:gradient 2s ease-in-out forwards}@keyframes gradient{0%{background:#e7ffd9}to{background:transparent}}` +
+        `:host(#${def.id.dialogbox}){position:fixed;top:0;left:0;width:100%;height:100%;background:0 0;pointer-events:none;z-index:2147483647}div.${def.class.db}{z-index:99999;box-sizing:content-box;max-width:420px;border:2px solid #efefef;color:#444444;pointer-events:auto}.${def.class.db}{position:absolute;top:calc(12% + 10px);right:15px;display:block;overflow:hidden;width:100%;border-radius:6px;background:#ffffff;box-shadow:0 0 10px 0 rgba(0, 0, 0, 0.3);transition:opacity .5s}.${def.class.db} *{text-shadow:0 0 1px #777!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}.${def.class.dbt}{display:flex;margin-top:0;padding:10px 15px;width:auto;background:#efefef;text-align:left;font-weight:700;font-size:18px!important;flex-wrap:wrap;justify-content:space-between;align-items:center;align-content:center}.${def.class.dbt},.${def.class.dbt} *{font-weight:700;font-size:20px!important;font-family:Candara,'Times New Roman',${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm}{margin:5px;padding:10px;color:#444444;text-align:left;font-weight:500;font-size:16px!important}.${def.class.dbb}{display:inline-block;box-sizing:content-box;margin:2px 1%;padding:8px 12px;min-width:12%;border-radius:4px;text-align:center;text-decoration:none!important;letter-spacing:0;font-weight:400;cursor:pointer}.${def.class.db} .${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}.${def.class.db} .gradient-bg{background:#e7ffd9;animation:gradient 2s ease-in-out forwards}@keyframes gradient{0%{background:#e7ffd9}to{background:transparent}}` +
           `.${def.class.dbb}:hover{box-sizing:content-box;color:#ffffff;text-decoration:none!important;font-weight:700;opacity:.8}.${def.class.db} .${def.class.dbt},.${def.class.dbb},.${def.class.dbb}:hover{text-shadow:none!important;-webkit-text-stroke:0 transparent!important;-webkit-user-select:none;user-select:none}.${def.class.dbbf},.${def.class.dbbf}:hover{border:1px solid #d93223!important;border-radius:6px;background:#d93223!important;color:#ffffff!important;font-size:14px!important}.${def.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${def.class.dbbt},.${def.class.dbbt}:hover{border:1px solid #038c5a!important;border-radius:6px;background:#038c5a!important;color:#ffffff!important;font-size:14px!important}.${def.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${def.class.dbbn},.${def.class.dbbn}:hover{border:1px solid #777777!important;border-radius:6px;background:#777777!important;color:#ffffff!important;font-size:14px!important}.${def.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${def.class.dbbc}{padding:2.5%;background:#efefef;color:#ffffff;text-align:right;font-size:initial}.${def.class.dbm} textarea{cursor:auto;scrollbar-width:thin;overscroll-behavior:contain}.${def.class.dbm} textarea::-webkit-scrollbar{width:8px;height:8px}.${def.class.dbm} textarea::-webkit-scrollbar-corner{border-radius:2px;background:#efefef;box-shadow:inset 0 0 3px #aaaaaa;}.${def.class.dbm} textarea::-webkit-scrollbar-thumb{border-radius:2px;background:#cfcfcf;box-shadow:inset 0 0 5px #999;}.${def.class.dbm} textarea::-webkit-scrollbar-track{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaaaaa;}.${def.class.dbm} textarea::-webkit-scrollbar-track-piece{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaaaaa;}` +
           `.${def.class.dbm} button:hover{background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important;cursor:pointer}.${def.class.dbm} p{margin:5px 0!important;text-align:left;text-indent:0!important;font-weight:400;font-size:16px!important;line-height:1.5!important;-webkit-user-select:none;user-select:none}.${def.class.dbm} ul{margin:0 0 0 10px!important;padding:2px;color:gray;list-style:none;font:italic 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-user-select:none;user-select:none;scrollbar-width:thin}.${def.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${def.class.dbm} ul::-webkit-scrollbar-thumb{border-radius:10px;background:#cfcfcf;box-shadow:inset 0 0 5px #999999;}.${def.class.dbm} ul::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #aaaaaa;}.${def.class.dbm} ul::-webkit-scrollbar-track-piece{border-radius:6px;background:#efefef;box-shadow:inset 0 0 5px #aaaaaa;}.${def.class.dbm} ul li{display:list-item;list-style-type:none;word-break:break-all}.${def.class.dbm} li:before{display:none}.${def.class.dbm} #${def.id.bk},.${def.class.dbm} #${def.id.pv},.${def.class.dbm} #${def.id.fs},.${def.class.dbm} #${def.id.fvp},.${def.class.dbm} #${def.id.hk},.${def.class.dbm} #${def.id.ct},.${def.class.dbm} #${def.id.mps},.${def.class.dbm} #${def.id.flc},.${def.class.dbm} #${def.id.gc},.${def.class.dbm} #${def.id.cm}{display:flex;box-sizing:content-box;margin:0;padding:2px 4px!important;width:calc(96% - 10px);height:max-content;min-width:auto;min-height:40px;list-style:none;font-style:normal;justify-content:space-between;align-items:flex-start;word-break:break-word}.${def.class.dbm} ul#${def.const.seed}_d_d_ li:hover{background-color:#fdf6eccc!important}.${def.class.dbm} #${def.const.seed}_temporary{padding:18px 8px;text-align:center;color:#555555;font-size:14px!important}` +
           `.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#ffffff;box-shadow:0 0 1px rgba(0,0,0,.6);color:#ffffff;content:' '}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#ffffff;content:'OFF';font-weight:700;font-style:normal;font-size:16px}.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4);cursor:pointer}.${def.class.checkbox}:checked+label::after{left:10px;content:'ON'}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:' '}` +
@@ -1541,7 +1538,7 @@
 
       const refont = CONST_VALUES.fontSelect?.split(",")[0]?.replace(/"|'/g, "") ?? "";
       const fontface_i = CONST_VALUES.fontFace;
-      const fontFamily = fontface_i ? `font-family:var(--fr-font-quote),var(--fr-font-family),var(--fr-font-basefont);` : ``;
+      const fontFamily = fontface_i ? `font-family:var(--fr-font-family),var(--fr-font-basefont);` : ``;
       const fontFaces = fontface_i ? (refont ? await funcFontface(refont) : "") : "";
       let bodyScale = "";
       const fontScale = parseFloat(CONST_VALUES.fontSize);
@@ -1586,7 +1583,7 @@
       const globalCssText = IS_REAL_GECKO && fontface_i ? def.const.style.global : "";
       const monoFontText = `${monoFontList || INITIAL_VALUES.monospacedFont},ui-monospace,${IS_REAL_GECKO ? "consolas" : "monospace"}`;
       const monoFeatureText = `${monoFeature || INITIAL_VALUES.monospacedFeature}`;
-      const rootPseudoClass = `:root{--fr-font-basefont:${INITIAL_VALUES.fontBase};--fr-font-fontscale:${fontScale};--fr-font-quote:'${def.const.chineseQuote}';--fr-font-family:${CONST_VALUES.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-mono-font:${monoFontText};--fr-mono-shadow:0 0 0 currentcolor;--fr-mono-feature:${monoFeatureText};--fr-no-stroke:0px transparent;}`;
+      const rootPseudoClass = `:root{--fr-font-basefont:${INITIAL_VALUES.fontBase};--fr-font-fontscale:${fontScale};--fr-font-family:${CONST_VALUES.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-mono-font:${monoFontText};--fr-mono-shadow:0 0 0 currentcolor;--fr-mono-feature:${monoFeatureText};--fr-no-stroke:0px transparent;}`;
       const tStyle = IS_CURRENTSITE_ALLOWED ? `@charset "UTF-8";${rootPseudoClass}${globalCssText}${fontStyle}` : ``;
 
       /* FR_CONFIGURE_SHADOWROOT_CONTENT */
@@ -2927,11 +2924,10 @@
           ...["Microsoft YaHei", "PingFangSC-Regular", "PingFangSC-Medium", "PingFangSC-Semibold", "PingFangHK-Regular", "PingFangHK-Medium"],
           ...[convertToUnicode("宋体"), convertToUnicode("楷体"), convertToUnicode("仿宋"), convertToUnicode("黑体"), convertToUnicode("微软雅黑")],
         ];
-        let returnFontface = fontList
-          .filter(item => item !== t)
-          .map(item => `@font-face{font-family:"${item}";src:local("${postscriptName}");}`)
-          .join("");
-        returnFontface += `@font-face{font-family:"${def.const.chineseQuote}";src:local("PingFang SC"),local("SimSun");unicode-range:U+2018,U+2019,U+201c,U+201d;}`;
+        let returnFontface = "";
+        for (let i = 0; i < fontList.length; i++) {
+          if (fontList[i] !== t) returnFontface += `@font-face{font-family:"${fontList[i]}";src:local("${postscriptName}");}`;
+        }
         return returnFontface;
       }
 
@@ -3638,7 +3634,7 @@
                 const _stroke = fstroke > 0 && fstroke <= 1.0 ? "-webkit-text-stroke:var(--fr-font-stroke);" : "";
                 const _smoothing = smooth ? funcSmooth : "";
                 const _textrender = smooth ? "text-rendering:optimizeLegibility;" : "";
-                const _fontfamily = fontface ? "font-family:var(--fr-font-quote),var(--fr-font-family),var(--fr-font-basefont);" : "";
+                const _fontfamily = fontface ? "font-family:var(--fr-font-family),var(--fr-font-basefont);" : "";
                 const _refont = fontselect?.split(",")[0].replace(/"|'/g, "") ?? "";
                 const _fontfaces = !fontface ? "" : _refont ? await funcFontface(_refont) : "";
                 const _exselector = CAN_I_USE ? `:is(${convertHtmlToText(fontex)})` : convertHtmlToText(fontex);
@@ -3651,7 +3647,7 @@
                   `${_exclude}${_codefont}${_fixfontstroke}`
                 );
                 const _globalCssText = IS_REAL_GECKO && fontface ? def.const.style.global : "";
-                const _rootpseudoclass = `:root{--fr-font-basefont:${INITIAL_VALUES.fontBase};--fr-font-fontscale:${fscale};--fr-font-quote:'${def.const.chineseQuote}';--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-mono-font:${monoFontText};--fr-mono-shadow:0 0 0 currentcolor;--fr-mono-feature:${monoFeatureText};--fr-no-stroke:0px transparent;}`;
+                const _rootpseudoclass = `:root{--fr-font-basefont:${INITIAL_VALUES.fontBase};--fr-font-fontscale:${fscale};--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-mono-font:${monoFontText};--fr-mono-shadow:0 0 0 currentcolor;--fr-mono-feature:${monoFeatureText};--fr-no-stroke:0px transparent;}`;
                 const __tshadow = _curEmptyConfig ? `/* BLANK_STYLE_SHEET */` : `@charset "UTF-8";${_rootpseudoclass}${_globalCssText}${_tshadow}`;
                 this.textContent = "\u4fdd\u5b58";
                 this.removeAttribute("style");
@@ -4311,7 +4307,7 @@
         }
 
         function fixViewportStyles() {
-          qA(`style:not([data-fr-processed])`).forEach(node => {
+          qA(`style:not([data-fr-processed]):not(.darkreader)`).forEach(node => {
             if (node.attributes[0]?.name.startsWith("fr-css-")) return;
             if (/^S[SC]\d+$/.test(node.id) || node.id === def.id.rndStyle) return;
             let cssText = node.textContent;
@@ -4379,8 +4375,9 @@
 
         const fixBoldObserver = new MutationObserver(fixBoldProcess);
         const config = { attributeOldValue: true, childList: true, subtree: true };
-        const excludeNode = def.const.exQueryString.split(",").filter(i => i.indexOf("*") === -1);
+        const excludeNodeSet = new Set(def.const.exQueryString.split(",").filter(i => i.indexOf("*") === -1));
         const styleMap = new WeakMap();
+        const repeatedAddedNodes = [];
         const changeAttribute = {
           add: el => raf.setTimeout(el.classList.add(def.const.boldAttrName), def.const.ft),
           del: el => raf.setTimeout(el.classList.remove(def.const.boldAttrName), def.const.ft),
@@ -4403,7 +4400,7 @@
           const els = uniq(elements);
           for (let index = 0, len = els.length; index < len; index++) {
             if (els[index].nodeType !== 1) continue;
-            if (excludeNode.includes(els[index].nodeName.toLowerCase())) continue;
+            if (excludeNodeSet.has(els[index].nodeName.toLowerCase())) continue;
             boldStyles.push({ isbold: isBold(els[index]), node: els[index] });
           }
           return boldStyles;
@@ -4433,16 +4430,12 @@
         }
 
         function querySelectorAllShadows(selector, root) {
-          const childShadows = qA("*", root)
-            .map(el => el.shadowRoot)
-            .filter(Boolean);
-          const childResults = childShadows.map(child => querySelectorAllShadows(selector, child));
-          const result = qA(selector, root);
-          return result.concat(childResults).flat();
+          const childShadows = qA("*", root).filter(el => el.shadowRoot);
+          const childResults = childShadows.flatMap(child => querySelectorAllShadows(selector, child));
+          return [...qA(selector, root), ...childResults];
         }
 
         function getSuitableElements(expr, node) {
-          expr = expr || "*";
           switch (node.nodeType) {
             case 1:
               return qA(expr, node).concat(node);
@@ -4453,15 +4446,13 @@
         }
 
         function mutationListMonitor(treeNodes, obs) {
-          if (!Array.isArray(treeNodes)) return;
-          const subtree = uniq(treeNodes);
-          if (subtree.length === 0) return;
-          subtree.forEach(node => {
+          if (!Array.isArray(treeNodes) || treeNodes.length === 0) return;
+          treeNodes.forEach(node => {
             if (![1, 9, 11].includes(node.nodeType)) return;
             const subtreeNodes = getSuitableElements(`:not(${def.const.exQueryString})`, node);
             for (let i = 0, l = subtreeNodes.length; i < l; i++) {
               if (subtreeNodes[i].nodeType !== 1) continue;
-              if (excludeNode.includes(subtreeNodes[i].nodeName.toLowerCase())) continue;
+              if (excludeNodeSet.has(subtreeNodes[i].nodeName.toLowerCase())) continue;
               if (subtreeNodes[i].shadowRoot) {
                 shadowRootNodeFixStroke(subtreeNodes[i].shadowRoot, fixedstyle);
                 obs.observe(subtreeNodes[i].shadowRoot, config);
@@ -4479,23 +4470,30 @@
 
         function fixBoldProcess(mutationsList, observer) {
           let oldValue, newValue;
-          const subtrees = [];
+          const subtrees = new Set();
           const pendingList = observer.takeRecords();
           observer.disconnect();
-          for (let mutation of uniq([...pendingList, ...mutationsList])) {
+          const uniqueMutations = uniq([...pendingList, ...mutationsList]);
+          for (const mutation of uniqueMutations) {
             const targetEl = mutation.target;
             switch (mutation.type) {
               case "childList":
                 for (let node of mutation.addedNodes) {
-                  if (node.nodeType === 1 && !excludeNode.includes(node.nodeName.toLowerCase())) subtrees.push(node);
+                  if (node.nodeType === 1 && !excludeNodeSet.has(node.nodeName.toLowerCase())) {
+                    repeatedAddedNodes.push(node);
+                    subtrees.add(node);
+                  }
                 }
                 for (let node of mutation.removedNodes) {
-                  if (node.nodeType === 1 && !excludeNode.includes(node.nodeName.toLowerCase())) styleMap.delete(node);
+                  if (node.nodeType === 1 && !excludeNodeSet.has(node.nodeName.toLowerCase())) {
+                    if (preventInfiniteLoops(node)) return;
+                    styleMap.delete(node);
+                  }
                 }
                 break;
               case "attributes":
                 if (targetEl.nodeType !== 1) continue;
-                if (excludeNode.includes(targetEl.nodeName.toLowerCase())) continue;
+                if (excludeNodeSet.has(targetEl.nodeName.toLowerCase())) continue;
                 switch (mutation.attributeName) {
                   case "style":
                     oldValue = mutation.oldValue?.replace(/\s/g, "") ?? "";
@@ -4503,16 +4501,16 @@
                     if (newValue !== oldValue) {
                       const oldArray = uniq(oldValue.split(";"));
                       const newArray = uniq(newValue.split(";"));
-                      const retValue = uniq(oldArray.filter(x => !newArray.includes(x)).concat(newArray.filter(y => !oldArray.includes(y)))).toString();
+                      const retValue = String([...oldArray.filter(x => !newArray.includes(x)), ...newArray.filter(y => !oldArray.includes(y))]);
                       if (!/font:|font-weight:/gi.test(retValue)) continue;
                     }
                     break;
                   case "class":
                     oldValue = mutation.oldValue ?? "";
-                    newValue = targetEl.classList;
+                    newValue = targetEl.className ?? "";
                     if (newValue !== oldValue) {
-                      if (!oldValue.includes(def.const.boldAttrName) && newValue.contains(def.const.boldAttrName)) continue;
-                      if (oldValue.includes(def.const.boldAttrName) && !newValue.contains(def.const.boldAttrName)) continue;
+                      if (!oldValue.includes(def.const.boldAttrName) && newValue.includes(def.const.boldAttrName)) continue;
+                      if (oldValue.includes(def.const.boldAttrName) && !newValue.includes(def.const.boldAttrName)) continue;
                     }
                     break;
                   default:
@@ -4523,10 +4521,21 @@
                 if (newValue === oldValue) continue;
                 break;
             }
-            subtrees.push(targetEl);
+            subtrees.add(targetEl);
           }
-          subtrees.length && mutationListMonitor(subtrees, observer);
+          subtrees.size && mutationListMonitor([...subtrees], observer);
           uniq(def.array.shadowRoot).forEach(s => observer.observe(s, config));
+        }
+
+        function preventInfiniteLoops(node) {
+          if (node.classList.contains("hidden") || node.hidden) return;
+          if (repeatedAddedNodes.length > 1e2) repeatedAddedNodes.length = 0;
+          const repeatedNodesLength = repeatedAddedNodes.filter(addedNode => addedNode.isEqualNode(node)).length;
+          if (repeatedNodesLength > 40) {
+            repeatedAddedNodes.length = 0;
+            __console("warn", "Ignored:", "FixBoldProcess loop limit exceeded");
+            return true;
+          }
         }
 
         function observeBoldElements() {
