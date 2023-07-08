@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜索引擎跳轉助手
 // @name:ru            скачок поисковой системы
 // @name:ja            優雅な検索エンジンジャンプ助手
-// @version            2023.06.10.1
+// @version            2023.07.08.1
 // @author             F9y4ng
 // @description        "elegant Search Engine Jump Assistant" permet aux utilisateurs de passer facilement d'un moteur de recherche spécifique à un autre; prend en charge la suppression de la redirection des liens, le blocage de la publicité, la détection automatique des mises à jour, etc., compatible avec plus d'une douzaine de moteurs de recherche, tels que Baidu, Google, Bing, Duckduckgo, Yandex, you, etc.
 // @description:en     "Elegant Search Engine Jump Assistant" provides a search experience for users to jump from a specific search engine to another. Support custom common search engines, optimize keyword effect. It also offers removal of search link redirects, blocking of ads in search results and automatic update detection. Compatible with many search engines in the world, such as Baidu, Google, Bing, Duckduckgo, Yandex, You, etc.
@@ -53,12 +53,13 @@
 // @connect            greasyfork.org
 // @connect            openuserjs.org
 // @connect            githubusercontent.com
+// @connect            favicon.yandex.net
 // @compatible         edge 兼容Tampermonkey, Violentmonkey
 // @compatible         Chrome 兼容Tampermonkey, Violentmonkey
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               新增Yahoo.com搜索引擎，删除Neeva搜索。\n修正Google search labs界面的按钮问题。\n优化脚本操作界面的兼容性，提升操作体验。\n修正一些小问题，优化样式，优化代码。
+// @note               新增全局缓存搜索站点ICON图标。\n修正Google搜索结果中地图链接的错误。\n修正一些小问题，优化样式，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -97,6 +98,7 @@
   /* PERFECTLY COMPATIBLE FOR GREASEMONKEY, TAMPERMONKEY, VIOLENTMONKEY, USERSCRIPTS 2023-04-08 F9Y4NG */
 
   const GMinfo = GM_info;
+  const GMversion = GMinfo.version ?? GMinfo.scriptHandlerVersion ?? "unknown";
   const GMscriptHandler = GMinfo.scriptHandler;
   const GMsetValue = gmSelector("setValue");
   const GMgetValue = gmSelector("getValue");
@@ -362,8 +364,8 @@
   }
 
   function capitalize(string) {
-    string = String(string);
-    return string.charAt(0).toUpperCase() + string.slice(1);
+    string = String(string ?? "").toLowerCase();
+    return string.replace(/\b[a-z]|\s[a-z]/g, str => str.toUpperCase());
   }
 
   function encrypt(string) {
@@ -472,6 +474,7 @@
   }
 
   function getNavigatorInfo() {
+    const certificate = `${GMscriptHandler} ${GMversion}`;
     const vmuad = (uad => {
       if (!uad) return;
       const archs = uad.arch?.split("-") ?? [];
@@ -480,12 +483,12 @@
         platform: capitalize(uad.os),
         bitness: archs[1] ?? "unknown",
         architecture: archs[0] ?? "unknown",
-        credit: GMscriptHandler,
+        credit: certificate,
       };
     })(GMinfo.platform);
     const tmuad = (uad => {
       if (!uad) return;
-      uad.credit = GMscriptHandler;
+      uad.credit = certificate;
       return uad;
     })(GMinfo.userAgentData);
     const uad = vmuad ?? tmuad ?? navigator.userAgentData;
@@ -665,9 +668,7 @@
     switch (typeof expr) {
       case "string":
         pendingNodes = qA(expr, scope);
-        pendingNodes.forEach(item => {
-          removeNode(item);
-        });
+        pendingNodes.forEach(item => removeNode(item));
         break;
       case "object":
         if (expr instanceof Element) {
@@ -987,12 +988,9 @@
     };
 
     function checkBlinkCheatingUA() {
-      if (typeof NavigatorUAData !== "undefined") {
-        if (CUR_PROTOCOL === "https:" && !navigator.userAgentData) return true;
-        // eslint-disable-next-line no-undef
-        return Boolean(navigator.userAgentData) && !(navigator.userAgentData instanceof NavigatorUAData);
-      }
-      return false;
+      if (typeof NavigatorUAData === "undefined") return false;
+      if (CUR_PROTOCOL === "https:" && !navigator.userAgentData) return true;
+      return Boolean(navigator.userAgentData) && !(navigator.userAgentData instanceof NavigatorUAData);
     }
 
     function insterAfter(newElement, targetElement) {
@@ -1037,13 +1035,6 @@
       let config_date = await getConfigureData();
       let { isAutoUpdate, keywordHighlight, isHotkey, selectedEngine, localWindow, googleJump, antiLinkRedirect, antiAds, customColor } = config_date;
 
-      const API_ICO_YANDEX = decrypt("aHR0cHMlM0ElMkYlMkZmYXZpY29uLnlhbmRleC5uZXQlMkZmYXZpY29uJTJGdjI=");
-      const API_ICO_BACKUP = decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjMlMkYwNiUyRjA5JTJGcENFYTVOUi5wbmc=");
-      const API_ICO_DDUCKGO = decrypt("aHR0cHMlM0ElMkYlMkZpY29ucy5kdWNrZHVja2dvLmNvbSUyRmlwMg==");
-      const API_ICO_NOICON = decrypt(
-        "ZGF0YSUzQWltYWdlJTJGcG5nJTNCYmFzZTY0JTJDaVZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQUNBQUFBQWdDQVlBQUFCemVucjBBQUFBQm1KTFIwUUElMkZ3RCUyRkFQJTJCZ3ZhZVRBQUFFRWtsRVFWUlloY1hYV1loWGRSUUg4SSUyRkxaS0pwdG94TG1VdHBHQmd0NWtNbWtWa2twR1MyUGdRJTJCdElCR1VCQkV2WmhCRHdVbVFRJTJCRkVKR1JXUThGcFMxRHVHUkZDbTVNTW8xbFpXcU9tbWlibWpvOW5IT2JPM2YlMkJUak5XOW9YTCUyRmQzenUlMkZkM3ZyOXp6dSUyQmNjJTJGbWYwYU9iNzQlMkZBTkl6RU1BekFIdXpFbDFpT2clMkY4MmdUcmNpJTJGdHhXU3Byd2c3OGpIb015Yms2Zkl4bjglMkY2UE1SMWZwYUpuTUxGRXVtZmwzamZmWDRyaldJYXhKNnU0QiUyQmJqR0Y0UXV6d0hZM0wlMkJVYnllNHlaTXlmR1ZPQTBUc0FyN2NkUEpLRiUyQk1YekJMN0d3JTJCTnFBZm5rYXI4TGNjSDA0U1YlMkJCcjNJN2VXSWlqbU4wZEFrJTJCbThva2k2RGFra2h0eHJiQktsVUFyZnNCQUxNam5sOUZIV09zd0puZEYlMkJmUlVNQXZEYzlGV2JCU1clMkJhU2tzRXFnRlU4azZUJTJGeSUyQmQyMHhDSzBZSEJWWWZrVTFLRVJIMkd1OE9mb25OdUNac3dvdmY4alZndHpGOWlQQmt6Rm9KUjlLbzdxNXB5Yld5YlFxelIlMkJBRE56OTVNeFR2aSUyRkx6NUkyWGtsMlNGc3hUVWwyU0FjeU4yT1Q5bFklMkZJcE5JbjZXNEtlcUpXQzlPR3BEOEpzMnMyN0wlMkJiWGFtN3VXQzFyeEZDNnV5TllJYTI5T0VoMHdRcHpkcSUyRkJZNWVNM2NpZEh1a2lnSVpYdHI4Z3Z4VHpoNXI5UUpKRnB3cWZyUkNDVzBTek1XRmVMZVEyTVM0WGZWT1F6OEE0dXlRMjNJekJTQkZwUGtVVEsyS05HOUhhQyUyQmx5bnBTS2ZtRHBhTWFvUTlzNzdNT3dTeFdWVjVjTkc0WjZHaW54OTNxdHlJbUd0S3ExUDFJNURJZ0NIVlQ5NFc2VGNVNEZtUEZnOEZDNW9FYVk3VzhlZ21vMDdhc2hQRklSRjRxcksxdVQ3WjRqaTFvN0FMZ3pGUGhHOVpaeUwzZDNZNGU4aUpWZlJqUDY1MGUlMkJyQkJwRlBlOHIwbTBaZzVOZ1YxRzh1MWo3NW1RbHJzN3hwaXFCOThVeG15cnFlUm5qUllYcmFxZFRCT2RxWEklMkI5JTJCZHdnWExsV1dMb2RnWU9pZzdrSGIySjdhY0VKNGhSODBVVUNuNVhHNjBRRjNTRXNjb3RJeFRVeEpSVmRLZnclMkJ1blQxckNFYmt0JTJCTnJsejk4SzFvNFFxTUVuV2pWVnRUZzQ0OTRUSVJLRk9FTzJhbWZDWGVFclclMkJ5SWlOZUI0dmxyN2ZJcHFRN2FJbXZGU2FHNG9QUlFHOElhM1NBV1BGS1Znb1dxdjNrdlZ1bkk1WGRINE03OEtrSEpjdFVPQXNmQzRLM0lXMUNCQTkzRkhSeVJSdDFYR1JQSVpyS3pKVkFpdUVxNWFmZ01CY1lhM1hjcjJkb2dUVXhHelJSaTFLUzB3Uzdya0lONHV6WGlhd05jbmRtVXBha2tBdmJZVm5oVGdSUyUyRk5hNG0lMkI2NXNtNVVCTnVFJTJGSFNQJTJCY21wSVdJT0tqUGNUJTJCUlMzWmlUaW82akF0d2E0N1A3MHhwRmZXaVJod1J6Y1E4WEM3aW9Zd0J1QTdQaWVwWnhNMCUyQjRlOEZ3ajFONHFlbDJ4Z2pPcGxHYlQ3Zkt4TFVidUhUWXlMSlBDeXk0VDdScHQ4bjhzeVpvdTA3b0pTcXUlMkZ0dlNQaDBwRERsUU5HJTJCZlNmU2E1SGg1b2ppczFGWWF4dGVGVEh4Q083V1NVTDZMJTJGQzR0djd5SWZHJTJGY0VyUlIlMkZ6WTlLNU8lMkZBa2NYemk1R1ElMkJMendBQUFBQkpSVTVFcmtKZ2dnJTNEJTNE"
-      );
-
       function getUrlParam(paraName) {
         try {
           switch (paraName) {
@@ -1080,23 +1071,25 @@
 
       /* ANTIREDIRECT_FUNCTIONS */
 
-      function clearHrefEvents(node) {
+      function clearHrefEvents(node, clearData = true) {
         if (!node) return;
         node.setAttribute("target", "_blank");
         ["ping", "onmouseover", "referrerpolicy", "h"].forEach(item => {
           node.hasAttribute(item) && node.removeAttribute(item);
         });
-        for (const ds in node.dataset) {
-          if (node.dataset.hasOwnProperty(ds)) delete node.dataset[ds];
+        if (clearData) {
+          for (const ds in node.dataset) {
+            if (node.dataset.hasOwnProperty(ds)) delete node.dataset[ds];
+          }
         }
       }
 
-      function addTargetEvent(str, siteName) {
+      function addTargetEvent(str, siteName, clearData = true) {
         const requestNodes = qA(str);
         if (!requestNodes.length) return;
         COUNT(`[${siteName}-Attributes-Clean]`);
         requestNodes.forEach(node => {
-          clearHrefEvents(node);
+          clearHrefEvents(node, clearData);
           node.setAttribute("gd-attributeclean-status", "success");
         });
       }
@@ -1305,7 +1298,7 @@
         }
       }
 
-      ~(function setSearchEngineConfig(checkAutoUpdate) {
+      ~(async function setSearchEngineConfig(checkAutoUpdate, getRemoteIcon) {
         "use strict";
         const selectedSite = [];
         const listSite = {
@@ -1351,7 +1344,7 @@
             KeyStyle: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
             AntiRedirect: () =>
               deBounce({ fn: addTargetEvent, delay: 5e2, timer: "google_c", immed: true })(
-                "#rcnt a:not([data-xbu='true']):not([data-ti]):not([aria-label^='Page']):not([href^='javascript:']):not([id^='pn']):not([gd-attributeclean-status])",
+                "#rcnt a:not([data-xbu='true']):not([data-ti]):not([aria-label^='Page']):not([href^='javascript:']):not([href='#']):not([id^='pn']):not([gd-attributeclean-status])",
                 "Google"
               ),
             AntiAds: () =>
@@ -1543,11 +1536,12 @@
             AntiRedirect: () => {
               deBounce({ fn: addTargetEvent, delay: 5e2, timer: "ecosia_c", immed: false })(
                 "#main section article div a:not([href^='javascript:']):not([gd-attributeclean-status]):not(.video-result__thumbnail)",
-                "Ecosia"
+                "Ecosia",
+                false
               );
             },
             AntiAds: () =>
-              deBounce({ fn: antiAds_RemoveNodes, delay: 8e2, timer: "ad_ecosia", immed: false })("div.main-header__install-cta,div.main-footer__card-container", "Ecosia"),
+              deBounce({ fn: antiAds_RemoveNodes, delay: 6e2, timer: "ad_ecosia", immed: false })("div.main-header__install-cta,div.main-footer__card-container", "Ecosia"),
           },
           yahoo: {
             SiteTypeID: 12,
@@ -1716,6 +1710,12 @@
         window.addEventListener("replaceState", getGlobalparameter);
         window.addEventListener("popstate", getGlobalparameter);
 
+        const API_ICO_YANDEX = decrypt("aHR0cHMlM0ElMkYlMkZmYXZpY29uLnlhbmRleC5uZXQlMkZmYXZpY29uJTJGdjI=");
+        const API_ICO_BACKUP = decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjMlMkYwNiUyRjA5JTJGcENFYTVOUi5wbmc=");
+        const API_ICO_YANDEX_URL = `${API_ICO_YANDEX}/${def.const.allSiteURIs}?size=32&stub=1`;
+        const iconBASE64 = await requestRemoteIcons(API_ICO_YANDEX_URL);
+        const iconBackground = iconBASE64 ? `url('${iconBASE64}')` : `url('${API_ICO_YANDEX_URL}'),url('${API_ICO_BACKUP}')`;
+
         def.const.googleSplitLine = currentSite.SiteTypeID === newSiteType.GOOGLE ? `<span jsname="s1VaRe" class="ACRAdd M2vV3"></span>` : ``;
         def.const.fsouSplitLine = currentSite.SiteTypeID === newSiteType.FSOU ? `<div class="divider"></div>` : ``;
         def.const.buttonCode = def.const.googleSplitLine.concat(
@@ -1730,7 +1730,7 @@
         def.const.highlightCss = listCurrentSite.KeyStyle
           ? `${listCurrentSite.KeyStyle}{background-color:${customColor.backgroundColor}!important;color:${customColor.foregroundColor}!important;font-weight:600!important}`
           : ``;
-        def.const.iconCss = `.${def.notice.noticejs} .${def.notice.configuration} span.${def.notice.favicon},.${def.notice.card}__body-cover-image span.${def.notice.favicons}{background-color:#ffffff;background-image:url('${API_ICO_YANDEX}/${def.const.allSiteURIs}?size=32&stub=1'),url('${API_ICO_BACKUP}');background-repeat:no-repeat;}`;
+        def.const.iconCss = `.${def.notice.noticejs} .${def.notice.configuration} span.${def.notice.favicon},.${def.notice.card}__body-cover-image span.${def.notice.favicons}{background-color:#ffffff;background-image:${iconBackground};background-repeat:no-repeat;}`;
 
         function getQueryString() {
           let val = "";
@@ -1769,6 +1769,25 @@
           def.const.indexPage = () => (currentSite.SiteTypeID === newSiteType.DUCKDUCKGO ? !location.search.includes("q=") : location.pathname === "/");
         }
 
+        async function requestRemoteIcons(URIs) {
+          let iconURL;
+          const iconData = await cache.get("_remoteicons_");
+          try {
+            if (!iconData || IS_DEBUG) {
+              iconURL = await getRemoteIcon(URIs);
+              iconURL && cache.set("_remoteicons_", iconURL);
+              DEBUG("Get Realtime RemoteICONs.");
+            } else {
+              iconURL = iconData;
+              DEBUG("Get ICONs from Cache.");
+            }
+          } catch (e) {
+            ERROR("Can not get Remote Icons.");
+            cache.remove("_remoteicons_");
+          }
+          return iconURL;
+        }
+
         ~(function prepareSearchParameters(responseUpdate) {
           "use strict";
           // MENUS_ACTION
@@ -1781,16 +1800,7 @@
               let returnHtml = "";
               for (let site in listSite) {
                 if (listSite.hasOwnProperty(site) && listSite[site].SiteTypeID !== 0 && listSite[site].SiteTypeID !== currentSite.SiteTypeID) {
-                  const iconStyle = String(
-                    listCurrentSite.SiteTypeID === newSiteType.DUCKDUCKGO
-                      ? `background-image:url('${API_ICO_DDUCKGO}/${listSite[site].SiteURI}.ico')!important;`
-                      : listCurrentSite.SiteTypeID === newSiteType.ECOSIA ||
-                        listCurrentSite.SiteTypeID === newSiteType.YAHOO ||
-                        listCurrentSite.SiteTypeID === newSiteType.BRAVE ||
-                        listCurrentSite.SiteTypeID === newSiteType.STARTPAGE
-                      ? `background-image:url(${API_ICO_NOICON})!important;filter:opacity(0.65);background-position:0 0;`
-                      : `background-position:0 ${(1 - listSite[site].SiteTypeID) * 24}px;`
-                  ).concat(`background-attachment:local;background-size:cover;`);
+                  const iconStyle = `background-position:0 ${(1 - listSite[site].SiteTypeID) * 24}px;background-attachment:local;background-size:cover;`;
                   returnHtml += String(
                     `<li>
                       <button class="${def.notice.searchButton}" id="${listSite[site].SiteTypeID}"
@@ -1810,16 +1820,7 @@
               let returnHtml = "";
               for (let site in listSite) {
                 if (listSite.hasOwnProperty(site) && listSite[site].SiteTypeID !== 0) {
-                  const iconStyle = String(
-                    listCurrentSite.SiteTypeID === newSiteType.DUCKDUCKGO
-                      ? `background-image:url('${API_ICO_DDUCKGO}/${listSite[site].SiteURI}.ico')!important;`
-                      : listCurrentSite.SiteTypeID === newSiteType.ECOSIA ||
-                        listCurrentSite.SiteTypeID === newSiteType.YAHOO ||
-                        listCurrentSite.SiteTypeID === newSiteType.BRAVE ||
-                        listCurrentSite.SiteTypeID === newSiteType.STARTPAGE
-                      ? `background-image:url(${API_ICO_NOICON})!important;filter:opacity(0.85);background-position:0 0;`
-                      : `background-position:0 ${(1 - listSite[site].SiteTypeID) * 32}px;`
-                  ).concat(`background-attachment:local;background-size:32px auto;`);
+                  const iconStyle = `background-position:0 ${(1 - listSite[site].SiteTypeID) * 32}px;background-attachment:local;background-size:32px auto;`;
                   returnHtml += String(
                     `<label class="${def.notice.card}">
                       <input class="${def.notice.card}__input" type="checkbox" name="${def.notice.card}_lists" data-sn="${listSite[site].SiteTypeID}"\
@@ -2586,7 +2587,19 @@
                       closeWith: ["click"],
                       timeout: false,
                       position: "topRight",
-                      callbacks: { onClose: [def.variable.refresh] },
+                      callbacks: {
+                        onClose: [
+                          async () => {
+                            try {
+                              const iconURL = await getRemoteIcon(API_ICO_YANDEX_URL);
+                              iconURL && cache.set("_remoteicons_", iconURL);
+                            } catch (e) {
+                              cache.remove("_remoteicons_");
+                            }
+                          },
+                          def.variable.refresh,
+                        ],
+                      },
                     });
                     def.const.u &&
                       sleep(6e3).then(() => {
@@ -2666,42 +2679,66 @@
             }
           }
         });
-      })(async () => {
-        "use strict";
-        const cache_autoupdate = await cache.get("_autoupdate_");
-        if (CUR_WINDOW_TOP && isAutoUpdate && (!cache_autoupdate || setDebuggerMode())) {
-          const rnd = Date.now().toString().slice(-8);
-          const result = await Promise.race([
-            update(`https://greasyfork.org/scripts/12909/code/Google%20%20baidu%20Switcher%20(ALL%20in%20One).meta.js?${rnd}`),
-            update(`https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js?${rnd}`),
-            update(`https://openuserjs.org/install/f9y4ng/Google_baidu_Switcher_(ALL_in_One).meta.js?${rnd}`),
-          ]).catch(e => ERROR("CheckUpdate:", e.message));
-          return result;
-        }
-        return null;
+      })(
+        async () => {
+          "use strict";
+          const cache_autoupdate = await cache.get("_autoupdate_");
+          if (CUR_WINDOW_TOP && isAutoUpdate && (!cache_autoupdate || setDebuggerMode())) {
+            const rnd = Date.now().toString().slice(-8);
+            const result = await Promise.race([
+              update(`https://greasyfork.org/scripts/12909/code/Google%20%20baidu%20Switcher%20(ALL%20in%20One).meta.js?${rnd}`),
+              update(`https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js?${rnd}`),
+              update(`https://openuserjs.org/install/f9y4ng/Google_baidu_Switcher_(ALL_in_One).meta.js?${rnd}`),
+            ]).catch(e => ERROR("CheckUpdate:", e.message));
+            return result;
+          }
+          return null;
 
-        function update(url) {
+          function update(url) {
+            return new Promise((resolve, reject) => {
+              GMxmlhttpRequest({
+                url: url,
+                nocache: true,
+                headers: { Accept: "*/*", Referer: url },
+                method: "GET",
+                timeout: 1e4,
+                onreadystatechange: response => {
+                  if (response.status === 200 && response.readyState === 4) {
+                    const res = response.responseText || response.response || "";
+                    res && resolve({ res, source: url });
+                  }
+                },
+                ontimeout: () => reject(new Error("Timeout Error")),
+              });
+            }).catch(e => {
+              ERROR("AutoUpdate.XHR:", e.message);
+              return { res: undefined, source: undefined };
+            });
+          }
+        },
+        async imgUrl => {
+          "use strict";
           return new Promise((resolve, reject) => {
             GMxmlhttpRequest({
-              url: url,
-              nocache: true,
-              headers: { Accept: "*/*", Referer: url },
+              url: imgUrl,
+              headers: { Accept: "*/*", Referer: imgUrl },
               method: "GET",
-              timeout: 1e4,
+              timeout: 5e3,
+              responseType: "blob",
               onreadystatechange: response => {
                 if (response.status === 200 && response.readyState === 4) {
-                  const res = response.responseText || response.response || "";
-                  res && resolve({ res, source: url });
+                  let blob = response.response;
+                  DEBUG("Response.Blob:", blob);
+                  let oFileReader = new FileReader();
+                  oFileReader.onloadend = e => resolve(e.target.result);
+                  oFileReader.readAsDataURL(blob);
                 }
               },
               ontimeout: () => reject(new Error("Timeout Error")),
             });
-          }).catch(e => {
-            ERROR("AutoUpdate.XHR:", e.message);
-            return { res: undefined, source: undefined };
-          });
+          }).catch(e => ERROR("GetRemoteIcons:", e.message));
         }
-      });
+      );
     })(
       async () => {
         "use strict";
