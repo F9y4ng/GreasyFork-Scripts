@@ -87,7 +87,9 @@
 - **已知问题二：** 针对视口单位 `vw, vh, vmin, vmax` 的修正已完成，解决了在字体缩放后视口单位长度不准确的问题。该功能为**实验性功能**，在核心高级功能中默认开启。在日常使用时，遇到以下特殊情况的处理方法：
   1. 部分站点因配置相关 CORS 策略，会使浏览器阻止对外部样式的获取（控制台 console 会看到相应报错，如：`No 'Access-Control-Allow-Origin' header is present on the requested resource.`），此时，可在扩展商店安装并开启 [Allow CORS: Access-Control-Allow-origin](https://chrome.google.com/webstore/detail/allow-cors-access-control/lhobafahddgcelffkeicbaginigeejlf)。
   2. 在部分应用了 CSP 策略的站点，浏览器可能会阻止内部样式的加载和解析（控制台 console 会看到相应的报错，如：`Refused to apply inline style because it violates the following Content Security Policy directive: "default-src 'self'".`），此时，可在扩展商店安装并开启 [Allow CSP: Content-Security-Policy](https://chrome.google.com/webstore/detail/allow-csp-content-securit/hnojoemndpdjofcdaonbefcfecpjfflh)
-  3. 使用其他同类扩展也可解决以上问题，如介意安全问题、或有其他顾虑、或不想使用该功能，请在高级核心功能设置中关闭**视口单位修正选项**或**字体缩放功能选项**，或将字体缩放设置为 `1.0` 后保存为站点独享数据。
+  3. 使用其他同类扩展也可解决以上问题，如介意安全问题、或有其他顾虑、或不想使用该功能，请按以下方法关闭该功能：
+     1. 在**字体渲染设置界面**内取消勾选**视口修正**选项，或将**字体缩放**设置为`1.0`后保存为独享数据
+     2. 在**高级核心功能设置**中单独关闭**视口单位修正**选项，或直接关闭**字体缩放功能**。
 - **未知情况：** 如遇到其他状况下的样式异常、坐标偏移，或其他相关问题，请及时向我[反馈](https://github.com/F9y4ng/GreasyFork-Scripts/issues)。
 
 ---
