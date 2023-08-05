@@ -16,13 +16,12 @@
 - 脚本错误、异常请反馈至{[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)}, 字体、渲染样式、乱码问题请反馈至{[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)}。
 - 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2023.07.08.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2023.08.05.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 修正部分站点对按键劫持造成无法正常输入的问题。
-@ 修正在Firefox重置数据时预览效果不生效的问题。
-@ 优化粗体修正功能的执行效率及错误检测能力。
-@ 优化部分函数性能、减低内存及CPU占用。
+@ 优化第三方Emoji字体图标与系统字体图标的优先级。
+@ 修正在content-context模式下冗余脚本检测的错误。
+@ 修复粗体修正功能在:hover样式下无法触发的问题。
 @ 修正一些已知的问题，优化样式，优化代码。
 ```
 
@@ -87,7 +86,9 @@
 - **已知问题二：** 针对视口单位 `vw, vh, vmin, vmax` 的修正已完成，解决了在字体缩放后视口单位长度不准确的问题。该功能为**实验性功能**，在核心高级功能中默认开启。在日常使用时，遇到以下特殊情况的处理方法：
   1. 部分站点因配置相关 CORS 策略，会使浏览器阻止对外部样式的获取（控制台 console 会看到相应报错，如：`No 'Access-Control-Allow-Origin' header is present on the requested resource.`），此时，可在扩展商店安装并开启 [Allow CORS: Access-Control-Allow-origin](https://chrome.google.com/webstore/detail/allow-cors-access-control/lhobafahddgcelffkeicbaginigeejlf)。
   2. 在部分应用了 CSP 策略的站点，浏览器可能会阻止内部样式的加载和解析（控制台 console 会看到相应的报错，如：`Refused to apply inline style because it violates the following Content Security Policy directive: "default-src 'self'".`），此时，可在扩展商店安装并开启 [Allow CSP: Content-Security-Policy](https://chrome.google.com/webstore/detail/allow-csp-content-securit/hnojoemndpdjofcdaonbefcfecpjfflh)
-  3. 使用其他同类扩展也可解决以上问题，如介意安全问题、或有其他顾虑、或不想使用该功能，请在高级核心功能设置中关闭**视口单位修正选项**或**字体缩放功能选项**，或将字体缩放设置为 `1.0` 后保存为站点独享数据。
+  3. 使用其他同类扩展也可解决以上问题，如介意安全问题、或有其他顾虑、或不想使用该功能，请按以下方法关闭该功能：
+        1. 在**字体渲染设置界面**内取消勾选**视口修正**选项，或将**字体缩放**设置为`1.0`后保存为独享数据
+        2. 在**高级核心功能设置**中单独关闭**视口单位修正**选项，或直接关闭**字体缩放功能**。(全局关闭)
 - **未知情况：** 如遇到其他状况下的样式异常、坐标偏移，或其他相关问题，请及时向我[反馈](https://github.com/F9y4ng/GreasyFork-Scripts/issues)。
 
 ---
@@ -99,12 +100,11 @@
 - [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B)
 - 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2023.07.08.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2023.08.05.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-+ 新增全局缓存搜索站点ICON图标。
-@ 修正Google搜索结果中地图链接的错误。
-@ 修正一些小问题，优化样式，优化代码。
+@ 修正在content-context模式下冗余脚本检测的错误。
+@ 修正一些已知问题，优化样式，优化代码。
 ```
 
 ## 最新功能介绍

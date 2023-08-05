@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2023.07.08.1
+// @version            2023.08.05.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的Greasemonkey脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的Greasemonkey脚本和浏览器扩展。
@@ -71,7 +71,7 @@
   const GMregisterMenuCommand = gmSelector("registerMenuCommand");
   const GMunregisterMenuCommand = gmSelector("unregisterMenuCommand");
   const GMunsafeWindow = gmSelector("unsafeWindow");
-  const GMcontextMode = gmSelector("contextMode");
+  const GMcontentMode = gmSelector("contentMode");
 
   /* INITIALIZE_DEBUG_FUNCTIONS */
 
@@ -102,14 +102,14 @@
       exQueryString: `html,head,head *,base,meta,style,link,script,noscript,iframe,img,br,hr,map,area,canvas,svg,svg *,defs,symbol,g,path,polygon,polyline,rect,ellipse,circle,line,text,tspan,tref,textpath,lineargradient,radialgradient,use,images,clippath,mask,pattern,filter,stop,picture,form,object,param,embed,audio,video,source,track,progress,fr-colorpicker,fr-colorpicker *,fr-configure,fr-configure *,fr-dialogbox,fr-dialogbox *,gb-notice,gb-notice *`,
     },
     variable: {
+      undefined: void 0,
       prototype: {
         getScreenCTM: SVGGraphicsElement.prototype.getScreenCTM,
         getClientRects: Element.prototype.getClientRects,
         getBoundingClientRect: Element.prototype.getBoundingClientRect,
       },
-      lisence: generateRandomString(64, "attr"),
       feedback: getMetaValue("supportURL") ?? "",
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.07.08.0",
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.08.05.0",
       scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? "F9y4ng",
       scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? GMinfo.script.name ?? "Font Rendering",
     },
@@ -286,7 +286,7 @@
       registerMenuCommand: typeof GM_registerMenuCommand !== "undefined" ? GM_registerMenuCommand : GM?.registerMenuCommand ?? (() => []),
       unregisterMenuCommand: typeof GM_unregisterMenuCommand !== "undefined" ? GM_unregisterMenuCommand : GM?.unregisterMenuCommand ?? (() => []),
       unsafeWindow: typeof unsafeWindow !== "undefined" ? unsafeWindow : w,
-      contextMode: GMinfo.injectInto === "content" || GMinfo.script["inject-into"] === "content" || ["dom", "js"].includes(GMinfo.sandboxMode),
+      contentMode: GMinfo.injectInto === "content" || GMinfo.script["inject-into"] === "content" || ["dom", "js"].includes(GMinfo.sandboxMode),
     };
     return gmFunctions[rec] ?? (() => {});
   }
@@ -370,7 +370,7 @@
 
   function qS(expr, target = document) {
     try {
-      if (/^#\w+$/.test(expr)) return target.getElementById(expr.slice(1));
+      if (/^#[\w:-]+$/.test(expr)) return target.getElementById(expr.slice(1));
       return target.querySelector(expr);
     } catch (e) {
       return null;
@@ -522,23 +522,20 @@
   function checkRedundantScript(global) {
     const { isTop: CUR_WINDOW_TOP } = getLocationInfo();
     // PAGE_MODE
-    const redundantScripts = global["fr-init-redundantscripts"];
+    const redundantScripts = global["fr-init-redundantcheck"];
     if (redundantScripts === true) return scriptRedundancyWarning();
-    global["fr-init-redundantscripts"] = true;
-    // CONTEXT_MODE
-    if (storageAvailable("__storage_test__")) {
-      if (GMcontextMode) {
-        let redundantScriptsJSON = JSON.parse(sessionStorage.getItem("fr-init-redundantscripts"));
-        if (redundantScriptsJSON?.check === true && redundantScriptsJSON?.lisence !== def.variable.lisence) {
-          sessionStorage.removeItem("fr-init-redundantscripts");
-          return scriptRedundancyWarning();
-        }
-        CUR_WINDOW_TOP &&
-          __console("warn", `${def.variable.scriptName}警告：\r\n脚本的注入模式已设置为"content"，部分脚本功能将受限制，如框架页面内部分功能失效、字体缩放后无法全局修正坐标等。`);
+    global["fr-init-redundantcheck"] = true;
+    // CONTENT_MODE
+    if (GMcontentMode) {
+      const redundantScriptsInfo = document.documentElement?.getAttribute("fr-init-redundantcheck");
+      if (redundantScriptsInfo === "true") {
+        document.documentElement?.removeAttribute("fr-init-redundantcheck");
+        return scriptRedundancyWarning();
       }
-      sessionStorage.setItem("fr-init-redundantscripts", JSON.stringify({ check: true, lisence: def.variable.lisence }));
-      w.addEventListener("beforeunload", () => sessionStorage.removeItem("fr-init-redundantscripts"));
+      CUR_WINDOW_TOP &&
+        __console("warn", `${def.variable.scriptName}警告：\r\n脚本的注入模式已设置为"content"，部分脚本功能将受限制，如框架页面内部分功能失效、字体缩放后无法全局修正坐标等。`);
     }
+    document.documentElement?.setAttribute("fr-init-redundantcheck", true);
     return false;
 
     function scriptRedundancyWarning() {
@@ -550,16 +547,6 @@
         });
       }
       return true;
-    }
-
-    function storageAvailable(v) {
-      try {
-        sessionStorage.setItem(v, v);
-        sessionStorage.removeItem(v);
-        return true;
-      } catch (e) {
-        return false;
-      }
     }
   }
 
@@ -815,10 +802,9 @@
     /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
     const UPDATE_VERSION_NOTICE = String(
-      `<li class="${def.const.seed}_fix">修正部分站点对按键劫持造成无法正常输入的问题。</li>
-        <li class="${def.const.seed}_fix">修正在Firefox重置数据时预览效果不生效的问题。</li>
-        <li class="${def.const.seed}_fix">优化粗体修正功能的执行效率及错误检测能力。</li>
-        <li class="${def.const.seed}_fix">优化部分函数性能、减低内存及CPU占用。</li>
+      `<li class="${def.const.seed}_fix">优化第三方Emoji字体图标与系统字体图标的优先级。</li>
+        <li class="${def.const.seed}_fix">修正在content-context模式下冗余脚本检测的错误。</li>
+        <li class="${def.const.seed}_fix">修复粗体修正功能在:hover样式下无法触发的问题。</li>
         <li class="${def.const.seed}_fix">修正一些已知的问题，优化样式，优化代码。</li>`
     );
 
@@ -863,7 +849,7 @@
     /* INITIALIZE_FONT_RENDERING_PARAMETERS */
 
     const INITIAL_VALUES = {
-      fontBase: `system-ui,-apple-system,BlinkMacSystemFont,sans-serif,'iconfont','icomoon','FontAwesome','Font Awesome 5 Pro','Font Awesome 6 Pro','IcoFont','fontello','themify','Material Icons','Material Icons Extended','bootstrap-icons','Segoe Fluent Icons','Material-Design-Iconic-Font','office365icons','Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji','Android Emoji','EmojiSymbols','emojione mozilla','twemoji mozilla'`,
+      fontBase: `system-ui,-apple-system,BlinkMacSystemFont,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji','Android Emoji','EmojiSymbols','emojione mozilla','twemoji mozilla','office365icons','iconfont','icomoon','FontAwesome','Font Awesome 5 Pro','Font Awesome 6 Pro','IcoFont','fontello','themify','Material Icons','Material Icons Extended','bootstrap-icons','Segoe Fluent Icons','Material-Design-Iconic-Font'`,
       fontSelect: IS_REAL_WEBKIT ? `'PingFang SC'` : `'Microsoft YaHei UI'`,
       fontFace: true,
       fontSmooth: true,
@@ -873,7 +859,7 @@
       fixStroke: IS_REAL_BLINK,
       fontShadow: IS_REAL_GECKO ? 0.36 : 0.75,
       shadowColor: IS_REAL_GECKO ? "#7C7C7C70" : "#7C7C7CDD",
-      fontCSS: `:not(i,head *):not([class*='glyph']):not([class*='icon']):not([class*='fa-']):not([class*='vjs-']):not([class*='mu-'])`,
+      fontCSS: `:not(i,head *):not([class*='glyph']):not([class*='symbols']):not([class*='icon']):not([class*='fa-']):not([class*='vjs-'])`,
       fontEx: `progress,meter,datalist,samp,kbd,pre,pre *,code,code *`,
       monospacedFont: `'Operator Mono Lig','Fira Code','Source Code Pro','DejaVu Sans Mono','Anonymous Pro','Ubuntu Mono','Roboto Mono','JetBrains Mono','Droid Sans Mono','Mono','Monaco','Menlo','Inconsolata','Liberation Mono'`,
       monospacedFeature: `"liga" 0,"tnum","zero"`,
@@ -886,7 +872,7 @@
       mainStyle: `display:inline-block;font-family:monospace,${INITIAL_VALUES.fontSelect},sans-serif`,
       global: "input:is([type='text'],[type='password'],[type='search']),input:not([type]){font-family:initial!important}",
       frDialogBox: String(
-        `:host(#${def.id.dialogbox}){position:fixed;top:0;left:0;width:100%;height:100%;background:0 0;pointer-events:none;z-index:2147483647}div.${def.class.db}{z-index:99999;box-sizing:content-box;max-width:420px;border:2px solid #efefef;color:#444444;pointer-events:auto}.${def.class.db}{position:absolute;top:calc(12% + 10px);right:15px;display:block;overflow:hidden;width:100%;border-radius:6px;background:#ffffff;box-shadow:0 0 10px 0 rgba(0, 0, 0, 0.3);transition:opacity .5s}.${def.class.db} *{text-shadow:0 0 1px #777!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}.${def.class.dbt}{display:flex;margin-top:0;padding:10px 15px;width:auto;background:#efefef;text-align:left;font-weight:700;font-size:18px!important;flex-wrap:wrap;justify-content:space-between;align-items:center;align-content:center}.${def.class.dbt},.${def.class.dbt} *{font-weight:700;font-size:20px!important;font-family:Candara,'Times New Roman',${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm}{margin:5px;padding:10px;color:#444444;text-align:left;font-weight:500;font-size:16px!important}.${def.class.dbb}{display:inline-block;box-sizing:content-box;margin:2px 1%;padding:8px 12px;min-width:12%;border-radius:4px;text-align:center;text-decoration:none!important;letter-spacing:0;font-weight:400;cursor:pointer}.${def.class.db} .${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}.${def.class.db} .gradient-bg{background:#e7ffd9;animation:gradient 2s ease-in-out forwards}@keyframes gradient{0%{background:#e7ffd9}to{background:transparent}}` +
+        `:host(#${def.id.dialogbox}){position:fixed!important;top:0;left:0;width:100%;height:100%;background:0 0!important;pointer-events:none;z-index:2147483647}div.${def.class.db}{z-index:99999;box-sizing:content-box;max-width:420px;border:2px solid #efefef;color:#444444;pointer-events:auto}.${def.class.db}{position:absolute;top:calc(12% + 10px);right:15px;display:block;overflow:hidden;width:100%;border-radius:6px;background:#ffffff;box-shadow:0 0 10px 0 rgba(0, 0, 0, 0.3);transition:opacity .5s}.${def.class.db} *{text-shadow:0 0 1px #777!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}.${def.class.dbt}{display:flex;margin-top:0;padding:10px 15px;width:auto;background:#efefef;text-align:left;font-weight:700;font-size:18px!important;flex-wrap:wrap;justify-content:space-between;align-items:center;align-content:center}.${def.class.dbt},.${def.class.dbt} *{font-weight:700;font-size:20px!important;font-family:Candara,'Times New Roman',${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm}{margin:5px;padding:10px;color:#444444;text-align:left;font-weight:500;font-size:16px!important}.${def.class.dbb}{display:inline-block;box-sizing:content-box;margin:2px 1%;padding:8px 12px;min-width:12%;border-radius:4px;text-align:center;text-decoration:none!important;letter-spacing:0;font-weight:400;cursor:pointer}.${def.class.db} .${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}.${def.class.db} .gradient-bg{background:#e7ffd9;animation:gradient 2s ease-in-out forwards}@keyframes gradient{0%{background:#e7ffd9}to{background:transparent}}` +
           `.${def.class.dbb}:hover{box-sizing:content-box;color:#ffffff;text-decoration:none!important;font-weight:700;opacity:.8}.${def.class.db} .${def.class.dbt},.${def.class.dbb},.${def.class.dbb}:hover{text-shadow:none!important;-webkit-text-stroke:0 transparent!important;-webkit-user-select:none;user-select:none}.${def.class.dbbf},.${def.class.dbbf}:hover{border:1px solid #d93223!important;border-radius:6px;background:#d93223!important;color:#ffffff!important;font-size:14px!important}.${def.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${def.class.dbbt},.${def.class.dbbt}:hover{border:1px solid #038c5a!important;border-radius:6px;background:#038c5a!important;color:#ffffff!important;font-size:14px!important}.${def.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${def.class.dbbn},.${def.class.dbbn}:hover{border:1px solid #777777!important;border-radius:6px;background:#777777!important;color:#ffffff!important;font-size:14px!important}.${def.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${def.class.dbbc}{padding:2.5%;background:#efefef;color:#ffffff;text-align:right;font-size:initial}.${def.class.dbm} textarea{cursor:auto;scrollbar-width:thin;overscroll-behavior:contain}.${def.class.dbm} textarea::-webkit-scrollbar{width:8px;height:8px}.${def.class.dbm} textarea::-webkit-scrollbar-corner{border-radius:2px;background:#efefef;box-shadow:inset 0 0 3px #aaaaaa;}.${def.class.dbm} textarea::-webkit-scrollbar-thumb{border-radius:2px;background:#cfcfcf;box-shadow:inset 0 0 5px #999;}.${def.class.dbm} textarea::-webkit-scrollbar-track{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaaaaa;}.${def.class.dbm} textarea::-webkit-scrollbar-track-piece{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaaaaa;}` +
           `.${def.class.dbm} button:hover{background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important;cursor:pointer}.${def.class.dbm} p{margin:5px 0!important;text-align:left;text-indent:0!important;font-weight:400;font-size:16px!important;line-height:1.5!important;-webkit-user-select:none;user-select:none}.${def.class.dbm} ul{margin:0 0 0 10px!important;padding:2px;color:gray;list-style:none;font:italic 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-user-select:none;user-select:none;scrollbar-width:thin}.${def.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${def.class.dbm} ul::-webkit-scrollbar-thumb{border-radius:10px;background:#cfcfcf;box-shadow:inset 0 0 5px #999999;}.${def.class.dbm} ul::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #aaaaaa;}.${def.class.dbm} ul::-webkit-scrollbar-track-piece{border-radius:6px;background:#efefef;box-shadow:inset 0 0 5px #aaaaaa;}.${def.class.dbm} ul li{display:list-item;list-style-type:none;word-break:break-all}.${def.class.dbm} li:before{display:none}.${def.class.dbm} #${def.id.bk},.${def.class.dbm} #${def.id.pv},.${def.class.dbm} #${def.id.fs},.${def.class.dbm} #${def.id.fvp},.${def.class.dbm} #${def.id.hk},.${def.class.dbm} #${def.id.ct},.${def.class.dbm} #${def.id.mps},.${def.class.dbm} #${def.id.flc},.${def.class.dbm} #${def.id.gc},.${def.class.dbm} #${def.id.cm}{display:flex;box-sizing:content-box;margin:0;padding:2px 4px!important;width:calc(96% - 10px);height:max-content;min-width:auto;min-height:40px;list-style:none;font-style:normal;justify-content:space-between;align-items:flex-start;word-break:break-word}.${def.class.dbm} ul#${def.const.seed}_d_d_ li:hover{background-color:#fdf6eccc!important}.${def.class.dbm} #${def.const.seed}_temporary{padding:18px 8px;text-align:center;color:#555555;font-size:14px!important}` +
           `.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#ffffff;box-shadow:0 0 1px rgba(0,0,0,.6);color:#ffffff;content:' '}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#ffffff;content:'OFF';font-weight:700;font-style:normal;font-size:16px}.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4);cursor:pointer}.${def.class.checkbox}:checked+label::after{left:10px;content:'ON'}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:' '}` +
@@ -896,7 +882,7 @@
       ),
       frConfigure:
         String(
-          `:host(#${def.id.configure}){position:fixed;top:0;left:0;width:100%;height:100%;background:0 0;pointer-events:none;z-index:2147483646}#${def.id.container}{position:absolute;top:10px;right:24px;z-index:99999;overflow-x:hidden;overflow-y:auto;box-sizing:content-box;padding:4px;max-height:calc(100% - 40px);min-height:10%;border-radius:12px;background:#f0f6ff!important;box-shadow:0 0 4px 0 rgb(0 0 0/30%);color:#333333;text-align:left;font-weight:700;font-size:16px!important;opacity:0;transition:opacity .5s;width:auto;overscroll-behavior:contain;scrollbar-color:rgb(51 102 153/85%) rgb(0 0 0/25%);scrollbar-width:thin;pointer-events:auto}#${def.id.container}::-webkit-scrollbar{width:10px;height:1px}#${def.id.container}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container}::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container} *{text-shadow:none!important;font-weight:700;font-size:16px;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji,Android Emoji,EmojiSymbols!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}` +
+          `:host(#${def.id.configure}){position:fixed!important;top:0;left:0;width:100%;height:100%;background:0 0!important;pointer-events:none;z-index:2147483646}#${def.id.container}{position:absolute;top:10px;right:24px;z-index:99999;overflow-x:hidden;overflow-y:auto;box-sizing:content-box;padding:4px;max-height:calc(100% - 40px);min-height:10%;border-radius:12px;background:#f0f6ff!important;box-shadow:0 0 4px 0 rgb(0 0 0/30%);color:#333333;text-align:left;font-weight:700;font-size:16px!important;opacity:0;transition:opacity .5s;width:auto;overscroll-behavior:contain;scrollbar-color:rgb(51 102 153/85%) rgb(0 0 0/25%);scrollbar-width:thin;pointer-events:auto}#${def.id.container}::-webkit-scrollbar{width:10px;height:1px}#${def.id.container}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container}::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container} *{text-shadow:none!important;font-weight:700;font-size:16px;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji,Android Emoji,EmojiSymbols!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}` +
             `#${def.id.container} fieldset{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;min-height:475px;border:2px groove #67a5df!important;border-radius:10px;background:#f0f6ff!important}#${def.id.container} legend{position:relative!important;float:none!important;display:block!important;visibility:visible!important;box-sizing:content-box;margin:0;padding:0 32px 0 8px;width:auto!important;height:auto!important;border:none!important;background:#f0f6ff!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.container} fieldset ul{margin:0;padding:0;background:#f0f6ff!important}#${def.id.container} ul li{float:none;display:inherit;box-sizing:content-box;margin:3px 0;min-width:-webkit-fill-available;min-width:-moz-available;border:none;background:#f0f6ff!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none}#${def.id.container} ul li:before{display:none}#${def.id.container} .${def.class.rotation} svg{visibility:visible!important;overflow:hidden;width:24px;height:24px;vertical-align:initial!important;fill:#67a5df;}#${def.id.container} .${def.class.rotation} svg:hover{cursor:help}#${def.const.seed}_scriptname{display:inline-block;vertical-align:bottom;overflow:hidden;max-width:225px;text-overflow:ellipsis;white-space:nowrap;font-weight:700!important;-webkit-user-select:all;user-select:all}#${def.id.container} .${def.class.title} .${def.class.guide}{position:absolute;display:inline-block;cursor:pointer}@keyframes rotation{0%{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(1turn)}}.${def.class.title} .${def.class.rotation}{top:auto;right:auto;bottom:auto;left:auto;margin:0;padding:0;width:24px;height:24px;-webkit-transform:rotate(1turn);transform-origin:center 50% 0;animation:rotation 5s linear infinite}` +
             `#${def.id.container} input:not([type='range'],[type='checkbox']):focus,#${def.id.container} textarea:focus{box-shadow:inset 0 1px 3px rgb(0 0 0/10%),0 0 6px rgb(82 168 236/60%)!important}#${def.id.fontList}{padding:2px 10px 0;min-height:73px}#${def.id.fontFace},#${def.id.fontSmooth}{display:flex!important;padding:2px 10px;width:calc(100% - 18px);height:40px;min-width:auto;align-items:center;justify-content:space-between}#${def.id.fontSize}{padding:2px 10px;height:60px}#${def.id.fontStroke}{padding:2px 10px;height:60px}#${def.id.fontShadow}{padding:2px 10px;height:60px}#${def.id.shadowColor}{display:flex;margin:4px;padding:2px 10px;width:auto;min-height:45px;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}#${def.id.fontCss},#${def.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${def.id.submit}{padding:2px 10px;height:40px}` +
             `#${def.id.fontList} .${def.class.selector} a{text-decoration:none;font-weight:400}#${def.id.fontList} .${def.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${def.id.fontList} .${def.class.label} span{display:inline-block;overflow:hidden;box-sizing:border-box;padding:5px;width:max-content;height:max-content;max-width:200px;min-width:12px;background:#67a5df;color:#ffffff;text-overflow:ellipsis;white-space:nowrap;font-weight:400;font-size:16px!important}#${def.id.fontList} .${def.class.close}{width:12px}#${def.id.fontList} .${def.class.close}:hover{border-radius:2px;background-color:#2d7dca;color:tomato}#${def.id.selector}{width:100%;max-width:100%}#${def.id.selector} label{display:block;margin:0 0 4px;color:#333333;cursor:auto}#${def.id.selector} #${def.id.cleaner}{margin-left:5px;cursor:pointer}#${def.id.selector} #${def.id.cleaner}:hover{color:#ff0000;}#${def.id.fontList} .${def.class.selector}{overflow-x:hidden;box-sizing:border-box;margin:0 0 6px;padding:6px 6px 0;width:100%;max-width:min-content;max-width:-moz-min-content;max-height:90px;min-width:100%;min-height:45px;border:2px solid #67a5df!important;border-radius:6px;overscroll-behavior:contain;scrollbar-color:#336699 rgba(0,0,0,.25);scrollbar-width:thin}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontList} .${def.class.selectFontId} span.${def.class.spanlabel},#${def.id.selector} span.${def.class.spanlabel}{display:block!important;margin:0!important;padding:0 0 4px;width:auto;border:0;background-color:transparent!important;color:#333333;text-align:left!important}` +
@@ -996,10 +982,10 @@
         this.neutralButtonText = neutralButtonText;
         this.hasFalse = falseButtonText !== null;
         this.hasNeutral = neutralButtonText !== null;
-        this.frDialog = undefined;
-        this.trueButton = undefined;
-        this.falseButton = undefined;
-        this.neutralButton = undefined;
+        this.frDialog = def.variable.undefined;
+        this.trueButton = def.variable.undefined;
+        this.falseButton = def.variable.undefined;
+        this.neutralButton = def.variable.undefined;
         this.parent = document.documentElement;
         this.__create(this);
         this.__append();
@@ -1081,7 +1067,7 @@
     function compatibleWithAdoptedStyleSheets(shadow, css, id) {
       const webkitCompatible = IS_REAL_WEBKIT && parseFloat(brandversion) >= 16.4;
       const blinkCompatible = IS_REAL_BLINK && parseFloat(brandversion) >= 73;
-      const geckoCompatible = IS_REAL_GECKO && parseFloat(brandversion) >= 101 && !IS_GREASEMONKEY && !GMcontextMode;
+      const geckoCompatible = IS_REAL_GECKO && parseFloat(brandversion) >= 101 && !IS_GREASEMONKEY && !GMcontentMode;
       const browserCompatible = webkitCompatible || blinkCompatible || geckoCompatible;
       try {
         if (!IS_CHEAT_UA && shadow.adoptedStyleSheets && browserCompatible) {
@@ -1562,7 +1548,7 @@
         def.array.scaleMatrix.push(1);
       }
       const smooth_i = CONST_VALUES.fontSmooth;
-      const funcSmooth = `font-feature-settings:"zero";font-variant:normal;font-optical-sizing:auto;font-kerning:auto;${
+      const funcSmooth = `font-feature-settings:unset;font-variant:unset;font-optical-sizing:auto;font-kerning:auto;${
         !IS_REAL_GECKO ? "-webkit-font-smoothing:antialiased!important;" : capitalize(os).startsWith("Mac") ? "-moz-osx-font-smoothing:grayscale!important;" : ""
       }`;
       const smoothing = smooth_i ? funcSmooth : "";
@@ -1832,7 +1818,7 @@
               succeeded = "true";
               break;
             default:
-              await sleep(GMcontextMode || IS_GREASEMONKEY ? 5e2 : 50, { useCachedSetTimeout: true });
+              await sleep(GMcontentMode || IS_GREASEMONKEY ? 5e2 : 50, { useCachedSetTimeout: true });
               try {
                 const target = h.document?.head;
                 if (!target) return;
@@ -2005,7 +1991,7 @@
               "font-weight:400"
             );
             _config_data_.rebuild = !order;
-            _config_data_.curVersion = undefined;
+            _config_data_.curVersion = def.variable.undefined;
           } else {
             __console(
               "error",
@@ -2022,7 +2008,7 @@
               isHotkey: true,
               isCloseTip: false,
               rebuild: !order,
-              curVersion: undefined,
+              curVersion: def.variable.undefined,
             };
           }
           curVersion = null;
@@ -2388,11 +2374,12 @@
           let _temp_ = exSite.sort();
           let exSiteLength = _temp_.length;
           for (let i = 0; i < exSiteLength; i++) {
+            const domainName = convertHtmlToText(_temp_[i]);
             listContents += String(
               `<li id="${def.const.seed}_d_d_l_${i}" style="display:flex;overflow:hidden;margin:0;padding:5px;max-width:364px;color:#555555;list-style:none;white-space:nowrap;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,sans-serif!important;justify-content:space-between">` +
                 `<span>${i + 1 > 9 ? i + 1 : "0".concat(i + 1)}. </span>` +
-                `<span style="overflow:hidden;margin-right:auto;padding-left:5px;width:85%;text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all">` +
-                `${convertHtmlToText(_temp_[i])}</span><span>[<a id="${def.const.seed}_d_d_l_s_${i}" data-fr-domain="${convertHtmlToText(_temp_[i])}" ` +
+                `<span style="overflow:hidden;margin-right:auto;padding-left:5px;width:85%;text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all" ` +
+                `title="${domainName}">${domainName}</span><span>[<a id="${def.const.seed}_d_d_l_s_${i}" data-fr-domain="${domainName}" ` +
                 `style="padding:2px;background:transparent;color:#8b0000;font-size:14px!important;cursor:pointer">删除</a>]</span></li>`
             );
           }
@@ -2608,12 +2595,13 @@
               ? `<p style="display:flex;justify-content:left;align-items:center"><input id="${def.const.seed}_d_s_" style="box-sizing:content-box;margin:4px 6px;padding:2px 6px;width:57%;height:22px;outline:none!important;border:2px solid #777777;border-radius:4px;font:normal 400 16px/150% monospace,Courier New,system-ui,-apple-system,BlinkMacSystemFont,serif!important"><button id="${def.const.seed}_d_s_s_" style="box-sizing:border-box;margin:0;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777777;border-radius:4px;background:#eeeeee;color:#333333!important;outline:none!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer">查 询</button><button id="${def.const.seed}_d_s_c_" style="box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777777;border-radius:4px;background:#eeeeee;color:#333333!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer">清 除</button></p>`
               : ``;
           for (let i = 0, l = domainValue.length; i < l; i++) {
+            const domainName = convertHtmlToText(domainValue[i].domain);
             listContents += String(
               `<li id="${def.const.seed}_d_d_l_${i}" style="display:flex;overflow:hidden;margin:0;padding:5px;max-width:364px;color:#555555;list-style:none;` +
                 `white-space:nowrap;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,sans-serif!important;justify-content:space-between">` +
                 `<span>[<a id="${def.const.seed}_d_d_l_s_${i}" style="display:inline;padding:2px;background:transparent;color:#8b0000;font-size:14px!important;` +
                 `cursor:pointer">删除</a>]<span>\u0020${i + 1 > 9 ? i + 1 : "0".concat(i + 1)}.</span></span><span style="overflow:hidden;margin-left:5px;width:57%;` +
-                `text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all">${convertHtmlToText(domainValue[i].domain)}</span>` +
+                `text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all" title="${domainName}">${domainName}</span>` +
                 `<span style="margin:0 5px">${setDateFormat("yyyy-MM-dd", new Date(domainValue[i].fontDate))}</span></li>`
             );
           }
@@ -2997,7 +2985,7 @@
         const base = s ? "var(--fr-font-family),var(--fr-font-basefont)" : "var(--fr-font-basefont)";
         const monoTextShadow = IS_REAL_GECKO ? "" : "text-shadow:var(--fr-mono-shadow)!important;";
         return codeSelector.concat(
-          `{line-height:${CUR_HOST_NAME.endsWith("github.com") ? "inherit" : "150%"}!important;font-size:14px!important;`,
+          `{line-height:${CUR_HOST_NAME.endsWith("github.com") ? "unset" : "150%"}!important;font-size:14px!important;`,
           `-webkit-text-stroke:var(--fr-no-stroke)!important;${monoTextShadow}font-family:var(--fr-mono-font),${base}!important;`,
           `font-feature-settings:var(--fr-mono-feature)!important;${IS_REAL_WEBKIT ? "-webkit-user-select" : "user-select"}:text!important;}${
             CUR_HOST_NAME.endsWith("github.com") ? `${codeSelector}::selection{color:currentcolor!important;background:#71bbff6e!important}` : ``
@@ -3912,10 +3900,10 @@
                         const _data_2 = JSON.parse(decrypt(_rs.db_2));
                         const _data_3 = _rs.db_3 ? JSON.parse(decrypt(_rs.db_3)) : [];
                         const _data_4 = _rs.db_4 ? JSON.parse(decrypt(_rs.db_4)) : [];
-                        const _data_5 = _rs.db_5 ? JSON.parse(decrypt(_rs.db_5)) : undefined;
-                        const _data_6 = _rs.db_6 ? JSON.parse(decrypt(_rs.db_6)) : undefined;
-                        const _data_7 = _rs.db_7 ? JSON.parse(decrypt(_rs.db_7)) : undefined;
-                        const _data_8 = _rs.db_8 ? JSON.parse(decrypt(_rs.db_8)) : undefined;
+                        const _data_5 = _rs.db_5 ? JSON.parse(decrypt(_rs.db_5)) : def.variable.undefined;
+                        const _data_6 = _rs.db_6 ? JSON.parse(decrypt(_rs.db_6)) : def.variable.undefined;
+                        const _data_7 = _rs.db_7 ? JSON.parse(decrypt(_rs.db_7)) : def.variable.undefined;
+                        const _data_8 = _rs.db_8 ? JSON.parse(decrypt(_rs.db_8)) : def.variable.undefined;
                         if (!isNaN(Date.parse(_data_0)) && new Date(_data_0) < new Date() && _data_R.includes(def.variable.scriptAuthor)) {
                           for (let key of await GMlistValues()) GMdeleteValue(key);
                           saveData("_FONTS_SET_", _data_1);
@@ -3927,7 +3915,7 @@
                           _data_8 && saveData("_MONOSPACED_FEATURE_", _data_8);
                           if (_data_5) {
                             _data_5.curVersion = def.variable.curVersion;
-                            _data_5.rebuild = undefined;
+                            _data_5.rebuild = def.variable.undefined;
                             saveData("_CONFIGURE_", _data_5);
                           } else {
                             DEBUG("no configure data");
@@ -4443,11 +4431,7 @@
           const nodes = getSuitableElements(`:not(${def.const.exQueryString})`, node);
           const items = getBoldStyles(nodes);
           for (let i = 0; i < items.length; i++) {
-            const item = items[i].node;
-            const bold = items[i].isbold;
-            const attr = item.classList.contains(def.const.boldAttrName);
-            if (bold && !attr) changeAttribute.add(item);
-            if (!bold && attr) changeAttribute.del(item);
+            boldFixedHandler(items[i]);
           }
         }
 
@@ -4484,6 +4468,15 @@
           }
         }
 
+        function boldFixedHandler(target) {
+          if (!target) return;
+          const bold = target.isbold ?? isBold(target);
+          const item = target.node ?? target;
+          const attr = item.classList.contains(def.const.boldAttrName);
+          if (!attr && bold) changeAttribute.add(item);
+          if (attr && !bold) changeAttribute.del(item);
+        }
+
         function mutationListMonitor(treeNodes, obs) {
           if (!Array.isArray(treeNodes) || !treeNodes.length) return;
           treeNodes.forEach(node => {
@@ -4498,10 +4491,7 @@
                 shadowRootSet.add(item.shadowRoot);
                 mutationListMonitor([item.shadowRoot], obs);
               } else {
-                const bold = isBold(item);
-                const attr = item.classList.contains(def.const.boldAttrName);
-                if (!attr && bold) changeAttribute.add(item);
-                if (attr && !bold) changeAttribute.del(item);
+                boldFixedHandler(item);
               }
             }
           });
@@ -4605,16 +4595,30 @@
           const el = querySelectorAllShadows(`:not(${def.const.exQueryString})`, document);
           const items = getBoldStyles(el);
           for (let i = 0; i < items.length; i++) {
-            const item = items[i];
-            if (item.isbold) changeAttribute.add(item.node);
+            boldFixedHandler(items[i]);
           }
           fixBoldObserver.observe(document, config);
           shadowRootSet.add(document);
           debugOnce(eventType, `detect fontbold.Stroke${IS_IN_FRAMES}:`, { eventType });
         }
 
+        function mouseEventsHandler(target) {
+          if (target.nodeType !== 1 || excludeNodeSet.has(getNodeName(target))) return;
+          target.addEventListener("transitionend", () => boldFixedHandler(target), { once: true });
+          boldFixedHandler(target);
+        }
+
+        function handlingMouseEvents() {
+          const type = event.type;
+          const target = event.target;
+          deBounce({ fn: mouseEventsHandler, delay: def.const.ft, timer: type, immed: type === "mouseout" })(target);
+          event.stopPropagation();
+        }
+
         w.addEventListener("pushState", observeBoldElements);
         w.addEventListener("replaceState", observeBoldElements);
+        document.addEventListener("mouseover", handlingMouseEvents);
+        document.addEventListener("mouseout", handlingMouseEvents);
         observeBoldElements();
       }
 
@@ -4717,8 +4721,8 @@
           isFixViewport = false;
           isHotkey = true;
           isCloseTip = false;
-          rebuild = undefined;
-          curVersion = undefined;
+          rebuild = def.variable.undefined;
+          curVersion = def.variable.undefined;
           globalDisable = false;
           isCustomMono = false;
           _config_data_ = { maxPersonalSites, isBackupFunction, isPreview, isFontsize, isFixViewport, isHotkey, isCloseTip, rebuild, curVersion, globalDisable };

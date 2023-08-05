@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜索引擎跳轉助手
 // @name:ru            скачок поисковой системы
 // @name:ja            優雅な検索エンジンジャンプ助手
-// @version            2023.07.08.1
+// @version            2023.08.05.1
 // @author             F9y4ng
 // @description        "elegant Search Engine Jump Assistant" permet aux utilisateurs de passer facilement d'un moteur de recherche spécifique à un autre; prend en charge la suppression de la redirection des liens, le blocage de la publicité, la détection automatique des mises à jour, etc., compatible avec plus d'une douzaine de moteurs de recherche, tels que Baidu, Google, Bing, Duckduckgo, Yandex, you, etc.
 // @description:en     "Elegant Search Engine Jump Assistant" provides a search experience for users to jump from a specific search engine to another. Support custom common search engines, optimize keyword effect. It also offers removal of search link redirects, blocking of ads in search results and automatic update detection. Compatible with many search engines in the world, such as Baidu, Google, Bing, Duckduckgo, Yandex, You, etc.
@@ -59,7 +59,7 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               新增全局缓存搜索站点ICON图标。\n修正Google搜索结果中地图链接的错误。\n修正一些小问题，优化样式，优化代码。
+// @note               修正在content-context模式下冗余脚本检测的错误。\n修正一些已知问题，优化样式，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -109,7 +109,7 @@
   const GMunregisterMenuCommand = gmSelector("unregisterMenuCommand");
   const GMxmlhttpRequest = gmSelector("xmlhttpRequest");
   const GMunsafeWindow = gmSelector("unsafeWindow");
-  const GMcontextMode = gmSelector("contextMode");
+  const GMcontentMode = gmSelector("contentMode");
 
   /* INITIALIZE_DEBUG_FUNCTIONS */
 
@@ -143,10 +143,10 @@
       scrollbars2: generateRandomString(8, "char"),
     },
     variable: {
+      undefined: void 0,
       refresh: () => location.reload(true),
-      lisence: generateRandomString(64, "attr"),
       feedback: getMetaValue("supportURL") ?? "",
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.06.10.0",
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.08.05.0",
       scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? "SearchEngine Assistant",
     },
     dialog: {
@@ -251,7 +251,7 @@
       unregisterMenuCommand: typeof GM_unregisterMenuCommand !== "undefined" ? GM_unregisterMenuCommand : GM?.unregisterMenuCommand ?? (() => []),
       xmlhttpRequest: typeof GM_xmlhttpRequest !== "undefined" ? GM_xmlhttpRequest : GM?.xmlHttpRequest ?? (xhr => replaceXHR(xhr)),
       unsafeWindow: typeof unsafeWindow !== "undefined" ? unsafeWindow : w,
-      contextMode: GMinfo.injectInto === "content" || GMinfo.script["inject-into"] === "content" || ["dom", "js"].includes(GMinfo.sandboxMode),
+      contentMode: GMinfo.injectInto === "content" || GMinfo.script["inject-into"] === "content" || ["dom", "js"].includes(GMinfo.sandboxMode),
     };
     return gmFunctions[rec] ?? (() => {});
   }
@@ -332,7 +332,7 @@
 
   function qS(expr, target = document) {
     try {
-      if (/^#\w+$/.test(expr)) return target.getElementById(expr.slice(1));
+      if (/^#[\w:-]+$/.test(expr)) return target.getElementById(expr.slice(1));
       return target.querySelector(expr);
     } catch (e) {
       return null;
@@ -437,21 +437,18 @@
   function checkRedundantScript(global) {
     const { isTop: CUR_WINDOW_TOP } = getLocationInfo();
     // PAGE_MODE
-    const redundantScripts = global["gb-init-redundantscripts"];
+    const redundantScripts = global["gb-init-redundantcheck"];
     if (redundantScripts === true) return scriptRedundancyWarning();
-    global["gb-init-redundantscripts"] = true;
-    // CONTEXT_MODE
-    if (storageAvailable("__storage_test__")) {
-      if (GMcontextMode) {
-        let redundantScriptsJSON = JSON.parse(sessionStorage.getItem("gb-init-redundantscripts"));
-        if (redundantScriptsJSON?.check === true && redundantScriptsJSON?.lisence !== def.variable.lisence) {
-          sessionStorage.removeItem("gb-init-redundantscripts");
-          return scriptRedundancyWarning();
-        }
+    global["gb-init-redundantcheck"] = true;
+    // CONTENT_MODE
+    if (GMcontentMode) {
+      const redundantScriptsInfo = document.documentElement?.getAttribute("gb-init-redundantcheck");
+      if (redundantScriptsInfo === "true") {
+        document.documentElement?.removeAttribute("gb-init-redundantcheck");
+        return scriptRedundancyWarning();
       }
-      sessionStorage.setItem("gb-init-redundantscripts", JSON.stringify({ check: true, lisence: def.variable.lisence }));
-      w.addEventListener("beforeunload", () => sessionStorage.removeItem("gb-init-redundantscripts"));
     }
+    document.documentElement?.setAttribute("gb-init-redundantcheck", true);
     return false;
 
     function scriptRedundancyWarning() {
@@ -460,16 +457,6 @@
         GMregisterMenuCommand("\ufff8\ud83d\uded1 Found redundant scripts, reload!", () => location.reload());
       }
       return true;
-    }
-
-    function storageAvailable(v) {
-      try {
-        sessionStorage.setItem(v, v);
-        sessionStorage.removeItem(v);
-        return true;
-      } catch (e) {
-        return false;
-      }
     }
   }
 
@@ -1039,7 +1026,7 @@
         try {
           switch (paraName) {
             case null:
-            case undefined:
+            case def.variable.undefined:
             case "":
               return "";
             case "/":
@@ -2712,7 +2699,7 @@
               });
             }).catch(e => {
               ERROR("AutoUpdate.XHR:", e.message);
-              return { res: undefined, source: undefined };
+              return { res: def.variable.undefined, source: def.variable.undefined };
             });
           }
         },
