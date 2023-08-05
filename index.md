@@ -20,13 +20,12 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2023.07.08.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2023.08.05.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 修正部分站点对按键劫持造成无法正常输入的问题。
-@ 修正在Firefox重置数据时预览效果不生效的问题。
-@ 优化粗体修正功能的执行效率及错误检测能力。
-@ 优化部分函数性能、减低内存及CPU占用。
+@ 优化第三方Emoji字体图标与系统字体图标的优先级。
+@ 修正在content-context模式下冗余脚本检测的错误。
+@ 修复粗体修正功能在:hover样式下无法触发的问题。
 @ 修正一些已知的问题，优化样式，优化代码。
 ```
 
@@ -102,12 +101,11 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2023.07.08.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2023.08.05.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-+ 新增全局缓存搜索站点ICON图标。
-@ 修正Google搜索结果中地图链接的错误。
-@ 修正一些小问题，优化样式，优化代码。
+@ 修正在content-context模式下冗余脚本检测的错误。
+@ 修正一些已知问题，优化样式，优化代码。
 ```
 
 ## 最新功能介绍
