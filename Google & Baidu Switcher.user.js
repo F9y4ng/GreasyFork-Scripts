@@ -3,16 +3,16 @@
 // @name:en            SearchEngine Assistant
 // @name:zh-CN         优雅的搜索引擎跳转助手
 // @name:zh-TW         優雅的搜索引擎跳轉助手
-// @name:ru            скачок поисковой системы
+// @name:ru            помощник поисковой системы
 // @name:ja            優雅な検索エンジンジャンプ助手
-// @version            2023.08.05.1
+// @version            2023.09.02.1
 // @author             F9y4ng
-// @description        "elegant Search Engine Jump Assistant" permet aux utilisateurs de passer facilement d'un moteur de recherche spécifique à un autre; prend en charge la suppression de la redirection des liens, le blocage de la publicité, la détection automatique des mises à jour, etc., compatible avec plus d'une douzaine de moteurs de recherche, tels que Baidu, Google, Bing, Duckduckgo, Yandex, you, etc.
-// @description:en     "Elegant Search Engine Jump Assistant" provides a search experience for users to jump from a specific search engine to another. Support custom common search engines, optimize keyword effect. It also offers removal of search link redirects, blocking of ads in search results and automatic update detection. Compatible with many search engines in the world, such as Baidu, Google, Bing, Duckduckgo, Yandex, You, etc.
-// @description:zh-CN  “优雅的搜索引擎跳转助手”方便用户从特定的搜索引擎跳转到另一个搜索引擎，以实现更优雅的搜索体验；并支持自定义常用搜索引擎、优化搜索结果关键词渲染效果。此外，该脚本还提供了去除搜索链接重定向、屏蔽搜索结果中的广告、可视化搜索参数设置、以及自动更新检测等高级功能，并兼容世界上十多个知名搜索引擎，如Baidu, Google, Bing, Duckduckgo, Yandex, You等。
-// @description:zh-TW  「優雅的搜索引擎跳轉助手」方便用戶從特定的搜索引擎跳轉到另一個搜索引擎，以實現更優雅的搜索體驗；並支持自定義常用搜索引擎、優化搜索結果關鍵詞渲染效果。此外，該腳本還提供了去除搜索鏈接重定向、屏蔽搜索結果中的廣告、可視化搜索參數設置、以及自動更新檢測等高級功能，並兼容世界上十多個知名搜索引擎，如Baidu, Google, Bing, Duckduckgo, Yandex, You等。
-// @description:ru     "скачок поисковой системы" предоставляет пользователям возможность поиска с одной поисковой системы на другую. Поддержка пользовательских общих поисковых систем, оптимизация эффекта ключевых слов. Он также предлагает удаление перенаправлений поисковых ссылок, блокировку рекламы в результатах поиска и автоматическое обнаружение обновлений. Совместим со многими поисковыми системами по всему миру, такими как Baidu, Google, Bing, Duckduckgo, Yandex, You и т. д.
-// @description:ja     “優雅な検索エンジンジャンプ助手”は、ユーザが特定の検索エンジンから別の検索エンジンにジャンプして、より優雅な検索体験を実現することを容易にし、常用検索エンジンをカスタマイズし、検索結果キーワードレンダリング効果を最適化することをサポートする。また，このスクリプトは，検索リンクリダイレクトの除去，検索結果中の広告の隠蔽，可視化検索パラメータ設定，自動更新検出などの高度な機能を提供し，Baidu，Google，Bing，Duckduckgo，Yandex，Youなど世界10以上の有名な検索エンジンと互換性がある.
+// @description        "Elegance moteur de recherche saut Assistant" pour faciliter le saut dans les différents moteurs de recherche; Support des moteurs de recherche personnalisés, mise en évidence des mots clés; Fournit des fonctionnalités avancées telles que la suppression des redirections de liens et le blocage des annonces de recherche ; Compatible avec les moteurs de recherche tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage et Brave.
+// @description:en     "Elegant search engine Jump Assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
+// @description:zh-CN  “优雅的搜索引擎跳转助手”方便用户在不同的搜索引擎之间跳转；支持自定义常用搜索引擎、关键词高亮渲染效果；还提供去除搜索链接重定向、屏蔽搜索结果广告、可视化参数设置、及自动更新检测等高级功能；兼容多个知名搜索引擎，如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Ecosia、You、Startpage、Brave等。
+// @description:zh-TW  「優雅的搜索引擎跳轉助手」方便用戶在不同的搜索引擎之間跳轉；支持自定義常用搜索引擎、關鍵詞高亮渲染效果；還提供去除搜索鏈接重定嚮、屏蔽搜索結果廣告、可視化參數設置、及自動更新檢測等高級功能；兼容多個知名搜索引擎，如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Ecosia、You、Startpage、Brave等。
+// @description:ru     "помощник поисковой системы" облегчает пользователям переход между различными поисковыми системами; поддерживает пользовательские широко используемые поисковые системы и эффекты подсветки ключевых слов; предоставляет расширенные функции, такие как удаление перенаправления поисковых ссылок, блокирование рекламы результатов поиска и т.д.; он совместим с известными поисковыми системами, такими как Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, brave и т.д.
+// @description:ja     “優雅な検索エンジンジャンプアシスタント”は、ユーザが異なる検索エンジン間でジャンプすることを容易にし、カスタム常用検索エンジン、検索キーワードのハイライト効果をサポートし、検索リンクのリダイレクト除去、検索結果広告の遮蔽、可視化パラメータ設定、自動更新検出などの高度な機能を提供し、Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Ecosia、You、Startpage、Braveなどの複数の有名な検索エンジンに対応する。
 // @namespace          https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
 // @icon               https://img.icons8.com/stickers/48/search-in-cloud.png
 // @homepage           https://f9y4ng.github.io/GreasyFork-Scripts/
@@ -59,7 +59,7 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               修正在content-context模式下冗余脚本检测的错误。\n修正一些已知问题，优化样式，优化代码。
+// @note               优化多语言脚本介绍的相关文字。\n修正XHR返回状态非200时的反馈错误。\n修正一些已知问题，优化样式，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -143,10 +143,10 @@
       scrollbars2: generateRandomString(8, "char"),
     },
     variable: {
-      undefined: void 0,
+      undef: void 0,
       refresh: () => location.reload(true),
       feedback: getMetaValue("supportURL") ?? "",
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.08.05.0",
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.09.02.0",
       scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? "SearchEngine Assistant",
     },
     dialog: {
@@ -1026,7 +1026,7 @@
         try {
           switch (paraName) {
             case null:
-            case def.variable.undefined:
+            case def.variable.undef:
             case "":
               return "";
             case "/":
@@ -1095,6 +1095,7 @@
           .catch(e => {
             node.classList.add(def.notice.linkerror);
             node.setAttribute("gd-antiredirect-status", "failed");
+            node.setAttribute("title", `${isChinese ? "此链接似乎已无法正常访问。" : "The link appears to be broken."}`);
             ERROR("antiRedirect_%s: %s %O", name, e.message, { Node: node, Text: node.textContent, URL: node.href });
           });
       }
@@ -1105,7 +1106,7 @@
           headers: { Accept: "*/*", Referer: location.href.replace(/^http:/i, "https:") },
           method: "GET",
           timeout: 3e4,
-          onreadystatechange: readystate(resolve),
+          onreadystatechange: readystate(resolve, reject),
           onerror: error(reject, resolve),
           ontimeout: timeout(reject),
         });
@@ -1122,8 +1123,13 @@
           switch (siteName) {
             case "Baidu":
               getRealUrl(url, node, siteName, {
-                onreadystatechangeFunc: resolve => response => {
-                  if (response.status === 200 && response.readyState === 4) resolve(response.finalUrl || response.responseURL);
+                onreadystatechangeFunc: (resolve, reject) => response => {
+                  if (response.readyState !== 4) return;
+                  if (response.status === 200) {
+                    resolve(response.finalUrl || response.responseURL);
+                  } else {
+                    rejectResponse(response, resolve, reject, url);
+                  }
                 },
                 onerrorFunc: (reject, resolve) => e => {
                   if (e.error?.includes("Request was redirected to a not whitelisted URL")) {
@@ -1141,12 +1147,16 @@
               break;
             case "Bing":
               getRealUrl(url, node, siteName, {
-                onreadystatechangeFunc: resolve => response => {
-                  if (response.status === 200 && response.readyState === 4) {
+                onreadystatechangeFunc: (resolve, reject) => response => {
+                  if (response.readyState !== 4) return;
+                  if (response.status === 200) {
                     const resText = response.responseText || response.response || "";
+                    const resUrl = response.finalUrl || response.responseURL || url;
                     let res = resText.match(/(var\s+u\s*=\s*")([^"]+)("\s*;\s*\r\n)/i);
-                    res = res ? res[2] : response.finalUrl || response.responseURL || null;
+                    res = res ? res[2] : resUrl;
                     resolve(res);
+                  } else {
+                    rejectResponse(response, resolve, reject, url);
                   }
                 },
                 onerrorFunc: reject => () => reject(new Error("URLBroken Error")),
@@ -1155,12 +1165,16 @@
               break;
             case "Sogou":
               getRealUrl(url, node, siteName, {
-                onreadystatechangeFunc: resolve => response => {
-                  if (response.status === 200 && response.readyState === 4) {
+                onreadystatechangeFunc: (resolve, reject) => response => {
+                  if (response.readyState !== 4) return;
+                  if (response.status === 200) {
                     const resText = response.responseText || response.response || "";
+                    const resUrl = response.finalUrl || response.responseURL || url;
                     let res = resText.match(/(URL\s*=\s*')([^']+)(')/);
-                    res = res ? res[2] : response.finalUrl || response.responseURL || null;
+                    res = res ? res[2] : resUrl;
                     resolve(res);
+                  } else {
+                    rejectResponse(response, resolve, reject, url);
                   }
                 },
                 onerrorFunc: reject => () => reject(new Error("URLBroken Error")),
@@ -1173,12 +1187,16 @@
                 node.setAttribute("gd-antiredirect-status", "success");
               } else {
                 getRealUrl(url, node, "So360", {
-                  onreadystatechangeFunc: resolve => response => {
-                    if (response.status === 200 && response.readyState === 4) {
+                  onreadystatechangeFunc: (resolve, reject) => response => {
+                    if (response.readyState !== 4) return;
+                    if (response.status === 200) {
                       const resText = response.responseText || response.response || "";
+                      const resUrl = response.finalUrl || response.responseURL || url;
                       let res = resText.match(/(URL\s*=\s*')([^']+)(')/);
-                      res = res ? res[2] : response.finalUrl || response.responseURL || null;
+                      res = res ? res[2] : resUrl;
                       resolve(res);
+                    } else {
+                      rejectResponse(response, resolve, reject, url);
                     }
                   },
                   onerrorFunc: reject => () => reject(new Error("URLBroken Error")),
@@ -1196,6 +1214,16 @@
               break;
           }
         });
+
+        function rejectResponse(response, resolve, reject, url) {
+          if (/^20[1-8]$/.test(response.status)) resolve(url);
+          const resUrl = response.finalUrl || response.responseURL || url;
+          if (resUrl === url || response.status === 0) {
+            reject(new Error(`ResponseError: ${response.status}`));
+          } else {
+            resolve(resUrl);
+          }
+        }
       }
 
       /* ANTIADS_FUNCTIONS */
@@ -1322,8 +1350,8 @@
             SiteName: "Google",
             SiteNick: isChinese ? "Google 搜索" : "Google.com",
             SiteURI: "www.google.com",
-            WebURL: "https://www.google.com/search?hl=zh-CN&source=hp&safe=off&filter=0&newwindow=1&q=",
-            ImgURL: "https://www.google.com/search?hl=zh-CN&source=lnms&tbm=isch&sa=X&safe=off&filter=0&q=",
+            WebURL: "https://www.google.com/search?source=hp&safe=off&filter=0&newwindow=1&q=",
+            ImgURL: "https://www.google.com/search?source=lnms&tbm=isch&sa=X&safe=off&filter=0&q=",
             IMGType: ["isch"],
             SplitName: "tbm",
             MainType: "form button[type='submit']",
@@ -1518,7 +1546,7 @@
             IMGType: ["images"],
             SplitName: "/",
             MainType: "form[role='search'][class~='search-form'][data-test-id='main-header-search-form']",
-            StyleCode: `#${def.const.rndID}{z-index:1999999995;position:relative;margin-left:-12px;height:40px;display:inline-block}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:40px}#${def.const.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;background:#ffffff;border-top-left-radius:20px;border-bottom-left-radius:20px;cursor:pointer;height:40px;color:#008009;min-width:90px;border:1px solid #bebeb9;box-shadow:0 1px 2px rgba(26,26,26,0.18),0 0 8px rgba(26,26,26,0.06);font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;background:#ffffff;border-top-right-radius:20px;border-bottom-right-radius:20px;cursor:pointer;height:40px;color:#008009;min-width:90px;border:1px solid #bebeb9;box-shadow:0 1px 2px rgba(26,26,26,0.18),0 0 8px rgba(26,26,26,0.06);font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{color:#ffffff;background: #006600;border:1px solid #006600;}`,
+            StyleCode: `#${def.const.rndID}{z-index:1999999995;position:relative;margin-left:-12px;height:40px;display:inline-block}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:40px}#${def.const.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;background:var(--color-background-primary);border-top-left-radius:20px;border-bottom-left-radius:20px;cursor:pointer;height:40px;color:#008009;min-width:90px;border:1px solid #bebeb9;box-shadow:0 1px 2px rgba(26,26,26,0.18),0 0 8px rgba(26,26,26,0.06);font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;background:var(--color-background-primary);border-top-right-radius:20px;border-bottom-right-radius:20px;cursor:pointer;height:40px;color:#008009;min-width:90px;border:1px solid #bebeb9;box-shadow:0 1px 2px rgba(26,26,26,0.18),0 0 8px rgba(26,26,26,0.06);font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{color:#ffffff;background: #006600;border:1px solid #006600;}`,
             KeyStyle: "",
             AntiRedirect: () => {
               deBounce({ fn: addTargetEvent, delay: 5e2, timer: "ecosia_c", immed: false })(
@@ -1722,7 +1750,7 @@
         function getQueryString() {
           let val = "";
           qA(
-            `input[id="kw"][name^="w"],input[name="q"]:not([type="hidden"]),input[name="text"][type="text"],input[name="query"][class$="query"],input[name="keyword"],input[id="search-input"],input[type="search"][class^="input"],#search-box-container input[class~="ant-input"],input#yschsp[name="p"]`
+            `input[id="kw"][name^="w"],input[name="q"]:not([type="hidden"]),input[name="text"][type="text"],input[name="query"][class$="query"],input[name="keyword"],input[id="search-input"],input[type="search"][class^="input"],#search-box-container input[class~="ant-input"],input#yschsp[name="p"],textarea[name="q"]`
           ).forEach((item, index, arr) => {
             val = item.value;
             val && DEBUG("QueryString[INPUT]: %O", { current_keyword: val, input_index: index, previous_keyword: arr[index].value });
@@ -2699,12 +2727,13 @@
               });
             }).catch(e => {
               ERROR("AutoUpdate.XHR:", e.message);
-              return { res: def.variable.undefined, source: def.variable.undefined };
+              return { res: def.variable.undef, source: def.variable.undef };
             });
           }
         },
         async imgUrl => {
           "use strict";
+          if (!CUR_WINDOW_TOP) return;
           return new Promise((resolve, reject) => {
             GMxmlhttpRequest({
               url: imgUrl,
