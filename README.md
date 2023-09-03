@@ -16,7 +16,7 @@
 - 脚本错误、异常请反馈至{[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)}, 字体、渲染样式、乱码问题请反馈至{[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)}。
 - 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2023.09.02.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2023.09.03.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
 + 新增对域名及IP附带端口号的功能支持。
@@ -95,7 +95,7 @@
 
 # 优雅的搜索引擎跳转助手 [`Google & Baidu Switcher.user.js`](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Google%20%26%20Baidu%20Switcher.user.js)
 
-简介：“优雅的搜索引擎跳转助手”方便用户从特定的搜索引擎跳转到另一个搜索引擎，以实现更优雅的搜索体验；并支持自定义常用搜索引擎、优化搜索结果关键词渲染效果。此外，该脚本还提供了去除搜索链接重定向、屏蔽搜索结果中的广告、可视化搜索参数设置、以及自动更新检测等高级功能，并兼容世界上十多个知名搜索引擎，如 Baidu, Google, Bing, Duckduckgo, Yandex, You 等。
+简介：“优雅的搜索引擎跳转助手”方便用户在不同的搜索引擎之间跳转；支持自定义常用搜索引擎、关键词高亮渲染效果；还提供去除搜索链接重定向、屏蔽搜索结果广告、可视化参数设置、及自动更新检测等高级功能；兼容多个知名搜索引擎，如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Ecosia、You、Startpage、Brave等。
 
 - [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B)
 - 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
