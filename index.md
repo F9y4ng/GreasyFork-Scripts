@@ -23,6 +23,8 @@
 ## version 2023.09.03.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
+@ 修正 #252 反馈的脚本冲突问题。
+
 + 新增对域名及IP附带端口号的功能支持。
 @ 修正变更、重置或恢复缩放数据时数组矩阵的Bug。
 @ 修正在某些站点因原生函数被重写覆盖而造成的错误。
