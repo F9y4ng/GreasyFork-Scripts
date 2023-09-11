@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜索引擎跳轉助手
 // @name:ru            помощник поисковой системы
 // @name:ja            優雅な検索エンジンジャンプ助手
-// @version            2023.09.02.1
+// @version            2023.09.11.1
 // @author             F9y4ng
 // @description        "Elegance moteur de recherche saut Assistant" pour faciliter le saut dans les différents moteurs de recherche; Support des moteurs de recherche personnalisés, mise en évidence des mots clés; Fournit des fonctionnalités avancées telles que la suppression des redirections de liens et le blocage des annonces de recherche ; Compatible avec les moteurs de recherche tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage et Brave.
 // @description:en     "Elegant search engine Jump Assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
@@ -59,7 +59,7 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               优化多语言脚本介绍的相关文字。\n修正XHR返回状态非200时的反馈错误。\n修正一些已知问题，优化样式，优化代码。
+// @note               修正Yandex.com搜索按钮的样式错误。\n修正Brave搜索按钮的样式错误。\n修正You.com搜索按钮的样式错误。\n优化Bing.com灰度测试的滚动样式。\n修正一些已知问题，优化样式，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -146,7 +146,7 @@
       undef: void 0,
       refresh: () => location.reload(true),
       feedback: getMetaValue("supportURL") ?? "",
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.09.02.0",
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.09.11.0",
       scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? "SearchEngine Assistant",
     },
     dialog: {
@@ -1373,12 +1373,12 @@
             SiteName: "Bing ®",
             SiteNick: isChinese ? "Bing 搜索" : "Bing.com",
             SiteURI: "www.bing.com",
-            WebURL: "https://www.bing.com/search?q=",
+            WebURL: "https://www.bing.com/search?rdr=1&q=",
             ImgURL: "https://www.bing.com/images/search?first=1&tsc=ImageBasicHover&q=",
             IMGType: ["images"],
             SplitName: "/",
             MainType: `.b_searchboxForm>input[type="hidden"][name="form"]`,
-            StyleCode: `#sw_as{z-index:1051}.scs_c.scs_ini{z-index:1049}#miniheader #miniheader_searchbox #sb_form_q{width:400px}#b_header .b_searchboxForm{z-index:1048}a,#b_results>li a,#b_results .b_no a{color:#001ba0;}#b_results>li a:visited{cololr:#4007a2;}#${def.const.rndID}{z-index:1048;position:relative;display:inline-flex;height:38px;min-width:180px;width:auto;margin:0;padding:0 6px 0 0;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{width:auto;margin:0;padding:0}#${def.const.rndID} input{box-sizing:border-box;cursor:pointer;min-width:90px;height:38px;background-color:#f7faff;border:1px solid #174ae4;color:#174ae4;font-weight:600;font-size:16px}#${def.const.leftButton} input{border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px;}#${def.const.rightButton} input{border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 2px;padding:0 18px 0 12px;}.${def.const.scrollspan}{}.${def.const.scrollbars}{}.${def.const.scrollspan2}{max-height:30px;padding:4px 4px 0 8px!important;margin:0!important;vertical-align:top!important}.${def.const.scrollbars2}{border-radius:4px!important;max-height:30px;padding:0 12px!important;margin-right:0!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#ffffff;transition:border linear .1s,box-shadow linear .3s;box-shadow:0px 0px 4px #174ae4;color:#174ae4;background-color:#f0f3f6;}.${def.notice.random}_input{width:300px!important}`,
+            StyleCode: `#sw_as{z-index:1051}.scs_c.scs_ini{z-index:1049}#miniheader #miniheader_searchbox #sb_form_q{width:400px}#b_header .b_searchboxForm{z-index:1048}a,#b_results>li a,#b_results .b_no a{color:#001ba0;}#b_results>li a:visited{cololr:#4007a2;}#${def.const.rndID}{z-index:1048;position:relative;display:inline-flex;height:38px;min-width:180px;width:auto;margin:0;padding:0 6px 0 0;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{width:auto;margin:0;padding:0}#${def.const.rndID} input{box-sizing:border-box;cursor:pointer;min-width:90px;height:38px;background-color:#f7faff;border:1px solid #174ae4;color:#174ae4;font-weight:600;font-size:16px}#${def.const.leftButton} input{border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px;}#${def.const.rightButton} input{border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 2px;padding:0 18px 0 12px;}.${def.const.scrollspan}{max-height:28px;margin:-13px -3px 0 0!important}.${def.const.scrollbars}{max-height:28px;font-size:14px!important}.${def.const.scrollspan2}{max-height:30px;padding:4px 4px 0 8px!important;margin:0!important;vertical-align:top!important}.${def.const.scrollbars2}{border-radius:4px!important;max-height:30px;padding:0 12px!important;margin-right:0!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#ffffff;transition:border linear .1s,box-shadow linear .3s;box-shadow:0px 0px 4px #174ae4;color:#174ae4;background-color:#f0f3f6;}.${def.notice.random}_input{width:300px!important}`,
             KeyStyle: String(
               // eslint-disable-next-line no-undef
               Number(getUrlParam("ensearch")) || Number(gbCookies.getItem("ENSEARCH")?.match(/\d/)?.[0]) || 0
@@ -1582,8 +1582,8 @@
             ImgURL: "https://you.com/search?fromSearchBar=true&tbm=isch&q=",
             IMGType: ["isch"],
             SplitName: "tbm",
-            MainType: "#section>main>div>div:last-child,#section>main>section~div,#section>main>ul>li~div",
-            StyleCode: `#${def.const.rndID}{z-index:999;position:relative;margin-left:6px;height:46px;display:inline-block}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;height:46px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:46px}#${def.const.leftButton} input{margin:0;padding:1px 10px 1px 20px!important;background-color:#ffffff;border-top-left-radius:100px;border-bottom-left-radius:100px;cursor:pointer;height:46px;color:#4a72f5;min-width:110px;border:1px solid #4a72f5;font-size:17px!important;vertical-align:top;font-weight:600}#${def.const.rightButton} input{margin:0;padding:1px 20px 1px 10px!important;background-color:#ffffff;border-top-right-radius:100px;border-bottom-right-radius:100px;cursor:pointer;height:46px;color:#4a72f5;min-width:110px;border:1px solid #4a72f5;font-size:17px!important;vertical-align:top;font-weight:600}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#4a72f5;color:#ffffff;}`,
+            MainType: "#section>main div[data-testid='STATIC_BOTTOM_BAR']",
+            StyleCode: `#${def.const.rndID}{z-index:999;position:relative;margin-left:6px;height:42px;display:inline-block}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;height:42px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:42px}#${def.const.leftButton} input{margin:2px 0 0 0;padding:1px 10px 1px 20px!important;background-color:#ffffff;border-top-left-radius:100px;border-bottom-left-radius:100px;cursor:pointer;height:40px;color:#4a72f5;min-width:110px;border:1px solid #4a72f5;font-size:17px!important;vertical-align:top;font-weight:600}#${def.const.rightButton} input{margin:2px 0 0 0;padding:1px 20px 1px 10px!important;background-color:#ffffff;border-top-right-radius:100px;border-bottom-right-radius:100px;cursor:pointer;height:40px;color:#4a72f5;min-width:110px;border:1px solid #4a72f5;font-size:17px!important;vertical-align:top;font-weight:600}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#4a72f5;color:#ffffff;}`,
             KeyStyle: `div[data-testid="app-mainline"] p strong,div[data-testid="app-mainline"] p b`,
             AntiRedirect: () => localStorage.setItem("openLinksInNewTabs", true),
             AntiAds: () => deBounce({ fn: antiAds_RemoveNodes, delay: 50, timer: "you", immed: true })(`div[data-testid="extension-button"]`, "You"),
@@ -2345,7 +2345,7 @@
                         } else if (def.const.vim === "products") {
                           qS(buttonID).style.right = `-${width - 60}px`;
                         } else {
-                          qS(buttonID).style.right = `-${width}px`;
+                          qS(buttonID).style.right = `-${width + 10}px`;
                           qS("form.search2") && (qS("form.search2").style.cssText += "padding-right:0px!important");
                           qS("button.input__settings") && (qS(`button.input__settings`).style.right = `-${width + 144}px`);
                           qS(`div.HeaderDesktopActions`) && (qS(`div.HeaderDesktopActions`).style.cssText = `position:relative;right:-${width - 10}px`);
@@ -2391,7 +2391,7 @@
                     qS("#search").parentNode.style.maxWidth = `${630 + (qS(buttonID)?.getBoundingClientRect().width ?? 170)}px`;
                     break;
                   case newSiteType.BRAVE:
-                    Target.parentNode.insertBefore(buttonSection, Target);
+                    insterAfter(buttonSection, Target);
                     qS("div.searchform-container").style.setProperty("--search-form-width", `${700 + (qS(buttonID)?.getBoundingClientRect().width / 2 ?? 80)}px`);
                     qS("#submit-button").addEventListener("mouseover", function () {
                       this.style.cssText = "border-radius:10px;transform:scale(0.9)";
