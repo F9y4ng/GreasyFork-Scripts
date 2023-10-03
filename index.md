@@ -20,14 +20,14 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2023.09.03.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2023.10.03.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 修正 #252 反馈的脚本冲突问题。
-
-+ 新增对域名及IP附带端口号的功能支持。
-@ 修正变更、重置或恢复缩放数据时数组矩阵的Bug。
-@ 修正在某些站点因原生函数被重写覆盖而造成的错误。
++ 新增自定义字体重写设置功能，设置规则请查看Discussions#267[1].
++ 新增站点缩放修正设置功能，字体缩放请查看Discussions#267[2].
+@ 修正自定义等宽字体工具部分参数设置的Bug.Issues#265
+@ 优化字体渲染样式的优先级，提升部分站点渲染准确率。
+@ 完善字体渲染数据备份功能，建议您重新备份数据。
 @ 修正一些已知的问题，优化样式，优化代码。
 ```
 
@@ -40,7 +40,7 @@
 
 ## 关于脚本加载延迟的处理办法
 
-**升级至TM4.19.0、VM2.14.0正式版后如出现脚本加载延迟、或未正确加载样式的临时处理办法：**
+**如出现脚本加载延迟、或未正确加载样式的临时处理办法：**
 
 * 针对**Tampermonkey**：进入**管理面板**，进入**设置**标签页，下拉至“**实验**”，将注入模式改为“**即时**”。
 * 针对**Violentmonkey**：进入**控制台界面**，进入**设置**标签页，在**高级-通用**中找到并勾选“**同步 page 模式**”。
@@ -103,13 +103,11 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2023.09.11.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2023.10.03.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ 修正Yandex.com搜索按钮的样式错误。
-@ 修正Brave搜索按钮的样式错误。
-@ 修正You.com搜索按钮的样式错误。
-@ 优化Bing.com灰度测试的滚动样式。
+@ 优化并发XHR，减少因超时造成的阻塞。
+@ 优化Bing.com全球版本按钮滚动样式。
 @ 修正一些已知问题，优化样式，优化代码。
 ```
 
