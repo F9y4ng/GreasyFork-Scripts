@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜索引擎跳轉助手
 // @name:ru            помощник поисковой системы
 // @name:ja            優雅な検索エンジンジャンプ助手
-// @version            2023.09.11.1
+// @version            2023.10.03.1
 // @author             F9y4ng
 // @description        "Elegance moteur de recherche saut Assistant" pour faciliter le saut dans les différents moteurs de recherche; Support des moteurs de recherche personnalisés, mise en évidence des mots clés; Fournit des fonctionnalités avancées telles que la suppression des redirections de liens et le blocage des annonces de recherche ; Compatible avec les moteurs de recherche tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage et Brave.
 // @description:en     "Elegant search engine Jump Assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
@@ -59,7 +59,7 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               修正Yandex.com搜索按钮的样式错误。\n修正Brave搜索按钮的样式错误。\n修正You.com搜索按钮的样式错误。\n优化Bing.com灰度测试的滚动样式。\n修正一些已知问题，优化样式，优化代码。
+// @note               优化并发减少因超时造成的阻塞。\n优化Bing.com全球版本按钮滚动样式。\n修正一些已知问题，优化样式，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -146,7 +146,7 @@
       undef: void 0,
       refresh: () => location.reload(true),
       feedback: getMetaValue("supportURL") ?? "",
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.09.11.0",
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.10.03.0",
       scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? "SearchEngine Assistant",
     },
     dialog: {
@@ -351,7 +351,7 @@
     return document.createElement(nodeName);
   }
 
-  function gS(target, value = null, opt = null) {
+  function gCS(target, value = null, opt = null) {
     if (value) {
       return w.getComputedStyle(target, opt).getPropertyValue(value);
     } else {
@@ -442,13 +442,10 @@
     global["gb-init-redundantcheck"] = true;
     // CONTENT_MODE
     if (GMcontentMode) {
-      const redundantScriptsInfo = document.documentElement?.getAttribute("gb-init-redundantcheck");
-      if (redundantScriptsInfo === "true") {
-        document.documentElement?.removeAttribute("gb-init-redundantcheck");
-        return scriptRedundancyWarning();
-      }
+      const redundantScriptsInfo = document.documentElement?.getAttribute("gb-init-rc");
+      if (redundantScriptsInfo === "true") return scriptRedundancyWarning();
     }
-    document.documentElement?.setAttribute("gb-init-redundantcheck", true);
+    document.documentElement?.setAttribute("gb-init-rc", true);
     return false;
 
     function scriptRedundancyWarning() {
@@ -462,31 +459,14 @@
 
   function getNavigatorInfo() {
     const certificate = `${GMscriptHandler} ${GMversion}`;
-    const vmuad = (uad => {
-      if (!uad) return;
-      const archs = uad.arch?.split("-") ?? [];
-      return {
-        brands: [{ brand: capitalize(uad.browserName), version: uad.browserVersion }],
-        platform: capitalize(uad.os),
-        bitness: archs[1] ?? "unknown",
-        architecture: archs[0] ?? "unknown",
-        credit: certificate,
-      };
-    })(GMinfo.platform);
-    const tmuad = (uad => {
-      if (!uad) return;
-      uad.credit = certificate;
-      return uad;
-    })(GMinfo.userAgentData);
-    const uad = vmuad ?? tmuad ?? navigator.userAgentData;
-    const trustengine = w.webkitRequestFileSystem ? "Blink" : !isNaN(parseFloat(w.mozInnerScreenX)) ? "Gecko" : w.GestureEvent ? "WebKit" : "Unknown";
+    const uad = getUserAgentDataFromExtension(certificate);
+    const trustengine = getRealBrowserEngine();
     let engine = "Unknown";
     let brand = "Unknown";
     let brandversion = "0.00";
     if (uad) {
       const os = capitalize(uad.platform);
       const brandMap = {
-        IE: { engine: "Trident", brand: "IE" },
         SAFARI: { engine: "WebKit", brand: "Safari" },
         FIREFOX: { engine: "Gecko", brand: "Firefox" },
         EDGE: { engine: "Blink", brand: "Edge" },
@@ -497,7 +477,7 @@
         "MICROSOFT EDGE": { engine: "Blink", brand: "Edge" },
         "GOOGLE CHROME": { engine: "Blink", brand: "Chrome" },
       };
-      uad.brands.some(b => {
+      uad.brands.FRsome(b => {
         const reqBrand = b.brand.toUpperCase();
         const brandInfo = brandMap[reqBrand];
         if (brandInfo) {
@@ -514,74 +494,78 @@
       return { engine, brand, brandversion, os, "trust-engine": trustengine, credit: uad.credit ?? null };
     } else {
       const ua = navigator.userAgent;
-      let nameOffset, verOffset, ix;
-      if ((verOffset = ua.indexOf("OPR")) !== -1) {
-        brand = "Opera";
-        engine = "Blink";
-        brandversion = ua.substring(verOffset + 4);
-        if ((verOffset = ua.indexOf("Version")) !== -1) brandversion = ua.substring(verOffset + 8);
-      } else if ((verOffset = ua.indexOf("UBrowser")) !== -1) {
-        brand = "UCBrowser";
-        engine = "Blink";
-        brandversion = ua.substring(verOffset + 9);
-      } else if ((verOffset = ua.indexOf("YaBrowser")) !== -1) {
-        brand = "Yandex";
-        engine = "Blink";
-        brandversion = ua.substring(verOffset + 10);
-      } else if ((verOffset = ua.indexOf("Brave")) !== -1) {
-        brand = "Brave";
-        engine = "Blink";
-        brandversion = ua.substring(verOffset + 6);
-      } else if ((verOffset = ua.indexOf("Edg")) !== -1) {
-        brand = "Edge";
-        engine = "Blink";
-        brandversion = ua.substring(verOffset + 4);
-      } else if ((verOffset = ua.indexOf("Chromium")) !== -1) {
-        brand = "Chromium";
-        engine = "Blink";
-        brandversion = ua.substring(verOffset + 9);
-      } else if ((verOffset = ua.indexOf("Maxthon")) !== -1) {
-        brand = "Maxthon";
-        engine = "Blink";
-        brandversion = ua.substring(verOffset + 8);
-      } else if ((verOffset = ua.indexOf("Chrome")) !== -1) {
-        brand = "Chrome";
-        engine = "Blink";
-        brandversion = ua.substring(verOffset + 7);
-      } else if ((verOffset = ua.indexOf("Safari")) !== -1) {
-        brand = "Safari";
-        engine = "WebKit";
-        brandversion = ua.substring(verOffset + 7);
-        if ((verOffset = ua.indexOf("Version")) !== -1) brandversion = ua.substring(verOffset + 8);
-      } else if ((verOffset = ua.indexOf("Waterfox")) !== -1) {
-        brand = "Waterfox";
-        engine = "Gecko";
-        brandversion = ua.substring(verOffset + 9);
-      } else if ((verOffset = ua.indexOf("Firefox")) !== -1) {
-        brand = "Firefox";
-        engine = "Gecko";
-        brandversion = ua.substring(verOffset + 8);
-      } else if ((verOffset = ua.indexOf("Trident")) !== -1) {
-        brand = "IE";
-        engine = "Trident";
-        brandversion = String(parseFloat(ua.substring(ua.indexOf("MSIE") + 5)) || parseFloat(ua.substring(ua.indexOf("rv") + 3)));
-      } else if ((nameOffset = ua.lastIndexOf(" ") + 1) < (verOffset = ua.lastIndexOf("/"))) {
-        brand = ua.substring(nameOffset, verOffset);
-        engine = trustengine;
-        brandversion = ua.substring(verOffset + 1);
-        if (brand.toLowerCase() === brand.toUpperCase()) {
-          brand = navigator.appName;
+      const checkString = str => ua.indexOf(str) !== -1;
+      const getVersion = (str, offset) => (ua.indexOf(str) !== -1 ? ua.substring(ua.indexOf(str) + offset).match(/\d+(\.\d+)*/)?.[0] : null);
+      const { brand, engine, brandversion } = getBrowserInfoFromUA(ua, checkString, getVersion);
+      const os = getOSInfoFromUA(checkString);
+      return { engine, brand, brandversion, os, "trust-engine": trustengine, credit: null };
+    }
+
+    function getUserAgentDataFromExtension(cert) {
+      const vmuad = (uad => {
+        if (!uad) return;
+        const archs = uad.arch?.split("-") ?? [];
+        const brand = capitalize(uad.browserBrand || uad.browserName); // at least need VM2.15.7+ or released version.
+        return {
+          brands: [{ brand, version: uad.browserVersion }],
+          platform: capitalize(uad.os),
+          bitness: archs[1] ?? "unknown",
+          architecture: archs[0] ?? "unknown",
+          credit: cert,
+        };
+      })(GMinfo.platform);
+      const tmuad = (uad => {
+        if (!uad) return;
+        uad.credit = cert;
+        return uad;
+      })(GMinfo.userAgentData);
+      return vmuad ?? tmuad ?? navigator.userAgentData;
+    }
+
+    function getRealBrowserEngine() {
+      return w.webkitRequestFileSystem ? "Blink" : !isNaN(parseFloat(w.mozInnerScreenX)) ? "Gecko" : w.GestureEvent ? "WebKit" : "Unknown";
+    }
+
+    function getBrowserInfoFromUA(ua, checkString, getVersion) {
+      const brandMap = {
+        OPR: { brand: "Opera", engine: "Blink", offset: 7, as: "Chrome" },
+        QQBrowser: { brand: "QQBrowser", engine: "Blink", offset: 7, as: "Chrome" },
+        YaBrowser: { brand: "Yandex", engine: "Blink", offset: 7, as: "Chrome" },
+        Brave: { brand: "Brave", engine: "Blink", offset: 6 },
+        Edg: { brand: "Edge", engine: "Blink", offset: 4 },
+        Maxthon: { brand: "Maxthon", engine: "Blink", offset: 7, as: "Chrome" },
+        Chromium: { brand: "Chromium", engine: "Blink", offset: 9 },
+        Chrome: { brand: "Chrome", engine: "Blink", offset: 7 },
+        Safari: { brand: "Safari", engine: "WebKit", offset: getVersion("Version", 8), overwrite: true },
+        Waterfox: { brand: "Waterfox", engine: "Gecko", offset: 9 },
+        PaleMoon: { brand: "PaleMoon", engine: "Gecko", offset: 8, as: "Firefox" },
+        Firefox: { brand: "Firefox", engine: "Gecko", offset: 8 },
+        Trident: { brand: "IE", engine: "Trident", offset: getVersion("MSIE", 5) || getVersion("rv", 3), overwrite: true },
+      };
+      for (const [key, value] of Object.entries(brandMap)) {
+        if (checkString(key)) {
+          const { brand: _brand, engine, offset, overwrite, as } = value;
+          const _brandversion = overwrite ? offset : getVersion(as ?? key, offset);
+          return { brand: _brandversion ? _brand : brand, engine, brandversion: _brandversion ?? brandversion };
         }
       }
-      if ((ix = brandversion.indexOf(";")) !== -1) brandversion = brandversion.substring(0, ix);
-      if ((ix = brandversion.indexOf(" ")) !== -1) brandversion = brandversion.substring(0, ix);
+      const nameOffset = ua.lastIndexOf(" ") + 1;
+      const verOffset = ua.lastIndexOf("/");
+      const _brand = ua.substring(nameOffset, verOffset);
+      const _brandversion = ua.substring(verOffset + 1);
+      const isValidValue = _brand.indexOf(";") !== -1 || _brand.indexOf("/") !== -1;
+      return { brand: isValidValue ? brand : _brand, engine: trustengine, brandversion: isValidValue ? brandversion : _brandversion };
+    }
+
+    function getOSInfoFromUA(checkString) {
       let os = "Unknown";
-      if (ua.indexOf("Win") !== -1) os = "Windows";
-      if (ua.indexOf("Mac") !== -1) os = "MacOS";
-      if (ua.indexOf("Linux") !== -1) os = "Linux";
-      if (ua.indexOf("Android") !== -1) os = "Android";
-      if (ua.indexOf("like Mac") !== -1) os = "iOS";
-      return { engine, brand, brandversion, os, "trust-engine": trustengine, credit: null };
+      const platforms = ["Win", "Mac", "Linux", "CrOS", "Debian", "Ubuntu", "Android", "like Mac"];
+      for (let i = 0; i < platforms.length; i++) {
+        const platform = platforms[i];
+        if (!checkString(platform)) continue;
+        os = platform === "like Mac" ? "iOS" : platform;
+      }
+      return os;
     }
   }
 
@@ -1112,81 +1096,93 @@
         });
       }
 
+      function parallelTasks(tasks, maxCount = 3) {
+        return new Promise(resolve => {
+          if (tasks.length === 0) {
+            DEBUG("No Task!");
+            resolve();
+            return;
+          }
+          let currentIndex = 0;
+          let finishedCount = 0;
+          for (let i = 0; i < maxCount && i < tasks.length; i++) {
+            doTask();
+          }
+
+          function doTask() {
+            const task = tasks[currentIndex];
+            currentIndex++;
+            task().then(() => {
+              finishedCount++;
+              if (currentIndex < tasks.length) {
+                doTask();
+              } else if (finishedCount === tasks.length) {
+                DEBUG("Task done!");
+                resolve();
+              }
+            });
+          }
+        });
+      }
+
       function antiRedirectFunc(str, siteName) {
         const requestNodes = qA(str);
         if (!requestNodes.length) return;
         COUNT(`[${siteName}-Anti-Redirect]`);
+        let task;
+        const taskList = [];
         requestNodes.forEach(node => {
           node.setAttribute("gd-antiredirect-status", "pending");
           const url = node.href.replace(/^http:/i, "https:");
           if (!url) return;
           switch (siteName) {
             case "Baidu":
-              getRealUrl(url, node, siteName, {
-                onreadystatechangeFunc: (resolve, reject) => response => {
-                  if (response.readyState !== 4) return;
-                  if (response.status === 200) {
-                    resolve(response.finalUrl || response.responseURL);
-                  } else {
-                    rejectResponse(response, resolve, reject, url);
-                  }
-                },
-                onerrorFunc: (reject, resolve) => e => {
-                  if (e.error?.includes("Request was redirected to a not whitelisted URL")) {
-                    const realUrl = e.error?.toString().match(/Refused to connect to "([^"]*)"/)[1];
-                    if (!realUrl || realUrl.includes("www.baidu.com/search/error")) reject(new Error("URLNotExistError"));
-                    resolve(realUrl);
-                  } else if (e.responseHeaders?.match(/Location:\s*([\S]+)/)) {
-                    resolve(e.responseHeaders?.match(/Location:\s*([\S]+)/)[1]);
-                  } else {
-                    reject(new Error("URLBrokenError"));
-                  }
-                },
-                ontimeoutFunc: reject => () => reject(new Error("Timeout Error")),
-              });
+              task = () =>
+                getRealUrl(url, node, siteName, {
+                  onreadystatechangeFunc: (resolve, reject) => response => {
+                    if (response.readyState !== 4) return;
+                    if (response.status === 200) {
+                      resolve(response.finalUrl || response.responseURL);
+                    } else {
+                      rejectResponse(response, resolve, reject, url);
+                    }
+                  },
+                  onerrorFunc: (reject, resolve) => e => {
+                    if (e.error?.includes("Request was redirected to a not whitelisted URL")) {
+                      const realUrl = e.error?.toString().match(/Refused to connect to "([^"]*)"/)[1];
+                      if (!realUrl || realUrl.includes("www.baidu.com/search/error")) reject(new Error("URLNotExistError"));
+                      resolve(realUrl);
+                    } else if (e.responseHeaders?.match(/Location:\s*([\S]+)/)) {
+                      resolve(e.responseHeaders?.match(/Location:\s*([\S]+)/)[1]);
+                    } else {
+                      reject(new Error("URLBrokenError"));
+                    }
+                  },
+                  ontimeoutFunc: reject => () => reject(new Error("Timeout Error")),
+                });
               break;
             case "Bing":
-              getRealUrl(url, node, siteName, {
-                onreadystatechangeFunc: (resolve, reject) => response => {
-                  if (response.readyState !== 4) return;
-                  if (response.status === 200) {
-                    const resText = response.responseText || response.response || "";
-                    const resUrl = response.finalUrl || response.responseURL || url;
-                    let res = resText.match(/(var\s+u\s*=\s*")([^"]+)("\s*;\s*\r\n)/i);
-                    res = res ? res[2] : resUrl;
-                    resolve(res);
-                  } else {
-                    rejectResponse(response, resolve, reject, url);
-                  }
-                },
-                onerrorFunc: reject => () => reject(new Error("URLBroken Error")),
-                ontimeoutFunc: reject => () => reject(new Error("Timeout Error")),
-              });
+              task = () =>
+                getRealUrl(url, node, siteName, {
+                  onreadystatechangeFunc: (resolve, reject) => response => {
+                    if (response.readyState !== 4) return;
+                    if (response.status === 200) {
+                      const resText = response.responseText || response.response || "";
+                      const resUrl = response.finalUrl || response.responseURL || url;
+                      let res = resText.match(/(var\s+u\s*=\s*")([^"]+)("\s*;\s*\r\n)/i);
+                      res = res ? res[2] : resUrl;
+                      resolve(res);
+                    } else {
+                      rejectResponse(response, resolve, reject, url);
+                    }
+                  },
+                  onerrorFunc: reject => () => reject(new Error("URLBroken Error")),
+                  ontimeoutFunc: reject => () => reject(new Error("Timeout Error")),
+                });
               break;
             case "Sogou":
-              getRealUrl(url, node, siteName, {
-                onreadystatechangeFunc: (resolve, reject) => response => {
-                  if (response.readyState !== 4) return;
-                  if (response.status === 200) {
-                    const resText = response.responseText || response.response || "";
-                    const resUrl = response.finalUrl || response.responseURL || url;
-                    let res = resText.match(/(URL\s*=\s*')([^']+)(')/);
-                    res = res ? res[2] : resUrl;
-                    resolve(res);
-                  } else {
-                    rejectResponse(response, resolve, reject, url);
-                  }
-                },
-                onerrorFunc: reject => () => reject(new Error("URLBroken Error")),
-                ontimeoutFunc: reject => () => reject(new Error("Timeout Error")),
-              });
-              break;
-            case "So360":
-              if (node.getAttribute("data-mdurl")) {
-                node.href = node.dataset.mdurl;
-                node.setAttribute("gd-antiredirect-status", "success");
-              } else {
-                getRealUrl(url, node, "So360", {
+              task = () =>
+                getRealUrl(url, node, siteName, {
                   onreadystatechangeFunc: (resolve, reject) => response => {
                     if (response.readyState !== 4) return;
                     if (response.status === 200) {
@@ -1202,6 +1198,29 @@
                   onerrorFunc: reject => () => reject(new Error("URLBroken Error")),
                   ontimeoutFunc: reject => () => reject(new Error("Timeout Error")),
                 });
+              break;
+            case "So360":
+              if (node.getAttribute("data-mdurl")) {
+                node.href = node.dataset.mdurl;
+                node.setAttribute("gd-antiredirect-status", "success");
+              } else {
+                task = () =>
+                  getRealUrl(url, node, "So360", {
+                    onreadystatechangeFunc: (resolve, reject) => response => {
+                      if (response.readyState !== 4) return;
+                      if (response.status === 200) {
+                        const resText = response.responseText || response.response || "";
+                        const resUrl = response.finalUrl || response.responseURL || url;
+                        let res = resText.match(/(URL\s*=\s*')([^']+)(')/);
+                        res = res ? res[2] : resUrl;
+                        resolve(res);
+                      } else {
+                        rejectResponse(response, resolve, reject, url);
+                      }
+                    },
+                    onerrorFunc: reject => () => reject(new Error("URLBroken Error")),
+                    ontimeoutFunc: reject => () => reject(new Error("Timeout Error")),
+                  });
               }
               break;
             case "Toutiao":
@@ -1213,7 +1232,10 @@
               }
               break;
           }
+          task && taskList.push(task);
         });
+
+        parallelTasks(taskList, 6);
 
         function rejectResponse(response, resolve, reject, url) {
           if (/^20[1-8]$/.test(response.status)) resolve(url);
@@ -1275,7 +1297,7 @@
               qA("li.serp-item.serp-item_card").forEach(node => {
                 const ads_Detect = qS("div.Organic-Subtitle>span.LabelDirect", node);
                 const ads_Detect_II = qS("span.LabelDirect.DirectLabel", node);
-                const styleState = ads_Detect_II && gS(ads_Detect_II, "background-image");
+                const styleState = ads_Detect_II && gCS(ads_Detect_II, "background-image");
                 if (
                   ads_Detect?.textContent?.includes("\u0420\u0435\u043a\u043b\u0430\u043c\u0430") ||
                   ads_Detect?.textContent?.toLowerCase().includes("ad") ||
@@ -1378,7 +1400,7 @@
             IMGType: ["images"],
             SplitName: "/",
             MainType: `.b_searchboxForm>input[type="hidden"][name="form"]`,
-            StyleCode: `#sw_as{z-index:1051}.scs_c.scs_ini{z-index:1049}#miniheader #miniheader_searchbox #sb_form_q{width:400px}#b_header .b_searchboxForm{z-index:1048}a,#b_results>li a,#b_results .b_no a{color:#001ba0;}#b_results>li a:visited{cololr:#4007a2;}#${def.const.rndID}{z-index:1048;position:relative;display:inline-flex;height:38px;min-width:180px;width:auto;margin:0;padding:0 6px 0 0;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{width:auto;margin:0;padding:0}#${def.const.rndID} input{box-sizing:border-box;cursor:pointer;min-width:90px;height:38px;background-color:#f7faff;border:1px solid #174ae4;color:#174ae4;font-weight:600;font-size:16px}#${def.const.leftButton} input{border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px;}#${def.const.rightButton} input{border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 2px;padding:0 18px 0 12px;}.${def.const.scrollspan}{max-height:28px;margin:-13px -3px 0 0!important}.${def.const.scrollbars}{max-height:28px;font-size:14px!important}.${def.const.scrollspan2}{max-height:30px;padding:4px 4px 0 8px!important;margin:0!important;vertical-align:top!important}.${def.const.scrollbars2}{border-radius:4px!important;max-height:30px;padding:0 12px!important;margin-right:0!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#ffffff;transition:border linear .1s,box-shadow linear .3s;box-shadow:0px 0px 4px #174ae4;color:#174ae4;background-color:#f0f3f6;}.${def.notice.random}_input{width:300px!important}`,
+            StyleCode: `#sw_as{z-index:1051}.scs_c.scs_ini{z-index:1049}#miniheader #miniheader_searchbox #sb_form_q{width:400px}#b_header .b_searchboxForm{z-index:1048}a,#b_results>li a,#b_results .b_no a{color:#001ba0;}#b_results>li a:visited{cololr:#4007a2;}#${def.const.rndID}{z-index:1048;position:relative;display:inline-flex;height:38px;min-width:180px;width:auto;margin:0;padding:0 6px 0 0;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{width:auto;margin:0;padding:0}#${def.const.rndID} input{box-sizing:border-box;cursor:pointer;min-width:90px;height:38px;background-color:#f7faff;border:1px solid #174ae4;color:#174ae4;font-weight:600;font-size:16px}#${def.const.leftButton} input{border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px;}#${def.const.rightButton} input{border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 2px;padding:0 18px 0 12px;}.${def.const.scrollspan}{max-height:28px;margin:-14px -3px 0 0!important}.${def.const.scrollbars}{max-height:28px;font-size:14px!important}.${def.const.scrollspan2}{max-height:30px;padding:4px 4px 0 8px!important;margin:0!important;vertical-align:top!important}.${def.const.scrollbars2}{border-radius:4px!important;max-height:30px;padding:0 12px!important;margin-right:0!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#ffffff;transition:border linear .1s,box-shadow linear .3s;box-shadow:0px 0px 4px #174ae4;color:#174ae4;background-color:#f0f3f6;}.${def.notice.random}_input{width:300px!important}`,
             KeyStyle: String(
               // eslint-disable-next-line no-undef
               Number(getUrlParam("ensearch")) || Number(gbCookies.getItem("ENSEARCH")?.match(/\d/)?.[0]) || 0
