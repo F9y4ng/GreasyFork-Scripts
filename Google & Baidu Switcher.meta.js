@@ -5,7 +5,7 @@
 // @name:zh-TW   優雅的搜索引擎跳轉助手
 // @name:ru      скачок поисковой системы
 // @name:ja      優雅な検索エンジンジャンプ助手
-// @version      2023.10.03.1
+// @version      2023.10.03.2
 // @author       F9y4ng
 // @description  "Elegant search engine Jump Assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
 // @namespace    https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)

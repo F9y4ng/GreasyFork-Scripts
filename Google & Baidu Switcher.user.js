@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜索引擎跳轉助手
 // @name:ru            помощник поисковой системы
 // @name:ja            優雅な検索エンジンジャンプ助手
-// @version            2023.10.03.1
+// @version            2023.10.03.2
 // @author             F9y4ng
 // @description        "Elegance moteur de recherche saut Assistant" pour faciliter le saut dans les différents moteurs de recherche; Support des moteurs de recherche personnalisés, mise en évidence des mots clés; Fournit des fonctionnalités avancées telles que la suppression des redirections de liens et le blocage des annonces de recherche ; Compatible avec les moteurs de recherche tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage et Brave.
 // @description:en     "Elegant search engine Jump Assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
@@ -477,7 +477,7 @@
         "MICROSOFT EDGE": { engine: "Blink", brand: "Edge" },
         "GOOGLE CHROME": { engine: "Blink", brand: "Chrome" },
       };
-      uad.brands.FRsome(b => {
+      uad.brands.some(b => {
         const reqBrand = b.brand.toUpperCase();
         const brandInfo = brandMap[reqBrand];
         if (brandInfo) {
