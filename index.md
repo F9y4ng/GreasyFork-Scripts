@@ -131,10 +131,10 @@
 
 简介：自动关闭知乎登录提示，仅仅用于关闭自动弹出的登录提示，不干别的，未来也不会去干别的。
 
-## version 2023.09.02.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
+## version 2023.10.05.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
 
 ```log
-@ 针对中低端配置优化代码执行效率，提升性能。
+@ 针对高配置电脑进行优化，减少弹窗判断错误。
 ```
 
 ## 重要说明
