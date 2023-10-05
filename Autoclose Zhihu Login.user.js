@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         自动关闭知乎登录提示
-// @version      2023.09.02.1
+// @version      2023.10.05.1
 // @author       F9y4ng
 // @description  自动关闭知乎自动弹出的登录与注册提示，仅仅用于关闭自动弹出的登录提示，不干别的，未来也不会去干别的。
 // @namespace    https://github.com/F9y4ng/GreasyFork-Scripts/
@@ -31,14 +31,7 @@
   const observer = new MutationObserver(hiddenLogin);
   const config = { childList: true, subtree: true };
   observer.observe(document, config);
-  document.addEventListener("readystatechange", checkNoLogin);
-
-  function checkNoLogin() {
-    if (document.readyState === "complete") {
-      if (nologin) nologin = false;
-      document.removeEventListener("readystatechange", checkNoLogin);
-    }
-  }
+  window.addEventListener("load", () => (nologin = false));
 
   function hiddenLoginNode(node) {
     if (!nologin) return;
@@ -57,7 +50,6 @@
   }
 
   function hiddenLogin(mutationsList, observer) {
-    observer.disconnect();
     for (let i = 0; i < mutationsList.length; i++) {
       const mutation = mutationsList[i];
       const type = mutation.type;
@@ -70,6 +62,5 @@
         hiddenFloatNode(node);
       }
     }
-    observer.observe(document, config);
   }
 })();
