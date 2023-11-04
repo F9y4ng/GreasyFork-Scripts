@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜索引擎跳轉助手
 // @name:ru            помощник поисковой системы
 // @name:ja            優雅な検索エンジンジャンプ助手
-// @version            2023.10.03.2
+// @version            2023.11.04.1
 // @author             F9y4ng
 // @description        "Elegance moteur de recherche saut Assistant" pour faciliter le saut dans les différents moteurs de recherche; Support des moteurs de recherche personnalisés, mise en évidence des mots clés; Fournit des fonctionnalités avancées telles que la suppression des redirections de liens et le blocage des annonces de recherche ; Compatible avec les moteurs de recherche tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage et Brave.
 // @description:en     "Elegant search engine Jump Assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
@@ -20,12 +20,11 @@
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.meta.js
 // @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js
-// @require            https://greasyfork.org/scripts/460897/code/gbCookies.js?version=1155350#sha256-tPcmrrZrxDx4nZQVrx2fQzJjAlMmScX0yFSaT3/T/Ss=
+// @require            https://greasyfork.org/scripts/460897/code/gbCookies.js?version=1274713#sha256-+GmV4fURu7LOOqIUoK6+Sm4tirTZ/JpO7sIOxvmqsTo=
 // @match              *://www.baidu.com/*
+// @match              *://image.baidu.com/search*
 // @match              *://kaifa.baidu.com/searchPage*
-// @match              *://ipv6.baidu.com/*
-// @match              *://image.baidu.com/*
-// @match              *://*.bing.com/*
+// @match              *://*.bing.com/*search*
 // @match              *://duckduckgo.com/*
 // @match              *://*.sogou.com/*
 // @match              *://fsoufsou.com/search*
@@ -35,11 +34,12 @@
 // @match              *://yandex.com/*search*
 // @match              *://yandex.ru/*search*
 // @match              *://www.ecosia.org/*
-// @match              *://search.yahoo.com/search*
-// @match              *://images.search.yahoo.com/search/images*
-// @match              *://*.you.com/search*
+// @match              *://*.search.yahoo.com/search*
+// @match              *://you.com/search*
 // @match              *://www.startpage.com/*
 // @match              *://search.brave.com/*
+// @match              *://yep.com/*
+// @match              *://swisscows.com/*
 // @include            *://*.google.*/search*
 // @exclude            *://www.google.com/sorry*
 // @exclude            *://www.baidu.com/link*
@@ -59,7 +59,7 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               优化并发减少因超时造成的阻塞。\n优化Bing.com全球版本按钮滚动样式。\n修正一些已知问题，优化样式，优化代码。
+// @note               新增Yep、Swisscows隐私保护搜索引擎。\n优化搜索结果重定向链接的解析效率。\n适配可自动夜间模式搜索引擎按钮样式。\n优化脚本更新检测机制及升级体验。\n优化通过UA获取浏览器信息的方法。\n修正You.com的跳转按钮的样式Bug.\n修正一些已知问题，优化样式，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -73,6 +73,7 @@
 // @grant              GM_registerMenuCommand
 // @grant              GM.registerMenuCommand
 // @grant              GM_unregisterMenuCommand
+// @grant              GM.unregisterMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
 // @license            GPL-3.0-only
@@ -83,9 +84,9 @@
 
 /* jshint esversion: 11 */
 
-~(function (w) {
-  "use strict";
+"use strict";
 
+~(function (w) {
   /**
    * LICENSE FOR OPEN SOURCE USE: GPLv3.
    * CUSTOM SCRIPT DEBUGGING, DO NOT TURN ON FOR DAILY USE.
@@ -97,7 +98,7 @@
 
   /* PERFECTLY COMPATIBLE FOR GREASEMONKEY, TAMPERMONKEY, VIOLENTMONKEY, USERSCRIPTS 2023-04-08 F9Y4NG */
 
-  const GMinfo = GM_info;
+  const GMinfo = GM?.info ?? GM_info;
   const GMversion = GMinfo.version ?? GMinfo.scriptHandlerVersion ?? "unknown";
   const GMscriptHandler = GMinfo.scriptHandler;
   const GMsetValue = gmSelector("setValue");
@@ -116,7 +117,6 @@
   const IS_DEBUG = setDebuggerMode() || IS_OPEN_DEBUG;
 
   const DEBUG = IS_DEBUG ? __console.bind(console, "log") : () => {};
-  const WARN = IS_DEBUG ? __console.bind(console, "warn") : () => {};
   const ERROR = IS_DEBUG ? __console.bind(console, "error") : () => {};
   const COUNT = IS_DEBUG ? __console.bind(console, "count") : () => {};
 
@@ -128,10 +128,11 @@
       allSiteURIs: "",
       isSecurityPolicy: false,
       ft: parseFloat(1000 / 60),
-      raf: `__GB_rAF_${generateRandomString(24, "attr")}`,
-      caf: `__GB_cAF_${generateRandomString(24, "attr")}`,
-      cssAttrName: `gb-css-${generateRandomString(8, "attr")}`,
+      raf: Symbol(`פֿ${generateRandomString(8, "hex")}`),
+      caf: Symbol(`פֿ${generateRandomString(8, "hex")}`),
+      cssAttrName: `gb-css-${generateRandomString(8, "hex")}`,
       gfHost: decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkYxMjkwOQ=="),
+      loading: generateRandomString(6, "char"),
       rndID: generateRandomString(12, "char"),
       rndclassName: `SC${generateRandomString(8, "digit")}`,
       rndstyleName: `SS${generateRandomString(8, "digit")}`,
@@ -145,8 +146,9 @@
     variable: {
       undef: void 0,
       refresh: () => location.reload(true),
-      feedback: getMetaValue("supportURL") ?? "",
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.10.03.0",
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.11.04.0",
+      feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? "https://f9y4ng.likes.fans/support",
+      homepage: getMetaValue("homepage") ?? getMetaValue("homepageURL") ?? "https://f9y4ng.github.io/GreasyFork-Scripts/",
       scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? "SearchEngine Assistant",
     },
     dialog: {
@@ -196,10 +198,12 @@
 
   class RAF {
     constructor(global) {
+      if (RAF.instance) return RAF.instance;
       this.timerMap = { timeout: {}, interval: {} };
       this.setTimeout = this.setTimeout.bind(this);
       this.global = global;
       registerWindowsProperties();
+      RAF.instance = this;
     }
     _ticking(fn, type, interval, lastTime = Date.now()) {
       const timerSymbol = Symbol(type);
@@ -207,11 +211,8 @@
         this._setTimerMap(timerSymbol, type, step);
         if (interval < def.const.ft || Date.now() - lastTime >= interval) {
           typeof fn === "function" && fn();
-          if (type === "interval") {
-            lastTime = Date.now();
-          } else {
-            this.clearTimeout(timerSymbol);
-          }
+          if (type === "interval") lastTime = Date.now();
+          else this.clearTimeout(timerSymbol);
         }
       };
       this._setTimerMap(timerSymbol, type, step);
@@ -256,30 +257,24 @@
     return gmFunctions[rec] ?? (() => {});
   }
 
-  function __console(act) {
-    const __this = console;
-    const __arguments = [...arguments];
-    const [argm = "", ...args] = __arguments.slice(1);
-    switch (__arguments[0]) {
+  function __console(act, argm = "", ...args) {
+    const _this = w.console;
+    switch (act) {
       case "log":
-        __this[act](`%c\ud83d\udd33 %c${argm}`, "display:inline-block", "font-family:monospace", ...args);
-        break;
+        return _this[act](`%c\ud83d\udd33 %c${argm}`, "display:inline-block", "font-family:monospace", ...args);
       case "error":
       case "warn":
-        __this[act](`%c\ud83d\udea9 ${argm}`, "display:inline-block;font-family:monospace", ...args);
-        break;
+        return _this[act](`%c\ud83d\udea9 ${argm}`, "display:inline-block;font-family:monospace", ...args);
       case "count":
-        __this[act](`\ud83d\udd33 ${argm}`);
-        break;
+        return _this[act](`\ud83d\udd33 ${argm}`);
       default:
-        __this.log(argm, ...args);
-        break;
+        return _this.log(argm, ...args);
     }
   }
 
   function registerWindowsProperties() {
     // REGISTER RAF
-    w[def.const.raf] =
+    w[def.const.raf] = GMunsafeWindow[def.const.raf] =
       w.requestAnimationFrame ||
       w.webkitRequestAnimationFrame ||
       w.mozRequestAnimationFrame ||
@@ -299,7 +294,7 @@
         };
       })();
     // REGISTER CAF
-    w[def.const.caf] =
+    w[def.const.caf] = GMunsafeWindow[def.const.caf] =
       w.cancelAnimationFrame ||
       w.webkitCancelAnimationFrame ||
       w.mozCancelAnimationFrame ||
@@ -311,14 +306,8 @@
       function cancelAnimationFrame(id) {
         clearTimeout(id);
       };
-    // REGISTER UNSAFEWINDOW RAF/CAF
-    GMunsafeWindow[def.const.raf] = w[def.const.raf];
-    GMunsafeWindow[def.const.caf] = w[def.const.caf];
     // REGISTER PUSHSTATE/REPLACESTATE
-    history.pushState = wrapHistory("pushState");
-    history.replaceState = wrapHistory("replaceState");
-
-    function wrapHistory(type) {
+    const wrapHistory = type => {
       const original = history[type];
       const event = new Event(type);
       return function () {
@@ -327,7 +316,9 @@
         w.dispatchEvent(event);
         return fn;
       };
-    }
+    };
+    history.pushState = wrapHistory("pushState");
+    history.replaceState = wrapHistory("replaceState");
   }
 
   function qS(expr, target = document) {
@@ -351,7 +342,8 @@
     return document.createElement(nodeName);
   }
 
-  function gCS(target, value = null, opt = null) {
+  function gCS(target, value, opt = null) {
+    if (!target) return;
     if (value) {
       return w.getComputedStyle(target, opt).getPropertyValue(value);
     } else {
@@ -392,9 +384,10 @@
     const digits = "0123456789";
     const lowerCaseLetters = "abcdefghijklmnopqrstuvwxyz";
     const upperCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const hexLetters = "abcdef";
     let characters = upperCaseLetters;
     let prefix = "";
-    let randomString = "";
+    let randomString = [];
     switch (type) {
       case "mix":
         characters = lowerCaseLetters + digits + upperCaseLetters;
@@ -407,14 +400,14 @@
       case "digit":
         characters = digits;
         break;
-      case "attr":
-        characters = digits + lowerCaseLetters.slice(0, 6);
+      case "hex":
+        characters = hexLetters + digits + hexLetters;
         break;
     }
     for (let i = length; i > 0; i--) {
-      randomString += characters[random(characters.length, "floor")];
+      randomString.push(characters[random(characters.length, "floor")]);
     }
-    return prefix + randomString;
+    return prefix + randomString.join("");
   }
 
   function replaceXHR(xhr) {
@@ -463,9 +456,9 @@
     const trustengine = getRealBrowserEngine();
     let engine = "Unknown";
     let brand = "Unknown";
-    let brandversion = "0.00";
+    let brandversion = "0.0.0.0";
     if (uad) {
-      const os = capitalize(uad.platform);
+      const os = getFullPlatformName(uad.platform);
       const brandMap = {
         SAFARI: { engine: "WebKit", brand: "Safari" },
         FIREFOX: { engine: "Gecko", brand: "Firefox" },
@@ -491,21 +484,28 @@
           brandversion = b.version;
         }
       });
-      return { engine, brand, brandversion, os, "trust-engine": trustengine, credit: uad.credit ?? null };
+      return { engine, brand, brandversion: formatVersion(brandversion), os, "trust-engine": trustengine, credit: uad.credit ?? null };
     } else {
       const ua = navigator.userAgent;
-      const checkString = str => ua.indexOf(str) !== -1;
-      const getVersion = (str, offset) => (ua.indexOf(str) !== -1 ? ua.substring(ua.indexOf(str) + offset).match(/\d+(\.\d+)*/)?.[0] : null);
+      const checkString = str => new RegExp(str).test(ua);
+      const getVersion = (str, offset) => checkString(str) && ua.substring(ua.indexOf(str) + offset).match(/\d+(\.\d+)*/)?.[0];
       const { brand, engine, brandversion } = getBrowserInfoFromUA(ua, checkString, getVersion);
       const os = getOSInfoFromUA(checkString);
       return { engine, brand, brandversion, os, "trust-engine": trustengine, credit: null };
+    }
+
+    function formatVersion(version) {
+      if (!version) return "0.0.0.0";
+      const numbers = version.split(".").map(num => parseInt(num));
+      while (numbers.length < 4) numbers.push(0);
+      return numbers.join(".");
     }
 
     function getUserAgentDataFromExtension(cert) {
       const vmuad = (uad => {
         if (!uad) return;
         const archs = uad.arch?.split("-") ?? [];
-        const brand = capitalize(uad.browserBrand || uad.browserName); // at least need VM2.15.7+ or released version.
+        const brand = capitalize(uad.browserBrand || uad.browserName);
         return {
           brands: [{ brand, version: uad.browserVersion }],
           platform: capitalize(uad.os),
@@ -522,48 +522,61 @@
       return vmuad ?? tmuad ?? navigator.userAgentData;
     }
 
+    function getFullPlatformName(platform) {
+      if (!platform) return "Unknown";
+      const os = capitalize(platform);
+      return /^(Like Mac|Ios)$/.test(os) ? "iOS" : os === "Cros" ? "Chrome OS" : os.startsWith("Win") ? "Windows" : os.startsWith("Mac") ? "MacOS" : os === "X11" ? "Unix" : os;
+    }
+
     function getRealBrowserEngine() {
       return w.webkitRequestFileSystem ? "Blink" : !isNaN(parseFloat(w.mozInnerScreenX)) ? "Gecko" : w.GestureEvent ? "WebKit" : "Unknown";
     }
 
     function getBrowserInfoFromUA(ua, checkString, getVersion) {
+      const engine = /Gecko\/|FxiOS/.test(ua) ? "Gecko" : /Chrom[e|ium]|CriOS/.test(ua) ? "Blink" : /AppleWebKit\//.test(ua) ? "WebKit" : "Unknown";
       const brandMap = {
-        OPR: { brand: "Opera", engine: "Blink", offset: 7, as: "Chrome" },
-        QQBrowser: { brand: "QQBrowser", engine: "Blink", offset: 7, as: "Chrome" },
-        YaBrowser: { brand: "Yandex", engine: "Blink", offset: 7, as: "Chrome" },
-        Brave: { brand: "Brave", engine: "Blink", offset: 6 },
-        Edg: { brand: "Edge", engine: "Blink", offset: 4 },
-        Maxthon: { brand: "Maxthon", engine: "Blink", offset: 7, as: "Chrome" },
-        Chromium: { brand: "Chromium", engine: "Blink", offset: 9 },
-        Chrome: { brand: "Chrome", engine: "Blink", offset: 7 },
-        Safari: { brand: "Safari", engine: "WebKit", offset: getVersion("Version", 8), overwrite: true },
-        Waterfox: { brand: "Waterfox", engine: "Gecko", offset: 9 },
-        PaleMoon: { brand: "PaleMoon", engine: "Gecko", offset: 8, as: "Firefox" },
-        Firefox: { brand: "Firefox", engine: "Gecko", offset: 8 },
-        Trident: { brand: "IE", engine: "Trident", offset: getVersion("MSIE", 5) || getVersion("rv", 3), overwrite: true },
+        OPR: { brand: "Opera", engine: "Blink", as: "Chrome" },
+        QQBrowser: { brand: "QQBrowser", engine: "Blink", as: "Chrome" },
+        YaBrowser: { brand: "Yandex", engine, as: "Chrome" },
+        Brave: { brand: "Brave", engine: "Blink" },
+        Edg: { brand: "Edge", engine: "Blink" },
+        Maxthon: { brand: "Maxthon", engine: "Blink", as: "Chrome" },
+        CriOS: { brand: "Chrome", engine: "Blink" },
+        Chromium: { brand: "Chromium", engine: "Blink" },
+        Chrome: { brand: "Chrome", engine: "Blink" },
+        FxiOS: { brand: "Firefox", engine: "Gecko" },
+        Waterfox: { brand: "Waterfox", engine: "Gecko" },
+        PaleMoon: { brand: "PaleMoon", engine: "Gecko", as: "Firefox" },
+        Firefox: { brand: "Firefox", engine: "Gecko" },
+        Safari: { brand: "Safari", engine: "WebKit", verset: ["Version"] },
+        Trident: { brand: "IE", engine: "Trident", verset: ["MSIE", "rv"] },
       };
-      for (const [key, value] of Object.entries(brandMap)) {
+      for (const key of Object.keys(brandMap)) {
         if (checkString(key)) {
-          const { brand: _brand, engine, offset, overwrite, as } = value;
-          const _brandversion = overwrite ? offset : getVersion(as ?? key, offset);
+          const { brand: _brand, engine, verset, as } = brandMap[key];
+          const _verset = verset?.find(k => checkString(k)) ?? verset?.[0];
+          const _key = _verset ?? as ?? key;
+          const _brandversion = formatVersion(getVersion(_key, _key.length + 1));
           return { brand: _brandversion ? _brand : brand, engine, brandversion: _brandversion ?? brandversion };
         }
       }
       const nameOffset = ua.lastIndexOf(" ") + 1;
       const verOffset = ua.lastIndexOf("/");
       const _brand = ua.substring(nameOffset, verOffset);
-      const _brandversion = ua.substring(verOffset + 1);
-      const isValidValue = _brand.indexOf(";") !== -1 || _brand.indexOf("/") !== -1;
-      return { brand: isValidValue ? brand : _brand, engine: trustengine, brandversion: isValidValue ? brandversion : _brandversion };
+      const _brandversion = formatVersion(ua.substring(verOffset + 1).match(/\d+(\.\d+)*/)?.[0]);
+      const isValidValue = !/version|\/|\(|\)|;/i.test(_brand) && _brandversion;
+      return { brand: isValidValue ? _brand : brand, engine, brandversion: isValidValue ? _brandversion : brandversion };
     }
 
     function getOSInfoFromUA(checkString) {
       let os = "Unknown";
-      const platforms = ["Win", "Mac", "Linux", "CrOS", "Debian", "Ubuntu", "Android", "like Mac"];
+      const platforms = ["like Mac", "Mac", "Android", "Debian", "Ubuntu", "Linux", "Win", "CrOS", "X11"];
       for (let i = 0; i < platforms.length; i++) {
         const platform = platforms[i];
-        if (!checkString(platform)) continue;
-        os = platform === "like Mac" ? "iOS" : platform;
+        if (checkString(platform)) {
+          os = getFullPlatformName(platform);
+          break;
+        }
       }
       return os;
     }
@@ -591,7 +604,7 @@
   }
 
   function setDebuggerMode() {
-    return new URLSearchParams(location.search).get("whoami") === (getMetaValue("author") ?? GMinfo.script.author);
+    return new URLSearchParams(location.search).get("whoami") === "\u0046\u0039\u0079\u0034\u006e\u0067";
   }
 
   function sleep(delay, { useCachedSetTimeout } = {}) {
@@ -606,30 +619,30 @@
   }
 
   function deBounce({ fn, delay, timer, immed, once } = {}) {
-    if (typeof fn !== "function") return;
+    if (typeof fn !== "function" || !timer) return;
     let caller = 0;
     const threshold = Number(Boolean(immed));
     return function () {
       const context = this;
       const args = arguments;
-      if (once === true) {
-        if (!def.count[timer]) {
-          def.count[timer] = true;
+      const name = Symbol.for(String(timer));
+      if (typeof def.count[name] === "undefined") {
+        if (immed === true) {
           fn.apply(context, args);
+          if (once === true) return (def.count[name] = true);
         }
       } else {
-        if (typeof def.count[timer] === "undefined") {
-          immed === true && fn.apply(context, args);
-        } else {
-          raf.clearTimeout(def.count[timer]);
-          caller++;
-        }
-        def.count[timer] = raf.setTimeout(() => {
-          caller >= threshold && fn.apply(context, args);
-          delete def.count[timer];
-          caller = null;
-        }, delay);
+        if (once === true && def.count[name] === true) return true;
+        raf.clearTimeout(def.count[name]);
+        caller++;
       }
+      def.count[name] = raf.setTimeout(() => {
+        if (caller >= threshold) {
+          fn.apply(context, args);
+          if (once === true) return (def.count[name] = true);
+        }
+        delete def.count[name];
+      }, Number(delay) || 0);
     };
   }
 
@@ -638,15 +651,19 @@
     let pendingNodes = [];
     switch (typeof expr) {
       case "string":
+        if (!expr) return false;
         pendingNodes = qA(expr, scope);
         pendingNodes.forEach(item => removeNode(item));
         break;
       case "object":
-        if (expr instanceof Element) {
+        if (expr?.nodeType === Node.ELEMENT_NODE) {
           pendingNodes.push(expr);
           removeNode(expr);
-        }
+        } else return false;
         break;
+      default:
+        ERROR("Element not exist!");
+        return false;
     }
     return compareArray(removedNodes, pendingNodes);
 
@@ -661,25 +678,21 @@
   }
 
   ~(function (tTP, requestEnvironmentConstants) {
-    "use strict";
-
     const { navigatorInfo, locationInfo } = requestEnvironmentConstants();
     const { engine, brand, "trust-engine": trustengine, credit } = navigatorInfo;
     const { cP: CUR_PROTOCOL, cHN: CUR_HOST_NAME, isTop: CUR_WINDOW_TOP } = locationInfo;
 
-    const IS_REAL_BLINK = trustengine === "Blink";
     const IS_REAL_GECKO = trustengine === "Gecko";
     const IS_CHEAT_UA = !credit && (engine !== trustengine || checkBlinkCheatingUA());
-    const IS_REAL_EDGE = !IS_CHEAT_UA && IS_REAL_BLINK && brand === "Edge";
     const IS_GREASEMONKEY = GMscriptHandler === "Greasemonkey";
 
-    def.const.noticecss = String(
+    const NOTICE_CSS = String(
       `.${def.notice.noticejs} *,.${def.notice.noticejs} *::after,.${def.notice.noticejs} *::before {box-sizing:content-box;line-height:normal;scrollbar-width:thin}.${def.notice.animated}{animation-duration:1s;animation-fill-mode:both}.${def.notice.animated}.infinite{animation-iteration-count:infinite}.${def.notice.animated}.hinge{animation-duration:2s}.${def.notice.animated}.bounceIn,.${def.notice.animated}.bounceOut,.${def.notice.animated}.flipOutX,.${def.notice.animated}.flipOutY{animation-duration:1.25s}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.${def.notice.random}_fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.${def.notice.random}_fadeOut{animation-name:fadeOut}#${def.const.rndID} *{text-shadow:none!important;font-family:Helvetica,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:0 transparent!important}.${def.notice.noticejs},.${def.notice.noticejs} *{text-shadow:none!important;font-family:Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:0 transparent!important}.${def.notice.noticejs}-top{top:0;width:100%}.${def.notice.noticejs}-top .${def.notice.item}{margin:0!important;border-radius:0!important}.${def.notice.noticejs}-topRight{top:10px;right:10px;z-index:10000059!important}.${def.notice.noticejs}-topLeft{top:10px;left:10px}.${def.notice.noticejs}-topCenter{top:10px;left:50%;transform:translate(-50%)}.${def.notice.noticejs}-middleLeft,.${def.notice.noticejs}-middleRight{right:10px;top:50%;transform:translateY(-50%)}.${def.notice.noticejs}-middleLeft{left:10px}.${def.notice.noticejs}-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.${def.notice.noticejs}-bottom{bottom:0;width:100%}.${def.notice.noticejs}-bottom .${def.notice.item}{border-radius:0!important;margin:0!important}.${def.notice.noticejs}-bottomRight{bottom:10px;right:10px;z-index:10000055!important}.${def.notice.noticejs}-bottomLeft{bottom:10px;left:10px}.${def.notice.noticejs}-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.${def.notice.noticejs} .${def.notice.item}{margin:0 0 10px;border-radius:6px;overflow:hidden}` +
         `.${def.notice.noticejs} .${def.notice.item} .${def.notice.close}{float:right;margin-right:7px;color:#ffffff;text-shadow:0 1px 0 #ffffff;font-weight:700;font-size:18px!important;line-height:1;opacity:1}.${def.notice.noticejs} .${def.notice.item} .${def.notice.close}:hover{color:#000;opacity:.5;cursor:pointer}.${def.notice.noticejs} .${def.notice.item} a{border-bottom:1px dashed #ffffff;color:#ffffff;}.${def.notice.noticejs} .${def.notice.item} a,.${def.notice.noticejs} .${def.notice.item} a:hover{text-decoration:none}.${def.notice.noticejs} .${def.notice.success}{background-color:#64ce83;}.${def.notice.noticejs} .${def.notice.success} .${def.notice.noticejs}-heading{padding:10px;background-color:#3da95c;color:#ffffff;font-weight:700;font-size:14px!important}.${def.notice.noticejs} .${def.notice.success} .${def.notice.noticejs}-body{padding:10px!important;color:#ffffff;}.${def.notice.noticejs} .${def.notice.success} .${def.notice.noticejs}-body:hover{visibility:visible!important}.${def.notice.noticejs} .${def.notice.success} .${def.notice.noticejs}-content{visibility:visible}.${def.notice.noticejs} .${def.notice.info}{background-color:#3ea2ff;}.${def.notice.noticejs} .${def.notice.info} .${def.notice.noticejs}-heading{padding:10px;background-color:#067cea;color:#ffffff;font-weight:700;font-size:14px!important}.${def.notice.noticejs} .${def.notice.info} .${def.notice.noticejs}-body{padding:10px!important;color:#ffffff;}.${def.notice.noticejs} .${def.notice.info} .${def.notice.noticejs}-body:hover{visibility:visible!important}.${def.notice.noticejs} .${def.notice.info} .${def.notice.noticejs}-content{visibility:visible}.${def.notice.noticejs} .${def.notice.warning}{background-color:#ff7f48;}.${def.notice.noticejs} .${def.notice.warning} .${def.notice.noticejs}-heading{padding:10px!important;background-color:#f97038;color:#ffffff;font-weight:700;font-size:14px!important}.${def.notice.noticejs} .${def.notice.warning} .${def.notice.noticejs}-body{color:#ffffff;padding:10px}.${def.notice.noticejs} .${def.notice.warning} .${def.notice.noticejs}-body:hover{visibility:visible!important}.${def.notice.noticejs} .${def.notice.warning} .${def.notice.noticejs}-content{visibility:visible}` +
         `.${def.notice.noticejs} .${def.notice.error}{background-color:#e74c3c;}.${def.notice.noticejs} .${def.notice.error} .${def.notice.noticejs}-heading{padding:10px!important;background-color:#e93724;color:#ffffff;font-weight:700;font-size:14px!important}.${def.notice.noticejs} .${def.notice.error} .${def.notice.noticejs}-body{padding:10px;color:#ffffff;}.${def.notice.noticejs} .${def.notice.error} .${def.notice.noticejs}-body:hover{visibility:visible!important}.${def.notice.noticejs} .${def.notice.error} .${def.notice.noticejs}-content{visibility:visible}.${def.notice.configuration} input[disabled],.${def.notice.configuration} select[disabled]{color:#bbbbbb;background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:20px 20px!important;background-color:#fff7f7!important}.${def.notice.noticejs} .${def.notice.configuration}{background:linear-gradient(to right,#fcfcfc,#f2f2f7);background:-webkit-gradient(linear,0 0,0 100%,from(#fcfcfc),to(#f2f2f7));box-shadow:0 0 5px #888}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.close}{float:right;margin-right:7px;color:#000000;text-shadow:0 1px 0 #aaaaaa;font-weight:700;font-size:18px!important;line-height:1;opacity:1}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.close}:hover{color:#555555;opacity:.5;cursor:pointer}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.noticejs}-heading{padding:10px!important;background-color:#e7e7e7;color:#333333;font-weight:700;font-size:14px!important}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.noticejs}-body{padding:10px;color:#333333;}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.noticejs}-body:hover{visibility:visible!important}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.noticejs}-content{visibility:visible}` +
         `.${def.notice.noticejs} .${def.notice.noticejs}-heading-title{display:inline-block;vertical-align:middle;overflow:hidden;max-width:275px;text-overflow:ellipsis;white-space:nowrap}.${def.notice.noticejs} .${def.notice.success} .${def.notice.noticejs}-progressbar{margin-top:-1px;width:100%;background-color:#64ce83;}.${def.notice.noticejs} .${def.notice.success} .${def.notice.noticejs}-progressbar .${def.notice.noticejs}-bar{width:100%;height:5px;background:#3da95c;}.${def.notice.noticejs} .${def.notice.info} .${def.notice.noticejs}-progressbar{margin-top:-1px;width:100%;background-color:#3ea2ff;}.${def.notice.noticejs} .${def.notice.info} .${def.notice.noticejs}-progressbar .${def.notice.noticejs}-bar{width:100%;height:5px;background:#067cea;}.${def.notice.noticejs} .${def.notice.warning} .${def.notice.noticejs}-progressbar{margin-top:-1px;width:100%;background-color:#ff7f48;}.${def.notice.noticejs} .${def.notice.warning} .${def.notice.noticejs}-progressbar .${def.notice.noticejs}-bar{width:100%;height:5px;background:#f44e06;}.${def.notice.noticejs} .${def.notice.error} .${def.notice.noticejs}-progressbar{margin-top:-1px;width:100%;background-color:#fd5f4e;}.${def.notice.noticejs} .${def.notice.error} .${def.notice.noticejs}-progressbar .${def.notice.noticejs}-bar{width:100%;height:5px;background:#ba2c1d;}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.noticejs}-progressbar{margin-top:-1px;width:100%;background-color:#efefef;}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.noticejs}-progressbar .${def.notice.noticejs}-bar{width:100%;height:5px;background:#cccccc;}` +
         `@keyframes ${def.notice.noticejs}-fadeOut{0%{opacity:1}to{opacity:0}}.${def.notice.noticejs}-fadeOut{animation-name:${def.notice.noticejs}-fadeOut}@keyframes ${def.notice.noticejs}-modal-in{to{opacity:.3}}@keyframes ${def.notice.noticejs}-modal-out{to{opacity:0}}.${def.notice.noticejs}{position:fixed;z-index:10000051}.${def.notice.noticejs} ::-webkit-scrollbar{width:8px}.${def.notice.noticejs} ::-webkit-scrollbar-button{width:8px;height:5px}.${def.notice.noticejs} ::-webkit-scrollbar-track{border-radius:3px}.${def.notice.noticejs} ::-webkit-scrollbar-thumb{background:#e1e1e1;border-radius:3px}.${def.notice.noticejs} ::-webkit-scrollbar-thumb:hover{background:#cccccc;}.${def.notice.noticejs}-modal{position:fixed;top:0;left:0;z-index:10000050;width:100%;height:100%;background-color:#000000;opacity:.3}.${def.notice.noticejs}-modal-open{opacity:0;animation:${def.notice.noticejs}-modal-in .3s ease-out}.${def.notice.noticejs}-modal-close{animation:${def.notice.noticejs}-modal-out .3s ease-out;animation-fill-mode:forwards}.${def.notice.rName}{padding:2px!important}.${def.notice.noticejs} .${def.notice.rName} dl{margin:0!important;padding:1px!important}.${def.notice.noticejs} .${def.notice.rName} dl dt{margin:2px 0 6px!important;font-weight:900!important;font-size:16px!important}.${def.notice.noticejs} .${def.notice.rName} dl dd{margin:2px 2px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${def.notice.noticejs} .${def.notice.rName} .${def.notice.center}{width:100%;text-align:center!important}.${def.notice.noticejs} .${def.notice.rName} dl dd em{padding:0 5px;color:#ffffff;font-style:italic;font-size:24px!important;font-family:Candara,sans-serif!important}.${def.notice.noticejs} .${def.notice.rName} dl dd span{margin-right:8px;font-weight:700;font-size:15px!important}.${def.notice.noticejs} .${def.notice.rName} dl dd i{font-size:20px!important;font-family:Candara,sans-serif!important}.${def.notice.noticejs} .${def.notice.rName} dl dd .im{padding:0 3px;color:gold;font-weight:900;font-size:16px!important}` +
-        `.${def.notice.noticejs} .${def.notice.warning} .${def.notice.rName} ul{display:inline-block;margin:0 0 0 8px;padding:4px 4px 8px;width:90%;color:rgba(255, 255, 255, 0.8);counter-reset:xxx 0;vertical-align:top;text-align:left}.${def.notice.noticejs} .${def.notice.warning} .${def.notice.rName} li{position:relative;margin:0 0 0 2px;padding:0 0 2px 2px;list-style:none;font-style:italic!important;line-height:150%;-webkit-transition:.12s;transition:.12s}.${def.notice.noticejs} .${def.notice.warning} .${def.notice.rName} li::before{display:inline-block;margin-left:-1.5em;width:1.5em;content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-size:1em;font-family:Candara,sans-serif;-webkit-transition:.5s;transition:.5s}.${def.notice.noticejs} .${def.notice.warning} .${def.notice.rName} #${def.notice.stopUpdate}{float:right;margin:0 5px!important;font-size:12px!important;cursor:help}` +
+        `.${def.notice.noticejs} .${def.notice.warning} .${def.notice.rName} ul{display:inline-block;margin:0 0 0 8px;padding:4px 4px 8px;width:90%;color:rgba(255, 255, 255, 0.8);counter-reset:xxx 0;vertical-align:top;text-align:left}.${def.notice.noticejs} .${def.notice.warning} .${def.notice.rName} li{position:relative;margin:0 0 0 2px;padding:0 0 2px 2px;list-style:none;font-style:italic!important;line-height:150%;-webkit-transition:.12s;transition:.12s}.${def.notice.noticejs} .${def.notice.warning} .${def.notice.rName} li::before{display:inline-block;margin-left:-1.5em;width:1.5em;content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-size:1em;font-family:Candara,sans-serif;-webkit-transition:.5s;transition:.5s}.${def.notice.noticejs} .${def.notice.warning} .${def.notice.rName} #${def.notice.stopUpdate}{float:right;margin:0 5px!important;font-size:12px!important;cursor:help}.${def.const.loading}{position:relative;}.${def.const.loading}::after{content:" \u21ba";animation:fade 1.25s infinite;}@keyframes fade{0%{opacity:0.1}50%{opacity:0.5}to{opacity:0}}` +
         `#${def.notice.stopUpdate} input[type='checkbox']{box-sizing:content-box;margin:2px 4px 0 0;width:14px;height:14px;border:2px solid #ffffff;border-radius:50%;background:#ffa077;vertical-align:top;cursor:help;-webkit-appearance:none}#${def.notice.stopUpdate}:hover input,#${def.notice.stopUpdate} input:hover{background:#ba2c1d;}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.checkbox}{display:none!important}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.checkbox}+label{position:relative;display:inline-block;-webkit-box-sizing:content-box;box-sizing:content-box;margin:0 0 0 25px;padding:11px 9px;width:58px;height:10px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);word-wrap:normal!important;cursor:pointer}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;-webkit-border-radius:7px;border-radius:7px;background:#ffffff;box-shadow:0 0 1px rgba(0,0,0,.6);color:#ffffff;content:" "}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.checkbox}+label::after{position:absolute;top:2px;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;padding:5px;-webkit-border-radius:100px;border-radius:100px;color:#ffffff;content:"OFF";font-weight:700;font-size:1em}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.checkbox}:checked+label{-webkit-box-sizing:content-box;box-sizing:content-box;margin:0 0 0 25px;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146, 196, 245, 0.4);cursor:pointer}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.checkbox}:checked+label::after{top:2px;left:10px;content:"ON"}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}` +
         `.${def.notice.noticejs} .${def.notice.configuration} button.${def.notice.searchButton}{display:flex;margin:0 0 10px;padding:6px 0;width:162px;height:25px;border:2px solid #eeeeee;border-radius:6px;background:#ffffff;box-shadow:1px 1px 0 1px #aaaaaa;font-size:14px!important;cursor:pointer;align-content:center;justify-content:center;align-items:center}.${def.notice.noticejs} .${def.notice.configuration} button.${def.notice.searchButton}:hover{box-shadow:1px 1px 3px 0 #888888;color:red}.${def.notice.noticejs} .${def.notice.configuration} span.${def.notice.favicon}{margin:0 6px 0 0;width:24px;height:24px}.${def.notice.noticejs} .${def.notice.configuration} ul.${def.notice.searchList}{margin:5px;padding:2px;list-style:none}.${def.notice.noticejs} .${def.notice.configuration} ul.${def.notice.searchList} li{margin:0;list-style:none;font-style:normal}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.fieldset}{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;border:2px dashed #dfdfdf;border-radius:10px;background:transparent!important;text-align:left}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.legend}{display:block;margin:0;padding:0 8px;width:auto;color:#8b0000!important;font-weight:900!important;font-size:14px!important;-webkit-user-select:all;user-select:all}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.settingList}{margin:0;padding:0;background:transparent!important}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.settingList} li{float:none;display:flex;margin:3px 0;padding:2px 8px 2px 12px;height:36px;border:none;background:transparent!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none;align-content:center;justify-content:space-between}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.settingList} li>div{font:normal 700 14px/150% Microsoft YaHei UI,Helvetica Neue,sans-serif!important}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.settingList} button{box-sizing:border-box;margin:0 0 0 8px;padding:4px 8px;height:36px;min-width:65px;border:1px solid #cccccc;border-radius:8px;background:#fafafa;box-shadow:1px 1px 1px 0 #cccccc;color:#5e5e5e;font-weight:700;font-size:14px!important}` +
         `.${def.notice.noticejs} .${def.notice.configuration} #${def.notice.random}_customColor{margin:0;cursor:pointer}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.settingList} button:hover{background:#ffffff;cursor:pointer}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}__content{display:block;margin:0;height:268px}.${def.notice.noticejs} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{overflow-x:hidden;overflow-y:auto;box-sizing:border-box;margin:4px 0 3px;padding:8px;width:266px;max-height:237px;overscroll-behavior:contain}.${def.notice.card} h2{margin:0;padding:0;border:0;vertical-align:baseline;font:inherit;font-size:100%}.${def.notice.card}{margin:0;padding:0;--background:#ffffff;--background-chackbox:#0082ff;--background-image:#ffffff,rgba(0,107,175,0.2);--text-color:#666666;--text-headline:#000000;--card-shadow:#0082ff;--card-height:48px;--card-witght:240px;--card-radius:12px;--header-height:47px;--blend-mode:overlay;--transition:0.15s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.${def.notice.card}__input{position:absolute;display:block;margin:0;padding:0;outline:none;border:none;background:none;-webkit-appearance:none}.${def.notice.card}__input:checked ~ .${def.notice.card}__body{--shadow:0 0 0 3px var(--card-shadow);}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox{--chack-bg:var(--background-chackbox);--chack-border:#ffffff;--chack-scale:1;--chack-opacity:1;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox--svg{--stroke-color:#ffffff;--stroke-dashoffset:0;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover:after{--opacity-bg:0;}.${def.notice.random}_iconText{color:#333333;}.${def.notice.random}_iconText:hover{color:crimson}` +
@@ -772,9 +785,9 @@
       noticeJsItem.classList.add(options.type);
       if (options.rtl === true) noticeJsItem.classList.add(`${def.notice.noticejs}-rtl`);
       if (options.width !== "" && Number.isInteger(options.width)) noticeJsItem.style.width = options.width + "px";
-      if (noticeJsHeader && noticeJsHeader.nodeType) noticeJsItem.appendChild(noticeJsHeader);
-      if (noticeJsBody.nodeType) noticeJsItem.appendChild(noticeJsBody);
-      if (noticeJsProgressBar && noticeJsProgressBar !== "" && noticeJsProgressBar.nodeType) noticeJsItem.appendChild(noticeJsProgressBar);
+      if (noticeJsHeader && noticeJsHeader.nodeType === Node.ELEMENT_NODE) noticeJsItem.appendChild(noticeJsHeader);
+      if (noticeJsBody.nodeType === Node.ELEMENT_NODE) noticeJsItem.appendChild(noticeJsBody);
+      if (noticeJsProgressBar && noticeJsProgressBar !== "" && noticeJsProgressBar.nodeType === Node.ELEMENT_NODE) noticeJsItem.appendChild(noticeJsProgressBar);
       if (["top", "bottom"].includes(options.position)) qS(target_class).textContent = "";
       if (options.animation !== null && options.animation.open !== null) noticeJsItem.className += " " + options.animation.open;
       if (options.modal === true) {
@@ -943,7 +956,7 @@
           const data = value.data;
           const expiredTime = value.expired;
           const curTime = Date.now();
-          if (expiredTime > curTime && typeof data !== "undefined") {
+          if (expiredTime > curTime && data) {
             return data;
           } else {
             cache.remove(key);
@@ -1001,24 +1014,31 @@
     }
 
     ~(async function (getConfigureData, isChinese) {
-      "use strict";
-
       let config_date = await getConfigureData();
       let { isAutoUpdate, keywordHighlight, isHotkey, selectedEngine, localWindow, googleJump, antiLinkRedirect, antiAds, customColor } = config_date;
+      const AUTO_UPDATA_TRIG = await cache.get("_autoupdate_");
+      const FETCH_TIMEOUT = 25e3;
+      const cachedLinkList = new Map();
 
-      function getUrlParam(paraName) {
+      function getUrlParam(parameter) {
         try {
-          switch (paraName) {
-            case null:
-            case def.variable.undef:
-            case "":
-              return "";
-            case "/":
-              return location.pathname.split("/")[1] || "";
-            case "$":
-              return location.hostname.split(".")[0] || "";
+          switch (typeof parameter) {
+            case "undefined":
+            case "object":
+              if (parameter) {
+                const { str, index } = parameter;
+                const keyArray = location.pathname.split(str);
+                return keyArray[index];
+              } else {
+                return "";
+              }
+            case "string":
+              if (!parameter) return "";
+              return new URLSearchParams(location.search).get(parameter) ?? "";
+            case "function":
+              return parameter();
             default:
-              return new URLSearchParams(location.search).get(paraName) || "";
+              return "";
           }
         } catch (e) {
           ERROR("getUrlParam:", e.message);
@@ -1026,31 +1046,34 @@
         }
       }
 
-      function isNeedUpdate(current, compare) {
-        const compare_array = compare.split(".");
-        const current_array = current.split(".");
-        if (compare_array.length !== current_array.length) return true;
-        for (let i = 0; i < compare_array.length; i++) {
-          if (parseInt(compare_array[i]) < parseInt(current_array[i])) {
-            return false;
-          } else if (parseInt(compare_array[i]) > parseInt(current_array[i])) {
-            return true;
+      function versionCompare(current, compare) {
+        try {
+          const compare_array = compare.split(".");
+          const current_array = current.split(".");
+          if (compare_array.length !== current_array.length) return true;
+          for (let i = 0; i < compare_array.length; i++) {
+            if (parseInt(compare_array[i]) < parseInt(current_array[i])) {
+              return false;
+            } else if (parseInt(compare_array[i]) > parseInt(current_array[i])) {
+              return true;
+            }
           }
+          return false;
+        } catch (e) {
+          return true;
         }
-        return false;
       }
 
       /* ANTIREDIRECT_FUNCTIONS */
 
-      function clearHrefEvents(node, clearData = true) {
+      function clearHrefEvents(node, clearData) {
         if (!node) return;
         node.setAttribute("target", "_blank");
-        ["ping", "onmouseover", "referrerpolicy", "h"].forEach(item => {
-          node.hasAttribute(item) && node.removeAttribute(item);
-        });
+        ["jsname", "ping", "onmouseover", "referrerpolicy", "h"].forEach(item => node.removeAttribute(item));
         if (clearData) {
-          for (const ds in node.dataset) {
-            if (node.dataset.hasOwnProperty(ds)) delete node.dataset[ds];
+          const dataSet = node.dataset;
+          for (const ds in dataSet) {
+            if (dataSet.hasOwnProperty(ds)) delete node.dataset[ds];
           }
         }
       }
@@ -1065,35 +1088,68 @@
         });
       }
 
-      function getRealUrl(url, node, name, { onreadystatechangeFunc, onerrorFunc, ontimeoutFunc }) {
-        return new Promise((resolve, reject) => {
-          fetchUrl(url, resolve, reject, onreadystatechangeFunc, onerrorFunc, ontimeoutFunc);
-        })
-          .then(res => {
-            DEBUG(res);
-            node.href = res;
-            node.style.backgroundColor = null;
-            clearHrefEvents(node);
-            node.setAttribute("gd-antiredirect-status", "success");
-          })
-          .catch(e => {
-            node.classList.add(def.notice.linkerror);
-            node.setAttribute("gd-antiredirect-status", "failed");
-            node.setAttribute("title", `${isChinese ? "此链接似乎已无法正常访问。" : "The link appears to be broken."}`);
-            ERROR("antiRedirect_%s: %s %O", name, e.message, { Node: node, Text: node.textContent, URL: node.href });
-          });
-      }
-
-      function fetchUrl(url, resolve, reject, readystate, error, timeout) {
+      function fetchData(url, resolve, reject, readystate, error, timeout) {
         GMxmlhttpRequest({
           url: url,
-          headers: { Accept: "*/*", Referer: location.href.replace(/^http:/i, "https:") },
+          headers: { Accept: "*/*", Referer: location.origin.replace(/^http:/i, "https:") },
           method: "GET",
-          timeout: 3e4,
+          timeout: FETCH_TIMEOUT,
           onreadystatechange: readystate(resolve, reject),
           onerror: error(reject, resolve),
           ontimeout: timeout(reject),
         });
+      }
+
+      function getRealUrl(url, node, name, { onreadystatechangeFunc, onerrorFunc, ontimeoutFunc }) {
+        return new Promise((resolve, reject) => {
+          if (cachedLinkList.has(url)) {
+            reject(new RangeError("DuplicateLinksError"));
+            return;
+          }
+          cachedLinkList.set(url, null);
+          fetchData(url, resolve, reject, onreadystatechangeFunc, onerrorFunc, ontimeoutFunc);
+        })
+          .then(res => {
+            DEBUG(res);
+            cachedLinkList.set(url, res);
+            setRealLink(node, res);
+            IS_DEBUG && node.classList.remove(def.const.loading);
+          })
+          .catch(e => {
+            if (["URLBrokenError", "TimeoutError", "URLNotExistError", "ResponseError"].includes(e?.message)) cachedLinkList.set(url, url);
+            if (e?.message === "DuplicateLinksError") {
+              const attemptToFindCacheLink = setInterval(() => {
+                const getcachedRealLinks = cachedLinkList.get(url);
+                if (getcachedRealLinks === null) return;
+                if (getcachedRealLinks === url) {
+                  setErrorLink(node);
+                  IS_DEBUG && node.classList.remove(def.const.loading);
+                  clearInterval(attemptToFindCacheLink);
+                } else {
+                  DEBUG("Duplicate Links:", { node, url: getcachedRealLinks });
+                  setRealLink(node, getcachedRealLinks);
+                  IS_DEBUG && node.classList.remove(def.const.loading);
+                  clearInterval(attemptToFindCacheLink);
+                }
+              }, 5e2);
+              return;
+            }
+            setErrorLink(node);
+            IS_DEBUG && node.classList.remove(def.const.loading);
+            ERROR("antiRedirect_%s: %s %O", name, e?.message, { Node: node, Text: node.textContent, URL: node.href });
+          });
+      }
+
+      function setRealLink(node, url) {
+        node.href = url;
+        clearHrefEvents(node, true);
+        node.setAttribute("gd-antiredirect-status", "success");
+      }
+
+      function setErrorLink(node) {
+        node.classList.add(def.notice.linkerror);
+        node.setAttribute("gd-antiredirect-status", "failed");
+        node.setAttribute("title", `${isChinese ? "此链接似乎已无法正常访问。" : "The link appears to be broken."}`);
       }
 
       function parallelTasks(tasks, maxCount = 3) {
@@ -1105,7 +1161,8 @@
           }
           let currentIndex = 0;
           let finishedCount = 0;
-          for (let i = 0; i < maxCount && i < tasks.length; i++) {
+          const taskCount = Math.min(maxCount, tasks.length);
+          for (let i = 0; i < taskCount; i++) {
             doTask();
           }
 
@@ -1117,8 +1174,7 @@
               if (currentIndex < tasks.length) {
                 doTask();
               } else if (finishedCount === tasks.length) {
-                DEBUG("Task done!");
-                resolve();
+                sleep(5e2)(resolve()).then(() => DEBUG("(%d) Task Done!", cachedLinkList.size));
               }
             });
           }
@@ -1135,6 +1191,8 @@
           node.setAttribute("gd-antiredirect-status", "pending");
           const url = node.href.replace(/^http:/i, "https:");
           if (!url) return;
+          const linkText = node.innerText?.trim();
+          if (IS_DEBUG && linkText) node.classList.add(def.const.loading);
           switch (siteName) {
             case "Baidu":
               task = () =>
@@ -1142,23 +1200,32 @@
                   onreadystatechangeFunc: (resolve, reject) => response => {
                     if (response.readyState !== 4) return;
                     if (response.status === 200) {
-                      resolve(response.finalUrl || response.responseURL);
+                      const resUrl = response.finalUrl || response.responseURL || url;
+                      resolve(resUrl);
                     } else {
                       rejectResponse(response, resolve, reject, url);
                     }
                   },
                   onerrorFunc: (reject, resolve) => e => {
                     if (e.error?.includes("Request was redirected to a not whitelisted URL")) {
-                      const realUrl = e.error?.toString().match(/Refused to connect to "([^"]*)"/)[1];
+                      const realUrl = e.error?.toString().match(/Refused to connect to "([^"]*)"/)?.[1];
                       if (!realUrl || realUrl.includes("www.baidu.com/search/error")) reject(new Error("URLNotExistError"));
                       resolve(realUrl);
-                    } else if (e.responseHeaders?.match(/Location:\s*([\S]+)/)) {
-                      resolve(e.responseHeaders?.match(/Location:\s*([\S]+)/)[1]);
                     } else {
-                      reject(new Error("URLBrokenError"));
+                      const responseHeader = e.responseHeaders?.match(/Location:\s*([\S]+)/);
+                      if (responseHeader) {
+                        resolve(responseHeader[1]);
+                      } else {
+                        const realURL = e.finalUrl;
+                        if (realURL && realURL !== url) {
+                          resolve(realURL);
+                        } else {
+                          reject(new Error("URLBrokenError"));
+                        }
+                      }
                     }
                   },
-                  ontimeoutFunc: reject => () => reject(new Error("Timeout Error")),
+                  ontimeoutFunc: reject => () => reject(new Error("TimeoutError")),
                 });
               break;
             case "Bing":
@@ -1169,15 +1236,15 @@
                     if (response.status === 200) {
                       const resText = response.responseText || response.response || "";
                       const resUrl = response.finalUrl || response.responseURL || url;
-                      let res = resText.match(/(var\s+u\s*=\s*")([^"]+)("\s*;\s*\r\n)/i);
-                      res = res ? res[2] : resUrl;
+                      let res = resText.match(/var\s+u\s*=\s*"([^"]+)"\s*;\s*\r\n/i);
+                      res = res ? res[1] : resUrl;
                       resolve(res);
                     } else {
                       rejectResponse(response, resolve, reject, url);
                     }
                   },
-                  onerrorFunc: reject => () => reject(new Error("URLBroken Error")),
-                  ontimeoutFunc: reject => () => reject(new Error("Timeout Error")),
+                  onerrorFunc: reject => () => reject(new Error("URLBrokenError")),
+                  ontimeoutFunc: reject => () => reject(new Error("TimeoutError")),
                 });
               break;
             case "Sogou":
@@ -1188,21 +1255,23 @@
                     if (response.status === 200) {
                       const resText = response.responseText || response.response || "";
                       const resUrl = response.finalUrl || response.responseURL || url;
-                      let res = resText.match(/(URL\s*=\s*')([^']+)(')/);
-                      res = res ? res[2] : resUrl;
+                      let res = resText.match(/URL\s*=\s*'([^']+)'/);
+                      res = res ? res[1] : resUrl;
                       resolve(res);
                     } else {
                       rejectResponse(response, resolve, reject, url);
                     }
                   },
-                  onerrorFunc: reject => () => reject(new Error("URLBroken Error")),
-                  ontimeoutFunc: reject => () => reject(new Error("Timeout Error")),
+                  onerrorFunc: reject => () => reject(new Error("URLBrokenError")),
+                  ontimeoutFunc: reject => () => reject(new Error("TimeoutError")),
                 });
               break;
             case "So360":
               if (node.getAttribute("data-mdurl")) {
                 node.href = node.dataset.mdurl;
+                clearHrefEvents(node, true);
                 node.setAttribute("gd-antiredirect-status", "success");
+                IS_DEBUG && node.classList.remove(def.const.loading);
               } else {
                 task = () =>
                   getRealUrl(url, node, "So360", {
@@ -1211,39 +1280,44 @@
                       if (response.status === 200) {
                         const resText = response.responseText || response.response || "";
                         const resUrl = response.finalUrl || response.responseURL || url;
-                        let res = resText.match(/(URL\s*=\s*')([^']+)(')/);
-                        res = res ? res[2] : resUrl;
+                        let res = resText.match(/URL\s*=\s*'([^']+)'/);
+                        res = res ? res[1] : resUrl;
                         resolve(res);
                       } else {
                         rejectResponse(response, resolve, reject, url);
                       }
                     },
-                    onerrorFunc: reject => () => reject(new Error("URLBroken Error")),
-                    ontimeoutFunc: reject => () => reject(new Error("Timeout Error")),
+                    onerrorFunc: reject => () => reject(new Error("URLBrokenError")),
+                    ontimeoutFunc: reject => () => reject(new Error("TimeoutError")),
                   });
               }
               break;
             case "Toutiao":
               if (url) {
-                const realUrl = url.match(/(\/search\/jump\?url=)([^&]+)(&)/);
-                node.href = realUrl ? decodeURI(decodeURIComponent(realUrl[2])) : url;
-                clearHrefEvents(node);
+                const realUrl = url.match(/\/search\/jump\?url=([^&]+)&/);
+                node.href = realUrl ? decodeURI(decodeURIComponent(realUrl[1])) : url;
+                clearHrefEvents(node, true);
                 node.setAttribute("gd-antiredirect-status", "success");
+                IS_DEBUG && node.classList.remove(def.const.loading);
               }
               break;
           }
-          task && taskList.push(task);
+          if (typeof task === "function") {
+            taskList.push(task);
+            task = null;
+          }
         });
-
         parallelTasks(taskList, 6);
 
         function rejectResponse(response, resolve, reject, url) {
-          if (/^20[1-8]$/.test(response.status)) resolve(url);
           const resUrl = response.finalUrl || response.responseURL || url;
-          if (resUrl === url || response.status === 0) {
-            reject(new Error(`ResponseError: ${response.status}`));
-          } else {
+          if (/^20[1-8]$/.test(response.status)) {
+            response.statusText === "Intercepted by the IDM Advanced Integration" &&
+              __console("warn", "Internet Download Manager (IDM) 的劫持会造成文件被直接下载。IDM hijacking causes files to be downloaded directly.");
             resolve(resUrl);
+          } else if (response.status !== 0) {
+            if (resUrl === url) reject(new Error("ResponseError"));
+            else resolve(resUrl);
           }
         }
       }
@@ -1271,57 +1345,60 @@
               qA("li.b_algo").forEach(node => {
                 if (qS(".b_caption>div.b_attribution:not([u])+p[class]", node)) {
                   node.style.display = "none";
-                  sleep(5e2)(node).then(r => r?.remove());
+                  safeRemove(node);
                 }
               });
             }
-
             break;
           case "Yandex":
+            qS(`button.Button2.Button2_view_clear`)?.click();
             qA("button.DistrSplashscreen-DeclineButton,button.MessageBox-Close,button.PromotionIncut-Close,span.popup2__close-icon").forEach(item => item.click());
             if (qS(".serp-adv__counter")) {
               const rightside_Ads = qS(".serp-adv__counter").nextElementSibling;
               COUNT(`[${siteName}-Anti-Ads-Deep-exp]`);
-              qS(".serp-adv__counter").remove();
+              qS(".serp-adv__counter")?.remove();
               rightside_Ads?.className !== "serp-adv__found" && rightside_Ads?.remove();
             }
             if (qA("li.serp-item.serp-item_card div.Organic-Subtitle>span.LabelDirect,li.serp-item.serp-item_card span.LabelDirect.DirectLabel").length > 0) {
               const match_Ads_Style_Yandex = str => {
                 const ad_Selector = qS(str);
                 const ad_Match_Filter = ad_Selector?.textContent?.match(/\.LabelDirect\.DirectLabel_[a-z]+\[class\]\[class\]\s*{\s*background-image:\s*url\(([^)]+)\);?\s*}/);
-                return ad_Match_Filter ? ad_Match_Filter[1] : "no-ads-icon";
+                return ad_Match_Filter?.[1] ?? "no-ads-icon";
               };
-              // const ad_Matched = match_Ads_Style_Yandex(`body>style[nonce][data-stylesheet="bundles-assets"]`);
-              const ad_Matcded_II = match_Ads_Style_Yandex(`#search-result-aside>style[nonce][data-stylesheet="progressive"]`);
+              const ad_Matched_Moz = match_Ads_Style_Yandex(`body>style[nonce][data-stylesheet="bundles-assets"]`);
+              const ad_Matched = match_Ads_Style_Yandex(`#search-result>style[nonce][data-stylesheet="bundles-assets"]`);
               COUNT(`[${siteName}-Anti-Ads-Deep]`);
-              qA("li.serp-item.serp-item_card").forEach(node => {
-                const ads_Detect = qS("div.Organic-Subtitle>span.LabelDirect", node);
-                const ads_Detect_II = qS("span.LabelDirect.DirectLabel", node);
-                const styleState = ads_Detect_II && gCS(ads_Detect_II, "background-image");
+              qA("li.serp-item.serp-item_card,#search-result-aside div.serp-list>div.serp-item").forEach(node => {
+                const ads_Detect = qS("span.LabelDirect", node);
+                const ads_Detect_Moz = qS("div.Organic-Subtitle>span.LabelDirect", node);
+                const ads_Detect_Txt = qS("div.Organic-Subtitle", node);
+                const styleState = gCS(ads_Detect, "background-image");
+                const styleState_Moz = gCS(ads_Detect_Moz, "background-image");
                 if (
-                  ads_Detect?.textContent?.includes("\u0420\u0435\u043a\u043b\u0430\u043c\u0430") ||
+                  ads_Detect_Txt?.textContent?.toLocaleLowerCase().includes("\u0440\u0435\u043a\u043b\u0430\u043c\u0430") ||
+                  ads_Detect?.textContent?.toLocaleLowerCase().includes("\u0440\u0435\u043a\u043b\u0430\u043c\u0430") ||
+                  ads_Detect_Txt?.textContent?.toLowerCase().includes("ad") ||
                   ads_Detect?.textContent?.toLowerCase().includes("ad") ||
-                  ads_Detect_II?.textContent?.toLowerCase().includes("ad") ||
-                  // styleState?.includes(ad_Matched) ||
-                  styleState?.includes(ad_Matcded_II)
+                  styleState?.includes(ad_Matched) ||
+                  styleState_Moz?.includes(ad_Matched_Moz)
                 ) {
-                  node?.remove();
+                  node.style.display = "none";
+                  node.remove();
                 }
               });
             }
             break;
           case "So360":
-            if (qA("ul.section>li span[class='txt']>s,ul.result>li>div[class~='res-recommend-tag']").length > 0) {
+            if (qA("ul.section>li span.txt>s, ul.result>li>div.res-recommend-tag").length > 0) {
               COUNT(`[${siteName}-Anti-Ads-Deep]`);
               qA("ul.section>li,ul.result>li").forEach(node => {
                 const ads = qS("span[class='txt']>s", node);
-                if (ads?.textContent?.includes("\u5e7f\u544a") || qS("div[class~='res-recommend-tag']", node)) {
-                  node?.remove();
-                }
+                if (ads?.textContent?.includes("\u5e7f\u544a") || qS("div.res-recommend-tag", node)) node.remove();
               });
             }
             break;
           case "You":
+            qS("button[aria-label='Close button']")?.click();
             if (qA("ul[data-testid='web-results'] div>div>span[class^='sc-']").length > 0) {
               COUNT(`[${siteName}-Anti-Ads-Deep]`);
               qA("ul[data-testid='web-results']>li").forEach(node => {
@@ -1332,52 +1409,51 @@
               });
             }
             break;
+          case "Yahoo":
+            qS(".browserExtensionPromotionWrapper a.btn.notnow")?.click();
+            break;
+          default:
+            break;
         }
       }
 
-      ~(async function setSearchEngineConfig(checkAutoUpdate, getRemoteIcon) {
-        "use strict";
+      ~(async function setSearchEngineConfig(checkAutoUpdate, fetchRemoteIcon) {
         const selectedSite = [];
         const listSite = {
           baidu: {
             SiteTypeID: 1,
-            SiteName: isChinese ? "百度一下" : "Baidu ®",
-            SiteNick: isChinese ? "百度 搜索" : "Baidu.com",
+            SiteName: isChinese ? "百度一下" : "𝐁𝐚𝐢𝐝𝐮",
+            SiteNick: isChinese ? "百度 搜索" : "𝐁𝐚𝐢𝐝𝐮.𝐜𝐨𝐦",
             SiteURI: "www.baidu.com",
             WebURL: "https://www.baidu.com/s?ie=utf-8&rqlang=cn&wd=",
             ImgURL: "https://image.baidu.com/search/index?tn=baiduimage&ps=1&ie=utf-8&word=",
             IMGType: ["baiduimage", "baiduimagedetail"],
             SplitName: "tn",
-            MainType: ".s_btn_wr,#sugOut",
-            StyleCode: `a,a em{text-decoration:none!important}:not([class^="page-inner"])>a:not(.${def.notice.linkerror}):hover{text-decoration:underline!important}#form{white-space:nowrap}#u{z-index:1!important}#${def.const.rndID}{z-index:1999999995;position:relative;margin:0 0 0 4px;height:40px;display:inline-block;line-height:40px;vertical-align:top;padding:0}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:40px}#${def.const.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#ffffff;min-width:90px;border:1px solid #3476d2;font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#ffffff;min-width:90px;border:1px solid #3476d2;font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background: #4662D9;border:1px solid #3476d2;}`,
+            MainType: ".s_btn_wr",
+            StyleCode: `a,a em{text-decoration:none!important}:not([class^="page-inner"])>a:not(.${def.notice.linkerror}):hover{text-decoration:underline!important}#form{white-space:nowrap}#u{z-index:1!important}#${def.const.rndID}{z-index:1999999995;position:relative;margin:0 0 0 4px;height:40px;display:inline-block;line-height:40px;vertical-align:top;padding:0}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:40px}#${def.const.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#ffffff;min-width:90px;border:1px solid transparent;font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#ffffff;min-width:90px;border:1px solid transparent;font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background: #4662d9;border:1px solid transparent;}`,
             KeyStyle: "#wrapper_wrapper em",
-            AntiRedirect: () => {
-              deBounce({ fn: antiRedirectFunc, delay: 2e2, timer: "baidu", immed: true })(
+            AntiRedirect: () =>
+              deBounce({ fn: antiRedirectFunc, delay: 2e2, timer: "baidu_c", immed: true })(
                 ".c-container a[href*='//www.baidu.com/link?url=']:not([gd-antiredirect-status])",
                 "Baidu"
-              );
-              deBounce({ fn: addTargetEvent, delay: 1e2, timer: "baidu_c", immed: false })(
-                "#container a:not(.c-gap-top-xsmall):not(.c-line-clamp1):not([href^='javascript:']):not([gd-attributeclean-status])",
-                "Baidu"
-              );
-            },
+              ),
             AntiAds: () =>
-              deBounce({ fn: antiAds_RemoveNodes, delay: 20, timer: "ad_baidu", immed: true })(
-                `#s-hotsearch-wrapper,.result-op[tpl='sp_hot_sale'],.result-op[tpl='b2b_prod'],#content_left>div:not([class]):not([style]),div[data-placeid],[id$='_canvas'],div.result.c-container:not([class~='xpath-log']),.imgpage .imglist>li.newfcImgli,.ec_wise_ad,div[class^='result-op'][tpl='right_tabs'][data-click],div[class^='result-op'][tpl='right_links'][data-click],#searchTag`,
+              deBounce({ fn: antiAds_RemoveNodes, delay: 50, timer: "ad_baidu", immed: true })(
+                `#s-hotsearch-wrapper,.result-op[tpl='sp_hot_sale'],.result-op[tpl='b2b_prod'],#content_left>div:not([class]):not([style]),div[data-placeid],[id$='_canvas'],div.result.c-container:not([class~='xpath-log']),.imgpage .imglist>li.newfcImgli,.ec_wise_ad,div[class^='result-op'][tpl='right_tabs'][data-click],div[class^='result-op'][tpl='right_links'][data-click],#searchTag,#con-ar div[fk*="热点推荐"]`,
                 "Baidu"
               ),
           },
           google: {
             SiteTypeID: 2,
-            SiteName: "Google",
-            SiteNick: isChinese ? "Google 搜索" : "Google.com",
+            SiteName: "𝐆𝐨𝐨𝐠𝐥𝐞",
+            SiteNick: isChinese ? "𝐆𝐨𝐨𝐠𝐥𝐞 搜索" : "𝐆𝐨𝐨𝐠𝐥𝐞.𝐜𝐨𝐦",
             SiteURI: "www.google.com",
             WebURL: "https://www.google.com/search?source=hp&safe=off&filter=0&newwindow=1&q=",
             ImgURL: "https://www.google.com/search?source=lnms&tbm=isch&sa=X&safe=off&filter=0&q=",
             IMGType: ["isch"],
             SplitName: "tbm",
             MainType: "form button[type='submit']",
-            StyleCode: `#${def.const.rndID}{z-index:100;position:relative;margin:0 4px 0 -5px;display:flex;justify-content:center;align-items:center}#${def.const.rndID} #${def.const.leftButton}{padding:0 2px 0 8px}.${def.const.scrollspan}{min-height:26px}.${def.const.scrollspan2}{min-height:26px;margin-top:0!important}.${def.const.scrollbars}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}.${def.const.scrollbars2}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}#${def.const.leftButton} input{margin:0;cursor:pointer;padding:1px 12px 1px 18px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;min-width:90px;height:38px;font-size:16px;font-weight:600;color:#ffffff;vertical-align:top;}#${def.const.rightButton} input{margin:0;cursor:pointer;padding:1px 18px 1px 12px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;min-width:90px;height:38px;font-size:16px;font-weight:600;color:#ffffff;vertical-align:top;}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#2b7de9;}`,
+            StyleCode: `#${def.const.rndID}{z-index:100;position:relative;margin:0 4px 0 -5px;display:flex;justify-content:center;align-items:center}#${def.const.rndID} #${def.const.leftButton}{padding:0 2px 0 8px}.${def.const.scrollspan}{min-height:26px}.${def.const.scrollspan2}{min-height:26px;margin-top:0!important}.${def.const.scrollbars}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}.${def.const.scrollbars2}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}#${def.const.leftButton} input{margin:0;cursor:pointer;padding:1px 12px 1px 18px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:24px;border-bottom-left-radius:24px;min-width:90px;height:38px;font-size:16px;font-weight:600;color:#ffffff;vertical-align:top;}#${def.const.rightButton} input{margin:0;cursor:pointer;padding:1px 18px 1px 12px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:24px;border-bottom-right-radius:24px;min-width:90px;height:38px;font-size:16px;font-weight:600;color:#ffffff;vertical-align:top;}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#1b66c9;}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{color:#202124;background:#8ab4f8;box-shadow: 0 1px 3px 1px rgba(0,0,0,.15), 0 1px 2px rgba(0,0,0,.3);}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#93baf9;}}`,
             KeyStyle: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
             AntiRedirect: () =>
               deBounce({ fn: addTargetEvent, delay: 5e2, timer: "google_c", immed: true })(
@@ -1392,28 +1468,27 @@
           },
           bing: {
             SiteTypeID: 3,
-            SiteName: "Bing ®",
-            SiteNick: isChinese ? "Bing 搜索" : "Bing.com",
+            SiteName: "𝐁𝐢𝐧𝐠 ®",
+            SiteNick: isChinese ? "𝐁𝐢𝐧𝐠 搜索" : "𝐁𝐢𝐧𝐠.𝐜𝐨𝐦",
             SiteURI: "www.bing.com",
             WebURL: "https://www.bing.com/search?rdr=1&q=",
             ImgURL: "https://www.bing.com/images/search?first=1&tsc=ImageBasicHover&q=",
             IMGType: ["images"],
-            SplitName: "/",
+            SplitName: { str: "/", index: 1 },
             MainType: `.b_searchboxForm>input[type="hidden"][name="form"]`,
-            StyleCode: `#sw_as{z-index:1051}.scs_c.scs_ini{z-index:1049}#miniheader #miniheader_searchbox #sb_form_q{width:400px}#b_header .b_searchboxForm{z-index:1048}a,#b_results>li a,#b_results .b_no a{color:#001ba0;}#b_results>li a:visited{cololr:#4007a2;}#${def.const.rndID}{z-index:1048;position:relative;display:inline-flex;height:38px;min-width:180px;width:auto;margin:0;padding:0 6px 0 0;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{width:auto;margin:0;padding:0}#${def.const.rndID} input{box-sizing:border-box;cursor:pointer;min-width:90px;height:38px;background-color:#f7faff;border:1px solid #174ae4;color:#174ae4;font-weight:600;font-size:16px}#${def.const.leftButton} input{border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px;}#${def.const.rightButton} input{border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 2px;padding:0 18px 0 12px;}.${def.const.scrollspan}{max-height:28px;margin:-14px -3px 0 0!important}.${def.const.scrollbars}{max-height:28px;font-size:14px!important}.${def.const.scrollspan2}{max-height:30px;padding:4px 4px 0 8px!important;margin:0!important;vertical-align:top!important}.${def.const.scrollbars2}{border-radius:4px!important;max-height:30px;padding:0 12px!important;margin-right:0!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#ffffff;transition:border linear .1s,box-shadow linear .3s;box-shadow:0px 0px 4px #174ae4;color:#174ae4;background-color:#f0f3f6;}.${def.notice.random}_input{width:300px!important}`,
-            KeyStyle: String(
-              // eslint-disable-next-line no-undef
-              Number(getUrlParam("ensearch")) || Number(gbCookies.getItem("ENSEARCH")?.match(/\d/)?.[0]) || 0
+            StyleCode: `#miniheader #miniheader_searchbox #sb_form_q{width:400px}a,#b_results>li a,#b_results .b_no a{color:#001ba0;}#b_results>li a:visited{cololr:#4007a2;}#${def.const.rndID}{z-index:0;position:relative;display:inline-flex;height:38px;min-width:180px;width:auto;margin:0;padding:0 6px 0 0;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{width:auto;margin:0;padding:0}#${def.const.rndID} input{box-sizing:border-box;cursor:pointer;min-width:90px;height:38px;background-color:#f7faff;border:1px solid #174ae4;color:#174ae4;font-weight:600;font-size:16px}#${def.const.leftButton} input{border-top-left-radius:24px;border-bottom-left-radius:24px;margin:0;padding:0 12px 0 18px;}#${def.const.rightButton} input{border-top-right-radius:24px;border-bottom-right-radius:24px;margin:0 0 0 2px;padding:0 18px 0 12px;}.${def.const.scrollspan}{max-height:28px;margin:-14px -3px 0 0!important}.${def.const.scrollbars}{max-height:28px;font-size:14px!important}.${def.const.scrollspan2}{max-height:30px;padding:4px 4px 0 8px!important;margin:0!important;vertical-align:top!important}.${def.const.scrollbars2}{border-radius:4px!important;max-height:30px;padding:0 12px!important;margin-right:0!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#ffffff;transition:border linear .1s,box-shadow linear .3s;box-shadow:0px 0px 4px #174ae4;color:#174ae4;background-color:#f0f3f6;}.${def.notice.random}_input{width:300px!important}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{color:#a2b7f4;background:transparent;border:1px solid #a2b7f4}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#a2b7f4;color:#333}}`,
+            KeyStyle:
+              Number(getUrlParam("ensearch")) || Number(w.gbCookies.getItem("ENSEARCH")?.match(/[=](\d)/)?.[1]) || 0
                 ? ".b_caption p strong, .b_caption .b_factrow strong, .b_secondaryText strong,th, h2 strong, h3 strong"
-                : "#sp_requery strong, #sp_recourse strong, #tile_link_cn strong, .b_ad .ad_esltitle~div strong, h2 strong, #b_results .b_algo p strong, .b_caption p strong, .b_snippetBigText strong, .recommendationsTableTitle+.b_slideexp strong, .recommendationsTableTitle+table strong, .recommendationsTableTitle+ul strong, .pageRecoContainer .b_module_expansion_control strong, .pageRecoContainer .b_title>strong, .b_rs strong, .b_rrsr strong, .richrswrapper strong, #dict_ans strong, .b_listnav>.b_ans_stamp>strong, #b_content #ans_nws .na_cnt strong, .b_vidAns strong, .adltwrnmsg strong"
-            ),
+                : "#sp_requery strong, #sp_recourse strong, #tile_link_cn strong, .b_ad .ad_esltitle~div strong, h2 strong, #b_results .b_algo p strong, .b_caption p strong, .b_snippetBigText strong, .recommendationsTableTitle+.b_slideexp strong, .recommendationsTableTitle+table strong, .recommendationsTableTitle+ul strong, .pageRecoContainer .b_module_expansion_control strong, .pageRecoContainer .b_title>strong, .b_rs strong, .b_rrsr strong, .richrswrapper strong, #dict_ans strong, .b_listnav>.b_ans_stamp>strong, #b_content #ans_nws .na_cnt strong, .b_vidAns strong, .adltwrnmsg strong",
             AntiRedirect: () => {
               deBounce({ fn: antiRedirectFunc, delay: 5e2, timer: "bing", immed: true })("#b_content a[href*='.bing.com/ck/a?']:not([gd-antiredirect-status])", "Bing");
-              deBounce({ fn: addTargetEvent, delay: 1e2, timer: "bing_c", immed: false })(
-                `#b_results a:not([href^="javascript:"]):not([role="presentation"]):not(.sb_bp):not([gd-attributeclean-status]),#b_context a:not([href^="javascript:"]):not([data-partnertag]):not([id="ht_toggle"]):not([gd-attributeclean-status]),#b_context li[data-priority]>a[h]:not([href^="javascript:"])`,
-                "Bing"
-              );
               GMunsafeWindow.AwayTimeThreshold = 864e3;
+              /^cn\.bing\.com$/.test(CUR_HOST_NAME) &&
+                deBounce({ fn: addTargetEvent, delay: 1e2, timer: "bing_c", immed: false })(
+                  `#b_results a:not([href^="javascript:"]):not([role="presentation"]):not(.sb_bp):not([gd-attributeclean-status]),#b_context a:not([href^="javascript:"]):not([data-partnertag]):not([id="ht_toggle"]):not([gd-attributeclean-status]),#b_context li[data-priority]>a[h]:not([href^="javascript:"])`,
+                  "Bing"
+                );
             },
             AntiAds: () =>
               deBounce({ fn: antiAds_RemoveNodes, delay: 20, timer: "ad_bing", immed: true })(
@@ -1423,38 +1498,33 @@
           },
           duckduckgo: {
             SiteTypeID: 4,
-            SiteName: "Duckduckgo",
-            SiteNick: isChinese ? "鸭鸭 搜索" : "Duckduckgo.com",
+            SiteName: "𝐃𝐮𝐜𝐤𝐝𝐮𝐜𝐤𝐠𝐨",
+            SiteNick: isChinese ? "𝐃𝐮𝐜𝐤𝐝𝐮𝐜𝐤𝐠𝐨 搜索" : "𝐃𝐮𝐜𝐤𝐝𝐮𝐜𝐤𝐠𝐨",
             SiteURI: "duckduckgo.com",
             WebURL: "https://duckduckgo.com/?k1=-1&kl=wt-wt&kd=-1&ko=1&kn=1&kp=-2&t=h_&ia=web&q=",
             ImgURL: "https://duckduckgo.com/?k1=-1&kl=wt-wt&kd=-1&ko=s&kn=1&kp=-2&t=h_&iax=images&ia=images&q=",
             IMGType: ["images"],
             SplitName: "ia",
             MainType: "#search_form",
-            StyleCode: `#${def.const.rndID}{z-index:1999999995;position:absolute;top:0;right:-188px;height:44px;display:block;}#${def.const.leftButton}{display:inline-block;height:44px}#${def.const.rightButton}{margin:0 0 0 -2px;display:inline-block;height:44px}#${def.const.leftButton} input{margin:0;cursor:pointer;padding:1px 10px 1px 15px!important;border:1px solid rgba(0, 0, 0, 0.15);box-shadow:0 2px 3px rgb(0 0 0 / 6%);background:#ffffff;border-top-left-radius:8px;border-bottom-left-radius:8px;min-width:90px;height:44px;font-size:16px;font-weight:400;color:#888888;vertical-align:top;}#${def.const.rightButton} input{margin:0;cursor:pointer;padding:1px 15px 1px 10px!important;border:1px solid rgba(0, 0, 0, 0.15);box-shadow:0 2px 3px rgb(0 0 0 / 6%);background:#ffffff;border-top-right-radius:8px;border-bottom-right-radius:8px;min-width:90px;height:44px;font-size:16px;font-weight:400;color:#888888;vertical-align:top;}#${def.const.rndID}:hover #${def.const.leftButton} input,#${def.const.rndID}:hover #${def.const.rightButton} input{background:#3969ef;color:#ffffff;}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#2950bf!important;border:1px solid rgba(0, 0, 0, 0.15);color:#ffffff;}`,
+            StyleCode: `#${def.const.rndID}{z-index:1999999995;position:absolute;top:0;right:-188px;height:44px;display:block;}#${def.const.leftButton}{display:inline-block;height:44px}#${def.const.rightButton}{margin:0 0 0 -2px;display:inline-block;height:44px}#${def.const.leftButton} input{margin:0;cursor:pointer;padding:1px 10px 1px 15px!important;border:1px solid var(--theme-col-bg-button-secondary-hover);box-shadow:0 2px 3px rgb(0 0 0 / 6%);background:transparent;border-top-left-radius:var(--default-border-radius);border-bottom-left-radius:var(--default-border-radius);min-width:90px;height:44px;font-size:16px;font-weight:400;color:var(--theme-col-txt-button-secondary);vertical-align:top;}#${def.const.rightButton} input{margin:0;cursor:pointer;padding:1px 15px 1px 10px!important;border:1px solid var(--theme-col-bg-button-secondary-hover);box-shadow:0 2px 3px rgb(0 0 0 / 6%);background:transparent;border-top-right-radius:var(--default-border-radius);border-bottom-right-radius:var(--default-border-radius);min-width:90px;height:44px;font-size:16px;font-weight:400;color:var(--theme-col-txt-button-secondary);vertical-align:top;}#${def.const.rndID}:hover #${def.const.leftButton} input,#${def.const.rndID}:hover #${def.const.rightButton} input{background-color:var(--theme-col-bg-button-secondary-hover);color:#999;}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#2950bf!important;border:1px solid #2950bf;color:#fff!important;}`,
             KeyStyle: "strong, b",
             AntiRedirect: () => {},
             AntiAds: () => {},
           },
           sogou: {
             SiteTypeID: 5,
-            SiteName: isChinese ? "搜狗搜索" : "Sougou",
-            SiteNick: isChinese ? "搜狗 搜索" : "Sougou.com",
+            SiteName: isChinese ? "搜狗搜索" : "𝐒𝐨𝐠𝐨𝐮",
+            SiteNick: isChinese ? "搜狗 搜索" : "𝐒𝐨𝐠𝐨𝐮.𝐜𝐨𝐦",
             SiteURI: "www.sogou.com",
             WebURL: "https://www.sogou.com/web?query=",
             ImgURL: "https://pic.sogou.com/pics?query=",
             IMGType: ["pics", "d"],
-            SplitName: "/",
-            MainType: "input[type='submit'].sbtn1,input[type='button'][uigs='search_account'],input[type='submit'].search-btn",
+            SplitName: { str: "/", index: 1 },
+            MainType: "input[type='submit'].sbtn1,input[type='button'][uigs='search_article'],input[type='submit'].search-btn",
             StyleCode: `#${def.const.rndID}{z-index:1999999995;position:absolute;right:0;top:0;width:auto;height:34px;margin:-1px 0 0 0;padding:0;cursor:pointer;-webkit-appearance:none}#${def.const.leftButton}{display:inline;height:34px}#${def.const.rightButton}{display:inline;height:34px}#${def.const.leftButton} input{padding:0 18px!important;background:#fafafa;border-radius:3px;cursor:pointer;height:34px;color:#000000;min-width:90px;border:1px solid #ababab;font-size:14px!important;font-weight:400;vertical-align:top;margin:0}#${def.const.rightButton} input{padding:0 18px!important;background:#fafafa;border-radius:3px;cursor:pointer;height:34px;color:#000;min-width:90px;border:1px solid #ababab;font-size:14px!important;font-weight:400;vertical-align:top;margin:0}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background: #f2f2f2;border:1px solid #7a7a7a;}.${def.notice.random}_weixin{background:#fff!important;border:1px solid #00a06a!important;color:#00a06a!important;border-radius:2px!important;font-size:15px!important}.${def.notice.random}_weixin:hover{background:#f7fffd!important}`,
             KeyStyle: "#wrapper em",
-            AntiRedirect: () => {
-              deBounce({ fn: antiRedirectFunc, delay: 2e2, timer: "sogou", immed: true })("#wrapper a[href^='/link?url=']:not([gd-antiredirect-status])", "Sogou");
-              deBounce({ fn: addTargetEvent, delay: 1e2, timer: "sogou_c", immed: false })(
-                "#wrapper :not(.filter_box)>a:not([id*='_page_']):not([id^='left_timespan_']):not([gd-attributeclean-status]):not([href^='javascript:'])",
-                "Sogou"
-              );
-            },
+            AntiRedirect: () =>
+              deBounce({ fn: antiRedirectFunc, delay: 2e2, timer: "sogou_c", immed: true })("#wrapper a[href^='/link?url=']:not([uigs]):not([gd-antiredirect-status])", "Sogou"),
             AntiAds: () =>
               deBounce({ fn: antiAds_RemoveNodes, delay: 20, timer: "ad_sogou", immed: true })(
                 `#biz_tip_box_tuiguang_float,.pz_pc_new_container,.share-wrap,.sponsored,.tgad-box,[class~='ext_query'][id*='sq_ext_'],div.top-better-hintBox`,
@@ -1463,30 +1533,30 @@
           },
           fsou: {
             SiteTypeID: 6,
-            SiteName: isChinese ? "F搜 ®" : "Fsou",
-            SiteNick: isChinese ? "FSou 搜索" : "Fsoufsou.com",
+            SiteName: "𝐅𝐬𝐨𝐮 ®",
+            SiteNick: isChinese ? "𝐅𝐬𝐨𝐮𝐟𝐬𝐨𝐮 搜索" : "𝐅𝐬𝐨𝐮𝐟𝐬𝐨𝐮.𝐜𝐨𝐦",
             SiteURI: "fsoufsou.com",
             WebURL: "https://fsoufsou.com/search?tbn=all&q=",
             ImgURL: "https://fsoufsou.com/search?tbn=images&q=",
             IMGType: ["images"],
             SplitName: "tbn",
             MainType: ".input-group-container .search-icon",
-            StyleCode: `#${def.const.rndID}{z-index:1999999995;position:relative;height:36px;margin:0 -17px 0 15px;z-index:100;display:inline-flex;justify-content:center;align-items:center}#${def.const.rightButton}{padding:0 0 0 2px}#${def.const.leftButton} input{cursor:pointer;padding:1px 12px 1px 18px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:22px;border-bottom-left-radius:22px;min-width:90px;height:36px;font-size:15px;font-weight:600;color:#ffffff;vertical-align:top;}#${def.const.rightButton} input{cursor:pointer;padding:1px 18px 1px 12px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:22px;border-bottom-right-radius:22px;min-width:90px;height:36px;font-size:15px;font-weight:600;color:#ffffff;vertical-align:top;}`,
+            StyleCode: `#${def.const.rndID}{z-index:1999999995;position:relative;height:36px;margin:0 -17px 0 15px;z-index:100;display:inline-flex;justify-content:center;align-items:center}#${def.const.rightButton}{padding:0 0 0 2px}#${def.const.leftButton} input{cursor:pointer;padding:1px 12px 1px 18px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-left-radius:22px;border-bottom-left-radius:22px;min-width:90px;height:36px;font-size:15px;font-weight:600;color:#ffffff;vertical-align:top;}#${def.const.rightButton} input{cursor:pointer;padding:1px 18px 1px 12px!important;border:1px solid transparent;background:#1a73e8;box-shadow:none;border-top-right-radius:22px;border-bottom-right-radius:22px;min-width:90px;height:36px;font-size:15px;font-weight:600;color:#ffffff;vertical-align:top;}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#1b66ca;}`,
             KeyStyle: ".highlight-style",
             AntiRedirect: () => {},
             AntiAds: () => {},
           },
           yandex: {
             SiteTypeID: 7,
-            SiteName: "Yandex",
-            SiteNick: isChinese ? "Yandex 搜索" : "Yandex.com",
+            SiteName: "𝐘𝐚𝐧𝐝𝐞𝐱",
+            SiteNick: isChinese ? "𝐘𝐚𝐧𝐝𝐞𝐱 搜索" : "𝐘𝐚𝐧𝐝𝐞𝐱.𝐜𝐨𝐦",
             SiteURI: "yandex.com",
             WebURL: `https://yandex.${navigator.language === "ru" ? "ru" : "com"}/search/?text=`,
             ImgURL: `https://yandex.${navigator.language === "ru" ? "ru" : "com"}/images/search?from=tabbar&family=no&text=`,
             IMGType: ["images"],
-            SplitName: "/",
+            SplitName: { str: "/", index: 1 },
             MainType: "form>div.search2__input,form>div.HeaderDesktopForm-InputWrapper",
-            StyleCode: `#${def.const.rndID}{z-index:1999999995;position:absolute;right:0;top:0;width:auto;height:40px;margin:0;padding:0;cursor:pointer;opacity:0;-webkit-appearance:none;transition:opacity 0.5s ease-in}#${def.const.leftButton}{display:inline-block;height:40px}#${def.const.rightButton}{margin:0 0 0 -2px;display:inline-block;height:40px}#${def.const.leftButton} input{cursor:pointer;padding:1px 12px 0 18px!important;border:1px solid transparent;background:#ffcc00;box-shadow:none;border-top-left-radius:10px;border-bottom-left-radius:10px;min-width:90px;height:40px;font-size:16px;font-weight:400;color:#000000;vertical-align:top;}#${def.const.rightButton} input{cursor:pointer;padding:1px 18px 0 12px!important;border:1px solid transparent;background:#ffcc00;box-shadow:none;border-top-right-radius:10px;border-bottom-right-radius:10px;min-width:90px;height:40px;font-size:16px;font-weight:400;color:#000000;vertical-align:top;}`,
+            StyleCode: `#${def.const.rndID}{z-index:1999999995;position:absolute;right:0;top:0;width:auto;height:44px;margin:0;padding:0;cursor:pointer;opacity:0;-webkit-appearance:none;transition:opacity 0.5s ease-in}#${def.const.leftButton}{display:inline-block;height:44px}#${def.const.rightButton}{margin:0 0 0 -2px;display:inline-block;height:44px}#${def.const.leftButton} input{cursor:pointer;padding:1px 12px 0 18px!important;border:1px solid transparent;background:#ffcc00;box-shadow:none;border-top-left-radius:10px;border-bottom-left-radius:10px;min-width:90px;height:44px;font-size:16px;font-weight:400;color:#000000;vertical-align:top;}#${def.const.rightButton} input{cursor:pointer;padding:1px 18px 0 12px!important;border:1px solid transparent;background:#ffcc00;box-shadow:none;border-top-right-radius:10px;border-bottom-right-radius:10px;min-width:90px;height:44px;font-size:16px;font-weight:400;color:#000000;vertical-align:top;}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#ffd633;}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{background-color:#fdde55;}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#fdc93d;}}`,
             KeyStyle: ".OrganicTitleContentSpan b,.OrganicTextContentSpan b",
             AntiRedirect: () =>
               deBounce({ fn: addTargetEvent, delay: 1e2, timer: "yandex_c", immed: false })(
@@ -1501,23 +1571,18 @@
           },
           so360: {
             SiteTypeID: 8,
-            SiteName: isChinese ? "360搜索" : "360So",
-            SiteNick: isChinese ? "360 搜索" : "www.so.com",
+            SiteName: isChinese ? "𝟑𝟔𝟎搜索" : "𝟑𝟔𝟎𝐬𝐨",
+            SiteNick: isChinese ? "𝟑𝟔𝟎 搜索" : "𝐰𝐰𝐰.𝐬𝐨.𝐜𝐨𝐦",
             SiteURI: "www.so.com",
             WebURL: "https://www.so.com/s?ie=utf-8&q=",
             ImgURL: "https://image.so.com/i?q=",
             IMGType: ["i", "view"],
-            SplitName: "/",
+            SplitName: { str: "/", index: 1 },
             MainType: "input[type='submit'][value='搜索'],button[type='submit'][class~='so-search__button']",
-            StyleCode: `#hd-rtools{z-index:1!important}#${def.const.rndID}{z-index:199999995;position:relative;left:0;top:0;width:auto;height:40px;margin:0 0 0 5px;padding:0;cursor:pointer;-webkit-appearance:none}#${def.const.leftButton}{padding:0 1px 0 0;height:40px;display:inline-block;vertical-align:top}#${def.const.rightButton}{height:40px;display:inline-block;vertical-align:top}#${def.const.leftButton} input{padding:0 18px!important;background:#0fb264;border:1px solid #0fb264;border-top-left-radius:8px;border-bottom-left-radius:8px;cursor:pointer;height:40px;color:#ffffff;min-width:90px;font-size:16px!important;font-weight:400;vertical-align:top;margin:0 -2px 0 0}#${def.const.rightButton} input{padding:0 18px!important;background:#0fb264;border:1px solid #0fb264;border-top-right-radius:8px;border-bottom-right-radius:8px;cursor:pointer;height:40px;color:#ffffff;min-width:90px;font-size:16px!important;font-weight:400;vertical-align:top;margin:0}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background: #109e5a;border:1px solid #109e5a;}`,
+            StyleCode: `#${def.const.rndID}{z-index:199999995;position:relative;left:0;top:0;width:auto;height:40px;margin:0 0 0 5px;padding:0;cursor:pointer;-webkit-appearance:none}#${def.const.leftButton}{padding:0 1px 0 0;height:40px;display:inline-block;vertical-align:top}#${def.const.rightButton}{height:40px;display:inline-block;vertical-align:top}#${def.const.leftButton} input{padding:0 18px!important;background:#0fb264;border:1px solid #0fb264;border-top-left-radius:8px;border-bottom-left-radius:8px;cursor:pointer;height:40px;color:#ffffff;min-width:90px;font-size:16px!important;font-weight:400;vertical-align:top;margin:0 -2px 0 0}#${def.const.rightButton} input{padding:0 18px!important;background:#0fb264;border:1px solid #0fb264;border-top-right-radius:8px;border-bottom-right-radius:8px;cursor:pointer;height:40px;color:#ffffff;min-width:90px;font-size:16px!important;font-weight:400;vertical-align:top;margin:0}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background: #109e5a;border:1px solid #109e5a;}`,
             KeyStyle: "em,#mohe-newdict_dict .mh-exsentence b",
-            AntiRedirect: () => {
-              deBounce({ fn: antiRedirectFunc, delay: 3e2, timer: "so360", immed: true })(".res-list a[href*='//www.so.com/link?m=']:not([gd-antiredirect-status])", "So360");
-              deBounce({ fn: addTargetEvent, delay: 5e2, timer: "so360_c", immed: false })(
-                "#warper :not([id='page']) a:not([href^='javascript:']):not([gd-attributeclean-status])",
-                "So360"
-              );
-            },
+            AntiRedirect: () =>
+              deBounce({ fn: antiRedirectFunc, delay: 3e2, timer: "so360_c", immed: true })(".res-list a[href*='//www.so.com/link?m=']:not([gd-antiredirect-status])", "So360"),
             AntiAds: () =>
               deBounce({ fn: antiAds_RemoveNodes, delay: 20, timer: "ad_so360", immed: true })(
                 `#so_bd-ad,#e_idea_pp,#righttop_box,[id^='mohe-360pic_ext--'],.res-mediav,.map_business_con,.lianmeng-ad,.res-mediav-right,.atom-adv,.e-buss,.spread,ul[data-so-biz-monitor-so-display],.related_query li.cm,[class='inline-recommend'][data-url],div#so_top,div#so-activity-entry,div.mh-relate-text,.section li[data-id^="related_query_init_"]`,
@@ -1526,8 +1591,8 @@
           },
           toutiao: {
             SiteTypeID: 9,
-            SiteName: isChinese ? "搜头条" : "Toutiao",
-            SiteNick: isChinese ? "头条 搜索" : "so.toutiao.com",
+            SiteName: isChinese ? "搜头条" : "𝐓𝐨𝐮𝐭𝐢𝐚𝐨",
+            SiteNick: isChinese ? "头条 搜索" : "𝐬𝐨.𝐭𝐨𝐮𝐭𝐢𝐚𝐨.𝐜𝐨𝐦",
             SiteURI: "so.toutiao.com",
             WebURL: "https://so.toutiao.com/search?dvpf=pc&keyword=",
             ImgURL: "https://so.toutiao.com/search?dvpf=pc&pd=atlas&from=gallery&keyword=",
@@ -1545,30 +1610,30 @@
           },
           kaifa: {
             SiteTypeID: 10,
-            SiteName: isChinese ? "开发者搜索" : "PROG.Baidu",
-            SiteNick: isChinese ? "百度开发者 搜索" : "kaifa.baidu.com",
+            SiteName: isChinese ? "百度开发者" : "𝐃𝐞𝐯.𝐁𝐢𝐚𝐝𝐮",
+            SiteNick: isChinese ? "百度开发者 搜索" : "𝐃𝐞𝐯.𝐁𝐢𝐚𝐝𝐮",
             SiteURI: "kaifa.baidu.com",
             WebURL: "https://kaifa.baidu.com/searchPage?module=SEARCH&wd=",
             ImgURL: "https://kaifa.baidu.com/searchPage?module=SUG&wd=",
             IMGType: [null],
             SplitName: "",
             MainType: "div#search-box-container .ant-input-group-addon",
-            StyleCode: `.ant-input-group-addon{background:transparent!important}#${def.const.rndID}{z-index:1999999995;position:relative;margin-left:4px;height:40px;display:inline-block;vertical-align:bottom}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:40px}#${def.const.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;background:#4e6ef2;border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#ffffff;min-width:90px;border:1px solid #3476d2;font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;background:#4e6ef2;border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#ffffff;min-width:90px;border:1px solid #3476d2;font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background: #4662D9;border:1px solid #3476d2;}`,
+            StyleCode: `.ant-input-group-addon{background:transparent!important}#${def.const.rndID}{z-index:1999999995;position:relative;margin-left:4px;height:40px;display:inline-block;vertical-align:bottom}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:40px}#${def.const.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;background:var(--ee-brand-6);border-top-left-radius:10px;border-bottom-left-radius:10px;cursor:pointer;height:40px;color:#ffffff;min-width:90px;border:1px solid var(--ee-brand-6);font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;background:var(--ee-brand-6);border-top-right-radius:10px;border-bottom-right-radius:10px;cursor:pointer;height:40px;color:#ffffff;min-width:90px;border:1px solid var(--ee-brand-6);font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background: var(--ee-brand-5);border:1px solid var(--ee-brand-5);}`,
             KeyStyle: "mark",
             AntiRedirect: () => {},
             AntiAds: () => deBounce({ fn: antiAds_RemoveNodes, delay: 20, timer: "ad_kaifa", immed: true })("#reward-entry", "Kaifa"),
           },
           ecosia: {
             SiteTypeID: 11,
-            SiteName: "Ecosia",
-            SiteNick: isChinese ? "Ecosia 搜索" : "Ecosia.org",
+            SiteName: "𝐄𝐜𝐨𝐬𝐢𝐚",
+            SiteNick: isChinese ? "𝐄𝐜𝐨𝐬𝐢𝐚 搜索" : "𝐄𝐜𝐨𝐬𝐢𝐚.𝐨𝐫𝐠",
             SiteURI: "www.ecosia.org",
             WebURL: "https://www.ecosia.org/search?method=index&q=",
             ImgURL: "https://www.ecosia.org/images?q=",
             IMGType: ["images"],
-            SplitName: "/",
+            SplitName: { str: "/", index: 1 },
             MainType: "form[role='search'][class~='search-form'][data-test-id='main-header-search-form']",
-            StyleCode: `#${def.const.rndID}{z-index:1999999995;position:relative;margin-left:-12px;height:40px;display:inline-block}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:40px}#${def.const.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;background:var(--color-background-primary);border-top-left-radius:20px;border-bottom-left-radius:20px;cursor:pointer;height:40px;color:#008009;min-width:90px;border:1px solid #bebeb9;box-shadow:0 1px 2px rgba(26,26,26,0.18),0 0 8px rgba(26,26,26,0.06);font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;background:var(--color-background-primary);border-top-right-radius:20px;border-bottom-right-radius:20px;cursor:pointer;height:40px;color:#008009;min-width:90px;border:1px solid #bebeb9;box-shadow:0 1px 2px rgba(26,26,26,0.18),0 0 8px rgba(26,26,26,0.06);font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{color:#ffffff;background: #006600;border:1px solid #006600;}`,
+            StyleCode: `#${def.const.rndID}{z-index:1999999995;position:relative;margin-left:-12px;height:40px;display:inline-block}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:40px}#${def.const.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;background:var(--color-background-primary);border-top-left-radius:20px;border-bottom-left-radius:20px;cursor:pointer;height:40px;color:var(--color-button-content-tertiary);min-width:90px;border:1px solid var(--color-form-border-default);box-shadow:0 1px 2px rgba(26,26,26,0.18),0 0 8px rgba(26,26,26,0.06);font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;background:var(--color-background-primary);border-top-right-radius:20px;border-bottom-right-radius:20px;cursor:pointer;height:40px;color:var(--color-button-content-tertiary);min-width:90px;border:1px solid var(--color-form-border-default);box-shadow:0 1px 2px rgba(26,26,26,0.18),0 0 8px rgba(26,26,26,0.06);font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{color:var(--color-button-content-primary);background:var(--color-button-background-primary-hover);border:1px solid var(--color-button-background-primary-hover);}`,
             KeyStyle: "",
             AntiRedirect: () => {
               deBounce({ fn: addTargetEvent, delay: 5e2, timer: "ecosia_c", immed: false })(
@@ -1582,13 +1647,13 @@
           },
           yahoo: {
             SiteTypeID: 12,
-            SiteName: "Yahoo",
-            SiteNick: isChinese ? "Yahoo 搜索" : "search.Yahoo",
+            SiteName: "𝐘𝐚𝐡𝐨𝐨",
+            SiteNick: isChinese ? "𝐘𝐚𝐡𝐨𝐨 搜索" : "𝐬𝐞𝐚𝐫𝐜𝐡.𝐘𝐚𝐡𝐨𝐨",
             SiteURI: "search.yahoo.com",
             WebURL: "https://search.yahoo.com/search?p=",
             ImgURL: "https://images.search.yahoo.com/search/images?p=",
             IMGType: ["images"],
-            SplitName: "$",
+            SplitName: () => location.hostname.split(".")[0],
             MainType: "#hd div.sbx form#sf,header.hd form#sf #sh section#sbx",
             StyleCode: `#${def.const.rndID}{z-index:1999999995;position:relative;margin-left:4px;width:max-content;height:44px;position:absolute;display:inline-block}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:44px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:44px}#${def.const.leftButton} input{margin:2px 0;padding:1px 12px 1px 18px!important;background:#4285f5;border-top-left-radius:100px;border-bottom-left-radius:100px;cursor:pointer;height:44px;color:#ffffff;min-width:90px;border:2px solid transparent;font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.rightButton} input{margin:2px 0;padding:1px 18px 1px 12px!important;background:#4285f5;border-top-right-radius:100px;border-bottom-right-radius:100px;cursor:pointer;height:44px;color:#ffffff;min-width:90px;border:2px solid transparent;font-size:16px!important;vertical-align:top;font-weight:600}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{color:#ffffff;background: #1967d2;border:2px solid transparent;}`,
             KeyStyle: "strong",
@@ -1597,61 +1662,98 @@
           },
           you: {
             SiteTypeID: 13,
-            SiteName: "You",
-            SiteNick: isChinese ? "You 搜索" : "You.com",
+            SiteName: "𝐘𝐨𝐮 ®",
+            SiteNick: isChinese ? "𝐘𝐨𝐮 搜索" : "𝐘𝐨𝐮.𝐜𝐨𝐦",
             SiteURI: "you.com",
             WebURL: "https://you.com/search?fromSearchBar=true&q=",
             ImgURL: "https://you.com/search?fromSearchBar=true&tbm=isch&q=",
             IMGType: ["isch"],
             SplitName: "tbm",
-            MainType: "#section>main div[data-testid='STATIC_BOTTOM_BAR']",
-            StyleCode: `#${def.const.rndID}{z-index:999;position:relative;margin-left:6px;height:42px;display:inline-block}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;height:42px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:42px}#${def.const.leftButton} input{margin:2px 0 0 0;padding:1px 10px 1px 20px!important;background-color:#ffffff;border-top-left-radius:100px;border-bottom-left-radius:100px;cursor:pointer;height:40px;color:#4a72f5;min-width:110px;border:1px solid #4a72f5;font-size:17px!important;vertical-align:top;font-weight:600}#${def.const.rightButton} input{margin:2px 0 0 0;padding:1px 20px 1px 10px!important;background-color:#ffffff;border-top-right-radius:100px;border-bottom-right-radius:100px;cursor:pointer;height:40px;color:#4a72f5;min-width:110px;border:1px solid #4a72f5;font-size:17px!important;vertical-align:top;font-weight:600}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#4a72f5;color:#ffffff;}`,
+            MainType: "button[data-testid='qb_submit_button']",
+            StyleCode: `#${def.const.rndID}{z-index:999;position:relative;margin:0 6px 0 0;height:48px;display:inline-block}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;height:45px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:45px}#${def.const.leftButton} input{margin:2px 0 0 0;padding:1px 10px 1px 20px!important;background-color:rgb(74, 114, 245);border-top-left-radius:12px;border-bottom-left-radius:12px;cursor:pointer;height:44px;color:rgb(255, 255, 255);min-width:110px;border:1px solid rgb(74, 114, 245);font-size:17px!important;vertical-align:top;font-weight:500}#${def.const.rightButton} input{margin:2px 0 0 0;padding:1px 20px 1px 10px!important;background-color:rgb(74, 114, 245);border-top-right-radius:12px;border-bottom-right-radius:12px;cursor:pointer;height:44px;color:rgb(255, 255, 255);min-width:110px;border:1px solid rgb(74, 114, 245);font-size:17px!important;vertical-align:top;font-weight:500}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:rgb(120, 151, 252);color:rgb(255, 255, 255);border:1px solid rgb(120, 151, 252);}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{background-color:rgb(102, 138, 255);border:1px solid rgb(102, 138, 255);}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:rgb(120, 151, 252);color:rgb(60, 60, 62);font-weight:600;}}`,
             KeyStyle: `div[data-testid="app-mainline"] p strong,div[data-testid="app-mainline"] p b`,
-            AntiRedirect: () => localStorage.setItem("openLinksInNewTabs", true),
-            AntiAds: () => deBounce({ fn: antiAds_RemoveNodes, delay: 50, timer: "you", immed: true })(`div[data-testid="extension-button"]`, "You"),
+            AntiRedirect: deBounce({ fn: () => localStorage.setItem("openLinksInNewTabs", true), timer: "you_c", once: true }),
+            AntiAds: deBounce({ fn: () => localStorage.setItem("hasSeenP13nAnnouncement", true), timer: "you", once: true }),
           },
           startpage: {
             SiteTypeID: 14,
-            SiteName: "Startpage",
-            SiteNick: isChinese ? "Startpage 搜索" : "Startpage.com",
+            SiteName: "𝐒𝐭𝐚𝐫𝐭𝐩𝐚𝐠𝐞",
+            SiteNick: isChinese ? "𝐒𝐭𝐚𝐫𝐭𝐩𝐚𝐠𝐞 搜索" : "𝐒𝐭𝐚𝐫𝐭𝐩𝐚𝐠𝐞.𝐜𝐨𝐦",
             SiteURI: "www.startpage.com",
             WebURL: `https://www.startpage.com/sp/search?t=device&segment=startpage.${brand.toLowerCase()}&cat=web&query=`,
             ImgURL: `https://www.startpage.com/sp/search?t=device&segment=startpage.${brand.toLowerCase()}&cat=images&query=`,
             IMGType: ["images"],
             SplitName: "cat",
             MainType: "#search-btn",
-            StyleCode: `#${def.const.rndID}{z-index:999;position:relative;height:20px;display:inline-block;margin:-11px 4px 0 0.5rem}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;height:30px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:0px;height:30px}#${def.const.leftButton} input{margin:0;padding:1px 10px 1px 20px!important;background:#f1f3ff;border-top-left-radius:2rem;border-bottom-left-radius:2rem;cursor:pointer;height:30px;color:#2e39b3;min-width:85px;border:0px solid transparent;font-size:14px!important;vertical-align:top;font-weight:600;box-shadow:#a4a5bb 0px 0px 2px;}#${def.const.rightButton} input{margin:0;padding:1px 20px 1px 10px!important;background:#f1f3ff;border-top-right-radius:2rem;border-bottom-right-radius:2rem;cursor:pointer;height:30px;color:#2e39b3;min-width:85px;border:0px solid transparent;font-size:14px!important;vertical-align:top;font-weight:600;box-shadow:#a4a5bb 0px 0px 2px;}#${def.const.leftButton} input:hover{background:#6573ff;color:#ffffff;}#${def.const.rightButton} input:hover{background:#6573ff;color:#ffffff;}`,
+            StyleCode: `#${def.const.rndID}{z-index:999;position:relative;height:20px;display:inline-block;margin:-11px 4px 0 0.5rem}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;height:30px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:0px;height:30px}#${def.const.leftButton} input{margin:0;padding:1px 10px 1px 20px!important;background:#f1f3ff;border-top-left-radius:2rem;border-bottom-left-radius:2rem;cursor:pointer;height:30px;color:#2e39b3;min-width:85px;border:0px solid transparent;font-size:14px!important;font-weight:600;box-shadow:#a4a5bb 0px 0px 2px;}#${def.const.rightButton} input{margin:0;padding:1px 20px 1px 10px!important;background:#f1f3ff;border-top-right-radius:2rem;border-bottom-right-radius:2rem;cursor:pointer;height:30px;color:#2e39b3;min-width:85px;border:0px solid transparent;font-size:14px!important;font-weight:600;box-shadow:#a4a5bb 0px 0px 2px;}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#6573ff;color:#ffffff;}@media (prefers-color-scheme: dark){#${def.const.leftButton} input{color:#fff;background:#252b3b;border:1px solid #252b3b;}#${def.const.rightButton} input{color:#fff;background:#252b3b;border:1px solid #252b3b;}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#6573ff;border:1px solid #6573ff;}}`,
             KeyStyle: `.w-gl__result b`,
             AntiRedirect: () => {
-              deBounce({ fn: addTargetEvent, delay: 1e2, timer: "startpage_c", immed: false })(
-                ".layout-web__body a:not([href^='javascript:']):not([gd-attributeclean-status])",
-                "Startpage"
-              );
-              // eslint-disable-next-line no-undef
-              deBounce({ fn: gbCookies.setItem, timer: "startpage_cookie", once: true })(
-                "preferences",
-                "date_timeEEEworldN1Ndisable_family_filterEEE1N1Ndisable_open_in_new_windowEEE0N1Nenable_post_methodEEE0N1Nenable_proxy_safety_suggestEEE1N1Nenable_stay_controlEEE1N1Ninstant_answersEEE1N1Nlang_homepageEEEs%2Fdevice%2FenN1NlanguageEEEjiantizhongwenN1Nlanguage_uiEEEenglishN1Nnum_of_resultsEEE10N1Nsearch_results_regionEEEallN1NsuggestionsEEE1N1Nwt_unitEEEcelsius",
-                Infinity
-              );
+              deBounce({ fn: addTargetEvent, delay: 1e2, timer: "startpage_c" })(".layout-web__body a:not([href^='javascript:']):not([gd-attributeclean-status])", "Startpage");
+              deBounce({ fn: w.gbCookies.setItem, timer: "startpage_cookie", delay: 2e2, immed: true })({
+                sKey: "preferences",
+                sValue: `date_timeEEEworldN1Ndisable_family_filterEEE1N1Ndisable_open_in_new_windowEEE0N1Nenable_post_methodEEE0N1Nenable_proxy_safety_suggestEEE1N1Nenable_stay_controlEEE1N1Ninstant_answersEEE1N1Nlang_homepageEEEs%2Fdevice%2FenN1NlanguageEEEjiantizhongwenN1Nlanguage_uiEEEenglishN1Nnum_of_resultsEEE10N1Nsearch_results_regionEEEallN1NsuggestionsEEE1N1Nwt_unitEEEcelsius`,
+                sEnd: Infinity,
+                sDomain: ".startpage.com",
+                sPath: "/",
+                sSecure: true,
+              });
             },
             AntiAds: () => deBounce({ fn: antiAds_RemoveNodes, delay: 20, timer: "startpage", immed: true })(`section.a-gl-tp,div.widget-install-legacy`, "Startpage"),
           },
           brave: {
             SiteTypeID: 15,
-            SiteName: "Brave",
-            SiteNick: isChinese ? "Brave 搜索" : "search.brave.com",
+            SiteName: "𝐁𝐫𝐚𝐯𝐞",
+            SiteNick: isChinese ? "𝐁𝐫𝐚𝐯𝐞 搜索" : "𝐬𝐞𝐚𝐫𝐜𝐡.𝐁𝐫𝐚𝐯𝐞",
             SiteURI: "search.brave.com",
             WebURL: "https://search.brave.com/search?source=web&q=",
-            ImgURL: "https://search.brave.com/images?source=web&q=",
+            ImgURL: "https://search.brave.com/images?source=web&spellcheck=0&q=",
             IMGType: ["images"],
-            SplitName: "/",
+            SplitName: { str: "/", index: 1 },
             MainType: "#submit-button",
-            StyleCode: `#${def.const.rndID}{order:6;z-index:999;position:relative;height:100%;display:inline;margin:0;padding:5px 6px}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;height:38px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:0px;height:38px}#${def.const.leftButton} input{margin:0;padding:4px 10px!important;background:#f9fafd;border-top-left-radius:6px;border-bottom-left-radius:6px;cursor:pointer;height:35px;color:#495057;min-width:85px;border:0px solid transparent;font-size:14px!important;vertical-align:top;font-weight:600;line-height:14px;box-shadow:#a4a5bb 0px 0px 2px;}#${def.const.rightButton} input{margin:0;padding:4px 10px!important;background:#f9fafd;border-top-right-radius:6px;border-bottom-right-radius:6px;cursor:pointer;height:35px;color:#495057;min-width:85px;border:0px solid transparent;font-size:14px!important;vertical-align:top;font-weight:600;line-height:14px;box-shadow:#a4a5bb 0px 0px 2px;}#${def.const.leftButton} input:hover{background:#a0a5eb29;color:#5755d9;}#${def.const.rightButton} input:hover{background:#a0a5eb29;color:#5755d9;}`,
+            StyleCode: `#${def.const.rndID}{order:6;z-index:999;position:relative;height:100%;display:inline;margin:0;padding:5px 6px}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;height:38px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:0px;height:38px}#${def.const.leftButton} input{margin:0;padding:4px 10px!important;background:var(--search-bgd-04);border-top-left-radius:6px;border-bottom-left-radius:6px;cursor:pointer;height:35px;color:var(--color-primary);min-width:85px;border:0px solid transparent;font-size:14px!important;vertical-align:top;font-weight:600;line-height:14px;box-shadow:#a4a5bb 0px 0px 2px;}#${def.const.rightButton} input{margin:0;padding:4px 10px!important;background:var(--search-bgd-04);border-top-right-radius:6px;border-bottom-right-radius:6px;cursor:pointer;height:35px;color:var(--color-primary);min-width:85px;border:0px solid transparent;font-size:14px!important;vertical-align:top;font-weight:600;line-height:14px;box-shadow:#a4a5bb 0px 0px 2px;}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--btn-filled-bg-hover);color:var(--color, #fff);}`,
             KeyStyle: `.snippet-content strong`,
             AntiRedirect: () =>
               deBounce({ fn: addTargetEvent, delay: 2e2, timer: "brave_c", immed: false })(
-                "#search-main a:not([href^='javascript:']):not(.btn):not([gd-attributeclean-status])",
+                "#results a:not([href^='javascript:']):not(.btn):not([gd-attributeclean-status])",
                 "Brave"
+              ),
+            AntiAds: () => {},
+          },
+          yep: {
+            SiteTypeID: 16,
+            SiteName: "𝐘𝐞𝐩 ®",
+            SiteNick: isChinese ? "𝐘𝐞𝐩 搜索" : "𝐘𝐞𝐩.𝐜𝐨𝐦",
+            SiteURI: "yep.com",
+            WebURL: "https://yep.com/web?q=",
+            ImgURL: "https://yep.com/images?q=",
+            IMGType: ["images"],
+            SplitName: { str: "/", index: 1 },
+            MainType: `form div[class$="-addon"]`,
+            StyleCode: `#${def.const.rndID}{z-index:112;position:absolute;top:0.5em;height:50px;display:block;margin:-6px 0 0 0;padding:0}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;height:50px}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:50px}#${def.const.leftButton} input{margin:0;padding:4px 15px 4px 25px!important;background:var(--background--brand);border-top-left-radius:25px;border-bottom-left-radius:25px;cursor:pointer;height:50px;color:#333;min-width:95px;border:1px solid #f1dc1b;font-size:16px!important;vertical-align:top;font-weight:600;line-height:16px;}#${def.const.rightButton} input{margin:0;padding:4px 25px 4px 15px!important;background:var(--background--brand);border-top-right-radius:25px;border-bottom-right-radius:25px;cursor:pointer;height:50px;color:#333;min-width:95px;border:1px solid #f1dc1b;font-size:16px!important;vertical-align:top;font-weight:600;line-height:16px;}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--background--brandHover);}`,
+            KeyStyle: ``,
+            AntiRedirect: () =>
+              deBounce({ fn: addTargetEvent, delay: 2e2, timer: "yep_c", immed: false })(
+                "div[class$='-resultsBox'] a:not([href^='javascript:']):not([gd-attributeclean-status])",
+                "Yep"
+              ),
+            AntiAds: () => {},
+          },
+          swisscows: {
+            SiteTypeID: 17,
+            SiteName: "𝐒𝐰𝐢𝐬𝐬𝐜𝐨𝐰𝐬",
+            SiteNick: isChinese ? "𝐒𝐰𝐢𝐬𝐬𝐜𝐨𝐰𝐬 搜索" : "𝐒𝐰𝐢𝐬𝐬𝐜𝐨𝐰𝐬.𝐜𝐨𝐦",
+            SiteURI: "swisscows.com",
+            WebURL: "https://swisscows.com/en/web?query=",
+            ImgURL: "https://swisscows.com/en/images?query=",
+            IMGType: ["images"],
+            SplitName: { str: "/", index: 2 },
+            MainType: "form.form-search>button.search-submit",
+            StyleCode: `#header .form-search{max-width:35em}#header :is(.badge-tg,.badge-vpn,.badge-email){display:none!important}#${def.const.rndID}{z-index:112;position:absolute;top:0.5em;height:2.5em;display:block;margin:-6px 0 0 0;padding:0}#${def.const.rndID} #${def.const.leftButton}{display:inline-block;height:2.5em}#${def.const.rndID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:2.5em}#${def.const.leftButton} input{margin:0;padding:4px 12px!important;background:transparent;border-top-left-radius:1.25em;border-bottom-left-radius:1.25em;cursor:pointer;height:2.6em;color:#252b3b;min-width:85px;border:1px solid #bfc8cd;font-size:14px!important;font-weight:600;vertical-align:middle;box-shadow:#a4a5bb 0px 0px 2px;}#${def.const.rightButton} input{margin:0;padding:4px 12px!important;background:transparent;border-top-right-radius:1.25em;border-bottom-right-radius:1.25em;cursor:pointer;height:2.6em;color:#252b3b;min-width:85px;border:1px solid #bfc8cd;font-size:14px!important;font-weight:600;vertical-align:middle;box-shadow:#a4a5bb 0px 0px 2px;}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#edf0f3;color:#df5d5d;}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{color:#99a4ab;background:#252b3b;border:1px solid #99a4ab;}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#353b3e;color:#df5d5d;}}`,
+            KeyStyle: `.web-results b`,
+            AntiRedirect: () =>
+              deBounce({ fn: addTargetEvent, delay: 2e2, timer: "swisscows_c", immed: false })(
+                ".web-results>article>a:not([href^='javascript:']):not([gd-attributeclean-status])",
+                "Swisscows"
               ),
             AntiAds: () => {},
           },
@@ -1674,64 +1776,48 @@
           YOU: listSite.you.SiteTypeID,
           STARTPAGE: listSite.startpage.SiteTypeID,
           BRAVE: listSite.brave.SiteTypeID,
+          YEP: listSite.yep.SiteTypeID,
+          SWISSCOWS: listSite.swisscows.SiteTypeID,
           OTHERS: listSite.other.SiteTypeID,
         };
 
-        let listCurrentSite, currentSite;
-        if (/^(\w+\.)?google\.[a-z.]{2,6}$/.test(location.hostname)) {
-          currentSite = selectedEngine.includes(newSiteType.GOOGLE) ? listSite.google : listSite.other;
-          listCurrentSite = listSite.google;
-        } else if (location.host.endsWith("kaifa.baidu.com")) {
-          currentSite = selectedEngine.includes(newSiteType.KAIFA) ? listSite.kaifa : listSite.other;
-          listCurrentSite = listSite.kaifa;
-        } else if (location.host.endsWith(".baidu.com")) {
-          currentSite = selectedEngine.includes(newSiteType.BAIDU) ? listSite.baidu : listSite.other;
-          listCurrentSite = listSite.baidu;
-        } else if (location.host.endsWith(".bing.com")) {
-          currentSite = selectedEngine.includes(newSiteType.BING) ? listSite.bing : listSite.other;
-          listCurrentSite = listSite.bing;
-        } else if (location.host.endsWith("duckduckgo.com")) {
-          currentSite = selectedEngine.includes(newSiteType.DUCKDUCKGO) ? listSite.duckduckgo : listSite.other;
-          listCurrentSite = listSite.duckduckgo;
-        } else if (location.host.endsWith(".sogou.com")) {
-          currentSite = selectedEngine.includes(newSiteType.SOGOU) ? listSite.sogou : listSite.other;
-          listCurrentSite = listSite.sogou;
-        } else if (location.host.endsWith("fsoufsou.com")) {
-          currentSite = selectedEngine.includes(newSiteType.FSOU) ? listSite.fsou : listSite.other;
-          listCurrentSite = listSite.fsou;
-        } else if (location.host.endsWith("yandex.com") || location.host.endsWith("yandex.ru")) {
-          currentSite = selectedEngine.includes(newSiteType.YANDEX) ? listSite.yandex : listSite.other;
-          listCurrentSite = listSite.yandex;
-        } else if (location.host.endsWith(".so.com")) {
-          currentSite = selectedEngine.includes(newSiteType.SO360) ? listSite.so360 : listSite.other;
-          listCurrentSite = listSite.so360;
-        } else if (location.host.endsWith("so.toutiao.com")) {
-          currentSite = selectedEngine.includes(newSiteType.TOUTIAO) ? listSite.toutiao : listSite.other;
-          listCurrentSite = listSite.toutiao;
-        } else if (location.host.endsWith("www.ecosia.org")) {
-          currentSite = selectedEngine.includes(newSiteType.ECOSIA) ? listSite.ecosia : listSite.other;
-          listCurrentSite = listSite.ecosia;
-        } else if (location.host.endsWith("search.yahoo.com")) {
-          currentSite = selectedEngine.includes(newSiteType.YAHOO) ? listSite.yahoo : listSite.other;
-          listCurrentSite = listSite.yahoo;
-        } else if (location.host.endsWith("you.com")) {
-          currentSite = selectedEngine.includes(newSiteType.YOU) ? listSite.you : listSite.other;
-          listCurrentSite = listSite.you;
-        } else if (location.host.endsWith("startpage.com")) {
-          currentSite = selectedEngine.includes(newSiteType.STARTPAGE) ? listSite.startpage : listSite.other;
-          listCurrentSite = listSite.startpage;
-        } else if (location.host.endsWith("search.brave.com")) {
-          currentSite = selectedEngine.includes(newSiteType.BRAVE) ? listSite.brave : listSite.other;
-          listCurrentSite = listSite.brave;
-        } else {
-          currentSite = listSite.other;
-          listCurrentSite = listSite.other;
+        const engineMap = {
+          "^(w+\\.)?google\\.[a-z.]{2,6}$": { siteType: newSiteType.GOOGLE, site: listSite.google },
+          "kaifa\\.baidu\\.com$": { siteType: newSiteType.KAIFA, site: listSite.kaifa },
+          "\\.baidu\\.com$": { siteType: newSiteType.BAIDU, site: listSite.baidu },
+          "\\.bing\\.com$": { siteType: newSiteType.BING, site: listSite.bing },
+          "duckduckgo\\.com$": { siteType: newSiteType.DUCKDUCKGO, site: listSite.duckduckgo },
+          "\\.sogou\\.com$": { siteType: newSiteType.SOGOU, site: listSite.sogou },
+          "fsoufsou\\.com$": { siteType: newSiteType.FSOU, site: listSite.fsou },
+          "yandex\\.com$": { siteType: newSiteType.YANDEX, site: listSite.yandex },
+          "yandex\\.ru$": { siteType: newSiteType.YANDEX, site: listSite.yandex },
+          "\\.so\\.com$": { siteType: newSiteType.SO360, site: listSite.so360 },
+          "so\\.toutiao\\.com$": { siteType: newSiteType.TOUTIAO, site: listSite.toutiao },
+          "www\\.ecosia\\.org$": { siteType: newSiteType.ECOSIA, site: listSite.ecosia },
+          "search\\.yahoo\\.com$": { siteType: newSiteType.YAHOO, site: listSite.yahoo },
+          "you\\.com$": { siteType: newSiteType.YOU, site: listSite.you },
+          "startpage\\.com$": { siteType: newSiteType.STARTPAGE, site: listSite.startpage },
+          "search\\.brave\\.com$": { siteType: newSiteType.BRAVE, site: listSite.brave },
+          "yep\\.com$": { siteType: newSiteType.YEP, site: listSite.yep },
+          "swisscows\\.com$": { siteType: newSiteType.SWISSCOWS, site: listSite.swisscows },
+        };
+        let currentSite = listSite.other;
+        let listCurrentSite = listSite.other;
+        const hostname = location.hostname;
+
+        for (const regex in engineMap) {
+          if (new RegExp(regex).test(hostname)) {
+            const { siteType, site } = engineMap[regex];
+            currentSite = selectedEngine.includes(siteType) ? site : listSite.other;
+            listCurrentSite = site;
+            break;
+          }
         }
 
         for (let site in listSite) {
           if (listSite.hasOwnProperty(site)) {
             if (listSite[site].SiteTypeID !== newSiteType.OTHERS) {
-              def.const.allSiteURIs += listSite[site].SiteURI.concat(";");
+              def.const.allSiteURIs += listSite[site].SiteURI + ";";
             }
             if (listSite[site].SiteTypeID === listCurrentSite.SiteTypeID) {
               def.const.curSiteName = site;
@@ -1742,21 +1828,21 @@
           }
         }
 
-        getGlobalparameter();
-        window.addEventListener("pushState", getGlobalparameter);
-        window.addEventListener("replaceState", getGlobalparameter);
-        window.addEventListener("popstate", getGlobalparameter);
+        getGlobalParameter();
+        w.addEventListener("pushState", getGlobalParameter);
+        w.addEventListener("replaceState", getGlobalParameter);
+        w.addEventListener("popstate", getGlobalParameter);
 
         const API_ICO_YANDEX = decrypt("aHR0cHMlM0ElMkYlMkZmYXZpY29uLnlhbmRleC5uZXQlMkZmYXZpY29uJTJGdjI=");
-        const API_ICO_BACKUP = decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjMlMkYwNiUyRjA5JTJGcENFYTVOUi5wbmc=");
+        const API_ICO_BACKUP = decrypt("aHR0cHMlM0ElMkYlMkZ6MS5heDF4LmNvbSUyRjIwMjMlMkYxMSUyRjAxJTJGcGl1U2xyVi5wbmc=");
         const API_ICO_YANDEX_URL = `${API_ICO_YANDEX}/${def.const.allSiteURIs}?size=32&stub=1`;
-        const iconBASE64 = await requestRemoteIcons(API_ICO_YANDEX_URL);
-        const iconBackground = iconBASE64 ? `url('${iconBASE64}')` : `url('${API_ICO_YANDEX_URL}'),url('${API_ICO_BACKUP}')`;
+        const ICON_BASE64 = await requestRemoteIcons(API_ICO_YANDEX_URL);
+        const ICON_BACKGROUND = ICON_BASE64 ? `url('${ICON_BASE64}')` : `url('${API_ICO_BACKUP}'),url('${API_ICO_YANDEX_URL}')`;
 
-        def.const.googleSplitLine = currentSite.SiteTypeID === newSiteType.GOOGLE ? `<span jsname="s1VaRe" class="ACRAdd M2vV3"></span>` : ``;
-        def.const.fsouSplitLine = currentSite.SiteTypeID === newSiteType.FSOU ? `<div class="divider"></div>` : ``;
-        def.const.buttonCode = def.const.googleSplitLine.concat(
-          def.const.fsouSplitLine,
+        const GOOGLE_SPLITLINE = currentSite.SiteTypeID === newSiteType.GOOGLE ? `<span jsname="s1VaRe" class="ACRAdd M2vV3"></span>` : ``;
+        const FSOU_SPLITLINE = currentSite.SiteTypeID === newSiteType.FSOU ? `<div class="divider"></div>` : ``;
+        const BUTTON_CODE = GOOGLE_SPLITLINE.concat(
+          FSOU_SPLITLINE,
           `<span id="${def.const.leftButton}" sn="${selectedSite[0].SiteTypeID}">
               <input type="button" title="${selectedSite[0].SiteNick}" value="${selectedSite[0].SiteName}"/>
             </span>
@@ -1764,74 +1850,87 @@
               <input type="button" title="${selectedSite[1].SiteNick}" value="${selectedSite[1].SiteName}"/>
             </span>`
         );
-        def.const.highlightCss = listCurrentSite.KeyStyle
+        const HIGHLIGHT_CSS = listCurrentSite.KeyStyle
           ? `${listCurrentSite.KeyStyle}{background-color:${customColor.backgroundColor}!important;color:${customColor.foregroundColor}!important;font-weight:600!important}`
           : ``;
-        def.const.iconCss = `.${def.notice.noticejs} .${def.notice.configuration} span.${def.notice.favicon},.${def.notice.card}__body-cover-image span.${def.notice.favicons}{background-color:#ffffff;background-image:${iconBackground};background-repeat:no-repeat;}`;
+        const ICON_CSS = `.${def.notice.noticejs} .${def.notice.configuration} span.${def.notice.favicon},.${def.notice.card}__body-cover-image span.${def.notice.favicons}{background-color:#ffffff;background-image:${ICON_BACKGROUND};background-repeat:no-repeat;}`;
 
         function getQueryString() {
-          let val = "";
-          qA(
-            `input[id="kw"][name^="w"],input[name="q"]:not([type="hidden"]),input[name="text"][type="text"],input[name="query"][class$="query"],input[name="keyword"],input[id="search-input"],input[type="search"][class^="input"],#search-box-container input[class~="ant-input"],input#yschsp[name="p"],textarea[name="q"]`
-          ).forEach((item, index, arr) => {
-            val = item.value;
-            val && DEBUG("QueryString[INPUT]: %O", { current_keyword: val, input_index: index, previous_keyword: arr[index].value });
+          let returnValue = "";
+          const inputSelectors = [
+            'input[id="kw"][name^="w"]',
+            'input[name="q"]:not([type="hidden"])',
+            'input[name="text"][type="text"]',
+            'input#q[name="query"]',
+            'input[name="query"][class$="query"]:not([id*="bottom"])',
+            'input.input-search[type="search"]',
+            "input#search-input",
+            'input[type="search"][class*="input"]',
+            '#search-box-container input[class~="ant-input"]',
+            'input#yschsp[name="p"]',
+            'textarea[name="q"]',
+            "textarea#search-input-textarea",
+          ];
+          qA(inputSelectors.join()).forEach((item, index, arr) => {
+            returnValue = item.value;
+            returnValue && DEBUG("QueryString[INPUT]: %O", { current_keyword: returnValue, input_index: index, previous_keyword: arr[index].value });
           });
-          if (val === null || val === "" || typeof val === "undefined") {
+          if (!returnValue) {
             const keys = ["wd", "word", "query", "q", "text", "keyword", "p"];
             for (let i = 0; i < keys.length; i++) {
               const queryString = getUrlParam(keys[i]);
               if (queryString) {
-                val = queryString;
-                DEBUG("QueryString[URL]: %s", val);
+                returnValue = queryString;
+                DEBUG("QueryString[URL]: %s", returnValue);
                 break;
               }
             }
-            val = val?.replace(/\+/g, " ") ?? "";
+            returnValue = returnValue?.replace(/\+/g, " ") ?? "";
           }
-          return encodeURIComponent(val);
+          return encodeURIComponent(returnValue);
         }
 
-        function getGlobalparameter() {
+        function getGlobalParameter() {
+          if (cachedLinkList.size >= 10) !DEBUG("Task Clear!") && cachedLinkList.clear();
           def.const.vim = getUrlParam(currentSite.SplitName).trim();
-          def.const.isSecurityPolicy = Boolean(
-            (listCurrentSite.SiteTypeID === newSiteType.GOOGLE && (/^(lcl|flm|fin)$/.test(def.const.vim) || getUrlParam("csui") === "1")) ||
-              (listCurrentSite.SiteTypeID === newSiteType.BING && /^(maps)$/.test(def.const.vim)) ||
-              (listCurrentSite.SiteTypeID === newSiteType.BAIDU && /^(news|vsearch)$/.test(def.const.vim)) ||
-              (listCurrentSite.SiteTypeID === newSiteType.SOGOU && (/^(kexue)$/.test(def.const.vim) || /^(fanyi|hanyu|gouwu|as|map)/.test(location.hostname))) ||
-              (listCurrentSite.SiteTypeID === newSiteType.DUCKDUCKGO && /^(maps)$/.test(getUrlParam("iaxm"))) ||
-              (listCurrentSite.SiteTypeID === newSiteType.YANDEX && location.pathname.includes("/direct")) ||
-              (listCurrentSite.SiteTypeID === newSiteType.YOU && /^(youchat)$/.test(def.const.vim))
-          );
           def.const.indexPage = () => (currentSite.SiteTypeID === newSiteType.DUCKDUCKGO ? !location.search.includes("q=") : location.pathname === "/");
+          def.const.isSecurityPolicy =
+            (listCurrentSite.SiteTypeID === newSiteType.GOOGLE && (/^(lcl|flm|fin)$/.test(def.const.vim) || getUrlParam("csui") === "1")) ||
+            (listCurrentSite.SiteTypeID === newSiteType.BING && /^(maps)$/.test(def.const.vim)) ||
+            (listCurrentSite.SiteTypeID === newSiteType.BAIDU && /^(news|vsearch)$/.test(def.const.vim)) ||
+            (listCurrentSite.SiteTypeID === newSiteType.SOGOU && (/^(kexue)$/.test(def.const.vim) || /^(fanyi|hanyu|gouwu|as|map)/.test(location.hostname))) ||
+            (listCurrentSite.SiteTypeID === newSiteType.DUCKDUCKGO && /^(maps)$/.test(getUrlParam("iaxm"))) ||
+            (listCurrentSite.SiteTypeID === newSiteType.YANDEX && location.pathname.includes("/direct")) ||
+            (listCurrentSite.SiteTypeID === newSiteType.YAHOO && /^(news|video)$/.test(def.const.vim)) ||
+            (listCurrentSite.SiteTypeID === newSiteType.YOU && /^(youchat)$/.test(def.const.vim));
         }
 
         async function requestRemoteIcons(URIs) {
+          if (!CUR_WINDOW_TOP) return;
           let iconURL;
           const iconData = await cache.get("_remoteicons_");
           try {
-            if (!iconData || IS_DEBUG) {
-              iconURL = await getRemoteIcon(URIs);
+            if (!iconData || setDebuggerMode()) {
+              DEBUG("%cFetch remote iconData.", "color:crimson");
+              iconURL = await fetchRemoteIcon(URIs);
               iconURL && cache.set("_remoteicons_", iconURL);
-              DEBUG("Get Realtime RemoteICONs.");
             } else {
+              DEBUG("%cGet localCache iconData.", "color:green");
               iconURL = iconData;
-              DEBUG("Get ICONs from Cache.");
             }
           } catch (e) {
-            ERROR("Can not get Remote Icons.");
-            cache.remove("_remoteicons_");
+            ERROR("Error: Can't fetch the iconData.");
           }
           return iconURL;
         }
 
         ~(function prepareSearchParameters(responseUpdate) {
-          "use strict";
           // MENUS_ACTION
           const addAction = {
-            closeConfig: (configPage = qS(`gb-notice.${def.notice.noticejs} .${def.notice.configuration}`)) => {
-              configPage && closeItem(configPage, true);
-              return !0;
+            closeConfig: () => {
+              const configPage = qS(`gb-notice.${def.notice.noticejs} .${def.notice.configuration}`);
+              if (configPage) closeItem(configPage, true);
+              return true;
             },
             listSearchEngine: currentSite => {
               let returnHtml = "";
@@ -1843,8 +1942,8 @@
                       <button class="${def.notice.searchButton}" id="${listSite[site].SiteTypeID}"
                       ${selectedEngine.includes(listSite[site].SiteTypeID) ? `title="${isChinese ? "您常用的搜索引擎" : "Commonly used search engine"}"` : ``}>
                       <span class="${def.notice.favicon} ${def.notice.random}_icon" style="${iconStyle}"></span>
-                      <span class="${def.notice.random}_iconText">${listSite[site].SiteNick}
-                        <sup>${selectedEngine.includes(listSite[site].SiteTypeID) ? "\u0020\u2726" : "\u0020\u0020"}</sup>
+                      <span class="${def.notice.random}_iconText">
+                        ${listSite[site].SiteNick}<sup>${selectedEngine.includes(listSite[site].SiteTypeID) ? "\u2726" : "\u0020"}</sup>
                       </span>
                     </button>
                   </li>`
@@ -1947,15 +2046,15 @@
                             </div>
                           </li>
                           <li>
-                            <div>${isChinese ? "更新检测（默认：开）" : "Auto Update Detect"}</div>
+                            <div title="关闭更新检测或由扩展自动更新时，您需要到脚本主页查看更新内容。">${isChinese ? "更新检测（默认：开）" : "Auto Update Detect"}</div>
                             <div style="margin:-2px 2px 0 10px">
                               <input type="checkbox" id="${def.notice.au}" class="${def.notice.checkbox}" ${isAutoUpdate ? "checked" : ""} />
                               <label for="${def.notice.au}"></label>
                             </div>
                           </li>
                           <li style="float:right">
-                            <button id="${def.notice.random}_help" title="${isChinese ? "单击查看使用帮助" : "View help document (Chinese)"}">
-                            ${isChinese ? "使用帮助" : "Guider!"}
+                            <button id="${def.notice.random}_help" title="${isChinese ? "单击查看脚本主页" : "View Homepage (Chinese)"}">
+                            ${isChinese ? "脚本主页" : "Guider!"}
                             </button>
                             <button id="${def.notice.random}_cancel">${isChinese ? "取消" : "Cancel"}</button>
                             <button id="${def.notice.random}_submit">${isChinese ? "保存" : "Save"}</button>
@@ -2051,7 +2150,7 @@
                     }
                   });
                   qS(`#${def.notice.random}_help`).addEventListener("click", () => {
-                    GMopenInTab(`${def.const.gfHost}#guide`, false);
+                    GMopenInTab(`${def.variable.homepage}#优雅的搜索引擎跳转助手-google--baidu-switcheruserjs`, false);
                   });
                   qS(`#${def.notice.random}_cancel`).addEventListener("click", () => {
                     closeItem(qS(`gb-notice.${def.notice.noticejs} .${def.notice.configuration}`));
@@ -2251,7 +2350,7 @@
 
           function insertStyle() {
             try {
-              const noticeStyle = `@charset "UTF-8";` + def.const.noticecss + def.const.iconCss + String(keywordHighlight ? def.const.highlightCss : "");
+              const noticeStyle = `@charset "UTF-8";` + NOTICE_CSS + ICON_CSS + String(keywordHighlight ? HIGHLIGHT_CSS : "");
               addStyle({ target: document.head, styleId: def.const.rndstyleName, media: "screen", styleContent: noticeStyle, isOverwrite: false });
             } catch (e) {
               ERROR("insertStyle:", e.message);
@@ -2263,7 +2362,7 @@
               const Selector = currentSite.MainType;
               const buttonSection = cE("gb-button");
               buttonSection.id = `${def.const.rndID}`;
-              buttonSection.innerHTML = tTP.createHTML(def.const.buttonCode);
+              buttonSection.innerHTML = tTP.createHTML(BUTTON_CODE);
               const buttonID = `#${buttonSection.id}`;
               const indexPage = def.const.indexPage();
               const Target = qS(Selector);
@@ -2300,20 +2399,22 @@
                       qS(buttonID).parentNode.firstElementChild.style.width = "400px";
                     }
                     break;
-                  case newSiteType.BING:
+                  case newSiteType.BING: {
                     insterAfter(buttonSection, Target);
                     qA(`#b_header .b_searchbox`).forEach(item => (item.style.maxWidth = "666px"));
                     qS(`textarea.b_searchbox[name="q"]`, Target.parentNode)?.getAttribute("rows") >= 2 &&
                       qA(`#${def.const.rndID} input`).forEach(node => {
                         node.style.cssText += "border-radius:8px";
                       });
-                    if (qS(".b_searchboxForm") && location.search.includes("view=detailV2")) {
-                      qS(".b_searchboxForm").style.cssText += "width:max-content!important;z-index:1000;position:relative;";
+                    const form = qS(".b_searchboxForm");
+                    if (form && location.search.includes("view=detailV2")) {
+                      form.style.cssText += "width:max-content!important;z-index:1000;position:relative;";
                       qA(`#${def.const.rndID} input`).forEach(node => {
                         node.style.cssText += "height:34px!important;border-radius:6px!important;padding:0 12px!important;margin:0 0 0 2px!important;";
                       });
                     }
                     break;
+                  }
                   case newSiteType.SOGOU:
                     if (currentSite.IMGType.includes(def.const.vim)) {
                       sleep(5e2, { useCachedSetTimeout: true }).then((s = buttonID, t = Target) => {
@@ -2323,16 +2424,18 @@
                           addSearchButtonEvent(qA(`${s} span[sn]:not([event-insert])`));
                         }
                       });
+                      resolve();
                     } else if (def.const.vim.endsWith("weixin")) {
                       insterAfter(buttonSection, Target);
                       qS(buttonID).style = "position:relative";
                       qA(`${buttonID} input`).forEach(node => node.classList.add(`${def.notice.random}_weixin`));
                     } else {
                       insterAfter(buttonSection, Target);
-                      qS(`#searchBtn2[value="\u5168\u7f51\u641c\u7d22"]`) && qS(`#searchBtn2[value="\u5168\u7f51\u641c\u7d22"]`).remove();
+                      qS(`#searchBtn2[value="\u5168\u7f51\u641c\u7d22"]`)?.remove();
                       sleep(2e2, { useCachedSetTimeout: true }).then(() => {
+                        const btn2 = qS(`#searchBtn2`);
                         qS(buttonID).style.right = `-${Number(qS(buttonID).getBoundingClientRect().width) + 10}px`;
-                        qS(`#searchBtn2`) && (qS(`#searchBtn2`).style.right = `-${Number(qS(buttonID).getBoundingClientRect().width) + 120}px`);
+                        if (btn2) btn2.style.right = `-${Number(qS(buttonID).getBoundingClientRect().width) + 120}px`;
                       });
                     }
                     break;
@@ -2357,75 +2460,97 @@
                     break;
                   case newSiteType.YANDEX:
                     insterAfter(buttonSection, Target);
-                    sleep(5e2, { useCachedSetTimeout: true })
+                    sleep(5e2)
                       .then(() => {
                         const width = Number(qS(buttonID).getBoundingClientRect().width) || 182;
-                        const isRU = location.host.endsWith(".ru");
+                        qS(buttonID).style.right = `-${width + 10}px`;
                         if (currentSite.IMGType.includes(def.const.vim)) {
-                          qS(buttonID).style.right = `-${isRU ? (IS_REAL_GECKO || IS_REAL_EDGE ? width - 60 : width - 130) : width - 60}px`;
-                          qS(`button.button2[data-bem]`) && (qS(`button.button2[data-bem]`).style.right = `-${width + 144}px`);
-                        } else if (def.const.vim === "products") {
-                          qS(buttonID).style.right = `-${width - 60}px`;
+                          const node = qS(`div.HeaderDesktopActions.HeaderDesktop-Actions`);
+                          if (node) node.style.cssText = `position:relative;right:-${width}px`;
                         } else {
-                          qS(buttonID).style.right = `-${width + 10}px`;
-                          qS("form.search2") && (qS("form.search2").style.cssText += "padding-right:0px!important");
-                          qS("button.input__settings") && (qS(`button.input__settings`).style.right = `-${width + 144}px`);
-                          qS(`div.HeaderDesktopActions`) && (qS(`div.HeaderDesktopActions`).style.cssText = `position:relative;right:-${width - 10}px`);
-                          qS(`span.serp-header__voice-search-container`) && (qS(`span.serp-header__voice-search-container`).style.right = `-${width + 190}px`);
-                          qS(`button.voice-search-button.input__voice-search`) && (qS(`button.voice-search-button.input__voice-search`).style.right = `-${width + 190}px`);
+                          const formNode = qS("form.search2");
+                          const setting = qS("button.input__settings");
+                          const action = qS(`div.HeaderDesktopActions`);
+                          const voice = qS(`span.serp-header__voice-search-container`);
+                          const voiceButton = qS(`button.voice-search-button.input__voice-search`);
+                          if (formNode) formNode.style.cssText += "padding-right:0px!important";
+                          if (setting) setting.style.right = `-${width + 144}px`;
+                          if (action) action.style.cssText = `position:relative;right:-${width - 10}px`;
+                          if (voice) voice.style.right = `-${width + 190}px`;
+                          if (voiceButton) voiceButton.style.right = `-${width + 190}px`;
                         }
-                        qS(`span.input__voice-search`) && (qS(`span.input__voice-search`).style.right = `-${width + 184}px`);
+                        const voiceSearch = qS(`span.input__voice-search`);
+                        if (voiceSearch) voiceSearch.style.right = `-${width + 184}px`;
                       })
                       .then(() => (qS(buttonID).style.opacity = 1));
                     break;
-                  case newSiteType.KAIFA:
+                  case newSiteType.KAIFA: {
                     Target.appendChild(buttonSection);
-                    if (qS(buttonID)) qS("#search-box-container input[class~='ant-input']").style.cssText += `width:605px!important`;
+                    const input = qS("#search-box-container input[class~='ant-input']");
+                    if (qS(buttonID) && input) input.style.cssText += `width:605px!important`;
                     break;
+                  }
                   case newSiteType.ECOSIA:
                     w.onload = function () {
                       !qS(buttonID) && Target && insterAfter(buttonSection, Target);
                       addSearchButtonEvent(qA(`${buttonID} span[sn]:not([event-insert])`));
                     };
+                    resolve();
                     break;
                   case newSiteType.YAHOO:
                     insterAfter(buttonSection, Target);
-                    if (currentSite.IMGType.includes(def.const.vim)) {
-                      const node = qS("#sbx").getBoundingClientRect();
-                      qS(buttonID).style.cssText = `position:absolute;left:${node.width + node.left}px`;
-                    } else {
-                      qS(buttonID).style.cssText = `position:absolute;top:0;left:${qS("#hd div.sbx").getBoundingClientRect().width}px`;
-                      new MutationObserver(() => {
-                        qS(buttonID).style.left = `${qS("#hd div.sbx").getBoundingClientRect().width}px`;
-                      }).observe(qS("#hd div.sbx"), { attributes: true });
+                    try {
+                      if (currentSite.IMGType.includes(def.const.vim)) {
+                        const node = qS("#sbx")?.getBoundingClientRect() ?? { width: 0, left: 0 };
+                        qS(buttonID).style.cssText = `position:absolute;left:${node.width + node.left}px`;
+                      } else {
+                        qS(buttonID).style.cssText = `position:absolute;top:0;left:${qS("#hd div.sbx").getBoundingClientRect().width}px`;
+                        new MutationObserver(() => {
+                          qS(buttonID).style.left = `${qS("#hd div.sbx").getBoundingClientRect().width}px`;
+                        }).observe(qS("#hd div.sbx"), { attributes: true });
+                      }
+                    } catch (e) {
+                      ERROR("insertButtons.YAHOO:", e.message);
                     }
                     break;
                   case newSiteType.YOU:
-                    Target.appendChild(buttonSection);
-                    Target.style.cssText += "display:flex;justify-content:center;align-items:center;";
-                    sleep(5e2).then(() => {
-                      const buttonNode = qS("button[aria-label='Close button']");
-                      buttonNode && buttonNode.click();
-                    });
-                    break;
-                  case newSiteType.STARTPAGE:
                     insterAfter(buttonSection, Target);
-                    qS("#search").parentNode.style.maxWidth = `${630 + (qS(buttonID)?.getBoundingClientRect().width ?? 170)}px`;
+                    sleep(0)(parseFloat(gCS(document.body, "zoom") ?? 1)).then(
+                      radius => radius !== 1 && (qS(`#section div[data-testid="bottom-bar"]`).style.width = `${100 / radius}vw`)
+                    );
                     break;
-                  case newSiteType.BRAVE:
+                  case newSiteType.STARTPAGE: {
                     insterAfter(buttonSection, Target);
-                    qS("div.searchform-container").style.setProperty("--search-form-width", `${700 + (qS(buttonID)?.getBoundingClientRect().width / 2 ?? 80)}px`);
-                    qS("#submit-button").addEventListener("mouseover", function () {
+                    const search = qS("#search");
+                    if (search) search.parentNode.style.maxWidth = `${630 + (qS(buttonID)?.getBoundingClientRect().width ?? 170)}px`;
+                    break;
+                  }
+                  case newSiteType.BRAVE: {
+                    insterAfter(buttonSection, Target);
+                    const form = qS("div.searchform-container");
+                    const button = qS("#submit-button");
+                    if (form) form.style.setProperty("--search-form-width", `${700 + (qS(buttonID)?.getBoundingClientRect().width / 2 ?? 80)}px`);
+                    button?.addEventListener("mouseover", function () {
                       this.style.cssText = "border-radius:10px;transform:scale(0.9)";
                     });
-                    qS("#submit-button").addEventListener("mouseout", function () {
+                    button?.addEventListener("mouseout", function () {
                       this.style.cssText = "";
                     });
+                    break;
+                  }
+                  case newSiteType.YEP:
+                    insterAfter(buttonSection, Target);
+                    buttonSection.style.right = `-${10 + (qS(buttonID)?.getBoundingClientRect().width ?? 170)}px`;
+                    break;
+                  case newSiteType.SWISSCOWS:
+                    insterAfter(buttonSection, Target);
+                    buttonSection.style.right = `-${10 + (qS(buttonID)?.getBoundingClientRect().width ?? 170)}px`;
                     break;
                 }
                 resolve({ buttonID, Selector, indexPage });
               })
                 .then(r => {
+                  if (!r) return;
                   addSearchButtonEvent(qA(`${r.buttonID} span[sn]:not([event-insert])`));
                   scrollDetect(qS(r.Selector), r.indexPage);
                 })
@@ -2505,107 +2630,158 @@
           }
 
           function getGlobalGoogle(google, checkGoogleJump) {
-            if (checkGoogleJump) {
-              const getRealHostName = hostname => {
-                const index = hostname || top.location.hostname;
-                return index.substring(index.indexOf("google"));
-              };
-              if (getRealHostName() !== getRealHostName(google) && !sessionStorage.getItem("_global_google_")) {
-                sessionStorage.setItem("_global_google_", 1);
-                const redirectNCR = () => {
-                  def.const.s?.close();
-                  delete def.const.s;
-                  sessionStorage.removeItem("_global_google_");
-                  top.location.href = top.location.href.replace(top.location.hostname, google);
-                };
-                try {
-                  sleep(5e2).then(() => {
-                    def.const.s = GMopenInTab(`https://${google}/ncr`, true);
-                    GMnotification({
-                      title: isChinese ? "智能跳转" : "Google NCR Jump",
-                      text: def.notice.noticeHTML(
-                        `<dd class="${def.notice.center}">${
-                          isChinese ? "当前页面即将跳转至 Google国际站（NCR）" : "Jump to Google.com(NCR)"
-                        } <br/><span>${google.toUpperCase()}</span></dd>`
-                      ),
-                      type: def.notice.info,
-                      closeWith: ["click"],
-                      timeout: 20,
-                      callbacks: { onClose: [redirectNCR] },
-                    });
-                  });
-                } catch (e) {
-                  ERROR("getGlobalGoogle:", e.message);
-                }
-              }
+            if (!checkGoogleJump || getRealHostName() === getRealHostName(google) || sessionStorage.getItem("_global_google_")) return;
+            try {
+              sessionStorage.setItem("_global_google_", 1);
+              sleep(5e2).then(() => {
+                def.const.s = GMopenInTab(`https://${google}/ncr`, true);
+                GMnotification({
+                  title: isChinese ? "智能跳转" : "Google NCR Jump",
+                  text: def.notice.noticeHTML(
+                    `<dd class="${def.notice.center}">
+                    ${isChinese ? "当前页面即将跳转至 Google国际站（NCR）" : "Jump to Google.com (NCR)"} <br/><span>${google.toUpperCase()}</span>
+                    </dd>`
+                  ),
+                  type: def.notice.info,
+                  timeout: 10,
+                  callbacks: { onClose: [redirectNCR] },
+                });
+              });
+            } catch (e) {
+              ERROR("getGlobalGoogle:", e.message);
+            }
+
+            function getRealHostName(hostname) {
+              const host = hostname || top.location.hostname;
+              return host.substring(host.indexOf("google"));
+            }
+
+            function redirectNCR() {
+              def.const.s?.close?.();
+              delete def.const.s;
+              sessionStorage.removeItem("_global_google_");
+              top.location.href = top.location.href.replace(top.location.hostname, google);
             }
           }
 
           function searchButtonObserve() {
-            let observer = new MutationObserver(mainThread);
-            let config = { childList: true, subtree: true };
-            observer.observe(document, config);
-
-            function mainThread() {
-              observer.disconnect();
+            const processMainThreadTasks = () => {
               const noButtonOrStyle = def.const.isSecurityPolicy
                 ? !qS(`#${def.const.rndstyleName}`)
                 : !qS(`#${def.const.rndclassName}`) || !qS(`#${def.const.rndID}`) || !qS(`#${def.const.rndstyleName}`);
               if (noButtonOrStyle) insertSearchButtonAndStyle();
-              antiLinkRedirect && listCurrentSite.SiteTypeID !== newSiteType.OTHERS && !def.const.indexPage() && listCurrentSite.AntiRedirect();
-              antiAds && listCurrentSite.SiteTypeID !== newSiteType.OTHERS && listCurrentSite.AntiAds();
-              observer.observe(document, config);
-            }
+              if (listCurrentSite.SiteTypeID !== newSiteType.OTHERS) {
+                antiLinkRedirect && !def.const.indexPage() && listCurrentSite.AntiRedirect();
+                antiAds && listCurrentSite.AntiAds();
+              }
+            };
+            const observer = new MutationObserver(processMainThreadTasks);
+            const config = { childList: true, subtree: true };
+            processMainThreadTasks();
+            observer.observe(document, config);
           }
 
           /* SEARCH_ENGINE_ASSISTANT_MAIN_PROCESS */
 
           !(async function searchEngineAssistant(updateRet) {
-            "use strict";
-            // CHECK_FOR_UPDATES
-            responseUpdate(await updateRet());
-            // SYSTEM_INFORMATION
-            showSystemInfo();
-            // INSERT_MENU
-            insertMenus();
-            // INSERT_HOTKEY
-            insertHotkey();
+            if (CUR_WINDOW_TOP) {
+              // CHECK_FOR_UPDATES
+              responseUpdate(updateRet);
+              // SYSTEM_INFORMATION
+              showSystemInfo();
+              // INSERT_MENU
+              insertMenus();
+              // INSERT_HOTKEY
+              insertHotkey();
+            }
             // INSERT_JUMP_BUTTON
             insertSearchButtonAndStyle();
             searchButtonObserve();
             moveCssToLastChild();
             // REQUEST_UPDATE
-          })(async () => await checkAutoUpdate());
-        })(value => {
-          "use strict";
-          if (!value) return;
-          let version, note;
-          let updateInfoList = "";
-          value.res
-            ? value.res.split(/[\r\n]+/).forEach(item => {
-                const versions = item.match(/^(\/\/\s+@version\s+)(\S+)$/);
-                version = versions ? versions[2] : version;
-                const notes = item.match(/^(\/\/\s+@note\s+)(.+)$/);
-                note = notes ? notes[2] : note;
-              })
-            : WARN(
-                "%c[GB-UpdateError]%c\r\nRefused to connect to 'the UpdateList URLs', Please check your Network or local DNS!",
-                "font-weight:bold;color:crimson",
-                "color:darkred"
-              );
-          note && note.split(/\\n/g).forEach(item => (updateInfoList += `<li>${item}</li>`));
-          const updateInfo = `<dd><ul>${note ? updateInfoList : "暂时无法获取更新详情。"}</ul></dd>`;
-          const updateHost = value.source ? new URL(value.source).hostname : null;
-          updateHost && DEBUG("[UpdateURI]: %c%s", "color:crimson", updateHost.replace(/raw\.|usercontent/g, ""));
-          if (version) {
-            if (isNeedUpdate(def.variable.curVersion, version)) {
-              const preInstall = () => {
-                sleep(5e2)(value.source.replace(".meta.", ".user."))
-                  .then(url => {
+          })(checkAutoUpdate(AUTO_UPDATA_TRIG));
+        })(requestUpdate => {
+          requestUpdate
+            .then(result => {
+              if (!result) return;
+              const { res, url } = result;
+              let version, notes;
+              let updateInfoList = "";
+              if (res) {
+                version = res.match(/\/\/\s+@version\s+(\S+)/)[1];
+                notes = res.match(/\/\/\s+@note\s+(.+)/g);
+                notes?.forEach(item => {
+                  updateInfoList += `<li>${item.replace(/\/\/\s+@note\s+/, "")}</li>`;
+                });
+              } else {
+                __console(
+                  "warn",
+                  "%c[GB-UpdateError]%c\r\nRefused to connect to 'the UpdateList URLs', Please check your Network or local DNS!",
+                  "font-weight:bold;color:crimson",
+                  "color:darkred"
+                );
+                return;
+              }
+              if (!version) return;
+              const updateInfo = `<dd><ul>${
+                notes ? updateInfoList : `<ol>当前更新源没有更新详情，请访问 <a target="_blank" href="${def.variable.homepage}">Github</a> 查看。</ol><ol>&nbsp;</ol>`
+              }</ul></dd>`;
+              if (versionCompare(def.variable.curVersion, version)) {
+                GMnotification({
+                  title: isChinese ? "发现新更新" : "Found new version",
+                  text: def.notice.noticeHTML(
+                    isChinese
+                      ? `<dd><span>发现新版本</span><i>V${version}</i>，点击可自动更新。</dd>${updateInfo}<dd id="${def.notice.stopUpdate}"><input type="checkbox">一周内不再提醒</dd>`
+                      : `<dd><span>New Version</span><i>V${version}</i>, Click to update.</dd>${updateInfo}<dd id="${def.notice.stopUpdate}"><input type="checkbox">Don't remind me for <b>one</b> week</dd>`
+                  ),
+                  type: def.notice.warning,
+                  closeWith: ["click"],
+                  timeout: 60,
+                  callbacks: { onClick: [preInstall] },
+                });
+                qS(`#${def.notice.stopUpdate}`)?.addEventListener("click", event => {
+                  event.stopPropagation();
+                  closeItem(qS(`gb-notice.${def.notice.noticejs} .${def.notice.warning}`));
+                  cache.set("_autoupdate_", def.variable.curVersion);
+                });
+                __console(
+                  "shown_new_update",
+                  `%c[GB-Update]%c\r\nWe found a new version: %c${version}%c.You can update now!`,
+                  "font-weight:bold;color:crimson",
+                  "color:0",
+                  "color:crimson",
+                  "color:0"
+                );
+              } else {
+                GMnotification({
+                  title: isChinese ? "更新成功" : "Update Success",
+                  text: def.notice.noticeHTML(
+                    isChinese
+                      ? `<dd style="margin: 10px 0"><span>恭喜您！</span>当前版本 <i>${def.variable.curVersion}</i> 已为最新！</dd>`
+                      : `<dd style="margin: 10px 0"><span>Congratulations!</span><br/>The current version <i>${def.variable.curVersion}</i> is up-to-date!</dd>`
+                  ),
+                  type: def.notice.success,
+                  closeWith: ["click"],
+                  timeout: 5,
+                });
+                cache.set("_autoupdate_", version);
+                __console(
+                  "shown_update_info",
+                  `%c[GB-Update]%c\r\nCurretVersion: %c${def.variable.curVersion}%c is up-to-date!`,
+                  "font-weight:700;color:darkcyan",
+                  "color:0",
+                  "color:crimson",
+                  "color:0"
+                );
+              }
+
+              function preInstall() {
+                sleep(5e2)(url.replace(".meta.", ".user."))
+                  .then(u => {
                     if (IS_REAL_GECKO) {
-                      def.const.u = GMopenInTab(IS_GREASEMONKEY ? url.replace(/\?\d+/g, "") : url, true);
+                      def.const.updateWindow = GMopenInTab(IS_GREASEMONKEY ? u.replace(/\?\w+/g, "") : u, true);
                     } else {
-                      location.href = url;
+                      location.href = u;
                     }
                   })
                   .then(() => {
@@ -2628,108 +2804,51 @@
                         onClose: [
                           async () => {
                             try {
-                              const iconURL = await getRemoteIcon(API_ICO_YANDEX_URL);
-                              iconURL && cache.set("_remoteicons_", iconURL);
+                              const iconURL = await fetchRemoteIcon(API_ICO_YANDEX_URL);
+                              if (iconURL) cache.set("_remoteicons_", iconURL);
                             } catch (e) {
-                              cache.remove("_remoteicons_");
+                              ERROR("Error: Can't fetch the iconData.");
+                            } finally {
+                              def.variable.refresh();
                             }
                           },
-                          def.variable.refresh,
                         ],
                       },
                     });
-                    def.const.u &&
-                      sleep(6e3).then(() => {
-                        def.const.u.close();
-                        delete def.const.u;
+                    if (def.const.updateWindow) {
+                      sleep(6e3, { useCachedSetTimeout: true }).then(() => {
+                        def.const.updateWindow.close();
+                        delete def.const.updateWindow;
                         qS(`#${def.notice.random}_error`).innerHTML = tTP.createHTML(
                           `<gb-error style="display:block;margin:0 0 4px -6px;padding:6px;width:max-content;border:1px dashed #ffb78c;border-radius:4px;color:#ffb78c">${
                             isChinese ? "如果升级窗口没有出现（网络问题），请点此重试！" : "If no upgrade window appears, click here to retry!"
                           }</gb-error>`
                         );
                       });
+                    }
                     return qS(`#${def.notice.random}_loading`);
                   })
                   .then(r => sleep(4e3, { useCachedSetTimeout: true })(r).then(s => s?.remove()))
                   .catch(e => ERROR("preInstall:", e.message));
-              };
-              sleep(5e2, { useCachedSetTimeout: true })
-                .then(() => {
-                  GMnotification({
-                    title: isChinese ? "发现新更新" : "Found new version",
-                    text: def.notice.noticeHTML(
-                      isChinese
-                        ? `<dd><span>发现新版本</span><i>V${version}</i>，点击可自动更新。</dd>${updateInfo}<dd id="${def.notice.stopUpdate}"><input type="checkbox">一周内不再提醒</dd>`
-                        : `<dd><span>New Version</span><i>V${version}</i>, Click to update.</dd>${updateInfo}<dd id="${def.notice.stopUpdate}"><input type="checkbox">Don't remind me for <b>one</b> week</dd>`
-                    ),
-                    type: def.notice.warning,
-                    closeWith: ["click"],
-                    timeout: 60,
-                    callbacks: { onClick: [preInstall] },
-                  });
-                  return qS(`#${def.notice.stopUpdate}`);
-                })
-                .then(r => {
-                  r &&
-                    r.addEventListener("click", event => {
-                      event.stopPropagation();
-                      closeItem(qS(`gb-notice.${def.notice.noticejs} .${def.notice.warning}`));
-                      cache.set("_autoupdate_", version);
-                    });
-                })
-                .then(() =>
-                  __console(
-                    "shown_new_update",
-                    `%c[GB-Update]%c\r\nWe found a new version: %c${version}%c.You can update now!`,
-                    "font-weight:bold;color:crimson",
-                    "color:0",
-                    "color:crimson",
-                    "color:0"
-                  )
-                );
-            } else {
-              sleep(5e2, { useCachedSetTimeout: true })
-                .then(() => {
-                  GMnotification({
-                    title: isChinese ? "更新成功" : "Update Success",
-                    text: def.notice.noticeHTML(
-                      isChinese
-                        ? `<dd style="margin: 10px 0"><span>恭喜您！</span>当前版本 <i>${def.variable.curVersion}</i> 已为最新！</dd>`
-                        : `<dd style="margin: 10px 0"><span>Congratulations!</span><br/>The current version <i>${def.variable.curVersion}</i> is up-to-date!</dd>`
-                    ),
-                    type: def.notice.success,
-                    closeWith: ["click"],
-                    timeout: 5,
-                  });
-                })
-                .then(() => cache.set("_autoupdate_", version))
-                .then((r = def.variable.curVersion) =>
-                  __console(
-                    "shown_update_info",
-                    `%c[GB-Update]%c\r\nCurretVersion: %c${r}%c is up-to-date!`,
-                    "font-weight:700;color:darkcyan",
-                    "color:0",
-                    "color:crimson",
-                    "color:0"
-                  )
-                );
-            }
-          }
+              }
+            })
+            .catch(e => ERROR(`requestUpdate: ${e?.message}`));
         });
       })(
-        async () => {
-          "use strict";
-          const cache_autoupdate = await cache.get("_autoupdate_");
+        cache_autoupdate => {
           if (CUR_WINDOW_TOP && isAutoUpdate && (!cache_autoupdate || setDebuggerMode())) {
-            const rnd = Date.now().toString().slice(-8);
-            const result = await Promise.race([
-              update(`https://greasyfork.org/scripts/12909/code/Google%20%20baidu%20Switcher%20(ALL%20in%20One).meta.js?${rnd}`),
-              update(`https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js?${rnd}`),
-              update(`https://openuserjs.org/install/f9y4ng/Google_baidu_Switcher_(ALL_in_One).meta.js?${rnd}`),
-            ]).catch(e => ERROR("CheckUpdate:", e.message));
-            return result;
+            const rnd = Date.now().toString(16);
+            return new Promise((resolve, reject) => {
+              Promise.any([
+                update(`https://greasyfork.org/scripts/12909/code/Google%20%20baidu%20Switcher%20(ALL%20in%20One).meta.js?${rnd}`),
+                update(`https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js?${rnd}`),
+                update(`https://openuserjs.org/install/f9y4ng/Google_baidu_Switcher_(ALL_in_One).meta.js?${rnd}`),
+              ])
+                .then(result => resolve(result))
+                .catch(e => reject(new Error(e)));
+            });
           }
-          return null;
+          return Promise.resolve(false);
 
           function update(url) {
             return new Promise((resolve, reject) => {
@@ -2740,21 +2859,21 @@
                 method: "GET",
                 timeout: 1e4,
                 onreadystatechange: response => {
-                  if (response.status === 200 && response.readyState === 4) {
-                    const res = response.responseText || response.response || "";
-                    res && resolve({ res, source: url });
+                  if (response.readyState !== 4) return;
+                  if (response.status === 200) {
+                    const res = response.responseText || response.response;
+                    resolve({ res, url });
+                  } else {
+                    reject();
                   }
                 },
-                ontimeout: () => reject(new Error("Timeout Error")),
+                onerror: () => reject(),
+                ontimeout: () => reject(),
               });
-            }).catch(e => {
-              ERROR("AutoUpdate.XHR:", e.message);
-              return { res: def.variable.undef, source: def.variable.undef };
-            });
+            }).catch(e => Promise.reject(ERROR("update:", e.message)));
           }
         },
-        async imgUrl => {
-          "use strict";
+        imgUrl => {
           if (!CUR_WINDOW_TOP) return;
           return new Promise((resolve, reject) => {
             GMxmlhttpRequest({
@@ -2764,22 +2883,25 @@
               timeout: 5e3,
               responseType: "blob",
               onreadystatechange: response => {
-                if (response.status === 200 && response.readyState === 4) {
+                if (response.readyState !== 4) return;
+                if (response.status === 200) {
                   let blob = response.response;
                   DEBUG("Response.Blob:", blob);
                   let oFileReader = new FileReader();
                   oFileReader.onloadend = e => resolve(e.target.result);
                   oFileReader.readAsDataURL(blob);
+                } else if (response.status !== 0) {
+                  reject(new Error("NoAccessError"));
                 }
               },
-              ontimeout: () => reject(new Error("Timeout Error")),
+              onerror: () => reject(new Error("NetworkError")),
+              ontimeout: () => reject(new Error("TimeoutError")),
             });
-          }).catch(e => ERROR("GetRemoteIcons:", e.message));
+          }).catch(e => Promise.reject(ERROR("fetchRemoteIcon:", e.message)));
         }
       );
     })(
       async () => {
-        "use strict";
         let config_date, isAutoUpdate, keywordHighlight, isHotkey, selectedEngine, localWindow, googleJump, antiLinkRedirect, antiAds, customColor;
         const configure = await GMgetValue("_configures_");
         if (!configure) {
@@ -2826,7 +2948,6 @@
         return { isAutoUpdate, keywordHighlight, isHotkey, selectedEngine, localWindow, googleJump, antiLinkRedirect, antiAds, customColor };
       },
       (s => {
-        "use strict";
         switch (navigator.language) {
           case "zh":
           case "zh-CN":
@@ -2842,7 +2963,6 @@
       })(true)
     );
   })(createTrustedTypePolicy(), () => {
-    "use strict";
     const navigatorInfo = getNavigatorInfo();
     const locationInfo = getLocationInfo();
     return { navigatorInfo, locationInfo };
