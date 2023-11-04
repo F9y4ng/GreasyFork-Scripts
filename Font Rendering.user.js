@@ -33,7 +33,6 @@
 // @grant              GM_registerMenuCommand
 // @grant              GM.registerMenuCommand
 // @grant              GM_unregisterMenuCommand
-// @grant              GM.unregisterMenuCommand
 // @compatible         edge 兼容Tampermonkey, Violentmonkey
 // @compatible         Chrome 兼容Tampermonkey, Violentmonkey
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
