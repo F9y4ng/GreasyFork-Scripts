@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2023.10.03.1
+// @version            2023.11.04.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -33,6 +33,7 @@
 // @grant              GM_registerMenuCommand
 // @grant              GM.registerMenuCommand
 // @grant              GM_unregisterMenuCommand
+// @grant              GM.unregisterMenuCommand
 // @compatible         edge 兼容Tampermonkey, Violentmonkey
 // @compatible         Chrome 兼容Tampermonkey, Violentmonkey
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
@@ -46,9 +47,9 @@
 
 /* jshint esversion: 11 */
 
-~(function (w) {
-  "use strict";
+"use strict";
 
+~(function (w) {
   /**
    * LICENSE FOR OPEN SOURCE USE: GPLv3.
    * CUSTOM SCRIPT DEBUGGING, DO NOT TURN ON FOR DAILY USE.
@@ -90,11 +91,11 @@
     const: {
       ft: parseFloat(1000 / 60),
       seed: generateRandomString(6, "mix"),
-      raf: `__FR_rAF_${generateRandomString(24, "attr")}`,
-      caf: `__FR_cAF_${generateRandomString(24, "attr")}`,
-      boldAttrName: `fr-fix-${generateRandomString(8, "attr")}`,
-      cssAttrName: `fr-css-${generateRandomString(8, "attr")}`,
-      frameAttrName: `fr-frames-${generateRandomString(8, "attr")}`,
+      raf: Symbol(`𐠱${generateRandomString(8, "hex")}`),
+      caf: Symbol(`𐠱${generateRandomString(8, "hex")}`),
+      cssAttrName: `fr-css-${generateRandomString(8, "hex")}`,
+      boldAttrName: `fr-fix-${generateRandomString(8, "hex")}`,
+      frameAttrName: `fr-frames-${generateRandomString(8, "hex")}`,
       gfHost: decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkY0MTY2ODg="),
       defaultFont: decrypt("JUU3JUJEJTkxJUU3JUFCJTk5JUU5JUJCJTk4JUU4JUFFJUE0JUU1JUFEJTk3JUU0JUJEJTkz"),
       fontlistImg: decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjIlMkYwNCUyRjAyJTJGcW9SZldkLmdpZg=="),
@@ -108,16 +109,13 @@
         getClientRects: Element.prototype.getClientRects,
         getBoundingClientRect: Element.prototype.getBoundingClientRect,
       },
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.10.03.0",
-      scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? "F9y4ng",
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.11.04.0",
+      scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? "\u0046\u0039\u0079\u0034\u006e\u0067",
       feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? "https://f9y4ng.likes.fans/support",
+      homepage: getMetaValue("homepage") ?? getMetaValue("homepageURL") ?? "https://f9y4ng.github.io/GreasyFork-Scripts/",
       scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? GMinfo.script.name ?? "Font Rendering",
     },
-    dialog: {
-      alert: alert.bind(w),
-      prompt: prompt.bind(w),
-      confirm: confirm.bind(w),
-    },
+    dialog: { alert: alert.bind(w), prompt: prompt.bind(w), confirm: confirm.bind(w) },
     class: {
       guide: generateRandomString(6, "mix"),
       title: generateRandomString(8, "char"),
@@ -191,6 +189,7 @@
       color: generateRandomString(8, "char"),
       cssinclued: generateRandomString(8, "char"),
       cssexclude: generateRandomString(8, "char"),
+      render: generateRandomString(8, "char"),
       mono: generateRandomString(8, "char"),
       cm: generateRandomString(8, "mix"),
       iscusmono: generateRandomString(6, "char"),
@@ -232,10 +231,12 @@
 
   class RAF {
     constructor(global) {
+      if (RAF.instance) return RAF.instance;
       this.timerMap = { timeout: {}, interval: {} };
       this.setTimeout = this.setTimeout.bind(this);
       this.global = global;
       registerWindowsProperties();
+      RAF.instance = this;
     }
     _ticking(fn, type, interval, lastTime = Date.now()) {
       const timerSymbol = Symbol(type);
@@ -243,11 +244,8 @@
         this._setTimerMap(timerSymbol, type, step);
         if (interval < def.const.ft || Date.now() - lastTime >= interval) {
           typeof fn === "function" && fn();
-          if (type === "interval") {
-            lastTime = Date.now();
-          } else {
-            this.clearTimeout(timerSymbol);
-          }
+          if (type === "interval") lastTime = Date.now();
+          else this.clearTimeout(timerSymbol);
         }
       };
       this._setTimerMap(timerSymbol, type, step);
@@ -274,6 +272,56 @@
 
   const raf = new RAF(w);
 
+  /* NODE_OBSERVER */
+
+  class NodeObserver {
+    constructor(targetNode) {
+      this.targetNode = targetNode ?? (() => document.documentElement);
+      this.callbackSet = new Set();
+    }
+    getNodeAndObserve({ name, callback, config } = {}) {
+      return new Promise(resolve => {
+        if (typeof callback === "function") this.callbackSet.add({ name, callback });
+        this.config = config ?? { attributes: true, childList: true, subtree: true };
+        this.target = this.targetNode();
+        if (this.target) {
+          resolve(this._observeElement({ node: this.target, callbackSet: this.callbackSet, config: this.config }));
+          return;
+        }
+        this.observer = new MutationObserver(mutationsList => {
+          this.target = this.targetNode();
+          for (let mutation of mutationsList) {
+            if (mutation.type !== "childList") continue;
+            const addedNodes = mutation.addedNodes;
+            for (let addedNode of addedNodes) {
+              if (addedNode.nodeType !== Node.ELEMENT_NODE || !addedNode.contains(this.target)) continue;
+              resolve(this._observeElement({ node: this.target, callbackSet: this.callbackSet, config: this.config }));
+              this.observer.disconnect();
+              return;
+            }
+          }
+        });
+        this.observer.observe(document, { childList: true, subtree: true });
+      });
+    }
+    _observeElement({ node, callbackSet, config }) {
+      const result = new Map([[undefined, node]]);
+      if (callbackSet.size === 0) return Promise.resolve(result);
+      else {
+        return new Promise(resolve => {
+          const elementObserver = new MutationObserver(function (mutations, obs) {
+            for (const { name, callback } of callbackSet) {
+              const rst = callback({ node, mutations, obs }) ?? node;
+              result.set(name, rst);
+            }
+            resolve(result);
+          });
+          elementObserver.observe(node, config);
+        });
+      }
+    }
+  }
+
   /* GLOBAL_GENERAL_FUNCTIONS */
 
   function gmSelector(rec) {
@@ -283,41 +331,34 @@
       deleteValue: typeof GM_deleteValue !== "undefined" ? GM_deleteValue : GM?.deleteValue ?? localStorage.removeItem.bind(localStorage),
       listValues: typeof GM_listValues !== "undefined" ? GM_listValues : GM?.listValues ?? (() => []),
       openInTab: typeof GM_openInTab !== "undefined" ? GM_openInTab : GM?.openInTab ?? w.open,
-      registerMenuCommand: typeof GM_registerMenuCommand !== "undefined" ? GM_registerMenuCommand : GM?.registerMenuCommand ?? (() => []),
-      unregisterMenuCommand: typeof GM_unregisterMenuCommand !== "undefined" ? GM_unregisterMenuCommand : GM?.unregisterMenuCommand ?? (() => []),
+      registerMenuCommand: typeof GM_registerMenuCommand !== "undefined" ? GM_registerMenuCommand : GM?.registerMenuCommand ?? (() => {}),
+      unregisterMenuCommand: typeof GM_unregisterMenuCommand !== "undefined" ? GM_unregisterMenuCommand : GM?.unregisterMenuCommand ?? (() => {}),
       unsafeWindow: typeof unsafeWindow !== "undefined" ? unsafeWindow : w,
       contentMode: GMinfo.injectInto === "content" || GMinfo.script["inject-into"] === "content" || ["dom", "js"].includes(GMinfo.sandboxMode),
     };
     return gmFunctions[rec] ?? (() => {});
   }
 
-  function __console(act) {
-    const __this = console;
-    const __arguments = [...arguments];
-    const [argm = "", ...args] = __arguments.slice(1);
-    switch (__arguments[0]) {
+  function __console(act, argm = "", ...args) {
+    const _this = w.console;
+    switch (act) {
       case "log":
-        __this[act](`%c\u27A4 %c${argm}`, "display:inline-block", "font-family:monospace", ...args);
-        break;
+        return _this[act](`%c\u27A4 %c${argm}`, "display:inline-block", "font-family:monospace", ...args);
       case "info":
-        __this.log(`%c\u27A4 ${argm}`, "display:inline-block;padding:4px 0", ...args);
-        break;
+        return _this.log(`%c\u27A4 ${argm}`, "display:inline-block;padding:4px 0", ...args);
       case "error":
       case "warn":
-        __this[act](`%c\ud83d\udea9 ${argm}`, "display:inline-block;font-family:monospace", ...args);
-        break;
+        return _this[act](`%c\ud83d\udea9 ${argm}`, "display:inline-block;font-family:monospace", ...args);
       case "count":
-        __this[act](`\u27A4 ${argm}`);
-        break;
+        return _this[act](`\u27A4 ${argm}`);
       default:
-        __this.log(argm, ...args);
-        break;
+        return _this.log(argm, ...args);
     }
   }
 
   function registerWindowsProperties() {
     // REGISTER RAF
-    w[def.const.raf] =
+    w[def.const.raf] = GMunsafeWindow[def.const.raf] =
       w.requestAnimationFrame ||
       w.webkitRequestAnimationFrame ||
       w.mozRequestAnimationFrame ||
@@ -337,7 +378,7 @@
         };
       })();
     // REGISTER CAF
-    w[def.const.caf] =
+    w[def.const.caf] = GMunsafeWindow[def.const.caf] =
       w.cancelAnimationFrame ||
       w.webkitCancelAnimationFrame ||
       w.mozCancelAnimationFrame ||
@@ -349,10 +390,17 @@
       function cancelAnimationFrame(id) {
         clearTimeout(id);
       };
-    // REGISTER UNSAFEWINDOW RAF/CAF
-    GMunsafeWindow[def.const.raf] = w[def.const.raf];
-    GMunsafeWindow[def.const.caf] = w[def.const.caf];
     // REGISTER PUSHSTATE/REPLACESTATE
+    const wrapHistory = type => {
+      const original = history[type];
+      const event = new Event(type);
+      return function () {
+        const fn = original.apply(this, arguments);
+        event.arguments = arguments;
+        w.dispatchEvent(event);
+        return fn;
+      };
+    };
     history.pushState = wrapHistory("pushState");
     history.replaceState = wrapHistory("replaceState");
     // REGISTER ARRAY.PROTOTYPE.FRSOME
@@ -367,17 +415,6 @@
       configurable: false,
       enumerable: false,
     });
-
-    function wrapHistory(type) {
-      const original = history[type];
-      const event = new Event(type);
-      return function () {
-        const fn = original.apply(this, arguments);
-        event.arguments = arguments;
-        w.dispatchEvent(event);
-        return fn;
-      };
-    }
   }
 
   function qS(expr, target = document) {
@@ -405,7 +442,8 @@
     return target.attachShadow({ mode: "open" });
   }
 
-  function gCS(target, value = null, opt = null) {
+  function gCS(target, value, opt = null) {
+    if (!target) return {};
     if (value) {
       return w.getComputedStyle(target, opt).getPropertyValue(value);
     } else {
@@ -483,9 +521,10 @@
     const digits = "0123456789";
     const lowerCaseLetters = "abcdefghijklmnopqrstuvwxyz";
     const upperCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const hexLetters = "abcdef";
     let characters = upperCaseLetters;
     let prefix = "";
-    let randomString = "";
+    let randomString = [];
     switch (type) {
       case "mix":
         characters = lowerCaseLetters + digits + upperCaseLetters;
@@ -498,14 +537,14 @@
       case "digit":
         characters = digits;
         break;
-      case "attr":
-        characters = digits + lowerCaseLetters.slice(0, 6);
+      case "hex":
+        characters = hexLetters + digits + hexLetters;
         break;
     }
     for (let i = length; i > 0; i--) {
-      randomString += characters[random(characters.length, "floor")];
+      randomString.push(characters[random(characters.length, "floor")]);
     }
-    return prefix + randomString;
+    return prefix + randomString.join("");
   }
 
   function createTrustedTypePolicy() {
@@ -518,9 +557,9 @@
       { host: "vscode.dev", policy: "safeInnerHtml" },
     ]);
     let policyName = "fr#safeCreateHTML";
-    for (const item of whiteList) {
-      if (currentHostName.endsWith(item.host)) {
-        policyName = item.policy;
+    for (const { host, policy } of whiteList) {
+      if (currentHostName.endsWith(host)) {
+        policyName = policy;
         break;
       }
     }
@@ -528,7 +567,7 @@
   }
 
   function getMainStyleElements({ currentScope, target } = {}) {
-    return currentScope ? qS(`#${def.id.rndStyle}`) : qA("style[id]", target ?? document.head).filter(item => item.attributes[0]?.name.startsWith("fr-css-"));
+    return currentScope ? qS(`#${def.id.rndStyle}`) : qA("style[id]", target).filter(item => item.attributes[0]?.name.startsWith("fr-css-"));
   }
 
   function checkRedundantScript(global) {
@@ -544,7 +583,7 @@
       CUR_WINDOW_TOP &&
         __console("warn", `${def.variable.scriptName}警告：\r\n脚本的注入模式已设置为"content"，部分脚本功能将受限制，如框架页面内部分功能失效、字体缩放后无法全局修正坐标等。`);
     }
-    checkRedundantForContentMode();
+    setRedundantFlagForContentMode();
     return false;
 
     function scriptRedundancyWarning() {
@@ -558,24 +597,20 @@
       return true;
     }
 
-    function checkRedundantForContentMode() {
-      const dE = document.documentElement;
-      let observer = new MutationObserver(addDocumentElementAttr);
-      observer.observe(dE ?? document, { attributes: true });
-      setAttributes(dE);
+    function setRedundantFlagForContentMode() {
+      const id = document.documentElement?.id || def.const.seed;
+      const dEobs = new MutationObserver(mu => setAttributes(mu, id));
+      dEobs.observe(document, { childList: true, subtree: true, attributes: true });
     }
 
-    function addDocumentElementAttr(mutationsList) {
-      for (const mutation of mutationsList) {
+    function setAttributes(mutations, id) {
+      for (let mutation of mutations) {
         const target = mutation.target;
-        if (target === document.documentElement) setAttributes(target);
+        if (target !== document.documentElement) continue;
+        if (target.getAttribute("id") !== id) target.setAttribute("id", id);
+        if (target.getAttribute("fr-init-rc") !== "true") target.setAttribute("fr-init-rc", true);
+        break;
       }
-    }
-
-    function setAttributes(target) {
-      if (!target) return;
-      if (!target.getAttribute("id")) target.setAttribute("id", def.const.seed);
-      if (target.getAttribute("fr-init-rc") !== "true") target.setAttribute("fr-init-rc", true);
     }
   }
 
@@ -585,9 +620,9 @@
     const trustengine = getRealBrowserEngine();
     let engine = "Unknown";
     let brand = "Unknown";
-    let brandversion = "0.00";
+    let brandversion = "0.0.0.0";
     if (uad) {
-      const os = capitalize(uad.platform);
+      const os = getFullPlatformName(uad.platform);
       const brandMap = {
         SAFARI: { engine: "WebKit", brand: "Safari" },
         FIREFOX: { engine: "Gecko", brand: "Firefox" },
@@ -613,21 +648,28 @@
           brandversion = b.version;
         }
       });
-      return { engine, brand, brandversion, os, "trust-engine": trustengine, credit: uad.credit ?? null };
+      return { engine, brand, brandversion: formatVersion(brandversion), os, "trust-engine": trustengine, credit: uad.credit ?? null };
     } else {
       const ua = navigator.userAgent;
-      const checkString = str => ua.indexOf(str) !== -1;
-      const getVersion = (str, offset) => (ua.indexOf(str) !== -1 ? ua.substring(ua.indexOf(str) + offset).match(/\d+(\.\d+)*/)?.[0] : null);
+      const checkString = str => new RegExp(str).test(ua);
+      const getVersion = (str, offset) => checkString(str) && ua.substring(ua.indexOf(str) + offset).match(/\d+(\.\d+)*/)?.[0];
       const { brand, engine, brandversion } = getBrowserInfoFromUA(ua, checkString, getVersion);
       const os = getOSInfoFromUA(checkString);
       return { engine, brand, brandversion, os, "trust-engine": trustengine, credit: null };
+    }
+
+    function formatVersion(version) {
+      if (!version) return "0.0.0.0";
+      const numbers = version.split(".").map(num => parseInt(num) || 0);
+      while (numbers.length < 4) numbers.push(0);
+      return numbers.join(".");
     }
 
     function getUserAgentDataFromExtension(cert) {
       const vmuad = (uad => {
         if (!uad) return;
         const archs = uad.arch?.split("-") ?? [];
-        const brand = capitalize(uad.browserBrand || uad.browserName); // at least need VM2.15.7+ or released version.
+        const brand = capitalize(uad.browserBrand || uad.browserName);
         return {
           brands: [{ brand, version: uad.browserVersion }],
           platform: capitalize(uad.os),
@@ -644,48 +686,61 @@
       return vmuad ?? tmuad ?? navigator.userAgentData;
     }
 
+    function getFullPlatformName(platform) {
+      if (!platform) return "Unknown";
+      const os = capitalize(platform);
+      return /^(Like Mac|Ios)$/.test(os) ? "iOS" : os === "Cros" ? "Chrome OS" : os.startsWith("Win") ? "Windows" : os.startsWith("Mac") ? "MacOS" : os === "X11" ? "Unix" : os;
+    }
+
     function getRealBrowserEngine() {
       return w.webkitRequestFileSystem ? "Blink" : !isNaN(parseFloat(w.mozInnerScreenX)) ? "Gecko" : w.GestureEvent ? "WebKit" : "Unknown";
     }
 
     function getBrowserInfoFromUA(ua, checkString, getVersion) {
+      const engine = /Gecko\/|FxiOS/.test(ua) ? "Gecko" : /Chrom(e|ium)\/|CriOS/.test(ua) ? "Blink" : /AppleWebKit\//.test(ua) ? "WebKit" : "Unknown";
       const brandMap = {
-        OPR: { brand: "Opera", engine: "Blink", offset: 7, as: "Chrome" },
-        QQBrowser: { brand: "QQBrowser", engine: "Blink", offset: 7, as: "Chrome" },
-        YaBrowser: { brand: "Yandex", engine: "Blink", offset: 7, as: "Chrome" },
-        Brave: { brand: "Brave", engine: "Blink", offset: 6 },
-        Edg: { brand: "Edge", engine: "Blink", offset: 4 },
-        Maxthon: { brand: "Maxthon", engine: "Blink", offset: 7, as: "Chrome" },
-        Chromium: { brand: "Chromium", engine: "Blink", offset: 9 },
-        Chrome: { brand: "Chrome", engine: "Blink", offset: 7 },
-        Safari: { brand: "Safari", engine: "WebKit", offset: getVersion("Version", 8), overwrite: true },
-        Waterfox: { brand: "Waterfox", engine: "Gecko", offset: 9 },
-        PaleMoon: { brand: "PaleMoon", engine: "Gecko", offset: 8, as: "Firefox" },
-        Firefox: { brand: "Firefox", engine: "Gecko", offset: 8 },
-        Trident: { brand: "IE", engine: "Trident", offset: getVersion("MSIE", 5) || getVersion("rv", 3), overwrite: true },
+        OPR: { brand: "Opera", engine: "Blink", as: "Chrome" },
+        QQBrowser: { brand: "QQBrowser", engine: "Blink", as: "Chrome" },
+        YaBrowser: { brand: "Yandex", engine, as: "Chrome" },
+        Brave: { brand: "Brave", engine: "Blink" },
+        Edg: { brand: "Edge", engine: "Blink" },
+        Maxthon: { brand: "Maxthon", engine: "Blink", as: "Chrome" },
+        CriOS: { brand: "Chrome", engine: "Blink" },
+        Chromium: { brand: "Chromium", engine: "Blink" },
+        Chrome: { brand: "Chrome", engine: "Blink" },
+        FxiOS: { brand: "Firefox", engine: "Gecko" },
+        Waterfox: { brand: "Waterfox", engine: "Gecko" },
+        PaleMoon: { brand: "PaleMoon", engine: "Gecko", as: "Firefox" },
+        Firefox: { brand: "Firefox", engine: "Gecko" },
+        Safari: { brand: "Safari", engine: "WebKit", verset: ["Version"] },
+        Trident: { brand: "IE", engine: "Trident", verset: ["MSIE", "rv"] },
       };
-      for (const [key, value] of Object.entries(brandMap)) {
+      for (const key of Object.keys(brandMap)) {
         if (checkString(key)) {
-          const { brand: _brand, engine, offset, overwrite, as } = value;
-          const _brandversion = overwrite ? offset : getVersion(as ?? key, offset);
+          const { brand: _brand, engine, verset, as } = brandMap[key];
+          const _verset = verset?.find(k => checkString(k)) ?? verset?.[0];
+          const _key = _verset ?? as ?? key;
+          const _brandversion = formatVersion(getVersion(_key, _key.length + 1));
           return { brand: _brandversion ? _brand : brand, engine, brandversion: _brandversion ?? brandversion };
         }
       }
       const nameOffset = ua.lastIndexOf(" ") + 1;
       const verOffset = ua.lastIndexOf("/");
       const _brand = ua.substring(nameOffset, verOffset);
-      const _brandversion = ua.substring(verOffset + 1);
-      const isValidValue = _brand.indexOf(";") !== -1 || _brand.indexOf("/") !== -1;
-      return { brand: isValidValue ? brand : _brand, engine: trustengine, brandversion: isValidValue ? brandversion : _brandversion };
+      const _brandversion = formatVersion(ua.substring(verOffset + 1).match(/\d+(\.\d+)*/)?.[0]);
+      const isValidValue = !/version|\/|\(|\)|;/i.test(_brand) && _brandversion;
+      return { brand: isValidValue ? _brand : brand, engine, brandversion: isValidValue ? _brandversion : brandversion };
     }
 
     function getOSInfoFromUA(checkString) {
       let os = "Unknown";
-      const platforms = ["Win", "Mac", "Linux", "CrOS", "Debian", "Ubuntu", "Android", "like Mac"];
+      const platforms = ["like Mac", "Mac", "Android", "Debian", "Ubuntu", "Linux", "Win", "CrOS", "X11"];
       for (let i = 0; i < platforms.length; i++) {
         const platform = platforms[i];
-        if (!checkString(platform)) continue;
-        os = platform === "like Mac" ? "iOS" : platform;
+        if (checkString(platform)) {
+          os = getFullPlatformName(platform);
+          break;
+        }
       }
       return os;
     }
@@ -713,7 +768,7 @@
   }
 
   function setDebuggerMode() {
-    return new URLSearchParams(location.search).get("whoami") === (getMetaValue("author") ?? GMinfo.script.author);
+    return new URLSearchParams(location.search).get("whoami") === "\u0046\u0039\u0079\u0034\u006e\u0067";
   }
 
   function sleep(delay, { useCachedSetTimeout } = {}) {
@@ -728,30 +783,30 @@
   }
 
   function deBounce({ fn, delay, timer, immed, once } = {}) {
-    if (typeof fn !== "function") return;
+    if (typeof fn !== "function" || !timer) return () => {};
     let caller = 0;
     const threshold = Number(Boolean(immed));
     return function () {
       const context = this;
       const args = arguments;
-      if (once === true) {
-        if (!def.count[timer]) {
-          def.count[timer] = true;
+      const name = Symbol.for(String(timer));
+      if (typeof def.count[name] === "undefined") {
+        if (immed === true) {
           fn.apply(context, args);
+          if (once === true) return (def.count[name] = true);
         }
       } else {
-        if (typeof def.count[timer] === "undefined") {
-          immed === true && fn.apply(context, args);
-        } else {
-          raf.clearTimeout(def.count[timer]);
-          caller++;
-        }
-        def.count[timer] = raf.setTimeout(() => {
-          caller >= threshold && fn.apply(context, args);
-          delete def.count[timer];
-          caller = null;
-        }, delay);
+        if (once === true && def.count[name] === true) return true;
+        raf.clearTimeout(def.count[name]);
+        caller++;
       }
+      def.count[name] = raf.setTimeout(() => {
+        if (caller >= threshold) {
+          fn.apply(context, args);
+          if (once === true) return (def.count[name] = true);
+        }
+        delete def.count[name];
+      }, Number(delay) || 0);
     };
   }
 
@@ -760,15 +815,18 @@
     let pendingNodes = [];
     switch (typeof expr) {
       case "string":
+        if (!expr) return false;
         pendingNodes = qA(expr, scope);
         pendingNodes.forEach(item => removeNode(item));
         break;
       case "object":
-        if (expr) {
-          pendingNodes.push(expr);
-          removeNode(expr);
-        }
+        if (expr?.nodeType !== Node.ELEMENT_NODE) return false;
+        pendingNodes.push(expr);
+        removeNode(expr);
         break;
+      default:
+        ERROR("Element not exist!");
+        return false;
     }
     return compareArray(removedNodes, pendingNodes);
 
@@ -791,20 +849,24 @@
     return ret.toUpperCase();
   }
 
-  function debugOnce(name, ...logs) {
-    deBounce({ fn: DEBUG, timer: name, once: true })(...logs);
+  function debugOnce(name, ...args) {
+    const internal = { fn: DEBUG, timer: name, once: true };
+    return deBounce(internal)(...args);
   }
 
   /* ENVIRONMENT_VARIABLE_PREPROCESSING */
 
   ~(async function (tTP, requestEnvironmentConstants) {
-    "use strict";
-
-    const SET_BOOL_FOR_UPDATE = true; // DON'T TOUCH IT! MUST BE BOOLEAN TYPE. LAST RECONSTRUCTION DATE: 2023.04.08
+    // DON'T TOUCH IT! MUST BE BOOLEAN TYPE. LAST RECONSTRUCTION DATE: 2023.04.08
+    const SET_BOOL_FOR_UPDATE = true;
 
     const { navigatorInfo, locationInfo } = requestEnvironmentConstants();
     const { engine, brand, brandversion, os, "trust-engine": trustengine, credit } = navigatorInfo;
     const { cH: CUR_HOST, cHN: CUR_HOST_NAME, cPN: CUR_HOST_PATH, cP: CUR_PROTOCOL, pH: TOP_HOST, isTop: CUR_WINDOW_TOP } = locationInfo;
+
+    const getDocumentElement = new NodeObserver();
+    const getHeadElement = new NodeObserver(() => document.head);
+    const getBodyElement = new NodeObserver(() => document.body);
 
     const IS_REAL_BLINK = trustengine === "Blink";
     const IS_REAL_GECKO = trustengine === "Gecko";
@@ -812,17 +874,18 @@
     const IS_CHEAT_UA = !credit && (engine !== trustengine || checkBlinkCheatingUA());
     const IS_IN_FRAMES = CUR_WINDOW_TOP ? "" : "[FRAMES]";
     const IS_GREASEMONKEY = GMscriptHandler === "Greasemonkey";
-    const IS_INTERNALSTYLE_ALLOWED = await isInternalStyleAllowed(10);
+    const IS_INTERNALSTYLE_ALLOWED = await isInternalStyleAllowed();
     const CAN_I_USE = detectBrowserCompatibility();
 
     /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
     const UPDATE_VERSION_NOTICE = String(
-      `<li class="${def.const.seed}_add">新增自定义字体重写设置功能，设置规则查看 <a href="${def.variable.feedback}/../discussions/267#discussion-5692372" target="_blank">#267<sup>[1]<sup></a></li>
-        <li class="${def.const.seed}_add">新增站点缩放修正设置功能，字体缩放查看 <a href="${def.variable.feedback}/../discussions/267#discussioncomment-7161615" target="_blank">#267<sup>[2]<sup></a></li>
-        <li class="${def.const.seed}_fix">修正自定义等宽字体工具部分参数设置的Bug. <a href="${def.variable.feedback}/265" target="_blank">#265</a></li>
-        <li class="${def.const.seed}_fix">优化字体渲染样式的优先级，提升站点字体渲染准确率。</li>
-        <li class="${def.const.seed}_fix">完善字体渲染数据备份功能，建议您重新备份数据。</li>
+      `<li class="${def.const.seed}_fix">修正预览时粗体修正在shadowRoot中样式加载的Bug.</li>
+        <li class="${def.const.seed}_fix">优化内部样式的插入效率，减少重绘和回流造成的卡顿。</li>
+        <li class="${def.const.seed}_fix">优化Blink内核粗体修正功能，减少页面加载时的卡顿。</li>
+        <li class="${def.const.seed}_fix">优化字体缩放时link元素Viewport units的修正效率。</li>
+        <li class="${def.const.seed}_fix">优化iframe框架的异步处理方式，减少主页面卡顿。</li>
+        <li class="${def.const.seed}_fix">优化通过UA获取浏览器参数的方法，提升识别准确度。</li>
         <li class="${def.const.seed}_fix">修正一些已知的问题，优化样式，优化代码。</li>`
     );
 
@@ -887,7 +950,7 @@
 
     def.const.style = {
       mainStyle: `display:inline-block;font-family:monospace,${INITIAL_VALUES.fontSelect},sans-serif`,
-      global: "input:is([type='text'],[type='password'],[type='search']),input:not([type]){font-family:initial!important}",
+      global: `:root input:is([type='text'],[type='password'],[type='search']),input:not([type]){font-family:initial!important}`,
       frDialogBox: String(
         `:host(#${def.id.dialogbox}){position:fixed!important;top:0;left:0;width:100%;height:100%;background:0 0!important;pointer-events:none;z-index:2147483647}div.${def.class.db}{z-index:99999;box-sizing:content-box;max-width:420px;border:2px solid #efefef;color:#444444;pointer-events:auto}.${def.class.db}{position:absolute;top:calc(12% + 10px);right:15px;display:block;overflow:hidden;width:100%;border-radius:6px;background:#ffffff;box-shadow:0 0 10px 0 rgba(0, 0, 0, 0.3);transition:opacity .5s}.${def.class.db} *{text-shadow:0 0 1px #777!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}.${def.class.dbt}{display:flex;margin-top:0;padding:10px 15px;width:auto;background:#efefef;text-align:left;font-weight:700;font-size:18px!important;flex-wrap:wrap;justify-content:space-between;align-items:center;align-content:center}.${def.class.dbt},.${def.class.dbt} *{font-weight:700;font-size:20px!important;font-family:Candara,'Times New Roman',${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm}{margin:5px;padding:10px;color:#444444;text-align:left;font-weight:500;font-size:16px!important}.${def.class.dbb}{display:inline-block;box-sizing:content-box;margin:2px 1%;padding:8px 12px;min-width:12%;border-radius:4px;text-align:center;text-decoration:none!important;letter-spacing:0;font-weight:400;cursor:pointer}.${def.class.db} .${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}.${def.class.db} .gradient-bg{background:#e7ffd9;animation:gradient 2s ease-in-out forwards}@keyframes gradient{0%{background:#e7ffd9}to{background:transparent}}` +
           `.${def.class.dbb}:hover{box-sizing:content-box;color:#ffffff;text-decoration:none!important;font-weight:700;opacity:.8}.${def.class.db} .${def.class.dbt},.${def.class.dbb},.${def.class.dbb}:hover{text-shadow:none!important;-webkit-text-stroke:0 transparent!important;-webkit-user-select:none;user-select:none}.${def.class.dbbf},.${def.class.dbbf}:hover{border:1px solid #d93223!important;border-radius:6px;background:#d93223!important;color:#ffffff!important;font-size:14px!important}.${def.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${def.class.dbbt},.${def.class.dbbt}:hover{border:1px solid #038c5a!important;border-radius:6px;background:#038c5a!important;color:#ffffff!important;font-size:14px!important}.${def.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${def.class.dbbn},.${def.class.dbbn}:hover{border:1px solid #777777!important;border-radius:6px;background:#777777!important;color:#ffffff!important;font-size:14px!important}.${def.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${def.class.dbbc}{padding:2.5%;background:#efefef;color:#ffffff;text-align:right;font-size:initial}.${def.class.dbm} textarea{cursor:auto;scrollbar-width:thin;overscroll-behavior:contain}.${def.class.dbm} textarea::-webkit-scrollbar{width:8px;height:8px}.${def.class.dbm} textarea::-webkit-scrollbar-corner{border-radius:2px;background:#efefef;box-shadow:inset 0 0 3px #aaaaaa;}.${def.class.dbm} textarea::-webkit-scrollbar-thumb{border-radius:2px;background:#cfcfcf;box-shadow:inset 0 0 5px #999;}.${def.class.dbm} textarea::-webkit-scrollbar-track{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaaaaa;}.${def.class.dbm} textarea::-webkit-scrollbar-track-piece{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaaaaa;}` +
@@ -915,7 +978,7 @@
         String(
           `.${def.class.tooltip}{position:relative;cursor:help;-webkit-user-select:none;user-select:none}.${def.class.tooltip} span.${def.class.emoji}{font-weight:400!important}.${def.class.tooltip}:active .${def.class.tooltip}{display:block}.${def.class.tooltip} .${def.class.tooltip}{position:absolute;z-index:999999;display:none;box-sizing:content-box;padding:10px;width:234px;max-width:234px;border:2px solid #b8c4ce;border-radius:6px;background-color:#54a2ec;color:#ffffff;font-weight:400;opacity:.9;word-break:break-all}.${def.class.tooltip} .${def.class.tooltip} *{font-size:14px!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${def.class.tooltip} .${def.class.tooltip} em{font-style:normal!important}.${def.class.tooltip} .${def.class.tooltip} strong{color:darkorange;font-size:18px!important}.${def.class.tooltip} .${def.class.tooltip} p{display:block;margin:0 0 10px;color:#ffffff;text-indent:0!important;line-height:150%}.${def.class.ps1}{position:relative;top:-33px;right:5px;float:right;margin:0;padding:0;width:24px;height:0}.${def.class.ps2}{top:35px;right:-7px}` +
             `.${def.class.ps3}{top:-197px;${IS_REAL_WEBKIT ? "left:-72px" : "left:auto"}}` +
-            `.${def.class.ps4}{top:-197px;${IS_REAL_WEBKIT ? "right:-64px" : "left:auto"}}` +
+            `.${def.class.ps4}{top:-247px;${IS_REAL_WEBKIT ? "right:-64px" : "left:auto"}}` +
             `.${def.class.ps5}{top:-322px;${IS_REAL_WEBKIT ? "right:-54px" : "left:auto"}}`
         ) +
         String(
@@ -935,13 +998,15 @@
 
     class RegisterEvents {
       constructor() {
+        if (RegisterEvents.instance) return RegisterEvents.instance;
         this.fns = [];
         this.finalfns = [];
         this.done = false;
         this.__register();
         document.addEventListener("readystatechange", () => this.__checkReadyState());
+        RegisterEvents.instance = this;
       }
-      __runFns(fns, background) {
+      __runFns(fns, background, desc) {
         let run = 0;
         let err = 0;
         for (let fn of fns) {
@@ -953,29 +1018,34 @@
             err++;
           }
         }
-        this.__onReady(background, run, err, document.readyState);
+        this.__onReady(background, desc, run, err, document.readyState);
       }
       __register() {
         if (this.done) return;
         if (IS_GREASEMONKEY) {
-          w.onload = () => this.__runFns(this.fns, "darkorange");
-          this.done = true;
-          return;
+          const newFn = () => this.__runFns(this.fns, "teal", "[WIN.ONLOAD]");
+          const windowLoad = w.onload;
+          if (typeof w.onload !== "function") w.onload = newFn;
+          else {
+            w.onload = function () {
+              newFn();
+              windowLoad();
+            };
+          }
+          return (this.done = true);
         }
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", () => this.__runFns(this.fns, "slateblue"));
-        } else {
-          w.addEventListener("load", () => this.__runFns(this.fns, "darkorange"));
-        }
+        if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => this.__runFns(this.fns, "slateblue"));
+        else w.addEventListener("load", () => this.__runFns(this.fns, "steelblue", "[WIN.LOADED]"));
         this.done = true;
       }
       __checkReadyState() {
         if (!this.done || document.readyState !== "complete") return;
         this.__runFns(this.finalfns, "green");
       }
-      __onReady(background, ...logs) {
+      __onReady(background, desc, ...logs) {
+        const description = desc ?? "[DOM.STATE]";
         const args = [leftStyle(background), rightStyle(background), "display:block;height:0", remarkStyle("0"), remarkStyle("grey")];
-        INFO(`%c[DOM.STATE]:%c${logs}!%c\r\n%c \u3000\u27A6${IS_IN_FRAMES} ${CUR_HOST_NAME} %c${CUR_HOST_PATH}`, ...args);
+        INFO(`%c${description}:%c${logs}!%c\r\n%c \u3000\u27A6${IS_IN_FRAMES} ${CUR_HOST_NAME} %c${CUR_HOST_PATH}`, ...args);
       }
       addFn(fn) {
         if (typeof fn !== "function") return;
@@ -1092,8 +1162,9 @@
           sheet.id = id;
           sheet.replaceSync(css);
           const hostSheet = shadow.adoptedStyleSheets;
-          const existSheet = hostSheet.FRsome(s => s.id === sheet.id);
-          if (!existSheet) shadow.adoptedStyleSheets = [...hostSheet, sheet];
+          const existIndex = hostSheet.findIndex(s => s.id === sheet.id);
+          if (existIndex === -1) shadow.adoptedStyleSheets = [...hostSheet, sheet];
+          else shadow.adoptedStyleSheets[existIndex] = sheet;
         } else {
           const style = cE("style");
           style.id = id;
@@ -1102,6 +1173,7 @@
           style.textContent = css;
           const existSheet = qS(`style#${id}`, shadow);
           if (!existSheet) shadow.appendChild(style);
+          else shadow.replaceChild(style, existSheet);
         }
       } catch (e) {
         ERROR("compatibleWithAdoptedStyleSheets:", e.message);
@@ -1139,23 +1211,33 @@
     function insertStyle({ target, styleId, styleContent, isOverwrite }) {
       if (!IS_INTERNALSTYLE_ALLOWED || !target || !styleId || !styleContent) return;
       const styles = getMainStyleElements({ currentScope: false, target });
-      let styleSize = styles.length;
-      if (styleSize && isOverwrite) {
-        styles.forEach(style => {
-          style.dataset.frRemoved = true;
-          if (safeRemove(style)) styleSize--;
-        });
+      const totalStyle = styles.length;
+      switch (totalStyle) {
+        case 0:
+          break;
+        case 1:
+          if (!isOverwrite) return true;
+          styles[0].dataset.frRemoved = true;
+          safeRemove(styles[0]);
+          break;
+        default:
+          for (let i = 0, l = totalStyle - !isOverwrite; i < l; i++) {
+            const style = styles[i];
+            style.dataset.frRemoved = true;
+            safeRemove(style);
+          }
+          if (!isOverwrite) return true;
+          break;
       }
-      if (styleSize > 0) return true;
       try {
-        const style = cE("style");
-        style.setAttribute(def.const.cssAttrName, isOverwrite);
-        style.id = styleId;
-        style.media = "screen";
-        style.type = "text/css";
-        style.textContent = styleContent;
-        const el = getLastStyleNode(target);
-        insertAfter(target, style, el);
+        const newStyle = cE("style");
+        newStyle.setAttribute(def.const.cssAttrName, isOverwrite ?? false);
+        newStyle.id = styleId;
+        newStyle.media = "screen";
+        newStyle.type = "text/css";
+        newStyle.textContent = styleContent;
+        const lastStyle = getLastStyleNode(target);
+        insertAfter(target, newStyle, lastStyle);
         return true;
       } catch (e) {
         ERROR("insertStyle:", e.message);
@@ -1219,27 +1301,26 @@
       URL.revokeObjectURL(url);
     }
 
-    async function isInternalStyleAllowed(t = def.const.ft) {
-      await sleep(t);
-      const testId = "test-internal-style";
-      const dE = document.documentElement;
-      try {
-        const style = cE("style");
-        style.id = testId;
-        style.type = "text/css";
-        style.textContent = `#${testId} { background-color: rebeccapurple; }`;
-        dE.appendChild(style);
-        const styleSheet = style.sheet;
-        if (typeof styleSheet === "undefined") return false;
-        const rules = styleSheet.cssRules || styleSheet.rules;
-        const isAllowed = rules.length > 0 && rules[0].cssText.includes("background-color: rebeccapurple");
-        return isAllowed;
-      } catch (e) {
-        __console("error", "%c站点CSP策略阻止警告：%c当前站点CSP阻止内部样式的加载与解析，可尝试通过“Allow CSP”扩展获取相应权限。", "font-weight:700", "line-height:150%");
-        return false;
-      } finally {
-        safeRemove(`style#${testId}`, dE);
-      }
+    async function isInternalStyleAllowed() {
+      return await getDocumentElement.getNodeAndObserve().then(res => {
+        const dE = res.get();
+        const testId = "test-internal-style";
+        try {
+          const style = cE("style");
+          style.id = testId;
+          style.type = "text/css";
+          style.textContent = `#${testId} { background-color: rebeccapurple; }`;
+          dE.appendChild(style);
+          const styleSheet = style.sheet;
+          if (typeof styleSheet === "undefined") return false;
+          const rules = styleSheet.cssRules || styleSheet.rules;
+          return rules.length > 0 && rules[0].cssText.includes("background-color: rebeccapurple");
+        } catch (e) {
+          return __console("error", "站点CSP策略阻止警告：\r\n当前站点CSP阻止内部样式的加载与解析，可尝试通过“Disable-CSP”扩展获取相应权限。");
+        } finally {
+          safeRemove(`style#${testId}`, dE);
+        }
+      });
     }
 
     /* SCALE_COORDINATE_CORRECTION_FUNCTION */
@@ -1264,7 +1345,6 @@
           props: [...def.array.props.HTMLElement],
         },
       ]);
-
       try {
         for (const obj_Target of obj_Targets.values()) {
           const objs = uniq(obj_Target.objs);
@@ -1308,7 +1388,6 @@
             });
           });
         }
-
         if (IS_REAL_BLINK) {
           deleteOriginal && Reflect.deleteProperty(SVGGraphicsElement.prototype, "getScreenCTM");
           Reflect.defineProperty(SVGGraphicsElement.prototype, "getScreenCTM", {
@@ -1331,7 +1410,6 @@
             IS_DEBUG &&
             ret_Results.add({ obj: `${SVGGraphicsElement.prototype}`, prop: "getScreenCTM()" });
         }
-
         if (IS_REAL_GECKO) {
           deleteOriginal && Reflect.deleteProperty(Element.prototype, "getClientRects");
           Reflect.defineProperty(Element.prototype, "getClientRects", {
@@ -1381,7 +1459,7 @@
     const cache = {
       value: (data, eT = 6048e5) => {
         DEBUG("cache Expiration: %c%s hrs", "color:green;font-weight:700", eT / 36e5);
-        return { data: data, expired: Date.now() + eT };
+        return { data, expired: Date.now() + eT };
       },
       set: (key, ...options) => GMsetValue(key, encrypt(JSON.stringify(cache.value(...options)))),
       get: async key => {
@@ -1410,6 +1488,7 @@
 
     class FontFaceSetObserver {
       constructor() {
+        if (FontFaceSetObserver.instance) return FontFaceSetObserver.instance;
         this.canvasWidth = 200;
         this.canvasHeight = 100;
         this.fontSize = 80;
@@ -1424,6 +1503,7 @@
         this.canvasContext.textBaseline = "middle";
         this.originFontData = this._checkFont(this.originFont);
         this.detectFontData = null;
+        FontFaceSetObserver.instance = this;
       }
       _checkFont(fontName) {
         try {
@@ -1443,7 +1523,7 @@
         this.detectFontData = this._checkFont(font);
         const fontSupport = this.originFontData !== this.detectFontData;
         fontSupport &&
-          DEBUG("detect Fonts: <Detected> %O", {
+          DEBUG("detect Fonts: <Detected>", {
             data: JSON.parse(this.detectFontData),
             font: unescape(font.replace(/\\/g, "%u")),
           });
@@ -1481,8 +1561,9 @@
       return uniqList;
     }
 
-    function getDeduplicatedValues(arra, arrb) {
-      return [...arra].filter(x => ![...arrb].FRsome(y => y.en === x.en || y.ch === x.ch));
+    function getNonDuplicateFontArray(arra, arrb) {
+      arrb = Array.from(arrb);
+      return Array.from(arra).filter(x => !arrb.FRsome(y => y.en === x.en || y.ch === x.ch));
     }
 
     function updateDomainsIndex(domains, curHost = CUR_HOST) {
@@ -1500,8 +1581,10 @@
     }
 
     function removeDuplicateFonts(stra, strb) {
-      const fontsArray = uniq(stra.split(",")).filter(x => !uniq(strb.split(",")).FRsome(y => y.replace(/'/g, ``) === x.replace(/'/g, ``)));
-      return String(fontsArray.map(font => (font.startsWith("'") ? font : `'${font}'`)));
+      const fontsArrayA = uniq(stra.split(","));
+      const fontsArrayB = uniq(strb.split(","));
+      const fontsArray = fontsArrayA.filter(x => !fontsArrayB.FRsome(y => y.replace(/'/g, "") === x.replace(/'/g, "")));
+      return fontsArray.map(font => (font.charAt(0) === "'" && font.charAt(font.length - 1) === "'" ? font : `'${font}'`)).join();
     }
 
     function saveData(key, data) {
@@ -1517,7 +1600,7 @@
       htmlString = htmlString.replace(/expression|\\u|`|{|}/gi, "");
       const tempElement = cE("fr-filterhtml");
       tempElement.innerHTML = tTP.createHTML(htmlString);
-      htmlString = tempElement.innerText?.trim() || tempElement.textContent?.trim() || "";
+      htmlString = (tempElement.innerText || tempElement.textContent || "").trim();
       while (htmlString.endsWith(",")) {
         htmlString = htmlString.slice(0, -1).trim();
       }
@@ -1544,9 +1627,10 @@
       return rstData;
     }
 
-    function getPriorityAttr() {
-      const documentElementId = document.documentElement?.getAttribute("id");
-      return CUR_WINDOW_TOP && documentElementId ? `:root#${documentElementId} ` : `:root `;
+    async function getDocumentElementAttr() {
+      const dEId = await getDocumentElement.getNodeAndObserve().then(res => res.get().getAttribute("id"));
+      // Blink browser has an unfixed stylesheet parsing bug inside iframe when switching src values.
+      return ((IS_REAL_BLINK && CUR_WINDOW_TOP) || !IS_REAL_BLINK) && dEId ? `:root#${dEId} ` : `:root `;
     }
 
     function formatSelectors(origin, prefix, suffix = "") {
@@ -1558,25 +1642,22 @@
 
     /* FONT_RENDERING_PREPROCESSING */
 
-    ~(async function (ROOT_SECRET_KEY, configData, customMonoData, exSiteData, fontSetData, fontScaleDef, fontOverrideDef) {
-      "use strict";
-
-      const addLoadEvents = new RegisterEvents();
-
-      let exSite = await exSiteData();
-      let _config_data_ = await configData();
+    ~(async function (ROOT_SECRET_KEY, configureData, customMonoData, excludeSiteData, fontCustomSetData, fontScaleDef, fontOverrideDef) {
+      let exSite = await excludeSiteData();
+      let _config_data_ = await configureData();
       let { maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, isFixViewport, isCloseTip, isCustomMono, rebuild, curVersion, globalDisable } = _config_data_;
       let { monoSiteRules, monoFontList, monoFeature } = await customMonoData();
+      const addLoadEvents = new RegisterEvents();
+      const globalPrefix = await getDocumentElementAttr();
       const fontOverrideData = await fontOverrideDef();
-      const CONST_VALUES = await fontSetData();
-      const globalPrefix = getPriorityAttr();
+      const CONST_VALUES = await fontCustomSetData();
 
       /* CONVERT_FONT_PARAMETERS_TO_REALTIME_STYLE */
 
-      const refont = CONST_VALUES.fontSelect?.split(",")[0]?.replace(/"|'/g, "") ?? "";
+      const selectedFont = CONST_VALUES.fontSelect?.split(",")[0]?.replace(/"|'/g, "") ?? "";
       const fontface_i = CONST_VALUES.fontFace;
       const fontFamily = fontface_i ? `font-family:var(--fr-font-family),var(--fr-font-basefont);` : ``;
-      const fontFaces = fontface_i ? (refont ? await funcFontface(refont) : "") : "";
+      const fontFaces = fontface_i ? (selectedFont ? await funcFontface(selectedFont) : "") : "";
       let bodyScale = "";
       let fontScale = parseFloat(CONST_VALUES.fontSize);
       if (isFontsize && !isNaN(fontScale) && fontScale >= 0.8 && fontScale <= 1.5 && fontScale !== 1) {
@@ -1620,13 +1701,14 @@
       const globalCssText = IS_REAL_GECKO && fontface_i ? def.const.style.global : "";
       const monoAllowed = _config_data_.isCustomMono ?? false;
       const monoFontText = monoAllowed ? `--fr-mono-font:${monoFontList || INITIAL_VALUES.monospacedFont},ui-monospace,${IS_REAL_GECKO ? "consolas" : "monospace"};` : ``;
-      const monoShadow = monoAllowed ? `--fr-mono-shadow:0 0 0 currentcolor;` : ``;
+      const monoShadow = monoAllowed ? `--fr-mono-shadow:0 0 0 ${INITIAL_VALUES.shadowColor};` : ``;
       const monoFeatureText = monoAllowed ? `--fr-mono-feature:${monoFeature || INITIAL_VALUES.monospacedFeature};` : ``;
       const rootPseudoClass = `:root{--fr-font-basefont:${INITIAL_VALUES.fontBase};--fr-font-fontscale:${fontScale};--fr-font-family:${CONST_VALUES.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-no-stroke:0px transparent;${monoFontText}${monoShadow}${monoFeatureText}}`;
       const tStyle = IS_CURRENTSITE_ALLOWED ? `@charset "UTF-8";${rootPseudoClass}${globalCssText}${fontStyle}` : ``;
 
       /* FR_CONFIGURE_SHADOWROOT_CONTENT */
 
+      const isDisabled = CONST_VALUES.isMatchEditorialSite ? `disabled="disabled" title="\u56fe\u6587/\u7f16\u8f91\u7f51\u7ad9\u81ea\u52a8\u7981\u7528" ` : ``;
       const tFixViewport = String(
         `<span id="${def.id.fviewport}" style="width:auto;color:#666666;font-size:12px">
           (<label title="如果开启它后出现网页加载或样式问题，请关闭之。">视口修正</label>
@@ -1638,11 +1720,11 @@
         <div class="${def.class.flex}">
           <span style="margin:0;padding:0" title="双击编辑站点缩放修正设置数据" id="${def.const.seed}_fontscale_defined">字体比例缩放</span>
           ${isFixViewport ? tFixViewport : ""}
-          <input id="${def.id.fontScale}" type="text" data-fr-type="number" maxlength="5" ${getImageAndTextProperties()}/>
+          <input id="${def.id.fontScale}" type="text" data-fr-type="number" maxlength="5" ${isDisabled}/>
         </div>
-        <div class="${def.class.range}" data-ticks-position="top" ${getImageAndTextProperties()}
+        <div class="${def.class.range}" data-ticks-position="top" ${isDisabled}
           style="--min:.8;--max:1.5;--step:.001;--value:${CONST_VALUES.fontSize};--text-value:'${String(CONST_VALUES.fontSize.toFixed(3))}'">
-          <input id="${def.id.scaleSize}" type="range" min=".8" max="1.5" step=".001" value="${CONST_VALUES.fontSize.toFixed(3)}" ${getImageAndTextProperties()}/>
+          <input id="${def.id.scaleSize}" type="range" min=".8" max="1.5" step=".001" value="${CONST_VALUES.fontSize.toFixed(3)}" ${isDisabled}/>
           <output></output>
           <div class='${def.class.rangeProgress}'></div>
         </div>
@@ -1728,11 +1810,12 @@
             </li>
             <li id="${def.id.fontCss}" style="min-width:254px">
               <div style="margin: 0 0 6px 0">需要渲染的网页元素\uff1a
-                <span class="${def.class.tooltip}">
+                <span id="${def.id.render}" class="${def.class.tooltip}">
                   <span class="${def.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
                   <span class="${def.class.tooltip} ${def.class.ps4}">
                     <p>默认为排除大多数网站常用的特殊CSS样式后需要渲染的页面元素。填写格式\uff1a<em style="color:#cecece">:not(.fa)</em> 或 <em style="color:#cecece">:not([class*="fa"])</em> 或 <em style="color:#cecece">,#id .classname</em></p>
                     <p><em style="color:darkred">该选项为重要参数，默认只读，双击解锁。请尽量不要修改，避免造成样式失效。若失效请重置。</em></p>
+                    <p>如果发现网站部分文字变为乱码或方块，请双击\ud83d\udd14打开修正帮助页面。</p>
                   </span>
                 </span>
                 <div id="${def.id.cSwitch}" class="${def.class.switcher}" fr-button-switch="ON">\u2227</div>
@@ -1842,61 +1925,101 @@
 
       async function framesInsertStyle({ node, condition, cssText }) {
         if (!node || !cssText) return;
-        const rect = node.getBoundingClientRect();
-        const styleState = gCS(node);
-        const rectView = rect.bottom >= 0 && rect.right >= 0 && rect.width > 4 && rect.height > 4;
-        const styleStateView = styleState.display !== "none" && styleState.visibility !== "hidden";
-        if (!rectView || !styleStateView) return;
-        let succeeded = "false";
-        node.removeAttribute("sandbox");
+        let result = "Ignored";
         try {
-          let doc = node.contentWindow.document || node.contentDocument;
-          const bT = doc.body?.innerText?.trim() ?? "";
-          const sID = generateRandomString(10, "mix");
-          const ffA = getMainStyleElements({ currentScope: false, target: doc.head })[0]?.textContent.match(/\.fr-fix-[0-9a-f]{8}/)?.[0];
-          cssText = cssText.replace(/\b#\w+\b/g, "").replace(/\.fr-fix-[0-9a-f]{8}/g, ffA);
-          switch (condition) {
-            case "Preview":
-              if (bT.length === 0) return;
-              insertStyle({ target: doc.head, styleId: sID, styleContent: cssText, isOverwrite: true });
-              succeeded = "true";
-              break;
-            default:
-              await sleep(GMcontentMode || IS_GREASEMONKEY ? 5e2 : 50, { useCachedSetTimeout: true });
-              try {
-                doc = node.contentWindow.document || node.contentDocument;
-                const target = doc.head;
-                if (!target) return;
-                let checkLimitCount = 0;
-                while (getMainStyleElements({ currentScope: false, target }).length === 0 && checkLimitCount < 1e2) {
-                  checkLimitCount++;
-                  if (insertStyle({ target, styleId: sID, styleContent: cssText, isOverwrite: true })) {
-                    succeeded = "true";
-                    break;
-                  }
-                }
-              } catch (e) {
-                ERROR("FramesInsertStyle.default:", e.message);
-                succeeded = "error";
+          if (condition === "Preview") {
+            const doc = node.contentWindow.document || node.contentDocument;
+            const bodyLength = doc.body?.innerText.replace(/\s/g, "").length ?? 0;
+            if (bodyLength === 0) return;
+            const { css, id } = getFrameStyleFixerName(cssText, doc.head);
+            const isInsertStyle = insertStyle({ target: doc.head, styleId: id, styleContent: css, isOverwrite: true });
+            if (isInsertStyle) result = condition;
+          } else {
+            await sleep(IS_GREASEMONKEY ? 3e2 : def.const.ft);
+            const doc = node.contentWindow?.document || node.contentDocument;
+            const target = doc?.head;
+            if (!target) return;
+            let checkLimitCount = 0;
+            const { css, id } = getFrameStyleFixerName(cssText, target);
+            while (getMainStyleElements({ currentScope: false, target }).length === 0 && checkLimitCount < 50) {
+              const isInsertStyle = insertStyle({ target, styleId: id, styleContent: css });
+              if (isInsertStyle) {
+                result = condition;
+                break;
               }
-              break;
+              checkLimitCount++;
+            }
+            if (IS_REAL_BLINK && condition === "addedNodes") correctBoldStrokeProcess({ Fixedstyle: fixBoldTextStyle, Scenes: "iframe", target: doc });
           }
-          node.setAttribute(def.const.frameAttrName, succeeded);
         } catch (e) {
-          ERROR("FramesInsertStyle:", e.message);
-          succeeded = "error";
+          ERROR("FramesInsertStyle.%s:", condition, e.message);
+          result = "Error";
         }
-        COUNT(`[ASYNCFRAMES][${condition.toUpperCase()}][${succeeded.toUpperCase()}]`);
+        return { node, result };
       }
 
-      function insertStyleInFrames(condition, target, cssText = tStyle) {
-        if (globalDisable) return;
-        const frameSets = new Set(target ?? qA("iframe"));
-        frameSets.forEach(async item => {
-          if (!item.hidden && item.style?.display !== "none" && item.style?.visibility !== "hidden") {
-            await framesInsertStyle({ node: item, condition: condition ?? "DOMLoaded", cssText });
+      function getFrameStyleFixerName(curCssText, frameTarget) {
+        const frameStyle = getMainStyleElements({ currentScope: false, target: frameTarget })[0];
+        const ffA = IS_REAL_BLINK && frameStyle?.textContent.match(/\.fr-fix-[0-9a-f]{8}/)?.[0];
+        const styleId = frameStyle?.getAttribute("id") || def.id.rndStyle.slice(2);
+        const dEId = frameTarget.parentNode?.id;
+        const filterId = !IS_REAL_BLINK && dEId ? "#" + dEId : "";
+        const cssText = ffA ? curCssText.replace(/\b#\w+\b/g, filterId).replace(/\.fr-fix-[0-9a-f]{8}/g, ffA) : curCssText.replace(/\b#(\w+)\b/g, filterId);
+        return { css: cssText, id: styleId };
+      }
+
+      function insertStyleInFrames({ condition, nodeArray, css } = {}) {
+        if ((globalDisable && curEmptyConfig) || !IS_CURRENTSITE_ALLOWED) return;
+        const cssText = css ?? tStyle;
+        const allFrames = nodeArray ?? [];
+        if (!nodeArray) {
+          qA("html>:not(head) *").forEach(el => {
+            const shadow = el.shadowRoot;
+            if (shadow) allFrames.push(...qA("iframe", shadow));
+            else if (getNodeName(el) === "iframe") allFrames.push(el);
+          });
+        }
+        allFrames.forEach(item => {
+          if (IS_GREASEMONKEY) {
+            item.addEventListener("load", () => {
+              try {
+                const target = item.contentWindow.document.head;
+                const { css, id } = getFrameStyleFixerName(cssText, target);
+                const isInsertStyle = insertStyle({ target, styleId: id, styleContent: css, isOverwrite: true });
+                if (isInsertStyle) {
+                  DEBUG("[GREASEMONKEY] PASSIVE INSERT STYLE!");
+                  item.setAttribute(def.const.frameAttrName, "Passive");
+                }
+              } catch (e) {
+                ERROR("insertStyleInFrames.Passive:", e.message);
+              }
+            });
           }
+          processingFramework({ node: item, condition, cssText });
         });
+      }
+
+      function processingFramework({ node, condition, cssText }) {
+        condition = condition ?? "DOMLoaded";
+        return new Promise(resovle => {
+          node.removeAttribute("sandbox");
+          const frameRect = node.getBoundingClientRect();
+          const frameStyle = gCS(node);
+          const isTangible = frameRect.bottom >= 0 && frameRect.right >= 0 && frameRect.width > 4 && frameRect.height > 4;
+          const isVisible = frameStyle.display !== "none" && frameStyle.visibility !== "hidden";
+          if (!isVisible || !isTangible) {
+            resovle();
+            return;
+          }
+          resovle(framesInsertStyle({ node, condition, cssText }));
+        })
+          .then(rst => {
+            if (!rst) return;
+            const { node, result } = rst;
+            node?.setAttribute(def.const.frameAttrName, result);
+            COUNT(`[ASYNCFRAMES][ACT:${result}]`);
+          })
+          .catch(e => ERROR("ASYNCFRAMES:", e.message));
       }
 
       function loadPreview(allowedPreview, cssText = tStyle, ret = true) {
@@ -1908,7 +2031,7 @@
             tScale !== oScale && correctCoordinateOffset(tScale / oScale);
             DEBUG("scale<Matrix>: %o", def.array.scaleMatrix);
           }
-          insertStyleInFrames("Preview", null, cssText);
+          insertStyleInFrames({ condition: "Preview", css: cssText });
           def.const.preview = !ret;
         } catch (e) {
           ERROR("LoadPreview:", e.message);
@@ -2140,101 +2263,11 @@
                   DEBUG("configure<errorCount>:", r.e.length);
                   r.e.length > 0 && reportErrorToAuthor(r.e, true);
                 });
-              qS(`.${def.class.title} span.${def.class.guide}`, def.const.configIf)?.addEventListener("click", () => {
-                GMopenInTab(`${def.const.gfHost}#guide`, false);
-              });
+              qS(`.${def.class.title} span.${def.class.guide}`, def.const.configIf)?.addEventListener("click", () => GMopenInTab(`${def.const.gfHost}#guide`, false));
+              qS(`#${def.id.render}`, def.const.configIf)?.addEventListener("dblclick", () => GMopenInTab(`${def.variable.feedback}/../discussions/42`, false));
               qS(`#${def.id.field} #${def.const.seed}_scriptname`, def.const.configIf)?.addEventListener("dblclick", function () {
                 hintUpdateInfo(`${def.const.gfHost}#update`, def.variable.curVersion);
                 this.style.userSelect = "none";
-              });
-              qS(`#${def.const.seed}_fontoverride_defined`, def.const.configIf)?.addEventListener("dblclick", async () => {
-                const _fontOverrideDef = JSON.stringify(fontOverrideData, null, "    ");
-                let frDialog = new FrDialogBox({
-                  trueButtonText: "确 定",
-                  neutralButtonText: "取 消",
-                  messageText: `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式填写字体重写的自定义数据。整体为数组类型，每个字体名称占一行，并使用半角双引号包括；如字体名称包含中文等双字节文本时，请在双引号内使用半角花括号包括。如您不了解该数据的含义，请勿修改，以免造成全局字体重写出错。<span style="color:#dc143c">(强烈建议您：按 <a href="${def.variable.feedback}/../discussions/267#discussion-5692372" target="_blank">作者提议</a> 填写此内容)</span></p><p><textarea id="${def.const.seed}_fontoverride_def_array" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain">${_fontOverrideDef}</textarea></p><p style="display:block;margin:-2px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（请勿添加脚本字体表已存在的字体，如重复将自动删除）</p>`,
-                  titleText: "自定义字体重写数据",
-                });
-                if (await frDialog.respond()) {
-                  const _res_fontOverrideDef = qS(`#${def.const.seed}_fontoverride_def_array`, def.const.dialogIf).value.trim();
-                  try {
-                    const __res_fontOverrideDef = _res_fontOverrideDef ? uniq(JSON.parse(_res_fontOverrideDef)) : [];
-                    const fontCheckArray = [];
-                    const fontCheckList = await cache.get("_FONTCHECKLIST_");
-                    if (Array.isArray(fontCheckList) && fontCheckList.length > 0) {
-                      for (let i = 0; i < fontCheckList.length; i++) {
-                        if (fontCheckList[i].en === "Microsoft YaHei") continue;
-                        if (fontCheckList[i].en.startsWith("\\")) {
-                          fontCheckArray.push(`{${fontCheckList[i].ch}}`);
-                        } else {
-                          fontCheckArray.push(fontCheckList[i].en);
-                        }
-                      }
-                    }
-                    const baseFontArray = INITIAL_VALUES.fontBase.replace(/'/g, "").split(",");
-                    const monoFontArray = (monoFontList || INITIAL_VALUES.monospacedFont).replace(/'/g, "").split(",");
-                    const filterFonts = uniq(["Courier New", "Courier", "monospace", ...baseFontArray, ...fontCheckArray, ...monoFontArray]);
-                    const __res_fontOverrideDef_ = __res_fontOverrideDef.filter(x => !filterFonts.includes(x));
-                    saveData("_FONTOVERRIDE_DEF_", __res_fontOverrideDef_.sort());
-                    let frDialog = new FrDialogBox({
-                      trueButtonText: "确 定",
-                      messageText: "<p style='color:darkgreen'>自定义字体重写数据已成功保存\uff01</p><p>当前页面将在您确认后自动刷新。</p>",
-                      titleText: "自定义字体重写数据设置成功",
-                    });
-                    if (await frDialog.respond()) closeConfigurePage({ isReload: true });
-                    frDialog = null;
-                  } catch (e) {
-                    let frDialog = new FrDialogBox({
-                      trueButtonText: "确 定",
-                      messageText: "<p style='color:darkred'>自定义字体重写数据格式错误，请重新输入\uff01</p>",
-                      titleText: "重写数据格式错误",
-                    });
-                    if (await frDialog.respond()) {
-                      let clickEvent = new Event("dblclick", { bubbles: true, cancelable: false });
-                      qS(`#${def.const.seed}_fontoverride_defined`, def.const.configIf)?.dispatchEvent(clickEvent);
-                      clickEvent = null;
-                    }
-                    frDialog = null;
-                  }
-                }
-                frDialog = null;
-              });
-              qS(`#${def.const.seed}_fontscale_defined`, def.const.configIf)?.addEventListener("dblclick", async () => {
-                const _fontScaleDef = await fontScaleDef();
-                const __fontScaleDef = JSON.stringify(_fontScaleDef, null, "    ");
-                let frDialog = new FrDialogBox({
-                  trueButtonText: "确 定",
-                  neutralButtonText: "取 消",
-                  messageText: `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式填写“字体比例缩放功能”所需的自定义站点缩放数据配置。由于该数据为脚本核心设置数据，如果您不了解该设置数据的格式要求或数据含义，请勿修改该数据！<span style="color:#dc143c">（强烈建议您：按 <a href="${def.variable.feedback}/../discussions/267#discussioncomment-7161615" target="_blank">作者提议</a> 填写此内容）</span></p><p><textarea id="${def.const.seed}_fontscale_def_json" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain">${__fontScaleDef}</textarea></p><p style="display:block;margin:-2px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（如果以上JSON内容格式错误，会造成脚本出错使渲染失效）</p>`,
-                  titleText: "站点缩放修正设置数据",
-                });
-                if (await frDialog.respond()) {
-                  const _res_fontScaleDef = qS(`#${def.const.seed}_fontscale_def_json`, def.const.dialogIf).value.trim();
-                  try {
-                    const __res_fontScaleDef = _res_fontScaleDef ? JSON.parse(_res_fontScaleDef) : {};
-                    saveData("_FONTSCALE_DEF_", __res_fontScaleDef);
-                    let frDialog = new FrDialogBox({
-                      trueButtonText: "确 定",
-                      messageText: "<p style='color:darkgreen'>站点缩放修正设置数据已成功保存\uff01</p><p>当前页面将在您确认后自动刷新。</p>",
-                      titleText: "站点缩放修正数据设置成功",
-                    });
-                    if (await frDialog.respond()) closeConfigurePage({ isReload: true });
-                    frDialog = null;
-                  } catch (e) {
-                    let frDialog = new FrDialogBox({
-                      trueButtonText: "确 定",
-                      messageText: "<p style='color:darkred'>站点缩放修正设置数据格式错误，请重新输入\uff01</p>",
-                      titleText: "设置数据格式错误",
-                    });
-                    if (await frDialog.respond()) {
-                      let clickEvent = new Event("dblclick", { bubbles: true, cancelable: false });
-                      qS(`#${def.const.seed}_fontscale_defined`, def.const.configIf)?.dispatchEvent(clickEvent);
-                      clickEvent = null;
-                    }
-                    frDialog = null;
-                  }
-                }
-                frDialog = null;
               });
             } catch (e) {
               ERROR("SetConfigure:", e.message);
@@ -2252,9 +2285,10 @@
             titleText: "禁止字体渲染",
           });
           if (await frDialog.respond()) {
-            exSite = await exSiteData();
+            exSite = await excludeSiteData();
             exSite.push(TOP_HOST);
-            saveData("_EXCLUDE_SITES_", uniq(exSite.sort()));
+            const exSiteData = uniq(exSite.sort());
+            saveData("_EXCLUDE_SITES_", exSiteData);
             closeConfigurePage({ isReload: true });
           } else {
             addAction.customExsite();
@@ -2262,7 +2296,7 @@
           frDialog = null;
         },
         vipConfigure: async () => {
-          const _config_data_ = await configData();
+          const _config_data_ = await configureData();
           isBackupFunction = Boolean(_config_data_.isBackupFunction ?? true);
           isPreview = Boolean(_config_data_.isPreview);
           isFontsize = Boolean(_config_data_.isFontsize);
@@ -2273,7 +2307,7 @@
           maxPersonalSites = Number(_config_data_.maxPersonalSites) || 100;
           let frDialog = new FrDialogBox({
             trueButtonText: "保存数据",
-            falseButtonText: "帮助文件",
+            falseButtonText: "脚本主页",
             neutralButtonText: "取 消",
             messageText: String(
               `<ul class="${def.class.main}" style="overflow-x:hidden;box-sizing:content-box;margin:0;padding:5px 0;max-height:255px;overscroll-behavior:contain">
@@ -2389,7 +2423,7 @@
               titleText: "禁用全局设置数据",
             });
             if (await frDialog.respond()) {
-              saveData("_FONTS_SET_", {
+              const fontSetData = {
                 fontSelect: INITIAL_VALUES.fontSelect,
                 fontFace: 0,
                 fontSmooth: false,
@@ -2400,7 +2434,8 @@
                 shadowColor: INITIAL_VALUES.shadowColor,
                 fontCSS: INITIAL_VALUES.fontCSS,
                 fontEx: INITIAL_VALUES.fontEx,
-              });
+              };
+              saveData("_FONTS_SET_", fontSetData);
               _config_data_.globalDisable = true;
               saveData("_CONFIGURE_", _config_data_);
               closeConfigurePage({ isReload: true });
@@ -2450,7 +2485,7 @@
             if (await frDialog.respond()) closeConfigurePage({ isReload: true });
             frDialog = null;
           } else {
-            GMopenInTab(`${def.const.gfHost}#warning`, false);
+            GMopenInTab(`${def.variable.homepage}#字体渲染自用脚本-font-renderinguserjs`, false);
           }
           frDialog = null;
         },
@@ -2464,7 +2499,7 @@
           });
           if (await frDialog.respond()) {
             let panDomain;
-            exSite = await exSiteData();
+            exSite = await excludeSiteData();
             let regexArr = exSite.map(site => !site.indexOf("*") && new RegExp(`^[a-z0-9][-a-z0-9]{0,62}${site.slice(1).replace(/\./g, "\\.")}(\\:\\d{2,5})?$`));
             for (let i = 0, l = exSite.length; i < l; i++) {
               if (exSite[i].indexOf("*") === 0 && regexArr[i].test(CUR_HOST)) {
@@ -2476,7 +2511,8 @@
             if (!panDomain) {
               def.const.exSitesIndex = updateExsitesIndex(exSite);
               typeof def.const.exSitesIndex !== "undefined" && exSite.splice(def.const.exSitesIndex, 1);
-              saveData("_EXCLUDE_SITES_", uniq(exSite.sort()));
+              const exSiteData = uniq(exSite.sort());
+              saveData("_EXCLUDE_SITES_", exSiteData);
               closeConfigurePage({ isReload: true });
             } else {
               let frDialog = new FrDialogBox({
@@ -2487,11 +2523,12 @@
                 titleText: "恢复泛域名下的字体渲染",
               });
               if (await frDialog.respond()) {
-                exSite = await exSiteData();
+                exSite = await excludeSiteData();
                 for (let i = exSite.length - 1; i >= 0; i--) {
                   if (exSite[i].endsWith(panDomain.slice(1))) exSite.splice(i, 1);
                 }
-                saveData("_EXCLUDE_SITES_", uniq(exSite.sort()));
+                const exSiteData = uniq(exSite.sort());
+                saveData("_EXCLUDE_SITES_", exSiteData);
                 closeConfigurePage({ isReload: true });
               } else {
                 addAction.customExsite();
@@ -2503,7 +2540,7 @@
           frDialog = null;
         },
         customExsite: async () => {
-          exSite = await exSiteData();
+          exSite = await excludeSiteData();
           let listContents = "";
           let _temp_ = exSite.sort();
           let exSiteLength = _temp_.length;
@@ -2595,7 +2632,8 @@
             }
           });
           if (await frDialog.respond()) {
-            saveData("_EXCLUDE_SITES_", uniq(_temp_.sort()));
+            const exSiteData = uniq(_temp_.sort());
+            saveData("_EXCLUDE_SITES_", exSiteData);
             let frDialog = new FrDialogBox({
               trueButtonText: "感谢使用",
               messageText: `<p style="color:darkgreen">自定义排除网站数据已成功保存\uff01</p><p>页面将在您确认后自动刷新。</p>`,
@@ -2827,91 +2865,104 @@
 
       /* FONT_LIST_GENERATION_AND_SELECTION */
 
-      function fontSet(s) {
-        if (typeof s !== "string" && typeof s !== "undefined") return;
+      function fontSet(expr) {
         return {
-          hide: () => qA(s, def.const.configIf).forEach(item => (item.style.display = "none")),
-          show: () => qA(s, def.const.configIf).forEach(item => (item.style.display = "block")),
-          cloze: async (item, fontData) => {
-            ddRemove(item.parentNode);
-            const value = item.parentNode.children[1].value;
-            const sort = Number(item.parentNode.children[1].attributes.sort.value) || -1;
-            const text = item.parentNode.children[0].textContent;
-            fontData.push({ ch: text, en: value, sort: sort });
-            fontData = getUniqueFontlist(fontData).sort((a, b) => a.sort - b.sort);
-            const submitButton = qS(`#${def.id.submit} .${def.class.submit}`, def.const.configIf);
-            if (!submitButton) return;
-            if (qA(`#${def.id.fontList} .${def.class.close}`, def.const.configIf).length === 0) {
-              const fontIndex = def.array.values.indexOf(def.id.fontName);
-              Boolean(~fontIndex) && def.array.values.splice(fontIndex, 1);
-              if (def.array.values.length === 0) {
-                submitButton.classList.contains(def.class.anim) && submitButton.classList.remove(def.class.anim);
-                if (def.const.isPreview) {
-                  submitButton.textContent = "\u4fdd\u5b58";
-                  submitButton.removeAttribute("style");
-                  submitButton.removeAttribute("v-Preview");
-                  loadPreview(def.const.preview);
-                }
-              } else {
-                def.const.isPreview && changePreviewButtonStyle(submitButton, def.array.values);
-              }
-              qS(`#${def.id.selector}`, def.const.configIf).style.display = "none";
-              const ffaceT = qS(`#${def.id.fface}`, def.const.configIf);
-              const inputFont = qS(`#${def.id.fontList} .${def.class.selectFontId} input`, def.const.configIf);
-              if (ffaceT.checked) {
-                const fontCheckList = await getMergedFontCheckList();
-                for (let i = 0, l = fontCheckList.length; i < l; i++) {
-                  if (fontCheckList[i].en === refont || convertToUnicode(fontCheckList[i].ch) === refont) {
-                    def.const.curFont = fontCheckList[i].ch;
-                    break;
-                  }
-                }
-                inputFont.setAttribute("placeholder", `\u5f53\u524d\u5b57\u4f53\uff1a${def.const.curFont}`);
+          fdeleteList: deleteFontSelectList,
+          fresetList: resetFontSelectList,
+          fsearchList: getFontSearchList,
+          fsearch: fontSearch,
+        };
+
+        function fontListShown(qs, shown = true) {
+          const disp = shown ? "block" : "none";
+          qA(qs, def.const.configIf).forEach(item => (item.style.display = disp));
+        }
+
+        async function closeFontSelected(item, fontData) {
+          ddRemove(item.parentNode);
+          const value = item.parentNode.children[1].value;
+          const sort = Number(item.parentNode.children[1].attributes.sort.value) || -1;
+          const text = item.parentNode.children[0].textContent;
+          fontData.push({ ch: text, en: value, sort: sort });
+          fontData = getUniqueFontlist(fontData).sort((a, b) => a.sort - b.sort);
+          const submitButton = qS(`#${def.id.submit} .${def.class.submit}`, def.const.configIf);
+          if (!submitButton) return;
+          if (qA(`#${def.id.fontList} .${def.class.close}`, def.const.configIf).length === 0) {
+            const fontIndex = def.array.values.indexOf(def.id.fontName);
+            Boolean(~fontIndex) && def.array.values.splice(fontIndex, 1);
+            if (def.array.values.length === 0) {
+              submitButton.classList.contains(def.class.anim) && submitButton.classList.remove(def.class.anim);
+              if (def.const.isPreview) {
+                submitButton.textContent = "\u4fdd\u5b58";
+                submitButton.removeAttribute("style");
+                submitButton.removeAttribute("v-Preview");
+                loadPreview(def.const.preview);
               }
             } else {
               def.const.isPreview && changePreviewButtonStyle(submitButton, def.array.values);
             }
-          },
-          fdeleteList: fontData => {
-            const closeNodes = qA(`#${def.id.fontList} .${def.class.close}`, def.const.configIf);
-            closeNodes.forEach(item => fontSet().cloze(item, fontData));
-          },
-          fresetList: fontData => {
-            fontSet().fdeleteList(fontData);
-            const fontlistSelectorNode = qS(`#${def.id.fontList} .${def.class.selector}`, def.const.configIf);
-            const resetDefaultFont = INITIAL_VALUES.fontSelect.replace(/'|"/g, "");
-            fontlistSelectorNode.insertAdjacentHTML(
-              "beforeend",
-              tTP.createHTML(
-                `<a class="${def.class.label}"><span style="border-bottom-left-radius:4px;border-top-left-radius:4px;font-family:${INITIAL_VALUES.fontSelect}!important">微软雅黑</span><input type="hidden" name="${def.id.fontName}" sort="0" value="${resetDefaultFont}"/><span class="${def.class.close}" style="border-top-right-radius:4px;border-bottom-right-radius:4px;font-family:system-ui,-apple-system,BlinkMacSystemFont,serif!important;cursor:pointer">\u0026\u0023\u0032\u0031\u0035\u003b</span></a>`
-              )
-            );
-            fontlistSelectorNode.parentNode.style.display = "block";
-            for (let i = 0; i < fontData.length; i++) {
-              if (fontData[i].en === resetDefaultFont) {
-                fontData.splice(i, 1);
-                break;
+            qS(`#${def.id.selector}`, def.const.configIf).style.display = "none";
+            const ffaceT = qS(`#${def.id.fface}`, def.const.configIf);
+            const inputFont = qS(`#${def.id.fontList} .${def.class.selectFontId} input`, def.const.configIf);
+            if (ffaceT.checked) {
+              const fontCheckList = await getMergedFontCheckList();
+              for (let i = 0, l = fontCheckList.length; i < l; i++) {
+                if (fontCheckList[i].en === selectedFont || convertToUnicode(fontCheckList[i].ch) === selectedFont) {
+                  def.const.curFont = fontCheckList[i].ch;
+                  break;
+                }
               }
+              inputFont.setAttribute("placeholder", `\u5f53\u524d\u5b57\u4f53\uff1a${def.const.curFont}`);
             }
-            def.array.values.push(def.id.fontName);
-            const submitButton = qS(`#${def.id.submit} .${def.class.submit}`, def.const.configIf);
-            def.const.isPreview && submitButton && changePreviewButtonStyle(submitButton, def.array.values);
-            const cleanerNode = qS(`#${def.id.selector} #${def.id.cleaner}`, def.const.configIf);
-            cleanerNode?.addEventListener("click", () => fontSet().fdeleteList(fontData));
-            const closeNode = qS(`#${def.id.fontList} input[name="${def.id.fontName}"][sort="0"]~.${def.class.close}`, def.const.configIf);
-            closeNode.addEventListener("click", function () {
-              fontSet().cloze(this, fontData);
-            });
-          },
-          fsearchList: name => {
-            let arr = [];
-            const inputListNodes = qA(`#${def.id.selector} .${def.class.selector} input[name="${name}"]`, def.const.configIf);
-            inputListNodes.forEach(item => arr.push(item.value));
-            return arr.filter(Boolean);
-          },
-          fsearch: fontData => {
-            const fHtml = String(
-              `<div id="${def.id.selector}">
+          } else {
+            def.const.isPreview && changePreviewButtonStyle(submitButton, def.array.values);
+          }
+        }
+
+        function deleteFontSelectList(fontData) {
+          if (!Array.isArray(fontData)) return;
+          const closeNodes = qA(`#${def.id.fontList} .${def.class.close}`, def.const.configIf);
+          closeNodes.forEach(async item => await closeFontSelected(item, fontData));
+        }
+
+        function resetFontSelectList(fontData) {
+          if (!Array.isArray(fontData)) return;
+          deleteFontSelectList(fontData);
+          const fontlistSelectorNode = qS(`#${def.id.fontList} .${def.class.selector}`, def.const.configIf);
+          const resetDefaultFont = INITIAL_VALUES.fontSelect.replace(/'|"/g, "");
+          fontlistSelectorNode.insertAdjacentHTML(
+            "beforeend",
+            tTP.createHTML(
+              `<a class="${def.class.label}"><span style="border-bottom-left-radius:4px;border-top-left-radius:4px;font-family:'Microsoft YaHei UI'!important">微软雅黑</span><input type="hidden" name="${def.id.fontName}" sort="0" value="${resetDefaultFont}"/><span class="${def.class.close}" style="border-top-right-radius:4px;border-bottom-right-radius:4px;font-family:system-ui,-apple-system,BlinkMacSystemFont,serif!important;cursor:pointer">\u0026\u0023\u0032\u0031\u0035\u003b</span></a>`
+            )
+          );
+          fontlistSelectorNode.parentNode.style.display = "block";
+          for (let i = 0; i < fontData.length; i++) {
+            if (fontData[i].en === resetDefaultFont) {
+              fontData.splice(i, 1);
+              break;
+            }
+          }
+          def.array.values.push(def.id.fontName);
+          const submitButton = qS(`#${def.id.submit} .${def.class.submit}`, def.const.configIf);
+          def.const.isPreview && submitButton && changePreviewButtonStyle(submitButton, def.array.values);
+          const cleanerNode = qS(`#${def.id.selector} #${def.id.cleaner}`, def.const.configIf);
+          if (cleanerNode) cleanerNode.onclick = () => deleteFontSelectList(fontData);
+          const closeNode = qS(`#${def.id.fontList} input[name="${def.id.fontName}"][sort="0"]~.${def.class.close}`, def.const.configIf);
+          if (closeNode) closeNode.onclick = async () => await closeFontSelected(closeNode, fontData);
+        }
+
+        function getFontSearchList(name) {
+          let arr = [];
+          const inputListNodes = qA(`#${def.id.selector} .${def.class.selector} input[name="${name}"]`, def.const.configIf);
+          inputListNodes.forEach(item => arr.push(item.value));
+          return arr.filter(Boolean);
+        }
+
+        function fontSearch(fontData) {
+          if (!expr || typeof expr !== "string" || !Array.isArray(fontData)) return;
+          const fHtml = String(
+            `<div id="${def.id.selector}">
                 <span class="${def.class.spanlabel}">已选择字体\uff1a<span id="${def.id.cleaner}">[清空]</span></span>
                 <div class="${def.class.selector}"></div>
               </div>
@@ -2931,128 +2982,127 @@
                   </span>
                 </span>
               </div>`
-            );
-            const fontListNode = qS(s, def.const.configIf);
-            if (!qS(`#${def.id.selector}`, def.const.configIf) && fontListNode) fontListNode.innerHTML = tTP.createHTML(fHtml);
-            const ffaceT = qS(`#${def.id.fface}`, def.const.configIf);
-            const fselectorT = qS(`#${def.id.fontList} .${def.class.selectFontId} input`, def.const.configIf);
-            fselectorT?.addEventListener("keydown", e => e.stopImmediatePropagation());
-            if (ffaceT && fselectorT) {
-              changeSelectorStatus(ffaceT.checked, fselectorT, def.class.readonly);
-              ffaceT.addEventListener("change", () => changeSelectorStatus(ffaceT.checked, fselectorT, def.class.readonly));
-            }
+          );
+          const fontListNode = qS(expr, def.const.configIf);
+          const selectorNode = qS(`#${def.id.selector}`, def.const.configIf);
+          if (!selectorNode && fontListNode) {
+            fontListNode.innerHTML = tTP.createHTML(fHtml);
             qS(`#${def.id.selector}`, def.const.configIf).style.display = "none";
-            fselectorT.addEventListener("input", () => searchEvents(fselectorT.value));
-            fselectorT.addEventListener("click", function (e) {
-              if (this.value.length === 0) {
-                const selector = `#${def.id.fontList} .${def.class.selectFontId} dl`;
-                const selectFontNode = qS(selector, def.const.configIf);
-                fontSet(selector).show();
-                if (fontData.length === 0 && selectFontNode) {
-                  selectFontNode.innerHTML = tTP.createHTML("<dd>\u6570\u636e\u6e90\u6682\u65e0\u6570\u636e</dd>");
-                } else {
-                  selectFontNode.textContent = "";
-                  fontData = getUniqueFontlist(fontData).sort((a, b) => a.sort - b.sort);
-                  fontData.forEach(item => {
-                    selectFontNode.insertAdjacentHTML(
-                      "beforeend",
-                      tTP.createHTML(`<dd title="${item.ch}" style="font-family:'${item.en}'!important" sort="${item.sort}" value="${item.en}">${item.ch}</dd>`)
-                    );
-                  });
-                }
-                clickEvents();
-              } else {
-                searchEvents(this.value);
-              }
-              e.stopPropagation();
-            });
-            document.addEventListener("click", selectorHidden);
+          }
+          const ffaceT = qS(`#${def.id.fface}`, def.const.configIf);
+          const fselectorT = qS(`#${def.id.fontList} .${def.class.selectFontId} input`, def.const.configIf);
+          if (ffaceT && fselectorT) {
+            fselectorT.addEventListener("keydown", e => e.stopImmediatePropagation());
+            changeSelectorStatus(ffaceT.checked, fselectorT, def.class.readonly);
+            ffaceT.addEventListener("change", () => changeSelectorStatus(ffaceT.checked, fselectorT, def.class.readonly));
+          }
+          fselectorT.addEventListener("input", () => searchEvents(fselectorT.value));
+          fselectorT.addEventListener("click", selectorEvent);
 
-            function changeSelectorStatus(inputCheckedStatus, target, cssName) {
-              if (!target) return;
-              if (inputCheckedStatus) {
-                target.removeAttribute("disabled");
-                target.classList.remove(cssName);
-              } else {
-                fontSet().fdeleteList(fontData);
-                target.setAttribute("disabled", "disabled");
-                target.classList.add(cssName);
-              }
-            }
-
-            function selectorHidden() {
-              fontSet(`#${def.id.fontList} .${def.class.selectFontId} dl`).hide();
-              const selectorInput = qS(`#${def.id.fontList} .${def.class.selectFontId} input`, def.const.configIf);
-              if (selectorInput) selectorInput.value = "";
-            }
-
-            function searchEvents(t) {
+          function selectorEvent(event) {
+            if (this.value.length === 0) {
               const selector = `#${def.id.fontList} .${def.class.selectFontId} dl`;
               const selectFontNode = qS(selector, def.const.configIf);
-              fontSet(selector).hide();
-              if (fontData.length > 0 && selectFontNode) {
-                fontSet(selector).show();
-                const sText = t.replace(/([.:?*+^$[\-=\](){}\\/|])/g, "\\$1");
-                const sRegExp = new RegExp(sText, "i");
-                let sMatched = false;
+              fontListShown(selector);
+              if (fontData.length === 0 && selectFontNode) {
+                selectFontNode.innerHTML = tTP.createHTML("<dd>\u6570\u636e\u6e90\u6682\u65e0\u6570\u636e</dd>");
+              } else {
                 selectFontNode.textContent = "";
                 fontData = getUniqueFontlist(fontData).sort((a, b) => a.sort - b.sort);
                 fontData.forEach(item => {
-                  if (sRegExp.test(item.ch) || sRegExp.test(item.en)) {
-                    sMatched = true;
-                    selectFontNode.insertAdjacentHTML(
-                      "beforeend",
-                      tTP.createHTML(`<dd title="${item.ch}" style="font-family:'${item.en}'!important" sort="${item.sort}" value="${item.en}">${item.ch}</dd>`)
-                    );
-                  }
+                  const nodeContent = `<dd title="${item.ch}" style="font-family:'${item.en}'!important" sort="${item.sort}" value="${item.en}">${item.ch}</dd>`;
+                  selectFontNode.insertAdjacentHTML("beforeend", tTP.createHTML(nodeContent));
                 });
-                if (!sMatched) selectFontNode.innerHTML = tTP.createHTML("<dd>\u6682\u65e0\u60a8\u641c\u7d22\u7684\u5b57\u4f53</dd>");
-                clickEvents();
               }
-            }
+              clickEvents();
+            } else searchEvents(this.value);
+            event.stopPropagation();
+          }
 
-            function clickEvents() {
-              const selectFontNodes = qA(`#${def.id.fontList} .${def.class.selectFontId} dl dd`, def.const.configIf);
-              selectFontNodes.forEach(item => {
-                item.addEventListener("click", function (e) {
-                  const value = this.attributes?.value?.value;
-                  const sort = this.attributes?.sort?.value;
-                  const selector = qS(`#${def.id.fontList} .${def.class.selector}`, def.const.configIf);
-                  if (value && sort && selector) {
-                    selector.insertAdjacentHTML(
-                      "beforeend",
-                      tTP.createHTML(
-                        `<a class="${def.class.label}"><span style="border-bottom-left-radius:4px;border-top-left-radius:4px;font-family:'${value}'!important">${this.textContent}</span><input type="hidden" name="${def.id.fontName}" sort="${sort}" value="${value}"/><span class="${def.class.close}" style="border-bottom-right-radius:4px;border-top-right-radius:4px;cursor:pointer;font-family:system-ui,-apple-system,BlinkMacSystemFont,serif!important">\u0026\u0023\u0032\u0031\u0035\u003b</span></a>`
-                      )
-                    );
-                    selector.parentNode.style.display = "block";
-                    fontData = getUniqueFontlist(fontData).sort((a, b) => a.sort - b.sort);
-                    for (let i = 0; i < fontData.length; i++) {
-                      if (fontData[i].en === value) {
-                        fontData.splice(i, 1);
-                        i = fontData.length;
-                      }
-                    }
-                    const cleanerNode = qS(`#${def.id.selector} #${def.id.cleaner}`, def.const.configIf);
-                    cleanerNode?.addEventListener("click", () => fontSet().fdeleteList(fontData));
-                    const closeNode = qS(`#${def.id.fontList} input[name="${def.id.fontName}"][sort="${sort}"]~.${def.class.close}`, def.const.configIf);
-                    closeNode.addEventListener("click", function () {
-                      fontSet().cloze(this, fontData);
-                    });
-                    const submitButton = qS(`#${def.id.submit} .${def.class.submit}`, def.const.configIf);
-                    if (submitButton) {
-                      !def.array.values.includes(def.id.fontName) && def.array.values.push(def.id.fontName);
-                      !submitButton.classList.contains(def.class.anim) && submitButton.classList.add(def.class.anim);
-                      def.const.isPreview && changePreviewButtonStyle(submitButton, def.array.values);
-                    }
-                  }
-                  selectorHidden();
-                  e.stopPropagation();
-                });
-              });
+          function changeSelectorStatus(inputCheckedStatus, target, cssName) {
+            if (!target) return;
+            if (inputCheckedStatus) {
+              target.removeAttribute("disabled");
+              target.classList.remove(cssName);
+            } else {
+              deleteFontSelectList(fontData);
+              target.setAttribute("disabled", "disabled");
+              target.classList.add(cssName);
             }
-          },
-        };
+          }
+
+          function selectorHidden() {
+            document.removeEventListener("click", selectorHidden);
+            fontListShown(`#${def.id.fontList} .${def.class.selectFontId} dl`, false);
+            const selectorInput = qS(`#${def.id.fontList} .${def.class.selectFontId} input`, def.const.configIf);
+            if (selectorInput) selectorInput.value = "";
+          }
+
+          function searchEvents(searchText) {
+            const selector = `#${def.id.fontList} .${def.class.selectFontId} dl`;
+            const selectFontNode = qS(selector, def.const.configIf);
+            fontListShown(selector, false);
+            if (fontData.length > 0 && selectFontNode) {
+              fontListShown(selector);
+              const sText = searchText.replace(/([.:?*+^$[\-=\](){}\\/|])/g, "\\$1");
+              const sRegExp = new RegExp(sText, "i");
+              let sMatched = false;
+              selectFontNode.textContent = "";
+              fontData = getUniqueFontlist(fontData).sort((a, b) => a.sort - b.sort);
+              fontData.forEach(item => {
+                if (sRegExp.test(item.ch) || sRegExp.test(item.en)) {
+                  sMatched = true;
+                  selectFontNode.insertAdjacentHTML(
+                    "beforeend",
+                    tTP.createHTML(`<dd title="${item.ch}" style="font-family:'${item.en}'!important" sort="${item.sort}" value="${item.en}">${item.ch}</dd>`)
+                  );
+                }
+              });
+              if (!sMatched) selectFontNode.innerHTML = tTP.createHTML("<dd>\u6682\u65e0\u60a8\u641c\u7d22\u7684\u5b57\u4f53</dd>");
+              clickEvents();
+            }
+          }
+
+          function clickEvents() {
+            const selectFontNodes = qA(`#${def.id.fontList} .${def.class.selectFontId} dl dd`, def.const.configIf);
+            const selector = qS(`#${def.id.fontList} .${def.class.selector}`, def.const.configIf);
+            selectFontNodes.forEach(item => (item.onclick = parseClick));
+            document.addEventListener("click", selectorHidden);
+
+            function parseClick(e) {
+              const value = this.attributes.value?.value;
+              const sort = this.attributes.sort?.value;
+              if (value && sort && selector) {
+                selector.insertAdjacentHTML(
+                  "beforeend",
+                  tTP.createHTML(
+                    `<a class="${def.class.label}"><span style="border-bottom-left-radius:4px;border-top-left-radius:4px;font-family:'${value}'!important">${this.textContent}</span><input type="hidden" name="${def.id.fontName}" sort="${sort}" value="${value}"/><span class="${def.class.close}" style="border-bottom-right-radius:4px;border-top-right-radius:4px;cursor:pointer;font-family:system-ui,-apple-system,BlinkMacSystemFont,serif!important">\u0026\u0023\u0032\u0031\u0035\u003b</span></a>`
+                  )
+                );
+                selector.parentNode.style.display = "block";
+                fontData = getUniqueFontlist(fontData).sort((a, b) => a.sort - b.sort);
+                for (let i = 0, l = fontData.length; i < l; i++) {
+                  if (fontData[i].en === value) {
+                    fontData.splice(i, 1);
+                    break;
+                  }
+                }
+                const cleanerNode = qS(`#${def.id.selector} #${def.id.cleaner}`, def.const.configIf);
+                if (cleanerNode) cleanerNode.onclick = () => deleteFontSelectList(fontData);
+                const closeNode = qS(`#${def.id.fontList} input[name="${def.id.fontName}"][sort="${sort}"]~.${def.class.close}`, def.const.configIf);
+                if (closeNode) closeNode.onclick = async () => await closeFontSelected(closeNode, fontData);
+                const submitButton = qS(`#${def.id.submit} .${def.class.submit}`, def.const.configIf);
+                if (submitButton) {
+                  !def.array.values.includes(def.id.fontName) && def.array.values.push(def.id.fontName);
+                  !submitButton.classList.contains(def.class.anim) && submitButton.classList.add(def.class.anim);
+                  def.const.isPreview && changePreviewButtonStyle(submitButton, def.array.values);
+                }
+              }
+              selectorHidden();
+              e.stopPropagation();
+            }
+          }
+        }
 
         function ddRemove(item) {
           if (!item) return;
@@ -3082,7 +3132,8 @@
         return c.substring(1) !== "FFFFFFFF" ? `0 0 ${r}px ${c}` : `0 0 ${r}px currentcolor`;
       }
 
-      async function fixScaleOffset(scaleValue) {
+      async function correctScaleOffset() {
+        const scaleValue = def.const.curScale;
         if (scaleValue === 1) return;
         const predefinedSitesProps = await fontScaleDef();
         sleep(20, { useCachedSetTimeout: true })(scaleValue).then(scale => {
@@ -3115,10 +3166,10 @@
         const codeSelector = CAN_I_USE ? `${globalPrefix}:is(${code_text})` : formatSelectors(code_text, globalPrefix);
         const codeSelection = CAN_I_USE ? `${globalPrefix}:is(${code_text})::selection` : formatSelectors(code_text, globalPrefix, "::selection");
         const base = s ? "var(--fr-font-family),var(--fr-font-basefont)" : "var(--fr-font-basefont)";
-        const monoTextShadow = IS_REAL_GECKO || brand === "Edge" ? "" : "text-shadow:var(--fr-mono-shadow)!important;";
+        const monoTextShadow = IS_REAL_GECKO ? "" : "text-shadow:var(--fr-mono-shadow)!important;";
         return codeSelector.concat(
           `{-webkit-text-stroke:var(--fr-no-stroke)!important;${monoTextShadow}font-family:var(--fr-mono-font),${base}!important;`,
-          `font-feature-settings:var(--fr-mono-feature)!important;${IS_REAL_WEBKIT ? "-webkit-user-select" : "user-select"}:text!important;}`,
+          `font-feature-settings:var(--fr-mono-feature)!important;-webkit-user-select:text!important;user-select:text!important}`,
           CUR_HOST_NAME.endsWith("github.com") ? `${codeSelection}{color:currentcolor!important;background:#71bbff6e!important}` : ``
         );
       }
@@ -3137,31 +3188,6 @@
         return insertResult;
       }
 
-      function couldMoveStyleElements(element) {
-        return (
-          (element instanceof HTMLStyleElement || (element instanceof HTMLLinkElement && element.rel?.toLowerCase().includes("stylesheet") && !element.disabled)) &&
-          element.media?.toLowerCase() !== "print" &&
-          !element.attributes[0]?.name.startsWith("fr-css-") &&
-          !element.classList.contains("darkreader")
-        );
-      }
-
-      async function moveStyleToLast(node) {
-        try {
-          const rndStyleNode = qS(`#${def.id.rndStyle}`);
-          if (rndStyleNode?.nextElementSibling && couldMoveStyleElements(node) && getLastStyleNode(document.head) !== rndStyleNode) {
-            COUNT(`[MOVESTYLE]${IS_IN_FRAMES}[i:${rndStyleNode.id}]`);
-            insertMainStyleElement({ overwrite: true });
-          }
-        } catch (e) {
-          ERROR("moveStyleToLast:", e.message);
-        }
-      }
-
-      function getImageAndTextProperties() {
-        return CONST_VALUES.isMatchEditorialSite ? `disabled="disabled" title="\u56fe\u6587/\u7f16\u8f91\u7f51\u7ad9\u81ea\u52a8\u7981\u7528" ` : ``;
-      }
-
       async function operateConfigure() {
         if (!CUR_WINDOW_TOP) return;
         try {
@@ -3174,6 +3200,7 @@
           const inputFont = qS(`#${def.id.fontList} .${def.class.selectFontId} input`, def.const.configIf);
           await getAndMonitorCurrentFont(ffaceT, inputFont);
           // Fonts Face
+          setFontOverrideDefTrigger(fontOverrideData);
           const submitButton = qS(`#${def.id.submit} .${def.class.submit}`, def.const.configIf);
           saveChangeStatus(ffaceT, CONST_VALUES.fontFace, submitButton, def.array.values);
           // Font Smooth
@@ -3316,6 +3343,7 @@
                     const aTrim = customFontlistNode.value.trim() ? "\r\n" : "";
                     customFontlistNode.value = customFontlistNode.value.trim().concat(aTrim, cusFontName, "\r\n");
                     custom_Fontlist = customFontlistNode.value.trim();
+                    customFontlistNode.scrollTop = customFontlistNode.scrollHeight;
                   } else {
                     def.dialog.alert("英文字体家族名称 格式输入错误\uff01");
                   }
@@ -3346,7 +3374,8 @@
                 } else if (Array.isArray(fontListArray) && fontListArray.length > 0) {
                   fontListArray.forEach(item => save_Fontlist.push(JSON.parse(item)));
                   const unique_Save_Fontlist = getUniqueFontlist(save_Fontlist);
-                  saveData("_CUSTOM_FONTLIST_", getDeduplicatedValues(unique_Save_Fontlist, fontCheck));
+                  const customFontlistData = getNonDuplicateFontArray(unique_Save_Fontlist, fontCheck);
+                  saveData("_CUSTOM_FONTLIST_", customFontlistData);
                   let frDialog = new FrDialogBox({
                     trueButtonText: "确 定",
                     messageText: `<p style="color:darkgreen">您所提交的自定义字体已保存成功\uff01<p><p>字体列表全局缓存已自动重建，当前页面即将刷新。</p><p style='color:coral;font-size:12px!important'>注：格式错误或重复的字体代码将被自动过滤。</p>`,
@@ -3380,11 +3409,88 @@
           }
         }
 
+        function checkTextareaFormat(target) {
+          target.addEventListener("input", function () {
+            try {
+              let previousCursorPosition = this.selectionStart;
+              const formattedValue = JSON.stringify(JSON.parse(this.value.trim()), null, "    ");
+              const diff = formattedValue.length - this.value.length;
+              const newCursorPosition = previousCursorPosition + diff;
+              const currentScrollTop = this.scrollTop;
+              this.value = formattedValue;
+              this.style.border = "1px solid #999999";
+              sleep(0)([currentScrollTop, newCursorPosition]).then(([top, pos]) => {
+                this.scrollTop = top;
+                this.setSelectionRange(pos, pos);
+              });
+            } catch (e) {
+              this.style.border = "2px solid #dc143c";
+            }
+          });
+        }
+
+        function setFontOverrideDefTrigger(data) {
+          qS(`#${def.const.seed}_fontoverride_defined`, def.const.configIf)?.addEventListener("dblclick", async () => {
+            const _fontOverrideDef = JSON.stringify(data, null, "    ");
+            let frDialog = new FrDialogBox({
+              trueButtonText: "确 定",
+              neutralButtonText: "取 消",
+              messageText: `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式填写字体重写的自定义数据。整体为数组类型，每个字体名称占一行，并使用半角双引号包括；如字体名称包含中文等双字节文本时，请在双引号内使用半角花括号包括。如您不了解该数据的含义，请勿修改，以免造成全局字体重写出错。<span style="color:#dc143c">(强烈建议您：按 <a href="${def.variable.feedback}/../discussions/267#discussion-5692372" target="_blank">作者提议</a> 填写此内容)</span></p><p><textarea id="${def.const.seed}_fontoverride_def_array" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain">${_fontOverrideDef}</textarea></p><p style="display:block;margin:-2px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（请勿添加脚本字体表已存在的字体，如重复将自动删除）</p>`,
+              titleText: "自定义字体重写数据",
+            });
+            const fontOverrideNode = qS(`#${def.const.seed}_fontoverride_def_array`, def.const.dialogIf);
+            checkTextareaFormat(fontOverrideNode);
+            if (await frDialog.respond()) {
+              const _res_fontOverrideDef = fontOverrideNode.value.trim();
+              try {
+                const __res_fontOverrideDef = _res_fontOverrideDef ? uniq(JSON.parse(_res_fontOverrideDef)) : [];
+                const fontCheckArray = [];
+                const fontCheckList = await cache.get("_FONTCHECKLIST_");
+                if (Array.isArray(fontCheckList) && fontCheckList.length > 0) {
+                  for (let i = 0; i < fontCheckList.length; i++) {
+                    if (fontCheckList[i].en === "Microsoft YaHei") continue;
+                    if (fontCheckList[i].en.startsWith("\\")) {
+                      fontCheckArray.push(`{${fontCheckList[i].ch}}`);
+                    } else {
+                      fontCheckArray.push(fontCheckList[i].en);
+                    }
+                  }
+                }
+                const baseFontArray = INITIAL_VALUES.fontBase.replace(/'/g, "").split(",");
+                const monoFontArray = (monoFontList || INITIAL_VALUES.monospacedFont).replace(/'/g, "").split(",");
+                const filterFonts = uniq(["Courier New", "Courier", "monospace", ...baseFontArray, ...fontCheckArray, ...monoFontArray]);
+                const fontOverrideData = __res_fontOverrideDef.filter(x => !filterFonts.includes(x)).sort();
+                saveData("_FONTOVERRIDE_DEF_", fontOverrideData);
+                let frDialog = new FrDialogBox({
+                  trueButtonText: "确 定",
+                  messageText: "<p style='color:darkgreen'>自定义字体重写数据已成功保存\uff01</p><p>当前页面将在您确认后自动刷新。</p>",
+                  titleText: "自定义字体重写数据设置成功",
+                });
+                if (await frDialog.respond()) closeConfigurePage({ isReload: true });
+                frDialog = null;
+              } catch (e) {
+                let frDialog = new FrDialogBox({
+                  trueButtonText: "确 定",
+                  messageText: "<p style='color:darkred'>自定义字体重写数据格式错误，请重新输入\uff01</p>",
+                  titleText: "重写数据格式错误",
+                });
+                if (await frDialog.respond()) {
+                  let clickEvent = new Event("dblclick", { bubbles: true, cancelable: false });
+                  qS(`#${def.const.seed}_fontoverride_defined`, def.const.configIf)?.dispatchEvent(clickEvent);
+                  clickEvent = null;
+                }
+                frDialog = null;
+              }
+            }
+            frDialog = null;
+          });
+        }
+
         async function getAndMonitorCurrentFont(fontfaceNode, inputNode) {
-          await getCurrentFontName(CONST_VALUES.fontFace, refont, def.const.defaultFont);
+          await getCurrentFontName(CONST_VALUES.fontFace, selectedFont, def.const.defaultFont);
           if (!fontfaceNode || !inputNode) return;
           fontfaceNode.addEventListener("change", async () => {
-            await getCurrentFontName(CONST_VALUES.fontFace, refont, def.const.defaultFont);
+            await getCurrentFontName(CONST_VALUES.fontFace, selectedFont, def.const.defaultFont);
             if (fontfaceNode.checked && !CONST_VALUES.fontFace) {
               inputNode.setAttribute("placeholder", "正在恢复之前设置的字体…");
               sleep(120)
@@ -3397,6 +3503,7 @@
         function getFontSizeScale(fontScaleNode, submitButton) {
           if (!def.const.isFontsize || !fontScaleNode) return;
           try {
+            setFontScaleDefTrigger();
             const drawScale = qS(`#${def.id.scaleSize}`, def.const.configIf);
             fontScaleNode.value = CONST_VALUES.fontSize === 1 ? "OFF" : CONST_VALUES.fontSize.toFixed(3);
             rangeSliderWidget(drawScale, fontScaleNode, 3, true);
@@ -3408,6 +3515,48 @@
           } finally {
             saveChangeStatus(fontScaleNode, CONST_VALUES.fontSize, submitButton, def.array.values, true);
           }
+        }
+
+        function setFontScaleDefTrigger() {
+          qS(`#${def.const.seed}_fontscale_defined`, def.const.configIf)?.addEventListener("dblclick", async () => {
+            const _fontScaleDef = await fontScaleDef();
+            const __fontScaleDef = JSON.stringify(_fontScaleDef, null, "    ");
+            let frDialog = new FrDialogBox({
+              trueButtonText: "确 定",
+              neutralButtonText: "取 消",
+              messageText: `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式填写“字体比例缩放功能”所需的自定义站点缩放数据配置。由于该数据为脚本核心设置数据，如果您不了解该设置数据的格式要求或数据含义，请勿修改该数据！<span style="color:#dc143c">（强烈建议您：按 <a href="${def.variable.feedback}/../discussions/267#discussioncomment-7161615" target="_blank">作者提议</a> 填写此内容）</span></p><p><textarea id="${def.const.seed}_fontscale_def_json" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain">${__fontScaleDef}</textarea></p><p style="display:block;margin:-2px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（如果以上JSON内容格式错误，会造成脚本出错使渲染失效）</p>`,
+              titleText: "站点缩放修正设置数据",
+            });
+            const fontScaleNode = qS(`#${def.const.seed}_fontscale_def_json`, def.const.dialogIf);
+            checkTextareaFormat(fontScaleNode);
+            if (await frDialog.respond()) {
+              const _res_fontScaleDef = fontScaleNode.value.trim();
+              try {
+                const fontScaleData = _res_fontScaleDef ? JSON.parse(_res_fontScaleDef) : {};
+                saveData("_FONTSCALE_DEF_", fontScaleData);
+                let frDialog = new FrDialogBox({
+                  trueButtonText: "确 定",
+                  messageText: "<p style='color:darkgreen'>站点缩放修正设置数据已成功保存\uff01</p><p>当前页面将在您确认后自动刷新。</p>",
+                  titleText: "站点缩放修正数据设置成功",
+                });
+                if (await frDialog.respond()) closeConfigurePage({ isReload: true });
+                frDialog = null;
+              } catch (e) {
+                let frDialog = new FrDialogBox({
+                  trueButtonText: "确 定",
+                  messageText: "<p style='color:darkred'>站点缩放修正设置数据格式错误，请重新输入\uff01</p>",
+                  titleText: "设置数据格式错误",
+                });
+                if (await frDialog.respond()) {
+                  let clickEvent = new Event("dblclick", { bubbles: true, cancelable: false });
+                  qS(`#${def.const.seed}_fontscale_defined`, def.const.configIf)?.dispatchEvent(clickEvent);
+                  clickEvent = null;
+                }
+                frDialog = null;
+              }
+            }
+            frDialog = null;
+          });
         }
 
         function getFixViewportBool(fontScaleNode, submitButton) {
@@ -3489,7 +3638,7 @@
         function getColorAndColorPicker(colorshowNode, submitButton) {
           if (!colorshowNode) return {};
           try {
-            const colorPicker = new w.frColorPicker(`#${def.id.color}`, {
+            const colorPicker = new w.FRColorPicker(`#${def.id.color}`, {
               value: CONST_VALUES.shadowColor,
               alpha: 1.0,
               format: "hexa",
@@ -3538,7 +3687,7 @@
           monoNode.addEventListener("dblclick", async () => {
             try {
               const { monoSiteRules: siteRule, monoFontList: fontlist, monoFeature: feature } = await customMonoData();
-              const _config_data_ = await configData();
+              const _config_data_ = await configureData();
               const monospacedsiterules = siteRule.join("\r\n").trim();
               const monospacedfont = fontlist.trim();
               const monospacedfeature = feature.trim();
@@ -3747,7 +3896,7 @@
               setEffectIntoSubmit(fontCssT.value, CONST_VALUES.fontCSS, def.array.values, fontCssT, submitButton);
               fontExT.value = CONST_VALUES.fontEx;
               setEffectIntoSubmit(fontExT.value, CONST_VALUES.fontEx, def.array.values, fontExT, submitButton);
-              await getCurrentFontName(ffaceT.checked, refont, def.const.defaultFont);
+              await getCurrentFontName(ffaceT.checked, selectedFont, def.const.defaultFont);
               loadPreview(def.const.preview);
               delete def.const.preview;
             }
@@ -3810,7 +3959,7 @@
                     const cl = getBrightness(fscolor.substring(1)) > 182 ? "#333" : "#eee";
                     DEBUG(`frColorPicker<Preview>: %c${fscolor}`, `${fullStyle(fscolor, cl)};border:1px solid #eee`);
                   })
-                  .then(() => fixFontStrokeStyleErrors(_fixfontstroke, { permit: isFixStrokeTask(fstroke && fixfstroke) }))
+                  .then(() => correctBoldStrokeProcess({ Fixedstyle: _fixfontstroke, Scenes: "preview", Permit: fixfstroke }))
                   .catch(e => ERROR("Preview:", e.message));
               } catch (e) {
                 ERROR("SubmitPreview:", e.message);
@@ -3859,7 +4008,7 @@
                   });
                 }
                 if (await frDialog.respond()) {
-                  saveData("_FONTS_SET_", {
+                  const fontSetData = {
                     fontSelect: convertHtmlToText(fontselect),
                     fontFace: Boolean(fontface),
                     fontSmooth: Boolean(smooth),
@@ -3871,7 +4020,8 @@
                     shadowColor: convertHtmlToText(fscolor),
                     fontCSS: convertHtmlToText(fontcss),
                     fontEx: convertHtmlToText(fontex),
-                  });
+                  };
+                  saveData("_FONTS_SET_", fontSetData);
                   if (globalDisable && !_curEmptyConfig) {
                     _config_data_.globalDisable = false;
                     saveData("_CONFIGURE_", _config_data_);
@@ -4169,9 +4319,10 @@
           def.array.values.length = 0;
           container.style.opacity = 0;
           sleep(5e2)(safeRemove("fr-colorpicker")).then(r => r && safeRemove("fr-configure"));
-          if (isReload === false && def.const.preview) {
+          if (isReload === false && def.const.isPreview) {
             def.array.scaleMatrix.push((def.const.curScale = CONST_VALUES.fontSize));
-            loadPreview(def.const.isPreview);
+            def.const.preview && correctBoldStrokeProcess({ Scenes: "recover", Permit: CONST_VALUES.fixStroke });
+            loadPreview(def.const.preview);
             delete def.const.preview;
           }
         }
@@ -4279,7 +4430,9 @@
               button.removeAttribute("v-Preview");
               def.const.curScale = CONST_VALUES.fontSize;
               if (def.array.scaleMatrix.slice(-1)[0] !== CONST_VALUES.fontSize) def.array.scaleMatrix.push(CONST_VALUES.fontSize);
+              def.const.preview && deBounce({ fn: correctBoldStrokeProcess, delay: 1e2, timer: "recover" })({ Scenes: "recover", Permit: CONST_VALUES.fixStroke });
               loadPreview(def.const.preview);
+              delete def.const.preview;
             }
           }
         } catch (exp) {
@@ -4367,124 +4520,147 @@
 
       function getStyleLoadStatus() {
         if (!IS_CURRENTSITE_ALLOWED || !IS_INTERNALSTYLE_ALLOWED || !IS_DEBUG) return;
-        sleep(3e3).then(() => {
-          const styleElement = getMainStyleElements({ currentScope: true });
-          const lastStyleElement = getLastStyleNode(document.head);
-          if (styleElement && lastStyleElement === styleElement) {
-            return DEBUG(`lastStyle${IS_IN_FRAMES}.ID: %c%s`, "color:teal;font-weight:700;font-family:monospace", styleElement?.id || "<NULL>");
-          }
-          getStyleLoadStatus();
-        });
+        sleep(2e3, { useCachedSetTimeout: false })
+          .then(() => getMainStyleElements({ currentScope: true }))
+          .then(styleElement => DEBUG(`INSERTED STYLE${IS_IN_FRAMES}.ID: %c${styleElement?.id}`, "color:teal;font:italic 700 12px/140% monospace;"));
       }
 
       /* FIX_VIEWPORT_ZOOM_STYLE_ERRORS 2023-04-08 F9Y4NG */
 
       const isNotFixViewportTask = !IS_INTERNALSTYLE_ALLOWED || !CONST_VALUES.fixViewport || def.const.curScale === 1;
 
+      function correctViewportProcess() {
+        if (!IS_CURRENTSITE_ALLOWED || !IS_INTERNALSTYLE_ALLOWED || !isFixViewport) return;
+        const parseViewport = ({ mutations }) =>
+          mutations.forEach(mutation => {
+            if (mutation.type !== "childList") return;
+            const addedNodes = mutation.addedNodes;
+            for (let j = 0, k = addedNodes.length; j < k; j++) {
+              const nodeName = getNodeName(addedNodes[j]);
+              if (!["link", "style"].includes(nodeName)) continue;
+              deBounce({ fn: fixViewportCssStyle, delay: 2e2, timer: `fix${nodeName}viewport` })(nodeName);
+            }
+          });
+        const config = { childList: true, subtree: true };
+        getDocumentElement.getNodeAndObserve({ callback: parseViewport, config });
+      }
+
       function runFixViewportUnits() {
         if (!isFixViewport || isNotFixViewportTask) return;
-        fixViewportCssStyle(null, def.const.curScale);
-        w.addEventListener("pushState", historyStateFix);
-        w.addEventListener("replaceState", historyStateFix);
+        fixViewportCssStyle();
+        w.addEventListener("pushState", fixViewportCssStyle);
+        w.addEventListener("replaceState", fixViewportCssStyle);
       }
 
-      function historyStateFix() {
-        sleep(1e2)(def.const.curScale).then(r => fixViewportCssStyle(null, r));
-      }
-
-      function fixViewportCssStyle(node, scaleValue) {
-        if (isNotFixViewportTask || typeof node === "undefined") return;
+      function fixViewportCssStyle(nodeName) {
+        if (isNotFixViewportTask || !IS_CURRENTSITE_ALLOWED) return;
+        const scaleValue = def.const.curScale;
         const fixRegex = /\b(\d+(?:\.\d+)?)(v[wh]|vmin|vmax)\b(?!\\)/g;
         const base64Regex = /(?:;base64,)((?:[a-zA-Z0-9/+]+)\b\d+(v[wh]|vmin|vmax)\b)+/g;
-        const triggerNode = node === null ? "dom" : getNodeName(node);
-        switch (triggerNode) {
+        switch (nodeName) {
           case "link":
             fixViewportLinks();
             break;
           case "style":
             fixViewportStyles();
             break;
-          case "dom":
+          default:
             fixViewportLinks();
             fixViewportStyles();
             break;
         }
 
         function fixViewportLinks() {
-          qA(`link[rel~="stylesheet" i]:not([data-fr-processed])`).forEach(node => {
-            let url = node.href || node.getAttribute("data-href");
+          const pendingLinks = qA(`link[rel~="stylesheet" i]:not([data-fr-processed])`);
+          pendingLinks.forEach(linkNode => {
+            let url = linkNode.href || linkNode.getAttribute("data-href");
             if (!url) return;
             url = url.replace(/^http:/, "https:");
-            node.setAttribute("data-fr-processed", false);
+            linkNode.setAttribute("data-fr-processed", false);
             debugOnce("fixlinks", "detect viewport.Links:", true);
-            return new Promise(() => {
-              const xhr = new XMLHttpRequest();
-              xhr.timeout = 5e3;
-              xhr.onreadystatechange = () => {
-                if (xhr.status === 200 && xhr.readyState === 4) {
-                  try {
-                    let cssText = xhr.responseText ?? xhr.response ?? "";
-                    const parent = node.parentNode ?? document.head;
-                    if (!cssText || !parent || !detectMatchingResults(cssText, fixRegex)) return;
-                    cssText = replaceStyle(cssText, fixRegex, scaleValue);
-                    cssText = replaceBaseURL(cssText, url);
-                    const style = cE("style");
-                    style.textContent = "/*# sourceURL=" + url + " */\r\n" + cssText;
-                    if (node.media) style.media = node.media;
-                    if (node.disabled) style.disabled = node.disabled;
-                    for (const ds in node.dataset) {
-                      if (node.dataset.hasOwnProperty(ds)) style.dataset[ds] = node.dataset[ds];
-                    }
-                    style.setAttribute("data-href", node.getAttribute("href"));
-                    style.setAttribute("data-fr-seed", Date.now());
-                    style.setAttribute("data-fr-processed", true);
-                    style.setAttribute("type", "text/css");
-                    if (node.className) {
-                      style.className = node.className;
-                      node.removeAttribute("href");
-                      node.removeAttribute("data-fr-processed");
-                      safeRemove(`style[class="${node.className}"]`, document.head);
-                      insertAfter(document.head, style, node);
-                    } else {
-                      if (node.id) style.id = node.id;
-                      parent.replaceChild(style, node);
-                    }
-                    DEBUG("viewport.Link Fixed: %O", style);
-                  } catch (e) {
-                    ERROR("fixViewportLinks.xhr:", e.message);
-                  }
-                }
-              };
-              xhr.onerror = e => ERROR("Network Error: Blocked by CORS/CSP.");
-              try {
-                xhr.open("GET", url, true);
-                xhr.send(null);
-              } catch (e) {
-                ERROR("fixViewportLinks:", e.message);
-              }
-            });
+            getLinkStyleAndParseCss(url, linkNode);
           });
         }
 
+        function getLinkStyleAndParseCss(url, originLink) {
+          return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.timeout = 5e3;
+            xhr.onreadystatechange = () => {
+              if (xhr.readyState !== 4) return;
+              if (xhr.status === 200) {
+                let cssText = xhr.responseText ?? xhr.response ?? "";
+                if (!cssText || !detectMatchingResults(cssText, fixRegex)) {
+                  resolve();
+                  return;
+                }
+                resolve(cssText);
+              } else if (xhr.status !== 0) {
+                reject(new Error(`NoAccessError${IS_IN_FRAMES}`));
+              }
+            };
+            xhr.onerror = () => reject(new Error(`NetworkError${IS_IN_FRAMES}`));
+            xhr.ontimeout = () => reject(new Error(`TimeoutError${IS_IN_FRAMES}`));
+            xhr.open("GET", url, true);
+            xhr.send(null);
+          })
+            .then(remoteCssText => {
+              if (!remoteCssText) return;
+              remoteCssText = replaceStyle(remoteCssText, fixRegex, scaleValue);
+              remoteCssText = replaceBaseURL(remoteCssText, url);
+              return remoteCssText;
+            })
+            .then(parsedCssText => {
+              if (!parsedCssText) return;
+              const style = cE("style");
+              style.textContent = "/*# sourceURL=" + url + " */\r\n" + parsedCssText;
+              if (originLink.media) style.media = originLink.media;
+              if (originLink.disabled) style.disabled = originLink.disabled;
+              for (const ds in originLink.dataset) {
+                if (originLink.dataset.hasOwnProperty(ds)) style.dataset[ds] = originLink.dataset[ds];
+              }
+              style.setAttribute("data-href", originLink.getAttribute("href"));
+              style.setAttribute("data-fr-processed", true);
+              style.setAttribute("type", "text/css");
+              if (originLink.className) {
+                style.className = originLink.className;
+                originLink.removeAttribute("href");
+                originLink.removeAttribute("data-fr-processed");
+                safeRemove(`style[class="${originLink.className}"]`, document.head);
+                insertAfter(document.head, style, originLink);
+              } else {
+                const parent = originLink.parentNode ?? document.head;
+                if (!parent) return;
+                if (originLink.id) style.id = originLink.id;
+                parent.replaceChild(style, originLink);
+              }
+              DEBUG("Fixed.viewport.Link:", { "new Style": style });
+            })
+            .catch(e => {
+              originLink.setAttribute("data-fr-processed", "error");
+              ERROR(`fixViewportLinks:`, e.message);
+            });
+        }
+
         function fixViewportStyles() {
-          qA(`style:not([data-fr-processed]):not(.darkreader)`).forEach(node => {
-            if (node.attributes[0]?.name.startsWith("fr-css-")) return;
-            if (/^S[SC]\d+$/.test(node.id) || node.id === def.id.rndStyle) return;
-            let cssText = node.textContent;
-            node.setAttribute("data-fr-processed", false);
+          const pendingStyles = qA(`style:not([data-fr-processed]):not(.darkreader)`);
+          pendingStyles.forEach(styleNode => {
+            if (styleNode.attributes[0]?.name.startsWith("fr-css-")) return;
+            if (/^S[SC]\d+$/.test(styleNode.id) || styleNode.id === def.id.rndStyle) return;
+            let cssText = styleNode.textContent;
+            styleNode.setAttribute("data-fr-processed", false);
             debugOnce("fixstyles", "detect viewport.Styles:", true);
             if (!detectMatchingResults(cssText, fixRegex)) return;
-            return new Promise(() => {
-              try {
-                cssText = replaceStyle(cssText, fixRegex, scaleValue);
-                node.textContent = cssText;
-                node.setAttribute("data-fr-seed", Date.now());
-                node.setAttribute("data-fr-processed", true);
-                node.setAttribute("type", "text/css");
-                DEBUG("viewport.Style Fixed: %O", node);
-              } catch (e) {
-                ERROR("fixViewportStyles:", e.message);
-              }
+            return new Promise(resolve => {
+              cssText = replaceStyle(cssText, fixRegex, scaleValue);
+              styleNode.textContent = cssText;
+              styleNode.setAttribute("data-fr-processed", true);
+              styleNode.setAttribute("type", "text/css");
+              DEBUG("Fixed.viewport.Style:", { "new Style": styleNode });
+              resolve();
+            }).catch(e => {
+              styleNode.setAttribute("data-fr-processed", "error");
+              ERROR("fixViewportStyles:", e.message);
             });
           });
         }
@@ -4500,11 +4676,8 @@
         function replaceStyle(txt, reg, scale) {
           const getBase64Eigenvalue = JSON.stringify(txt.match(base64Regex));
           return txt.replace(reg, function (match, num, unit) {
-            if (getBase64Eigenvalue.includes(match)) {
-              return match;
-            } else {
-              return Number((num / scale).toFixed(4)) + unit;
-            }
+            if (getBase64Eigenvalue.includes(match)) return match;
+            else return Number((num / scale).toFixed(4)) + unit;
           });
         }
 
@@ -4512,76 +4685,87 @@
           const regex = /url\((?<mark>['"]?)(?!\/|https?:)([\w\-/.?=]+)\k<mark>\)/g;
           url = url.substring(0, url.lastIndexOf("/") + 1);
           return txt.replace(regex, function (match, mark, file) {
-            const markReg = mark ? new RegExp(`${mark}`, "g") : "";
-            return match.replace(markReg, "").replace(file, url + file);
+            return mark ? match.replace(new RegExp(mark, "g"), "").replace(file, url + file) : match.replace(file, url + file);
           });
         }
       }
 
       /* FIX_FONT_BOLD_STROKE_STYLE_ERRORS 2023-04-08 F9Y4NG */
 
-      function isFixStrokeTask(condition) {
-        return Boolean(IS_INTERNALSTYLE_ALLOWED && !IS_CHEAT_UA && IS_REAL_BLINK && parseFloat(brandversion) >= 96 && condition);
-      }
-
-      function fixFontStrokeStyleErrors(fixedstyle, { permit } = {}) {
-        if (typeof permit === "boolean") {
-          if (!permit) return;
-        } else {
-          if (!isFixStrokeTask(IS_CURRENTSITE_ALLOWED && CONST_VALUES.fixStroke)) return;
-        }
-
+      function correctBoldStrokeProcess({ Fixedstyle, Scenes, Permit, target } = {}) {
         const MAX_MODIFIED_NODES = 50;
         const MAX_REPEATED_NODES = 3;
         const MAX_TIME_INTERVAL = 50;
-        const styleMap = new WeakMap();
         const shadowRootSet = new Set();
+        const styleMap = new WeakMap();
+        const changeAttribute = {
+          add: el => el.classList.add(def.const.boldAttrName),
+          del: el => el.classList.remove(def.const.boldAttrName),
+        };
         const repeatedModifiedNodes = { childList: [], attributes: [] };
         const fixBoldObserver = new MutationObserver(fixBoldProcess);
         const config = { attributeOldValue: true, childList: true, subtree: true };
         const excludeNodeSet = new Set(def.const.exQueryString.split(",").filter(i => i.indexOf("*") === -1));
-        const changeAttribute = {
-          add: el => raf.setTimeout(el.classList.add(def.const.boldAttrName), def.const.ft),
-          del: el => raf.setTimeout(el.classList.remove(def.const.boldAttrName), def.const.ft),
-        };
 
-        function isBold(element) {
-          if (element instanceof Element) {
-            if (styleMap.has(element)) {
-              return styleMap.get(element).fontWeight >= 600;
-            }
-            const style = gCS(element);
-            styleMap.set(element, style);
-            return style.fontWeight >= 600;
-          }
-          return false;
+        switch (Scenes) {
+          case "iframe":
+            return isFixStrokeTask(Scenes) && correctBoldManual(target);
+          case "preview":
+            return isFixStrokeTask(Scenes) && correctBoldManual();
+          case "recover":
+            Fixedstyle = Permit ? fixBoldTextStyle : "";
+            return isFixStrokeTask(Scenes) && correctBoldManual();
+          default:
+            if (!isFixStrokeTask(IS_CURRENTSITE_ALLOWED && CONST_VALUES.fixStroke)) return;
+            Fixedstyle = Fixedstyle ?? fixBoldTextStyle;
+            w.addEventListener("pushState", correctBoldManual);
+            w.addEventListener("replaceState", correctBoldManual);
+            document.addEventListener("mouseover", handlingMouseEvents);
+            document.addEventListener("mouseout", handlingMouseEvents);
+            addLoadEvents.addFinalFn(correctBoldManual);
+            return observeBoldElements();
         }
 
-        function getBoldStyles(elements) {
+        function isFixStrokeTask(condition) {
+          return Boolean(IS_INTERNALSTYLE_ALLOWED && !IS_CHEAT_UA && IS_REAL_BLINK && parseFloat(brandversion) >= 96 && condition);
+        }
+
+        function isBold(element) {
+          if (element.nodeType !== Node.ELEMENT_NODE) return false;
+          if (styleMap.has(element)) {
+            return styleMap.get(element).fontWeight >= 600;
+          }
+          const style = gCS(element);
+          styleMap.set(element, style);
+          return style.fontWeight >= 600;
+        }
+
+        function getBoldStyles(elementsArray) {
           const boldStyles = [];
-          const els = uniq(elements);
+          const els = uniq(elementsArray);
           for (let index = 0, len = els.length; index < len; index++) {
             const node = els[index];
-            if (node.nodeType !== 1 || excludeNodeSet.has(getNodeName(node))) continue;
             const isbold = isBold(node);
             boldStyles.push({ isbold, node });
           }
           return boldStyles;
         }
 
-        function getAndProcessBoldStyles(node) {
-          const nodes = getSuitableElements(`:not(${def.const.exQueryString})`, node);
+        function getAndProcessBoldStyles(nodes) {
           const items = getBoldStyles(nodes);
           for (let i = 0; i < items.length; i++) {
-            boldFixedHandler(items[i]);
+            const checkedNode = items[i];
+            boldFixedHandler({ checkedNode });
           }
         }
 
         function shadowRootNodeFixStroke(host, syncStyle) {
           if (host instanceof ShadowRoot) {
-            getAndProcessBoldStyles(host);
-            const curSyncStyle = `:host(${getNodeName(host.host)}){--fr-no-stroke:0px transparent}` + syncStyle;
+            const curSyncStyle = syncStyle ? `:host(${getNodeName(host.host)}){--fr-no-stroke:0px transparent}` + syncStyle : "";
             compatibleWithAdoptedStyleSheets(host, curSyncStyle, `${def.const.seed}-fixboldstroke`);
+            if (Permit === false) return;
+            const nodes = getSuitableElements(`:not(${def.const.exQueryString})`, host);
+            getAndProcessBoldStyles(nodes);
           }
         }
 
@@ -4591,65 +4775,80 @@
             .map(el => {
               const shadow = el.shadowRoot;
               if (!shadow) return;
-              shadowRootNodeFixStroke(shadow, fixedstyle);
-              fixBoldObserver.observe(shadow, config);
-              shadowRootSet.add(shadow);
-              return shadow;
+              shadowRootNodeFixStroke(shadow, Fixedstyle);
+              if (Permit || typeof Scenes === "undefined") {
+                fixBoldObserver.observe(shadow, config);
+                shadowRootSet.add(shadow);
+              } else {
+                fixBoldObserver.disconnect();
+              }
+              return true;
             })
             .filter(Boolean);
           const childResults = childShadows.map(child => querySelectorAllShadows(selector, child));
-          return docNodes.concat(childResults.flat());
+          const resultNodes = docNodes.concat(childResults.flat());
+          return resultNodes;
         }
 
         function getSuitableElements(expr, node) {
           switch (node.nodeType) {
-            case 1:
-              return qA(expr, node).concat(node);
-            case 9:
-            case 11:
+            case Node.ELEMENT_NODE:
+              return [...qA(expr, node), node];
+            case Node.DOCUMENT_NODE:
+            case Node.DOCUMENT_FRAGMENT_NODE:
               return qA(expr, node);
+            default:
+              return [];
           }
         }
 
-        function boldFixedHandler(target) {
-          if (!target) return;
-          const bold = target.isbold ?? isBold(target);
-          const item = target.node ?? target;
+        function boldFixedHandler({ checkedNode, uncheckedNode }) {
+          const item = checkedNode?.node ?? uncheckedNode;
+          if (!item) return;
+          const bold = checkedNode?.isbold ?? isBold(uncheckedNode);
           const attr = item.classList.contains(def.const.boldAttrName);
           if (!attr && bold) changeAttribute.add(item);
           if (attr && !bold) changeAttribute.del(item);
         }
 
-        function mutationListMonitor(treeNodes, obs) {
-          if (!Array.isArray(treeNodes) || !treeNodes.length) return;
-          treeNodes.forEach(node => {
-            if (![1, 9, 11].includes(node.nodeType)) return;
-            const subtreeNodes = getSuitableElements(`*`, node);
-            for (let i = 0, l = subtreeNodes.length; i < l; i++) {
-              const item = subtreeNodes[i];
-              if (item.nodeType !== 1 || excludeNodeSet.has(getNodeName(item))) continue;
-              const shadow = item.shadowRoot;
-              if (shadow) {
-                shadowRootNodeFixStroke(shadow, fixedstyle);
-                obs.observe(shadow, config);
-                shadowRootSet.add(shadow);
-                mutationListMonitor([shadow], obs);
-              } else {
-                boldFixedHandler(item);
-              }
+        function processNodes(treeNode, obs) {
+          if (![Node.ELEMENT_NODE, Node.DOCUMENT_NODE, Node.DOCUMENT_FRAGMENT_NODE].includes(treeNode.nodeType) || excludeNodeSet.has(getNodeName(treeNode))) return;
+          const pendingNodes = [];
+          const subtreeNodes = getSuitableElements(`:not(${def.const.exQueryString})`, treeNode);
+          subtreeNodes.forEach(item => {
+            const shadow = item.shadowRoot;
+            if (shadow) {
+              shadowRootNodeFixStroke(shadow, Fixedstyle);
+              obs.observe(shadow, config);
+              shadowRootSet.add(shadow);
+              mutationListMonitor([shadow], obs);
+            } else {
+              pendingNodes.push(item);
             }
           });
-          return true;
+          getAndProcessBoldStyles(pendingNodes);
+        }
+
+        function mutationListMonitor(treeNodes, obs) {
+          if (!Array.isArray(treeNodes)) return;
+          for (let i = 0, treeLength = treeNodes.length; i < treeLength; i++) {
+            const treeNode = treeNodes[i];
+            if (w.scheduler?.postTask && treeLength > 5) {
+              w.scheduler.postTask(() => processNodes(treeNode, obs), { priority: "user-blocking" });
+            } else {
+              processNodes(treeNode, obs);
+            }
+          }
         }
 
         function fixBoldProcess(mutationsList, observer) {
           const subtrees = new Set();
           const pendingList = observer.takeRecords();
           observer.disconnect();
-          const uniqueMutations = uniq(pendingList.concat(mutationsList));
+          const uniqueMutations = uniq([...pendingList, ...mutationsList]);
           for (let i = 0; i < uniqueMutations.length; i++) {
             const mutation = uniqueMutations[i];
-            const targetEl = mutation.target;
+            const target = mutation.target;
             const type = mutation.type;
             switch (type) {
               case "childList": {
@@ -4657,55 +4856,54 @@
                 const removedNodes = mutation.removedNodes;
                 for (let j = 0; j < addedNodes.length; j++) {
                   const node = addedNodes[j];
-                  if (node.nodeType !== 1 || excludeNodeSet.has(getNodeName(node))) continue;
+                  if (node.nodeType !== Node.ELEMENT_NODE || excludeNodeSet.has(getNodeName(node))) continue;
                   subtrees.add(node);
                 }
                 for (let k = 0; k < removedNodes.length; k++) {
                   const node = removedNodes[k];
-                  if (node.nodeType !== 1 || excludeNodeSet.has(getNodeName(node))) continue;
+                  if (node.nodeType !== Node.ELEMENT_NODE || excludeNodeSet.has(getNodeName(node))) continue;
                   if (runLoopLimitChecker(node, type)) return;
                   styleMap.delete(node);
                 }
                 break;
               }
               case "attributes": {
-                if (targetEl.nodeType !== 1 || excludeNodeSet.has(getNodeName(targetEl))) continue;
+                if (target.nodeType !== Node.ELEMENT_NODE || excludeNodeSet.has(getNodeName(target))) continue;
                 let oldValue, newValue;
                 switch (mutation.attributeName) {
                   case "style":
                     oldValue = mutation.oldValue?.replace(/\s/g, "") ?? "";
-                    newValue = targetEl.style?.cssText?.replace(/\s/g, "") ?? "";
+                    newValue = target.style?.cssText?.replace(/\s/g, "") ?? "";
                     if (newValue !== oldValue) {
                       const oldArray = uniq(oldValue.split(";"));
                       const newArray = uniq(newValue.split(";"));
-                      const retValue = String([...oldArray.filter(x => !newArray.includes(x)), ...newArray.filter(y => !oldArray.includes(y))]);
+                      const filterToStr = (a, b) => a.filter(c => !b.includes(c)).join();
+                      const retValue = filterToStr(oldArray, newArray) + filterToStr(newArray, oldArray);
                       if (!/font:|font-weight:/gi.test(retValue)) continue;
                     }
                     break;
                   case "class":
                     oldValue = mutation.oldValue ?? "";
-                    newValue = typeof targetEl.className === "object" ? targetEl.className?.baseVal ?? "" : targetEl.className ?? "";
+                    newValue = typeof target.className === "object" ? target.className?.baseVal ?? "" : target.className ?? "";
                     if (newValue !== oldValue) {
                       if (!oldValue.includes(def.const.boldAttrName) && newValue.includes(def.const.boldAttrName)) continue;
-                      if (oldValue.includes(def.const.boldAttrName) && !newValue.includes(def.const.boldAttrName)) {
-                        if (runLoopLimitChecker(targetEl, type)) return;
-                        continue;
-                      }
+                      if (oldValue.includes(def.const.boldAttrName) && !newValue.includes(def.const.boldAttrName) && runLoopLimitChecker(target, type)) return;
                     }
                     break;
                   default:
                     oldValue = mutation.oldValue;
-                    newValue = targetEl.getAttribute(mutation.attributeName);
+                    newValue = target.getAttribute(mutation.attributeName);
                     break;
                 }
                 if (newValue === oldValue) continue;
                 break;
               }
             }
-            subtrees.add(targetEl);
+            subtrees.add(target);
           }
-          mutationListMonitor(Array.from(subtrees), observer) && subtrees.clear();
-          Array.from(shadowRootSet).forEach(s => observer.observe(s, config));
+          mutationListMonitor(Array.from(subtrees), observer);
+          shadowRootSet.forEach(target => observer.observe(target, config));
+          subtrees.clear();
         }
 
         function runLoopLimitChecker(node, mode) {
@@ -4735,21 +4933,42 @@
         }
 
         function observeBoldElements() {
-          const eventType = w.event?.type ?? "initial";
-          const el = querySelectorAllShadows(`:not(${def.const.exQueryString})`, document);
-          const items = getBoldStyles(el);
-          for (let i = 0; i < items.length; i++) {
-            boldFixedHandler(items[i]);
-          }
           fixBoldObserver.observe(document, config);
           shadowRootSet.add(document);
+          correctBoldManual();
+        }
+
+        function correctBoldManual(target = document) {
+          const eventType = w.event?.type ?? Scenes ?? "initial";
+          const els = querySelectorAllShadows(`:not(${def.const.exQueryString})`, target);
           debugOnce(eventType, `detect fontbold.Stroke${IS_IN_FRAMES}:`, { eventType });
+          if (Permit === false) return;
+          getAndProcessBoldStyles(els);
         }
 
         function mouseEventsHandler(event) {
           const target = event.target;
-          if (target.nodeType !== 1 || excludeNodeSet.has(getNodeName(target))) return;
-          sleep(1e2)(boldFixedHandler(target)).then(() => boldFixedHandler(target));
+          if (target.nodeType !== Node.ELEMENT_NODE) return;
+          const computedStyle = gCS(target);
+          const transition = computedStyle?.transition;
+          if (!transition || transition === "none" || transition === "all 0s ease 0s") {
+            boldFixedHandler({ uncheckedNode: target });
+            return;
+          }
+          const timerName = target.innerText.replace(/[\s.,]/g, "").slice(-16) || "transition";
+          const delayTime = 1e3 * (parseFloat(computedStyle.transitionDelay) || 0 + parseFloat(computedStyle.transitionDuration) || 0);
+          deBounce({
+            fn: () => {
+              boldFixedHandler({ uncheckedNode: target });
+              target.addEventListener("transitionend", e => {
+                if (e.propertyName !== "font-weight") return;
+                boldFixedHandler({ uncheckedNode: target });
+              });
+            },
+            delay: delayTime,
+            timer: timerName,
+            once: true,
+          })();
         }
 
         function handlingMouseEvents() {
@@ -4757,82 +4976,73 @@
           event.stopPropagation();
           deBounce({ fn: mouseEventsHandler, delay: def.const.ft, timer: type, immed: type === "mouseout" })(event);
         }
-
-        w.addEventListener("pushState", observeBoldElements);
-        w.addEventListener("replaceState", observeBoldElements);
-        document.addEventListener("mouseover", handlingMouseEvents);
-        document.addEventListener("mouseout", handlingMouseEvents);
-        observeBoldElements();
       }
 
       /* CSS_STYLE_PROCESSING_MAIN_THREAD */
 
       function monitorMainStyleProcess() {
         if (!IS_CURRENTSITE_ALLOWED || !IS_INTERNALSTYLE_ALLOWED) return;
-        const mainStyleObserver = new MutationObserver(mainStyleProcess);
-        const config = { attributes: true, childList: true, subtree: true };
-        mainStyleObserver.observe(document, config);
-
-        function mainStyleProcess(mutationsList, observer) {
+        getHeadElement.getNodeAndObserve().then(insertMainStyleElement);
+        const mainStyleProcess = mutations => {
           const hasMainStyle = getMainStyleElements({ currentScope: true });
-          const pendingList = observer.takeRecords();
-          observer.disconnect();
-          const uniqueMutations = uniq(pendingList.concat(mutationsList));
-          for (let i = 0; i < uniqueMutations.length; i++) {
-            const mutation = uniqueMutations[i];
-            const targetEl = mutation.target;
+          mutations.forEach(mutation => {
+            if (mutation.type !== "childList") return;
+            const removedNodes = mutation.removedNodes;
+            if (!hasMainStyle) {
+              const addedNodes = mutation.addedNodes;
+              for (let j = 0; j < addedNodes.length; j++) {
+                deBounce({ fn: insertMainStyleElement, delay: 5e2, timer: "repeatcheck", immed: true })();
+              }
+            }
+            for (let k = 0; k < removedNodes.length; k++) {
+              const node = removedNodes[k];
+              const nodeName = getNodeName(node);
+              if (nodeName === "style" && node.id === def.id.rndStyle && !node.dataset.frRemoved) {
+                const result = insertMainStyleElement({ overwrite: true });
+                INFO(`%c[MO]${IS_IN_FRAMES}[REINSERT]:%c<${nodeName}> ${result}`, leftStyle("brown"), rightStyle("brown"));
+              }
+            }
+          });
+        };
+        const styleObserve = new MutationObserver(mainStyleProcess);
+        const config = { childList: true, subtree: true };
+        styleObserve.observe(document, config);
+      }
+
+      function monitorBodyIframeProcess() {
+        const config = { attributes: true, childList: true, subtree: true };
+        const praseIframes = ({ mutations }) =>
+          mutations.forEach(mutation => {
+            const target = mutation.target;
+            const addedNodes = mutation.addedNodes;
             switch (mutation.type) {
-              case "childList": {
-                const addedNodes = mutation.addedNodes;
-                const removedNodes = mutation.removedNodes;
-                for (let j = 0; j < addedNodes.length; j++) {
+              case "childList":
+                for (let j = 0, k = addedNodes.length; j < k; j++) {
                   const node = addedNodes[j];
                   const nodeName = getNodeName(node);
-                  if (node.nodeType !== 1) continue;
-                  if (!hasMainStyle && document.head) deBounce({ fn: insertMainStyleElement, delay: 1e2, timer: "repeatcheck", immed: true })();
-                  switch (nodeName) {
-                    case "iframe":
-                      insertStyleInFrames("addedNodes", [node]);
-                      break;
-                    case "link":
-                    case "style":
-                      if (isFixViewport) deBounce({ fn: fixViewportCssStyle, delay: 1e2, timer: "fixviewport" })(node, def.const.curScale);
-                      if (targetEl === document.head) deBounce({ fn: moveStyleToLast, delay: 3e2, timer: "movestyle" })(node);
-                      break;
-                  }
-                }
-                for (let k = 0; k < removedNodes.length; k++) {
-                  const node = removedNodes[k];
-                  const nodeName = getNodeName(node);
-                  if (targetEl === document.head && nodeName === "style" && node.id === def.id.rndStyle && !node.dataset.frRemoved) {
-                    const insertSuccess = insertMainStyleElement({ overwrite: false });
-                    if (insertSuccess) INFO(`%c[MO]${IS_IN_FRAMES}[REINSERT]:%c<${nodeName}> ${insertSuccess}`, leftStyle("brown"), rightStyle("brown"));
-                  }
+                  if (nodeName === "iframe") insertStyleInFrames({ condition: "addedNodes", nodeArray: [node] });
                 }
                 break;
-              }
               case "attributes":
-                if (getNodeName(targetEl) === "iframe" && mutation.attributeName === "src") {
-                  if (targetEl.src) insertStyleInFrames("Attributes", [targetEl]);
+                if (getNodeName(target) === "iframe" && mutation.attributeName === "src" && target.src) {
+                  insertStyleInFrames({ condition: "Attributes", nodeArray: [target] });
                 }
                 break;
             }
-          }
-          observer.observe(document, config);
-        }
+          });
+        getBodyElement.getNodeAndObserve({ callback: praseIframes, config });
       }
 
       /* FONT_RENDERING_MAIN_PROCESS */
 
       !(async function FontRendering(initMenus) {
-        "use strict";
         if (CUR_WINDOW_TOP) {
           // DATA_AND_UPDATE
           if (await detectAndReconstructData(SET_BOOL_FOR_UPDATE)) {
             showUpdateInfo();
           }
           // SYSTEM_INFO
-          await getCurrentFontName(CONST_VALUES.fontFace, refont, def.const.defaultFont);
+          await getCurrentFontName(CONST_VALUES.fontFace, selectedFont, def.const.defaultFont);
           showSystemInfo.system();
           showSystemInfo.compat(IS_CHEAT_UA);
           // MENUS
@@ -4841,24 +5051,22 @@
           insertHotkey();
         }
         // MAIN_THREAD
-        insertMainStyleElement();
         monitorMainStyleProcess();
-        fixFontStrokeStyleErrors(fixBoldTextStyle);
-        await fixScaleOffset(def.const.curScale);
+        correctBoldStrokeProcess();
+        correctViewportProcess();
+        monitorBodyIframeProcess();
+        await correctScaleOffset();
         // LOADEVENTS
         addLoadEvents.addFn(insertStyleInFrames);
         addLoadEvents.addFn(runFixViewportUnits);
         addLoadEvents.addFinalFn(getStyleLoadStatus);
       })(() => {
-        "use strict";
-        if (CUR_WINDOW_TOP && !IS_GREASEMONKEY) {
-          return GMregisterMenuCommand("\ufff0\ud83d\udd52\u0020正在载入脚本菜单，请稍候…", () => location.reload());
-        }
+        if (!CUR_WINDOW_TOP || String(GMunregisterMenuCommand) === "() => {}") return;
+        return GMregisterMenuCommand("\ufff0\ud83d\udd52\u0020正在载入脚本菜单，请稍候…", () => location.reload());
       });
     })(
       "JUU4JUFBJUIxSlZpWSVFNyU5MCU4OSVFNiU5RiU5MyVFNSVBRCVCQSVFOCU4MiVCQXAyTyVFNiU5MyU5MzAlRTglODUlOTF0JUU1JUIyJTgwJUU1JUFFJTlBJUU4JTg2JUJBZQ==",
       async () => {
-        "use strict";
         let maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, isFixViewport, isCloseTip, isCustomMono, rebuild, curVersion, globalDisable, _config_data_;
         const configure = await GMgetValue("_CONFIGURE_");
         if (!configure) {
@@ -4901,7 +5109,6 @@
         return { maxPersonalSites, isBackupFunction, isPreview, isFontsize, isFixViewport, isHotkey, isCloseTip, isCustomMono, rebuild, curVersion, globalDisable };
       },
       async () => {
-        "use strict";
         let monoSiteRules = await GMgetValue("_MONOSPACED_SITERULES_");
         try {
           monoSiteRules = monoSiteRules ? [...JSON.parse(decrypt(monoSiteRules))] : [];
@@ -4926,7 +5133,6 @@
         return { monoSiteRules, monoFontList, monoFeature };
       },
       async () => {
-        "use strict";
         let exSite;
         const defautlExSite = ["workstation-xi", "127.0.0.1"].sort();
         const exSiteSave = await GMgetValue("_EXCLUDE_SITES_");
@@ -4946,7 +5152,6 @@
         return exSite;
       },
       async () => {
-        "use strict";
         let fontValue, domainValue, domainValueIndex, fontSelect, fontFace, fontSmooth, fontSize, fixViewport, fontStroke, fixStroke, fontShadow, shadowColor, fontCSS, fontEx;
         const domains = await GMgetValue("_DOMAINS_FONTS_SET_");
         const fonts = await GMgetValue("_FONTS_SET_");
@@ -4966,7 +5171,7 @@
           def.const.domainIndex = domainValueIndex;
         }
         if (!fonts) {
-          saveData("_FONTS_SET_", {
+          const fontSetData = {
             fontSelect: INITIAL_VALUES.fontSelect,
             fontFace: INITIAL_VALUES.fontFace,
             fontSmooth: INITIAL_VALUES.fontSmooth,
@@ -4978,7 +5183,8 @@
             shadowColor: INITIAL_VALUES.shadowColor,
             fontCSS: INITIAL_VALUES.fontCSS,
             fontEx: INITIAL_VALUES.fontEx,
-          });
+          };
+          saveData("_FONTS_SET_", fontSetData);
           fontSelect = INITIAL_VALUES.fontSelect;
           fontFace = INITIAL_VALUES.fontFace;
           fontSmooth = INITIAL_VALUES.fontSmooth;
@@ -5027,7 +5233,6 @@
         return { fontSelect, fontFace, fontSmooth, fontSize, fixViewport, fontStroke, fixStroke, fontShadow, shadowColor, fontCSS, fontEx, isMatchEditorialSite };
       },
       async () => {
-        "use strict";
         let _fontScaleDef;
         const defaultScaleRule = {
           ".smzdm.com": { Element: ["clientWidth"] },
@@ -5049,14 +5254,11 @@
         return _fontScaleDef;
       },
       async () => {
-        "use strict";
         let _fontOverride;
-        const defaultFontRule = [
-          ...["Arial", "Helvetica", "Helvetica Neue", "Verdana", "Georgia", "Tahoma", "Noto Sans", "Open Sans", "Segoe UI"],
-          ...["Roboto", "RobotoDraft", "Ubuntu", "SimSun", "NSimSun", "SimHei", "FangSong", "KaiTi", "MingLiU", "PMingLiU"],
-          ...["PingFangSC-Regular", "PingFangSC-Medium", "PingFangSC-Semibold", "PingFangHK-Regular", "PingFangHK-Medium"],
-          ...["Microsoft YaHei", "SF Pro SC", "HanHei SC", "{宋体}", "{楷体}", "{仿宋}", "{黑体}", "{微软雅黑}", "{微軟正黑體}"],
-        ];
+        const defaultFonts = String(
+          "Arial,Helvetica,Helvetica Neue,Verdana,Georgia,Tahoma,Noto Sans,Open Sans,Segoe UI,Roboto,RobotoDraft,Ubuntu,SimSun,NSimSun,SimHei,FangSong,KaiTi,MingLiU,PMingLiU,PingFangSC-Regular,PingFangSC-Medium,PingFangSC-Semibold,PingFangHK-Regular,PingFangHK-Medium,Microsoft YaHei,SF Pro SC,HanHei SC,{宋体},{楷体},{仿宋},{黑体},{微软雅黑},{微軟正黑體}"
+        );
+        const defaultFontRule = defaultFonts.split(",").sort();
         const __fontOverride = await GMgetValue("_FONTOVERRIDE_DEF_");
         try {
           _fontOverride = JSON.parse(decrypt(__fontOverride));
@@ -5067,13 +5269,12 @@
           }
         } catch (e) {
           _fontOverride = defaultFontRule;
-          saveData("_FONTOVERRIDE_DEF_", defaultFontRule.sort());
+          saveData("_FONTOVERRIDE_DEF_", defaultFontRule);
         }
         return _fontOverride;
       }
     );
   })(createTrustedTypePolicy(), () => {
-    "use strict";
     const navigatorInfo = getNavigatorInfo();
     const locationInfo = getLocationInfo();
     return { navigatorInfo, locationInfo };
