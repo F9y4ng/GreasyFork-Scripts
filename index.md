@@ -20,14 +20,15 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2023.10.03.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2023.11.04.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-+ 新增自定义字体重写设置功能，设置规则请查看Discussions#267[1].
-+ 新增站点缩放修正设置功能，字体缩放请查看Discussions#267[2].
-@ 修正自定义等宽字体工具部分参数设置的Bug.Issues#265
-@ 优化字体渲染样式的优先级，提升部分站点渲染准确率。
-@ 完善字体渲染数据备份功能，建议您重新备份数据。
+@ 修正预览时粗体修正在shadowRoot中样式加载的Bug.
+@ 优化内部样式的插入效率，减少重绘和回流造成的卡顿。
+@ 优化Blink内核粗体修正功能，减少页面加载时的卡顿。
+@ 优化字体缩放时link元素Viewport units的修正效率。
+@ 优化iframe框架的异步处理方式，减少主页面卡顿。
+@ 优化通过UA获取浏览器参数的方法，提升识别准确度。
 @ 修正一些已知的问题，优化样式，优化代码。
 ```
 
@@ -103,19 +104,26 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2023.10.03.2 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2023.11.04.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ 优化并发XHR，减少因超时造成的阻塞。
-@ 优化Bing.com全球版本按钮滚动样式。
++ 新增Yep、Swisscows隐私保护搜索引擎。
+@ 优化搜索结果重定向链接的解析效率。
+@ 适配可自动夜间模式搜索引擎按钮样式。
+@ 优化脚本更新检测机制及升级体验。
+@ 优化通过UA获取浏览器信息的方法。
+@ 修正You(You.com)的跳转按钮的样式Bug.
 @ 修正一些已知问题，优化样式，优化代码。
 ```
 
 ## 最新功能介绍
 * 新增去除搜索结果及侧栏广告功能。`New!`
-* 新增自定义搜索引擎选取功能。（包含：百度、Google、Bing、Duckduckgo、搜狗、F搜、Yandex、360搜索、头条搜索、百度开发者、Ecosia、Yahoo、You、Startpage、brave搜索等）
+* 新增自定义搜索引擎选取功能。（包含：百度、Google、Bing、Duckduckgo、搜狗、F搜、Yandex、360搜索、头条搜索、百度开发者、Ecosia、Yahoo、You、Startpage、brave、Yep、Swisscows搜索等）
 * 新增搜索结果链接去重定向功能。
 * 更智能的更新检测功能。
+
+## 图标缓存的更新
+访问[任意搜索引擎](https://www.baidu.com/?whoami=F9y4ng)，在地址栏内向 URL 添加 `?whoami=F9y4ng` 或 `&whoami=F9y4ng`，开启临时调试模式，即可自动更新搜索引擎站点的icons；或等待图标缓存过期（七天）后自动更新图标缓存。
 
 ## 重要说明
 新版本“**自动更新**”功能默认开启，如不需要，请在脚本菜单“**功能设置开关**”中，关闭**更新检测**即可。
@@ -131,10 +139,10 @@
 
 简介：自动关闭知乎登录提示，仅仅用于关闭自动弹出的登录提示，不干别的，未来也不会去干别的。
 
-## version 2023.10.05.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
+## version 2023.11.04.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
 
 ```log
-@ 针对高配置电脑进行优化，减少弹窗判断错误。
+@ 优化脚本在safari中无法在document-start加载而造成的bug.
 ```
 
 ## 重要说明
