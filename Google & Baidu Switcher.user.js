@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜索引擎跳轉助手
 // @name:ru            помощник поисковой системы
 // @name:ja            優雅な検索エンジンジャンプ助手
-// @version            2023.11.04.1
+// @version            2023.11.05.1
 // @author             F9y4ng
 // @description        "Elegance moteur de recherche saut Assistant" pour faciliter le saut dans les différents moteurs de recherche; Support des moteurs de recherche personnalisés, mise en évidence des mots clés; Fournit des fonctionnalités avancées telles que la suppression des redirections de liens et le blocage des annonces de recherche ; Compatible avec les moteurs de recherche tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage et Brave.
 // @description:en     "Elegant search engine Jump Assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
@@ -59,7 +59,7 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               新增Yep、Swisscows隐私保护搜索引擎。\n优化搜索结果重定向链接的解析效率。\n适配可自动夜间模式搜索引擎按钮样式。\n优化脚本更新检测机制及升级体验。\n优化通过UA获取浏览器信息的方法。\n修正You.com的跳转按钮的样式Bug.\n修正一些已知问题，优化样式，优化代码。
+// @note               修正重定向造成Google自动翻页的Bug.
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -1068,7 +1068,7 @@
       function clearHrefEvents(node, clearData) {
         if (!node) return;
         node.setAttribute("target", "_blank");
-        ["jsname", "ping", "onmouseover", "referrerpolicy", "h"].forEach(item => node.removeAttribute(item));
+        ["ping", "onmouseover", "referrerpolicy", "h"].forEach(item => node.removeAttribute(item));
         if (clearData) {
           const dataSet = node.dataset;
           for (const ds in dataSet) {

@@ -5,9 +5,9 @@
 // @name:zh-TW   優雅的搜索引擎跳轉助手
 // @name:ru      скачок поисковой системы
 // @name:ja      優雅な検索エンジンジャンプ助手
-// @version      2023.11.04.1
+// @version      2023.11.05.1
 // @author       F9y4ng
 // @description  "Elegant search engine Jump Assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
 // @namespace    https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
-// @note         新增Yep、Swisscows隐私保护搜索引擎。\n优化搜索结果重定向链接的解析效率。\n适配可自动夜间模式搜索引擎按钮样式。\n优化脚本更新检测机制及升级体验。\n优化通过UA获取浏览器信息的方法。\n修正You.com的跳转按钮的样式Bug.\n修正一些已知问题，优化样式，优化代码。
+// @note         修正重定向造成Google自动翻页的Bug.
 // ==/UserScript==
