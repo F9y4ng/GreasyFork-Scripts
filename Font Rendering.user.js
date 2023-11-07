@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2023.11.04.1
+// @version            2023.11.07.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -520,7 +520,7 @@
     const digits = "0123456789";
     const lowerCaseLetters = "abcdefghijklmnopqrstuvwxyz";
     const upperCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const hexLetters = "abcdef";
+    const hexLetters = lowerCaseLetters.slice(0, 6);
     let characters = upperCaseLetters;
     let prefix = "";
     let randomString = [];
@@ -879,7 +879,8 @@
     /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
     const UPDATE_VERSION_NOTICE = String(
-      `<li class="${def.const.seed}_fix">修正预览时粗体修正在shadowRoot中样式加载的Bug.</li>
+      `<li class="${def.const.seed}_fix">热更新：修正一些由用户提出的已知问题。</li>
+        <li class="${def.const.seed}_fix">修正预览时粗体修正在shadowRoot中样式加载的Bug.</li>
         <li class="${def.const.seed}_fix">优化内部样式的插入效率，减少重绘和回流造成的卡顿。</li>
         <li class="${def.const.seed}_fix">优化Blink内核粗体修正功能，减少页面加载时的卡顿。</li>
         <li class="${def.const.seed}_fix">优化字体缩放时link元素Viewport units的修正效率。</li>
@@ -1700,7 +1701,7 @@
       const globalCssText = IS_REAL_GECKO && fontface_i ? def.const.style.global : "";
       const monoAllowed = _config_data_.isCustomMono ?? false;
       const monoFontText = monoAllowed ? `--fr-mono-font:${monoFontList || INITIAL_VALUES.monospacedFont},ui-monospace,${IS_REAL_GECKO ? "consolas" : "monospace"};` : ``;
-      const monoShadow = monoAllowed ? `--fr-mono-shadow:0 0 0 ${INITIAL_VALUES.shadowColor};` : ``;
+      const monoShadow = monoAllowed ? `--fr-mono-shadow:0 0 0 currentcolor;` : ``;
       const monoFeatureText = monoAllowed ? `--fr-mono-feature:${monoFeature || INITIAL_VALUES.monospacedFeature};` : ``;
       const rootPseudoClass = `:root{--fr-font-basefont:${INITIAL_VALUES.fontBase};--fr-font-fontscale:${fontScale};--fr-font-family:${CONST_VALUES.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-no-stroke:0px transparent;${monoFontText}${monoShadow}${monoFeatureText}}`;
       const tStyle = IS_CURRENTSITE_ALLOWED ? `@charset "UTF-8";${rootPseudoClass}${globalCssText}${fontStyle}` : ``;
@@ -2079,6 +2080,14 @@
         });
       }
 
+      function removeKeyboardEvent(target) {
+        if (!target) return;
+        const stopPropagation = e => e.stopImmediatePropagation();
+        target.addEventListener("keydown", stopPropagation);
+        target.addEventListener("keyup", stopPropagation);
+        target.addEventListener("keypress", stopPropagation);
+      }
+
       function getBrightness(hexa) {
         const { r, g, b, a } = {
           r: parseInt(hexa.substr(0, 2), 16),
@@ -2388,7 +2397,7 @@
           _ct = Boolean(qS(`#${def.id.isclosetip}`, def.const.dialogIf).checked);
           _mps = Number(qS(`#${def.id.maxps}`, def.const.dialogIf).value) || 100;
           const maxpsNode = qS(`#${def.id.maxps}`, def.const.dialogIf);
-          maxpsNode?.addEventListener("keydown", e => e.stopImmediatePropagation());
+          removeKeyboardEvent(maxpsNode);
           maxpsNode?.addEventListener("input", function () {
             this.value = this.value.replace(/[^0-9]/g, "");
           });
@@ -2567,13 +2576,12 @@
           const tpNode = qS(`#${def.const.seed}_temporary`, def.const.dialogIf);
           if (ddNode && dsNode && dssNode && dsaNode) {
             dsNode.addEventListener("keydown", e => {
-              e.stopImmediatePropagation();
-              if (e.keyCode === 13) {
-                e.preventDefault();
-                dssNode.focus();
-                dssNode.click();
-              }
+              if (e.keyCode !== 13) return;
+              e.preventDefault();
+              dssNode.focus();
+              dssNode.click();
             });
+            removeKeyboardEvent(dsNode);
             dsNode.addEventListener("input", () => {
               dsNode.value = dsNode.value.replace(/[^-a-z0-9.*:]|^https?:\/\//gi, "").toLowerCase();
             });
@@ -2792,13 +2800,12 @@
           const ddNode = qS(`#${def.const.seed}_d_d_`, def.const.dialogIf);
           if (ddNode && dsNode && dscNode && dssNode) {
             dsNode.addEventListener("keydown", e => {
-              e.stopImmediatePropagation();
-              if (e.keyCode === 13) {
-                e.preventDefault();
-                dssNode.focus();
-                dssNode.click();
-              }
+              if (e.keyCode !== 13) return;
+              e.preventDefault();
+              dssNode.focus();
+              dssNode.click();
             });
+            removeKeyboardEvent(dsNode);
             dsNode.addEventListener("input", () => (dsNode.value = dsNode.value.replace(/[^-a-z0-9.]/gi, "").toLowerCase()));
             dscNode.addEventListener("click", () => {
               dsNode.value = "";
@@ -2991,7 +2998,7 @@
           const ffaceT = qS(`#${def.id.fface}`, def.const.configIf);
           const fselectorT = qS(`#${def.id.fontList} .${def.class.selectFontId} input`, def.const.configIf);
           if (ffaceT && fselectorT) {
-            fselectorT.addEventListener("keydown", e => e.stopImmediatePropagation());
+            removeKeyboardEvent(fselectorT);
             changeSelectorStatus(ffaceT.checked, fselectorT, def.class.readonly);
             ffaceT.addEventListener("change", () => changeSelectorStatus(ffaceT.checked, fselectorT, def.class.readonly));
           }
@@ -3208,31 +3215,31 @@
           // FontSize Scale
           const fontScaleT = qS(`#${def.id.fontScale}`, def.const.configIf);
           let drawScale = getFontSizeScale(fontScaleT, submitButton) ?? {};
-          fontScaleT?.addEventListener("keydown", e => e.stopImmediatePropagation());
+          removeKeyboardEvent(fontScaleT);
           // Fix Viewport
           let fixViewportT = getFixViewportBool(fontScaleT, submitButton) ?? {};
           // Fonts stroke
           const strokeT = qS(`#${def.id.strokeSize}`, def.const.configIf);
           let drawStrock = getFontsStroke(strokeT, submitButton);
-          strokeT?.addEventListener("keydown", e => e.stopImmediatePropagation());
+          removeKeyboardEvent(strokeT);
           // Fix Fonts stroke
           let fixStrokeT = getFixStrokeBool(strokeT, submitButton) ?? {};
           // Fonts shadow
           const shadowsT = qS(`#${def.id.shadowSize}`, def.const.configIf);
           const shadowColorNode = qS(`#${def.id.shadowColor}`, def.const.configIf);
           let drawShadow = getFontShadow(shadowsT, shadowColorNode, submitButton);
-          shadowsT?.addEventListener("keydown", e => e.stopImmediatePropagation());
+          removeKeyboardEvent(shadowsT);
           // Fonts shadow color selection
           const colorshowT = qS(`#${def.id.color}`, def.const.configIf);
           const colorReg = /^#[0-9A-F]{8}$|^currentcolor$/i;
           let colorPickerT = getColorAndColorPicker(colorshowT, submitButton);
-          colorshowT?.addEventListener("keydown", e => e.stopImmediatePropagation());
+          removeKeyboardEvent(colorshowT);
           // Double-click allows to edit
           const fontCssT = qS(`#${def.id.cssinclued}`, def.const.configIf);
           const fontExT = qS(`#${def.id.cssexclude}`, def.const.configIf);
-          fontCssT?.addEventListener("keydown", e => e.stopImmediatePropagation());
-          fontExT?.addEventListener("keydown", e => e.stopImmediatePropagation());
+          removeKeyboardEvent(fontCssT);
           doubleClickToEdit(fontCssT);
+          removeKeyboardEvent(fontExT);
           saveChangeStatus(fontCssT, CONST_VALUES.fontCSS, submitButton, def.array.values);
           saveChangeStatus(fontExT, CONST_VALUES.fontEx, submitButton, def.array.values);
           // Expand & Collapse
@@ -3310,7 +3317,7 @@
                 titleText: "自定义字体表",
               });
               const customFontlistNode = qS(`#${def.const.seed}_custom_Fontlist`, def.const.dialogIf);
-              customFontlistNode?.addEventListener("keydown", e => e.stopImmediatePropagation());
+              removeKeyboardEvent(customFontlistNode);
               let custom_Fontlist = customFontlistNode?.value.trim() ?? "";
               qS(`#${def.const.seed}_addTools`, def.const.dialogIf)?.addEventListener("click", () => {
                 let chName, enName, psName, cusFontName;
@@ -3438,6 +3445,7 @@
               titleText: "自定义字体重写数据",
             });
             const fontOverrideNode = qS(`#${def.const.seed}_fontoverride_def_array`, def.const.dialogIf);
+            removeKeyboardEvent(fontOverrideNode);
             checkTextareaFormat(fontOverrideNode);
             if (await frDialog.respond()) {
               const _res_fontOverrideDef = fontOverrideNode.value.trim();
@@ -3527,6 +3535,7 @@
               titleText: "站点缩放修正设置数据",
             });
             const fontScaleNode = qS(`#${def.const.seed}_fontscale_def_json`, def.const.dialogIf);
+            removeKeyboardEvent(fontScaleNode);
             checkTextareaFormat(fontScaleNode);
             if (await frDialog.respond()) {
               const _res_fontScaleDef = fontScaleNode.value.trim();
@@ -3706,9 +3715,9 @@
               const monospacedFontNode = qS(`#${def.const.seed}_monospaced_font`, def.const.dialogIf);
               const monospacedFeatureNode = qS(`#${def.const.seed}_monospaced_feature`, def.const.dialogIf);
               const customMonoSwitch = qS(`#${def.id.iscusmono}`, def.const.dialogIf);
-              monospacedSiteRulesNode?.addEventListener("keydown", e => e.stopImmediatePropagation());
-              monospacedFontNode?.addEventListener("keydown", e => e.stopImmediatePropagation());
-              monospacedFeatureNode?.addEventListener("keydown", e => e.stopImmediatePropagation());
+              removeKeyboardEvent(monospacedSiteRulesNode);
+              removeKeyboardEvent(monospacedFontNode);
+              removeKeyboardEvent(monospacedFeatureNode);
               const changeDisabledStatus = (listenerCheck, nodes, cssName) => {
                 nodes.forEach(node => {
                   if (listenerCheck) {
@@ -4954,7 +4963,7 @@
             boldFixedHandler({ uncheckedNode: target });
             return;
           }
-          const timerName = target.innerText.replace(/[\s.,]/g, "").slice(-16) || "transition";
+          const timerName = target.innerText?.replace(/[\s.,]/g, "").slice(-16) || "transition";
           const delayTime = 1e3 * (parseFloat(computedStyle.transitionDelay) || 0 + parseFloat(computedStyle.transitionDuration) || 0);
           deBounce({
             fn: () => {
