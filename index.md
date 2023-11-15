@@ -10,7 +10,7 @@
 - 使用 **Adguard桌面版** 或 **Userscripts** 等脚本管理器，可通过 [键盘快捷键](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89#user-content-hotkey) 呼出脚本管理菜单。
 
 ### 郑重警告
-在某些国产魔改的Blink内核浏览器中，关闭 **DirectWrite** 功能，会造成大部分字体无法被程序识别，或出现非ASCII字符或Emoji图标无法被正确渲染的问题。**重要提示**：后续所有脚本更新不再对应用 _`disabled DirectWrite`_ 的浏览器做代码兼容和问题解答，要使用该项目内的脚本，建议您使用主流浏览器。
+在某些国产魔改的Blink内核浏览器中，关闭 **DirectWrite** 功能，会造成大部分字体无法被程序识别，或出现非ASCII字符与Emoji图标无法被正确渲染的问题。**重要提示**：后续所有脚本更新不再对应用 _`disabled DirectWrite`_ 的浏览器做代码兼容和问题解答，要使用该项目内的脚本，建议您使用主流浏览器。
 ***
 
 # 字体渲染（自用脚本） `Font Rendering.user.js`
