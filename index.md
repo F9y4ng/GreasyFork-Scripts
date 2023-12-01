@@ -5,12 +5,12 @@
 [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues)
 [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/F9y4ng/GreasyFork-Scripts/stargazers)
 
-- 请先安装**脚本管理器**扩展(如：Tampermonkey, Violentmonkey, Userscripts)，然后再**安装脚本**。
-- **Chrome** 及 **Firefox** 推荐安装使用 **Tampermonkey**，**Safari** 推荐安装使用 **Userscripts**. `New!`
+- 请先安装**脚本管理器**扩展(如：Tampermonkey, Violentmonkey, Greasemonkey)，然后再**安装脚本**。
+- **Chrome**, **Firefox** 推荐安装 **Tampermonkey/Violentmonkey**，**Safari** 推荐安装 **Tampermonkey**.
 - 使用 **Adguard桌面版** 或 **Userscripts** 等脚本管理器，可通过 [键盘快捷键](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89#user-content-hotkey) 呼出脚本管理菜单。
 
-## 郑重声明
-某些魔改版本的Blink内核浏览器，关闭 **DirectWrite** 功能，会造成大部分字体无法被程序识别，或出现非ASCII字符与Emoji图标无法被正确渲染的问题。**重要提示**：后续所有脚本更新不再对应用 _`disabled DirectWrite`_ 的浏览器做代码兼容和问题解答，要使用该项目内的脚本，建议您使用主流浏览器。
+> ## 郑重声明
+> 某些魔改版本的Blink内核浏览器，关闭 **DirectWrite** 功能，会造成大部分字体无法被程序识别，或出现非ASCII字符与Emoji图标无法被正确渲染的问题。**重要提示**：后续所有脚本更新不再对应用 _`disabled DirectWrite`_ 的浏览器做代码兼容和问题解答，要使用该项目内的脚本，建议您使用主流浏览器。
 
 ***
 
@@ -131,7 +131,7 @@
 - 更智能的更新检测功能。
 
 ## 图标缓存的更新
-访问[任意搜索引擎](https://www.baidu.com/?whoami=F9y4ng)，在地址栏内向 URL 添加 `?whoami=F9y4ng` 或 `&whoami=F9y4ng`，开启临时调试模式，即可自动更新搜索引擎站点的icons；或等待图标缓存过期（十五天）后自动更新图标缓存。
+访问[任意搜索引擎](https://www.baidu.com/s?wd=greasyfork&whoami=F9y4ng)，在地址栏内向 URL 添加 `?whoami=F9y4ng` 或 `&whoami=F9y4ng`，开启临时调试模式，即可自动更新搜索引擎站点的icons；或等待图标缓存过期（十五天）后自动更新图标缓存。
 
 ## 重要说明
 新版本“**自动更新**”功能默认开启，如不需要，请在脚本菜单“**功能设置开关**”中，关闭**更新检测**即可。
