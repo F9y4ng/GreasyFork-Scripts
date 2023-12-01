@@ -42,7 +42,7 @@
 - 新版脚本中**内置了默认的字体渲染样式，该样式为我的本地配置，并不能完美适配于你的计算机**。所以，首次使用时，如果出现渲染效果没有达到理想状态，属于**正常情况**。请根据**自有显示器的配置及设置**，通过**脚本配置界面**修正相关参数来达到最佳显示效果。
 - 老用户从旧版本升级至最新版时，如遇到样式异常，可通过重置功能重置数据来使用最新规则来尝试纠正问题。大版本（数据重建）更新不建议您使用备份还原，请重新配置参数并保存，并重新备份新数据。
 
-> 注：在Windows系统中，不论高分屏或低分屏，系统/浏览器应用150%以上缩放率可获得最佳渲染效果，这是Windows默认渲染所决定的。
+> 注：Win10/11下，系统或浏览器应用150%以上缩放率可获得最佳渲染效果，这是Windows默认渲染决定的。
 
 ## 关于脚本加载延迟的处理办法
 
@@ -104,7 +104,7 @@
 # 优雅的搜索引擎跳转助手 `Google & Baidu Switcher.user.js`
  　[[查看源代码](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Google%20%26%20Baidu%20Switcher.user.js)] 　[[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)] 　[[访问 GreasyFork](https://greasyfork.org/scripts/12909)] _（GreasyFork不再处理Issues反馈）_
 
-简介：“优雅的搜索引擎跳转助手”方便用户在不同的搜索引擎之间跳转；支持自定义常用搜索引擎、关键词高亮渲染效果；还提供去除搜索链接重定向、屏蔽搜索结果广告、可视化参数设置、及自动更新检测等高级功能；兼容多个知名搜索引擎，如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Ecosia、You、Startpage、Brave等。
+简介：“优雅的搜索引擎跳转助手”方便用户在不同的搜索引擎之间跳转；支持自定义常用搜索引擎、关键词高亮渲染效果；还提供去除搜索链接重定向、屏蔽搜索结果广告、可视化参数设置、及自动更新检测等高级功能；兼容多个知名搜索引擎，如Baidu、Google、Bing、Duckduckgo、搜狗、无追搜索、Yandex、360 搜索、头条搜索、百度开发者、Ecosia、Yahoo、You、Startpage、Brave、Yep、Swisscows等。
 
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
@@ -124,13 +124,14 @@
 ```
 
 ## 最新功能介绍
-* 新增去除搜索结果及侧栏广告功能。`New!`
-* 新增自定义搜索引擎选取功能。（包含：百度、Google、Bing、Duckduckgo、搜狗、Yandex、360搜索、头条搜索、百度开发者、Ecosia、Yahoo、You、Startpage、brave、Yep、Swisscows搜索等）
-* 新增搜索结果链接去重定向功能。
-* 更智能的更新检测功能。
+- 新增搜索结果关键词高效过滤功能，杜绝内容农场与垃圾信息。`New!`
+- 新增去除搜索结果及侧栏广告功能，优化广告屏蔽效率。
+- 新增自定义搜索引擎选取功能（包含：百度、Google、Bing、Duckduckgo、搜狗、无追搜索、Yandex、360 搜索、头条搜索、百度开发者、Ecosia、Yahoo、You、Startpage、Brave、Yep、Swisscows搜索等常见的搜索引擎）
+- 新增搜索结果链接去重定向功能，优化隐私参数屏蔽功能。
+- 更智能的更新检测功能。
 
 ## 图标缓存的更新
-访问[任意搜索引擎](https://www.baidu.com/?whoami=F9y4ng)，在地址栏内向 URL 添加 `?whoami=F9y4ng` 或 `&whoami=F9y4ng`，开启临时调试模式，即可自动更新搜索引擎站点的icons；或等待图标缓存过期（七天）后自动更新图标缓存。
+访问[任意搜索引擎](https://www.baidu.com/?whoami=F9y4ng)，在地址栏内向 URL 添加 `?whoami=F9y4ng` 或 `&whoami=F9y4ng`，开启临时调试模式，即可自动更新搜索引擎站点的icons；或等待图标缓存过期（十五天）后自动更新图标缓存。
 
 ## 重要说明
 新版本“**自动更新**”功能默认开启，如不需要，请在脚本菜单“**功能设置开关**”中，关闭**更新检测**即可。
