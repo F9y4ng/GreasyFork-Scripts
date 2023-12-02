@@ -23,17 +23,12 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2023.11.07.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2023.12.02.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 热更新：修正一些由用户提出的已知问题。
-
-@ 修正预览时粗体修正在shadowRoot中样式加载的Bug.
-@ 优化内部样式的插入效率，减少重绘和回流造成的卡顿。
-@ 优化Blink内核粗体修正功能，减少页面加载时的卡顿。
-@ 优化字体缩放时link元素Viewport units的修正效率。
-@ 优化iframe框架的异步处理方式，减少主页面卡顿。
-@ 优化通过UA获取浏览器参数的方法，提升识别准确度。
++ 更新 greasyfork.org 新版本 @require 链接地址。
+@ 增强代码的兼容性，减少与其他第三方脚本的冲突。
+@ 修正Safari下文本域中文输入上屏时字符验证的bug.
 @ 修正一些已知的问题，优化样式，优化代码。
 ```
 
@@ -109,17 +104,14 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2023.11.05.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2023.12.02.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ 修正重定向造成Google自动翻页的Bug.
-
-+ 新增Yep、Swisscows隐私保护搜索引擎。
-@ 优化搜索结果重定向链接的解析效率。
-@ 适配可自动夜间模式搜索引擎按钮样式。
-@ 优化脚本更新检测机制及升级体验。
-@ 优化通过UA获取浏览器信息的方法。
-@ 修正You(You.com)的跳转按钮的样式Bug.
++ 更新 greasyfork.org 新版本 @require 地址。
++ 新增搜索结果过滤功能，拒绝垃圾与内容农场。
+@ 移除失效的Fsou,新增中文搜索：无追搜索。
+@ 重构去重定向功能，优化重定向链接解析效率。
+@ 重构去广告功能，优化广告屏蔽效率和效果。
 @ 修正一些已知问题，优化样式，优化代码。
 ```
 
