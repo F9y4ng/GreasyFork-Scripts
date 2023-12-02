@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2023.11.07.1
+// @version            2023.12.02.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -18,7 +18,7 @@
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.meta.js
 // @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
-// @require            https://greasyfork.org/scripts/437214/code/frColorPicker.js?version=1193185#sha256-ZQoXdFH5rNO+dCJE6qn/AV9rUGpLvY5cLlFCzvgfKro=
+// @require            https://update.greasyfork.org/scripts/437214/1193185/frColorPicker.js#sha256-ZQoXdFH5rNO+dCJE6qn/AV9rUGpLvY5cLlFCzvgfKro=
 // @match              *://*/*
 // @grant              GM_getValue
 // @grant              GM.getValue
@@ -95,10 +95,10 @@
       cssAttrName: `fr-css-${generateRandomString(8, "hex")}`,
       boldAttrName: `fr-fix-${generateRandomString(8, "hex")}`,
       frameAttrName: `fr-frames-${generateRandomString(8, "hex")}`,
-      gfHost: decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkY0MTY2ODg="),
+      greasyfork: decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkY0MTY2ODg="),
       defaultFont: decrypt("JUU3JUJEJTkxJUU3JUFCJTk5JUU5JUJCJTk4JUU4JUFFJUE0JUU1JUFEJTk3JUU0JUJEJTkz"),
       fontlistImg: decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjIlMkYwNCUyRjAyJTJGcW9SZldkLmdpZg=="),
-      loadImg: decrypt("aHR0cHMlM0ElMkYlMkZpbWcuemNvb2wuY24lMkZjb21tdW5pdHklMkYwMzhkZGU0NThmOWE4NzRhODAxMjE2MGY3NDE3ZjZlLmdpZg=="),
+      loadingImg: decrypt("aHR0cHMlM0ElMkYlMkZpbWcuemNvb2wuY24lMkZjb21tdW5pdHklMkYwMzhkZGU0NThmOWE4NzRhODAxMjE2MGY3NDE3ZjZlLmdpZg=="),
       exQueryString: `html,head,head *,base,meta,style,link,script,noscript,iframe,img,br,hr,map,area,canvas,svg,svg *,defs,symbol,g,path,polygon,polyline,rect,ellipse,circle,line,text,tspan,tref,textpath,lineargradient,radialgradient,use,images,clippath,mask,pattern,filter,stop,picture,form,object,param,embed,audio,video,source,track,progress,fr-colorpicker,fr-colorpicker *,fr-configure,fr-configure *,fr-dialogbox,fr-dialogbox *,gb-notice,gb-notice *`,
     },
     variable: {
@@ -108,11 +108,11 @@
         getClientRects: Element.prototype.getClientRects,
         getBoundingClientRect: Element.prototype.getBoundingClientRect,
       },
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.11.04.0",
-      scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? "\u0046\u0039\u0079\u0034\u006e\u0067",
-      feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? "https://f9y4ng.likes.fans/support",
-      homepage: getMetaValue("homepage") ?? getMetaValue("homepageURL") ?? "https://f9y4ng.github.io/GreasyFork-Scripts/",
-      scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? GMinfo.script.name ?? "Font Rendering",
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.12.02.0",
+      scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("Rjl5NG5n"),
+      scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? GMinfo.script.name ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
+      feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRnN1cHBvcnQ="),
+      homepage: getMetaValue("homepage") ?? getMetaValue("homepageURL") ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcuZ2l0aHViLmlvJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJG"),
     },
     dialog: { alert: alert.bind(w), prompt: prompt.bind(w), confirm: confirm.bind(w) },
     class: {
@@ -231,10 +231,10 @@
   class RAF {
     constructor(global) {
       if (RAF.instance) return RAF.instance;
+      registerWindowsProperties(global);
       this.timerMap = { timeout: {}, interval: {} };
       this.setTimeout = this.setTimeout.bind(this);
       this.global = global;
-      registerWindowsProperties();
       RAF.instance = this;
     }
     _ticking(fn, type, interval, lastTime = Date.now()) {
@@ -308,7 +308,7 @@
       if (callbackSet.size === 0) return Promise.resolve(result);
       else {
         return new Promise(resolve => {
-          const elementObserver = new MutationObserver(function (mutations, obs) {
+          const elementObserver = new MutationObserver((mutations, obs) => {
             for (const { name, callback } of callbackSet) {
               const rst = callback({ node, mutations, obs }) ?? node;
               result.set(name, rst);
@@ -355,13 +355,13 @@
     }
   }
 
-  function registerWindowsProperties() {
+  function registerWindowsProperties(scope) {
     // REGISTER RAF
-    w[def.const.raf] = GMunsafeWindow[def.const.raf] =
-      w.requestAnimationFrame ||
-      w.webkitRequestAnimationFrame ||
-      w.mozRequestAnimationFrame ||
-      w.oRequestAnimationFrame ||
+    scope[def.const.raf] =
+      scope.requestAnimationFrame ||
+      scope.webkitRequestAnimationFrame ||
+      scope.mozRequestAnimationFrame ||
+      scope.oRequestAnimationFrame ||
       (function () {
         const delay = def.const.ft;
         const animationStartTime = Date.now();
@@ -377,15 +377,15 @@
         };
       })();
     // REGISTER CAF
-    w[def.const.caf] = GMunsafeWindow[def.const.caf] =
-      w.cancelAnimationFrame ||
-      w.webkitCancelAnimationFrame ||
-      w.mozCancelAnimationFrame ||
-      w.oCancelAnimationFrame ||
-      w.cancelRequestAnimationFrame ||
-      w.webkitCancelRequestAnimationFrame ||
-      w.mozCancelRequestAnimationFrame ||
-      w.oCancelRequestAnimationFrame ||
+    scope[def.const.caf] =
+      scope.cancelAnimationFrame ||
+      scope.webkitCancelAnimationFrame ||
+      scope.mozCancelAnimationFrame ||
+      scope.oCancelAnimationFrame ||
+      scope.cancelRequestAnimationFrame ||
+      scope.webkitCancelRequestAnimationFrame ||
+      scope.mozCancelRequestAnimationFrame ||
+      scope.oCancelRequestAnimationFrame ||
       function cancelAnimationFrame(id) {
         clearTimeout(id);
       };
@@ -396,7 +396,7 @@
       return function () {
         const fn = original.apply(this, arguments);
         event.arguments = arguments;
-        w.dispatchEvent(event);
+        scope.dispatchEvent(event);
         return fn;
       };
     };
@@ -582,7 +582,7 @@
       CUR_WINDOW_TOP &&
         __console("warn", `${def.variable.scriptName}警告：\r\n脚本的注入模式已设置为"content"，部分脚本功能将受限制，如框架页面内部分功能失效、字体缩放后无法全局修正坐标等。`);
     }
-    setRedundantFlagForContentMode();
+    setFlagAtDocumentElement(document.documentElement);
     return false;
 
     function scriptRedundancyWarning() {
@@ -595,22 +595,12 @@
       }
       return true;
     }
+  }
 
-    function setRedundantFlagForContentMode() {
-      const id = document.documentElement?.id || def.const.seed;
-      const dEobs = new MutationObserver(mu => setAttributes(mu, id));
-      dEobs.observe(document, { childList: true, subtree: true, attributes: true });
-    }
-
-    function setAttributes(mutations, id) {
-      for (let mutation of mutations) {
-        const target = mutation.target;
-        if (target !== document.documentElement) continue;
-        if (target.getAttribute("id") !== id) target.setAttribute("id", id);
-        if (target.getAttribute("fr-init-rc") !== "true") target.setAttribute("fr-init-rc", true);
-        break;
-      }
-    }
+  function setFlagAtDocumentElement(target) {
+    if (!target) return;
+    if (!target.getAttribute("id")) target.setAttribute("id", def.const.seed);
+    if (target.getAttribute("fr-init-rc") !== "true") target.setAttribute("fr-init-rc", true);
   }
 
   function getNavigatorInfo() {
@@ -879,13 +869,9 @@
     /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
     const UPDATE_VERSION_NOTICE = String(
-      `<li class="${def.const.seed}_fix">热更新：修正一些由用户提出的已知问题。</li>
-        <li class="${def.const.seed}_fix">修正预览时粗体修正在shadowRoot中样式加载的Bug.</li>
-        <li class="${def.const.seed}_fix">优化内部样式的插入效率，减少重绘和回流造成的卡顿。</li>
-        <li class="${def.const.seed}_fix">优化Blink内核粗体修正功能，减少页面加载时的卡顿。</li>
-        <li class="${def.const.seed}_fix">优化字体缩放时link元素Viewport units的修正效率。</li>
-        <li class="${def.const.seed}_fix">优化iframe框架的异步处理方式，减少主页面卡顿。</li>
-        <li class="${def.const.seed}_fix">优化通过UA获取浏览器参数的方法，提升识别准确度。</li>
+      `<li class="${def.const.seed}_fix">更新 <i>greasyfork.org</i> 新版本 <i>@require</i> 链接地址。</li>
+        <li class="${def.const.seed}_fix">增强代码的兼容性，减少与其他第三方脚本的冲突。</li>
+        <li class="${def.const.seed}_fix">修正Safari下文本域中文输入上屏时字符验证的bug.</li>
         <li class="${def.const.seed}_fix">修正一些已知的问题，优化样式，优化代码。</li>`
     );
 
@@ -939,7 +925,7 @@
       fixStroke: IS_REAL_BLINK,
       fontShadow: IS_REAL_GECKO ? 0.36 : 0.75,
       shadowColor: IS_REAL_GECKO ? "#7C7C7C70" : "#7C7C7CDD",
-      fontCSS: `:not(i,head *):not([class*='glyph']):not([class*='symbols']):not([class*='icon']):not([class*='fa-']):not([class*='vjs-'])`,
+      fontCSS: `:not(i,head *):not([class*='glyph']):not([class*='symbols' i]):not([class*='icon' i]):not([class*='fa-']):not([class*='vjs-'])`,
       fontEx: `progress,meter,datalist,samp,kbd,pre,pre *,code,code *`,
       monospacedFont: `'Operator Mono Lig','Fira Code','Source Code Pro','DejaVu Sans Mono','Anonymous Pro','Ubuntu Mono','Roboto Mono','JetBrains Mono','Droid Sans Mono','Mono','Monaco','Menlo','Inconsolata','Liberation Mono'`,
       monospacedFeature: `"liga" 0,"tnum","zero"`,
@@ -957,7 +943,7 @@
           `.${def.class.dbm} button:hover{background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important;cursor:pointer}.${def.class.dbm} p{margin:5px 0!important;text-align:left;text-indent:0!important;font-weight:400;font-size:16px!important;line-height:1.5!important;-webkit-user-select:none;user-select:none}.${def.class.dbm} ul{margin:0 0 0 10px!important;padding:2px;color:gray;list-style:none;font:italic 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-user-select:none;user-select:none;scrollbar-width:thin}.${def.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${def.class.dbm} ul::-webkit-scrollbar-thumb{border-radius:10px;background:#cfcfcf;box-shadow:inset 0 0 5px #999999;}.${def.class.dbm} ul::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #aaaaaa;}.${def.class.dbm} ul::-webkit-scrollbar-track-piece{border-radius:6px;background:#efefef;box-shadow:inset 0 0 5px #aaaaaa;}.${def.class.dbm} ul li{display:list-item;list-style-type:none;word-break:break-all}.${def.class.dbm} li:before{display:none}.${def.class.dbm} #${def.id.bk},.${def.class.dbm} #${def.id.pv},.${def.class.dbm} #${def.id.fs},.${def.class.dbm} #${def.id.fvp},.${def.class.dbm} #${def.id.hk},.${def.class.dbm} #${def.id.ct},.${def.class.dbm} #${def.id.mps},.${def.class.dbm} #${def.id.flc},.${def.class.dbm} #${def.id.gc},.${def.class.dbm} #${def.id.cm}{display:flex;box-sizing:content-box;margin:0;padding:2px 4px!important;width:calc(96% - 10px);height:max-content;min-width:auto;min-height:40px;list-style:none;font-style:normal;justify-content:space-between;align-items:flex-start;word-break:break-word}.${def.class.dbm} ul#${def.const.seed}_d_d_ li:hover{background-color:#fdf6eccc!important}.${def.class.dbm} #${def.const.seed}_temporary{padding:18px 8px;text-align:center;color:#555555;font-size:14px!important}` +
           `.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#ffffff;box-shadow:0 0 1px rgba(0,0,0,.6);color:#ffffff;content:' '}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#ffffff;content:'OFF';font-weight:700;font-style:normal;font-size:16px}.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4);cursor:pointer}.${def.class.checkbox}:checked+label::after{left:10px;content:'ON'}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:' '}` +
           `.${def.class.dbm} .${def.const.seed}_VIP,.${def.class.dbm} .${def.const.seed}_cusmono{margin:2px 0 0 0;color:#b8860b!important;font:normal 400 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${def.class.dbm} #${def.id.flc} button,.${def.class.dbm} #${def.id.gc} button{box-sizing:border-box!important;margin:0 5px 0 0!important;padding:2px 5px!important;border:1px solid #999!important;border-radius:4px!important;background-color:#eeeeee;color:#444444!important;letter-spacing:normal!important;font-weight:400!important;font-size:14px!important}#${def.const.seed}_monospaced_siterules:placeholder-shown{color:#555555!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}#${def.const.seed}_monospaced_siterules::-webkit-input-placeholder,#${def.const.seed}_monospaced_siterules::-moz-placeholder,#${def.const.seed}_monospaced_font::-moz-placeholder{color:#555555!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} a{color:#0969da;text-decoration:none!important;font-style:inherit}.${def.class.dbm} a:hover{color:#dc143c;text-decoration:underline}.${def.class.dbm} #${def.id.feedback}{padding:2px 10px;width:max-content;height:22px;min-width:auto}.${def.class.dbm} #${def.id.files}{display:none}.${def.class.dbm} #${def.id.feedback}:hover{color:crimson!important}` +
-          `.${def.class.dbm} #${def.id.feedback}:after{width:0;height:0;background:url('${def.const.loadImg}') no-repeat -400px -300px;content:""}` +
+          `.${def.class.dbm} #${def.id.feedback}:after{width:0;height:0;background:url('${def.const.loadingImg}') no-repeat -400px -300px;content:""}` +
           `.${def.class.dbm} #${def.const.seed}_custom_Fontlist:placeholder-shown{color:#aaaaaa!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} #${def.const.seed}_custom_Fontlist::-webkit-input-placeholder{color:#aaaaaa!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;word-break:break-all!important}.${def.class.dbm} #${def.const.seed}_custom_Fontlist::-moz-placeholder{color:#555555!important;white-space:pre-line;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} #${def.const.seed}_update li{margin:0;padding:1px 0;color:gray;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} .${def.const.seed}_add:before{display:inline;margin:0 4px 0 -10px;content:'+'}.${def.class.dbm} .${def.const.seed}_del:before{display:inline;margin:0 4px 0 -10px;content:'-'}.${def.class.dbm} .${def.const.seed}_fix:before{display:inline;margin:0 4px 0 -10px;content:'@'}.${def.class.dbm} .${def.const.seed}_info{color:#daa520!important}.${def.class.dbm} .${def.const.seed}_info:before{display:inline;margin:0 4px 0 -10px;content:'#'}.${def.class.dbm} .${def.const.seed}_warn{color:#e90000!important}.${def.class.dbm} .${def.const.seed}_warn:before{display:inline;margin:0 4px 0 -10px;content:'!'}.${def.class.dbm} .${def.const.seed}_init{color:#65a16a!important}.${def.class.dbm} .${def.const.seed}_init:before{display:inline;margin:0 4px 0 -10px;content:'$'}.${def.class.dbm} input:focus,.${def.class.dbm} textarea:focus{box-shadow:inset 0 1px 3px rgb(0 0 0/10%),0 0 4px rgb(110 111 112/60%)!important}`
       ),
       frConfigure:
@@ -1709,145 +1695,145 @@
       /* FR_CONFIGURE_SHADOWROOT_CONTENT */
 
       const isDisabled = CONST_VALUES.isMatchEditorialSite ? `disabled="disabled" title="\u56fe\u6587/\u7f16\u8f91\u7f51\u7ad9\u81ea\u52a8\u7981\u7528" ` : ``;
-      const tFixViewport = String(
+      const tFixViewport =
+        `<!-- Viewport Fixed -->` +
         `<span id="${def.id.fviewport}" style="width:auto;color:#666666;font-size:12px">
           (<label title="如果开启它后出现网页加载或样式问题，请关闭之。">视口修正</label>
           <input type="checkbox" id="${def.id.fixViewport}" ${CONST_VALUES.fixViewport ? "checked" : ""}/>)
-        </span>`
-      );
-      const tFontSizeHTML = String(
+        </span>`;
+      const tFontSizeHTML =
+        `<!-- Font Size -->` +
         `<li id="${def.id.fontSize}">
-        <div class="${def.class.flex}">
-          <span style="margin:0;padding:0" title="双击编辑站点缩放修正设置数据" id="${def.const.seed}_fontscale_defined">字体比例缩放</span>
-          ${isFixViewport ? tFixViewport : ""}
-          <input id="${def.id.fontScale}" type="text" data-fr-type="number" maxlength="5" ${isDisabled}/>
-        </div>
-        <div class="${def.class.range}" data-ticks-position="top" ${isDisabled}
-          style="--min:.8;--max:1.5;--step:.001;--value:${CONST_VALUES.fontSize};--text-value:'${String(CONST_VALUES.fontSize.toFixed(3))}'">
-          <input id="${def.id.scaleSize}" type="range" min=".8" max="1.5" step=".001" value="${CONST_VALUES.fontSize.toFixed(3)}" ${isDisabled}/>
-          <output></output>
-          <div class='${def.class.rangeProgress}'></div>
-        </div>
-      </li>`
-      );
-      const tFixStrokeHTML = String(
+          <div class="${def.class.flex}">
+            <span style="margin:0;padding:0" title="双击编辑站点缩放修正设置数据" id="${def.const.seed}_fontscale_defined">字体比例缩放</span>
+            ${isFixViewport ? tFixViewport : ""}
+            <input id="${def.id.fontScale}" type="text" data-fr-type="number" maxlength="5" ${isDisabled}/>
+          </div>
+          <div class="${def.class.range}" data-ticks-position="top" ${isDisabled}
+            style="--min:.8;--max:1.5;--step:.001;--value:${CONST_VALUES.fontSize};--text-value:'${String(CONST_VALUES.fontSize.toFixed(3))}'">
+            <input id="${def.id.scaleSize}" type="range" min=".8" max="1.5" step=".001" value="${CONST_VALUES.fontSize.toFixed(3)}" ${isDisabled}/>
+            <output></output>
+            <div class='${def.class.rangeProgress}'></div>
+          </div>
+        </li>`;
+      const tFixStrokeHTML =
+        `<!-- Bold Fixed -->` +
         `<span id="${def.id.fstroke}" style="width:auto;color:#666666;font-size:12px">
           (<label title="如果开启它后出现明显的卡顿现象，请关闭之。">粗体修正</label>
           <input type="checkbox" id="${def.id.fixStroke}" ${CONST_VALUES.fixStroke ? "checked" : ""} />)
-        </span>`
-      );
-      const tHTML = String(
+        </span>`;
+      const tHTML =
+        `<!-- Configure Page -->` +
         `<div id="${def.id.container}">
-        <fieldset id="${def.id.field}" style="display:block">
-          <legend class="${def.class.title}">
-            <span id="${def.const.seed}_scriptname" title="${def.variable.scriptName} v${curVersion}" style="color:#8b0000!important">${def.variable.scriptName}</span>
-            <span class="${def.class.guide}">
-              <div class="${def.class.rotation}" title="打开脚本使用帮助文档" height="24" width="24"/>
-                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0,0,255.99431,255.99431"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="0" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode:normal"><g transform="scale(0.5,0.5)"><path d="M504.1,256c0,-137 -111.1,-248.1 -248.1,-248.1c-137,0 -248.1,111.1 -248.1,248.1c0,137 111.1,248.1 248.1,248.1c137,0 248.1,-111.1 248.1,-248.1z" fill="#67a5df"></path><path d="M146.1,181.5c0,-13.9 4.5,-28 13.4,-42.3c8.9,-14.3 22,-26.1 39.1,-35.5c17.1,-9.4 37.1,-14.1 60,-14.1c21.2,0 40,3.9 56.2,11.8c16.3,7.8 28.8,18.5 37.7,32c8.9,13.5 13.3,28.1 13.3,43.9c0,12.5 -2.5,23.4 -7.6,32.7c-5.1,9.4 -11.1,17.5 -18,24.3c-7,6.8 -19.4,18.3 -37.5,34.4c-5,4.5 -9,8.5 -12,12c-3,3.4 -5.2,6.6 -6.7,9.4c-1.5,2.9 -2.6,5.7 -3.4,8.6c-0.8,2.9 -2,7.9 -3.6,15.1c-2.8,15.2 -11.5,22.9 -26.1,22.9c-7.6,0 -14,-2.5 -19.2,-7.5c-5.2,-5 -7.8,-12.4 -7.8,-22.2c0,-12.3 1.9,-23 5.7,-32c3.8,-9 8.9,-16.9 15.2,-23.7c6.3,-6.8 14.8,-14.9 25.5,-24.3c9.4,-8.2 16.1,-14.4 20.3,-18.6c4.2,-4.2 7.7,-8.8 10.5,-14c2.9,-5.1 4.3,-10.7 4.3,-16.7c0,-11.7 -4.4,-21.6 -13.1,-29.7c-8.7,-8.1 -20,-12.1 -33.7,-12.1c-16.1,0 -28,4.1 -35.6,12.2c-7.6,8.1 -14.1,20.1 -19.3,35.9c-5,16.6 -14.4,24.8 -28.3,24.8c-8.2,0 -15.1,-2.9 -20.8,-8.7c-5.6,-5.6 -8.5,-11.8 -8.5,-18.6zM253.4,422.3c-8.9,0 -16.7,-2.9 -23.4,-8.7c-6.7,-5.8 -10,-13.9 -10,-24.3c0,-9.2 3.2,-17 9.7,-23.3c6.4,-6.3 14.4,-9.4 23.7,-9.4c9.2,0 17,3.2 23.3,9.4c6.3,6.3 9.4,14.1 9.4,23.3c0,10.3 -3.3,18.3 -9.9,24.2c-6.6,5.9 -14.2,8.8 -22.8,8.8z" fill="#ffffff"></path></g></g></svg>
-              </div>
-            </span>
-          </legend>
-          <ul class="${def.class.main}">
-            <li id="${def.id.fontList}">
-              <div class="${def.class.fontList}"></div>
-            </li>
-            <li id="${def.id.fontFace}">
-              <div style="margin:0;padding:0">
-                <span title="双击编辑自定义字体重写数据"  id="${def.const.seed}_fontoverride_defined">字体重写</span>（默认\uff1a开）
-              </div>
-              <div style="margin:0;padding:0;height:32px;align-self:center">
-                <input type="checkbox" id="${def.id.fface}" class="${def.class.checkbox}" ${CONST_VALUES.fontFace ? "checked" : ""} />
-                <label for="${def.id.fface}"></label>
-              </div>
-            </li>
-            <li id="${def.id.fontSmooth}">
-              <div style="margin:0;padding:0">字体平滑（默认\uff1a开）</div>
-              <div style="margin:0;padding:0;height:32px;align-self:center">
-                <input type="checkbox" id="${def.id.smooth}" class="${def.class.checkbox}" ${CONST_VALUES.fontSmooth ? "checked" : ""} />
-                <label for="${def.id.smooth}"></label>
-              </div>
-            </li>
-            ${def.const.isFontsize ? tFontSizeHTML : ""}
-            <li id="${def.id.fontStroke}">
-              <div class="${def.class.flex}">
-                <span style="margin:0;padding:0">字体描边尺寸</span>
-                ${IS_REAL_BLINK ? tFixStrokeHTML : ""}
-                <input id="${def.id.strokeSize}" type="text" data-fr-type="number" maxlength="5" />
-              </div>
-              <div class="${def.class.range}" data-ticks-position="top"
-                style="--step:.001;--min:0;--max:1;--value:${CONST_VALUES.fontStroke};--text-value:'${String(CONST_VALUES.fontStroke.toFixed(3))}'">
-                <input id="${def.id.stroke}" type="range" min="0" max="1" step=".001" value="${CONST_VALUES.fontStroke.toFixed(3)}" />
-                <output></output>
-                <div class="${def.class.rangeProgress}"></div>
-              </div>
-            </li>
-            <li id="${def.id.fontShadow}">
-              <div class="${def.class.flex}">
-                <span style="margin:0;padding:0">字体阴影尺寸</span>
-                <input id="${def.id.shadowSize}" type="text" data-fr-type="number" maxlength="4" />
-              </div>
-              <div class="${def.class.range}" data-ticks-position="top"
-                style="--step:.01;--min:0;--max:4;--value:${CONST_VALUES.fontShadow};--text-value:'${String(CONST_VALUES.fontShadow.toFixed(2))}'">
-                <input id="${def.id.shadow}" type="range" min="0" max="4" step=".01" value="${CONST_VALUES.fontShadow.toFixed(2)}" />
-                <output></output>
-                <div class="${def.class.rangeProgress}"></div>
-              </div>
-            </li>
-            <li id="${def.id.shadowColor}">
-              <div style="margin:0;padding:0">
-                <span style="margin:0;padding:0">阴影颜色</span>
-                <span class="${def.class.tooltip}">
-                  <span class="${def.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
-                  <span class="${def.class.tooltip} ${def.class.ps3}">
-                    <p>阴影颜色可通过点击色块激活拾色器选择，也可自定义填写，格式支持: <em style="color:#cecece">RGB, RGBA, HEX, HEXA.</em> 纯白色的所有格式表示自身颜色 <em style="color:#cecece">currentcolor.</em></p>
-                    <p><em style="color:darkred">注意\uff1a输入数值会自动转化为HEXA格式，但数值保持一致性。错误格式会被替换为刚刚正确显示的数值。</em></p>
+          <fieldset id="${def.id.field}" style="display:block">
+            <legend class="${def.class.title}">
+              <span id="${def.const.seed}_scriptname" title="${def.variable.scriptName} v${curVersion}" style="color:#8b0000!important">${def.variable.scriptName}</span>
+              <span class="${def.class.guide}">
+                <div class="${def.class.rotation}" title="打开脚本使用帮助文档" height="24" width="24"/>
+                  <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0,0,255.99431,255.99431"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="0" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode:normal"><g transform="scale(0.5,0.5)"><path d="M504.1,256c0,-137 -111.1,-248.1 -248.1,-248.1c-137,0 -248.1,111.1 -248.1,248.1c0,137 111.1,248.1 248.1,248.1c137,0 248.1,-111.1 248.1,-248.1z" fill="#67a5df"></path><path d="M146.1,181.5c0,-13.9 4.5,-28 13.4,-42.3c8.9,-14.3 22,-26.1 39.1,-35.5c17.1,-9.4 37.1,-14.1 60,-14.1c21.2,0 40,3.9 56.2,11.8c16.3,7.8 28.8,18.5 37.7,32c8.9,13.5 13.3,28.1 13.3,43.9c0,12.5 -2.5,23.4 -7.6,32.7c-5.1,9.4 -11.1,17.5 -18,24.3c-7,6.8 -19.4,18.3 -37.5,34.4c-5,4.5 -9,8.5 -12,12c-3,3.4 -5.2,6.6 -6.7,9.4c-1.5,2.9 -2.6,5.7 -3.4,8.6c-0.8,2.9 -2,7.9 -3.6,15.1c-2.8,15.2 -11.5,22.9 -26.1,22.9c-7.6,0 -14,-2.5 -19.2,-7.5c-5.2,-5 -7.8,-12.4 -7.8,-22.2c0,-12.3 1.9,-23 5.7,-32c3.8,-9 8.9,-16.9 15.2,-23.7c6.3,-6.8 14.8,-14.9 25.5,-24.3c9.4,-8.2 16.1,-14.4 20.3,-18.6c4.2,-4.2 7.7,-8.8 10.5,-14c2.9,-5.1 4.3,-10.7 4.3,-16.7c0,-11.7 -4.4,-21.6 -13.1,-29.7c-8.7,-8.1 -20,-12.1 -33.7,-12.1c-16.1,0 -28,4.1 -35.6,12.2c-7.6,8.1 -14.1,20.1 -19.3,35.9c-5,16.6 -14.4,24.8 -28.3,24.8c-8.2,0 -15.1,-2.9 -20.8,-8.7c-5.6,-5.6 -8.5,-11.8 -8.5,-18.6zM253.4,422.3c-8.9,0 -16.7,-2.9 -23.4,-8.7c-6.7,-5.8 -10,-13.9 -10,-24.3c0,-9.2 3.2,-17 9.7,-23.3c6.4,-6.3 14.4,-9.4 23.7,-9.4c9.2,0 17,3.2 23.3,9.4c6.3,6.3 9.4,14.1 9.4,23.3c0,10.3 -3.3,18.3 -9.9,24.2c-6.6,5.9 -14.2,8.8 -22.8,8.8z" fill="#ffffff"></path></g></g></svg>
+                </div>
+              </span>
+            </legend>
+            <ul class="${def.class.main}">
+              <li id="${def.id.fontList}">
+                <div class="${def.class.fontList}"></div>
+              </li>
+              <li id="${def.id.fontFace}">
+                <div style="margin:0;padding:0">
+                  <span title="双击编辑自定义字体重写数据"  id="${def.const.seed}_fontoverride_defined">字体重写</span>（默认\uff1a开）
+                </div>
+                <div style="margin:0;padding:0;height:32px;align-self:center">
+                  <input type="checkbox" id="${def.id.fface}" class="${def.class.checkbox}" ${CONST_VALUES.fontFace ? "checked" : ""} />
+                  <label for="${def.id.fface}"></label>
+                </div>
+              </li>
+              <li id="${def.id.fontSmooth}">
+                <div style="margin:0;padding:0">字体平滑（默认\uff1a开）</div>
+                <div style="margin:0;padding:0;height:32px;align-self:center">
+                  <input type="checkbox" id="${def.id.smooth}" class="${def.class.checkbox}" ${CONST_VALUES.fontSmooth ? "checked" : ""} />
+                  <label for="${def.id.smooth}"></label>
+                </div>
+              </li>
+              ${def.const.isFontsize ? tFontSizeHTML : ""}
+              <li id="${def.id.fontStroke}">
+                <div class="${def.class.flex}">
+                  <span style="margin:0;padding:0">字体描边尺寸</span>
+                  ${IS_REAL_BLINK ? tFixStrokeHTML : ""}
+                  <input id="${def.id.strokeSize}" type="text" data-fr-type="number" maxlength="5" />
+                </div>
+                <div class="${def.class.range}" data-ticks-position="top"
+                  style="--step:.001;--min:0;--max:1;--value:${CONST_VALUES.fontStroke};--text-value:'${String(CONST_VALUES.fontStroke.toFixed(3))}'">
+                  <input id="${def.id.stroke}" type="range" min="0" max="1" step=".001" value="${CONST_VALUES.fontStroke.toFixed(3)}" />
+                  <output></output>
+                  <div class="${def.class.rangeProgress}"></div>
+                </div>
+              </li>
+              <li id="${def.id.fontShadow}">
+                <div class="${def.class.flex}">
+                  <span style="margin:0;padding:0">字体阴影尺寸</span>
+                  <input id="${def.id.shadowSize}" type="text" data-fr-type="number" maxlength="4" />
+                </div>
+                <div class="${def.class.range}" data-ticks-position="top"
+                  style="--step:.01;--min:0;--max:4;--value:${CONST_VALUES.fontShadow};--text-value:'${String(CONST_VALUES.fontShadow.toFixed(2))}'">
+                  <input id="${def.id.shadow}" type="range" min="0" max="4" step=".01" value="${CONST_VALUES.fontShadow.toFixed(2)}" />
+                  <output></output>
+                  <div class="${def.class.rangeProgress}"></div>
+                </div>
+              </li>
+              <li id="${def.id.shadowColor}">
+                <div style="margin:0;padding:0">
+                  <span style="margin:0;padding:0">阴影颜色</span>
+                  <span class="${def.class.tooltip}">
+                    <span class="${def.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
+                    <span class="${def.class.tooltip} ${def.class.ps3}">
+                      <p>阴影颜色可通过点击色块激活拾色器选择，也可自定义填写，格式支持: <em style="color:#cecece">RGB, RGBA, HEX, HEXA.</em> 纯白色的所有格式表示自身颜色 <em style="color:#cecece">currentcolor.</em></p>
+                      <p><em style="color:darkred">注意\uff1a输入数值会自动转化为HEXA格式，但数值保持一致性。错误格式会被替换为刚刚正确显示的数值。</em></p>
+                    </span>
                   </span>
-                </span>
-              </div>
-              <div class="${def.class.frColorPicker}">
-                <input title="输入颜色代码" type="text" id="${def.id.color}" />
-              </div>
-            </li>
-            <li id="${def.id.fontCss}" style="min-width:254px">
-              <div style="margin: 0 0 6px 0">需要渲染的网页元素\uff1a
-                <span id="${def.id.render}" class="${def.class.tooltip}">
-                  <span class="${def.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
-                  <span class="${def.class.tooltip} ${def.class.ps4}">
-                    <p>默认为排除大多数网站常用的特殊CSS样式后需要渲染的页面元素。填写格式\uff1a<em style="color:#cecece">:not(.fa)</em> 或 <em style="color:#cecece">:not([class*="fa"])</em> 或 <em style="color:#cecece">,#id .classname</em></p>
-                    <p><em style="color:darkred">该选项为重要参数，默认只读，双击解锁。请尽量不要修改，避免造成样式失效。若失效请重置。</em></p>
-                    <p>如果发现网站部分文字变为乱码或方块，请双击\ud83d\udd14打开修正帮助页面。</p>
+                </div>
+                <div class="${def.class.frColorPicker}">
+                  <input title="输入颜色代码" type="text" id="${def.id.color}" />
+                </div>
+              </li>
+              <li id="${def.id.fontCss}" style="min-width:254px">
+                <div style="margin: 0 0 6px 0">需要渲染的网页元素\uff1a
+                  <span id="${def.id.render}" class="${def.class.tooltip}">
+                    <span class="${def.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
+                    <span class="${def.class.tooltip} ${def.class.ps4}">
+                      <p>默认为排除大多数网站常用的特殊CSS样式后需要渲染的页面元素。填写格式\uff1a<em style="color:#cecece">:not(.fa)</em> 或 <em style="color:#cecece">:not([class*="fa"])</em> 或 <em style="color:#cecece">,#id .classname</em></p>
+                      <p><em style="color:darkred">该选项为重要参数，默认只读，双击解锁。请尽量不要修改，避免造成样式失效。若失效请重置。</em></p>
+                      <p>如果发现网站部分文字变为乱码或方块，请双击\ud83d\udd14打开修正帮助页面。</p>
+                    </span>
                   </span>
-                </span>
-                <div id="${def.id.cSwitch}" class="${def.class.switcher}" fr-button-switch="ON">\u2227</div>
-              </div>
-              <textarea placeholder="请谨慎修改默认值，避免渲染失效。" id="${def.id.cssinclued}" class="${def.class.readonly}"
-                title="重要参数，默认只读，双击解锁。" readonly="readonly">${CONST_VALUES.fontCSS}</textarea>
-            </li>
-            <li id="${def.id.fontEx}" style="min-width:254px">
-              <div style="margin: 0 0 6px 0">排除渲染的HTML标签\uff1a
-                <span id="${def.id.mono}" class="${def.class.tooltip}">
-                  <span class="${def.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
-                  <span class="${def.class.tooltip} ${def.class.ps5}">
-                    <p>该选项排除渲染字体描边、字体阴影效果，请将排除渲染的HTML标签用逗号分隔。具体规则请点击顶部旋转的帮助文件图标。</p>
-                    <p><em style="color:darkred">编辑该选项需要CSS知识，如需要排除复杂的样式或标签可通过这里进行添加，样式若混乱请重置。</em></p>
-                    <p>双击\ud83d\udd14可打开自定义等宽字体添加工具，设置您需要的等宽字体。</p>
-                    <p><em style="color:darkred">请注意：使用自定义等宽字体时，请谨慎删除该文本域中的重要代码：<br/>『 <em style="color:#ededed">pre,pre *,code,code *</em> 』</em></p>
+                  <div id="${def.id.cSwitch}" class="${def.class.switcher}" fr-button-switch="ON">\u2227</div>
+                </div>
+                <textarea placeholder="请谨慎修改默认值，避免渲染失效。" id="${def.id.cssinclued}" class="${def.class.readonly}"
+                  title="重要参数，默认只读，双击解锁。" readonly="readonly">${CONST_VALUES.fontCSS}</textarea>
+              </li>
+              <li id="${def.id.fontEx}" style="min-width:254px">
+                <div style="margin: 0 0 6px 0">排除渲染的HTML标签\uff1a
+                  <span id="${def.id.mono}" class="${def.class.tooltip}">
+                    <span class="${def.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
+                    <span class="${def.class.tooltip} ${def.class.ps5}">
+                      <p>该选项排除渲染字体描边、字体阴影效果，请将排除渲染的HTML标签用逗号分隔。具体规则请点击顶部旋转的帮助文件图标。</p>
+                      <p><em style="color:darkred">编辑该选项需要CSS知识，如需要排除复杂的样式或标签可通过这里进行添加，样式若混乱请重置。</em></p>
+                      <p>双击\ud83d\udd14可打开自定义等宽字体添加工具，设置您需要的等宽字体。</p>
+                      <p><em style="color:darkred">请注意：使用自定义等宽字体时，请谨慎删除该文本域中的重要代码：<br/>『 <em style="color:#ededed">pre,pre *,code,code *</em> 』</em></p>
+                    </span>
                   </span>
-                </span>
-                <div id="${def.id.eSwitch}" class="${def.class.switcher}" fr-button-switch="ON">\u2227</div>
-              </div>
-              <textarea id="${def.id.cssexclude}" placeholder="请输入要排除渲染的HTML标签，形如: input, em, div[id='test']">${CONST_VALUES.fontEx}</textarea>
-            </li>
-            <li id="${def.id.submit}">
-              <button class="${def.class.reset}">重置</button>
-              <button class="${def.class.cancel}">取消</button>
-              <button id="${def.id.backup}">备份</button>
-              <button class="${def.class.submit}">保存</button>
-            </li>
-          </ul>
-        </fieldset>
-      </div>`
-      );
+                  <div id="${def.id.eSwitch}" class="${def.class.switcher}" fr-button-switch="ON">\u2227</div>
+                </div>
+                <textarea id="${def.id.cssexclude}" placeholder="请输入要排除渲染的HTML标签，形如: input, em, div[id='test']">${CONST_VALUES.fontEx}</textarea>
+              </li>
+              <li id="${def.id.submit}">
+                <button class="${def.class.reset}">重置</button>
+                <button class="${def.class.cancel}">取消</button>
+                <button id="${def.id.backup}">备份</button>
+                <button class="${def.class.submit}">保存</button>
+              </li>
+            </ul>
+          </fieldset>
+        </div>`;
 
       /* SHOW_SCRIPT_PACKAGE_INFORMATION */
 
@@ -1929,7 +1915,7 @@
         try {
           if (condition === "Preview") {
             const doc = node.contentWindow.document || node.contentDocument;
-            const bodyLength = doc.body?.innerText.replace(/\s/g, "").length ?? 0;
+            const bodyLength = doc.body?.innerText?.replace(/\s/g, "").length ?? 0;
             if (bodyLength === 0) return;
             const { css, id } = getFrameStyleFixerName(cssText, doc.head);
             const isInsertStyle = insertStyle({ target: doc.head, styleId: id, styleContent: css, isOverwrite: true });
@@ -2025,6 +2011,9 @@
       function loadPreview(allowedPreview, cssText = tStyle, ret = true) {
         try {
           if (!allowedPreview) return;
+          const newID = `#${document.documentElement.id}`;
+          const keyID = cssText.match(/\b#\w+\b/)?.[0];
+          cssText = keyID && keyID !== newID ? cssText.replace(/\b#\w+\b/g, newID) : cssText;
           insertStyle({ target: document.head, styleId: def.id.rndStyle, styleContent: cssText, isOverwrite: true });
           if (def.const.isFontsize) {
             const { oScale, tScale } = getscaleValueMatrix(def.array.scaleMatrix);
@@ -2242,7 +2231,7 @@
         if (curVersion === def.variable.curVersion) return;
         addLoadEvents.addFn(async () => {
           DEBUG(`Update.Info.[${!curVersion ? "new-deploy" : "up-to-date"}]: %cV${def.variable.curVersion}`, "color:crimson;font-weight:600");
-          if (!isCloseTip || curVersion === null) await hintUpdateInfo(`${def.const.gfHost}#update`, curVersion);
+          if (!isCloseTip || curVersion === null) await hintUpdateInfo(`${def.const.greasyfork}#update`, curVersion);
           _config_data_.curVersion = def.variable.curVersion;
           saveData("_CONFIGURE_", _config_data_);
           cache.remove("_FONTCHECKLIST_");
@@ -2271,10 +2260,10 @@
                   DEBUG("configure<errorCount>:", r.e.length);
                   r.e.length > 0 && reportErrorToAuthor(r.e, true);
                 });
-              qS(`.${def.class.title} span.${def.class.guide}`, def.const.configIf)?.addEventListener("click", () => GMopenInTab(`${def.const.gfHost}#guide`, false));
-              qS(`#${def.id.render}`, def.const.configIf)?.addEventListener("dblclick", () => GMopenInTab(`${def.variable.feedback}/../discussions/42`, false));
+              qS(`.${def.class.title} span.${def.class.guide}`, def.const.configIf)?.addEventListener("click", () => GMopenInTab(`${def.const.greasyfork}#guide`, false));
+              qS(`#${def.id.render}`, def.const.configIf)?.addEventListener("dblclick", () => GMopenInTab(`${def.variable.feedback}/42`, false));
               qS(`#${def.id.field} #${def.const.seed}_scriptname`, def.const.configIf)?.addEventListener("dblclick", function () {
-                hintUpdateInfo(`${def.const.gfHost}#update`, def.variable.curVersion);
+                hintUpdateInfo(`${def.const.greasyfork}#update`, def.variable.curVersion);
                 this.style.userSelect = "none";
               });
             } catch (e) {
@@ -2313,79 +2302,78 @@
           isCloseTip = Boolean(_config_data_.isCloseTip);
           globalDisable = Boolean(_config_data_.globalDisable);
           maxPersonalSites = Number(_config_data_.maxPersonalSites) || 100;
+          const globalDisabledTrigger = !globalDisable
+            ? `<li id="${def.id.gc}">
+                <div class="${def.const.seed}_VIP" title="当您仅需要在特定域名渲染时，可使用此快捷功能关闭全局设置\uff01">\u2468 仅在特定域名生效（全局禁用）</div>
+                <button style="width:max-content;height:max-content;min-width:70px;min-height:32px" id="${def.id.globaldisable}">关闭全局</button>
+              </li>`
+            : ``;
           let frDialog = new FrDialogBox({
             trueButtonText: "保存数据",
             falseButtonText: "脚本主页",
             neutralButtonText: "取 消",
-            messageText: String(
+            messageText:
+              `<!-- ConfigData Page -->` +
               `<ul class="${def.class.main}" style="overflow-x:hidden;box-sizing:content-box;margin:0;padding:5px 0;max-height:255px;overscroll-behavior:contain">
-              <li id="${def.id.bk}">
-                <div class="${def.const.seed}_VIP" title="养成定期备份的好习惯，保护自己的数据安全\uff01">\u2460 本地备份功能（默认\uff1a开启）</div>
-                <div style="margin:0;padding:0">
-                  <input type="checkbox" id="${def.id.isbackup}" class="${def.class.checkbox}" ${isBackupFunction ? "checked" : ""} />
-                  <label for="${def.id.isbackup}"></label>
-                </div>
-              </li>
-              <li id="${def.id.pv}">
-                <div class="${def.const.seed}_VIP" title="无需保存刷新页面，直接预览渲染效果\uff01">\u2461 保存预览功能（默认\uff1a关闭）</div>
-                <div style="margin:0;padding:0">
-                  <input type="checkbox" id="${def.id.ispreview}" class="${def.class.checkbox}" ${isPreview ? "checked" : ""} />
-                  <label for="${def.id.ispreview}"></label>
-                </div>
-              </li>
-              <li id="${def.id.fs}">
-                <div class="${def.const.seed}_VIP" title="实验性功能\uff1a兼容大部分浏览器，但仍在Beta测试阶段\uff01">\u2462 字体缩放功能（默认\uff1a关闭）</div>
-                <div style="margin:0;padding:0">
-                  <input type="checkbox" id="${def.id.isfontsize}" class="${def.class.checkbox}" ${isFontsize ? "checked" : ""} />
-                  <label for="${def.id.isfontsize}"></label>
-                </div>
-              </li>
-              <li id="${def.id.fvp}">
-                <div class="${def.const.seed}_VIP" title="实验性功能\uff1a跟随字体缩放开关，可单独关闭，使用方法查阅帮助文件\uff01">\u2463 视口单位修正（默认\uff1a关闭）</div>
-                <div style="margin:0;padding:0">
-                  <input type="checkbox" id="${def.id.isfixviewport}" class="${def.class.checkbox}" ${isFixViewport ? "checked" : ""} />
-                  <label for="${def.id.isfixviewport}"></label>
-                </div>
-              </li>
-              <li id="${def.id.hk}">
-                <div class="${def.const.seed}_VIP" title="如快捷键有冲突，请在此关闭它\uff01">\u2464 键盘快捷键功能（默认\uff1a开启）</div>
-                <div style="margin:0;padding:0">
-                  <input type="checkbox" id="${def.id.ishotkey}" class="${def.class.checkbox}" ${isHotkey ? "checked" : ""} />
-                  <label for="${def.id.ishotkey}"></label>
-                </div>
-              </li>
-              <li id="${def.id.ct}">
-                <div class="${def.const.seed}_VIP" title="您将无法第一时间获得更新内容，错过重要提示\uff01">\u2465 关闭更新提示功能（不推荐）</div>
-                <div style="margin:0;padding:0">
-                  <input type="checkbox" id="${def.id.isclosetip}" class="${def.class.checkbox}" ${isCloseTip ? "checked" : ""} />
-                  <label for="${def.id.isclosetip}"></label>
-                </div>
-              </li>
-              <li id="${def.id.mps}">
-                <div class="${def.const.seed}_VIP" title="防止页面加载缓慢，不建议设置过高的数值\uff01">\u2466 个性化设置总数（默认\uff1a100）</div>
-                <div style="margin:0 5px 0 0;padding:0">
-                  <input maxlength="4" id="${def.id.maxps}" placeholder="100" value="${maxPersonalSites}"
-                    style="box-sizing:border-box;padding:4px 5px;width:70px;min-width:70px;border:2px solid #b8860b;border-radius:4px;color:#333333;text-align:center;font:normal 500 16px/150% Impact,Times,serif!important" />
-                </div>
-              </li>
-              <li id="${def.id.flc}">
-                <div class="${def.const.seed}_VIP" title="安装新字体后，请先重启浏览器再重建全局缓存\uff01">\u2467 字体列表全局缓存（时效\uff1a7天）</div>
-                <button style="width:max-content;height:max-content;min-width:70px;min-height:32px" id="${def.id.flcid}">重建缓存</button>
-              </li>
-              ${
-                globalDisable
-                  ? ``
-                  : `<li id="${def.id.gc}">
-                      <div class="${def.const.seed}_VIP" title="当您仅需要在特定域名渲染时，可使用此快捷功能关闭全局设置\uff01">\u2468 仅在特定域名生效（全局禁用）</div>
-                      <button style="width:max-content;height:max-content;min-width:70px;min-height:32px" id="${def.id.globaldisable}">关闭全局</button>
-                    </li>`
-              }
-            </ul>
-            <div id="${def.id.feedback}" title="遇到问题，建议先看看脚本帮助文件。"
-              style="box-sizing:content-box;margin:0 0 0 5px;padding:4px 0;width:auto;height:auto;color:#333333;font-style:normal;font-size:16px;cursor:help">
-                \ud83e\udde1<span style="font-weight:700">\u0020如果您遇到错误或提建议，请及时向我反馈\u0020</span>\ud83e\udde1
-            </div>`
-            ),
+                <li id="${def.id.bk}">
+                  <div class="${def.const.seed}_VIP" title="养成定期备份的好习惯，保护自己的数据安全\uff01">\u2460 本地备份功能（默认\uff1a开启）</div>
+                  <div style="margin:0;padding:0">
+                    <input type="checkbox" id="${def.id.isbackup}" class="${def.class.checkbox}" ${isBackupFunction ? "checked" : ""} />
+                    <label for="${def.id.isbackup}"></label>
+                  </div>
+                </li>
+                <li id="${def.id.pv}">
+                  <div class="${def.const.seed}_VIP" title="无需保存刷新页面，直接预览渲染效果\uff01">\u2461 保存预览功能（默认\uff1a关闭）</div>
+                  <div style="margin:0;padding:0">
+                    <input type="checkbox" id="${def.id.ispreview}" class="${def.class.checkbox}" ${isPreview ? "checked" : ""} />
+                    <label for="${def.id.ispreview}"></label>
+                  </div>
+                </li>
+                <li id="${def.id.fs}">
+                  <div class="${def.const.seed}_VIP" title="实验性功能\uff1a兼容大部分浏览器，但仍在Beta测试阶段\uff01">\u2462 字体缩放功能（默认\uff1a关闭）</div>
+                  <div style="margin:0;padding:0">
+                    <input type="checkbox" id="${def.id.isfontsize}" class="${def.class.checkbox}" ${isFontsize ? "checked" : ""} />
+                    <label for="${def.id.isfontsize}"></label>
+                  </div>
+                </li>
+                <li id="${def.id.fvp}">
+                  <div class="${def.const.seed}_VIP" title="实验性功能\uff1a跟随字体缩放开关，可单独关闭，使用方法查阅帮助文件\uff01">\u2463 视口单位修正（默认\uff1a关闭）</div>
+                  <div style="margin:0;padding:0">
+                    <input type="checkbox" id="${def.id.isfixviewport}" class="${def.class.checkbox}" ${isFixViewport ? "checked" : ""} />
+                    <label for="${def.id.isfixviewport}"></label>
+                  </div>
+                </li>
+                <li id="${def.id.hk}">
+                  <div class="${def.const.seed}_VIP" title="如快捷键有冲突，请在此关闭它\uff01">\u2464 键盘快捷键功能（默认\uff1a开启）</div>
+                  <div style="margin:0;padding:0">
+                    <input type="checkbox" id="${def.id.ishotkey}" class="${def.class.checkbox}" ${isHotkey ? "checked" : ""} />
+                    <label for="${def.id.ishotkey}"></label>
+                  </div>
+                </li>
+                <li id="${def.id.ct}">
+                  <div class="${def.const.seed}_VIP" title="您将无法第一时间获得更新内容，错过重要提示\uff01">\u2465 关闭更新提示功能（不推荐）</div>
+                  <div style="margin:0;padding:0">
+                    <input type="checkbox" id="${def.id.isclosetip}" class="${def.class.checkbox}" ${isCloseTip ? "checked" : ""} />
+                    <label for="${def.id.isclosetip}"></label>
+                  </div>
+                </li>
+                <li id="${def.id.mps}">
+                  <div class="${def.const.seed}_VIP" title="防止页面加载缓慢，不建议设置过高的数值\uff01">\u2466 个性化设置总数（默认\uff1a100）</div>
+                  <div style="margin:0 5px 0 0;padding:0">
+                    <input maxlength="4" id="${def.id.maxps}" placeholder="100" value="${maxPersonalSites}"
+                      style="box-sizing:border-box;padding:4px 5px;width:70px;min-width:70px;border:2px solid #b8860b;border-radius:4px;color:#333333;text-align:center;font:normal 500 16px/150% Impact,Times,serif!important" />
+                  </div>
+                </li>
+                <li id="${def.id.flc}">
+                  <div class="${def.const.seed}_VIP" title="安装新字体后，请先重启浏览器再重建全局缓存\uff01">\u2467 字体列表全局缓存（时效\uff1a7天）</div>
+                  <button style="width:max-content;height:max-content;min-width:70px;min-height:32px" id="${def.id.flcid}">重建缓存</button>
+                </li>
+                ${globalDisabledTrigger}
+              </ul>
+              <div id="${def.id.feedback}" title="遇到问题，建议先看看脚本帮助文件。"
+                style="box-sizing:content-box;margin:0 0 0 5px;padding:4px 0;width:auto;height:auto;color:#333333;font-style:normal;font-size:16px;cursor:help">
+                  \ud83e\udde1<span style="font-weight:700">\u0020如果您遇到错误或提建议，请及时向我反馈\u0020</span>\ud83e\udde1
+              </div>`,
             titleText: `<span>高级核心功能设置</span><span style="font-size:16px!important">- Version ${def.variable.curVersion} -</span>`,
           });
           let _bk, _pv, _fs, _fvp, _hk, _ct, _mps;
@@ -2453,7 +2441,7 @@
           qS(`#${def.id.flcid}`, def.const.dialogIf)?.addEventListener("click", async () => {
             let frDialog = new FrDialogBox({
               trueButtonText: "确 定",
-              messageText: `<p style="padding-bottom:6px;color:#b8860b;text-align:center;font-size:18px!important">字体列表全局缓存已重建，当前页面即将刷新\uff01</p><p style="text-align:center"><a style="display:inline-block;overflow:hidden;width:302px;height:237px;border:2px solid #b8860b;border-radius:8px;background:url('${def.const.loadImg}') 50% 50% no-repeat"><img src='${def.const.fontlistImg}' alt="字体列表全局缓存已重建"/></a></p>`,
+              messageText: `<p style="padding-bottom:6px;color:#b8860b;text-align:center;font-size:18px!important">字体列表全局缓存已重建，当前页面即将刷新\uff01</p><p style="text-align:center"><a style="display:inline-block;overflow:hidden;width:302px;height:237px;border:2px solid #b8860b;border-radius:8px;background:url('${def.const.loadingImg}') 50% 50% no-repeat"><img src='${def.const.fontlistImg}' alt="字体列表全局缓存已重建"/></a></p>`,
               titleText: "字体列表全局缓存已重建",
             });
             cache.remove("_FONTCHECKLIST_");
@@ -2936,10 +2924,11 @@
           deleteFontSelectList(fontData);
           const fontlistSelectorNode = qS(`#${def.id.fontList} .${def.class.selector}`, def.const.configIf);
           const resetDefaultFont = INITIAL_VALUES.fontSelect.replace(/'|"/g, "");
+          const resetFontCHN = IS_REAL_WEBKIT ? "\u82f9\u65b9\u002d\u7b80" : "\u5fae\u8f6f\u96c5\u9ed1";
           fontlistSelectorNode.insertAdjacentHTML(
             "beforeend",
             tTP.createHTML(
-              `<a class="${def.class.label}"><span style="border-bottom-left-radius:4px;border-top-left-radius:4px;font-family:'Microsoft YaHei UI'!important">微软雅黑</span><input type="hidden" name="${def.id.fontName}" sort="0" value="${resetDefaultFont}"/><span class="${def.class.close}" style="border-top-right-radius:4px;border-bottom-right-radius:4px;font-family:system-ui,-apple-system,BlinkMacSystemFont,serif!important;cursor:pointer">\u0026\u0023\u0032\u0031\u0035\u003b</span></a>`
+              `<a class="${def.class.label}"><span style="border-bottom-left-radius:4px;border-top-left-radius:4px;font-family:${INITIAL_VALUES.fontSelect}!important">${resetFontCHN}</span><input type="hidden" name="${def.id.fontName}" sort="0" value="${resetDefaultFont}"/><span class="${def.class.close}" style="border-top-right-radius:4px;border-bottom-right-radius:4px;font-family:system-ui,-apple-system,BlinkMacSystemFont,serif!important;cursor:pointer">\u0026\u0023\u0032\u0031\u0035\u003b</span></a>`
             )
           );
           fontlistSelectorNode.parentNode.style.display = "block";
@@ -2967,28 +2956,28 @@
 
         function fontSearch(fontData) {
           if (!expr || typeof expr !== "string" || !Array.isArray(fontData)) return;
-          const fHtml = String(
+          const fHtml =
+            `<!-- Font Selector -->` +
             `<div id="${def.id.selector}">
                 <span class="${def.class.spanlabel}">已选择字体\uff1a<span id="${def.id.cleaner}">[清空]</span></span>
                 <div class="${def.class.selector}"></div>
-              </div>
-              <div class="${def.class.selectFontId}">
-                <span class="${def.class.spanlabel}">设置字体，请选择\uff1a</span>
-                <input type="search" placeholder="输入关键字可检索字体" autocomplete="off" class="${def.class.placeholder}">
-                <dl style="display:none"></dl>
-                <span class="${def.class.tooltip} ${def.class.ps1}" id="${def.id.fonttooltip}">
-                  <span class="${def.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
-                  <span class="${def.class.tooltip} ${def.class.ps2}">
-                  <p><strong>温馨提示 </strong>脚本预载了常用的中文字体，下拉菜单中所罗列的字体是在代码字体表中您已安装过的字体，没有安装过则不会显示。</p>
-                  <p><em style="color:darkred">（注一）</em>如果没有重新选择字体，则使用上一次保存的字体。首次使用默认为微软雅黑字体。</p>
-                  <p><em style="color:darkred">（注二）</em>输入框可输入关键字进行搜索，支持中文和英文字体名。</p>
-                  <p><em style="color:darkred">（注三）</em>字体是按您选择的先后顺序进行优先渲染的，所以多选不如只选一个您最想要的。</p>
-                  <p><em style="color:darkred">（注四）</em>如果“字体重写”被关闭，那么本功能将自动禁用，网页字体将采用“网站默认”的字体设置。</p>
-                  <p><em style="color:darkred">（注五）</em>双击\ud83d\udd14可以打开自定义字体的添加工具，以使用更多新字体。</p>
-                  </span>
+            </div>
+            <div class="${def.class.selectFontId}">
+              <span class="${def.class.spanlabel}">设置字体，请选择\uff1a</span>
+              <input type="search" placeholder="输入关键字可检索字体" autocomplete="off" class="${def.class.placeholder}">
+              <dl style="display:none"></dl>
+              <span class="${def.class.tooltip} ${def.class.ps1}" id="${def.id.fonttooltip}">
+                <span class="${def.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
+                <span class="${def.class.tooltip} ${def.class.ps2}">
+                <p><strong>温馨提示 </strong>脚本预载了常用的中文字体，下拉菜单中所罗列的字体是在代码字体表中您已安装过的字体，没有安装过则不会显示。</p>
+                <p><em style="color:darkred">（注一）</em>如果没有重新选择字体，则使用上一次保存的字体。首次使用默认为微软雅黑字体。</p>
+                <p><em style="color:darkred">（注二）</em>输入框可输入关键字进行搜索，支持中文和英文字体名。</p>
+                <p><em style="color:darkred">（注三）</em>字体是按您选择的先后顺序进行优先渲染的，所以多选不如只选一个您最想要的。</p>
+                <p><em style="color:darkred">（注四）</em>如果“字体重写”被关闭，那么本功能将自动禁用，网页字体将采用“网站默认”的字体设置。</p>
+                <p><em style="color:darkred">（注五）</em>双击\ud83d\udd14可以打开自定义字体的添加工具，以使用更多新字体。</p>
                 </span>
-              </div>`
-          );
+              </span>
+            </div>`;
           const fontListNode = qS(expr, def.const.configIf);
           const selectorNode = qS(`#${def.id.selector}`, def.const.configIf);
           if (!selectorNode && fontListNode) {
@@ -3140,7 +3129,7 @@
 
       async function correctScaleOffset() {
         const scaleValue = def.const.curScale;
-        if (scaleValue === 1) return;
+        if (!isFontsize || scaleValue === 1) return;
         const predefinedSitesProps = await fontScaleDef();
         sleep(20, { useCachedSetTimeout: true })(scaleValue).then(scale => {
           for (let [domain, props] of Object.entries(predefinedSitesProps)) {
@@ -3169,7 +3158,9 @@
           if (CUR_HOST.endsWith(rule[1])) customMonoRules.push(...rule[3].split(","));
         });
         const code_text = uniq(pre.concat(code, codeStyle, customMonoRules)).join();
-        const codeSelector = CAN_I_USE ? `${globalPrefix}:is(${code_text})` : formatSelectors(code_text, globalPrefix);
+        const codeSelector = CAN_I_USE
+          ? `${globalPrefix}:is(${code_text}):not([class*='expand' i],[class*='collapse' i])`
+          : formatSelectors(code_text, globalPrefix, ":not([class*='expand' i],[class*='collapse' i])");
         const codeSelection = CAN_I_USE ? `${globalPrefix}:is(${code_text})::selection` : formatSelectors(code_text, globalPrefix, "::selection");
         const base = s ? "var(--fr-font-family),var(--fr-font-basefont)" : "var(--fr-font-basefont)";
         const monoTextShadow = IS_REAL_GECKO ? "" : "text-shadow:var(--fr-mono-shadow)!important;";
@@ -3313,7 +3304,7 @@
                 trueButtonText: "保 存",
                 falseButtonText: "帮助文档",
                 neutralButtonText: "取 消",
-                messageText: `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式增加自定义字体。请用小贴士或按样例填写，输入有误将被自动过滤。与『<a href="${def.const.gfHost}#fontlist" title="查看内置字体表" target="_blank">内置字体表</a>』重复的字体将被自动剔除。【功能小贴士\uff1a<span id="${def.const.seed}_addTools" title="点击开启工具" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${def.const.seed}_custom_Fontlist" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下\uff1a\r\n{ "ch":"中文字体名一","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"中文字体名二","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n（注一\uff1a“ps:”该项为字体PostScript名称，可选填写）\r\n（注二\uff1a\u21b2为换行符号，输入(Enter)回车即可）'>${received_Fontlist}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`,
+                messageText: `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式增加自定义字体。请用小贴士或按样例填写，输入有误将被自动过滤。与『<a href="${def.const.greasyfork}#fontlist" title="查看内置字体表" target="_blank">内置字体表</a>』重复的字体将被自动剔除。【功能小贴士\uff1a<span id="${def.const.seed}_addTools" title="点击开启工具" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${def.const.seed}_custom_Fontlist" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下\uff1a\r\n{ "ch":"中文字体名一","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"中文字体名二","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n（注一\uff1a“ps:”该项为字体PostScript名称，可选填写）\r\n（注二\uff1a\u21b2为换行符号，输入(Enter)回车即可）'>${received_Fontlist}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`,
                 titleText: "自定义字体表",
               });
               const customFontlistNode = qS(`#${def.const.seed}_custom_Fontlist`, def.const.dialogIf);
@@ -3405,7 +3396,7 @@
                   frDialog = null;
                 }
               } else {
-                GMopenInTab(`${def.const.gfHost}#custom`, false);
+                GMopenInTab(`${def.const.greasyfork}#custom`, false);
               }
               frDialog = null;
             });
@@ -3416,8 +3407,12 @@
         }
 
         function checkTextareaFormat(target) {
-          target.addEventListener("input", function () {
+          let composing = false;
+          target?.addEventListener("compositionstart", () => (composing = true));
+          target?.addEventListener("compositionend", () => (composing = false));
+          target?.addEventListener("input", function () {
             try {
+              if (composing) return;
               let previousCursorPosition = this.selectionStart;
               const formattedValue = JSON.stringify(JSON.parse(this.value.trim()), null, "    ");
               const diff = formattedValue.length - this.value.length;
@@ -3441,7 +3436,7 @@
             let frDialog = new FrDialogBox({
               trueButtonText: "确 定",
               neutralButtonText: "取 消",
-              messageText: `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式填写字体重写的自定义数据。整体为数组类型，每个字体名称占一行，并使用半角双引号包括；如字体名称包含中文等双字节文本时，请在双引号内使用半角花括号包括。如您不了解该数据的含义，请勿修改，以免造成全局字体重写出错。<span style="color:#dc143c">(强烈建议您：按 <a href="${def.variable.feedback}/../discussions/267#discussion-5692372" target="_blank">作者提议</a> 填写此内容)</span></p><p><textarea id="${def.const.seed}_fontoverride_def_array" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain">${_fontOverrideDef}</textarea></p><p style="display:block;margin:-2px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（请勿添加脚本字体表已存在的字体，如重复将自动删除）</p>`,
+              messageText: `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式填写字体重写的自定义数据。整体为数组类型，每个字体名称占一行，并使用半角双引号包括；如字体名称包含中文等双字节文本时，请在双引号内使用半角花括号包括。如您不了解该数据的含义，请勿修改，以免造成全局字体重写出错。<span style="color:#dc143c">(强烈建议您：按 <a href="${def.variable.feedback}/267#discussion-5692372" target="_blank">作者提议</a> 填写此内容)</span></p><p><textarea id="${def.const.seed}_fontoverride_def_array" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain">${_fontOverrideDef}</textarea></p><p style="display:block;margin:-2px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（请勿添加脚本字体表已存在的字体，如重复将自动删除）</p>`,
               titleText: "自定义字体重写数据",
             });
             const fontOverrideNode = qS(`#${def.const.seed}_fontoverride_def_array`, def.const.dialogIf);
@@ -3531,7 +3526,7 @@
             let frDialog = new FrDialogBox({
               trueButtonText: "确 定",
               neutralButtonText: "取 消",
-              messageText: `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式填写“字体比例缩放功能”所需的自定义站点缩放数据配置。由于该数据为脚本核心设置数据，如果您不了解该设置数据的格式要求或数据含义，请勿修改该数据！<span style="color:#dc143c">（强烈建议您：按 <a href="${def.variable.feedback}/../discussions/267#discussioncomment-7161615" target="_blank">作者提议</a> 填写此内容）</span></p><p><textarea id="${def.const.seed}_fontscale_def_json" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain">${__fontScaleDef}</textarea></p><p style="display:block;margin:-2px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（如果以上JSON内容格式错误，会造成脚本出错使渲染失效）</p>`,
+              messageText: `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式填写“字体比例缩放功能”所需的自定义站点缩放数据配置。由于该数据为脚本核心设置数据，如果您不了解该设置数据的格式要求或数据含义，请勿修改该数据！<span style="color:#dc143c">（强烈建议您：按 <a href="${def.variable.feedback}/267#discussioncomment-7161615" target="_blank">作者提议</a> 填写此内容）</span></p><p><textarea id="${def.const.seed}_fontscale_def_json" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain">${__fontScaleDef}</textarea></p><p style="display:block;margin:-2px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（如果以上JSON内容格式错误，会造成脚本出错使渲染失效）</p>`,
               titleText: "站点缩放修正设置数据",
             });
             const fontScaleNode = qS(`#${def.const.seed}_fontscale_def_json`, def.const.dialogIf);
@@ -4530,7 +4525,7 @@
         if (!IS_CURRENTSITE_ALLOWED || !IS_INTERNALSTYLE_ALLOWED || !IS_DEBUG) return;
         sleep(2e3, { useCachedSetTimeout: false })
           .then(() => getMainStyleElements({ currentScope: true }))
-          .then(styleElement => DEBUG(`INSERTED STYLE${IS_IN_FRAMES}.ID: %c${styleElement?.id}`, "color:teal;font:italic 700 12px/140% monospace;"));
+          .then(style => DEBUG(`INSERTED STYLE${IS_IN_FRAMES}.ID: %c${style?.id}`, "color:teal;font:italic 700 12px/140% monospace;"));
       }
 
       /* FIX_VIEWPORT_ZOOM_STYLE_ERRORS 2023-04-08 F9Y4NG */
@@ -4546,7 +4541,7 @@
             for (let j = 0, k = addedNodes.length; j < k; j++) {
               const nodeName = getNodeName(addedNodes[j]);
               if (!["link", "style"].includes(nodeName)) continue;
-              deBounce({ fn: fixViewportCssStyle, delay: 2e2, timer: `fix${nodeName}viewport` })(nodeName);
+              deBounce({ fn: fixViewportCssStyle, delay: 1e2, timer: `fix${nodeName}viewport` })(nodeName);
             }
           });
         const config = { childList: true, subtree: true };
@@ -4654,7 +4649,7 @@
           const pendingStyles = qA(`style:not([data-fr-processed]):not(.darkreader)`);
           pendingStyles.forEach(styleNode => {
             if (styleNode.attributes[0]?.name.startsWith("fr-css-")) return;
-            if (/^S[SC]\d+$/.test(styleNode.id) || styleNode.id === def.id.rndStyle) return;
+            if (/^S[ACS]\d+$/.test(styleNode.id) || styleNode.id === def.id.rndStyle) return;
             let cssText = styleNode.textContent;
             styleNode.setAttribute("data-fr-processed", false);
             debugOnce("fixstyles", "detect viewport.Styles:", true);
@@ -4841,11 +4836,7 @@
           if (!Array.isArray(treeNodes)) return;
           for (let i = 0, treeLength = treeNodes.length; i < treeLength; i++) {
             const treeNode = treeNodes[i];
-            if (w.scheduler?.postTask && treeLength > 5) {
-              w.scheduler.postTask(() => processNodes(treeNode, obs), { priority: "user-blocking" });
-            } else {
-              processNodes(treeNode, obs);
-            }
+            processNodes(treeNode, obs);
           }
         }
 
@@ -4979,7 +4970,7 @@
           })();
         }
 
-        function handlingMouseEvents() {
+        function handlingMouseEvents(event) {
           const type = event.type;
           event.stopPropagation();
           deBounce({ fn: mouseEventsHandler, delay: def.const.ft, timer: type, immed: type === "mouseout" })(event);
@@ -4991,33 +4982,55 @@
       function monitorMainStyleProcess() {
         if (!IS_CURRENTSITE_ALLOWED || !IS_INTERNALSTYLE_ALLOWED) return;
         getHeadElement.getNodeAndObserve().then(insertMainStyleElement);
+        const updateStyleWithDEID = (style, id) => {
+          const newStyleText = (style?.textContent ?? tStyle).replace(/\b#\w+\b/g, `#${id}`);
+          insertStyle({ target: document.head, styleId: def.id.rndStyle, styleContent: newStyleText, isOverwrite: true }) &&
+            INFO(`%c[MO]${IS_IN_FRAMES}[NEWDEID]:%c#${id} <i:${def.id.rndStyle}>`, leftStyle("dodgerblue"), rightStyle("dodgerblue"));
+        };
         const mainStyleProcess = mutations => {
-          const hasMainStyle = getMainStyleElements({ currentScope: true });
+          const mainStyle = getMainStyleElements({ currentScope: true });
           mutations.forEach(mutation => {
-            if (mutation.type !== "childList") return;
-            const removedNodes = mutation.removedNodes;
-            if (!hasMainStyle) {
-              const addedNodes = mutation.addedNodes;
-              for (let j = 0; j < addedNodes.length; j++) {
-                deBounce({ fn: insertMainStyleElement, delay: 5e2, timer: "repeatcheck", immed: true })();
-              }
-            }
-            for (let k = 0; k < removedNodes.length; k++) {
-              const node = removedNodes[k];
-              const nodeName = getNodeName(node);
-              if (nodeName === "style" && node.id === def.id.rndStyle && !node.dataset.frRemoved) {
-                const result = insertMainStyleElement({ overwrite: true });
-                INFO(`%c[MO]${IS_IN_FRAMES}[REINSERT]:%c<${nodeName}> ${result}`, leftStyle("brown"), rightStyle("brown"));
-              }
+            const target = mutation.target;
+            switch (mutation.type) {
+              case "childList":
+                if (!mainStyle) {
+                  const addedNodes = mutation.addedNodes;
+                  for (let j = 0; j < addedNodes.length; j++) {
+                    deBounce({ fn: insertMainStyleElement, delay: 5e2, timer: "repeatcheck", immed: true })();
+                  }
+                }
+                if (target === document.documentElement) setFlagAtDocumentElement(target);
+                for (let k = 0, removedNodes = mutation.removedNodes; k < removedNodes.length; k++) {
+                  const node = removedNodes[k];
+                  const nodeName = getNodeName(node);
+                  if (nodeName === "style" && node.id === def.id.rndStyle && !node.dataset.frRemoved) {
+                    const result = insertMainStyleElement({ overwrite: true });
+                    return INFO(`%c[MO]${IS_IN_FRAMES}[REINSERT]:%c<${nodeName}> ${result}`, leftStyle("brown"), rightStyle("brown"));
+                  }
+                }
+                break;
+              case "attributes":
+                if (target === document.documentElement) {
+                  const oldId = mutation.oldValue?.trim();
+                  const newId = target.id?.trim();
+                  if (oldId && !newId) {
+                    target.id = def.const.seed;
+                    updateStyleWithDEID(mainStyle, def.const.seed);
+                  } else if (oldId && newId && oldId !== newId) {
+                    updateStyleWithDEID(mainStyle, newId);
+                  }
+                }
+                break;
             }
           });
         };
         const styleObserve = new MutationObserver(mainStyleProcess);
-        const config = { childList: true, subtree: true };
+        const config = { childList: true, subtree: true, attributeOldValue: true, attributeFilter: ["id"] };
         styleObserve.observe(document, config);
       }
 
       function monitorBodyIframeProcess() {
+        if (!IS_CURRENTSITE_ALLOWED || (globalDisable && curEmptyConfig)) return;
         const config = { attributes: true, childList: true, subtree: true };
         const praseIframes = ({ mutations }) =>
           mutations.forEach(mutation => {
@@ -5069,7 +5082,7 @@
         addLoadEvents.addFn(runFixViewportUnits);
         addLoadEvents.addFinalFn(getStyleLoadStatus);
       })(() => {
-        if (!CUR_WINDOW_TOP || String(GMunregisterMenuCommand) === "() => {}") return;
+        if (!CUR_WINDOW_TOP || !GMunregisterMenuCommand || String(GMunregisterMenuCommand) === "() => {}") return;
         return GMregisterMenuCommand("\ufff0\ud83d\udd52\u0020正在载入脚本菜单，请稍候…", () => location.reload());
       });
     })(
