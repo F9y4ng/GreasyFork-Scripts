@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング（カスタマイズ）
 // @name:en            Font Rendering (Customized)
-// @version            2023.12.02.1
+// @version            2023.12.12.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -46,9 +46,9 @@
 
 /* jshint esversion: 11 */
 
-"use strict";
-
 ~(function (w) {
+  "use strict";
+
   /**
    * LICENSE FOR OPEN SOURCE USE: GPLv3.
    * CUSTOM SCRIPT DEBUGGING, DO NOT TURN ON FOR DAILY USE.
@@ -108,7 +108,7 @@
         getClientRects: Element.prototype.getClientRects,
         getBoundingClientRect: Element.prototype.getBoundingClientRect,
       },
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.12.02.0",
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.12.12.0",
       scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("Rjl5NG5n"),
       scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? GMinfo.script.name ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
       feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRnN1cHBvcnQ="),
@@ -338,20 +338,21 @@
     return gmFunctions[rec] ?? (() => {});
   }
 
-  function __console(act, argm = "", ...args) {
+  function __console(act, argm, ...args) {
     const _this = w.console;
+    const _argm = argm ?? "";
     switch (act) {
       case "log":
-        return _this[act](`%c\u27A4 %c${argm}`, "display:inline-block", "font-family:monospace", ...args);
+        return _this[act](`%c\u27A4 %c${_argm}`, "display:inline-block", "font-family:monospace", ...args);
       case "info":
-        return _this.log(`%c\u27A4 ${argm}`, "display:inline-block;padding:4px 0", ...args);
+        return _this.log(`%c\u27A4 ${_argm}`, "display:inline-block;padding:4px 0", ...args);
       case "error":
       case "warn":
-        return _this[act](`%c\ud83d\udea9 ${argm}`, "display:inline-block;font-family:monospace", ...args);
+        return _this[act](`%c\ud83d\udea9 ${_argm}`, "display:inline-block;font-family:monospace", ...args);
       case "count":
-        return _this[act](`\u27A4 ${argm}`);
+        return _this[act](`\u27A4 ${_argm}`);
       default:
-        return _this.log(argm, ...args);
+        return _this.log(_argm, ...args);
     }
   }
 
@@ -737,13 +738,13 @@
 
   function getLocationInfo() {
     const { pathname: cPN, host: cH, hostname: cHN, protocol: cP } = location;
-    const isTop = self === top;
-    const pH = parent !== self ? getParentHost() : cH;
+    const isTop = w.self === w.top;
+    const pH = w.parent !== w.self ? getParentHost() : cH;
     return { cH, cHN, cPN, cP, pH, isTop };
 
     function getParentHost() {
       try {
-        return parent.location.host;
+        return w.parent.location.host;
       } catch (e) {
         return new URL(document.referrer || location).host;
       }
@@ -757,7 +758,9 @@
   }
 
   function setDebuggerMode() {
-    return new URLSearchParams(location.search).get("whoami") === "\u0046\u0039\u0079\u0034\u006e\u0067";
+    const key = decrypt("Rjl5NG5n");
+    const value = new URLSearchParams(location.search).get("whoami");
+    return Object.is(key, value);
   }
 
   function sleep(delay, { useCachedSetTimeout } = {}) {
@@ -869,9 +872,7 @@
     /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
     const UPDATE_VERSION_NOTICE = String(
-      `<li class="${def.const.seed}_fix">更新 <i>greasyfork.org</i> 新版本 <i>@require</i> 链接地址。</li>
-        <li class="${def.const.seed}_fix">增强代码的兼容性，减少与其他第三方脚本的冲突。</li>
-        <li class="${def.const.seed}_fix">修正Safari下文本域中文输入上屏时字符验证的bug.</li>
+      `<li class="${def.const.seed}_fix">修正在notion.so下脚本冲突造成的死循环问题。</li>
         <li class="${def.const.seed}_fix">修正一些已知的问题，优化样式，优化代码。</li>`
     );
 
@@ -2132,10 +2133,9 @@
           "s+": date.getSeconds().toString(),
           "S+": date.getMilliseconds().toString(),
         };
-        let ret;
         for (let k in opt) {
           if (opt.hasOwnProperty(k)) {
-            ret = new RegExp("(" + k + ")").exec(fmt);
+            const ret = new RegExp("(" + k + ")").exec(fmt);
             if (ret) fmt = fmt.replace(ret[1], ret[1].length === 1 ? opt[k] : opt[k].padStart(ret[1].length, "0"));
           }
         }
@@ -2605,7 +2605,7 @@
             });
             dssNode.addEventListener("click", () => searchTextAndSelect(dsNode, ddNode, "exsite", "li>:nth-child(2)"));
           }
-          ddNode.addEventListener("click", event => {
+          ddNode?.addEventListener("click", event => {
             const target = event.target;
             if (getNodeName(target) === "a" && target.id.startsWith(`${def.const.seed}_d_d_l_s_`)) {
               const _list_Id_ = Number(target.id.replace(`${def.const.seed}_d_d_l_s_`, "")) || -1;
@@ -2803,7 +2803,7 @@
             });
             dssNode.addEventListener("click", () => searchTextAndSelect(dsNode, ddNode, "domain", "li>:nth-child(2)"));
           }
-          ddNode.addEventListener("click", event => {
+          ddNode?.addEventListener("click", event => {
             const target = event.target;
             if (getNodeName(target) === "a" && target.id.startsWith(`${def.const.seed}_d_d_l_s_`)) {
               if (!target.hasAttribute("data-del")) {
@@ -2990,12 +2990,13 @@
             removeKeyboardEvent(fselectorT);
             changeSelectorStatus(ffaceT.checked, fselectorT, def.class.readonly);
             ffaceT.addEventListener("change", () => changeSelectorStatus(ffaceT.checked, fselectorT, def.class.readonly));
+            fselectorT.addEventListener("input", () => searchEvents(fselectorT.value));
+            fselectorT.addEventListener("click", selectorEvent);
           }
-          fselectorT.addEventListener("input", () => searchEvents(fselectorT.value));
-          fselectorT.addEventListener("click", selectorEvent);
 
           function selectorEvent(event) {
-            if (this.value.length === 0) {
+            const _this = this ?? event.target;
+            if (_this.value.length === 0) {
               const selector = `#${def.id.fontList} .${def.class.selectFontId} dl`;
               const selectFontNode = qS(selector, def.const.configIf);
               fontListShown(selector);
@@ -3010,7 +3011,7 @@
                 });
               }
               clickEvents();
-            } else searchEvents(this.value);
+            } else searchEvents(_this.value);
             event.stopPropagation();
           }
 
@@ -3065,13 +3066,14 @@
             document.addEventListener("click", selectorHidden);
 
             function parseClick(e) {
-              const value = this.attributes.value?.value;
-              const sort = this.attributes.sort?.value;
+              const _this = this ?? e.target;
+              const value = _this.attributes.value?.value;
+              const sort = _this.attributes.sort?.value;
               if (value && sort && selector) {
                 selector.insertAdjacentHTML(
                   "beforeend",
                   tTP.createHTML(
-                    `<a class="${def.class.label}"><span style="border-bottom-left-radius:4px;border-top-left-radius:4px;font-family:'${value}'!important">${this.textContent}</span><input type="hidden" name="${def.id.fontName}" sort="${sort}" value="${value}"/><span class="${def.class.close}" style="border-bottom-right-radius:4px;border-top-right-radius:4px;cursor:pointer;font-family:system-ui,-apple-system,BlinkMacSystemFont,serif!important">\u0026\u0023\u0032\u0031\u0035\u003b</span></a>`
+                    `<a class="${def.class.label}"><span style="border-bottom-left-radius:4px;border-top-left-radius:4px;font-family:'${value}'!important">${_this.textContent}</span><input type="hidden" name="${def.id.fontName}" sort="${sort}" value="${value}"/><span class="${def.class.close}" style="border-bottom-right-radius:4px;border-top-right-radius:4px;cursor:pointer;font-family:system-ui,-apple-system,BlinkMacSystemFont,serif!important">\u0026\u0023\u0032\u0031\u0035\u003b</span></a>`
                   )
                 );
                 selector.parentNode.style.display = "block";
@@ -4841,68 +4843,77 @@
         }
 
         function fixBoldProcess(mutationsList, observer) {
-          const subtrees = new Set();
-          const pendingList = observer.takeRecords();
-          observer.disconnect();
-          const uniqueMutations = uniq([...pendingList, ...mutationsList]);
-          for (let i = 0; i < uniqueMutations.length; i++) {
-            const mutation = uniqueMutations[i];
-            const target = mutation.target;
-            const type = mutation.type;
-            switch (type) {
-              case "childList": {
-                const addedNodes = mutation.addedNodes;
-                const removedNodes = mutation.removedNodes;
-                for (let j = 0; j < addedNodes.length; j++) {
-                  const node = addedNodes[j];
-                  if (node.nodeType !== Node.ELEMENT_NODE || excludeNodeSet.has(getNodeName(node))) continue;
-                  subtrees.add(node);
+          try {
+            const subtrees = new Set();
+            const pendingList = observer.takeRecords();
+            observer.disconnect();
+            const uniqueMutations = uniq([...pendingList, ...mutationsList]);
+            for (let i = 0; i < uniqueMutations.length; i++) {
+              const mutation = uniqueMutations[i];
+              const target = mutation.target;
+              const type = mutation.type;
+              switch (type) {
+                case "childList": {
+                  const addedNodes = mutation.addedNodes;
+                  const removedNodes = mutation.removedNodes;
+                  for (let j = 0; j < addedNodes.length; j++) {
+                    const node = addedNodes[j];
+                    if (node.nodeType !== Node.ELEMENT_NODE || excludeNodeSet.has(getNodeName(node))) continue;
+                    subtrees.add(node);
+                  }
+                  for (let k = 0; k < removedNodes.length; k++) {
+                    const node = removedNodes[k];
+                    if (node.nodeType !== Node.ELEMENT_NODE || excludeNodeSet.has(getNodeName(node))) continue;
+                    if (runLoopLimitChecker(node, type)) throw new Error(`LoopLimitError: ${type}`);
+                    styleMap.delete(node);
+                  }
+                  break;
                 }
-                for (let k = 0; k < removedNodes.length; k++) {
-                  const node = removedNodes[k];
-                  if (node.nodeType !== Node.ELEMENT_NODE || excludeNodeSet.has(getNodeName(node))) continue;
-                  if (runLoopLimitChecker(node, type)) return;
-                  styleMap.delete(node);
+                case "attributes": {
+                  if (target.nodeType !== Node.ELEMENT_NODE || excludeNodeSet.has(getNodeName(target))) continue;
+                  let oldValue, newValue;
+                  switch (mutation.attributeName) {
+                    case "style":
+                      oldValue = mutation.oldValue?.replace(/\s/g, "") ?? "";
+                      newValue = target.style?.cssText?.replace(/\s/g, "") ?? "";
+                      if (newValue !== oldValue) {
+                        const oldArray = uniq(oldValue.split(";"));
+                        const newArray = uniq(newValue.split(";"));
+                        const filterToStr = (a, b) => a.filter(c => !b.includes(c)).join();
+                        const retValue = filterToStr(oldArray, newArray) + filterToStr(newArray, oldArray);
+                        if (!/font:|font-weight:/gi.test(retValue)) continue;
+                      }
+                      break;
+                    case "class":
+                      oldValue = mutation.oldValue ?? "";
+                      newValue = typeof target.className === "object" ? target.className?.baseVal ?? "" : target.className ?? "";
+                      if (newValue !== oldValue) {
+                        if (!oldValue.includes(def.const.boldAttrName) && newValue.includes(def.const.boldAttrName)) continue;
+                        if (oldValue.includes(def.const.boldAttrName) && !newValue.includes(def.const.boldAttrName)) {
+                          if (runLoopLimitChecker(target, type)) throw new Error(`LoopLimitError: ${type}`);
+                          continue;
+                        }
+                      }
+                      break;
+                    default:
+                      oldValue = mutation.oldValue;
+                      newValue = target.getAttribute(mutation.attributeName);
+                      break;
+                  }
+                  if (newValue === oldValue) continue;
+                  break;
                 }
-                break;
               }
-              case "attributes": {
-                if (target.nodeType !== Node.ELEMENT_NODE || excludeNodeSet.has(getNodeName(target))) continue;
-                let oldValue, newValue;
-                switch (mutation.attributeName) {
-                  case "style":
-                    oldValue = mutation.oldValue?.replace(/\s/g, "") ?? "";
-                    newValue = target.style?.cssText?.replace(/\s/g, "") ?? "";
-                    if (newValue !== oldValue) {
-                      const oldArray = uniq(oldValue.split(";"));
-                      const newArray = uniq(newValue.split(";"));
-                      const filterToStr = (a, b) => a.filter(c => !b.includes(c)).join();
-                      const retValue = filterToStr(oldArray, newArray) + filterToStr(newArray, oldArray);
-                      if (!/font:|font-weight:/gi.test(retValue)) continue;
-                    }
-                    break;
-                  case "class":
-                    oldValue = mutation.oldValue ?? "";
-                    newValue = typeof target.className === "object" ? target.className?.baseVal ?? "" : target.className ?? "";
-                    if (newValue !== oldValue) {
-                      if (!oldValue.includes(def.const.boldAttrName) && newValue.includes(def.const.boldAttrName)) continue;
-                      if (oldValue.includes(def.const.boldAttrName) && !newValue.includes(def.const.boldAttrName) && runLoopLimitChecker(target, type)) return;
-                    }
-                    break;
-                  default:
-                    oldValue = mutation.oldValue;
-                    newValue = target.getAttribute(mutation.attributeName);
-                    break;
-                }
-                if (newValue === oldValue) continue;
-                break;
-              }
+              subtrees.add(target);
             }
-            subtrees.add(target);
+            mutationListMonitor(Array.from(subtrees), observer);
+            shadowRootSet.forEach(target => observer.observe(target, config));
+            subtrees.clear();
+          } catch (e) {
+            observer.disconnect();
+            def.const.loops = true;
+            ERROR("fixBoldProcess:", e.message);
           }
-          mutationListMonitor(Array.from(subtrees), observer);
-          shadowRootSet.forEach(target => observer.observe(target, config));
-          subtrees.clear();
         }
 
         function runLoopLimitChecker(node, mode) {
@@ -4938,6 +4949,7 @@
         }
 
         function correctBoldManual(target = document) {
+          if (def.const.loops === true) return;
           const eventType = w.event?.type ?? Scenes ?? "initial";
           const els = querySelectorAllShadows(`:not(${def.const.exQueryString})`, target);
           debugOnce(eventType, `detect fontbold.Stroke${IS_IN_FRAMES}:`, { eventType });
