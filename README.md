@@ -19,12 +19,10 @@
 - 脚本错误、异常请反馈至{[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)}, 字体、渲染样式、乱码问题请反馈至{[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)}。
 - 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-### version 2023.12.02.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2023.12.12.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-+ 更新 greasyfork.org 新版本 @require 链接地址。
-@ 增强代码的兼容性，减少与其他第三方脚本的冲突。
-@ 修正Safari下文本域中文输入上屏时字符验证的bug.
+@ 修正在notion.so下脚本冲突造成的死循环问题。
 @ 修正一些已知的问题，优化样式，优化代码。
 ```
 
