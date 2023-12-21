@@ -7,17 +7,17 @@
 [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues)
 [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/F9y4ng/GreasyFork-Scripts/stargazers)
 
-- Please install the **script manager extension** first, such as: Tampermonkey, Violentmonkey, and then **install the script**
-- **Chrome**, **Firefox** recommend installing **Tampermonkey/Violentmonkey**, **Safari** recommend installing **Tampermonkey**.
-- Use script manager such as **Adguard Desktop** or **Userscripts** via **keyboard shortcuts** Call the script menu.
+- Please install the **script manager extension** first, such as: _Tampermonkey, Violentmonkey, Greasemonkey, Userscripts_, and then **install the script** you want.
+- **Chrome**, **Firefox** recommend installing **Tampermonkey/Violentmonkey**, **Safari** recommend installing **Tampermonkey/Userscripts**.
+- Using **Adguard Desktop** or **Userscripts**, the script menus can be called up via **keyboard shortcuts**.
 
-> ## 郑重声明
-> 某些魔改版本的Blink内核浏览器，关闭 **DirectWrite** 功能，会造成大部分字体无法被程序识别，或出现非ASCII字符与Emoji图标无法被正确渲染的问题。**重要提示**：后续所有脚本更新不再对应用 _`disabled DirectWrite`_ 的浏览器做代码兼容和问题解答，要使用该项目内的脚本，建议您使用主流浏览器。
+> ## Declaration 
+> Some personal modified Blink kernel browsers with **DirectWrite** disabled will cause most fonts to be unrecognized by the program, or non-ASCII characters and Emoji icons will not be rendered correctly. **Important Note**: All scripts updates will no longer provide code compatibility and Q&A for browsers with _`disabled DirectWrite`_, to use the scripts in this project, we recommend you use a official browser.
 
 ***
 
-# 字体渲染（自用脚本） `Font Rendering.user.js`
- 　[[查看源代码](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Font%20Rendering.user.js)] 　[[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)] 　[[访问 GreasyFork](https://greasyfork.org/scripts/416688)] _（GreasyFork不再处理Issues反馈）_
+# Font Rendering (Costomized) `Font Rendering.user.js`
+ 　[[View source code](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Font%20Rendering.user.js)] 　[[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)] 　[[Visit GreasyFork](https://greasyfork.org/scripts/416688)] _（Issue feedback is no longer processed in GreasyFork）_
 
 简介：无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 
