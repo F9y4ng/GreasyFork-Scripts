@@ -52,38 +52,38 @@
 
 **Note 2:** To report script errors or style issues, please provide **the URL**, **the browser and version**, **the script manager and version**, **error page screenshot**, and **operation process** or **error prompt** (if any) where the problem occurs when **using this script only**, etc., because the problem you encountered may not be reproduced locally.
 
-* [Sharing of website style error correction settings.](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42) (Chinese)
-* [Share: How to set English fonts and Chinese fonts separately.](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83) (Chinese)
-* [How to correctly set parameters for different monitors and browsers?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160) (Chinese)
+* [Occasional updates: How to fix websites font style errors?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42) (Chinese)
+* [How to set custom English and Chinese fonts for the website?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83) (Chinese)
+* [How to correctly set font rendering parameters for different browsers?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160) (Chinese)
 
-> ### How to provide script error log? `New`
+> ### How to provide script error log?
 >
 > 1. Turn on the script debugging switch first:
 >    - v2023.04.08.1 or above, add `?whoami=F9y4ng` or `&whoami=F9y4ng` to the URL to enable debugging mode.
 >    - To use the old version change the code from `const IS_OPEN_DEBUG = false` to `true` at about line 54 and save.
 > 2. Press **F12** in your browser to open the console, refresh, operate until the problem is reproduced, right-click in the console margin and select **Save As...**.
-> 3. **Bug report** and package and upload the saved log file to [Github ISSUES](https://github.com/F9y4ng/GreasyFork-Scripts/issues)。
+> 3. Use **Bug report** and upload the saved log file to [Github ISSUES](https://github.com/F9y4ng/GreasyFork-Scripts/issues)。
 > 4. During daily use, do not turn on the script debugging switch to avoid slow script execution or page lagging.
 
-## Addition of customized fonts
-If you need to add custom fonts to the font library, please follow [Help Instructions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/64). Chinese fonts from the font library [Download](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/46).
+## About adding custom fonts
+If you need to add custom fonts into the font library, please follow [Help Instructions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/64). The Chinese fonts in the built-in font library [Download](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/46).
 
-If you need to add a new font, please add the complete and accurate **Chinese and English name** and **PostScript name** of the font into the custom font table according to the **default format**.
+If you want to add new fonts, please add complete and accurate **font names in English and Chinese**, and **PostScript names** into the customized font library in the preset format.
 
 The format is as follows: ```{"ch":"鸿蒙黑体", "en":"HarmonyOS Sans SC", "ps":"HarmonyOS_Sans_SC"}```
 
 * When adding new fonts, fonts with font-weight of **Standard/Regular** are generally accepted. To adjust the font weight and boldness, please use the font stroke setting.
 * "ps:" indicates the PostScript name, this is an optional attribute. In order to make the font take effect globally, please fill in the "ps:" attribute as much as possible.
-* If the font does not have Chinese fontname, please use the English fontname or other language fontname instead, and pay attention to uniqueness.
+* If the font does not have Chinese font name, please use the English font name or other language font name instead, and pay attention to uniqueness.
 
-When a new font is installed, to make it **immediately effective**, be sure to **restart your browser** and rebuild the font list cache in **Advanced Core Setting**.
+When a new font is installed, to make it **immediately effective**, be sure to **restart your browser** and rebuild the font list cache in **Advanced Core Setting** in the script menu.
 
-- Note 1: The **Edit Save** of a custom font list automatically triggers a rebuild of the font list global cache without additional manual processing.
-- Note 2: If only fonts defined in the **built-in font list** are installed, you need to **manually** rebuild the font list global cache after restarting the browser.
+- Note 1: Edit and save operations of custom font library will automatically trigger the rebuild of the global cache of the font list without additional manual processing.
+- Note 2: If you only install fonts from the built-in font library, you need to manually rebuild the global cache of the font list in the **Advanced Core Setting** after restarting the browser.
 
-## Notes on font scaling
+## About font scaling
 
-Font scaling (experimental feature) Beta version, default off, please turn on font scaling in **Advanced Core Setting**.
+Font scaling (experimental feature) BETA version, off by default, please turn on the font scaling feature in the **Advanced Core Setting**.
 
 - **KNOWN ISSUES I:** Due to the compatibility of Firefox (Gecko kernel), only the internal coordinate offset problem of the script has been fixed, but it will be insufficiently compatible with some website styles and functions, so please use it according to your needs and discretion.**Strongly recommended**: Use Firefox's own zoom function instead (`Ctrl++`, `Ctrl+-`).
 - **KNOWN ISSUES II:** A fix for viewport units `vw, vh, vmin, vmax` has been completed, solving the problem of inaccurate viewport unit lengths after font scaling.This feature is **experimental** and is turned off by default, but can be turned on in the **Advanced Core Setting**.
