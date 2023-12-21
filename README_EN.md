@@ -4,7 +4,7 @@
 
 [![LICENSE](https://img.shields.io/badge/License-GPL--3.0--only-blue.svg?style=for-the-badge&logo=github "LICENSE")](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/LICENSE) [![LAST COMMIT](https://img.shields.io/github/last-commit/F9y4ng/GreasyFork-Scripts?color=blue&logo=github&style=for-the-badge "LAST COMMIT")](https://github.com/F9y4ng/GreasyFork-Scripts/commits/master) [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues) [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/F9y4ng/GreasyFork-Scripts/stargazers)
 
-- Please install the **script manager extension** first, such as: _Tampermonkey, Violentmonkey, Greasemonkey, Userscripts_, and then **install the script** you want.
+- Please install the **script manager extension** first, such as: _Tampermonkey, Violentmonkey, Greasemonkey_, and then **install the script**.
 - **Chrome**, **Firefox** recommend installing **Tampermonkey/Violentmonkey**, **Safari** recommend installing **Tampermonkey/Userscripts**.
 - Using **Adguard Desktop** or **Userscripts**, the script menus can be called up via **keyboard shortcuts**.
 
@@ -49,7 +49,7 @@
 
 ### Feedback
 
-**Note**: Unknown compatibility errors may occur when using the `Beta, Dev, Canary, Nightly` and other test branches of the browser and script manager. The script will not correct the errors of the test version. **If you must use the test version and It has extremely high requirements for scripts. It is recommended that you choose other similar scripts**. Because there is a very small probability that the data will be initialized abnormally, please back up your local data in time! ! ! **
+**Note**: Unknown compatibility errors may occur when using the `Beta, Dev, Canary, Nightly` and other test branches of the browser and script manager. The script will not correct the errors of the test version. **If you must use the test version and It has extremely high requirements for scripts. It is recommended that you choose other similar scripts**. Because there is a very small probability that the data will be initialized abnormally, please back up your local data in time!
 
 **Please note for feedback issues**: To report script errors or style issues, please enter the **access URL** where the problem occurs if **only use this script**, the **browser version** used, Please send **the script manager version**, **error screenshot**, and **operation process** or **error prompt** (if any). The problem you encountered may not be reproduced locally.
 
