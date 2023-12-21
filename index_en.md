@@ -44,7 +44,7 @@
 **Temporary solutions if script loading is delayed or styles are not loaded correctly:**
 
 * For **Tampermonkey**: Enter the **Dashboard**, enter the **Settings** tab, scroll down to "**Experimental**", and change the injection mode to "**Instant**".
-* For **Violentmonkey**: Enter the **Dashboard**, enter the **Settings** tab, find and check "**Sync Page Mode**" in **Advanced - General**.
+* For **Violentmonkey**: Enter the **Dashboard**, enter the **Settings** tab, find and check "**Synchronous page mode**" in **Advanced - General**.
 
 ## Feedback on issues
 
