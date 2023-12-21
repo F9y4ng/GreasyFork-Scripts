@@ -65,16 +65,16 @@
 > 3. **Bug report** and package and upload the saved log file to [Github ISSUES](https://github.com/F9y4ng/GreasyFork-Scripts/issues)。
 > 4. During daily use, do not turn on the script debugging switch to avoid slow script execution or page lagging.
 
-## 关于字体的添加
-如果您需要向字体表添加自定义字体，请按[帮助说明](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/64)进行操作。字体表中文字体[下载](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/46)。
+## Addition of customized fonts
+If you need to add custom fonts to the font library, please follow [Help Instructions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/64). Chinese fonts from the font library [Download](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/46).
 
-如果需增加新字体，请将**完整且准确**的字体**中英文名称**及**PostScript名称**按**预设格式**添加进自定义字体表。
+If you need to add a new font, please add the complete and accurate **Chinese and English name** and **PostScript name** of the font into the custom font table according to the **default format**.
 
-格式如右：```{"ch":"鸿蒙黑体", "en":"HarmonyOS Sans SC", "ps":"HarmonyOS_Sans_SC"}```
+The format is as follows: ```{"ch":"鸿蒙黑体", "en":"HarmonyOS Sans SC", "ps":"HarmonyOS_Sans_SC"}```
 
-* 新增字体，一般接受字重为**标准体/Regular**的字体，调整字重粗体请使用字体描边设置。
-* "ps:"表示PostScript名称，此为可选属性。为实现字体全局生效，请尽可能填写"ps:"属性。
-* 很多字体存在各种修改版本，非原版字体会造成字体名或属性不一致，从而使得代码无法识别。
+* When adding new fonts, fonts with font-weight of **Standard/Regular** are generally accepted. To adjust the font weight and boldness, please use the font stroke setting.
+* "ps:" indicates the PostScript name, this is an optional attribute. In order to make the font take effect globally, please fill in the "ps:" attribute as much as possible.
+* If the font does not have Chinese fontname, please use the English fontname or other language fontname instead.
 
 当安装了新字体，要使其**立即生效**，请务必**重启浏览器**，并在**高级核心功能设置**中重建字体列表缓存。
 
