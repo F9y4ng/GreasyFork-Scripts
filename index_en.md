@@ -99,58 +99,58 @@ Font scaling (experimental feature) Beta version, default off, please turn on fo
 # SearchEngine Assistants `Google & Baidu Switcher.user.js`
  　[[View source code](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Google%20%26%20Baidu%20Switcher.user.js)] 　[[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)] 　[[Visit GreasyFork](https://greasyfork.org/scripts/12909)]  _（Issues aren't processed at GreasyFork）_
 
-简介：“优雅的搜索引擎跳转助手”方便用户在不同的搜索引擎之间跳转；支持自定义常用搜索引擎、关键词高亮渲染效果；还提供去除搜索链接重定向、屏蔽搜索结果广告、可视化参数设置、及自动更新检测等高级功能；兼容多个知名搜索引擎，如Baidu、Google、Bing、Duckduckgo、搜狗、无追搜索、Yandex、360 搜索、头条搜索、百度开发者、Ecosia、Yahoo、You、Startpage、Brave、Yep、Swisscows等。
+**Introduction:** "Elegant search engine Jump Assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
 
-* [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B)
-* 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
+* [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B)
+* If you don't need to be prompted for updates, you can turn it off in the "**parameter setting**".
 
-## version 2023.12.02.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2023.12.02.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-+ 更新 greasyfork.org 新版本 @require 地址。
-+ 新增搜索结果过滤功能，拒绝垃圾与内容农场。
-@ 移除失效的Fsou,新增中文搜索：无追搜索。
-@ 重构去重定向功能，优化重定向链接解析效率。
-@ 重构去广告功能，优化广告屏蔽效率和效果。
-@ 修正一些已知问题，优化样式，优化代码。
++ Update greasyfork.org new version @require address.
++ Added search results filtering function to reject spam and content farms.
+@ Remove the invalid Fsoufsou, add Chinese search: wuzhuiso.com.
+@ Reconstruct the de-redirect function and optimize the efficiency of redirect link parsing.
+@ Reconstruct the ad removal function to optimize ad blocking efficiency and effectiveness.
+@ Fix some known issues, optimize styles, and optimize code.
 ```
 
-## 最新功能介绍
-- 新增搜索结果关键词高效过滤功能，杜绝内容农场与垃圾信息。`New!`
-- 新增去除搜索结果及侧栏广告功能，优化广告屏蔽效率。
-- 新增自定义搜索引擎选取功能（包含：百度、Google、Bing、Duckduckgo、搜狗、无追搜索、Yandex、360 搜索、头条搜索、百度开发者、Ecosia、Yahoo、You、Startpage、Brave、Yep、Swisscows等搜索引擎）
-- 新增搜索结果链接去重定向功能，优化隐私参数屏蔽功能。
-- 更智能的更新检测功能。
+## Latest feature introduction
+- Added a new high-efficiency keyword filtering function for search results to eliminate content farms and spam. `New!`
+- Added the function of removing search results and sidebar ads to optimize ad blocking efficiency.
+- Added custom search engine selection function (including: Baidu, Google, Bing, Duckduckgo, Sogou, Wuzhuiso, Yandex, 360 Search, Toutiao Search, Baidu Developer, Ecosia, Yahoo, You, Startpage, Brave, Yep, Swisscows)
+- Added search result link redirection function and optimized privacy parameter shielding function.
+- Smarter update detection feature.
 
-## 图标缓存的更新
-访问[任意搜索引擎](https://www.baidu.com/s?wd=greasyfork&whoami=F9y4ng)，在地址栏内向 URL 添加 `?whoami=F9y4ng` 或 `&whoami=F9y4ng`，开启临时调试模式，即可自动更新搜索引擎站点的icons；或等待图标缓存过期（十五天）后自动更新图标缓存。
+## Icon cache update
+Visit [any search engine](https://www.baidu.com/s?wd=greasyfork&whoami=F9y4ng), add `?whoami=F9y4ng` or `&whoami=F9y4ng` to the URL in the address bar to enable temporary debugging mode. You can automatically update the icons of the search engine site; or wait for the icon cache to expire (15 days) and automatically update the icon cache.
 
-## 重要说明
-新版本“**自动更新**”功能默认开启，如不需要，请在脚本菜单“**功能设置开关**”中，关闭**更新检测**即可。
+## Important
+The "**Automatic Update**" function is enabled by default. If not required, please turn off **Auto Update Detect** in the "**Parameter Setting**" of the script menu.
 
-- **反馈问题**：反馈脚本错误或样式问题，请把**仅使用本脚本**时发生问题的**访问网址**、使用的**浏览器版本**、**脚本管理器版本**、**错误截图**、以及**操作流程**、**错误提示**发出来，你遇到的问题不一定能在我本地复现。
+- **Feedback Issues**: To report script errors or style issues, please provide the **access URL** where the problem occurs when **only using this script**, the **browser version** used, and **script manager The version**, **error screenshot**, and **operation process**, **error prompt** are sent out. The problems you encounter may not be reproduced locally.
 
-- 一般来说，新版本发布将在**Github**进行，**GreasyFork**、**OpenUserJs**会自动同步。已开启自动更新检测功能的用户，脚本在访问搜索引擎时会进行自动更新。
+- Generally, new releases will be made on **Github**, and **GreasyFork**, **OpenUserJs** will be synchronized automatically. For those who have enabled automatic update detection, scripts will be updated automatically when visit the search engine.
 
 ---
 
-# 自动关闭知乎登录提示 `Autoclose Zhihu Login.user.js`
+# Automatically close Zhihu login prompt `Autoclose Zhihu Login.user.js`
  　[[View source code](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Autoclose%20Zhihu%20Login.user.js)] 　[[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)] 　[[Visit GreasyFork](https://greasyfork.org/scripts/463539)]  _（Issues aren't processed at GreasyFork）_
 
-简介：自动关闭知乎登录提示，仅仅用于关闭自动弹出的登录提示，不干别的，未来也不会去干别的。
+**Introduction:** Automatically closing the Zhihu login prompt is only used to close the automatically pop-up login prompt. It does nothing else and will not do anything else in the future.
 
-## version 2023.11.04.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
+## version 2023.11.04.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
 
 ```log
-@ 优化脚本在safari中无法在document-start加载而造成的bug.
+@ Fixed a bug that caused the script to fail to load in document-start in Safari.
 ```
 
-## 重要说明
-### 浏览器版本要求：
+## Important
+### Browser version requirements:
 ```
 Chrome >= 105; Edge >= 105; Safari >= 15.4; Firefox >= 103; Opera >= 91
 ```
 
-### 注意：
-* Firefox 使用时需在 `about:config` 中，将 `layout.css.has-selector.enabled` 改为 `true`.
-* Blink 内核浏览器 `105 > Version >= 101`，可进入 `chrome://flags/#enable-experimental-web-platform-features` 改为 `Enabled` 后跨版本使用.
+### Notice:
+* When using Firefox, you need to change `layout.css.has-selector.enabled` to `true` in `about:config`.
+* For Blink kernel browser `105 > Version >= 101`, you can enter `chrome://flags/#enable-experimental-web-platform-features` and change it to `Enabled` for cross-version use.
