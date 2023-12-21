@@ -17,53 +17,53 @@
 ***
 
 # Font Rendering (Costomized) `Font Rendering.user.js`
- 　[[View source code](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Font%20Rendering.user.js)] 　[[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)] 　[[Visit GreasyFork](https://greasyfork.org/scripts/416688)] _（Issue feedback is no longer processed in GreasyFork）_
+ 　[[View source code](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Font%20Rendering.user.js)] 　[[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)] 　[[Visit GreasyFork](https://greasyfork.org/scripts/416688)] _（Issues aren't processed at GreasyFork）_
 
-简介：无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
+**Introduction:** Without MacType, improve browser displaying more textured. "Microsoft Yahei" is used by default. For browser displaying, the script provides advanced features such as font rewriting, smoothing, scaling, stroke, shadow, special style elements, custom monospaced, etc. It can configure by "click Script Manager icon" or "use hotkeys" to call out the setup. The script is already compatible with major browsers and userscript managers, also commonly used Greasemonkey scripts and browser extensions.
 
-* [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89)
-* 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
-* 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
+* [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89)
+* Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and rendering style, garbled code issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
+* Please back up your local data in time! Do not use backup files from unknown sources!
 
-## version 2023.12.12.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2023.12.12.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 修正在notion.so下脚本冲突造成的死循环问题。
-@ 修正一些已知的问题，优化样式，优化代码。
+@ Fixed the infinite loop problem caused by script conflicts under notion.so.
+@ Fix some known problems, optimize styles, and optimize code.
 ```
 
-## 字体渲染新版本，使用前请注意以下事项：
+## Please note the following before using the font rendering script:
 
-- 新版脚本中**内置了默认的字体渲染样式，该样式为我的本地配置，并不能完美适配于你的计算机**。所以，首次使用时，如果出现渲染效果没有达到理想状态，属于**正常情况**。请根据**自有显示器的配置及设置**，通过**脚本配置界面**修正相关参数来达到最佳显示效果。
-- 老用户从旧版本升级至最新版时，如遇到样式异常，可通过重置功能重置数据来使用最新规则来尝试纠正问题。大版本（数据重建）更新不建议您使用备份还原，请重新配置参数并保存，并重新备份新数据。
+- The new version of the script has **a built-in default font rendering style. This style is my local configuration and may not be perfectly adapted to your computer**. Therefore, if the rendering effect does not reach the ideal state when using it for the first time, it is a **normal condition**. Please correct the parameters through the **script config interface** according to the configuration and settings of your own monitor to achieve the best display effect.
+- If you encounter style anomalies when upgrading from an old version to the latest version, you can use the reset function to reset the data and use the latest rules to try to correct the problem. It is not recommended that you use backup and restore for major version (data reconstruction) updates. Please reconfigure the parameters and save them, and back up the new data again.
 
-> 注：在Win10/Win11下，不论高分屏或低分屏，只要系统或浏览器应用150%以上缩放率即可获得最佳渲染效果，这是Windows默认渲染机制所决定的。
+> Note: Under Win10/Win11, regardless of high-resolution screen or low-resolution screen, the best rendering effect can be obtained as long as the system or browser applies a zoom ratio of more than 150%. This is determined by the Windows default rendering mechanism.
 
-## 关于脚本加载延迟的处理办法
+## How to deal with script loading delay?
 
-**如出现脚本加载延迟、或未正确加载样式的临时处理办法：**
+**Temporary solutions if script loading is delayed or styles are not loaded correctly:**
 
-* 针对**Tampermonkey**：进入**管理面板**，进入**设置**标签页，下拉至“**实验**”，将注入模式改为“**即时**”。
-* 针对**Violentmonkey**：进入**控制台界面**，进入**设置**标签页，在**高级-通用**中找到并勾选“**同步 page 模式**”。
+* For **Tampermonkey**: Enter the **Dashboard**, enter the **Settings** tab, scroll down to "**Experimental**", and change the injection mode to "**Instant**".
+* For **Violentmonkey**: Enter the **Dashboard**, enter the **Settings** tab, find and check "**Sync Page Mode**" in **Advanced - General**.
 
-## 关于问题反馈
+## Feedback
 
-**注意**：使用浏览器、脚本管理器的`Beta、Dev、Canary、Nightly`等测试分支可能出现未知的兼容错误，脚本不会修正测试版本的错误，**如必须使用测试版本并对脚本有极高要求，建议你选择其他同类脚本**。因有极小概率发生数据被异常初始化，**请及时备份您的本地数据！！！**
+**Note**: Unknown compatibility errors may occur when using the `Beta, Dev, Canary, Nightly` and other test branches of the browser and script manager. The script will not correct the errors of the test version. **If you must use the test version and It has extremely high requirements for scripts. It is recommended that you choose other similar scripts**. Because there is a very small probability that the data will be initialized abnormally, please back up your local data in time! ! ! **
 
-**反馈问题请注意**：反馈脚本错误或样式问题，请把**仅使用本脚本**情况下发生问题的**访问网址**、使用的**浏览器版本**、**脚本管理器版本**、**错误截图**、以及**操作流程**或**错误提示**（如果有的话）发出来，你遇到的问题不一定能在我本地复现。
+**Please note for feedback issues**: To report script errors or style issues, please enter the **access URL** where the problem occurs if **only use this script**, the **browser version** used, Please send **the script manager version**, **error screenshot**, and **operation process** or **error prompt** (if any). The problem you encountered may not be reproduced locally.
 
-* [关于个别网站样式错误修正的设置分享，不定期更新，自取自用。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42)
-* [分享：关于分别设置英文字体和中文字体的方法。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83)
-* [如何正确地对不同显示器、浏览器设定字体渲染参数？](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160)
+* [Sharing of website style error correction settings.](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42) (Chinese)
+* [Share: How to set English fonts and Chinese fonts separately.](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83) (Chinese)
+* [How to correctly set parameters for different monitors and browsers?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160) (Chinese)
 
-> ### 如何提供脚本错误日志？ `New`
+> ### How to provide script error log? `New`
 >
-> 1. 先打开脚本调试开关：
->    - v2023.04.08.1以上版本，向URL添加`?whoami=F9y4ng`或`&whoami=F9y4ng`，开启调试模式。
->    - 使用旧版本需将代码大约第 54 行 `const IS_OPEN_DEBUG = false` 改为 `true`，并保存。
-> 2. 在浏览器中按**F12**打开控制台，刷新，操作直至复现问题，在控制台空白处右键选择**另存为...**。
-> 3. 进行 **错误报告（Bug report）**，并将保存好的日志文件打包上传至 [Github ISSUES](https://github.com/F9y4ng/GreasyFork-Scripts/issues)。
-> 4. 日常使用时，请勿开启脚本调试开关，以免造成脚本执行缓慢或页面卡顿等情况。
+> 1. Turn on the script debugging switch first:
+>    - v2023.04.08.1 or above, add `?whoami=F9y4ng` or `&whoami=F9y4ng` to the URL to enable debugging mode.
+>    - To use the old version change the code from `const IS_OPEN_DEBUG = false` to `true` at about line 54 and save.
+> 2. Press **F12** in your browser to open the console, refresh, operate until the problem is reproduced, right-click in the console margin and select **Save As...**.
+> 3. **Bug report** and package and upload the saved log file to [Github ISSUES](https://github.com/F9y4ng/GreasyFork-Scripts/issues)。
+> 4. During daily use, do not turn on the script debugging switch to avoid slow script execution or page lagging.
 
 ## 关于字体的添加
 如果您需要向字体表添加自定义字体，请按[帮助说明](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/64)进行操作。字体表中文字体[下载](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/46)。
