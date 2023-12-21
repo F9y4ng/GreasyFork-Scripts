@@ -32,12 +32,12 @@
 @ Fix some known problems, optimize styles, and optimize code.
 ```
 
-## Please note the following before using the font rendering script:
+## Please note the following before using the new version:
 
-- The new version of the script has **a built-in default font rendering style. This style is my local configuration and may not be perfectly adapted to your computer**. Therefore, if the rendering effect does not reach the ideal state when using it for the first time, it is a **normal condition**. Please correct the parameters through the **script config interface** according to the configuration and settings of your own monitor to achieve the best display effect.
-- If you encounter style anomalies when upgrading from an old version to the latest version, you can use the reset function to reset the data and use the latest rules to try to correct the problem. It is not recommended that you use backup and restore for major version (data reconstruction) updates. Please reconfigure the parameters and save them, and back up the new data again.
+- The new version of the script has a built-in **default font rendering style**, which is my local configuration and **may not be perfectly adapted to your computer**. Therefore, when using it for the first time, if the rendering effect does not reach the ideal state, **it is normal**. Please modify the rendering parameters through the script settings interface according to the configuration and settings of your local monitor to achieve the best display effect.
+- When upgrading from an older version to the latest version, if there is a style error, you can try to correct it by resetting the data to use the latest rules. however, major version (data rebuild) updates are not recommended to restore using a local backup, and it is recommended to reconfigure the parameters and backup the data.
 
-> Note: Under Win10/Win11, regardless of high-resolution screen or low-resolution screen, the best rendering effect can be obtained as long as the system or browser applies a zoom ratio of more than 150%. This is determined by the Windows default rendering mechanism.
+> Note: Under Win10/Win11, regardless of high or low aspect ratio, the best rendering results can be obtained as long as the system or browser applies 150% or more zoom ratio, which is determined by the default rendering mechanism of Windows.
 
 ## How to deal with script loading delay?
 
@@ -46,11 +46,11 @@
 * For **Tampermonkey**: Enter the **Dashboard**, enter the **Settings** tab, scroll down to "**Experimental**", and change the injection mode to "**Instant**".
 * For **Violentmonkey**: Enter the **Dashboard**, enter the **Settings** tab, find and check "**Sync Page Mode**" in **Advanced - General**.
 
-## Feedback
+## Feedback on issues
 
-**Note**: Unknown compatibility errors may occur when using the `Beta, Dev, Canary, Nightly` and other test branches of the browser and script manager. The script will not correct the errors of the test version. **If you must use the test version and It has extremely high requirements for scripts. It is recommended that you choose other similar scripts**. Because there is a very small probability that the data will be initialized abnormally, please back up your local data in time!
+**Note 1:** Unknown compatibility errors may occur when using the `Beta, Dev, Canary, Nightly` and other test branches of the browser or script manager, and the script will not correct errors in the test version. Since there is a very small probability that the data will be initialized abnormally, **please back up your local data in time**.
 
-**Please note for feedback issues**: To report script errors or style issues, please provide the **access URL** where the problem occurs when **only using this script**, **the browser version** used, and **The script manager version**, **error screenshot**, and **operation process**, **error prompt** are sent out. The problems you encounter may not be reproduced locally.
+**Note 2:** To report script errors or style issues, please provide **the URL**, **the browser and version**, **the script manager and version**, **error page screenshot**, and **operation process** or **error prompt** (if any) where the problem occurs when **using this script only**, etc., because the problem you encountered may not be reproduced locally.
 
 * [Sharing of website style error correction settings.](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42) (Chinese)
 * [Share: How to set English fonts and Chinese fonts separately.](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83) (Chinese)
