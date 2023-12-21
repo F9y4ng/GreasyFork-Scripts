@@ -142,7 +142,7 @@
 ## version 2023.11.04.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
 
 ```log
-@ 优化脚本在safari中无法在document-start加载而造成的bug.
+@ 修正脚本在safari中无法在document-start加载而造成的bug.
 ```
 
 ## 重要说明
