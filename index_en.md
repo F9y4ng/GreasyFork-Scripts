@@ -74,30 +74,30 @@ The format is as follows: ```{"ch":"鸿蒙黑体", "en":"HarmonyOS Sans SC", "ps
 
 * When adding new fonts, fonts with font-weight of **Standard/Regular** are generally accepted. To adjust the font weight and boldness, please use the font stroke setting.
 * "ps:" indicates the PostScript name, this is an optional attribute. In order to make the font take effect globally, please fill in the "ps:" attribute as much as possible.
-* If the font does not have Chinese fontname, please use the English fontname or other language fontname instead.
+* If the font does not have Chinese fontname, please use the English fontname or other language fontname instead, and pay attention to uniqueness.
 
-当安装了新字体，要使其**立即生效**，请务必**重启浏览器**，并在**高级核心功能设置**中重建字体列表缓存。
+When a new font is installed, to make it **immediately effective**, be sure to **restart your browser** and rebuild the font list cache in **Advanced Core Setting**.
 
-- 注 1：自定义字体表的**编辑保存操作**会自动触发字体列表全局缓存的重建，无需额外手动处理。
-- 注 2：若仅安装**内置字体表**定义的字体，重启浏览器后，需要**手动**重建字体列表全局缓存。
+- Note 1: The **Edit Save** of a custom font list automatically triggers a rebuild of the font list global cache without additional manual processing.
+- Note 2: If only fonts defined in the **built-in font list** are installed, you need to **manually** rebuild the font list global cache after restarting the browser.
 
-## 关于字体缩放
+## Notes on font scaling
 
-字体比例缩放（实验性功能）Beta 版，默认关闭，请在 **高级核心功能设置** 中打开字体缩放功能。
+Font scaling (experimental feature) Beta version, default off, please turn on font scaling in **Advanced Core Setting**.
 
-- **已知问题一：** 由于 Firefox (Gecko 内核) 的兼容性原因，仅修正了脚本内部坐标偏移问题，但会对部分网站样式、功能兼容不足，请根据需求酌情使用。**强烈建议您**：使用 Firefox 自身缩放功能替代(`Ctrl++`, `Ctrl+-`)。
-- **已知问题二：** 针对视口单位 `vw, vh, vmin, vmax` 的修正已完成，解决了在字体缩放后视口单位长度不准确的问题。该功能为**实验性功能**，默认关闭，可在**高级核心功能设置**中开启。
-  1. 部分站点因配置相关 CORS 策略，会使浏览器阻止对外部样式的获取（控制台 console 会看到相应报错，如：`No 'Access-Control-Allow-Origin' header is present on the requested resource.`），此时，可在扩展商店安装并开启 [Moesif Origin & CORS Changer](https://chromewebstore.google.com/detail/moesif-origin-cors-change/digfbfaphojjndkpccljibejjbppifbc)。
-  2. 在部分应用了 CSP 策略的站点，浏览器可能会阻止内部样式的加载和解析（控制台 console 会看到相应的报错，如：`Refused to apply inline style because it violates the following Content Security Policy directive: "default-src 'self'".`），此时，可在扩展商店安装并开启 [Disable-CSP](https://chromewebstore.google.com/detail/disable-csp/hgegihapiofjgmmgigbblnjaicgjhoko)
-  3. 使用其他CSP扩展也可解决此问题，如介意安全问题或有其他顾虑，请按以下方法关闭该功能：
-     1. 在**字体渲染设置界面**内取消勾选**视口修正**选项，或将**字体缩放**设置为`1.0`后保存为独享数据。
-     2. 在**高级核心功能设置**中单独关闭**视口单位修正**选项，或直接关闭**字体缩放功能**。（全局关闭）
-- **未知情况：** 如遇到其他状况下的样式异常、坐标偏移，或其他相关问题，请及时向我[反馈](https://github.com/F9y4ng/GreasyFork-Scripts/issues)。
+- **KNOWN ISSUES I:** Due to the compatibility of Firefox (Gecko kernel), only the internal coordinate offset problem of the script has been fixed, but it will be insufficiently compatible with some website styles and functions, so please use it according to your needs and discretion.**Strongly recommended**: Use Firefox's own zoom function instead (`Ctrl++`, `Ctrl+-`).
+- **KNOWN ISSUES II:** A fix for viewport units `vw, vh, vmin, vmax` has been completed, solving the problem of inaccurate viewport unit lengths after font scaling.This feature is **experimental** and is turned off by default, but can be turned on in the **Advanced Core Setting**.
+  1. In some sites, due to CORS policy, browsers may block access to external styles (console console will see corresponding errors, e.g. `No 'Access-Control-Allow-Origin' header is present on the requested resource.`), in this case, you can install and enable [Moesif Origin & CORS Changer](https://chromewebstore.google.com/detail/moesif-origin-cors-change/digfbfaphojjndkpccljibejjbppifbc) in the Extension Store.
+  2. On sites where CSP policies are applied, the browser may prevent the loading and parsing of internal styles (the console will see corresponding errors, such as: `Refused to apply inline style because it violates the following Content Security Policy directive: "default -src 'self'".`), at this time, you can install and enable [Disable-CSP](https://chromewebstore.google.com/detail/disable-csp/hgegihapiofjgmmgigbblnjaicgjhoko) in the extension store
+  3. This problem can also be solved using other CSP extensions. If you are concerned about security issues or have other concerns, please turn off this feature as follows:
+     1. Uncheck the **fix VPU** option in the **Font Rendering Setting Interface**, or set the **Font Scaling** to `1.0` and save it as exclusive data.
+     2. Turn off the **Fix Viewport** option individually in **Advanced Core Setting**, or simply turn off the **Font Scaling**. (Global Off)
+- **UNKNOWN ISSUES:** If you encounter style anomalies, coordinate offsets, or other problems with other conditions, please send me [feedback](https://github.com/F9y4ng/GreasyFork-Scripts/issues).
 
 ---
 
-# 优雅的搜索引擎跳转助手 `Google & Baidu Switcher.user.js`
- 　[[查看源代码](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Google%20%26%20Baidu%20Switcher.user.js)] 　[[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)] 　[[访问 GreasyFork](https://greasyfork.org/scripts/12909)] _（GreasyFork不再处理Issues反馈）_
+# SearchEngine Assistants `Google & Baidu Switcher.user.js`
+ 　[[View source code](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Google%20%26%20Baidu%20Switcher.user.js)] 　[[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)] 　[[Visit GreasyFork](https://greasyfork.org/scripts/12909)]  _（Issues aren't processed at GreasyFork）_
 
 简介：“优雅的搜索引擎跳转助手”方便用户在不同的搜索引擎之间跳转；支持自定义常用搜索引擎、关键词高亮渲染效果；还提供去除搜索链接重定向、屏蔽搜索结果广告、可视化参数设置、及自动更新检测等高级功能；兼容多个知名搜索引擎，如Baidu、Google、Bing、Duckduckgo、搜狗、无追搜索、Yandex、360 搜索、头条搜索、百度开发者、Ecosia、Yahoo、You、Startpage、Brave、Yep、Swisscows等。
 
@@ -135,7 +135,7 @@ The format is as follows: ```{"ch":"鸿蒙黑体", "en":"HarmonyOS Sans SC", "ps
 ---
 
 # 自动关闭知乎登录提示 `Autoclose Zhihu Login.user.js`
- 　[[查看源代码](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Autoclose%20Zhihu%20Login.user.js)] 　[[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)] 　[[访问 GreasyFork](https://greasyfork.org/scripts/463539)] _（GreasyFork不再处理Issues反馈）_
+ 　[[View source code](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Autoclose%20Zhihu%20Login.user.js)] 　[[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)] 　[[Visit GreasyFork](https://greasyfork.org/scripts/463539)]  _（Issues aren't processed at GreasyFork）_
 
 简介：自动关闭知乎登录提示，仅仅用于关闭自动弹出的登录提示，不干别的，未来也不会去干别的。
 
