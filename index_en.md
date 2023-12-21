@@ -12,7 +12,7 @@
 - Using **Adguard Desktop** or **Userscripts**, the script menus can be called up via **keyboard shortcuts**.
 
 > ## Declaration 
-> Some personal modified Blink kernel browsers with **DirectWrite** disabled will cause most fonts to be unrecognized by the program, or non-ASCII characters and Emoji icons will not be rendered correctly. **Important Note**: All scripts updates will no longer provide code compatibility and Q&A for browsers with _`disabled DirectWrite`_, to use the scripts in this project, we recommend you use a official browser.
+> For browsers that unofficially modify the Blink kernel and turn off DirectWrite, some fonts may not be recognized by the program, or non-ASCII characters and Emoji icons may not be rendered correctly. **Important note:** The script updates will no longer provide code compatibility and troubleshooting for browsers with _`disabled DirectWrite`_. To use the scripts in this project, it is recommended that you use the official browser.
 
 ***
 
