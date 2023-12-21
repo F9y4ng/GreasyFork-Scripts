@@ -50,7 +50,7 @@
 
 **Note**: Unknown compatibility errors may occur when using the `Beta, Dev, Canary, Nightly` and other test branches of the browser and script manager. The script will not correct the errors of the test version. **If you must use the test version and It has extremely high requirements for scripts. It is recommended that you choose other similar scripts**. Because there is a very small probability that the data will be initialized abnormally, please back up your local data in time!
 
-**Please note for feedback issues**: To report script errors or style issues, please enter the **access URL** where the problem occurs if **only use this script**, the **browser version** used, Please send **the script manager version**, **error screenshot**, and **operation process** or **error prompt** (if any). The problem you encountered may not be reproduced locally.
+**Please note for feedback issues**: To report script errors or style issues, please provide the **access URL** where the problem occurs when **only using this script**, **the browser version** used, and **The script manager version**, **error screenshot**, and **operation process**, **error prompt** are sent out. The problems you encounter may not be reproduced locally.
 
 * [Sharing of website style error correction settings.](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42) (Chinese)
 * [Share: How to set English fonts and Chinese fonts separately.](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83) (Chinese)
@@ -128,7 +128,7 @@ Visit [any search engine](https://www.baidu.com/s?wd=greasyfork&whoami=F9y4ng), 
 ## Important
 The "**Automatic Update**" function is enabled by default. If not required, please turn off **Auto Update Detect** in the "**Parameter Setting**" of the script menu.
 
-- **Feedback Issues**: To report script errors or style issues, please provide the **access URL** where the problem occurs when **only using this script**, the **browser version** used, and **script manager The version**, **error screenshot**, and **operation process**, **error prompt** are sent out. The problems you encounter may not be reproduced locally.
+- **Feedback Issues**: To report script errors or style issues, please provide the **access URL** where the problem occurs when **only using this script**, **the browser version** used, and **The script manager version**, **error screenshot**, and **operation process**, **error prompt** are sent out. The problems you encounter may not be reproduced locally.
 
 - Generally, new releases will be made on **Github**, and **GreasyFork**, **OpenUserJs** will be synchronized automatically. For those who have enabled automatic update detection, scripts will be updated automatically when visit the search engine.
 
