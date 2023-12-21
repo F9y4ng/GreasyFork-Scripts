@@ -85,11 +85,11 @@ When a new font is installed, to make it **immediately effective**, be sure to *
 
 Font scaling (experimental feature) BETA version, off by default, please turn on the font scaling feature in the **Advanced Core Setting**.
 
-- **KNOWN ISSUES I:** Due to the compatibility of Firefox (Gecko kernel), only the internal coordinate offset problem of the script has been fixed, but it will be insufficiently compatible with some website styles and functions, so please use it according to your needs and discretion.**Strongly recommended**: Use Firefox's own zoom function instead (`Ctrl++`, `Ctrl+-`).
-- **KNOWN ISSUES II:** A fix for viewport units `vw, vh, vmin, vmax` has been completed, solving the problem of inaccurate viewport unit lengths after font scaling.This feature is **experimental** and is turned off by default, but can be turned on in the **Advanced Core Setting**.
+- **KNOWN ISSUES I:** Due to the compatibility of Firefox (Gecko kernel), only the internal coordinate offset problem of the script has been fixed, but it will be insufficiently compatible with some website styles and functions, so please use it according to your needs and discretion. **Strongly recommended**: Use Firefox's own zoom function instead (`Ctrl++`, `Ctrl+-`).
+- **KNOWN ISSUES II:** The fix for viewport units `vw, vh, vmin, vmax` has been completed, solving the problem of inaccurate viewport unit lengths after font scaling. This feature is **experimental** and off by default, it can be turned on in the **Advanced Core Setting**.
   1. In some sites, due to CORS policy, browsers may block access to external styles (console console will see corresponding errors, e.g. `No 'Access-Control-Allow-Origin' header is present on the requested resource.`), in this case, you can install and enable [Moesif Origin & CORS Changer](https://chromewebstore.google.com/detail/moesif-origin-cors-change/digfbfaphojjndkpccljibejjbppifbc) in the Extension Store.
-  2. On sites where CSP policies are applied, the browser may prevent the loading and parsing of internal styles (the console will see corresponding errors, such as: `Refused to apply inline style because it violates the following Content Security Policy directive: "default -src 'self'".`), at this time, you can install and enable [Disable-CSP](https://chromewebstore.google.com/detail/disable-csp/hgegihapiofjgmmgigbblnjaicgjhoko) in the extension store
-  3. This problem can also be solved using other CSP extensions. If you are concerned about security issues or have other concerns, please turn off this feature as follows:
+  2. On some sites which CSP policies are applied, the browser may prevent the loading and parsing of internal styles (the console will see corresponding errors, such as: `Refused to apply inline style because it violates the following Content Security Policy directive: "default -src 'self'".`), in this case, you can install and enable [Disable-CSP](https://chromewebstore.google.com/detail/disable-csp/hgegihapiofjgmmgigbblnjaicgjhoko) in the extension store.
+  3. This problem can also be solved using other disable CSP extensions. If you are concerned about security issues or have other concerns, please turn off this feature as follows:
      1. Uncheck the **fix VPU** option in the **Font Rendering Setting Interface**, or set the **Font Scaling** to `1.0` and save it as exclusive data.
      2. Turn off the **Fix Viewport** option individually in **Advanced Core Setting**, or simply turn off the **Font Scaling**. (Global Off)
 - **UNKNOWN ISSUES:** If you encounter style anomalies, coordinate offsets, or other problems with other conditions, please send me [feedback](https://github.com/F9y4ng/GreasyFork-Scripts/issues).
@@ -116,19 +116,19 @@ Font scaling (experimental feature) BETA version, off by default, please turn on
 ```
 
 ## Latest feature introduction
-- Added a new high-efficiency keyword filtering function for search results to eliminate content farms and spam. `New!`
+- Added a new high-efficiency keyword filtering function for search results to eliminate content farms and spam. `New`
 - Added the function of removing search results and sidebar ads to optimize ad blocking efficiency.
 - Added custom search engine selection function (including: Baidu, Google, Bing, Duckduckgo, Sogou, Wuzhuiso, Yandex, 360 Search, Toutiao Search, Baidu Developer, Ecosia, Yahoo, You, Startpage, Brave, Yep, Swisscows)
 - Added search result link redirection function and optimized privacy parameter shielding function.
 - Smarter update detection feature.
 
 ## Icon cache update
-Visit [any search engine](https://www.baidu.com/s?wd=greasyfork&whoami=F9y4ng), add `?whoami=F9y4ng` or `&whoami=F9y4ng` to the URL in the address bar to enable temporary debugging mode. You can automatically update the icons of the search engine site; or wait for the icon cache to expire (15 days) and automatically update the icon cache.
+Visit [any search engine](https://www.baidu.com/s?wd=greasyfork&whoami=F9y4ng), add `?whoami=F9y4ng` or `&whoami=F9y4ng` to the URL in the address bar to enable temporary debugging mode, then you can automatically update the icons of the search engine site; or wait for the icon cache to expire (15 days) and automatically update the icon cache.
 
-## Important
+## Important notes
 The "**Automatic Update**" function is enabled by default. If not required, please turn off **Auto Update Detect** in the "**Parameter Setting**" of the script menu.
 
-- **Feedback Issues**: To report script errors or style issues, please provide the **access URL** where the problem occurs when **only using this script**, **the browser version** used, and **The script manager version**, **error screenshot**, and **operation process**, **error prompt** are sent out. The problems you encounter may not be reproduced locally.
+- **Feedback Issues**: To report script errors or style issues, please provide **the URL**, **the browser and version**, **the script manager and version**, **error page screenshot**, and **operation process** or **error prompt** (if any) where the problem occurs when **using this script only**, etc., because the problem you encountered may not be reproduced locally.
 
 - Generally, new releases will be made on **Github**, and **GreasyFork**, **OpenUserJs** will be synchronized automatically. For those who have enabled automatic update detection, scripts will be updated automatically when visit the search engine.
 
@@ -137,7 +137,7 @@ The "**Automatic Update**" function is enabled by default. If not required, plea
 # Autoclose Zhihu Login Prompt `Autoclose Zhihu Login.user.js`
  　[[View source code](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Autoclose%20Zhihu%20Login.user.js)] 　[[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)] 　[[Visit GreasyFork](https://greasyfork.org/scripts/463539)]  _（Issues aren't processed at GreasyFork）_
 
-**Introduction:** Automatically closing the Zhihu login prompt is only used to close the automatically pop-up login prompt. It does nothing else and will not do anything else in the future.
+**Introduction:** "Autoclose Zhihu Login Prompt" is only used to close the automatically pop-up login prompt. It does nothing else and will not do anything else in the future.
 
 ## version 2023.11.04.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
 
