@@ -1,4 +1,4 @@
-# [**GreasyFork Scripts**](https://f9y4ng.github.io/GreasyFork-Scripts/) (F9y4ng) [![WIKI](https://img.shields.io/badge/WIKI-GREASYFORK%20SCRIPTS-brightgreen.svg?logo=github "wiki")](https://github.com/F9y4ng/GreasyFork-Scripts/wiki)
+# [**GreasyFork Scripts**](https://f9y4ng.github.io/GreasyFork-Scripts/index_en.html) (F9y4ng) [![WIKI](https://img.shields.io/badge/WIKI-GREASYFORK%20SCRIPTS-brightgreen.svg?logo=github "wiki")](https://github.com/F9y4ng/GreasyFork-Scripts/wiki)
 
 **页面语言** (**Language**) |  [中文 (Chinese)](index.md) | 英语 (English)
 
