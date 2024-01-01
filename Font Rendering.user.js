@@ -2,9 +2,9 @@
 // @name               字体渲染（自用脚本）
 // @name:zh-CN         字体渲染（自用脚本）
 // @name:zh-TW         字體渲染（自用腳本）
-// @name:ja            フォントレンダリング（カスタマイズ）
+// @name:ja            フォントレンダリング
 // @name:en            Font Rendering (Customized)
-// @version            2023.12.12.1
+// @version            2024.01.01.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -40,7 +40,7 @@
 // @compatible         Safari 兼容Tampermonkey, Userscripts
 // @license            GPL-3.0-only
 // @create             2020-11-24
-// @copyright          2020-2023, F9y4ng
+// @copyright          2020-2024, F9y4ng
 // @run-at             document-start
 // ==/UserScript==
 
@@ -72,11 +72,12 @@
   const GMunregisterMenuCommand = gmSelector("unregisterMenuCommand");
   const GMunsafeWindow = gmSelector("unsafeWindow");
   const GMcontentMode = gmSelector("contentMode");
+  const GMcachedPrototype = gmSelector("cachedPrototype");
 
   /* INITIALIZE_DEBUG_FUNCTIONS */
 
   const IS_DEBUG = setDebuggerMode() || IS_OPEN_DEBUG;
-
+  const IS_CHN = checkLocalChineseLanguage();
   const DEBUG = IS_DEBUG ? __console.bind(console, "log") : () => {};
   const INFO = IS_DEBUG ? __console.bind(console, "info") : () => {};
   const ERROR = IS_DEBUG ? __console.bind(console, "error") : () => {};
@@ -96,21 +97,21 @@
       boldAttrName: `fr-fix-${generateRandomString(8, "hex")}`,
       frameAttrName: `fr-frames-${generateRandomString(8, "hex")}`,
       greasyfork: decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkY0MTY2ODg="),
-      defaultFont: decrypt("JUU3JUJEJTkxJUU3JUFCJTk5JUU5JUJCJTk4JUU4JUFFJUE0JUU1JUFEJTk3JUU0JUJEJTkz"),
+      defaultFont: decrypt(IS_CHN ? "JUU3JUJEJTkxJUU3JUFCJTk5JUU5JUJCJTk4JUU4JUFFJUE0JUU1JUFEJTk3JUU0JUJEJTkz" : "V2Vic2l0ZSUyMEZvbnRz"),
       fontlistImg: decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjIlMkYwNCUyRjAyJTJGcW9SZldkLmdpZg=="),
       loadingImg: decrypt("aHR0cHMlM0ElMkYlMkZpbWcuemNvb2wuY24lMkZjb21tdW5pdHklMkYwMzhkZGU0NThmOWE4NzRhODAxMjE2MGY3NDE3ZjZlLmdpZg=="),
       exQueryString: `html,head,head *,base,meta,style,link,script,noscript,iframe,img,br,hr,map,area,canvas,svg,svg *,defs,symbol,g,path,polygon,polyline,rect,ellipse,circle,line,text,tspan,tref,textpath,lineargradient,radialgradient,use,images,clippath,mask,pattern,filter,stop,picture,form,object,param,embed,audio,video,source,track,progress,fr-colorpicker,fr-colorpicker *,fr-configure,fr-configure *,fr-dialogbox,fr-dialogbox *,gb-notice,gb-notice *`,
     },
     variable: {
       undef: void 0,
-      prototype: {
+      prototypes: {
         getScreenCTM: SVGGraphicsElement.prototype.getScreenCTM,
         getClientRects: Element.prototype.getClientRects,
         getBoundingClientRect: Element.prototype.getBoundingClientRect,
       },
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.12.12.0",
-      scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("Rjl5NG5n"),
-      scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? GMinfo.script.name ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.01.01.0",
+      scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
+      scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("\x52\x6a\x6c\x35\x4e\x47\x35\x6e"),
       feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRnN1cHBvcnQ="),
       homepage: getMetaValue("homepage") ?? getMetaValue("homepageURL") ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcuZ2l0aHViLmlvJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJG"),
     },
@@ -329,17 +330,18 @@
       getValue: typeof GM_getValue !== "undefined" ? GM_getValue : GM?.getValue ?? localStorage.getItem.bind(localStorage),
       deleteValue: typeof GM_deleteValue !== "undefined" ? GM_deleteValue : GM?.deleteValue ?? localStorage.removeItem.bind(localStorage),
       listValues: typeof GM_listValues !== "undefined" ? GM_listValues : GM?.listValues ?? (() => []),
-      openInTab: typeof GM_openInTab !== "undefined" ? GM_openInTab : GM?.openInTab ?? w.open,
+      openInTab: typeof GM_openInTab !== "undefined" ? GM_openInTab : GM?.openInTab ?? open.bind(w),
       registerMenuCommand: typeof GM_registerMenuCommand !== "undefined" ? GM_registerMenuCommand : GM?.registerMenuCommand ?? (() => {}),
       unregisterMenuCommand: typeof GM_unregisterMenuCommand !== "undefined" ? GM_unregisterMenuCommand : GM?.unregisterMenuCommand ?? (() => {}),
       unsafeWindow: typeof unsafeWindow !== "undefined" ? unsafeWindow : w,
       contentMode: GMinfo.injectInto === "content" || GMinfo.script["inject-into"] === "content" || ["dom", "js"].includes(GMinfo.sandboxMode),
+      cachedPrototype: { decrypt: atob.bind(w), encrypt: btoa.bind(w), console: Object.assign({}, w.console) },
     };
     return gmFunctions[rec] ?? (() => {});
   }
 
   function __console(act, argm, ...args) {
-    const _this = w.console;
+    const _this = GMcachedPrototype.console;
     const _argm = argm ?? "";
     switch (act) {
       case "log":
@@ -415,6 +417,22 @@
       configurable: false,
       enumerable: false,
     });
+  }
+
+  function checkLocalChineseLanguage() {
+    const lang = navigator.language || navigator.userLanguage || "en-US";
+    switch (lang) {
+      case "zh":
+      case "zh-CN":
+      case "zh-HK":
+      case "zh-TW":
+      case "zh-MO":
+      case "zh-SG":
+      case "zh-MY":
+        return true;
+      default:
+        return false;
+    }
   }
 
   function qS(expr, target = document) {
@@ -497,14 +515,24 @@
     return node?.nodeName?.toLowerCase() ?? "";
   }
 
-  function encrypt(string) {
+  function encrypt(string, encode = true) {
     if (typeof string !== "string") return "";
-    return btoa(encodeURIComponent(string));
+    try {
+      const req = encode ? encodeURIComponent(string) : string;
+      return GMcachedPrototype.encrypt(req);
+    } catch (e) {
+      return "";
+    }
   }
 
-  function decrypt(string) {
+  function decrypt(string, decode = true) {
     if (typeof string !== "string") return "";
-    return decodeURIComponent(atob(string.replace(/[^A-Za-z0-9+/=]/g, "")));
+    try {
+      const rst = GMcachedPrototype.decrypt(string.replace(/[^A-Za-z0-9+/=]/g, ""));
+      return decode ? decodeURIComponent(rst) : rst;
+    } catch (e) {
+      return "";
+    }
   }
 
   function compareArray(array1, array2) {
@@ -581,15 +609,25 @@
       const redundantScriptsInfo = document.documentElement?.getAttribute("fr-init-rc");
       if (redundantScriptsInfo === "true") return scriptRedundancyWarning();
       CUR_WINDOW_TOP &&
-        __console("warn", `${def.variable.scriptName}警告：\r\n脚本的注入模式已设置为"content"，部分脚本功能将受限制，如框架页面内部分功能失效、字体缩放后无法全局修正坐标等。`);
+        __console(
+          "warn",
+          IS_CHN
+            ? `${def.variable.scriptName}警告\r\n脚本的注入模式已设置为"content"，部分脚本功能将受限制，如框架页面内部分功能失效、字体缩放后无法全局修正坐标等。`
+            : `${def.variable.scriptName} Warning\r\nThe injection mode of scripts has been set to "content", and some script functions will be limited.`
+        );
     }
     setFlagAtDocumentElement(document.documentElement);
     return false;
 
     function scriptRedundancyWarning() {
       if (CUR_WINDOW_TOP) {
-        __console("error", `\ud83d\udea9 [Redundant Scripts]:\r\n发现冗余安装的脚本：${def.variable.scriptName}，如刷新后问题依旧，请访问 ${def.variable.feedback}/117 排查错误。`);
-        GMregisterMenuCommand("\ufff8\ud83d\uded1 发现冗余安装的脚本，点击排查！", () => {
+        __console(
+          "error",
+          IS_CHN
+            ? `\ud83d\udea9 [脚本冗余警告]:\r\n发现冗余安装的脚本: "${def.variable.scriptName}"，如刷新后问题依旧，请访问 ${def.variable.feedback}/117 排查错误。`
+            : `\ud83d\udea9 [Redundant Warning]:\r\nFound Redundant Script: '${def.variable.scriptName}', if persists after reloading, please visit ${def.variable.feedback}/117 to troubleshoot.`
+        );
+        GMregisterMenuCommand(`\ufff8\ud83d\uded1 ${IS_CHN ? "发现冗余安装的脚本，点击排查！" : "Troubleshoot Redundant"} `, () => {
           GMopenInTab(`${def.variable.feedback}/117`, false);
           location.reload();
         });
@@ -621,6 +659,7 @@
         OPERA: { engine: "Blink", brand: "Opera" },
         BRAVE: { engine: "Blink", brand: "Brave" },
         YANDEX: { engine: "Blink", brand: "Yandex" },
+        CATSXP: { engine: "Blink", brand: "Catsxp" },
         "MICROSOFT EDGE": { engine: "Blink", brand: "Edge" },
         "GOOGLE CHROME": { engine: "Blink", brand: "Chrome" },
       };
@@ -758,7 +797,7 @@
   }
 
   function setDebuggerMode() {
-    const key = decrypt("Rjl5NG5n");
+    const key = decrypt("\u0052\u006a\u006c\u0035\u004e\u0047\u0035\u006e");
     const value = new URLSearchParams(location.search).get("whoami");
     return Object.is(key, value);
   }
@@ -872,8 +911,17 @@
     /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
     const UPDATE_VERSION_NOTICE = String(
-      `<li class="${def.const.seed}_fix">修正在notion.so下脚本冲突造成的死循环问题。</li>
-        <li class="${def.const.seed}_fix">修正一些已知的问题，优化样式，优化代码。</li>`
+      IS_CHN
+        ? `<li class="${def.const.seed}_info">✨🎉🧡 祝新年快乐、身体健康、万事如意 🧡🎉✨</li>
+            <li class="${def.const.seed}_add">新增脚本中英文双语，非中文系统默认使用英语界面。</li>
+            <li class="${def.const.seed}_fix">优化粗体修正功能针对脚本冲突问题的检测机制。</li>
+            <li class="${def.const.seed}_fix">提升代码兼容性，兼容更多浏览器与脚本管理器。</li>
+            <li class="${def.const.seed}_fix">修正一些已知的问题，优化样式，优化代码。</li>`
+        : `<li class="${def.const.seed}_info">✨🎉🧡 Happy New Year To All Users 🧡🎉✨</li>
+            <li class="${def.const.seed}_add">Added Chinese and English bilingual features. </li>
+            <li class="${def.const.seed}_fix">Optimize bold-style fixed for conflict detection.</li>
+            <li class="${def.const.seed}_fix">Compatible with more browsers and extensions.</li>
+            <li class="${def.const.seed}_fix">Fix some known issues, Optimize styles & code.</li>`
     );
 
     /* INITIALIZE_FONT_LIBRARY */
@@ -950,7 +998,7 @@
       frConfigure:
         String(
           `:host(#${def.id.configure}){position:fixed!important;top:0;left:0;width:100%;height:100%;background:0 0!important;pointer-events:none;z-index:2147483646}#${def.id.container}{position:absolute;top:10px;right:24px;z-index:99999;overflow-x:hidden;overflow-y:auto;box-sizing:content-box;padding:4px;max-height:calc(100% - 40px);min-height:10%;border-radius:12px;background:#f0f6ff!important;box-shadow:0 0 4px 0 rgb(0 0 0/30%);color:#333333;text-align:left;font-weight:700;font-size:16px!important;opacity:0;transition:opacity .5s;width:auto;overscroll-behavior:contain;scrollbar-color:rgb(51 102 153/85%) rgb(0 0 0/25%);scrollbar-width:thin;pointer-events:auto}#${def.id.container}::-webkit-scrollbar{width:10px;height:1px}#${def.id.container}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container}::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container} *{text-shadow:none!important;font-weight:700;font-size:16px;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji,Android Emoji,EmojiSymbols!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}` +
-            `#${def.id.container} fieldset{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;min-height:475px;border:2px groove #67a5df!important;border-radius:10px;background:#f0f6ff!important}#${def.id.container} legend{position:relative!important;float:none!important;display:block!important;visibility:visible!important;box-sizing:content-box;margin:0;padding:0 32px 0 8px;width:auto!important;height:auto!important;border:none!important;background:#f0f6ff!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.container} fieldset ul{margin:0;padding:0;background:#f0f6ff!important}#${def.id.container} ul li{float:none;display:inherit;box-sizing:content-box;margin:3px 0;min-width:-webkit-fill-available;min-width:-moz-available;border:none;background:#f0f6ff!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none}#${def.id.container} ul li:before{display:none}#${def.id.container} .${def.class.rotation} svg{visibility:visible!important;overflow:hidden;width:24px;height:24px;vertical-align:initial!important;fill:#67a5df;}#${def.id.container} .${def.class.rotation} svg:hover{cursor:help}#${def.const.seed}_scriptname{display:inline-block;vertical-align:bottom;overflow:hidden;max-width:225px;text-overflow:ellipsis;white-space:nowrap;font-weight:700!important;-webkit-user-select:all;user-select:all}#${def.const.seed}_scriptname:hover{cursor:help}#${def.id.container} .${def.class.title} .${def.class.guide}{position:absolute;display:inline-block;cursor:pointer}@keyframes rotation{0%{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(1turn)}}.${def.class.title} .${def.class.rotation}{top:auto;right:auto;bottom:auto;left:auto;margin:0;padding:0;width:24px;height:24px;-webkit-transform:rotate(1turn);transform-origin:center 50% 0;animation:rotation 5s linear infinite}` +
+            `#${def.id.container} fieldset{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;min-height:475px;border:2px groove #67a5df!important;border-radius:10px;background:#f0f6ff!important}#${def.id.container} legend{position:relative!important;float:none!important;display:block!important;visibility:visible!important;box-sizing:content-box;margin:0;padding:0 32px 0 8px;width:auto!important;height:auto!important;border:none!important;background:#f0f6ff!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.container} fieldset ul{margin:0;padding:0;background:#f0f6ff!important}#${def.id.container} ul li{float:none;display:inherit;box-sizing:content-box;margin:3px 0;min-width:-webkit-fill-available;min-width:-moz-available;border:none;background:#f0f6ff!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none}#${def.id.container} ul li:before{display:none}#${def.id.container} .${def.class.rotation} svg{visibility:visible!important;overflow:hidden;width:24px;height:24px;vertical-align:initial!important;fill:#67a5df;}#${def.id.container} .${def.class.rotation} svg:hover{cursor:help}#${def.const.seed}_scriptname{display:inline-block;vertical-align:bottom;overflow:hidden;min-width:130px;max-width:225px;text-overflow:ellipsis;white-space:nowrap;font-weight:700!important;-webkit-user-select:all;user-select:all}#${def.const.seed}_scriptname:hover{cursor:help}#${def.id.container} .${def.class.title} .${def.class.guide}{position:absolute;display:inline-block;cursor:pointer}@keyframes rotation{0%{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(1turn)}}.${def.class.title} .${def.class.rotation}{top:auto;right:auto;bottom:auto;left:auto;margin:0;padding:0;width:24px;height:24px;-webkit-transform:rotate(1turn);transform-origin:center 50% 0;animation:rotation 5s linear infinite}` +
             `#${def.id.container} input:not([type='range'],[type='checkbox']):focus,#${def.id.container} textarea:focus{box-shadow:inset 0 1px 3px rgb(0 0 0/10%),0 0 6px rgb(82 168 236/60%)!important}#${def.id.fontList}{padding:2px 10px 0;min-height:73px}#${def.id.fontFace},#${def.id.fontSmooth}{display:flex!important;padding:2px 10px;width:calc(100% - 18px);height:40px;min-width:auto;align-items:center;justify-content:space-between}#${def.id.fontSize}{padding:2px 10px;height:60px}#${def.id.fontStroke}{padding:2px 10px;height:60px}#${def.id.fontShadow}{padding:2px 10px;height:60px}#${def.id.shadowColor}{display:flex;margin:4px;padding:2px 10px;width:auto;min-height:45px;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}#${def.id.fontCss},#${def.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${def.id.submit}{padding:2px 10px;height:40px}` +
             `#${def.id.fontList} .${def.class.selector} a{text-decoration:none;font-weight:400}#${def.id.fontList} .${def.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${def.id.fontList} .${def.class.label} span{display:inline-block;overflow:hidden;box-sizing:border-box;padding:5px;width:max-content;height:max-content;max-width:200px;min-width:12px;background:#67a5df;color:#ffffff;text-overflow:ellipsis;white-space:nowrap;font-weight:400;font-size:16px!important}#${def.id.fontList} .${def.class.close}{width:12px}#${def.id.fontList} .${def.class.close}:hover{border-radius:2px;background-color:#2d7dca;color:tomato}#${def.id.selector}{width:100%;max-width:100%}#${def.id.selector} label{display:block;margin:0 0 4px;color:#333333;cursor:auto}#${def.id.selector} #${def.id.cleaner}{margin-left:5px;cursor:pointer}#${def.id.selector} #${def.id.cleaner}:hover{color:#ff0000;}#${def.id.fontList} .${def.class.selector}{overflow-x:hidden;box-sizing:border-box;margin:0 0 6px;padding:6px 6px 0;width:100%;max-width:min-content;max-width:-moz-min-content;max-height:90px;min-width:100%;min-height:45px;border:2px solid #67a5df!important;border-radius:6px;overscroll-behavior:contain;scrollbar-color:#336699 rgba(0,0,0,.25);scrollbar-width:thin}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontList} .${def.class.selectFontId} span.${def.class.spanlabel},#${def.id.selector} span.${def.class.spanlabel}{display:block!important;margin:0!important;padding:0 0 4px;width:auto;border:0;background-color:transparent!important;color:#333333;text-align:left!important}` +
             `#${def.id.fontList} .${def.class.selectFontId}{width:auto}#${def.id.fontList} .${def.class.selectFontId} input{overflow:hidden;box-sizing:border-box;margin:0;padding:1px 23px 1px 2px;width:230px;height:42px!important;max-width:100%;min-width:100%;outline:none!important;outline-color:#67a5df;border:2px solid #67a5df!important;border-radius:6px;background:#fafafa;text-indent:8px;text-overflow:ellipsis;font-weight:700;font-size:16px!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.fontList} .${def.class.selectFontId} input[disabled]{pointer-events:none!important}#${def.id.fontList} .${def.class.selectFontId} input::-webkit-search-cancel-button{margin:0 7px}.${def.class.placeholder}:placeholder-shown{color:#336699!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.95!important}.${def.class.placeholder}::-webkit-input-placeholder{color:#336699!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}.${def.class.placeholder}::-moz-placeholder{color:#336699!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;opacity:.65!important}#${def.id.fontList} .${def.class.selectFontId} dl{position:absolute;z-index:1000;overflow-x:hidden;box-sizing:content-box;margin:4px 0 0;padding:4px 8px;width:auto;max-width:calc(100% - 68px);max-height:298px;min-width:60%;border:2px solid #67a5df!important;border-radius:6px;background-color:#ffffff;white-space:nowrap;font-size:18px!important;overscroll-behavior:contain;scrollbar-color:#487baf rgba(0,0,0,.25);scrollbar-width:thin}` +
@@ -963,10 +1011,7 @@
             `#${def.id.submit} button{box-sizing:border-box;margin:0;padding:5px 10px;width:auto;height:35px;min-width:min-content;min-height:35px;border:2px solid #6ba7e0;border-radius:6px;background-color:#67a5df;background-image:none;color:#ffffff!important;font:normal 600 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;cursor:pointer}#${def.id.submit} button:hover{box-shadow:0 0 5px rgba(0,0,0,.4)!important}#${def.id.submit} .${def.class.cancel},#${def.id.submit} .${def.class.reset}{float:left;margin-right:10px}#${def.id.submit} .${def.class.submit}{float:right}#${def.id.submit} #${def.id.backup}{display:none;margin:0 10px 0 0}.${def.class.anim}{border:2px solid #dc143c!important;background:#dc143c!important;animation:jiggle 1.8s ease-in infinite}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}`
         ) +
         String(
-          `.${def.class.tooltip}{position:relative;cursor:help;-webkit-user-select:none;user-select:none}.${def.class.tooltip} span.${def.class.emoji}{font-weight:400!important}.${def.class.tooltip}:active .${def.class.tooltip}{display:block}.${def.class.tooltip} .${def.class.tooltip}{position:absolute;z-index:999999;display:none;box-sizing:content-box;padding:10px;width:234px;max-width:234px;border:2px solid #b8c4ce;border-radius:6px;background-color:#54a2ec;color:#ffffff;font-weight:400;opacity:.9;word-break:break-all}.${def.class.tooltip} .${def.class.tooltip} *{font-size:14px!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${def.class.tooltip} .${def.class.tooltip} em{font-style:normal!important}.${def.class.tooltip} .${def.class.tooltip} strong{color:darkorange;font-size:18px!important}.${def.class.tooltip} .${def.class.tooltip} p{display:block;margin:0 0 10px;color:#ffffff;text-indent:0!important;line-height:150%}.${def.class.ps1}{position:relative;top:-33px;right:5px;float:right;margin:0;padding:0;width:24px;height:0}.${def.class.ps2}{top:35px;right:-7px}` +
-            `.${def.class.ps3}{top:-197px;${IS_REAL_WEBKIT ? "left:-72px" : "left:auto"}}` +
-            `.${def.class.ps4}{top:-247px;${IS_REAL_WEBKIT ? "right:-64px" : "left:auto"}}` +
-            `.${def.class.ps5}{top:-322px;${IS_REAL_WEBKIT ? "right:-54px" : "left:auto"}}`
+          `.${def.class.tooltip}{position:relative;cursor:help;-webkit-user-select:none;user-select:none}.${def.class.tooltip} span.${def.class.emoji}{font-weight:400!important}.${def.class.tooltip}:active .${def.class.tooltip}{display:block}.${def.class.tooltip} .${def.class.tooltip}{position:absolute;z-index:999999;display:none;box-sizing:content-box;padding:10px;width:234px;max-width:234px;border:2px solid #b8c4ce;border-radius:6px;background-color:#54a2ec;color:#ffffff;font-weight:400;opacity:.92;word-break:break-all}.${def.class.tooltip} .${def.class.tooltip} *{font-size:14px!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${def.class.tooltip} .${def.class.tooltip} em{font-style:normal!important}.${def.class.tooltip} .${def.class.tooltip} strong{color:darkorange;font-size:18px!important}.${def.class.tooltip} .${def.class.tooltip} p{display:block;margin:0 0 10px;color:#ffffff;text-indent:0!important;line-height:150%}.${def.class.ps1}{position:relative;top:-33px;right:5px;float:right;margin:0;padding:0;width:24px;height:0}.${def.class.ps2}{top:35px;right:-7px}.${def.class.ps3},.${def.class.ps4},.${def.class.ps5}{bottom:25px;left:auto}`
         ) +
         String(
           `.${def.class.range}{--primary-color:#67a5df;--value-offset-y:var(--ticks-gap);--value-active-color:white;--value-background:transparent;--value-background-hover:var(--primary-color);--value-font:italic 700 14px/14px monospace,serif;--fill-color:var(--primary-color);--progress-background:rgb(223, 223, 223);--progress-radius:20px;--show-min-max:none;--track-height:calc(var(--thumb-size) / 2);--min-max-font:12px serif;--min-max-opacity:0.5;--min-max-x-offset:10%;--thumb-size:22px;--thumb-color:white;--thumb-shadow:0 0 3px rgba(0, 0, 0, 0.4),0 0 1px rgba(0, 0, 0, 0.5) inset,0 0 0 99px var(--thumb-color) inset;--thumb-shadow-active:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px var(--primary-color) inset,0 0 3px rgba(0, 0, 0, 0.4);--thumb-shadow-hover:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px darkorange inset,0 0 3px rgba(0, 0, 0, 0.4);--ticks-thickness:1px;--ticks-height:5px;--ticks-gap:var(--ticks-height, 0);--ticks-color:transparent;--step:1;--ticks-count:(var(--max) - var(--min))/var(--step);--maxTicksAllowed:1000;--too-many-ticks:Min(1, Max(var(--ticks-count) - var(--maxTicksAllowed), 0));--x-step:Max(var(--step), var(--too-many-ticks) * (var(--max) - var(--min)));--tickIntervalPerc_1:Calc((var(--max) - var(--min)) / var(--x-step));--tickIntervalPerc:calc((100% - var(--thumb-size)) / var(--tickIntervalPerc_1) * var(--tickEvery, 1));--value-a:Clamp(var(--min), var(--value, 0), var(--max));--value-b:var(--value, 0);--text-value-a:var(--text-value, "");--completed-a:calc((var(--value-a) - var(--min)) / (var(--max) - var(--min)) * 100);--completed-b:calc((var(--value-b) - var(--min)) / (var(--max) - var(--min)) * 100);--ca:Min(var(--completed-a), var(--completed-b));--cb:Max(var(--completed-a), var(--completed-b));--thumbs-too-close:Clamp(-1, 1000 * (Min(1, Max(var(--cb) - var(--ca) - 5, -1)) + 0.001), 1);--thumb-close-to-min:Min(1, Max(var(--ca) - 5, 0));--thumb-close-to-max:Min(1, Max(95 - var(--cb), 0))}` +
@@ -1303,7 +1348,12 @@
           const rules = styleSheet.cssRules || styleSheet.rules;
           return rules.length > 0 && rules[0].cssText.includes("background-color: rebeccapurple");
         } catch (e) {
-          return __console("error", "站点CSP策略阻止警告：\r\n当前站点CSP阻止内部样式的加载与解析，可尝试通过“Disable-CSP”扩展获取相应权限。");
+          return __console(
+            "error",
+            IS_CHN
+              ? "站点CSP策略阻止警告:\r\n当前站点CSP阻止内部样式的加载与解析，可尝试通过“Disable-CSP”扩展获取相应权限。"
+              : "CSP Blocking Warning:\r\nThe current site CSP is blocking the loading and parsing of internal styles, get permissions by 'Disable-CSP'."
+          );
         } finally {
           safeRemove(`style#${testId}`, dE);
         }
@@ -1381,7 +1431,7 @@
             configurable: true,
             enumerable: true,
             value: function () {
-              const value = def.variable.prototype.getScreenCTM.call(this);
+              const value = def.variable.prototypes.getScreenCTM.call(this);
               const newSVGMatrix = this.ownerSVGElement.createSVGMatrix();
               const newValue = new Proxy(value, {
                 get: function (target, proper) {
@@ -1403,7 +1453,7 @@
             configurable: true,
             enumerable: true,
             value: function () {
-              const list = def.variable.prototype.getClientRects.call(this);
+              const list = def.variable.prototypes.getClientRects.call(this);
               const newRectlist = new Set();
               for (let i = 0, l = list.length; i < l; i++) {
                 let newRect = new Proxy(list[i], {
@@ -1423,7 +1473,7 @@
             configurable: true,
             enumerable: true,
             value: function () {
-              const value = def.variable.prototype.getBoundingClientRect.call(this);
+              const value = def.variable.prototypes.getBoundingClientRect.call(this);
               const newValue = new Proxy(value, {
                 get: function (target, proper) {
                   return Reflect.get(target, proper) / scaleFactor;
@@ -1498,7 +1548,8 @@
           this.canvasContext.font = `${this.fontSize}px ${this.originFont.toUpperCase() === fontName.toUpperCase() ? this.originFont : `'${fontName}',${this.originFont}`}`;
           this.canvasContext.fillText(this.fontText, this.canvasWidth / 2, this.canvasHeight / 2);
           const fontData = this.canvasContext.getImageData(0, 0, this.canvasWidth, this.canvasHeight).data;
-          return JSON.stringify(Array.from(fontData).filter(Boolean));
+          const fontWidth = this.canvasContext.measureText(this.fontText).width;
+          return { fontData: JSON.stringify(Array.from(fontData).filter(Boolean)), fontWidth };
         } catch (e) {
           ERROR("FontFaceSetObserver.checkFont:", e.message);
           return null;
@@ -1508,10 +1559,11 @@
         if (typeof font !== "string" || !font) return false;
         if (this.originFont.toUpperCase().includes(font.toUpperCase())) return true;
         this.detectFontData = this._checkFont(font);
-        const fontSupport = this.originFontData !== this.detectFontData;
+        if (!this.detectFontData) return false;
+        const fontSupport = this.originFontData.fontData !== this.detectFontData.fontData || this.originFontData.fontWidth !== this.detectFontData.fontWidth;
         fontSupport &&
           DEBUG("detect Fonts: <Detected>", {
-            data: JSON.parse(this.detectFontData),
+            data: this.detectFontData,
             font: unescape(font.replace(/\\/g, "%u")),
           });
         return fontSupport;
@@ -1629,7 +1681,9 @@
 
     /* FONT_RENDERING_PREPROCESSING */
 
-    ~(async function (ROOT_SECRET_KEY, configureData, customMonoData, excludeSiteData, fontCustomSetData, fontScaleDef, fontOverrideDef) {
+    ~(async function (requestCodeAndFunc, configureData, customMonoData, excludeSiteData, fontCustomSetData, fontScaleDef, fontOverrideDef) {
+      const { code: ROOT_SECRET_KEY, func: callback } = requestCodeAndFunc();
+      if (!inspectLicense()?.inspect()) return callback(IS_DEBUG);
       let exSite = await excludeSiteData();
       let _config_data_ = await configureData();
       let { maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, isFixViewport, isCloseTip, isCustomMono, rebuild, curVersion, globalDisable } = _config_data_;
@@ -1687,7 +1741,7 @@
       );
       const globalCssText = IS_REAL_GECKO && fontface_i ? def.const.style.global : "";
       const monoAllowed = _config_data_.isCustomMono ?? false;
-      const monoFontText = monoAllowed ? `--fr-mono-font:${monoFontList || INITIAL_VALUES.monospacedFont},ui-monospace,${IS_REAL_GECKO ? "consolas" : "monospace"};` : ``;
+      const monoFontText = monoAllowed ? `--fr-mono-font:${monoFontList || INITIAL_VALUES.monospacedFont},ui-monospace,${IS_REAL_GECKO ? "'Courier New'" : "monospace"};` : ``;
       const monoShadow = monoAllowed ? `--fr-mono-shadow:0 0 0 currentcolor;` : ``;
       const monoFeatureText = monoAllowed ? `--fr-mono-feature:${monoFeature || INITIAL_VALUES.monospacedFeature};` : ``;
       const rootPseudoClass = `:root{--fr-font-basefont:${INITIAL_VALUES.fontBase};--fr-font-fontscale:${fontScale};--fr-font-family:${CONST_VALUES.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-no-stroke:0px transparent;${monoFontText}${monoShadow}${monoFeatureText}}`;
@@ -1695,18 +1749,27 @@
 
       /* FR_CONFIGURE_SHADOWROOT_CONTENT */
 
-      const isDisabled = CONST_VALUES.isMatchEditorialSite ? `disabled="disabled" title="\u56fe\u6587/\u7f16\u8f91\u7f51\u7ad9\u81ea\u52a8\u7981\u7528" ` : ``;
-      const tFixViewport =
-        `<!-- Viewport Fixed -->` +
+      const isDisabled = CONST_VALUES.isMatchEditorialSite
+        ? `disabled="disabled" title="${IS_CHN ? "图文/编辑网站自动禁用" : "Graphic/editing websites are automatically disabled"}" `
+        : ``;
+      const tFixViewport = String(
         `<span id="${def.id.fviewport}" style="width:auto;color:#666666;font-size:12px">
-          (<label title="如果开启它后出现网页加载或样式问题，请关闭之。">视口修正</label>
+          (${
+            IS_CHN
+              ? "<label title='如果开启后出现样式问题，请关闭之。'>视口修正</label>"
+              : "<label title='Fix Viewport Unit, if occurs style error, please turn it off.'>Fix VPU</label>"
+          }
           <input type="checkbox" id="${def.id.fixViewport}" ${CONST_VALUES.fixViewport ? "checked" : ""}/>)
-        </span>`;
-      const tFontSizeHTML =
-        `<!-- Font Size -->` +
+        </span>`
+      );
+      const tFontSizeHTML = String(
         `<li id="${def.id.fontSize}">
           <div class="${def.class.flex}">
-            <span style="margin:0;padding:0" title="双击编辑站点缩放修正设置数据" id="${def.const.seed}_fontscale_defined">字体比例缩放</span>
+            ${
+              IS_CHN
+                ? `<span style="margin:0;padding:0" title="双击编辑站点缩放修正设置数据" id="${def.const.seed}_fontscale_defined">字体比例缩放</span>`
+                : `<span style="margin:0;padding:0" title="Double-click to edit the site scaling correction setting" id="${def.const.seed}_fontscale_defined">Font Scaling</span>`
+            }
             ${isFixViewport ? tFixViewport : ""}
             <input id="${def.id.fontScale}" type="text" data-fr-type="number" maxlength="5" ${isDisabled}/>
           </div>
@@ -1716,21 +1779,25 @@
             <output></output>
             <div class='${def.class.rangeProgress}'></div>
           </div>
-        </li>`;
-      const tFixStrokeHTML =
-        `<!-- Bold Fixed -->` +
+        </li>`
+      );
+      const tFixStrokeHTML = String(
         `<span id="${def.id.fstroke}" style="width:auto;color:#666666;font-size:12px">
-          (<label title="如果开启它后出现明显的卡顿现象，请关闭之。">粗体修正</label>
+          (${
+            IS_CHN
+              ? `<label title="如果开启后出现卡顿现象，请关闭之。">粗体修正</label>`
+              : `<label title="Fix bold style with stroke, if occurs obvious lagging, please turn it off.">Fix Bold</label>`
+          }
           <input type="checkbox" id="${def.id.fixStroke}" ${CONST_VALUES.fixStroke ? "checked" : ""} />)
-        </span>`;
-      const tHTML =
-        `<!-- Configure Page -->` +
+        </span>`
+      );
+      const tHTML = String(
         `<div id="${def.id.container}">
           <fieldset id="${def.id.field}" style="display:block">
             <legend class="${def.class.title}">
               <span id="${def.const.seed}_scriptname" title="${def.variable.scriptName} v${curVersion}" style="color:#8b0000!important">${def.variable.scriptName}</span>
               <span class="${def.class.guide}">
-                <div class="${def.class.rotation}" title="打开脚本使用帮助文档" height="24" width="24"/>
+                <div class="${def.class.rotation}" title="${IS_CHN ? "打开脚本使用帮助文档" : "Open Usage Document"}" height="24" width="24"/>
                   <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24" viewBox="0,0,255.99431,255.99431"><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="0" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode:normal"><g transform="scale(0.5,0.5)"><path d="M504.1,256c0,-137 -111.1,-248.1 -248.1,-248.1c-137,0 -248.1,111.1 -248.1,248.1c0,137 111.1,248.1 248.1,248.1c137,0 248.1,-111.1 248.1,-248.1z" fill="#67a5df"></path><path d="M146.1,181.5c0,-13.9 4.5,-28 13.4,-42.3c8.9,-14.3 22,-26.1 39.1,-35.5c17.1,-9.4 37.1,-14.1 60,-14.1c21.2,0 40,3.9 56.2,11.8c16.3,7.8 28.8,18.5 37.7,32c8.9,13.5 13.3,28.1 13.3,43.9c0,12.5 -2.5,23.4 -7.6,32.7c-5.1,9.4 -11.1,17.5 -18,24.3c-7,6.8 -19.4,18.3 -37.5,34.4c-5,4.5 -9,8.5 -12,12c-3,3.4 -5.2,6.6 -6.7,9.4c-1.5,2.9 -2.6,5.7 -3.4,8.6c-0.8,2.9 -2,7.9 -3.6,15.1c-2.8,15.2 -11.5,22.9 -26.1,22.9c-7.6,0 -14,-2.5 -19.2,-7.5c-5.2,-5 -7.8,-12.4 -7.8,-22.2c0,-12.3 1.9,-23 5.7,-32c3.8,-9 8.9,-16.9 15.2,-23.7c6.3,-6.8 14.8,-14.9 25.5,-24.3c9.4,-8.2 16.1,-14.4 20.3,-18.6c4.2,-4.2 7.7,-8.8 10.5,-14c2.9,-5.1 4.3,-10.7 4.3,-16.7c0,-11.7 -4.4,-21.6 -13.1,-29.7c-8.7,-8.1 -20,-12.1 -33.7,-12.1c-16.1,0 -28,4.1 -35.6,12.2c-7.6,8.1 -14.1,20.1 -19.3,35.9c-5,16.6 -14.4,24.8 -28.3,24.8c-8.2,0 -15.1,-2.9 -20.8,-8.7c-5.6,-5.6 -8.5,-11.8 -8.5,-18.6zM253.4,422.3c-8.9,0 -16.7,-2.9 -23.4,-8.7c-6.7,-5.8 -10,-13.9 -10,-24.3c0,-9.2 3.2,-17 9.7,-23.3c6.4,-6.3 14.4,-9.4 23.7,-9.4c9.2,0 17,3.2 23.3,9.4c6.3,6.3 9.4,14.1 9.4,23.3c0,10.3 -3.3,18.3 -9.9,24.2c-6.6,5.9 -14.2,8.8 -22.8,8.8z" fill="#ffffff"></path></g></g></svg>
                 </div>
               </span>
@@ -1741,7 +1808,11 @@
               </li>
               <li id="${def.id.fontFace}">
                 <div style="margin:0;padding:0">
-                  <span title="双击编辑自定义字体重写数据"  id="${def.const.seed}_fontoverride_defined">字体重写</span>（默认\uff1a开）
+                  ${
+                    IS_CHN
+                      ? `<span title="双击编辑自定义字体重写数据"  id="${def.const.seed}_fontoverride_defined">字体重写</span>（默认\uff1a开）`
+                      : `<span title="Double-click to edit custom font rewrite data"  id="${def.const.seed}_fontoverride_defined">Font Rewrite (ON*)</span>`
+                  }
                 </div>
                 <div style="margin:0;padding:0;height:32px;align-self:center">
                   <input type="checkbox" id="${def.id.fface}" class="${def.class.checkbox}" ${CONST_VALUES.fontFace ? "checked" : ""} />
@@ -1749,7 +1820,7 @@
                 </div>
               </li>
               <li id="${def.id.fontSmooth}">
-                <div style="margin:0;padding:0">字体平滑（默认\uff1a开）</div>
+                <div style="margin:0;padding:0">${IS_CHN ? "字体平滑（默认\uff1a开）" : "Font Smooth (ON*)"}</div>
                 <div style="margin:0;padding:0;height:32px;align-self:center">
                   <input type="checkbox" id="${def.id.smooth}" class="${def.class.checkbox}" ${CONST_VALUES.fontSmooth ? "checked" : ""} />
                   <label for="${def.id.smooth}"></label>
@@ -1758,7 +1829,7 @@
               ${def.const.isFontsize ? tFontSizeHTML : ""}
               <li id="${def.id.fontStroke}">
                 <div class="${def.class.flex}">
-                  <span style="margin:0;padding:0">字体描边尺寸</span>
+                  <span style="margin:0;padding:0">${IS_CHN ? "字体描边尺寸" : "Font Stroke"}</span>
                   ${IS_REAL_BLINK ? tFixStrokeHTML : ""}
                   <input id="${def.id.strokeSize}" type="text" data-fr-type="number" maxlength="5" />
                 </div>
@@ -1771,7 +1842,7 @@
               </li>
               <li id="${def.id.fontShadow}">
                 <div class="${def.class.flex}">
-                  <span style="margin:0;padding:0">字体阴影尺寸</span>
+                  <span style="margin:0;padding:0">${IS_CHN ? "字体阴影尺寸" : "Font Shadow"}</span>
                   <input id="${def.id.shadowSize}" type="text" data-fr-type="number" maxlength="4" />
                 </div>
                 <div class="${def.class.range}" data-ticks-position="top"
@@ -1783,58 +1854,68 @@
               </li>
               <li id="${def.id.shadowColor}">
                 <div style="margin:0;padding:0">
-                  <span style="margin:0;padding:0">阴影颜色</span>
+                  <span style="margin:0;padding:0">${IS_CHN ? "阴影颜色" : "SDColor"}</span>
                   <span class="${def.class.tooltip}">
-                    <span class="${def.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
+                    <span class="${def.class.emoji}" title="${IS_CHN ? "单击查看帮助" : "Click for help"}">\ud83d\udd14</span>
                     <span class="${def.class.tooltip} ${def.class.ps3}">
-                      <p>阴影颜色可通过点击色块激活拾色器选择，也可自定义填写，格式支持: <em style="color:#cecece">RGB, RGBA, HEX, HEXA.</em> 纯白色的所有格式表示自身颜色 <em style="color:#cecece">currentcolor.</em></p>
-                      <p><em style="color:darkred">注意\uff1a输入数值会自动转化为HEXA格式，但数值保持一致性。错误格式会被替换为刚刚正确显示的数值。</em></p>
+                    ${
+                      IS_CHN
+                        ? `<p>阴影颜色可通过点击色块激活拾色器选择，也可自定义填写，格式支持: <em style="color:#cecece">RGB, RGBA, HEX, HEXA.</em> 纯白色的所有格式表示自身颜色 <em style="color:#cecece">currentcolor.</em></p><p><em style="color:darkred">注意\uff1a输入数值会自动转化为HEXA格式，但数值保持一致性。错误格式会被替换为刚刚正确显示的数值。</em></p>`
+                        : `<p>Shadow colors can be selected by clicking color-block to activate the colorpicker, or custom filled in format that supports: <em style="color:#cecece">RGB, RGBA, HEX, HEXA.</em> Pure white in all formats resolves to its own color <em style="color:#cecece">currentcolor</em></p><p><em style="color:darkred">Note: The value is converted to HEXA. The incorrect value is replaced with the final correct value.</em></p>`
+                    }
                     </span>
                   </span>
                 </div>
                 <div class="${def.class.frColorPicker}">
-                  <input title="输入颜色代码" type="text" id="${def.id.color}" />
+                  <input title="${IS_CHN ? "输入颜色代码" : "Input color code"}" type="text" id="${def.id.color}" />
                 </div>
               </li>
               <li id="${def.id.fontCss}" style="min-width:254px">
-                <div style="margin: 0 0 6px 0">需要渲染的网页元素\uff1a
+                <div style="margin: 0 0 6px 0">${IS_CHN ? "需要渲染的网页元素\uff1a" : "Rendered Elements:"}
                   <span id="${def.id.render}" class="${def.class.tooltip}">
-                    <span class="${def.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
+                    <span class="${def.class.emoji}" title="${IS_CHN ? "单击查看帮助" : "Click for help"}">\ud83d\udd14</span>
                     <span class="${def.class.tooltip} ${def.class.ps4}">
-                      <p>默认为排除大多数网站常用的特殊CSS样式后需要渲染的页面元素。填写格式\uff1a<em style="color:#cecece">:not(.fa)</em> 或 <em style="color:#cecece">:not([class*="fa"])</em> 或 <em style="color:#cecece">,#id .classname</em></p>
-                      <p><em style="color:darkred">该选项为重要参数，默认只读，双击解锁。请尽量不要修改，避免造成样式失效。若失效请重置。</em></p>
-                      <p>如果发现网站部分文字变为乱码或方块，请双击\ud83d\udd14打开修正帮助页面。</p>
+                    ${
+                      IS_CHN
+                        ? `<p>默认为排除大多数网站常用的特殊CSS样式后需要渲染的页面元素。填写格式\uff1a<em style="color:#cecece">:not(.fa)</em> 或 <em style="color:#cecece">:not([class*="fa"])</em> 或 <em style="color:#cecece">,#id.className</em></p><p><em style="color:darkred">该选项为重要参数，默认只读，双击解锁。请尽量不要修改，避免造成样式失效。若失效请重置。</em></p><p>如果发现网站部分文字变为乱码或方块，请双击\ud83d\udd14打开修正帮助页面。</p>`
+                        : `<p>Defaults to page elements that need to be rendered after excluding special CSS styles used on websites. Fill format: <em style="color:#cecece">:not(.fa)</em> or <em style="color:#cecece">:not([class*="fa"])</em></p><p><em style="color:darkred">This option is an important parameter, read-only by default, double-click to unlock.</em></p><p>If some of the text becomes garbled or squares, please double-click \ud83d\udd14 to open the help page.</p>`
+                    }
                     </span>
                   </span>
                   <div id="${def.id.cSwitch}" class="${def.class.switcher}" fr-button-switch="ON">\u2227</div>
                 </div>
-                <textarea placeholder="请谨慎修改默认值，避免渲染失效。" id="${def.id.cssinclued}" class="${def.class.readonly}"
-                  title="重要参数，默认只读，双击解锁。" readonly="readonly">${CONST_VALUES.fontCSS}</textarea>
+                <textarea placeholder="${IS_CHN ? "请谨慎修改默认值，避免渲染失效。" : "Modify defaults carefully to avoid font rendering failures."}"
+                  class="${def.class.readonly}" title="${IS_CHN ? "重要参数，默认只读，双击解锁。" : "Read-only by default, Double-click to unlock."}"
+                  id="${def.id.cssinclued}" readonly="readonly">${CONST_VALUES.fontCSS}</textarea>
               </li>
               <li id="${def.id.fontEx}" style="min-width:254px">
-                <div style="margin: 0 0 6px 0">排除渲染的HTML标签\uff1a
+                <div style="margin: 0 0 6px 0">${IS_CHN ? "排除渲染的HTML标签\uff1a" : "Exclude HTML Labels:"}
                   <span id="${def.id.mono}" class="${def.class.tooltip}">
-                    <span class="${def.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
+                    <span class="${def.class.emoji}" title="${IS_CHN ? "单击查看帮助" : "Click for help"}">\ud83d\udd14</span>
                     <span class="${def.class.tooltip} ${def.class.ps5}">
-                      <p>该选项排除渲染字体描边、字体阴影效果，请将排除渲染的HTML标签用逗号分隔。具体规则请点击顶部旋转的帮助文件图标。</p>
-                      <p><em style="color:darkred">编辑该选项需要CSS知识，如需要排除复杂的样式或标签可通过这里进行添加，样式若混乱请重置。</em></p>
-                      <p>双击\ud83d\udd14可打开自定义等宽字体添加工具，设置您需要的等宽字体。</p>
-                      <p><em style="color:darkred">请注意：使用自定义等宽字体时，请谨慎删除该文本域中的重要代码：<br/>『 <em style="color:#ededed">pre,pre *,code,code *</em> 』</em></p>
+                    ${
+                      IS_CHN
+                        ? `<p>该选项排除渲染字体描边、字体阴影效果，请将排除渲染的HTML标签用逗号分隔。具体规则请点击顶部旋转的帮助文件图标。</p><p><em style="color:darkred">编辑该选项需要CSS知识，如需要排除复杂的样式或标签可通过这里进行添加，样式若混乱请重置。</em></p><p>双击\ud83d\udd14可打开自定义等宽字体添加工具，设置您需要的等宽字体。</p><p><em style="color:darkred">请注意：使用自定义等宽字体时，请谨慎删除该文本域中的重要代码：<br/>『 <em style="color:#ededed">pre,pre *,code,code *</em> 』</em></p>`
+                        : `<p>This option excludes the rendering of font stroke, font shadow effects, please separate the excluded HTML tags with commas.</p><p><em style="color:darkred">Knowledge of CSS is required to edit, If you need to exclude complex styles or tags you can add them here.</em></p><p>Double-click \ud83d\udd14 to open the Custom monospace Font Tool and set the isometric font you need.</p><p><em style="color:darkred">Note: if using custom monospace fonts, Please be careful to delete important codes in this textarea:『 <em style="color:#ededed">pre,pre *,code,code *</em> 』</em></p>`
+                    }
                     </span>
                   </span>
                   <div id="${def.id.eSwitch}" class="${def.class.switcher}" fr-button-switch="ON">\u2227</div>
                 </div>
-                <textarea id="${def.id.cssexclude}" placeholder="请输入要排除渲染的HTML标签，形如: input, em, div[id='test']">${CONST_VALUES.fontEx}</textarea>
+                <textarea placeholder="${
+                  IS_CHN ? "排除描边与阴影渲染的HTML标签，形如:" : "HTML labels to exclude stroke & shadow rendering, such as:"
+                } input, em, div[id$='test']" id="${def.id.cssexclude}">${CONST_VALUES.fontEx}</textarea>
               </li>
               <li id="${def.id.submit}">
-                <button class="${def.class.reset}">重置</button>
-                <button class="${def.class.cancel}">取消</button>
-                <button id="${def.id.backup}">备份</button>
-                <button class="${def.class.submit}">保存</button>
+                <button class="${def.class.reset}">${IS_CHN ? "重置" : "Reset"}</button>
+                <button class="${def.class.cancel}">${IS_CHN ? "取消" : "Close"}</button>
+                <button id="${def.id.backup}" title="${IS_CHN ? "备份与恢复" : "Backup & Restore"}">${IS_CHN ? "备份" : "\u212c"}</button>
+                <button class="${def.class.submit}">${IS_CHN ? "保存" : "Save"}</button>
               </li>
             </ul>
           </fieldset>
-        </div>`;
+        </div>`
+      );
 
       /* SHOW_SCRIPT_PACKAGE_INFORMATION */
 
@@ -1843,7 +1924,9 @@
           if (typeof def.const.exSitesIndex === "undefined") {
             __console(
               "shown-system-info",
-              `%c${def.variable.scriptName}\r\n%cINTRO.URL:\u0020https://f9y4ng.likes.fans/FontRendering\r\n%c\u259e\u0020脚本版本\uff1a%cV%s%c%s%c\r\n\u259e\u0020个性化设置\uff1a%c%s%c/%s（当前设置：%s）\r\n%c\u259e\u0020本地备份\uff1a%s\u3000\u259a\u0020字体缩放\uff1a%s\r\n\u259e\u0020保存预览\uff1a%s\u3000\u259a\u0020视口修正\uff1a%s\r\n%c\u259e\u0020渲染字体\uff1a%s\r\n\u259e\u0020字体平滑\uff1a%s\u3000\u259a\u0020字体重写\uff1a%s\r\n\u259e\u0020字体描边\uff1a%s\u3000\u259a\u0020字体阴影\uff1a%s`,
+              IS_CHN
+                ? `%c${def.variable.scriptName}\r\n%cINTRO.URL:\u0020https://f9y4ng.likes.fans/FontRendering\r\n%c\u259e\u0020脚本版本\uff1a%cV%s%c%s%c\r\n\u259e\u0020个性化设置\uff1a%c%s%c/%s（当前设置：%s）\r\n%c\u259e\u0020本地备份\uff1a%s\u3000\u259a\u0020字体缩放\uff1a%s\r\n\u259e\u0020保存预览\uff1a%s\u3000\u259a\u0020视口修正\uff1a%s\r\n%c\u259e\u0020渲染字体\uff1a%s\r\n\u259e\u0020字体平滑\uff1a%s\u3000\u259a\u0020字体重写\uff1a%s\r\n\u259e\u0020字体描边\uff1a%s\u3000\u259a\u0020字体阴影\uff1a%s`
+                : `%c${def.variable.scriptName}\r\n%cINTRO.URL: https://f9y4ng.likes.fans/FontRendering\r\n%c\u259e Script Version: %cV%s%c%s%c\r\n\u259e Customize Total: %c%s%c/%s (current: %s)\r\n%c\u259e Backups: %s\u3000\u259a Font Scaling: %s\r\n\u259e Preview: %s\u3000\u259a Fix Viewport: %s\r\n%c\u259e Rendering Font: %s\r\n\u259e Font Smooth: %s\u3000\u259a Font Rewrite: %s\r\n\u259e Font Stroke: %s\u3000\u259a Font Shadow: %s`,
               "color:#dc143c;font:normal 700 16px/150% system-ui,-apple-system,BlinkMacSystemFont,sans-serif",
               "color:#777777;font:italic 400 10px/180% monospace",
               "color:#708090;font-size:12px;line-height:180%",
@@ -1856,7 +1939,7 @@
               def.count.domainCount,
               "color:#4682b4;font-size:12px;line-height:180%",
               maxPersonalSites,
-              typeof def.const.domainIndex !== "undefined" ? "\u81ea\u5b9a\u4e49" : "\u5168\u5c40",
+              typeof def.const.domainIndex !== "undefined" ? (IS_CHN ? "\u81ea\u5b9a\u4e49" : "Custom") : IS_CHN ? "\u5168\u5c40" : "Global",
               "color:#4682b4;font-size:12px;line-height:180%",
               isBackupFunction ? "ON " : "OFF",
               def.const.isFontsize
@@ -1870,7 +1953,7 @@
               isPreview ? "ON " : "OFF",
               isFixViewport ? "ON " : "OFF",
               "color:teal;font-size:12px;line-height:180%",
-              fontface_i ? def.const.reFontFace : "\u5df2\u5173\u95ed\uff08\u91c7\u7528" + def.const.reFontFace + "\uff09",
+              fontface_i ? def.const.reFontFace : IS_CHN ? `\u5df2\u5173\u95ed\uff08\u91c7\u7528${def.const.reFontFace}\uff09` : `OFF (using ${def.const.reFontFace})`,
               CONST_VALUES.fontSmooth ? "ON " : "OFF",
               CONST_VALUES.fontFace ? "ON " : "OFF",
               CONST_VALUES.fontStroke ? "ON " : "OFF",
@@ -1879,7 +1962,11 @@
           } else {
             __console(
               "shown-exclude-info",
-              `%c${def.variable.scriptName}\r\n%c${TOP_HOST.toUpperCase()} 已在排除渲染列表内，若要重新渲染，请在脚本菜单中打开重新渲染。%s`,
+              `%c${def.variable.scriptName}\r\n%c${TOP_HOST.toUpperCase()} ${
+                IS_CHN
+                  ? "已在排除渲染列表内，若要重新渲染，请在脚本菜单中打开重新渲染。"
+                  : "is already in the excluded rendering list. To re-render, please turn it on in the script menu."
+              } %s`,
               "color:#dc143c;font:normal 700 16px/150% system-ui,-apple-system,BlinkMacSystemFont,sans-serif",
               "color:indigo;font-size:12px;line-height:180%",
               isHotkey && !IS_CHEAT_UA ? `(${capitalize(os).startsWith("Mac") ? "Option" : "Alt"}+X)` : ""
@@ -1899,7 +1986,9 @@
           isCheatUA &&
             __console(
               "warn",
-              `%c浏览器UA异常检测警告：%c${trim}伪造userAgent信息会造成脚本部分功能失效，如需全功能请恢复浏览器默认userAgent信息。`,
+              IS_CHN
+                ? `%c浏览器UA异常检测警告：%c${trim}伪造userAgent信息会造成脚本部分功能失效，如需全功能请恢复浏览器默认userAgent信息。`
+                : `%cBrowser UA Detection Warning: %c${trim}Fake userAgent information will cause part of the script function is invalidated, if you need full functionality, please restore the browser default userAgent information.`,
               "display:inline-block;padding:4px 0;font-weight:700",
               "display:inline-block;line-height:150%"
             );
@@ -2142,16 +2231,31 @@
         return fmt;
       }
 
+      function inspectLicense() {
+        if (!ROOT_SECRET_KEY) return;
+        try {
+          const source = decodeURI("%C3%99%C3%97%C3%9D%7F%7D%C2%9A%7D%C3%9D%C2%9A%7F%C3%9EZ%C3%B7%C3%87%1B%C3%99%C3%B6%C2%BB%C3%93n%C3%BC%C3%AB%C2%A7x");
+          const result = sqliteDBDataAccess(encrypt(source, null), def.variable.undef, ROOT_SECRET_KEY);
+          const subkey = new RegExp(def.variable.scriptAuthor).exec(decrypt(result))?.[0];
+          return {
+            keycode: () => result,
+            inspect: (key = decrypt(result)) => key.includes(subkey),
+          };
+        } catch (e) {
+          ERROR("inspectLicense:", e.message);
+        }
+      }
+
       async function detectAndReconstructData(order) {
         const keys = await GMlistValues();
         if (def.const.structureError === true || (typeof rebuild === "boolean" && rebuild === order)) {
-          for (let key of keys) {
-            if (key !== "_CONFIGURE_" || def.const.structureError === true) GMdeleteValue(key);
-          }
+          keys.forEach(key => (key !== "_CONFIGURE_" || def.const.structureError === true) && GMdeleteValue(key));
           if (def.const.structureError !== true) {
             __console(
               "warn",
-              "%c数据已重建\r\n%c程序开启升级后数据重建选项，所有配置数据已初始化，您可手动还原正确的备份数据。但强烈建议您重新配置参数，以使用最新参数功能！",
+              IS_CHN
+                ? "%c数据已重建\r\n%c程序开启升级后数据重建选项，所有配置数据已初始化，您可手动还原正确的备份数据。但强烈建议您重新配置参数，以使用最新参数功能！"
+                : "%cData has been rebuilt\r\n%cThe program turns on the option to rebuild data after an upgrade. all configuration data has been initialized. you can manually restore the correct backup data. but it is strongly recommended that you reconfigure the parameters to use the latest parameter functions!",
               "font-weight:700",
               "font-weight:400"
             );
@@ -2160,7 +2264,9 @@
           } else {
             __console(
               "error",
-              "%c数据重置警告\r\n%c因检测到存储数据解析异常或被非法篡改，为确保程序正常运行，所有配置数据已初始化，请手动还原正确的本地备份数据！",
+              IS_CHN
+                ? "%c数据重置警告\r\n%c因检测到存储数据解析异常或被非法篡改，为确保程序正常运行，所有配置数据已初始化，请手动还原正确的本地备份数据！"
+                : "%cData Reset Warning\r\n%c Due to the detection of abnormal parsing of stored data or illegal tampering, all configuration data has been initialized in order to ensure the normal operation of the program, please restore the correct local backup data manually!",
               "font-weight:700",
               "font-weight:400"
             );
@@ -2194,33 +2300,49 @@
             `color:${dataStatus ? "green" : "red"};font-style:italic;font-family:monospace`
           );
         }
-        return Boolean(keys);
+        return Boolean(keys.length);
       }
 
       async function hintUpdateInfo(url, curVersion) {
         const CANDIDATE_FIELD =
           typeof curVersion === "undefined"
-            ? "新安装首次运行"
+            ? IS_CHN
+              ? "新安装首次运行"
+              : "new-install excuted"
             : curVersion === null
-            ? "数据被重置后运行"
+            ? IS_CHN
+              ? "数据被重置后运行"
+              : "data-rebuilt excute"
             : curVersion === def.variable.curVersion
-            ? "您通过历史查询"
-            : "更新后首次运行";
+            ? IS_CHN
+              ? "您通过历史查询"
+              : "historical query for"
+            : IS_CHN
+            ? "更新后首次运行"
+            : "update first excute";
         const FIRST_INSTALL_NOTICE_WARNING =
           typeof curVersion === "undefined"
-            ? `<li class="${def.const.seed}_init"><strong>温馨提示</strong> 首次加载此脚本时，默认使用内置参数进行渲染，若显示效果不佳，<b>属于正常情况</b>。请根据您的显示器及浏览器的本地配置，<b>重新设定</b>渲染参数以达到最佳效果！</li>`
+            ? IS_CHN
+              ? `<li class="${def.const.seed}_init"><strong>温馨提示</strong> 首次加载此脚本时，默认使用内置参数进行渲染，若显示效果不佳，<b>属于正常情况</b>。请根据您的显示器及浏览器的本地配置，<b>重新设定</b>渲染参数以达到最佳效果！</li>`
+              : `<li class="${def.const.seed}_init" style="word-break:keep-all;"><strong>Kind Tips</strong> When first loaded, built-in parameters are used for rendering. If the effect is weak, it's <b>NORMAL</b>! Please <b>Reset</b> the parameters according to the your local monitor & browser to achieve the best effect!</li>`
             : ``;
         const STRUCTURE_ERROR_NOTICE_WARNING =
           def.const.structureError === true
-            ? `<li class="${def.const.seed}_warn"><strong>数据重置警告</strong> 由于检测到本地运行的存储数据解析异常或被非法篡改，为确保程序正常运行，所有设置数据已初始化，请您手动还原正确的本地备份数据！</li>`
+            ? IS_CHN
+              ? `<li class="${def.const.seed}_warn"><strong>数据重置警告</strong> 由于检测到本地运行的存储数据解析异常或被非法篡改，为确保程序正常运行，所有设置数据已初始化，请您手动还原正确的本地备份数据！</li>`
+              : `<li class="${def.const.seed}_warn" style="word-break:keep-all;"><strong>Data Reset Warning</strong> Due to the detection of abnormal parsing or illegal tampering of local storage data, all config data has been initialized, please restore the correct local backup-data manually!</li>`
             : curVersion === null
-            ? `<li class="${def.const.seed}_warn" style="color:indigo!important"><strong>数据已重建</strong> 程序开启升级后数据重建选项，所有数据已初始化。您仍可通过备份还原之前的设置数据，但<b>强烈建议</b>您重新配置参数，以使用新功能！记得及时重新备份哟！</li>`
+            ? IS_CHN
+              ? `<li class="${def.const.seed}_warn" style="color:indigo!important"><strong>数据已重建</strong> 脚本开启升级后数据重建选项，所有数据已初始化。您仍可通过备份还原之前的设置数据，但<b>强烈建议</b>您重新配置参数，以使用新功能！记得及时重新备份哟！</li>`
+              : `<li class="${def.const.seed}_warn" style="color:indigo!important;word-break:keep-all;"><strong>Data has been reconstructed</strong> The script has turned on reconstruct option after upgrade, and all data has been initialized. You can still restore the previous config data through backup, but it's <b>strongly recommended</b> that reconfigure data to use the new features! Remember to backup again in time!</li>`
             : ``;
         let frDialog = new FrDialogBox({
-          trueButtonText: "好，去看看",
-          falseButtonText: "不，算了吧",
-          messageText: `<p style="word-break:break-all;"><span style="color:tomato;font:italic 700 22px/150% Arial">您好\uff01</span>这是${CANDIDATE_FIELD}<span style="padding:4px;font-weight:700;">${def.variable.scriptName}</span>更新版本<span style="padding:4px;color:tomato;font:italic 700 22px/150% Candara,Times New Roman!important">V${def.variable.curVersion}</span>，更新内容如下\uff1a</p><p><ul id="${def.const.seed}_update">${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}${UPDATE_VERSION_NOTICE}</ul></p><p>建议您先看看 <strong style="color:tomato;font-weight:700">新版帮助文档</strong> ，去看一下吗？</p>`,
-          titleText: "脚本更新 - 温馨提示",
+          trueButtonText: IS_CHN ? "好，去看看" : "Yes, Let's go",
+          falseButtonText: IS_CHN ? "不，算了吧" : "No, Thanks",
+          messageText: IS_CHN
+            ? `<p style="word-break:break-all;"><span style="color:tomato;font:italic 700 22px/150% Arial">您好\uff01</span>这是${CANDIDATE_FIELD}<span style="padding:4px;font-weight:700;">${def.variable.scriptName}</span>更新版本<span style="padding:4px;color:tomato;font:italic 700 22px/150% Candara,Times New Roman!important">V${def.variable.curVersion}</span>，更新内容如下\uff1a</p><p><ul id="${def.const.seed}_update">${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}${UPDATE_VERSION_NOTICE}</ul></p><p>建议您先去查阅 <strong style="color:tomato;font-weight:700;font-style:italic">新版使用文档</strong> ，要去看一下吗？</p>`
+            : `<p style="word-break:break-all;line-height:180%!important;"><span style="color:tomato;font:normal 700 20px/150% Arial">Hi! </span>This is ${CANDIDATE_FIELD} "<span style="padding:4px;font-weight:700;">${def.variable.scriptName}</span>" in Version<span style="padding:0px 4px;color:tomato;font:italic 700 20px/130% Candara,Times New Roman!important">V${def.variable.curVersion}</span>, and the update details are as follows:</p><p><ul id="${def.const.seed}_update">${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}${UPDATE_VERSION_NOTICE}</ul></p><p>Suggest you to view <strong style="color:tomato;font-weight:700;font-style:italic">Usage Document,</strong> okay?</p></p>`,
+          titleText: IS_CHN ? "脚本更新 - 温馨提示" : "Script Updates - Update Tips",
         });
         if (await frDialog.respond()) GMopenInTab(url, false);
         frDialog = null;
@@ -2262,8 +2384,9 @@
                 });
               qS(`.${def.class.title} span.${def.class.guide}`, def.const.configIf)?.addEventListener("click", () => GMopenInTab(`${def.const.greasyfork}#guide`, false));
               qS(`#${def.id.render}`, def.const.configIf)?.addEventListener("dblclick", () => GMopenInTab(`${def.variable.feedback}/42`, false));
-              qS(`#${def.id.field} #${def.const.seed}_scriptname`, def.const.configIf)?.addEventListener("dblclick", function () {
-                hintUpdateInfo(`${def.const.greasyfork}#update`, def.variable.curVersion);
+              qS(`#${def.id.field} #${def.const.seed}_scriptname`, def.const.configIf)?.addEventListener("dblclick", async function () {
+                const uri = IS_CHN ? "字体渲染（自用脚本）" : "Font-Rendering-(Customized)";
+                await hintUpdateInfo(`${def.variable.feedback}/../wiki/${encodeURI(uri)}`, def.variable.curVersion);
                 this.style.userSelect = "none";
               });
             } catch (e) {
@@ -2275,11 +2398,13 @@
         },
         excludeSites: async () => {
           let frDialog = new FrDialogBox({
-            trueButtonText: "确 定",
-            falseButtonText: "自定义排除",
-            neutralButtonText: "取 消",
-            messageText: `<p style="font:italic 700 24px/150% Candara,Times New Roman!important;word-break:break-all">${TOP_HOST}</p><p style="color:#8b0000">该域名下所有页面将被禁止字体渲染\uff01</p><p>确定后当前页面将自动刷新，请确认是否排除？</p>`,
-            titleText: "禁止字体渲染",
+            trueButtonText: IS_CHN ? "确 定" : "OK",
+            falseButtonText: IS_CHN ? "自定义排除" : "Exclusion",
+            neutralButtonText: IS_CHN ? "取 消" : "Cancel",
+            messageText: IS_CHN
+              ? `<p style="font:italic 700 24px/150% Candara,Times New Roman!important;word-break:break-all">${TOP_HOST}</p><p style="color:#8b0000">该域名下所有页面将被禁止字体渲染\uff01</p><p>确定后当前页面将自动刷新，请确认是否排除？</p>`
+              : `<p style="font:italic 700 24px/150% Candara,Times New Roman!important;word-break:keep-all">${TOP_HOST}</p><p style="color:#8b0000">All the webpages under this domain name will be prohibited from font rendering!</p><p>Please confirm to exclude?</p>`,
+            titleText: IS_CHN ? "排除字体渲染" : "Exclude Font Rendering",
           });
           if (await frDialog.respond()) {
             exSite = await excludeSiteData();
@@ -2304,77 +2429,114 @@
           maxPersonalSites = Number(_config_data_.maxPersonalSites) || 100;
           const globalDisabledTrigger = !globalDisable
             ? `<li id="${def.id.gc}">
-                <div class="${def.const.seed}_VIP" title="当您仅需要在特定域名渲染时，可使用此快捷功能关闭全局设置\uff01">\u2468 仅在特定域名生效（全局禁用）</div>
-                <button style="width:max-content;height:max-content;min-width:70px;min-height:32px" id="${def.id.globaldisable}">关闭全局</button>
+                ${
+                  IS_CHN
+                    ? `<div class="${def.const.seed}_VIP" title="当您仅需要在特定域名渲染时，可使用此快捷功能关闭全局设置\uff01">\u2468 仅在特定域名生效（全局禁用）</div><button style="width:max-content;height:max-content;min-width:70px;min-height:32px" id="${def.id.globaldisable}">关闭全局</button>`
+                    : `<div class="${def.const.seed}_VIP" title="To turn off global render when only need to render at specific domain name.">\u2468 Disabled Global Rendering</div><button style="width:max-content;height:max-content;min-width:70px;min-height:32px" id="${def.id.globaldisable}">Disable</button>`
+                }
               </li>`
             : ``;
           let frDialog = new FrDialogBox({
-            trueButtonText: "保存数据",
-            falseButtonText: "脚本主页",
-            neutralButtonText: "取 消",
-            messageText:
-              `<!-- ConfigData Page -->` +
+            trueButtonText: IS_CHN ? "保存数据" : "Save",
+            falseButtonText: IS_CHN ? "脚本主页" : "Homepage",
+            neutralButtonText: IS_CHN ? "取 消" : "Cancel",
+            messageText: String(
               `<ul class="${def.class.main}" style="overflow-x:hidden;box-sizing:content-box;margin:0;padding:5px 0;max-height:255px;overscroll-behavior:contain">
                 <li id="${def.id.bk}">
-                  <div class="${def.const.seed}_VIP" title="养成定期备份的好习惯，保护自己的数据安全\uff01">\u2460 本地备份功能（默认\uff1a开启）</div>
+                  ${
+                    IS_CHN
+                      ? `<div class="${def.const.seed}_VIP" title="养成定期备份的好习惯，保护自己的数据安全\uff01">\u2460 本地备份功能（默认\uff1a开启）</div>`
+                      : `<div class="${def.const.seed}_VIP" title="Keep your data safe with regular backups!">\u2460 Local Backup (Default: ON)</div>`
+                  }
                   <div style="margin:0;padding:0">
                     <input type="checkbox" id="${def.id.isbackup}" class="${def.class.checkbox}" ${isBackupFunction ? "checked" : ""} />
                     <label for="${def.id.isbackup}"></label>
                   </div>
                 </li>
                 <li id="${def.id.pv}">
-                  <div class="${def.const.seed}_VIP" title="无需保存刷新页面，直接预览渲染效果\uff01">\u2461 保存预览功能（默认\uff1a关闭）</div>
+                  ${
+                    IS_CHN
+                      ? `<div class="${def.const.seed}_VIP" title="无需保存刷新页面，直接预览渲染效果\uff01">\u2461 保存预览功能（默认\uff1a关闭）</div>`
+                      : `<div class="${def.const.seed}_VIP" title="Preview the rendering directly without saving and refreshing the page.">\u2461 Save Preview (Default: OFF)</div>`
+                  }
                   <div style="margin:0;padding:0">
                     <input type="checkbox" id="${def.id.ispreview}" class="${def.class.checkbox}" ${isPreview ? "checked" : ""} />
                     <label for="${def.id.ispreview}"></label>
                   </div>
                 </li>
                 <li id="${def.id.fs}">
-                  <div class="${def.const.seed}_VIP" title="实验性功能\uff1a兼容大部分浏览器，但仍在Beta测试阶段\uff01">\u2462 字体缩放功能（默认\uff1a关闭）</div>
+                  ${
+                    IS_CHN
+                      ? `<div class="${def.const.seed}_VIP" title="实验性功能\uff1a兼容大部分浏览器，但仍在Beta测试阶段\uff01">\u2462 字体缩放功能（默认\uff1a关闭）</div>`
+                      : `<div class="${def.const.seed}_VIP" title="Experimental: Compatible with most browsers, but still in Beta.">\u2462 Font Scaling (Default: OFF)</div>`
+                  }
                   <div style="margin:0;padding:0">
                     <input type="checkbox" id="${def.id.isfontsize}" class="${def.class.checkbox}" ${isFontsize ? "checked" : ""} />
                     <label for="${def.id.isfontsize}"></label>
                   </div>
                 </li>
                 <li id="${def.id.fvp}">
-                  <div class="${def.const.seed}_VIP" title="实验性功能\uff1a跟随字体缩放开关，可单独关闭，使用方法查阅帮助文件\uff01">\u2463 视口单位修正（默认\uff1a关闭）</div>
+                  ${
+                    IS_CHN
+                      ? `<div class="${def.const.seed}_VIP" title="实验性功能\uff1a跟随字体缩放开关，可单独关闭，使用方法查阅帮助文件\uff01">\u2463 视口单位修正（默认\uff1a关闭）</div>`
+                      : `<div class="${def.const.seed}_VIP" title="Experimental: Follow the font scaling switch, can be turned off individually.">\u2463 Fix Viewport (Default: OFF)</div>`
+                  }
                   <div style="margin:0;padding:0">
                     <input type="checkbox" id="${def.id.isfixviewport}" class="${def.class.checkbox}" ${isFixViewport ? "checked" : ""} />
                     <label for="${def.id.isfixviewport}"></label>
                   </div>
                 </li>
                 <li id="${def.id.hk}">
-                  <div class="${def.const.seed}_VIP" title="如快捷键有冲突，请在此关闭它\uff01">\u2464 键盘快捷键功能（默认\uff1a开启）</div>
+                  ${
+                    IS_CHN
+                      ? `<div class="${def.const.seed}_VIP" title="如快捷键有冲突，请在此关闭它\uff01">\u2464 键盘快捷键功能（默认\uff1a开启）</div>`
+                      : `<div class="${def.const.seed}_VIP" title="If there is a conflict in the shortcut, please close it.">\u2464 Shortcut Tool (Default: ON)</div>`
+                  }
                   <div style="margin:0;padding:0">
                     <input type="checkbox" id="${def.id.ishotkey}" class="${def.class.checkbox}" ${isHotkey ? "checked" : ""} />
                     <label for="${def.id.ishotkey}"></label>
                   </div>
                 </li>
                 <li id="${def.id.ct}">
-                  <div class="${def.const.seed}_VIP" title="您将无法第一时间获得更新内容，错过重要提示\uff01">\u2465 关闭更新提示功能（不推荐）</div>
+                  ${
+                    IS_CHN
+                      ? `<div class="${def.const.seed}_VIP" title="您将无法第一时间获得更新内容，错过重要提示\uff01">\u2465 关闭更新提示功能（不推荐）</div>`
+                      : `<div class="${def.const.seed}_VIP" title="You won't get update or important tips, which we don't recommend.">\u2465 Turn Off Update Prompts</div>`
+                  }
                   <div style="margin:0;padding:0">
                     <input type="checkbox" id="${def.id.isclosetip}" class="${def.class.checkbox}" ${isCloseTip ? "checked" : ""} />
                     <label for="${def.id.isclosetip}"></label>
                   </div>
                 </li>
                 <li id="${def.id.mps}">
-                  <div class="${def.const.seed}_VIP" title="防止页面加载缓慢，不建议设置过高的数值\uff01">\u2466 个性化设置总数（默认\uff1a100）</div>
+                  ${
+                    IS_CHN
+                      ? `<div class="${def.const.seed}_VIP" title="防止页面加载缓慢，不建议设置过高的数值\uff01">\u2466 个性化设置总数（默认\uff1a100）</div>`
+                      : `<div class="${def.const.seed}_VIP" title="Prevents slow loading, not recommended to set a higher value.">\u2466 Customize Total (Defalut: 100)</div>`
+                  }
                   <div style="margin:0 5px 0 0;padding:0">
                     <input maxlength="4" id="${def.id.maxps}" placeholder="100" value="${maxPersonalSites}"
                       style="box-sizing:border-box;padding:4px 5px;width:70px;min-width:70px;border:2px solid #b8860b;border-radius:4px;color:#333333;text-align:center;font:normal 500 16px/150% Impact,Times,serif!important" />
                   </div>
                 </li>
                 <li id="${def.id.flc}">
-                  <div class="${def.const.seed}_VIP" title="安装新字体后，请先重启浏览器再重建全局缓存\uff01">\u2467 字体列表全局缓存（时效\uff1a7天）</div>
-                  <button style="width:max-content;height:max-content;min-width:70px;min-height:32px" id="${def.id.flcid}">重建缓存</button>
+                  ${
+                    IS_CHN
+                      ? `<div class="${def.const.seed}_VIP" title="安装新字体后，请先重启浏览器再重建全局缓存\uff01">\u2467 字体列表全局缓存（时效\uff1a7天）</div>`
+                      : `<div class="${def.const.seed}_VIP" title="After installing new fonts, restart browser before rebuilding the global cache.">\u2467 FontList Cache (Expired: 7d)</div>`
+                  }
+                  <button style="width:max-content;height:max-content;min-width:70px;min-height:32px" id="${def.id.flcid}">${IS_CHN ? "重建缓存" : "Rebuild"}</button>
                 </li>
                 ${globalDisabledTrigger}
               </ul>
-              <div id="${def.id.feedback}" title="遇到问题，建议先看看脚本帮助文件。"
-                style="box-sizing:content-box;margin:0 0 0 5px;padding:4px 0;width:auto;height:auto;color:#333333;font-style:normal;font-size:16px;cursor:help">
-                  \ud83e\udde1<span style="font-weight:700">\u0020如果您遇到错误或提建议，请及时向我反馈\u0020</span>\ud83e\udde1
-              </div>`,
-            titleText: `<span>高级核心功能设置</span><span style="font-size:16px!important">- Version ${def.variable.curVersion} -</span>`,
+              <div style="box-sizing:content-box;margin:0 0 0 5px;padding:4px 0;width:auto;height:auto;color:#333333;font-style:normal;font-size:16px;cursor:pointer"
+                id="${def.id.feedback}">\ud83e\udde1<span style="font-weight:700">\u0020${
+                IS_CHN ? "如果您遇到错误或提建议，请及时向我反馈" : "Feedback for any errors or suggestions"
+              }\u0020</span>\ud83e\udde1</div>`
+            ),
+            titleText: String(
+              `<span>${IS_CHN ? "高级核心功能设置" : "Advanced Core Settings"}</span><span style="font-size:16px!important">- Version ${def.variable.curVersion} -</span>`
+            ),
           });
           let _bk, _pv, _fs, _fvp, _hk, _ct, _mps;
           _bk = Boolean(qS(`#${def.id.isbackup}`, def.const.dialogIf)?.checked);
@@ -2391,17 +2553,23 @@
           });
           const ctNode = qS(`#${def.id.isclosetip}`, def.const.dialogIf);
           ctNode?.addEventListener("click", function () {
-            const info = `关闭更新提示，您将不能及时获取更新信息，或错过重要的使用提示和警示通告。如遇重大功能升级，忽略更新提示有几率影响正常使用。双击字体渲染设置窗口顶部的脚本名称（或访问Github主页），可查看历史更新提示。\r\n\r\n请确认是否关闭更新提示功能？`;
+            const info = IS_CHN
+              ? `关闭更新提示，您将不能及时获取更新信息，或错过重要的使用提示和警示通告。如遇重大功能升级，忽略更新提示有几率影响正常使用。双击字体渲染设置窗口顶部的脚本名称（或访问Github主页），可查看历史更新提示。\r\n\r\n请确认是否关闭更新提示功能？`
+              : `Turn off the update prompt, you will not be able to obtain updated information in time. Double-click the script name at the top of font rendering setting interface (or visit the Github homepage) to view historical update tips. \r\n\r\nPlease confirm to close the update prompt?`;
             if (this.checked) this.checked = Boolean(def.dialog.confirm(info));
           });
           const fsNode = qS(`#${def.id.isfontsize}`, def.const.dialogIf);
           const fvpNode = qS(`#${def.id.isfixviewport}`, def.const.dialogIf);
           fsNode?.addEventListener("click", function () {
-            const info = "字体比例缩放（实验性功能）\r\n\r\n警告：".concat(
+            const info = (IS_CHN ? "字体比例缩放（实验性功能）\r\n\r\n警告：" : "Font scaling (experimental)\r\n\r\nWarning: ").concat(
               IS_REAL_GECKO
-                ? "由于Firefox(Gecko内核)的兼容性原因，会对部分网站样式、功能兼容不足，从而造成样式错乱、页面动作缺失等问题，请根据实际需求酌情使用。\r\n\r\n强烈建议您：使用“浏览器缩放”替代(快捷键：ctrl+-/ctrl++)"
-                : "脚本对视口单位(vw, vh, vm*)已全局修正，由于CORS、CSP策略影响，在部分站点会被浏览器阻止，可通过安装扩展“Allow CORS”、“Allow CSP”来修正。如介意安全问题或有其他顾虑，请不要开启该功能，或单独将“视口单位修正”功能关闭即可。",
-              "\r\n\r\n请确认是否开启字体缩放功能？"
+                ? IS_CHN
+                  ? "由于Firefox(Gecko内核)的兼容性原因，会对部分网站样式、功能兼容不足，从而造成样式错乱、页面动作缺失等问题，请根据实际需求酌情使用。\r\n\r\n强烈建议您：使用“浏览器缩放”替代(快捷键：ctrl+-/ctrl++)"
+                  : "Due to the compatibility of Firefox (Gecko kernel), may cause lack of compatibility with some websites, please use it according to actual needs. \r\n\r\nStrongly recommended: use 'browser zoom' instead (shortcut key: ctrl+-/ctrl++)"
+                : IS_CHN
+                ? "脚本对视口单位(vw, vh, vm*)已全局修正，由于CORS、CSP策略影响，在部分站点会被浏览器阻止，可通过安装扩展“Allow CORS”、“Allow CSP”来修正。如介意安全问题或有其他顾虑，请不要开启该功能，或单独将“视口单位修正”功能关闭即可。"
+                : "The script has been globally corrected for viewport units (vw, vh, vm*). If you have any concerns, please turn off this option, or turn off 'Fix Viewport' separately.",
+              IS_CHN ? "\r\n\r\n请确认是否开启字体缩放功能？" : "\r\n\r\nPlease confirm to enable font scaling?"
             );
             if (this.checked) this.checked = Boolean(def.dialog.confirm(info));
             if (!this.checked && fvpNode?.checked) fvpNode.checked = false;
@@ -2413,10 +2581,12 @@
           const globaldisableNode = qS(`#${def.id.globaldisable}`, def.const.dialogIf);
           globaldisableNode?.addEventListener("click", async () => {
             let frDialog = new FrDialogBox({
-              trueButtonText: "确 定",
-              neutralButtonText: "取 消",
-              messageText: `<p style="color:darkred">下一步操作将关闭默认的全局设置数据，您可以仅在指定的域名保存需要渲染的站点独享数据。请注意，全局数据禁用后，您需要重新配置并保存为全局数据才能启用默认全局渲染规则。</p><p>请确认您是否要禁用全局设置？</p>`,
-              titleText: "禁用全局设置数据",
+              trueButtonText: IS_CHN ? "确 定" : "OK",
+              neutralButtonText: IS_CHN ? "取 消" : "Cancel",
+              messageText: IS_CHN
+                ? `<p style="color:darkred">下一步操作将关闭默认的全局设置数据，您可以仅在指定的域名保存需要渲染的站点独享数据。请注意，全局数据禁用后，您需要重新配置并保存为全局数据才能启用默认全局渲染规则。</p><p>请确认您是否要禁用全局设置？</p>`
+                : `<p style="color:darkred">The next step will clear the global data and you can save site data only on the specified domain name. Note that after global data is disabled, you need to reconfigure and save as global data to re-enable global rendering.</p><p>Please confirm to disable global settings?</p>`,
+              titleText: IS_CHN ? "禁用全局设置数据" : "Disable Global Settings",
             });
             if (await frDialog.respond()) {
               const fontSetData = {
@@ -2440,9 +2610,13 @@
           });
           qS(`#${def.id.flcid}`, def.const.dialogIf)?.addEventListener("click", async () => {
             let frDialog = new FrDialogBox({
-              trueButtonText: "确 定",
-              messageText: `<p style="padding-bottom:6px;color:#b8860b;text-align:center;font-size:18px!important">字体列表全局缓存已重建，当前页面即将刷新\uff01</p><p style="text-align:center"><a style="display:inline-block;overflow:hidden;width:302px;height:237px;border:2px solid #b8860b;border-radius:8px;background:url('${def.const.loadingImg}') 50% 50% no-repeat"><img src='${def.const.fontlistImg}' alt="字体列表全局缓存已重建"/></a></p>`,
-              titleText: "字体列表全局缓存已重建",
+              trueButtonText: IS_CHN ? "确 定" : "OK",
+              messageText:
+                `<p style="padding-bottom:6px;color:#b8860b;text-align:center;font-size:18px!important">` +
+                (IS_CHN ? "字体列表全局缓存已重建，当前页面即将刷新\uff01" : "Rebuilt Fontlist cache and refresh soon!") +
+                `</p><p style="text-align:center"><a style="display:inline-block;overflow:hidden;width:302px;height:237px;border:2px solid #b8860b;` +
+                `border-radius:8px;background:url('${def.const.loadingImg}') 50% 50% no-repeat"><img src='${def.const.fontlistImg}' /></a></p>`,
+              titleText: IS_CHN ? "字体列表全局缓存已重建" : "Rebuilt Fontlist Cache",
             });
             cache.remove("_FONTCHECKLIST_");
             if (await frDialog.respond()) closeConfigurePage({ isReload: true });
@@ -2474,24 +2648,26 @@
             _config_data_.maxPersonalSites = _mps;
             saveData("_CONFIGURE_", _config_data_);
             let frDialog = new FrDialogBox({
-              trueButtonText: "确 定",
-              messageText: "<p style='color:darkgoldenrod'>高级核心功能参数已成功保存，当前页面即将刷新\uff01</p>",
-              titleText: "高级核心功能设置保存",
+              trueButtonText: IS_CHN ? "确 定" : "OK",
+              messageText: `<p style='color:darkgoldenrod'>${IS_CHN ? "高级核心功能参数已成功保存，当前页面即将刷新\uff01" : "Advanced Core Data was saved and refresh soon!"}</p>`,
+              titleText: IS_CHN ? "高级核心功能设置保存" : "Advanced Core Data Save",
             });
             if (await frDialog.respond()) closeConfigurePage({ isReload: true });
             frDialog = null;
           } else {
-            GMopenInTab(`${def.variable.homepage}#字体渲染自用脚本-font-renderinguserjs`, false);
+            GMopenInTab(`${def.variable.homepage}${IS_CHN ? "#字体渲染自用脚本" : "index_en.html#font-rendering-customized"}-font-renderinguserjs`, false);
           }
           frDialog = null;
         },
         includeSites: async () => {
           let frDialog = new FrDialogBox({
-            trueButtonText: "确 定",
-            falseButtonText: "自定义排除",
-            neutralButtonText: "取 消",
-            messageText: `<p style="font:italic 700 24px/150% Candara,'Times New Roman'!important">${TOP_HOST}</p><p style="color:darkgreen">该域名下所有页面将重新进行字体渲染\uff01</p><p>确定后当前页面将自动刷新，请确认是否恢复？</p>`,
-            titleText: "恢复字体渲染",
+            trueButtonText: IS_CHN ? "确 定" : "OK",
+            falseButtonText: IS_CHN ? "自定义排除" : "Exclusion",
+            neutralButtonText: IS_CHN ? "取 消" : "Cancel",
+            messageText: IS_CHN
+              ? `<p style="font:italic 700 24px/150% Candara,'Times New Roman'!important">${TOP_HOST}</p><p style="color:darkgreen">该域名下所有页面将重新进行字体渲染\uff01</p><p>确定后当前页面将自动刷新，请确认是否恢复？</p>`
+              : `<p style="font:italic 700 24px/150% Candara,'Times New Roman'!important">${TOP_HOST}</p><p style="color:darkgreen">All the webpages under this domain name will be allowed from font rendering!</p><p>Please confirm to re-render?</p>`,
+            titleText: IS_CHN ? "恢复字体渲染" : "Allow Font Rendering",
           });
           if (await frDialog.respond()) {
             let panDomain;
@@ -2512,11 +2688,13 @@
               closeConfigurePage({ isReload: true });
             } else {
               let frDialog = new FrDialogBox({
-                trueButtonText: "确 定",
-                falseButtonText: "管 理",
-                neutralButtonText: "取 消",
-                messageText: `<p style="font:italic 700 24px/150% Candara,'Times New Roman'!important">${panDomain}</p><p style="color:darkred">该网站是被以上包含通配符的泛域名所排除渲染的。</p><p>『确定』将自动取消该泛域名下所有的排除项。</p><p>『管理』您将进入自定义排除站点列表手动处理。</p>`,
-                titleText: "恢复泛域名下的字体渲染",
+                trueButtonText: IS_CHN ? "确 定" : "OK",
+                falseButtonText: IS_CHN ? "管 理" : "Manage",
+                neutralButtonText: IS_CHN ? "取 消" : "Cancel",
+                messageText: IS_CHN
+                  ? `<p style="font:italic 700 24px/150% Candara,'Times New Roman'!important">${panDomain}</p><p style="color:darkred">该网站是被以上包含通配符的泛域名所排除渲染的。</p><p>『确定』将自动取消该泛域名下所有的排除项。</p><p>『管理』您将进入自定义排除站点列表手动处理。</p>`
+                  : `<p style="font:italic 700 24px/150% Candara,'Times New Roman'!important">${panDomain}</p><p style="color:darkred">This site is excluded by Pan-domain name.</p><p>『OK』Allow all under this Pan-domain name.</p><p>『Manage』Enter the customized exclusion list.`,
+                titleText: IS_CHN ? "恢复泛域名下的字体渲染" : "Allow Pan-domain Font Rendering",
               });
               if (await frDialog.respond()) {
                 exSite = await excludeSiteData();
@@ -2547,15 +2725,21 @@
                 `<span>${i + 1 > 9 ? i + 1 : "0".concat(i + 1)}. </span>` +
                 `<span style="overflow:hidden;margin-right:auto;padding-left:5px;width:85%;text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all" ` +
                 `title="${domainName}">${domainName}</span><span>[<a id="${def.const.seed}_d_d_l_s_${i}" data-fr-domain="${domainName}" ` +
-                `style="padding:2px;background:transparent;color:#8b0000;font-size:14px!important;cursor:pointer">删除</a>]</span></li>`
+                `style="padding:2px;background:transparent;color:#8b0000;font-size:14px!important;cursor:pointer">${IS_CHN ? "删除" : "Del"}</a>]</span></li>`
             );
           }
-          listContents = listContents || `<li id="${def.const.seed}_temporary">---- 暂时没有自定义排除站点 ----</li>`;
+          listContents = listContents || `<li id="${def.const.seed}_temporary">---- ${IS_CHN ? "暂时没有自定义排除站点" : "No customized exclusion"} ----</li>`;
+          const searchBtn = IS_CHN ? "查 询" : "Search";
+          const addBtn = IS_CHN ? "添 加" : "Add";
           let frDialog = new FrDialogBox({
-            trueButtonText: "保存数据",
-            neutralButtonText: "取 消",
-            messageText: `<p style="color:#555555;font-size:14px!important"><b style="color:#8b0000">添加自定义排除站点</b>：在文本框中输入正确的域名，点击添加按钮，支持首位通配符的泛域名，如：*.example.com</p><p style="color:#555555;font-size:14px!important"><b style="color:#8b0000">数据保存</b>：完成所有添加、删除操作后需点击保存按钮才会使数据保存生效，保存数据后不能撤回，请谨慎操作。</p><p style="display:flex;justify-content:left;align-items:center"><input id="${def.const.seed}_d_s_" style="box-sizing:content-box;margin:4px 6px;padding:2px 6px;width:57%;height:22px;outline:none!important;border:2px solid #777777;border-radius:4px;font:normal 400 16px/150% monospace,Courier New,system-ui,-apple-system,BlinkMacSystemFont,serif!important"><button id="${def.const.seed}_d_s_s_" style="box-sizing:border-box;margin:0;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777777;border-radius:4px;background:#eeeeee;color:#333333!important;outline:none!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer">查 询</button><button id="${def.const.seed}_d_s_a_" style="box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777777;border-radius:4px;background:#eeeeee;color:#8b0000!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer">添 加</button></p><ul id="${def.const.seed}_d_d_" style="overflow-x:hidden;margin:0!important;padding:0!important;max-height:190px;list-style:none!important;overscroll-behavior:contain">${listContents}</ul>`,
-            titleText: "自定义排除站点管理",
+            trueButtonText: IS_CHN ? "保存数据" : "Save",
+            neutralButtonText: IS_CHN ? "取 消" : "Cancel",
+            messageText:
+              (IS_CHN
+                ? `<p style="color:#555555;font-size:14px!important"><b style="color:#8b0000">添加自定义排除站点</b>：在文本框中输入正确的域名，点击添加按钮，支持首位通配符的泛域名，如：*.example.com</p><p style="color:#555555;font-size:14px!important"><b style="color:#8b0000">数据保存</b>：完成所有添加、删除操作后需点击保存按钮才会使数据保存生效，保存数据后不能撤回，请谨慎操作。</p>`
+                : `<p style="color:#555555;font-size:14px!important"><b style="color:#8b0000">Add</b>: Enter domain-name and click the Add button. Supports wildcard domain as: *.example.com</p><p style="color:#555555;font-size:14px!important"><b style="color:#8b0000">Save</b>: Click the Save button after finishing adding and deleting to make it effective.</p>`) +
+              `<p style="display:flex;justify-content:left;align-items:center"><input id="${def.const.seed}_d_s_" style="box-sizing:content-box;margin:4px 6px;padding:2px 6px;width:57%;height:22px;outline:none!important;border:2px solid #777777;border-radius:4px;font:normal 400 16px/150% monospace,Courier New,system-ui,-apple-system,BlinkMacSystemFont,serif!important"><button id="${def.const.seed}_d_s_s_" style="box-sizing:border-box;margin:0;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777777;border-radius:4px;background:#eeeeee;color:#333333!important;outline:none!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer">${searchBtn}</button><button id="${def.const.seed}_d_s_a_" style="box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777777;border-radius:4px;background:#eeeeee;color:#8b0000!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer">${addBtn}</button></p><ul id="${def.const.seed}_d_d_" style="overflow-x:hidden;margin:0!important;padding:0!important;max-height:190px;list-style:none!important;overscroll-behavior:contain">${listContents}</ul>`,
+            titleText: IS_CHN ? "自定义排除站点管理" : "Manage Customized Exclusions",
           });
           const dsNode = qS(`#${def.const.seed}_d_s_`, def.const.dialogIf);
           const dssNode = qS(`#${def.const.seed}_d_s_s_`, def.const.dialogIf);
@@ -2596,7 +2780,7 @@
                 `<span>${exSiteLength > 9 ? exSiteLength : "0".concat(exSiteLength)}. </span>` +
                   `<span style="overflow:hidden;margin-right:auto;padding-left:5px;width:85%;text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all" ` +
                   `title="${domainName}">${domainName}</span><span>[<a id="${def.const.seed}_d_d_l_s_${exSiteLength - 1}" data-fr-domain="${domainName}"` +
-                  `style="padding:2px;background:transparent;color:#8b0000;font-size:14px!important;cursor:pointer">删除</a>]</span>`
+                  `style="padding:2px;background:transparent;color:#8b0000;font-size:14px!important;cursor:pointer">${IS_CHN ? "删除" : "Del"}</a>]</span>`
               );
               ddNode.appendChild(newNode);
               _temp_.push(exDomain);
@@ -2614,13 +2798,13 @@
                 const _index_ = _temp_.indexOf(nodeDomain);
                 Boolean(~_index_) && _temp_.splice(_index_, 1);
                 target.setAttribute("data-del", _list_Id_);
-                target.textContent = "恢复";
+                target.textContent = IS_CHN ? "恢复" : "Reset";
                 target.style.color = "darkgreen";
                 target.parentNode.previousElementSibling.style.cssText += "text-decoration:line-through;font-style:italic";
               } else {
                 !_temp_.includes(nodeDomain) && _temp_.push(nodeDomain);
                 target.removeAttribute("data-del");
-                target.textContent = "删除";
+                target.textContent = IS_CHN ? "删除" : "Del";
                 target.style.color = "darkred";
                 target.parentNode.previousElementSibling.style.cssText += "text-decoration:none;font-style:normal";
               }
@@ -2630,9 +2814,11 @@
             const exSiteData = uniq(_temp_.sort());
             saveData("_EXCLUDE_SITES_", exSiteData);
             let frDialog = new FrDialogBox({
-              trueButtonText: "感谢使用",
-              messageText: `<p style="color:darkgreen">自定义排除网站数据已成功保存\uff01</p><p>页面将在您确认后自动刷新。</p>`,
-              titleText: "自定义排除网站数据保存",
+              trueButtonText: IS_CHN ? "感谢使用" : "Thanks",
+              messageText: IS_CHN
+                ? `<p style="color:darkgreen">自定义排除网站数据已成功保存\uff01</p><p>页面将在您确认后自动刷新。</p>`
+                : `<p style="color:darkgreen">Customized Exclusion Data Saved!</p><p>Page refreshes after confirming.</p>`,
+              titleText: IS_CHN ? "自定义排除网站数据保存" : "Customized Exclusions Data Save",
             });
             if (await frDialog.respond()) closeConfigurePage({ isReload: true });
             frDialog = null;
@@ -2691,19 +2877,23 @@
             if (font_Ready) {
               if (typeof def.const.exSitesIndex === "undefined") {
                 font_Set ? GMunregisterMenuCommand(font_Set) : DEBUG("%cInstalling Font_Set_Menu", "color:gray");
-                font_Set = GMregisterMenuCommand(`\ufff1\ud83c\udf13 字体渲染设置${isHotkey ? "(P)" : ""}`, addAction.setConfigure);
+                font_Set = GMregisterMenuCommand(`\ufff1\ud83c\udf13 ${IS_CHN ? "字体渲染设置" : "Font Rendering Settings "}${isHotkey ? "(P)" : ""}`, addAction.setConfigure);
                 exclude_site ? GMunregisterMenuCommand(exclude_site) : DEBUG("%cInstalling Exclude_Site_Menu", "color:gray");
-                exclude_site = GMregisterMenuCommand(`\ufff2\u26d4 排除渲染 ${TOP_HOST} ${isHotkey ? "(X)" : ""}`, addAction.excludeSites);
+                exclude_site = GMregisterMenuCommand(`\ufff2\u26d4 ${IS_CHN ? "排除渲染" : "Exclude "} ${TOP_HOST} ${isHotkey ? "(X)" : ""}`, addAction.excludeSites);
                 parameter_Set ? GMunregisterMenuCommand(parameter_Set) : DEBUG("%cInstalling Parameter_Set_Menu", "color:gray");
-                parameter_Set = GMregisterMenuCommand(`\ufff3\ud83d\udc8e 高级核心功能设置${isHotkey ? "(G)" : ""}`, addAction.vipConfigure);
+                parameter_Set = GMregisterMenuCommand(`\ufff3\ud83d\udc8e ${IS_CHN ? "高级核心功能设置" : "Advanced Core Settings "}${isHotkey ? "(G)" : ""}`, () => {
+                  addAction.vipConfigure();
+                });
               } else {
                 include_site ? GMunregisterMenuCommand(include_site) : DEBUG("%cInstalling Include_Site_Menu", "color:gray");
-                include_site = GMregisterMenuCommand(`\ufff4\ud83c\udf40 重新渲染 ${TOP_HOST} ${isHotkey ? "(X)" : ""}`, addAction.includeSites);
+                include_site = GMregisterMenuCommand(`\ufff4\ud83c\udf40 ${IS_CHN ? "重新渲染" : "Re-rendering "} ${TOP_HOST} ${isHotkey ? "(X)" : ""}`, addAction.includeSites);
                 feed_Back ? GMunregisterMenuCommand(feed_Back) : DEBUG("%cInstalling Feed_Back_Menu", "color:gray");
-                feed_Back = GMregisterMenuCommand(`\ufff5\ud83e\udde1 向作者反馈问题或建议${isHotkey ? "(T)" : ""}`, () => GMopenInTab(def.variable.feedback, false));
+                feed_Back = GMregisterMenuCommand(`\ufff5\ud83e\udde1 ${IS_CHN ? "向作者反馈错误或建议" : "Feedback to Author "}${isHotkey ? "(T)" : ""}`, () => {
+                  GMopenInTab(def.variable.feedback, false);
+                });
               }
             } else {
-              loading = GMregisterMenuCommand("\ufff0\ud83c\udf13 重新装载脚本菜单！", () => location.reload(true));
+              loading = GMregisterMenuCommand(`\ufff0\ud83c\udf13 ${IS_CHN ? "重新装载脚本菜单！" : "Reload Script Menus!"}`, () => location.reload(true));
             }
           })
           .catch(e => ERROR("MenusInsert:", e.message));
@@ -2761,9 +2951,12 @@
             ERROR("DomainValue.JSON.parse:", e.message);
             domainValue = [];
           }
+          const searchBtn = IS_CHN ? "查 询" : "Search";
+          const clearBtn = IS_CHN ? "清 除" : "Clear";
+          const delBtn = IS_CHN ? "删除" : "Del";
           const _data_search_ =
             domainValue.length > 6
-              ? `<p style="display:flex;justify-content:left;align-items:center"><input id="${def.const.seed}_d_s_" style="box-sizing:content-box;margin:4px 6px;padding:2px 6px;width:57%;height:22px;outline:none!important;border:2px solid #777777;border-radius:4px;font:normal 400 16px/150% monospace,Courier New,system-ui,-apple-system,BlinkMacSystemFont,serif!important"><button id="${def.const.seed}_d_s_s_" style="box-sizing:border-box;margin:0;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777777;border-radius:4px;background:#eeeeee;color:#333333!important;outline:none!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer">查 询</button><button id="${def.const.seed}_d_s_c_" style="box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777777;border-radius:4px;background:#eeeeee;color:#333333!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer">清 除</button></p>`
+              ? `<p style="display:flex;justify-content:left;align-items:center"><input id="${def.const.seed}_d_s_" style="box-sizing:content-box;margin:4px 6px;padding:2px 6px;width:57%;height:22px;outline:none!important;border:2px solid #777777;border-radius:4px;font:normal 400 16px/150% monospace,Courier New,system-ui,-apple-system,BlinkMacSystemFont,serif!important"><button id="${def.const.seed}_d_s_s_" style="box-sizing:border-box;margin:0;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777777;border-radius:4px;background:#eeeeee;color:#333333!important;outline:none!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer">${searchBtn}</button><button id="${def.const.seed}_d_s_c_" style="box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777777;border-radius:4px;background:#eeeeee;color:#333333!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer">${clearBtn}</button></p>`
               : ``;
           for (let i = 0, l = domainValue.length; i < l; i++) {
             const domainName = convertHtmlToText(domainValue[i].domain);
@@ -2771,16 +2964,17 @@
               `<li id="${def.const.seed}_d_d_l_${i}" style="display:flex;overflow:hidden;margin:0;padding:5px;max-width:364px;color:#555555;list-style:none;` +
                 `white-space:nowrap;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,sans-serif!important;justify-content:space-between">` +
                 `<span>[<a id="${def.const.seed}_d_d_l_s_${i}" style="display:inline;padding:2px;background:transparent;color:#8b0000;font-size:14px!important;` +
-                `cursor:pointer">删除</a>]<span>\u0020${i + 1 > 9 ? i + 1 : "0".concat(i + 1)}.</span></span><span style="overflow:hidden;margin-left:5px;width:57%;` +
+                `cursor:pointer">${delBtn}</a>]<span>\u0020${i + 1 > 9 ? i + 1 : "0".concat(i + 1)}.</span></span><span style="overflow:hidden;margin-left:5px;width:57%;` +
                 `text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all" title="${domainName}">${domainName}</span>` +
                 `<span style="margin:0 5px">${setDateFormat("yyyy-MM-dd", new Date(domainValue[i].fontDate))}</span></li>`
             );
           }
+          const _data_notice_ = IS_CHN ? "请谨慎操作，保存后生效，已删除的数据将不可恢复\uff01" : "Operate with caution, effective after saving, good luck!";
           let frDialog = new FrDialogBox({
-            trueButtonText: "确认操作，保存数据",
-            neutralButtonText: "取 消",
-            messageText: `<p style="color:#8b0000;text-indent:6px!important;font-size:14px!important">请谨慎操作，保存后生效，已删除的数据将不可恢复\uff01</p>${_data_search_}<ul id="${def.const.seed}_d_d_" style="overflow-x:hidden;margin:0!important;padding:0!important;max-height:190px;list-style:none!important;overscroll-behavior:contain">${listContents}</ul>`,
-            titleText: "网站个性化设置数据列表",
+            trueButtonText: IS_CHN ? "确认操作，保存数据" : "Save",
+            neutralButtonText: IS_CHN ? "取 消" : "Cancel",
+            messageText: `<p style="color:#8b0000;text-indent:6px!important;font-size:14px!important">${_data_notice_}</p>${_data_search_}<ul id="${def.const.seed}_d_d_" style="overflow-x:hidden;margin:0!important;padding:0!important;max-height:190px;list-style:none!important;overscroll-behavior:contain">${listContents}</ul>`,
+            titleText: IS_CHN ? "网站个性化设置数据列表" : "Customized Sites Data",
           });
           const dsNode = qS(`#${def.const.seed}_d_s_`, def.const.dialogIf);
           const dscNode = qS(`#${def.const.seed}_d_s_c_`, def.const.dialogIf);
@@ -2810,7 +3004,7 @@
                 const _list_Id_ = Number(target.id.replace(`${def.const.seed}_d_d_l_s_`, "")) || 0;
                 _temp_.push(domainValue[_list_Id_].domain);
                 target.setAttribute("data-del", domainValue[_list_Id_].domain);
-                target.textContent = "恢复";
+                target.textContent = IS_CHN ? "恢复" : "Reset";
                 target.style.color = "darkgreen";
                 target.parentNode.nextElementSibling.style.cssText += "text-decoration:line-through;font-style:italic";
                 target.parentNode.nextElementSibling.nextElementSibling.style.cssText += "text-decoration:line-through;font-style:italic";
@@ -2818,7 +3012,7 @@
                 const _index_ = _temp_.indexOf(target.getAttribute("data-del"));
                 Boolean(~_index_) && _temp_.splice(_index_, 1);
                 target.removeAttribute("data-del");
-                target.textContent = "删除";
+                target.textContent = IS_CHN ? "删除" : "Del";
                 target.style.color = "darkred";
                 target.parentNode.nextElementSibling.style.cssText += "text-decoration:none;font-style:normal";
                 target.parentNode.nextElementSibling.nextElementSibling.style.cssText += "text-decoration:none;font-style:normal";
@@ -2840,13 +3034,19 @@
             }
             saveData("_DOMAINS_FONTS_SET_", domainValue);
             let frDialog = new FrDialogBox({
-              trueButtonText: "感谢使用",
-              messageText: `<p style="color:darkgreen">网站个性化设置数据已成功保存\uff01</p><p>${
-                def.const.equal ? "当前网站数据有变动，页面将在您确认后自动刷新。" : "提示：您可继续留在当前页面进行其他操作。"
+              trueButtonText: IS_CHN ? "感谢使用" : "Thanks",
+              messageText: `<p style="color:darkgreen">${IS_CHN ? "网站个性化设置数据已成功保存\uff01" : "Customize data save succeeded!"}</p><p>${
+                def.const.equal
+                  ? IS_CHN
+                    ? "当前网站数据有变动，页面将在您确认后自动刷新。"
+                    : "Current site data changed, and refreshes soon."
+                  : IS_CHN
+                  ? "提示：您可继续留在当前页面进行其他操作。"
+                  : "Tip: You can continue with other operations."
               }</p>`,
-              titleText: "个性化数据保存",
+              titleText: IS_CHN ? "个性化数据保存" : "Customize Data Save",
             });
-            if (await frDialog.respond()) closeConfigurePage({ isReload: Boolean(def.const.equal) });
+            if ((await frDialog.respond()) && def.const.equal) closeConfigurePage({ isReload: true });
             frDialog = null;
           }
           frDialog = null;
@@ -2887,7 +3087,7 @@
             if (def.array.values.length === 0) {
               submitButton.classList.contains(def.class.anim) && submitButton.classList.remove(def.class.anim);
               if (def.const.isPreview) {
-                submitButton.textContent = "\u4fdd\u5b58";
+                submitButton.textContent = IS_CHN ? "\u4fdd\u5b58" : "Save";
                 submitButton.removeAttribute("style");
                 submitButton.removeAttribute("v-Preview");
                 loadPreview(def.const.preview);
@@ -2906,7 +3106,7 @@
                   break;
                 }
               }
-              inputFont.setAttribute("placeholder", `\u5f53\u524d\u5b57\u4f53\uff1a${def.const.curFont}`);
+              inputFont.setAttribute("placeholder", `${def.const.fontNamePh + def.const.curFont}`);
             }
           } else {
             def.const.isPreview && changePreviewButtonStyle(submitButton, def.array.values);
@@ -2956,28 +3156,41 @@
 
         function fontSearch(fontData) {
           if (!expr || typeof expr !== "string" || !Array.isArray(fontData)) return;
-          const fHtml =
-            `<!-- Font Selector -->` +
+          const fHtml = String(
             `<div id="${def.id.selector}">
-                <span class="${def.class.spanlabel}">已选择字体\uff1a<span id="${def.id.cleaner}">[清空]</span></span>
+                ${
+                  IS_CHN
+                    ? `<span class="${def.class.spanlabel}">已选择字体\uff1a<span id="${def.id.cleaner}">[清空]</span></span>`
+                    : `<span class="${def.class.spanlabel}">Selected Fonts: <span id="${def.id.cleaner}">[Clear]</span></span>`
+                }
                 <div class="${def.class.selector}"></div>
             </div>
             <div class="${def.class.selectFontId}">
-              <span class="${def.class.spanlabel}">设置字体，请选择\uff1a</span>
-              <input type="search" placeholder="输入关键字可检索字体" autocomplete="off" class="${def.class.placeholder}">
+              <span class="${def.class.spanlabel}">${IS_CHN ? "设置字体，请选择\uff1a" : "Set Fonts, Please Select:"}</span>
+              <input type="search" placeholder="${IS_CHN ? "输入关键字可检索字体" : "Enter some keywords"}" autocomplete="off" class="${def.class.placeholder}">
               <dl style="display:none"></dl>
               <span class="${def.class.tooltip} ${def.class.ps1}" id="${def.id.fonttooltip}">
-                <span class="${def.class.emoji}" title="单击查看帮助">\ud83d\udd14</span>
+                <span class="${def.class.emoji}" title="${IS_CHN ? "单击查看帮助" : "Click to Help"}">\ud83d\udd14</span>
                 <span class="${def.class.tooltip} ${def.class.ps2}">
-                <p><strong>温馨提示 </strong>脚本预载了常用的中文字体，下拉菜单中所罗列的字体是在代码字体表中您已安装过的字体，没有安装过则不会显示。</p>
-                <p><em style="color:darkred">（注一）</em>如果没有重新选择字体，则使用上一次保存的字体。首次使用默认为微软雅黑字体。</p>
-                <p><em style="color:darkred">（注二）</em>输入框可输入关键字进行搜索，支持中文和英文字体名。</p>
-                <p><em style="color:darkred">（注三）</em>字体是按您选择的先后顺序进行优先渲染的，所以多选不如只选一个您最想要的。</p>
-                <p><em style="color:darkred">（注四）</em>如果“字体重写”被关闭，那么本功能将自动禁用，网页字体将采用“网站默认”的字体设置。</p>
-                <p><em style="color:darkred">（注五）</em>双击\ud83d\udd14可以打开自定义字体的添加工具，以使用更多新字体。</p>
+                ${
+                  IS_CHN
+                    ? `<p><strong>温馨提示 </strong>脚本预载了常用的中文字体，下拉菜单中所罗列的字体是在代码字体表中您已安装过的字体，没有安装过则不会显示。</p>
+                        <p><em style="color:darkred">（注一）</em>如果没有重新选择字体，则使用上一次保存的字体。首次使用默认为${INITIAL_VALUES.fontSelect}字体。</p>
+                        <p><em style="color:darkred">（注二）</em>输入框可输入关键字进行搜索，支持中文和英文字体名。</p>
+                        <p><em style="color:darkred">（注三）</em>字体是按您选择的先后顺序进行优先渲染的，所以多选不如只选一个您最想要的。</p>
+                        <p><em style="color:darkred">（注四）</em>如果“字体重写”被关闭，那么本功能将自动禁用，网页字体将采用“网站默认”的字体设置。</p>
+                        <p><em style="color:darkred">（注五）</em>双击\ud83d\udd14可以打开自定义字体的添加工具，以使用更多新字体。</p>`
+                    : `<p><strong>Tips: </strong>The fonts shown in the list are the fonts were installed on your system in font-library. No install & add-lib, No display.</p>
+                        <p><em style="color:darkred">(ACT1)</em> If this option is not reselected, the last saved is used. Default by ${INITIAL_VALUES.fontSelect}.</p>
+                        <p><em style="color:darkred">(ACT2)</em> Enter keywords in the inputbox to quickly search for your favorite fonts.</p>
+                        <p><em style="color:darkred">(ACT3)</em> Fonts are rendered first in the order you choose, so just pick the one you want the most.</p>
+                        <p><em style="color:darkred">(ACT4)</em> If "Font Rewrite" is turned off, this option will be disabled and the webpage will use "website-defined font".</p>
+                        <p><em style="color:darkred">(ACT5)</em> Double-click \ud83d\udd14 to open the custom font-library adding tool to use more custom fonts.</p>`
+                }
                 </span>
               </span>
-            </div>`;
+            </div>`
+          );
           const fontListNode = qS(expr, def.const.configIf);
           const selectorNode = qS(`#${def.id.selector}`, def.const.configIf);
           if (!selectorNode && fontListNode) {
@@ -3001,7 +3214,7 @@
               const selectFontNode = qS(selector, def.const.configIf);
               fontListShown(selector);
               if (fontData.length === 0 && selectFontNode) {
-                selectFontNode.innerHTML = tTP.createHTML("<dd>\u6570\u636e\u6e90\u6682\u65e0\u6570\u636e</dd>");
+                selectFontNode.innerHTML = tTP.createHTML(`<dd>${IS_CHN ? "\u6570\u636e\u6e90\u6682\u65e0\u6570\u636e" : "Not Available!"}</dd>`);
               } else {
                 selectFontNode.textContent = "";
                 fontData = getUniqueFontlist(fontData).sort((a, b) => a.sort - b.sort);
@@ -3054,7 +3267,7 @@
                   );
                 }
               });
-              if (!sMatched) selectFontNode.innerHTML = tTP.createHTML("<dd>\u6682\u65e0\u60a8\u641c\u7d22\u7684\u5b57\u4f53</dd>");
+              if (!sMatched) selectFontNode.innerHTML = tTP.createHTML(`<dd>${IS_CHN ? "\u6682\u65e0\u60a8\u641c\u7d22\u7684\u5b57\u4f53" : "No Matching Fonts"}</dd>`);
               clickEvents();
             }
           }
@@ -3303,11 +3516,13 @@
                 received_Fontlist += JSON.stringify(item) + "\r\n";
               });
               let frDialog = new FrDialogBox({
-                trueButtonText: "保 存",
-                falseButtonText: "帮助文档",
-                neutralButtonText: "取 消",
-                messageText: `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式增加自定义字体。请用小贴士或按样例填写，输入有误将被自动过滤。与『<a href="${def.const.greasyfork}#fontlist" title="查看内置字体表" target="_blank">内置字体表</a>』重复的字体将被自动剔除。【功能小贴士\uff1a<span id="${def.const.seed}_addTools" title="点击开启工具" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${def.const.seed}_custom_Fontlist" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下\uff1a\r\n{ "ch":"中文字体名一","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"中文字体名二","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n（注一\uff1a“ps:”该项为字体PostScript名称，可选填写）\r\n（注二\uff1a\u21b2为换行符号，输入(Enter)回车即可）'>${received_Fontlist}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`,
-                titleText: "自定义字体表",
+                trueButtonText: IS_CHN ? "保 存" : "Save",
+                falseButtonText: IS_CHN ? "帮助文档" : "Help",
+                neutralButtonText: IS_CHN ? "取 消" : "Cancel",
+                messageText: IS_CHN
+                  ? `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式增加自定义字体。请用小贴士或按样例填写，输入有误将被自动过滤。与『<a href="${def.const.greasyfork}#fontlist" title="查看内置字体表" target="_blank">内置字体表</a>』重复的字体将被自动剔除。【功能小贴士\uff1a<span id="${def.const.seed}_addTools" title="点击开启工具" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${def.const.seed}_custom_Fontlist" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下\uff1a\r\n{ "ch":"中文字体名一","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"中文字体名二","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n(注一\uff1a如无中文字体名，可用英文或其他语言名称替代)\r\n(注二\uff1a“ps:” 该项为字体的PostScript名称，可选填写)'>${received_Fontlist}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`
+                  : `<p style="color:#555555;font-size:14px!important">Add customized fonts in a predetermined format. Please use the tip or fill in the sample, any input errors will be filtered. With '<a href="${def.const.greasyfork}#fontlist" title="Viewing the built-in font library" Target="_blank">Built-in Font library</a>' duplicate fonts will be eliminated automatically. [TIP: <span id="${def.const.seed}_addTools" title="Click to open tool" style="color:crimson;cursor:pointer">Font Adding Aid</span>]</p><p><textarea id="${def.const.seed}_custom_Fontlist" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain" placeholder='One set of Fontname data per line, as follow:\r\n{ "ch":"CHN Fontname 1","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"CHN Fontname 2","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n(Note1: If no Chinese fontname, use another instead) \r\n (Note2: "ps:" for the font PostScript name, optional)'>${received_Fontlist}</textarea></p><p style="display:block;margin:-2px 0 0 0px!important;height:max-content;color:#dc143c;font-size:14px!important">(Don't add too many custom fonts to avoid slowly load)</p>`,
+                titleText: IS_CHN ? "自定义字体表" : "Custom Font Library",
               });
               const customFontlistNode = qS(`#${def.const.seed}_custom_Fontlist`, def.const.dialogIf);
               removeKeyboardEvent(customFontlistNode);
@@ -3315,24 +3530,31 @@
               qS(`#${def.const.seed}_addTools`, def.const.dialogIf)?.addEventListener("click", () => {
                 let chName, enName, psName, cusFontName;
                 chName = def.dialog.prompt(
-                  "请输入「中文字体家族名称」\uff1a\r\n(例如\uff1a鸿蒙黑体，仅支持半角输入模式，包括中文、日文、韩文、英文，数字、小数点、减号、下划线、空格、@)",
+                  IS_CHN
+                    ? "请输入「中文字体家族名称」\uff1a\r\n(例如\uff1a鸿蒙黑体，仅支持半角输入模式，包括中文、日文、韩文、英文，数字、小数点、减号、下划线、空格、@)\r\n(注意：如没有中文字体名称，可使用英文或其他语言名称来替代)"
+                    : "Please enter 'Chinese Fontname':\r\n (e.g. 鸿蒙黑体, only half-width input mode is supported, including Chinese, Japanese, Korean, English, numbers, decimal-point, minus-sign, underscore, space, @)\r\n (Note: If no Chinese fontname, use English or another instead)",
                   "鸿蒙黑体"
                 );
                 if (chName === null) {
                   return;
                 } else if (/^@?[\w\u2E80-\uD7FF\-.,!/（）() ]+$/.test(chName.trim())) {
                   enName = def.dialog.prompt(
-                    "请输入「英文字体家族名称」\uff1a\r\n(例如\uff1aHarmonyOS Sans SC，仅支持半角输入模式，包括英文、数字、小数点、减号、下划线、空格、@)",
+                    IS_CHN
+                      ? "请输入「英文字体家族名称」\uff1a\r\n(例如\uff1aHarmonyOS Sans SC，仅支持半角输入模式，包括英文、数字、小数点、减号、下划线、空格、@)"
+                      : "Please enter 'English Fontname':\r\n (e.g. HarmonyOS Sans SC, only half-width input mode is supported, including English, numbers, decimal-point, minus-sign, underscore, space, @)",
                     "HarmonyOS Sans SC"
                   );
                   if (enName === null) {
                     return;
                   } else if (/^@?[\w\-., !/()]+$/.test(enName.trim())) {
                     psName = def.dialog.prompt(
-                      "请输入「PostScript名称」\uff1a\r\n(为使新增字体全局生效，请尽量填写PostScript名称。如您暂时无法提供PostScript名称，可留空)（查询请访问Fontke.com）",
+                      IS_CHN
+                        ? "请输入「PostScript名称」\uff1a\r\n(为使新增字体全局生效，请尽量填写PostScript名称。如您暂时无法提供PostScript名称，可留空)（查询请访问 Discussions#261）"
+                        : "Please enter the 'PostScript name':\r\n(To make the added fonts take effect globally, please fill in the PostScript name as much as possible. If you can't provide the PostScript name, you can leave it blank) (Query visit Discussions#261)",
                       ""
                     );
                     if (psName === null) {
+                      GMopenInTab(`${def.variable.feedback}/64`, false);
                       return;
                     } else if (/^[\w\u2E80-\uD7FF\-.,@!&=?|+~ ]+$/.test(psName.trim())) {
                       cusFontName = `{"ch":"${chName.trim()}","en":"${enName.trim()}","ps":"${psName.trim()}"}`;
@@ -3344,10 +3566,10 @@
                     custom_Fontlist = customFontlistNode.value.trim();
                     customFontlistNode.scrollTop = customFontlistNode.scrollHeight;
                   } else {
-                    def.dialog.alert("英文字体家族名称 格式输入错误\uff01");
+                    def.dialog.alert(IS_CHN ? "英文字体家族名称 格式输入错误\uff01" : "English Fontname Input Format Error!");
                   }
                 } else {
-                  def.dialog.alert("中文字体家族名称 格式输入错误\uff01");
+                  def.dialog.alert(IS_CHN ? "中文字体家族名称 格式输入错误\uff01" : "Chinese Fontname Input Format Error!");
                 }
               });
               customFontlistNode?.addEventListener("change", function () {
@@ -3363,9 +3585,11 @@
                 if (!custom_Fontlist.length) {
                   GMdeleteValue("_CUSTOM_FONTLIST_");
                   let frDialog = new FrDialogBox({
-                    trueButtonText: "确 定",
-                    messageText: "<p style='color:indigo'>自定义字体表已初始化成功\uff01<p><p>字体列表全局缓存已自动重建，当前页面即将刷新。</p>",
-                    titleText: "自定义字体数据重置",
+                    trueButtonText: IS_CHN ? "确 定" : "OK",
+                    messageText: IS_CHN
+                      ? "<p style='color:indigo'>自定义字体表已初始化成功\uff01<p><p>字体列表全局缓存已自动重建，当前页面即将刷新。</p>"
+                      : "<p style='color:indigo'>Custom font library initialized successfully!<p><p>The Fontlist cache has been rebuilt and reload.</p>",
+                    titleText: IS_CHN ? "自定义字体数据重置" : "Customized FontData Reset",
                   });
                   cache.remove("_FONTCHECKLIST_");
                   if (await frDialog.respond()) closeConfigurePage({ isReload: true });
@@ -3376,9 +3600,11 @@
                   const customFontlistData = getNonDuplicateFontArray(unique_Save_Fontlist, fontCheck);
                   saveData("_CUSTOM_FONTLIST_", customFontlistData);
                   let frDialog = new FrDialogBox({
-                    trueButtonText: "确 定",
-                    messageText: `<p style="color:darkgreen">您所提交的自定义字体已保存成功\uff01<p><p>字体列表全局缓存已自动重建，当前页面即将刷新。</p><p style='color:coral;font-size:12px!important'>注：格式错误或重复的字体代码将被自动过滤。</p>`,
-                    titleText: "自定义字体数据保存",
+                    trueButtonText: IS_CHN ? "确 定" : "OK",
+                    messageText: IS_CHN
+                      ? `<p style="color:darkgreen">您所提交的自定义字体已保存成功\uff01<p><p>字体列表全局缓存已自动重建，当前页面即将刷新。</p><p style='color:coral;font-size:12px!important'>注：格式错误或重复的字体代码将被自动过滤。</p>`
+                      : `<p style="color:darkgreen">The customized font saved successfully!<p><p>The Fontlist cache has been rebuilt and reload.</p><p style='color:coral;font-size:12px!important'>Note: Incorrectly or duplicate fonts were filtered.</p>`,
+                    titleText: IS_CHN ? "自定义字体数据保存" : "Customized FontData Save",
                   });
                   cache.remove("_FONTCHECKLIST_");
                   if (await frDialog.respond()) closeConfigurePage({ isReload: true });
@@ -3386,9 +3612,11 @@
                 } else {
                   copyToClipboard(custom_Fontlist);
                   let frDialog = new FrDialogBox({
-                    trueButtonText: "确 定",
-                    messageText: "<p style='color:crimson'>您所提交的自定义字体数据格式有误，请重新输入。<p><p>注意：先前提交的信息已自动保存至剪切板中。</p>",
-                    titleText: "字体表数据格式错误",
+                    trueButtonText: IS_CHN ? "确 定" : "OK",
+                    messageText: IS_CHN
+                      ? "<p style='color:crimson'>您所提交的自定义字体数据格式有误，请重新输入。<p><p>注意：先前提交的信息已自动保存至剪切板中。</p>"
+                      : "<p style='color:crimson'>The custom Fontdata is incorrectly.<p><p>Note: Previous content saved to the clipboard.</p>",
+                    titleText: IS_CHN ? "字体表数据格式错误" : "Font Library Data Format Error",
                   });
                   if (await frDialog.respond()) {
                     let clickEvent = new Event("dblclick", { bubbles: true, cancelable: false });
@@ -3398,7 +3626,8 @@
                   frDialog = null;
                 }
               } else {
-                GMopenInTab(`${def.const.greasyfork}#custom`, false);
+                const uri = IS_CHN ? "字体渲染（自用脚本）#自定义字体的添加" : "Font-Rendering-(Customized)#adding-custom-fonts";
+                GMopenInTab(`${def.variable.feedback}/../wiki/${encodeURI(uri)}`, false);
               }
               frDialog = null;
             });
@@ -3436,10 +3665,12 @@
           qS(`#${def.const.seed}_fontoverride_defined`, def.const.configIf)?.addEventListener("dblclick", async () => {
             const _fontOverrideDef = JSON.stringify(data, null, "    ");
             let frDialog = new FrDialogBox({
-              trueButtonText: "确 定",
-              neutralButtonText: "取 消",
-              messageText: `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式填写字体重写的自定义数据。整体为数组类型，每个字体名称占一行，并使用半角双引号包括；如字体名称包含中文等双字节文本时，请在双引号内使用半角花括号包括。如您不了解该数据的含义，请勿修改，以免造成全局字体重写出错。<span style="color:#dc143c">(强烈建议您：按 <a href="${def.variable.feedback}/267#discussion-5692372" target="_blank">作者提议</a> 填写此内容)</span></p><p><textarea id="${def.const.seed}_fontoverride_def_array" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain">${_fontOverrideDef}</textarea></p><p style="display:block;margin:-2px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（请勿添加脚本字体表已存在的字体，如重复将自动删除）</p>`,
-              titleText: "自定义字体重写数据",
+              trueButtonText: IS_CHN ? "确 定" : "OK",
+              neutralButtonText: IS_CHN ? "取 消" : "Cancel",
+              messageText: IS_CHN
+                ? `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式填写字体重写的自定义数据。整体为数组类型，每个字体名称占一行，并使用半角双引号包括；如字体名称包含中文等双字节文本时，请在双引号内使用半角花括号包括。如您不了解该数据的含义，请勿修改，以免造成全局字体重写出错。<span style="color:#dc143c">(强烈建议您：按 <a href="${def.variable.feedback}/267#discussion-5692372" target="_blank">作者提议</a> 填写此内容)</span></p><p><textarea id="${def.const.seed}_fontoverride_def_array" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain">${_fontOverrideDef}</textarea></p><p style="display:block;margin:-2px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（请勿添加脚本字体表已存在的字体，如重复将自动删除）</p>`
+                : `<p style="color:#555555;font-size:14px!important">Predefined format overall array type, one Fontname per line, and the use of half-width double quotes include; If the fontname contains double-byte text such as Chinese, please use half-width brackets within the double quotes include. <span style="color:#dc143c">(Suggestion: "<a href="${def.variable.feedback}/267#discussion-5692372" target="_blank">Author's proposal</a>")</span></p><p><textarea id="${def.const.seed}_fontoverride_def_array" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain">${_fontOverrideDef}</textarea></p><p style="display:block;margin:0!important;height:max-content;color:#dc143c;font-size:14px!important">(Duplicate Fontname in the Font Library will be deleted)</p>`,
+              titleText: IS_CHN ? "自定义字体重写数据" : "Customized Font-Rewrite Data",
             });
             const fontOverrideNode = qS(`#${def.const.seed}_fontoverride_def_array`, def.const.dialogIf);
             removeKeyboardEvent(fontOverrideNode);
@@ -3466,17 +3697,21 @@
                 const fontOverrideData = __res_fontOverrideDef.filter(x => !filterFonts.includes(x)).sort();
                 saveData("_FONTOVERRIDE_DEF_", fontOverrideData);
                 let frDialog = new FrDialogBox({
-                  trueButtonText: "确 定",
-                  messageText: "<p style='color:darkgreen'>自定义字体重写数据已成功保存\uff01</p><p>当前页面将在您确认后自动刷新。</p>",
-                  titleText: "自定义字体重写数据设置成功",
+                  trueButtonText: IS_CHN ? "确 定" : "OK",
+                  messageText: IS_CHN
+                    ? "<p style='color:darkgreen'>自定义字体重写数据已成功保存\uff01</p><p>当前页面将在您确认后自动刷新。</p>"
+                    : "<p style='color:darkgreen'>Customized Font Rewrite Data was saved!</p><p>The page will be refreshed after confirming.</p>",
+                  titleText: IS_CHN ? "自定义字体重写数据设置成功" : "Customized Font-Rewrite Data Save",
                 });
                 if (await frDialog.respond()) closeConfigurePage({ isReload: true });
                 frDialog = null;
               } catch (e) {
                 let frDialog = new FrDialogBox({
-                  trueButtonText: "确 定",
-                  messageText: "<p style='color:darkred'>自定义字体重写数据格式错误，请重新输入\uff01</p>",
-                  titleText: "重写数据格式错误",
+                  trueButtonText: IS_CHN ? "确 定" : "OK",
+                  messageText: IS_CHN
+                    ? "<p style='color:darkred'>自定义字体重写数据格式错误，请重新输入\uff01</p>"
+                    : "<p style='color:darkred'>Customized font rewrite data error, Please refill!</p>",
+                  titleText: IS_CHN ? "重写数据格式错误" : "Customized Font-Rewrite Data Error",
                 });
                 if (await frDialog.respond()) {
                   let clickEvent = new Event("dblclick", { bubbles: true, cancelable: false });
@@ -3496,7 +3731,7 @@
           fontfaceNode.addEventListener("change", async () => {
             await getCurrentFontName(CONST_VALUES.fontFace, selectedFont, def.const.defaultFont);
             if (fontfaceNode.checked && !CONST_VALUES.fontFace) {
-              inputNode.setAttribute("placeholder", "正在恢复之前设置的字体…");
+              inputNode.setAttribute("placeholder", IS_CHN ? "正在恢复之前设置的字体…" : "Restore previous font…");
               sleep(120)
                 .then(() => qS(`#${def.id.submit} .${def.class.submit}[v-Preview="true"]`, def.const.configIf))
                 .then(submitPreview => submitPreview?.click());
@@ -3526,10 +3761,12 @@
             const _fontScaleDef = await fontScaleDef();
             const __fontScaleDef = JSON.stringify(_fontScaleDef, null, "    ");
             let frDialog = new FrDialogBox({
-              trueButtonText: "确 定",
-              neutralButtonText: "取 消",
-              messageText: `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式填写“字体比例缩放功能”所需的自定义站点缩放数据配置。由于该数据为脚本核心设置数据，如果您不了解该设置数据的格式要求或数据含义，请勿修改该数据！<span style="color:#dc143c">（强烈建议您：按 <a href="${def.variable.feedback}/267#discussioncomment-7161615" target="_blank">作者提议</a> 填写此内容）</span></p><p><textarea id="${def.const.seed}_fontscale_def_json" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain">${__fontScaleDef}</textarea></p><p style="display:block;margin:-2px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（如果以上JSON内容格式错误，会造成脚本出错使渲染失效）</p>`,
-              titleText: "站点缩放修正设置数据",
+              trueButtonText: IS_CHN ? "确 定" : "OK",
+              neutralButtonText: IS_CHN ? "取 消" : "Cancel",
+              messageText: IS_CHN
+                ? `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式填写“字体比例缩放功能”所需的自定义站点缩放数据配置。由于该数据为脚本核心设置数据，如果您不了解该设置数据的格式要求或数据含义，请勿修改该数据！<span style="color:#dc143c">（强烈建议您：按 <a href="${def.variable.feedback}/267#discussioncomment-7161615" target="_blank">作者提议</a> 填写此内容）</span></p><p><textarea id="${def.const.seed}_fontscale_def_json" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain">${__fontScaleDef}</textarea></p><p style="display:block;margin:-2px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（如果以上JSON内容格式错误，会造成脚本出错使渲染失效）</p>`
+                : `<p style="color:#555555;font-size:14px!important">Fill in the custom site scaling data configuration of the "Font Scaling" in a predetermined format. If you do not understand the meaning of the data, please do not modify it! <span style="color:#dc143c">(Suggestion: "<a href="${def.variable.feedback}/267#discussioncomment-7161615" target="_blank">Author's proposal</a>")</span></p><p><textarea id="${def.const.seed}_fontscale_def_json" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain">${__fontScaleDef}</textarea></p><p style="display:block;margin:0!important;height:max-content;color:#dc143c;font-size:14px!important">(If the above JSON format is incorrect, rendering will fail)</p>`,
+              titleText: IS_CHN ? "站点缩放修正设置数据" : "Sites Scaling Setting Data",
             });
             const fontScaleNode = qS(`#${def.const.seed}_fontscale_def_json`, def.const.dialogIf);
             removeKeyboardEvent(fontScaleNode);
@@ -3540,17 +3777,21 @@
                 const fontScaleData = _res_fontScaleDef ? JSON.parse(_res_fontScaleDef) : {};
                 saveData("_FONTSCALE_DEF_", fontScaleData);
                 let frDialog = new FrDialogBox({
-                  trueButtonText: "确 定",
-                  messageText: "<p style='color:darkgreen'>站点缩放修正设置数据已成功保存\uff01</p><p>当前页面将在您确认后自动刷新。</p>",
-                  titleText: "站点缩放修正数据设置成功",
+                  trueButtonText: IS_CHN ? "确 定" : "OK",
+                  messageText: IS_CHN
+                    ? "<p style='color:darkgreen'>站点缩放修正设置数据已成功保存\uff01</p><p>当前页面将在您确认后自动刷新。</p>"
+                    : "<p style='color:darkgreen'>Sites scaling setting data saved succeeded!</p><p>The page will be refreshed after confirming.</p>",
+                  titleText: IS_CHN ? "站点缩放修正数据设置成功" : "Sites Scaling Setting Data Save",
                 });
                 if (await frDialog.respond()) closeConfigurePage({ isReload: true });
                 frDialog = null;
               } catch (e) {
                 let frDialog = new FrDialogBox({
-                  trueButtonText: "确 定",
-                  messageText: "<p style='color:darkred'>站点缩放修正设置数据格式错误，请重新输入\uff01</p>",
-                  titleText: "设置数据格式错误",
+                  trueButtonText: IS_CHN ? "确 定" : "OK",
+                  messageText: IS_CHN
+                    ? "<p style='color:darkred'>站点缩放修正设置数据格式错误，请重新输入\uff01</p>"
+                    : "<p style='color:darkred'>Sites scaling setting data error, Please refill!</p>",
+                  titleText: IS_CHN ? "设置数据格式错误" : "Sites Scaling Setting Data Error",
                 });
                 if (await frDialog.respond()) {
                   let clickEvent = new Event("dblclick", { bubbles: true, cancelable: false });
@@ -3682,7 +3923,6 @@
           if (!fontCssNode) return;
           fontCssNode.addEventListener("dblclick", () => {
             fontCssNode.setAttribute("class", def.class.notreadonly);
-            fontCssNode.title = "\u8bf7\u8c28\u614e\u4fee\u6539\u8be5\u53c2\u6570\uff01";
             fontCssNode.readOnly = false;
           });
         }
@@ -3697,16 +3937,19 @@
               const monospacedfont = fontlist.trim();
               const monospacedfeature = feature.trim();
               let frDialog = new FrDialogBox({
-                trueButtonText: "保存数据",
-                neutralButtonText: "取 消",
+                trueButtonText: IS_CHN ? "保存数据" : "Save",
+                neutralButtonText: IS_CHN ? "取 消" : "Cancel",
                 messageText:
                   `<div id="${def.id.cm}" style="margin:0 0 8px;border-bottom:1px groove #cccccc;width:97%!important">
-                    <span class="${def.const.seed}_cusmono" style="color:#555555!important;font-weight:700!important">开启自定义等宽字体（默认：关闭）</span>
+                    <span class="${def.const.seed}_cusmono" style="color:#555555!important;font-weight:700!important">
+                    ${IS_CHN ? "开启自定义等宽字体（默认：关闭）" : "Enable Custom Monospaced Font"}</span>
                     <input type="checkbox" id="${def.id.iscusmono}" class="${def.class.checkbox}" ${_config_data_.isCustomMono ? "checked" : ""} />
                     <label for="${def.id.iscusmono}"></label>
                   </div>` +
-                  `<p style="display:block;color:#555555;font-size:14px!important">\u2474 以下文本域可设置需应用等宽字体的根域及元素选择器。<br><em style="color:#dc143c">如果您不熟悉CSS语法规则，请保持留空，避免样式失效。</em></p><p><textarea id="${def.const.seed}_monospaced_siterules" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:140px!important;outline:0!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain;word-break:keep-all!important" placeholder="每行只能允许一条规则，相同站点不同规则可重复添加。\r\n格式如：@网站域名##元素选择器1,元素选择器2,……\r\n例如：\r\n@github.com##[class~='blob-code'] *\r\n@github.com##.example,#abc,div:not(.test)\r\n@github.dev###test:not([class*='test'])">${monospacedsiterules}\r\n</textarea></p><p style="display:block;margin-top:10px!important;color:#555555;font-size:14px!important">\u2475 以下可设置自定义英文等宽字体，请按示例格式填写。<br><em style="color:#dc143c">请注意：monospace字体族已程序内置，无需重复添加。</em></p><p><input id="${def.const.seed}_monospaced_font" style="box-sizing:border-box;padding:5px;width:380px;outline:0!important;border:1px solid #999999;border-radius:6px;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important" placeholder="例如：'Source Code Pro','Mono','Monaco'" value="${monospacedfont}"></p><p style="display:block;margin-top:10px!important;color:#555555;font-size:14px!important">\u2476 以下可设置OpenType字体font-feature-settings属性。<br><em style="color:#dc143c">如果您不了解该属性，请保持留空，以免造成样式错误。</em></p><p><input id="${def.const.seed}_monospaced_feature" style="box-sizing:border-box;padding:5px;width:380px;outline:0!important;border:1px solid #999999;border-radius:6px;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important" placeholder='例如："liga" 0,"tnum","zero"' value='${monospacedfeature}'></p>`,
-                titleText: "设置自定义等宽字体",
+                  (IS_CHN
+                    ? `<p style="display:block;color:#555555;font-size:14px!important">\u2474 以下文本域可设置需应用等宽字体的根域及元素选择器。<br><em style="color:#dc143c">如果您不熟悉CSS语法规则，请保持留空，避免样式失效。</em></p><p><textarea id="${def.const.seed}_monospaced_siterules" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:140px!important;outline:0!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain;word-break:keep-all!important" placeholder="每行只能允许一组规则，相同站点不同规则可重复添加。\r\n格式如：@网站域名##元素选择器1,元素选择器2,……\r\n例如：\r\n@github.com##[class~='blob-code'] *\r\n@github.com##.example,#abc,div:not(.test)\r\n@github.dev###test:not([class*='test'])">${monospacedsiterules}\r\n</textarea></p><p style="display:block;margin-top:10px!important;color:#555555;font-size:14px!important">\u2475 以下可设置自定义英文等宽字体，请按示例格式填写。<br><em style="color:#dc143c">请注意：monospace字体族已程序内置，无需重复添加。</em></p><p><input id="${def.const.seed}_monospaced_font" style="box-sizing:border-box;padding:5px;width:380px;outline:0!important;border:1px solid #999999;border-radius:6px;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important" placeholder="例如：'Source Code Pro','Mono','Monaco'" value="${monospacedfont}"></p><p style="display:block;margin-top:10px!important;color:#555555;font-size:14px!important">\u2476 以下可设置OpenType字体font-feature-settings属性。<br><em style="color:#dc143c">如果您不了解该属性，请保持留空，以免造成样式错误。</em></p><p><input id="${def.const.seed}_monospaced_feature" style="box-sizing:border-box;padding:5px;width:380px;outline:0!important;border:1px solid #999999;border-radius:6px;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important" placeholder='例如："liga" 0,"tnum","zero"' value='${monospacedfeature}'></p>`
+                    : `<p style="display:block;color:#555555;font-size:14px!important">\u2474 Set the root field and selector for monospaced font.<br><em style="color:#dc143c">If not familiar with CSS syntax, please leave it blank.</em></p><p><textarea id="${def.const.seed}_monospaced_siterules" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:140px!important;outline:0!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain;word-break:keep-all!important" placeholder="Only One set of rules per line, different rules for the same site can be repeated. Such as:\r\n@github.com##[class~='blob-code'] *\r\n@github.com##.example,#abc,div:not(.test)\r\n@github.dev###test:not([class*='test'])">${monospacedsiterules}\r\n</textarea></p><p style="display:block;margin-top:10px!important;color:#555555;font-size:14px!important">\u2475 Set custom monospaced font according to example.<br><em style="color:#dc143c">Note: monospace is built-in, don't add repeatedly.</em></p><p><input id="${def.const.seed}_monospaced_font" style="box-sizing:border-box;padding:5px;width:380px;outline:0!important;border:1px solid #999999;border-radius:6px;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important" placeholder="Such as: 'Source Code Pro','Mono','Monaco'" value="${monospacedfont}"></p><p style="display:block;margin-top:10px!important;color:#555555;font-size:14px!important">\u2476 Set OpenType font font-feature-settings property.<br><em style="color:#dc143c">If you don't know the attribute, leave it blank.</em></p><p><input id="${def.const.seed}_monospaced_feature" style="box-sizing:border-box;padding:5px;width:380px;outline:0!important;border:1px solid #999999;border-radius:6px;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important" placeholder='Such as: "liga" 0,"tnum","zero"' value='${monospacedfeature}'></p>`),
+                titleText: IS_CHN ? "设置自定义等宽字体" : "Set Custom Monospaced Font",
               });
               const monospacedSiteRulesNode = qS(`#${def.const.seed}_monospaced_siterules`, def.const.dialogIf);
               const monospacedFontNode = qS(`#${def.const.seed}_monospaced_font`, def.const.dialogIf);
@@ -3759,9 +4002,11 @@
                 if (custom_MonospacedSiteRules && !monospaced_SiteRulesArray) {
                   copyToClipboard(custom_MonospacedSiteRules);
                   let frDialog = new FrDialogBox({
-                    trueButtonText: "确 定",
-                    messageText: "<p style='color:crimson'>自定义根域及元素选择器有误，请重新输入。</p><p>注意：先前提交的信息已自动保存至剪切板中。</p>",
-                    titleText: "自定义根域及元素选择器数据错误",
+                    trueButtonText: IS_CHN ? "确 定" : "OK",
+                    messageText: IS_CHN
+                      ? "<p style='color:crimson'>自定义根域及元素选择器有误，请重新输入。</p><p>注意：先前提交的信息已自动保存至剪切板中。</p>"
+                      : "<p style='color:crimson'>Custom Root/Selectors data error, Please refill!</p><p>Note: Previous content saved to the clipboard.</p>",
+                    titleText: IS_CHN ? "自定义根域及元素选择器数据错误" : "Custom Root/Selectors Data Error",
                   });
                   if (await frDialog.respond()) {
                     let clickEvent = new Event("dblclick", { bubbles: true, cancelable: false });
@@ -3775,9 +4020,11 @@
                 if (custom_MonospacedFontList && !monospaced_FontListArray) {
                   copyToClipboard(custom_MonospacedFontList);
                   let frDialog = new FrDialogBox({
-                    trueButtonText: "确 定",
-                    messageText: "<p style='color:crimson'>您提交的自定义等宽字体数据有误，请重新输入。</p><p>注意：先前提交的信息已自动保存至剪切板中。</p>",
-                    titleText: "自定义等宽字体数据错误",
+                    trueButtonText: IS_CHN ? "确 定" : "OK",
+                    messageText: IS_CHN
+                      ? "<p style='color:crimson'>您提交的自定义等宽字体数据有误，请重新输入。</p><p>注意：先前提交的信息已自动保存至剪切板中。</p>"
+                      : "<p style='color:crimson'>Custom Monospaced Font Data error, Please refill!</p><p>Note: Previous content saved to the clipboard.</p>",
+                    titleText: IS_CHN ? "自定义等宽字体数据错误" : "Custom Monospaced Font Data Error",
                   });
                   if (await frDialog.respond()) {
                     let clickEvent = new Event("dblclick", { bubbles: true, cancelable: false });
@@ -3798,9 +4045,11 @@
                   _config_data_.isCustomMono = Boolean(qS(`#${def.id.iscusmono}`, def.const.dialogIf).checked);
                   saveData("_CONFIGURE_", _config_data_);
                   let frDialog = new FrDialogBox({
-                    trueButtonText: "确 定",
-                    messageText: `<p style="color:darkgreen">您提交的自定义等宽字体相关数据已保存成功\uff01</p><p>当前页面将在您确认后自动刷新。</p><p style="color:coral;font-size:12px!important">注：格式错误的输入内容将被自动过滤。</p>`,
-                    titleText: "自定义等宽字体相关数据保存",
+                    trueButtonText: IS_CHN ? "确 定" : "OK",
+                    messageText: IS_CHN
+                      ? `<p style="color:darkgreen">您提交的自定义等宽字体相关数据已保存成功\uff01</p><p>当前页面将在您确认后自动刷新。</p><p style="color:coral;font-size:12px!important">注：格式错误的输入内容将被自动过滤。</p>`
+                      : `<p style="color:darkgreen">Custom Monospaced Font Data Save succeeded!</p><p>The page will be refreshed after confirming.</p><p style="color:coral;font-size:12px!important">Note: Incorrect content will be filtered.</p>`,
+                    titleText: IS_CHN ? "自定义等宽字体相关数据保存" : "Custom Monospaced Font Data Save",
                   });
                   if (await frDialog.respond()) closeConfigurePage({ isReload: true });
                   frDialog = null;
@@ -3821,11 +4070,13 @@
           if (!resetT) return;
           resetT.addEventListener("click", async () => {
             let frDialog = new FrDialogBox({
-              trueButtonText: "重 置",
-              falseButtonText: "恢 复",
-              neutralButtonText: "取 消",
-              messageText: `<p>『重置/恢复』将当前设置初始化为 <span style="color:slategray">程序默认的初始数据</span> 或 <span style="color:slategrey">上次正确保存的数据</span>。一般是在您错误配置参数且造成无法挽回的情况下才进行重置参数的操作。</p><p style="color:darkgreen">重置\uff1a重置当前数据为程序初始值，手动保存生效。</p><p style="color:darkred">恢复\uff1a替换为上次正确保存的数据，自动恢复预览。</p><p style="color:gray">取消\uff1a放弃重置操作。</p>`,
-              titleText: "参数重置确认",
+              trueButtonText: IS_CHN ? "重 置" : "Reset",
+              falseButtonText: IS_CHN ? "恢 复" : "Restore",
+              neutralButtonText: IS_CHN ? "取 消" : "Cancel",
+              messageText: IS_CHN
+                ? `<p>『重置/恢复』将当前设置初始化为 <span style="color:slategray">程序默认的初始数据</span> 或 <span style="color:slategrey">上次正确保存的数据</span>。一般是在您配置错误或需使用新功能参数的情况下才进行重置参数的操作。</p><p style="color:darkgreen">重置\uff1a重置当前数据为程序初始值，手动保存生效。</p><p style="color:darkred">恢复\uff1a替换为上次正确保存的数据，自动恢复预览。</p><p style="color:gray">取消\uff1a放弃重置操作。</p>`
+                : `<p>『Reset/Restore』Initializes the current settings to <span style="color:slategray">the program's default initial data</span> or <span style="color:slategrey">the last saved data</span>. The reset is usually done when configuration error or new feature is needed. </p><p style="color:darkgreen"><b>Reset:</b> Reset the current data to the initial value of the program, and save data manually.</p><p style="color:darkred"><b>Restore:</b> Replace all with the last correctly saved data, and automatically restore preview. </p><p style="color:gray"><b>Cancel:</b> Abort the reset operation. </p>`,
+              titleText: IS_CHN ? "参数重置确认" : "Confirm To Reset Settings",
             });
             if (await frDialog.respond()) {
               smoothT.checked !== INITIAL_VALUES.fontSmooth ? smoothT.click() : DEBUG("<fontSmooth> NOT MODIFIED");
@@ -3953,7 +4204,7 @@
                 const _globalCssText = IS_REAL_GECKO && fontface ? def.const.style.global : "";
                 const _rootpseudoclass = `:root{--fr-font-basefont:${INITIAL_VALUES.fontBase};--fr-font-fontscale:${fscale};--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-no-stroke:0px transparent;${monoFontText}${monoShadow}${monoFeatureText}}`;
                 const __tshadow = _curEmptyConfig ? `/* BLANK_STYLE_SHEET */` : `@charset "UTF-8";${_rootpseudoclass}${_globalCssText}${_tshadow}`;
-                this.textContent = "\u4fdd\u5b58";
+                this.textContent = IS_CHN ? "\u4fdd\u5b58" : "𝑺𝒂𝒗𝒆";
                 this.removeAttribute("style");
                 this.removeAttribute("v-Preview");
                 def.const.curScale = fscale;
@@ -3974,11 +4225,13 @@
             } else {
               try {
                 let frDialog = new FrDialogBox({
-                  trueButtonText: "保存到全局数据",
-                  falseButtonText: "保存到网站数据",
-                  neutralButtonText: "取 消",
-                  messageText: `<p style="color:darkgreen;font-weight:700">保存到全局数据\uff1a</p><p>将当前设置保存为全局设置，默认使用全局参数。</p><p style="color:#8b0000;font-weight:700">保存到当前网站数据\uff1a<span id="${def.const.seed}_a_w_d_l_">[<span style="margin:0;padding:0 2px;color:#3e3e3e;font-weight:400;font-size:12px!important;cursor:pointer">全部数据列表</span>]</span></p><p style="min-height:22px"><span title="保存到网站数据会自动覆盖之前的数据" style="color:indigo;cursor:help;word-break:break-all" id="${def.const.seed}_c_w_d_">为 ${TOP_HOST} 保存独立的设置数据。</span>`,
-                  titleText: "保存设置数据",
+                  trueButtonText: IS_CHN ? "保存到全局数据" : "Global Save",
+                  falseButtonText: IS_CHN ? "保存到网站数据" : "Website Save",
+                  neutralButtonText: IS_CHN ? "取 消" : "Cancel",
+                  messageText: IS_CHN
+                    ? `<p style="color:darkgreen;font-weight:700">保存到全局数据\uff1a</p><p>将当前设置保存为全局设置，默认使用全局参数。</p><p style="color:#8b0000;font-weight:700">保存到当前网站数据\uff1a<span id="${def.const.seed}_a_w_d_l_">[<span style="margin:0;padding:0 2px;color:#3e3e3e;font-weight:400;font-size:12px!important;cursor:pointer">全部数据列表</span>]</span></p><p style="min-height:22px"><span title="保存到网站数据会自动覆盖之前的数据" style="color:indigo;cursor:help;word-break:break-all" id="${def.const.seed}_c_w_d_">为 ${TOP_HOST} 保存独立的设置数据。</span>`
+                    : `<p style="color:darkgreen;font-weight:700">Save to Global Data:</p><p>Save as global setting, using global by default. </p><p style="color:#8b0000;font-weight:700">Save to Current Website Data: <span id="${def.const.seed}_a_w_d_l_">[<span style=" margin:0;padding:0 2px;color:#3e3e3e;font-weight:400;font-size:12px!important;cursor:pointer"> All Data List </span>]</span></p><p style="min-height:22px"><span title="Data saved to the website will automatically overwrite the previous data" style="color:indigo;cursor:help;word-break:break-all" id="${def.const.seed}_c_w_d_">Save to website data for ${TOP_HOST}</span>`,
+                  titleText: IS_CHN ? "保存设置数据" : "Save Settings Data",
                 });
                 let domains, domainValue, domainValueIndex;
                 domains = await GMgetValue("_DOMAINS_FONTS_SET_");
@@ -3998,15 +4251,19 @@
                 if (typeof domainValueIndex !== "undefined" && cwdNode) {
                   const fontDate = setDateFormat("yyyy-MM-dd HH:mm:ss", new Date(domainValue[domainValueIndex].fontDate));
                   cwdNode.innerHTML = tTP.createHTML(
-                    `<p style="display:flex;height:30px;align-items:center"><span style="color:indigo"><strong>上次保存\uff1a</strong>${fontDate} </span><button id="${def.const.seed}_c_w_d_d_" style="box-sizing:border-box;margin-left:15px;padding:3px 5px;width:max-content;height:max-content;max-width:120px;min-height:30px;border:1px solid #777777;border-radius:4px;background-color:#eeeeee;color:#333333!important;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer" title="删除数据后将刷新页面">删除当前网站数据</button></p>`
+                    IS_CHN
+                      ? `<p style="display:flex;height:30px;align-items:center"><span style="color:indigo"><strong>上次保存\uff1a</strong>${fontDate} </span><button id="${def.const.seed}_c_w_d_d_" style="box-sizing:border-box;margin-left:15px;padding:3px 5px;width:max-content;height:max-content;max-width:120px;min-height:30px;border:1px solid #777777;border-radius:4px;background-color:#eeeeee;color:#333333!important;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer" title="删除数据后将刷新页面">删除当前网站数据</button></p>`
+                      : `<p style="display:flex;height:30px;align-items:center"><span style="color:indigo"><strong>The last saved</strong>: ${fontDate} </span><button id="${def.const.seed}_c_w_d_d_" style="box-sizing:border-box;margin-left:15px;padding:3px 10px;width:max-content;height:max-content;max-width:120px;min-height:30px;border:1px solid #777777;border-radius:4px;background-color:#eeeeee;color:#333333!important;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer" title="The page will be refreshed after deleting the data">Delete it</button></p>`
                   );
                   qS(`#${def.const.seed}_c_w_d_d_`, def.const.dialogIf).addEventListener("click", async () => {
                     typeof domainValueIndex !== "undefined" && domainValue.splice(domainValueIndex, 1);
                     saveData("_DOMAINS_FONTS_SET_", domainValue);
                     let frDialog = new FrDialogBox({
-                      trueButtonText: "感谢使用",
-                      messageText: "<p style='color:darkred'>当前网站的个性化数据已成功删除\uff01</p><p>当前页面将在您确认后自动刷新。</p>",
-                      titleText: "个性化数据删除",
+                      trueButtonText: IS_CHN ? "感谢使用" : "Thanks",
+                      messageText: IS_CHN
+                        ? "<p style='color:darkred'>当前网站的个性化数据已成功删除\uff01</p><p>当前页面将在您确认后自动刷新。</p>"
+                        : "<p style='color:darkred'>The current siteData was deleted!</p><p>The page will be refreshed after confirming.</p>",
+                      titleText: IS_CHN ? "个性化数据删除" : "Personalized Data Deletion",
                     });
                     if (await frDialog.respond()) closeConfigurePage({ isReload: true });
                     frDialog = null;
@@ -4070,11 +4327,13 @@
                     def.const.successId = true;
                   } else {
                     let frDialog = new FrDialogBox({
-                      trueButtonText: "依然保存",
-                      falseButtonText: "管理列表",
-                      neutralButtonText: "我放弃",
-                      messageText: `<p style="color:gray">您已经保存超过<span style="color:#dc143c;font-weight:700;font-style:italic;font-size:20px">${maxPersonalSites} </span>个网站的个性化数据了，过多的数据会使脚本运行速度过慢，进而会影响您浏览网页的响应速度，建议您及时删除一些平时访问较少的站点设置，然后再进行新网站设置的数据保存。</p><p style="color:crimson">您确认要继续保存吗？</p>`,
-                      titleText: "数据过多的提示",
+                      trueButtonText: IS_CHN ? "依然保存" : "Save",
+                      falseButtonText: IS_CHN ? "管理列表" : "Manage",
+                      neutralButtonText: IS_CHN ? "我放弃" : "Abort",
+                      messageText: IS_CHN
+                        ? `<p style="color:gray">您已经保存超过<span style="color:#dc143c;font-weight:700;font-style:italic;font-size:20px">${maxPersonalSites} </span>个网站的个性化数据了，过多的数据会使脚本运行速度过慢，进而会影响您浏览网页的响应速度，建议您及时删除一些平时访问较少的站点设置，然后再进行新网站设置的数据保存。</p><p style="color:crimson">您确认要继续保存吗？</p>`
+                        : `<p style="color:gray">You have saved more than <span style="color:#dc143c;font-weight:700;font-style:normal;font-size:20px">${maxPersonalSites}</span > Personalized data. Too much data will make script run slowly. It's recommended that you delete some site settings that are rarely visited in time. </p><p style="color:crimson">Are you sure you want to continue saving? </p>`,
+                      titleText: IS_CHN ? "数据过多的提示" : "Too Much Data",
                     });
                     if (await frDialog.respond()) {
                       saveData("_DOMAINS_FONTS_SET_", domainValue);
@@ -4095,9 +4354,11 @@
               } finally {
                 if (def.const.successId) {
                   let frDialog = new FrDialogBox({
-                    trueButtonText: "感谢使用",
-                    messageText: "<p style='color:darkgreen'>您设置的字体渲染数据已成功保存\uff01</p><p>当前页面将在您确认后自动刷新。</p>",
-                    titleText: "字体渲染数据保存",
+                    trueButtonText: IS_CHN ? "感谢使用" : "Thanks",
+                    messageText: IS_CHN
+                      ? "<p style='color:darkgreen'>您设置的字体渲染数据已成功保存\uff01</p><p>当前页面将在您确认后自动刷新。</p>"
+                      : "<p style='color:darkgreen'>The Font Rendering data has been saved!</p><p>The page will be refreshed after confirming.</p>",
+                    titleText: IS_CHN ? "字体渲染数据保存" : "Font Rendering Data Save",
                   });
                   if (await frDialog.respond()) closeConfigurePage({ isReload: true });
                   frDialog = null;
@@ -4113,11 +4374,13 @@
           backupT.addEventListener("click", async () => {
             try {
               let frDialog = new FrDialogBox({
-                trueButtonText: "备 份",
-                falseButtonText: "还 原",
-                neutralButtonText: "取 消",
-                messageText: `<p style="color:darkgreen;font-weight:700">备份到本地文件\uff1a</p><p>备份到本地，自动下载 backup.*.sqlitedb 文件。</p><p style="color:#8b0000;font-weight:700">从本地文件还原\uff1a</p><p><span style="color:indigo;cursor:pointer" id="${def.id.tfiles}">\ud83d\udd0e\u0020[点击这里载入*.sqlitedb备份文件]</span><input accept=".sqlitedb" type="file" id="${def.id.files}"/></p>`,
-                titleText: "备份与还原数据",
+                trueButtonText: IS_CHN ? "备 份" : "Backup",
+                falseButtonText: IS_CHN ? "还 原" : "Restore",
+                neutralButtonText: IS_CHN ? "取 消" : "Cancel",
+                messageText: IS_CHN
+                  ? `<p style="color:darkgreen;font-weight:700">备份到本地文件\uff1a</p><p>备份到本地，自动下载 backup.*.sqlitedb 文件。</p><p style="color:#8b0000;font-weight:700">从本地文件还原\uff1a</p><p><span style="color:indigo;cursor:pointer" id="${def.id.tfiles}">\ud83d\udd0e\u0020[点击这里载入*.sqlitedb备份文件]</span><input accept=".sqlitedb" type="file" id="${def.id.files}"/></p>`
+                  : `<p style="color:darkgreen;font-weight:700">Backup to local file:</p><p>Backup and download the backup.*.sqlitedb file.</p><p style="color:#8b0000;font-weight:700">Restore from local file:</p><p><span style="color:indigo;cursor:pointer" id="${def.id.tfiles}">\ud83d\udd0e\u0020[Click here to load *.sqlitedb backup file]</span><input accept=".sqlitedb" type="file" id="${def.id.files}"/></p>`,
+                titleText: IS_CHN ? "备份与还原数据" : "Backup and Restore Data",
               });
               const tfs = qS(`#${def.id.tfiles}`, def.const.dialogIf);
               const fs = qS(`#${def.id.files}`, def.const.dialogIf);
@@ -4126,8 +4389,9 @@
                 fs.addEventListener("change", () => {
                   tfs.innerHTML = tTP.createHTML(
                     fs.files[0]
-                      ? `<em style="color:indigo;font-size:11px!important;word-break:break-all">${fs.files[0].name}</em><br/><span style="color:crimson">\u0020\ud83d\udd0e\u0020[重新选择]</span>`
-                      : `\ud83d\udd0e\u0020[点击这里载入*.sqlitedb备份文件]`
+                      ? `<em style="color:indigo;font-size:11px!important;word-break:break-all">${fs.files[0].name}</em><br/>
+                          <span style="color:crimson">\u0020\ud83d\udd0e\u0020[${IS_CHN ? "重新选择" : "Reselect"}]</span>`
+                      : `\ud83d\udd0e\u0020[${IS_CHN ? "点击这里载入*.sqlitedb备份文件" : "Click here to load *.sqlitedb backup file"}]`
                   );
                 });
               }
@@ -4149,7 +4413,7 @@
                 const _fontOverride_defined_ = await GMgetValue("_FONTOVERRIDE_DEF_");
                 const _fontOverride_defined__ = _fontOverride_defined_ || "";
                 const _configure__ = await GMgetValue("_CONFIGURE_");
-                const db_R = "QXV0aGVyJUUyJTlBJUExRjl5NG5nJUYwJTlGJTkyJTk2JTQw".concat(encrypt(def.variable.scriptName));
+                const db_R = inspectLicense()?.keycode().concat(encrypt(def.variable.scriptName));
                 const db_0 = encrypt(String(new Date()));
                 const db_1 = _fonts_Set__;
                 const db_2 = _exclude_Site__;
@@ -4165,11 +4429,13 @@
                 const via = brand.toLowerCase();
                 const timeStamp = setDateFormat("yyyy-MM-ddTHH-mm-ssZ", new Date());
                 const _fileName_ = `FontRendering-backup-${via}-${timeStamp}.sqlitedb`;
-                dataDownload(_fileName_, sqliteDBDataAccess(JSON.stringify(db), 22, decrypt(ROOT_SECRET_KEY)));
+                dataDownload(_fileName_, sqliteDBDataAccess(JSON.stringify(db), 10086, ROOT_SECRET_KEY));
                 let frDialog = new FrDialogBox({
-                  trueButtonText: "确 定",
-                  messageText: `<p style="color:darkgreen">备份数据已归档，备份文件导出下载中……</p><p style="color:#8b0000;font-style:italic;font-size:12px!important;word-break:break-all">${_fileName_}</p>`,
-                  titleText: "数据备份",
+                  trueButtonText: IS_CHN ? "确 定" : "OK",
+                  messageText: IS_CHN
+                    ? `<p style="color:darkgreen">备份数据已归档，备份文件导出下载中……</p><p style="color:#8b0000;font-style:italic;font-size:12px!important;word-break:break-all">${_fileName_}</p>`
+                    : `<p style="color:darkgreen">The data archived and being downloaded…</p><p style="color:#8b0000;font-style:italic;font-size:12px!important;word-break:break-all">${_fileName_}</p>`,
+                  titleText: IS_CHN ? "数据备份" : "Data Backup",
                 });
                 if (await frDialog.respond()) {
                   closeConfigurePage({ isReload: false });
@@ -4186,7 +4452,7 @@
                     async function () {
                       try {
                         const _file = decrypt(String(this.result));
-                        const _rs = JSON.parse(sqliteDBDataAccess(_file, null, decrypt(ROOT_SECRET_KEY)));
+                        const _rs = JSON.parse(sqliteDBDataAccess(_file, null, ROOT_SECRET_KEY));
                         const _data_R = decrypt(_rs.db_R);
                         const _data_0 = decrypt(_rs.db_0);
                         const _data_1 = JSON.parse(decrypt(_rs.db_1));
@@ -4199,8 +4465,9 @@
                         const _data_8 = _rs.db_8 ? JSON.parse(decrypt(_rs.db_8)) : def.variable.undef;
                         const _data_9 = _rs.db_9 ? JSON.parse(decrypt(_rs.db_9)) : def.variable.undef;
                         const _data_10 = _rs.db_10 ? JSON.parse(decrypt(_rs.db_10)) : def.variable.undef;
-                        if (!isNaN(Date.parse(_data_0)) && new Date(_data_0) < new Date() && _data_R.includes(def.variable.scriptAuthor)) {
-                          for (let key of await GMlistValues()) GMdeleteValue(key);
+                        if (!isNaN(Date.parse(_data_0)) && new Date(_data_0) < new Date() && inspectLicense()?.inspect(_data_R)) {
+                          const keys = await GMlistValues();
+                          keys.forEach(key => GMdeleteValue(key));
                           saveData("_FONTS_SET_", _data_1);
                           saveData("_EXCLUDE_SITES_", _data_2);
                           saveData("_DOMAINS_FONTS_SET_", _data_3);
@@ -4218,9 +4485,11 @@
                             DEBUG("no configure data");
                           }
                           let frDialog = new FrDialogBox({
-                            trueButtonText: "确 定",
-                            messageText: "<p style='color:darkgreen'>本地备份数据还原完毕\uff01</p><p>当前页面将在您确认后自动刷新。</p>",
-                            titleText: "数据还原成功",
+                            trueButtonText: IS_CHN ? "确 定" : "OK",
+                            messageText: IS_CHN
+                              ? "<p style='color:darkgreen'>本地备份数据还原完毕\uff01</p><p>当前页面将在您确认后自动刷新。</p>"
+                              : "<p style='color:darkgreen'>Local backup data restored completly!</p><p>The page will be refreshed after confirming.</p>",
+                            titleText: IS_CHN ? "数据还原成功" : "Data Restored Successfully",
                           });
                           if (await frDialog.respond()) closeConfigurePage({ isReload: true });
                           frDialog = null;
@@ -4230,9 +4499,11 @@
                       } catch (e) {
                         ERROR("FileReader.load:", e.message);
                         let frDialog = new FrDialogBox({
-                          trueButtonText: "确 定",
-                          messageText: "<p style='color:red'>数据校验错误，请选择正确的本地备份文件\uff01</p>",
-                          titleText: "数据文件错误",
+                          trueButtonText: IS_CHN ? "确 定" : "OK",
+                          messageText: IS_CHN
+                            ? "<p style='color:red'>数据校验错误，请选择正确的本地备份文件\uff01</p>"
+                            : "<p style='color:red'>Data validation error, please recheck the file!</p>",
+                          titleText: IS_CHN ? "数据文件错误" : "Data File Error",
                         });
                         if (await frDialog.respond()) qS(`#${def.id.backup}`, def.const.configIf)?.click();
                         frDialog = null;
@@ -4245,9 +4516,11 @@
                 } catch (e) {
                   ERROR("<The file is null>", e.name);
                   let frDialog = new FrDialogBox({
-                    trueButtonText: "确 定",
-                    messageText: "<p style='color:indigo'>载入文件为空，请选择要还原的备份文件\uff01</p>",
-                    titleText: "没有文件载入",
+                    trueButtonText: IS_CHN ? "确 定" : "OK",
+                    messageText: IS_CHN
+                      ? "<p style='color:indigo'>载入文件为空，请选择要还原的备份文件\uff01</p>"
+                      : "<p style='color:indigo'>Load file is empty, please select one to restore!</p>",
+                    titleText: IS_CHN ? "没有文件载入" : "No File Loading",
                   });
                   if (await frDialog.respond()) qS(`#${def.id.backup}`, def.const.configIf)?.click();
                   frDialog = null;
@@ -4295,26 +4568,30 @@
 
       async function getCurrentFontName(_isfontface_, refont, defaultFont) {
         const inputFont = qS(`#${def.id.fontList} .${def.class.selectFontId} input`, def.const.configIf);
+        def.const.fontNamePh = IS_CHN ? "\u5f53\u524d\u5b57\u4f53\uff1a" : "Current: ";
         def.const.reFontFace = defaultFont;
         def.const.curFont = defaultFont;
         if (_isfontface_) {
+          def.const.reFontFace = IS_CHN
+            ? `\u672a\u77e5\u5b57\u4f53\u540d\uff08\u8bf7\u91cd\u65b0\u6dfb\u52a0\u8be5\u81ea\u5b9a\u4e49\u5b57\u4f53\u003a\u0020${refont}\uff09`
+            : `Unknown (Re-Add: ${refont})`;
+          def.const.curFont = IS_CHN ? "\u672a\u77e5\u5b57\u4f53\u540d" : "Unknown";
           const fontCheckList = await getMergedFontCheckList();
           for (let i = 0, l = fontCheckList.length; i < l; i++) {
             if (fontCheckList[i].en === refont || convertToUnicode(fontCheckList[i].ch) === refont) {
-              def.const.curFont = refont.includes("\\") ? `` : `（${fontCheckList[i].en}）`;
+              def.const.curFont = refont.includes("\\") ? `` : ` (${fontCheckList[i].en})`;
               def.const.reFontFace = fontCheckList[i].ch + def.const.curFont;
               def.const.curFont = fontCheckList[i].ch;
               break;
-            } else {
-              def.const.reFontFace = `\u672a\u77e5\u5b57\u4f53\u540d\uff08\u8bf7\u91cd\u65b0\u6dfb\u52a0\u8be5\u81ea\u5b9a\u4e49\u5b57\u4f53\u003a\u0020${refont}\uff09`;
-              def.const.curFont = "\u672a\u77e5\u5b57\u4f53\u540d";
             }
           }
         }
         if (inputFont) {
-          inputFont.setAttribute("placeholder", `\u5f53\u524d\u5b57\u4f53\uff1a${def.const.curFont}`);
-          inputFont.addEventListener("mouseover", () => inputFont.setAttribute("placeholder", "\u8f93\u5165\u5173\u952e\u5b57\u53ef\u68c0\u7d22\u5b57\u4f53"));
-          inputFont.addEventListener("mouseout", () => inputFont.setAttribute("placeholder", `\u5f53\u524d\u5b57\u4f53\uff1a${def.const.curFont}`));
+          inputFont.setAttribute("placeholder", def.const.fontNamePh + def.const.curFont);
+          inputFont.addEventListener("mouseover", () => {
+            inputFont.setAttribute("placeholder", IS_CHN ? "\u8f93\u5165\u5173\u952e\u5b57\u53ef\u68c0\u7d22\u5b57\u4f53" : "Enter some keywords");
+          });
+          inputFont.addEventListener("mouseout", () => inputFont.setAttribute("placeholder", def.const.fontNamePh + def.const.curFont));
         }
       }
 
@@ -4430,7 +4707,7 @@
           } else {
             if (button.classList.contains(def.class.anim)) button.classList.remove(def.class.anim);
             if (def.const.isPreview) {
-              button.textContent = "\u4fdd\u5b58";
+              button.textContent = IS_CHN ? "\u4fdd\u5b58" : "Save";
               button.removeAttribute("style");
               button.removeAttribute("v-Preview");
               def.const.curScale = CONST_VALUES.fontSize;
@@ -4447,12 +4724,13 @@
 
       function changePreviewButtonStyle(button, arr) {
         if (IS_REAL_GECKO && arr.includes(def.id.fontScale)) {
-          button.textContent = "\u4fdd\u5b58";
-          button.title = "Firefox: 因字体比例缩放的兼容性问题，预览功能已暂停，请保存后查看效果！";
+          button.textContent = IS_CHN ? "\u4fdd\u5b58" : "𝑺𝒂𝒗𝒆";
+          button.title = IS_CHN ? "Firefox: 由于字体缩放的兼容问题，预览已暂停，请保存后查看！" : "Due to Font scaling compatibility issues, Preview paused, please save to check!";
           button.setAttribute("style", "background-color:#da09b7!important;border-color:#da09b7!important");
           button.removeAttribute("v-Preview");
         } else {
-          button.textContent = "\u9884\u89c8";
+          button.textContent = IS_CHN ? "\u9884\u89c8" : "𝑷𝒓𝒆𝒗";
+          button.title = IS_CHN ? null : "Preview";
           button.setAttribute("style", "background-color:coral!important;border-color:coral!important");
           button.setAttribute("v-Preview", "true");
         }
@@ -4493,15 +4771,23 @@
               expReport += `${i + 1}、${exps[i]}${i + 1 !== exps.length ? "\u3000<br/>" : ""}`;
             }
             let frDialog = new FrDialogBox({
-              trueButtonText: "反馈问题",
-              falseButtonText: "刷新页面",
+              trueButtonText: IS_CHN ? "反馈问题" : "FeedBack",
+              falseButtonText: IS_CHN ? "刷新页面" : "Reload",
               messageText:
-                `<p style="color:#dc143c;font-size:14px!important">脚本在运行时发生了重大异常或错误，若在『刷新页面』后依然报错，请通过『反馈问题』及时告知作者，感谢您的反馈\uff01<br/><kbd style="display:inline-block;box-sizing:content-box;margin:4px 0 0;padding:3px 10px;width:94%;border:1px solid rgba(175, 184, 193, 0.4);border-radius:6px;background-color:#f6f8fa;color:#666666;vertical-align:middle;text-align:center;font-size:14px!important">以下信息会自动保存至您的剪切板</kbd></p>` +
+                (IS_CHN
+                  ? `<p style="color:#dc143c;font-size:14px!important">脚本在运行时发生了重大异常或错误，若在『刷新页面』后依然报错，请通过『反馈问题』及时告知作者，感谢您的反馈\uff01<br/><kbd style="display:inline-block;box-sizing:content-box;margin:4px 0 0;padding:3px 10px;width:94%;border:1px solid rgba(175, 184, 193, 0.4);border-radius:6px;background-color:#f6f8fa;color:#666666;vertical-align:middle;text-align:center;font-size:14px!important">以下信息会自动保存至您的剪切板</kbd></p>`
+                  : `<p style="color:#dc143c;font-size:14px!important">If an error occured in the script and still occured after reloading, please report to the author in time, Thanks.<br/><kbd style="display:inline-block;box-sizing:content-box;margin:4px 0 0;padding:3px 10px;width:94%;border:1px solid rgba(175, 184, 193, 0.4);border-radius:6px;background-color:#f6f8fa;color:#666666;vertical-align:middle;text-align:center;font-size:14px!important">The following will be saved to the clipboard</kbd></p>`) +
                 `<p><ul id="${def.const.seed}_copy_to_author" style="overflow-y:auto;margin:0!important;padding:0!important;max-height:300px;list-style-position:outside">` +
-                `<li>浏览器信息\uff1a${JSON.stringify(navigatorInfo)}\u3000</li><li>脚本扩展信息\uff1a${GMscriptHandler} ${GMversion}\u3000</li>` +
-                `<li>脚本版本信息\uff1a${def.variable.curVersion}\u3000</li><li>当前访问域名\uff1a${CUR_HOST}<span hidden>\u0020${CUR_HOST_PATH}</span>\u3000</li>` +
-                `<li>错误信息列表\uff1a\u3000<span style="display:block;color:tan">${expReport}</span></li></ul></p>`,
-              titleText: def.variable.scriptName + "错误报告",
+                (IS_CHN
+                  ? `<li>浏览器信息\uff1a${JSON.stringify(navigatorInfo)}\u3000</li><li>脚本扩展信息\uff1a${GMscriptHandler} v${GMversion}\u3000</li>`
+                  : `<li><b>BrowserInfo:</b> ${JSON.stringify(navigatorInfo)}\u3000</li><li><b>ScriptManager:</b> ${GMscriptHandler} v${GMversion}\u3000</li>`) +
+                (IS_CHN
+                  ? `<li>脚本版本信息\uff1av${def.variable.curVersion}\u3000</li><li>当前访问域名\uff1a${CUR_PROTOCOL}//${CUR_HOST}<span hidden>\u0020${CUR_HOST_PATH}</span>\u3000</li>`
+                  : `<li><b>ScriptVersion:</b> v${def.variable.curVersion}\u3000</li><li><b>DomainName:</b> ${CUR_PROTOCOL}//${CUR_HOST}<span hidden>\u0020${CUR_HOST_PATH}</span>\u3000</li>`) +
+                (IS_CHN
+                  ? `<li>错误信息列表\uff1a\u3000<span style="display:block;color:tan">${expReport}</span></li></ul></p>`
+                  : `<li><b>ErrorsList:</b>\u3000<span style="display:block;color:tan">${expReport}</span></li></ul></p>`),
+              titleText: IS_CHN ? "错误报告" : "Error Report",
             });
             frDialog.container.setAttribute("fr-error", true);
             const copyText = qS(`#${def.const.seed}_copy_to_author`, def.const.dialogIf)
@@ -4524,7 +4810,7 @@
       }
 
       function getStyleLoadStatus() {
-        if (!IS_CURRENTSITE_ALLOWED || !IS_INTERNALSTYLE_ALLOWED || !IS_DEBUG) return;
+        if (!IS_DEBUG || !IS_CURRENTSITE_ALLOWED || !IS_INTERNALSTYLE_ALLOWED) return;
         sleep(2e3, { useCachedSetTimeout: false })
           .then(() => getMainStyleElements({ currentScope: true }))
           .then(style => DEBUG(`INSERTED STYLE${IS_IN_FRAMES}.ID: %c${style?.id}`, "color:teal;font:italic 700 12px/140% monospace;"));
@@ -4532,10 +4818,10 @@
 
       /* FIX_VIEWPORT_ZOOM_STYLE_ERRORS 2023-04-08 F9Y4NG */
 
-      const isNotFixViewportTask = !IS_INTERNALSTYLE_ALLOWED || !CONST_VALUES.fixViewport || def.const.curScale === 1;
+      const IS_NOT_FIX_VIEWPORT = !IS_CURRENTSITE_ALLOWED || !IS_INTERNALSTYLE_ALLOWED || !isFixViewport || !CONST_VALUES.fixViewport || def.const.curScale === 1;
 
       function correctViewportProcess() {
-        if (!IS_CURRENTSITE_ALLOWED || !IS_INTERNALSTYLE_ALLOWED || !isFixViewport) return;
+        if (IS_NOT_FIX_VIEWPORT) return;
         const parseViewport = ({ mutations }) =>
           mutations.forEach(mutation => {
             if (mutation.type !== "childList") return;
@@ -4551,14 +4837,13 @@
       }
 
       function runFixViewportUnits() {
-        if (!isFixViewport || isNotFixViewportTask) return;
+        if (IS_NOT_FIX_VIEWPORT) return;
         fixViewportCssStyle();
         w.addEventListener("pushState", fixViewportCssStyle);
         w.addEventListener("replaceState", fixViewportCssStyle);
       }
 
       function fixViewportCssStyle(nodeName) {
-        if (isNotFixViewportTask || !IS_CURRENTSITE_ALLOWED) return;
         const scaleValue = def.const.curScale;
         const fixRegex = /\b(\d+(?:\.\d+)?)(v[wh]|vmin|vmax)\b(?!\\)/g;
         const base64Regex = /(?:;base64,)((?:[a-zA-Z0-9/+]+)\b\d+(v[wh]|vmin|vmax)\b)+/g;
@@ -4651,7 +4936,7 @@
           const pendingStyles = qA(`style:not([data-fr-processed]):not(.darkreader)`);
           pendingStyles.forEach(styleNode => {
             if (styleNode.attributes[0]?.name.startsWith("fr-css-")) return;
-            if (/^S[ACS]\d+$/.test(styleNode.id) || styleNode.id === def.id.rndStyle) return;
+            if (styleNode.id === def.id.rndStyle || /^S[ACS]\d+$/.test(styleNode.id)) return;
             let cssText = styleNode.textContent;
             styleNode.setAttribute("data-fr-processed", false);
             debugOnce("fixstyles", "detect viewport.Styles:", true);
@@ -4698,8 +4983,8 @@
       /* FIX_FONT_BOLD_STROKE_STYLE_ERRORS 2023-04-08 F9Y4NG */
 
       function correctBoldStrokeProcess({ Fixedstyle, Scenes, Permit, target } = {}) {
-        const MAX_MODIFIED_NODES = 50;
-        const MAX_REPEATED_NODES = 3;
+        const MAX_MODIFIED_NODES = 100;
+        const MAX_REPEATED_NODES = 5;
         const MAX_TIME_INTERVAL = 50;
         const shadowRootSet = new Set();
         const styleMap = new WeakMap();
@@ -4910,8 +5195,11 @@
             shadowRootSet.forEach(target => observer.observe(target, config));
             subtrees.clear();
           } catch (e) {
-            observer.disconnect();
-            def.const.loops = true;
+            if (e.message.includes("LoopLimitError")) {
+              observer.disconnect();
+              document.removeEventListener("mouseover", handlingMouseEvents);
+              document.removeEventListener("mouseout", handlingMouseEvents);
+            }
             ERROR("fixBoldProcess:", e.message);
           }
         }
@@ -4925,18 +5213,21 @@
         function defineLoopLimitChecker(node, currentTime, mode) {
           const modifiedNodes = repeatedModifiedNodes[mode];
           if (modifiedNodes.length < MAX_MODIFIED_NODES) return;
-          const findFixedBold = item => mode === "attributes" || qS(`.${def.const.boldAttrName}`, item) || item.classList.contains(def.const.boldAttrName);
           const groups = modifiedNodes.reduce((acc, cur) => {
-            const key = cur.node.outerHTML;
+            const key = String(cur.node.outerHTML);
             acc[key] = (acc[key] || 0) + 1;
             return acc;
           }, {});
           const object = Object.keys(groups);
           const count = object.length;
+          if (count > MAX_REPEATED_NODES) return false;
           const maxKey = object.reduce((a, b) => (groups[a] > groups[b] ? a : b));
-          const filterNodeRules = r => r.node.isEqualNode(node) && r.node.outerHTML === maxKey && findFixedBold(node) && currentTime - r.previousTime <= MAX_TIME_INTERVAL;
+          const findFixedBold = item => qS(`.${def.const.boldAttrName}`, item) || item.classList.contains(def.const.boldAttrName);
+          const filterNodeRules = r =>
+            currentTime - r.previousTime <= MAX_TIME_INTERVAL &&
+            (mode === "attributes" ? String(r.node.outerHTML) === maxKey : r.node.isEqualNode(node) && String(r.node.outerHTML) === maxKey && findFixedBold(node));
           const repeatedNodes = modifiedNodes.filter(filterNodeRules);
-          if (count > MAX_REPEATED_NODES || repeatedNodes.length < MAX_MODIFIED_NODES / count) return false;
+          if (repeatedNodes.length < MAX_MODIFIED_NODES / count) return false;
           repeatedModifiedNodes[mode].length = 0;
           __console("warn", "Ignored:", capitalize(mode), "loop limit exceeded", IS_IN_FRAMES);
           return true;
@@ -4949,7 +5240,6 @@
         }
 
         function correctBoldManual(target = document) {
-          if (def.const.loops === true) return;
           const eventType = w.event?.type ?? Scenes ?? "initial";
           const els = querySelectorAllShadows(`:not(${def.const.exQueryString})`, target);
           debugOnce(eventType, `detect fontbold.Stroke${IS_IN_FRAMES}:`, { eventType });
@@ -5094,11 +5384,26 @@
         addLoadEvents.addFn(runFixViewportUnits);
         addLoadEvents.addFinalFn(getStyleLoadStatus);
       })(() => {
-        if (!CUR_WINDOW_TOP || !GMunregisterMenuCommand || String(GMunregisterMenuCommand) === "() => {}") return;
-        return GMregisterMenuCommand("\ufff0\ud83d\udd52\u0020正在载入脚本菜单，请稍候…", () => location.reload());
+        if (!CUR_WINDOW_TOP || String(GMunregisterMenuCommand) === "() => {}") return;
+        return GMregisterMenuCommand(`\ufff0\ud83d\udd52\u0020${IS_CHN ? "正在载入脚本菜单，请稍候…" : "Loading menus, please wait..."}`, () => location.reload());
       });
     })(
-      "JUU4JUFBJUIxSlZpWSVFNyU5MCU4OSVFNiU5RiU5MyVFNSVBRCVCQSVFOCU4MiVCQXAyTyVFNiU5MyU5MzAlRTglODUlOTF0JUU1JUIyJTgwJUU1JUFFJTlBJUU4JTg2JUJBZQ==",
+      () => {
+        const _XCode = "JUU4JUFBJUIxSlZpWSVFNyU5MCU4OSVFNiU5RiU5MyVFNSVBRCVCQSVFOCU4MiVCQXAyTyVFNiU5MyU5MzAlRTglODUlOTF0JUU1JUIyJTgwJUU1JUFFJTlBJUU4JTg2JUJBZQ==";
+        const _XFunction = s => {
+          if (!CUR_WINDOW_TOP) return;
+          const n = {
+            t: IS_CHN
+              ? "\u8bf7\u5b89\u88c5\u4f7f\u7528\u6b63\u7248\u811a\u672c"
+              : "\x50\x6c\x65\x61\x73\x65\x20\x55\x73\x65\x20\x47\x65\x6e\x75\x69\x6e\x65\x20\x53\x63\x72\x69\x70\x74",
+            o: `\r\n${IS_CHN ? "\u6b63\u7248\u5730\u5740\uff1a" : "\x47\x65\x6e\x75\x69\x6e\x65\x20\x55\x52\x4c\x3a\x20"}${def.const.greasyfork}`,
+          };
+          __console("\x65\x72\x72\x6f\x72", `${def.variable.scriptName}\r\n${n.t}\x20\x40\x20${def.const.greasyfork}`);
+          GMregisterMenuCommand(`\ufff0\ud83d\udea8\x20${n.t}`, () => GMopenInTab(def.const.greasyfork));
+          return !s && def.dialog.alert(`${def.variable.scriptName}\x20\x2d\x20${n.t}${n.o}`);
+        };
+        return { code: decrypt(_XCode), func: _XFunction };
+      },
       async () => {
         let maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, isFixViewport, isCloseTip, isCustomMono, rebuild, curVersion, globalDisable, _config_data_;
         const configure = await GMgetValue("_CONFIGURE_");
