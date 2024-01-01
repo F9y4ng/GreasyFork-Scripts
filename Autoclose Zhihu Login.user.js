@@ -1,38 +1,51 @@
 // ==UserScript==
-// @name         自动关闭知乎登录提示
-// @version      2023.11.04.1
-// @author       F9y4ng
-// @description  自动关闭知乎自动弹出的登录与注册提示，仅仅用于关闭自动弹出的登录提示，不干别的，未来也不会去干别的。
-// @namespace    https://github.com/F9y4ng/GreasyFork-Scripts/
-// @icon         https://img.icons8.com/windows/48/zhihu.png
-// @homepage     https://f9y4ng.github.io/GreasyFork-Scripts/
-// @homepageURL  https://f9y4ng.github.io/GreasyFork-Scripts/
-// @supportURL   https://github.com/F9y4ng/GreasyFork-Scripts/issues
-// @updateURL    https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.meta.js
-// @downloadURL  https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js
-// @match        *://*.zhihu.com/*
-// @grant        none
-// @compatible   Edge version>=105
-// @compatible   Chrome version>=105
-// @compatible   Firefox version>=103
-// @compatible   Opera version>=91
-// @compatible   Safari version>=15.4
-// @license      GPL-3.0-only
-// @copyright    2023, F9y4ng
-// @run-at       document-start
+// @name               自动关闭知乎登录提示
+// @name:en            Autoclose Zhihu Login Prompt
+// @name:zh-CN         自动关闭知乎登录提示
+// @name:zh-TW         自動關閉知乎登錄提示
+// @version            2024.01.01.1
+// @author             F9y4ng
+// @description        自动关闭知乎自动弹出的登录与注册提示，仅仅用于关闭自动弹出的登录提示。
+// @description:en     Autoclose Zhihu Login Prompt is only used to close the pop-up login and registration prompt.
+// @description:zh-CN  自动关闭知乎自动弹出的登录与注册提示，仅仅用于关闭自动弹出的登录提示。
+// @description:zh-TW  自動關閉知乎自動彈出的登錄與註冊提示，僅僅用於關閉自動彈出的登錄提示。
+// @namespace          https://github.com/F9y4ng/GreasyFork-Scripts/
+// @icon               https://img.icons8.com/windows/48/zhihu.png
+// @homepage           https://f9y4ng.github.io/GreasyFork-Scripts/
+// @homepageURL        https://f9y4ng.github.io/GreasyFork-Scripts/
+// @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
+// @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.meta.js
+// @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js
+// @match              *://*.zhihu.com/*
+// @grant              none
+// @noframes           true
+// @compatible         Edge version>=105
+// @compatible         Chrome version>=105
+// @compatible         Firefox version>=103
+// @compatible         Opera version>=91
+// @compatible         Safari version>=15.4
+// @license            GPL-3.0-only
+// @copyright          2023-2024, F9y4ng
+// @run-at             document-start
 // ==/UserScript==
 
 /* jshint esversion: 11 */
 
-"use strict";
+~(function (w) {
+  "use strict";
 
-~(function () {
   let nologin = true;
-  const observer = new MutationObserver(hiddenLogin);
-  const config = { childList: true, subtree: true };
-  observer.observe(document, config);
-  window.addEventListener("load", cloze);
-  document.addEventListener("readystatechange", cloze);
+  if (location.hostname.startsWith("link.")) {
+    const target = decodeURIComponent(new URLSearchParams(location.search).get("target"));
+    document.documentElement.textContent = "";
+    location.replace(target);
+  } else {
+    const observer = new MutationObserver(hiddenLogin);
+    const config = { childList: true, subtree: true };
+    observer.observe(document, config);
+    w.addEventListener("load", cloze);
+    document.addEventListener("readystatechange", cloze);
+  }
 
   function cloze(e) {
     document.body?.querySelector(`button[aria-label="关闭"][class~='Modal-closeButton']`)?.click();
@@ -69,4 +82,4 @@
       }
     }
   }
-})();
+})(typeof window !== "undefined" ? window : this);
