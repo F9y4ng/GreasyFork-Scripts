@@ -25,11 +25,14 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data promptly and don't use backup files from unknown sources!
 
-## version 2023.12.12.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2024.01.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ Fixed the infinite loop problem caused by script conflicts under notion.so.
-@ Fix some known problems, optimize styles, and optimize code.
+# ✨🎉🧡 Happy New Year To All Users 🧡🎉✨
++ Added Chinese and English bilingual features.
+@ Optimize bold-style fixed for conflict detection.
+@ Compatible with more browsers and extensions.
+@ Fix some known issues, Optimize styles & code.
 ```
 
 ## Please note the following before using the new version:
@@ -104,15 +107,14 @@ Font scaling (experimental feature) BETA version, off by default, please turn on
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-## version 2023.12.02.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2024.01.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-+ Update greasyfork.org new version @require address.
-+ Added search results filtering function to reject spam and content farms.
-@ Remove the invalid Fsoufsou, add Chinese search: wuzhuiso.com.
-@ Reconstruct the de-redirect function and optimize the efficiency of redirect link parsing.
-@ Reconstruct the ad removal function to optimize ad blocking efficiency and effectiveness.
-@ Fix some known issues, optimize styles, and optimize code.
+# ✨🎉🧡 Happy New Year To All Users 🧡🎉✨
+@ Optimize the ad removal function of some search engines.
+@ Optimize the detection effect of keyword filtering in search results.
+@ Improved compatibility with more browsers and script managers.
+@ Fix some known issues, Optimize styles & code.
 ```
 
 ## Latest feature introduction
@@ -139,10 +141,11 @@ The "**Automatic Update**" function is enabled by default. If not required, plea
 
 **Introduction:** "Autoclose Zhihu Login Prompt" is only used to close the automatically pop-up login prompt. It does nothing else and will not do anything else in the future.
 
-## version 2023.11.04.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
+## version 2024.01.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
 
 ```log
-@ Fixed a bug that caused the script to fail to load in document-start in Safari.
+# ✨🎉🧡 Happy New Year To All Users 🧡🎉✨
++ Added the automatic jump function of Zhihu jump links.
 ```
 
 ## Important
