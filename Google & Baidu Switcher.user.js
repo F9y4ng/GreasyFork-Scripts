@@ -1,18 +1,18 @@
 // ==UserScript==
 // @name               Google & baidu Switcher (ALL in One)
-// @name:en            SearchEngine Assistant
-// @name:zh-CN         优雅的搜索引擎跳转助手
-// @name:zh-TW         優雅的搜索引擎跳轉助手
-// @name:ru            помощник поисковой системы
-// @name:ja            優雅な検索エンジンジャンプ助手
-// @version            2023.12.02.1
+// @name:en            Search Engine Assistant
+// @name:zh-CN         优雅的搜索引擎助手
+// @name:zh-TW         優雅的搜索引擎助手
+// @name:ru            Поисковый помощник
+// @name:ja            優雅な検索エンジン助手
+// @version            2024.01.01.1
 // @author             F9y4ng
-// @description        "Elegance moteur de recherche saut Assistant" pour faciliter le saut dans les différents moteurs de recherche; Support des moteurs de recherche personnalisés, mise en évidence des mots clés; Fournit des fonctionnalités avancées telles que la suppression des redirections de liens et le blocage des annonces de recherche ; Compatible avec les moteurs de recherche tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage et Brave.
-// @description:en     "Elegant search engine Jump Assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
-// @description:zh-CN  “优雅的搜索引擎跳转助手”方便用户在不同的搜索引擎之间跳转；支持自定义常用搜索引擎、关键词高亮渲染效果；还提供去除搜索链接重定向、屏蔽搜索结果广告、可视化参数设置、及自动更新检测等高级功能；兼容多个知名搜索引擎，如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Ecosia、You、Startpage、Brave等。
-// @description:zh-TW  「優雅的搜索引擎跳轉助手」方便用戶在不同的搜索引擎之間跳轉；支持自定義常用搜索引擎、關鍵詞高亮渲染效果；還提供去除搜索鏈接重定嚮、屏蔽搜索結果廣告、可視化參數設置、及自動更新檢測等高級功能；兼容多個知名搜索引擎，如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Ecosia、You、Startpage、Brave等。
-// @description:ru     "помощник поисковой системы" облегчает пользователям переход между различными поисковыми системами; поддерживает пользовательские широко используемые поисковые системы и эффекты подсветки ключевых слов; предоставляет расширенные функции, такие как удаление перенаправления поисковых ссылок, блокирование рекламы результатов поиска и т.д.; он совместим с известными поисковыми системами, такими как Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, brave и т.д.
-// @description:ja     “優雅な検索エンジンジャンプアシスタント”は、ユーザが異なる検索エンジン間でジャンプすることを容易にし、カスタム常用検索エンジン、検索キーワードのハイライト効果をサポートし、検索リンクのリダイレクト除去、検索結果広告の遮蔽、可視化パラメータ設定、自動更新検出などの高度な機能を提供し、Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Ecosia、You、Startpage、Braveなどの複数の有名な検索エンジンに対応する。
+// @description        "Assistant de moteur de recherche élégant" pour faciliter le saut dans les différents moteurs de recherche; Support des moteurs de recherche personnalisés, mise en évidence des mots clés; Fournit des fonctionnalités avancées telles que la suppression des redirections de liens et le blocage des annonces de recherche ; Compatible avec les moteurs de recherche tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage et Brave.
+// @description:en     "Elegant search engine assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
+// @description:zh-CN  “优雅的搜索引擎助手”方便用户在不同的搜索引擎之间跳转；支持自定义常用搜索引擎、关键词高亮渲染效果；还提供去除搜索链接重定向、屏蔽搜索结果广告、可视化参数设置、及自动更新检测等高级功能；兼容多个知名搜索引擎，如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Ecosia、You、Startpage、Brave等。
+// @description:zh-TW  「優雅的搜索引擎助手」方便用戶在不同的搜索引擎之間跳轉；支持自定義常用搜索引擎、關鍵詞高亮渲染效果；還提供去除搜索鏈接重定嚮、屏蔽搜索結果廣告、可視化參數設置、及自動更新檢測等高級功能；兼容多個知名搜索引擎，如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Ecosia、You、Startpage、Brave等。
+// @description:ru     "Поисковый помощник" облегчает пользователям переход между различными поисковыми системами; поддерживает пользовательские широко используемые поисковые системы и эффекты подсветки ключевых слов; предоставляет расширенные функции, такие как удаление перенаправления поисковых ссылок, блокирование рекламы результатов поиска и т.д.; он совместим с известными поисковыми системами, такими как Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, brave и т.д.
+// @description:ja     “優雅な検索エンジン助手”は、ユーザが異なる検索エンジン間でジャンプすることを容易にし、カスタム常用検索エンジン、検索キーワードのハイライト効果をサポートし、検索リンクのリダイレクト除去、検索結果広告の遮蔽、可視化パラメータ設定、自動更新検出などの高度な機能を提供し、Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Ecosia、You、Startpage、Braveなどの複数の有名な検索エンジンに対応する。
 // @namespace          https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
 // @icon               https://img.icons8.com/stickers/48/search-in-cloud.png
 // @homepage           https://f9y4ng.github.io/GreasyFork-Scripts/
@@ -50,6 +50,7 @@
 // @connect            bing.com
 // @connect            sogou.com
 // @connect            so.com
+// @connect            search.yahoo.com
 // @connect            greasyfork.org
 // @connect            openuserjs.org
 // @connect            githubusercontent.com
@@ -59,11 +60,10 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               更新greasyfork.org新版本@require地址。
-// @note               新增搜索结果过滤功能，拒绝垃圾与内容农场。
-// @note               移除失效的Fsou,新增中文搜索：无追搜索。
-// @note               重构去重定向功能，优化重定向链接解析效率。
-// @note               重构去广告功能，优化广告屏蔽效率和效果。
+// @note               ✨🎉祝新年快乐，身体健康，万事如意🎉✨
+// @note               优化部分搜索引擎的去广告功能。
+// @note               优化搜索结果关键词过滤的检测效果。
+// @note               提升对更多浏览器及脚本管理器的兼容性。
 // @note               修正一些已知问题，优化样式，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
@@ -82,15 +82,15 @@
 // @grant              GM.xmlHttpRequest
 // @license            GPL-3.0-only
 // @create             2015-10-07
-// @copyright          2015-2023, F9y4ng
+// @copyright          2015-2024, F9y4ng
 // @run-at             document-start
 // ==/UserScript==
 
 /* jshint esversion: 11 */
 
-"use strict";
-
 ~(function (w) {
+  "use strict";
+
   /**
    * LICENSE FOR OPEN SOURCE USE: GPLv3.
    * CUSTOM SCRIPT DEBUGGING, DO NOT TURN ON FOR DAILY USE.
@@ -115,11 +115,11 @@
   const GMxmlhttpRequest = gmSelector("xmlhttpRequest");
   const GMunsafeWindow = gmSelector("unsafeWindow");
   const GMcontentMode = gmSelector("contentMode");
+  const GMcachedPrototype = gmSelector("cachedPrototype");
 
   /* INITIALIZE_DEBUG_FUNCTIONS */
 
   const IS_DEBUG = setDebuggerMode() || IS_OPEN_DEBUG;
-
   const DEBUG = IS_DEBUG ? __console.bind(console, "log") : () => {};
   const ERROR = IS_DEBUG ? __console.bind(console, "error") : () => {};
   const COUNT = IS_DEBUG ? __console.bind(console, "count") : () => {};
@@ -154,8 +154,8 @@
     variable: {
       undef: void 0,
       refresh: () => location.reload(true),
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2023.12.02.0",
-      scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? decrypt("U2VhcmNoRW5naW5lJTIwQXNzaXN0YW50"),
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.01.01.0",
+      scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRnN1cHBvcnQ="),
       homepage: getMetaValue("homepage") ?? getMetaValue("homepageURL") ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcuZ2l0aHViLmlvJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJG"),
     },
@@ -252,28 +252,30 @@
       getValue: typeof GM_getValue !== "undefined" ? GM_getValue : GM?.getValue ?? localStorage.getItem.bind(localStorage),
       deleteValue: typeof GM_deleteValue !== "undefined" ? GM_deleteValue : GM?.deleteValue ?? localStorage.removeItem.bind(localStorage),
       listValues: typeof GM_listValues !== "undefined" ? GM_listValues : GM?.listValues ?? (() => []),
-      openInTab: typeof GM_openInTab !== "undefined" ? GM_openInTab : GM?.openInTab ?? w.open,
+      openInTab: typeof GM_openInTab !== "undefined" ? GM_openInTab : GM?.openInTab ?? open.bind(w),
       registerMenuCommand: typeof GM_registerMenuCommand !== "undefined" ? GM_registerMenuCommand : GM?.registerMenuCommand ?? (() => {}),
       unregisterMenuCommand: typeof GM_unregisterMenuCommand !== "undefined" ? GM_unregisterMenuCommand : GM?.unregisterMenuCommand ?? (() => {}),
-      xmlhttpRequest: typeof GM_xmlhttpRequest !== "undefined" ? GM_xmlhttpRequest : GM?.xmlHttpRequest ?? (xhr => replaceXHR(xhr)),
+      xmlhttpRequest: typeof GM_xmlhttpRequest !== "undefined" ? GM_xmlhttpRequest : GM?.xmlHttpRequest ?? replaceXHR,
       unsafeWindow: typeof unsafeWindow !== "undefined" ? unsafeWindow : w,
       contentMode: GMinfo.injectInto === "content" || GMinfo.script["inject-into"] === "content" || ["dom", "js"].includes(GMinfo.sandboxMode),
+      cachedPrototype: { decrypt: atob.bind(w), encrypt: btoa.bind(w), console: Object.assign({}, w.console) },
     };
     return gmFunctions[rec] ?? (() => {});
   }
 
-  function __console(act, argm = "", ...args) {
-    const _this = w.console;
+  function __console(act, argm, ...args) {
+    const _this = GMcachedPrototype.console;
+    const _argm = argm ?? "";
     switch (act) {
       case "log":
-        return _this[act](`%c\ud83d\udd33 %c${argm}`, "display:inline-block", "font-family:monospace", ...args);
+        return _this[act](`%c\ud83d\udd33 %c${_argm}`, "display:inline-block", "font-family:monospace", ...args);
       case "error":
       case "warn":
-        return _this[act](`%c\ud83d\udea9 ${argm}`, "display:inline-block;font-family:monospace", ...args);
+        return _this[act](`%c\ud83d\udea9 ${_argm}`, "display:inline-block;font-family:monospace", ...args);
       case "count":
-        return _this[act](`\ud83d\udd33 ${argm}`);
+        return _this[act](`\ud83d\udd33 ${_argm}`);
       default:
-        return _this.log(argm, ...args);
+        return _this.log(_argm, ...args);
     }
   }
 
@@ -365,14 +367,24 @@
     return string.replace(/\b[a-z]|\s[a-z]/g, str => str.toUpperCase());
   }
 
-  function encrypt(string) {
+  function encrypt(string, encode = true) {
     if (typeof string !== "string") return "";
-    return btoa(encodeURIComponent(string));
+    try {
+      const req = encode ? encodeURIComponent(string) : string;
+      return GMcachedPrototype.encrypt(req);
+    } catch (e) {
+      return "";
+    }
   }
 
-  function decrypt(string) {
+  function decrypt(string, decode = true) {
     if (typeof string !== "string") return "";
-    return decodeURIComponent(atob(string.replace(/[^A-Za-z0-9+/=]/g, "")));
+    try {
+      const rst = GMcachedPrototype.decrypt(string.replace(/[^A-Za-z0-9+/=]/g, ""));
+      return decode ? decodeURIComponent(rst) : rst;
+    } catch (e) {
+      return "";
+    }
   }
 
   function compareArray(array1, array2) {
@@ -600,13 +612,13 @@
 
   function getLocationInfo() {
     const { pathname: cPN, hostname: cHN, protocol: cP } = location;
-    const isTop = self === top;
-    const pHN = parent !== self ? getParentHost() : cHN;
+    const isTop = w.self === w.top;
+    const pHN = w.parent !== w.self ? getParentHost() : cHN;
     return { cHN, cPN, cP, pHN, isTop };
 
     function getParentHost() {
       try {
-        return parent.location.hostname;
+        return w.parent.location.hostname;
       } catch (e) {
         return new URL(document.referrer || location).hostname;
       }
@@ -620,7 +632,9 @@
   }
 
   function setDebuggerMode() {
-    return new URLSearchParams(location.search).get("whoami") === "\u0046\u0039\u0079\u0034\u006e\u0067";
+    const key = decrypt("\u0052\u006a\u006c\u0035\u004e\u0047\u0035\u006e");
+    const value = new URLSearchParams(location.search).get("whoami");
+    return Object.is(key, value);
   }
 
   function sleep(delay, { useCachedSetTimeout } = {}) {
@@ -1051,9 +1065,8 @@
                 const { str, index } = parameter;
                 const keyArray = location.pathname.split(str);
                 return keyArray[index];
-              } else {
-                return "";
               }
+              return "";
             case "number":
             case "string":
               if (!parameter && parameter !== 0) return "";
@@ -1352,6 +1365,23 @@
               IS_DEBUG && node.classList.remove(def.const.loading);
             }
             break;
+          case "Yahoo":
+            task = () =>
+              getRealUrl(url, node, siteName, {
+                onreadystatechangeFunc: (resolve, reject) => response => {
+                  if (response.readyState !== 4) return;
+                  if (response.status === 200) {
+                    const resText = response.responseText || response.response || "";
+                    let res = resText.match(/URL\s*=\s*'([^']+)'/);
+                    resolve(res?.[1] ?? url);
+                  } else {
+                    rejectResponse(response, resolve, reject, url);
+                  }
+                },
+                onerrorFunc: reject => () => reject(new Error("URLBrokenError")),
+                ontimeoutFunc: reject => () => reject(new Error("TimeoutError")),
+              });
+            break;
         }
         return task;
       }
@@ -1396,8 +1426,9 @@
             }
             break;
           case "Yandex":
-            qS(`button.Button2.Button2_view_clear`)?.click();
-            qA("button.DistrSplashscreen-DeclineButton,button.MessageBox-Close,button.PromotionIncut-Close,span.popup2__close-icon").forEach(item => item.click());
+            qA(
+              ".PopupDesktop-Buttons button.PopupDesktop-Button_type_close,button.DistrSplashscreen-DeclineButton,button.MessageBox-Close,button.PromotionIncut-Close,span.popup2__close-icon"
+            ).forEach(item => item.click());
             if (qS(".serp-adv__counter")) {
               const rightside_Ads = qS(".serp-adv__counter").nextElementSibling;
               qS(".serp-adv__counter")?.classList.add(def.const.disappear);
@@ -1446,8 +1477,7 @@
             }
             break;
           case "You":
-            qS("button[aria-label='Close button']")?.click();
-            if (qA("ul[data-testid='web-results'] div>div>span[class^='sc-']").length > 0) {
+            if (qA("ul[data-testid='web-results']>li div>div>span[class^='sc-']").length > 0) {
               COUNT(`[${siteName}-Anti-Ads-Deep-exp]`);
               qA("ul[data-testid='web-results']>li").forEach(node => {
                 const ads = qS("div>div>span[class^='sc-']", node);
@@ -1724,8 +1754,8 @@
           },
           kaifa: {
             SiteTypeID: 10,
-            SiteName: isChinese ? "百度开发者" : "𝐃𝐞𝐯.𝐁𝐢𝐚𝐝𝐮",
-            SiteNick: isChinese ? "百度开发者 搜索" : "𝐃𝐞𝐯.𝐁𝐢𝐚𝐝𝐮",
+            SiteName: isChinese ? "百度开发者" : "𝐃𝐞𝐯.𝐁𝐚𝐢𝐝𝐮",
+            SiteNick: isChinese ? "百度开发者 搜索" : "𝐃𝐞𝐯.𝐁𝐚𝐢𝐝𝐮",
             SiteURI: "kaifa.baidu.com",
             WebURL: "https://kaifa.baidu.com/searchPage?module=SEARCH&wd=",
             ImgURL: "https://kaifa.baidu.com/searchPage?module=SUG&wd=",
@@ -1781,7 +1811,7 @@
             },
             AntiAds: function () {
               deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "ecosia_ad", immed: true })({
-                selectors: `div.main-header__install-cta,div.main-footer__card-container,div.personal-counter__tooltip,div.cookie-wrapper`,
+                selectors: `div.main-header__install-cta,div.main-footer__card-container,div.personal-counter__tooltip,div.cookie-wrapper,div.mainline__footer>a[data-test-id='chat-entry']`,
                 siteName: "Ecosia",
               });
             },
@@ -1799,7 +1829,12 @@
             StyleCode: `#${def.const.rndButtonID}{position:relative;position:absolute;z-index:1999999995;display:inline-block;margin-left:4px;width:max-content;height:44px}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:44px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:44px}#${def.const.leftButton} input{margin:2px 0;padding:1px 12px 1px 18px!important;height:44px;min-width:100px;border:2px solid transparent;border-bottom-left-radius:100px;border-top-left-radius:100px;background:#4285f5;color:#fff;vertical-align:top;font-weight:600;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:2px 0;padding:1px 18px 1px 12px!important;height:44px;min-width:100px;border:2px solid transparent;border-top-right-radius:100px;border-bottom-right-radius:100px;background:#4285f5;color:#fff;vertical-align:top;font-weight:600;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:2px solid transparent;background:#1967d2;color:#fff}`,
             ResultList: { qs: `#web>ol>li`, delay: 10 },
             KeyStyle: "strong",
-            AntiRedirect: null,
+            AntiRedirect: function () {
+              deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yahoo_ar" })("#main ol a[href^='https://r.search.yahoo.com/_ylt=']", "Yahoo", {
+                useNewTab: true,
+                useAdvancedAntiRedirect: true,
+              });
+            },
             AntiAds: function () {
               deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "yahoo_ad", immed: true })({
                 selectors: `#main ol.searchCenterBottomAds,#main ol.searchCenterTopAds`,
@@ -1831,7 +1866,9 @@
                 once: true,
               })(["openLinksInNewTabs", "hasSeenP13nAnnouncement", "hasUserClosedExtensionModal"]);
             },
-            AntiAds: null,
+            AntiAds: function () {
+              deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "you_ad", immed: true })({ siteName: "You" });
+            },
           },
           startpage: {
             SiteTypeID: 14,
@@ -2188,7 +2225,7 @@
                     text: String(
                       `<fieldset class="${def.notice.fieldset}">
                         <legend class="${def.notice.legend}" title="Version ${def.variable.curVersion}">
-                          ${isChinese ? "高级功能参数设置" : "Advanced feature Setting"}
+                          ${isChinese ? "高级功能参数设置" : "Advanced Feature Settings"}
                         </legend>
                         <ur class="${def.notice.settingList}">
                           <li class="${def.notice.random}__content">
@@ -2253,7 +2290,7 @@
                             </div>
                           </li>
                           <li style="display:flex;justify-content:space-between;">
-                            <button id="${def.notice.random}_help" title="${isChinese ? "单击查看脚本主页" : "View Homepage (Chinese)"}">
+                            <button id="${def.notice.random}_help" title="${isChinese ? "单击查看脚本主页" : "View Homepage"}">
                             ${isChinese ? "脚本主页" : "Guide!"}
                             </button>
                             <div>
@@ -2352,7 +2389,7 @@
                     }
                   });
                   qS(`#${def.notice.random}_help`).addEventListener("click", () => {
-                    GMopenInTab(`${def.variable.homepage}#优雅的搜索引擎跳转助手-google--baidu-switcheruserjs`, false);
+                    GMopenInTab(`${def.variable.homepage}${isChinese ? "#优雅的搜索引擎跳转助手" : "index_en.html#searchengine-assistants"}-google--baidu-switcheruserjs`, false);
                   });
                   qS(`#${def.notice.random}_cancel`).addEventListener("click", () => closeItem(qS(`gb-notice.${def.notice.noticejs} .${def.notice.configuration}`)));
                   qS(`#${def.notice.random}_submit`).addEventListener("click", async () => {
@@ -2581,11 +2618,15 @@
             if (!CUR_WINDOW_TOP) return;
             let parameter_Set, engine_List, filter_Set;
             parameter_Set ? GMunregisterMenuCommand(parameter_Set) : DEBUG("%cInstalling Parameter_Set_Menu", "color:gray");
-            parameter_Set = GMregisterMenuCommand(`\ufff0\u2699\ufe0f ${isChinese ? "搜索引擎助手参数设置" : "Parameter Setting"}${isHotkey ? "(E)" : ""}`, addAction.setConfigure);
+            parameter_Set = GMregisterMenuCommand(`\ufff0\u2699\ufe0f ${isChinese ? "搜索引擎助手高级设置" : "Advanced Feature Settings "}${isHotkey ? "(E)" : ""}`, () => {
+              addAction.setConfigure();
+            });
             filter_Set ? GMunregisterMenuCommand(filter_Set) : DEBUG("%cInstalling Filter_Set_Menu", "color:gray");
-            filter_Set = GMregisterMenuCommand(`\ufff2\ud83d\udcdb ${isChinese ? "搜索结果拦截词设置" : "Search Filter Setting"}${isHotkey ? "(B)" : ""}`, addAction.filterResult);
+            filter_Set = GMregisterMenuCommand(`\ufff2\ud83d\udcdb ${isChinese ? "搜索结果拦截词设置" : "Search Filter Settings "}${isHotkey ? "(B)" : ""}`, () => {
+              addAction.filterResult();
+            });
             engine_List ? GMunregisterMenuCommand(engine_List) : DEBUG("%cInstalling Engine_List_Menu", "color:gray");
-            engine_List = GMregisterMenuCommand(`\ufff4\ud83d\udc4b ${isChinese ? "嗨，你想去哪里吖？" : "Hi, Where to visit?"} ${isHotkey ? "(V)" : ""}`, addAction.listEngine);
+            engine_List = GMregisterMenuCommand(`\ufff4\ud83d\udc4b ${isChinese ? "嗨，你想去哪里吖？" : "Hi, Where to visit? "} ${isHotkey ? "(V)" : ""}`, addAction.listEngine);
           }
 
           function insertHotkey() {
@@ -2706,7 +2747,7 @@
                     getGlobalGoogle("www.google.com", googleJump);
                     insterAfter(buttonSection, Target);
                     if (!qS(buttonID)) return;
-                    qS(buttonID).parentNode.style.width = "100%";
+                    qS(buttonID).parentNode.style.width = "fit-content";
                     qS(buttonID).parentNode.style.minWidth = "100%";
                     qS(buttonID).parentNode.parentNode.style.width = "100%";
                     qS(buttonID).parentNode.parentNode.parentNode.style.width = "95%";
@@ -2804,15 +2845,15 @@
                     break;
                   }
                   case newSiteType.ECOSIA:
-                    if (!def.const.insertEcosiaButton) {
-                      def.const.insertEcosiaButton = true;
+                    if (currentSite.IMGType.includes(def.const.vim)) {
+                      insterAfter(buttonSection, Target);
+                    } else {
                       w.addEventListener("load", () => {
-                        delete def.const.insertEcosiaButton;
                         !qS(buttonID) && Target && insterAfter(buttonSection, Target);
                         addSearchButtonEvent(qA(`${buttonID} span[sn]:not([event-insert])`));
                       });
+                      resolve();
                     }
-                    resolve();
                     break;
                   case newSiteType.YAHOO:
                     insterAfter(buttonSection, Target);
@@ -2986,14 +3027,11 @@
             let timeout = Number(delay) || 50;
             if (timeout === Infinity) {
               if (!def.const.infinityFilterTime) {
-                if (def.const.addedInfinityLoad) return;
-                def.const.addedInfinityLoad = true;
                 w.addEventListener("load", () => {
                   def.const.infinityFilterTime = true;
                   filterSearchResultsProcess(qs);
                 });
               } else {
-                delete def.const.addedInfinityLoad;
                 deBounce({ fn: filterSearchResultsProcess, timer: "filterSearchResults", delay: 50 })(qs);
               }
               return;
@@ -3012,7 +3050,9 @@
               const nodes = qA(`${selectors}`);
               nodes.forEach(item => {
                 if (item.nodeType !== Node.ELEMENT_NODE) return;
-                const content = item.innerText?.replace(/\n/g, "").trim();
+                const href = qS("a:not([title^='Search']):not([aria-label^='Anonymous']):not([href*='.bing.com/ck/a?'])", item)?.href ?? "";
+                const url = [1, 5, 8].includes(listCurrentSite.SiteTypeID) ? "" : getDecodeURI(href);
+                const content = item.innerText?.replace(/[\t\r\n\ue62b]/g, "").trim() + url;
                 content && returnContent.set(item, content);
               });
               resolve(returnContent);
@@ -3020,25 +3060,30 @@
               .then(rtst => {
                 if (!rtst || rtst.size === 0) return;
                 for (let i = 0, l = resultFilters.length; i < l; i++) {
-                  const filter = resultFilters[i];
-                  const regex = new RegExp(filter, "i");
-                  for (const [item, content] of rtst) {
-                    if (item?.nodeType !== Node.ELEMENT_NODE) continue;
-                    if (!regex.test(content)) continue;
-                    if (IS_DEBUG) {
-                      const noticeNode = qS("notice-label", item);
-                      if (!noticeNode) {
-                        const notice = cE("notice-label");
-                        notice.classList.add("code");
-                        notice.textContent = `<![CDATA[ "${filter}" ]]>`;
-                        item.prepend(notice);
+                  try {
+                    const filter = resultFilters[i];
+                    const regex = new RegExp(filter, "i");
+                    for (const [item, content] of rtst) {
+                      if (item?.nodeType !== Node.ELEMENT_NODE) continue;
+                      if (!regex.test(content)) continue;
+                      if (IS_DEBUG) {
+                        const noticeNode = qS("notice-label", item);
+                        if (!noticeNode) {
+                          const notice = cE("notice-label");
+                          notice.classList.add("code");
+                          notice.textContent = `<![CDATA[ "${filter}" ]]>`;
+                          item.prepend(notice);
+                        }
                       }
+                      usedFilterWords.add(filter);
+                      item.classList.add(IS_DEBUG ? def.const.translucent : def.const.disappear);
+                      DEBUG("Filter.match:", { filter, item, content });
+                      qA("a", item).forEach(a => a.setAttribute("gd-antiredirect-status", "blocked"));
+                      rtst.delete(item);
                     }
-                    usedFilterWords.add(filter);
-                    item.classList.add(IS_DEBUG ? def.const.translucent : def.const.disappear);
-                    DEBUG("Filter.match:", { filter, item, content });
-                    qA("a", item).forEach(a => a.setAttribute("gd-antiredirect-status", "blocked"));
-                    rtst.delete(item);
+                  } catch (e) {
+                    ERROR("Filter.match:", e.message);
+                    continue;
                   }
                 }
                 rtst.clear();
@@ -3086,6 +3131,20 @@
               });
           }
 
+          function getDecodeURI(href) {
+            if (!href || /^javascript:/i.test(href)) return "";
+            let url;
+            try {
+              if (listCurrentSite.SiteTypeID === newSiteType.TOUTIAO) {
+                href = new URLSearchParams(new URL(href).search).get("url");
+              }
+              url = decodeURIComponent(href);
+            } catch (e) {
+              url = href;
+            }
+            return `\ue620${url}\ue620`;
+          }
+
           function getGlobalGoogle(google, checkGoogleJump) {
             if (!checkGoogleJump || getRealHostName() === getRealHostName(google) || sessionStorage.getItem("_global_google_")) return;
             try {
@@ -3093,14 +3152,18 @@
               sleep(5e2).then(() => {
                 def.const.s = GMopenInTab(`https://${google}/ncr`, true);
                 GMnotification({
-                  title: isChinese ? "智能跳转" : "Google NCR Jump",
+                  title: isChinese ? "智能跳转" : "Google NCR",
                   text: def.notice.noticeHTML(
                     `<dd class="${def.notice.center}">
-                    ${isChinese ? "当前页面即将跳转至 Google国际站（NCR）" : "Jump to Google.com (NCR)"} <br/><span>${google.toUpperCase()}</span>
+                      ${
+                        isChinese
+                          ? "当前页面即将跳转至 Google.com (NCR)<br/><span>新开的后台窗口会自动关闭！</span>"
+                          : "Jump to Google.com (NCR)<br/><span>The new window will close automatically!</span>"
+                      }
                     </dd>`
                   ),
                   type: def.notice.info,
-                  timeout: 10,
+                  timeout: 20,
                   callbacks: { onClose: [redirectNCR] },
                 });
               });
@@ -3369,7 +3432,7 @@
         const configure = await GMgetValue("_configures_");
         if (!configure) {
           const keys = await GMlistValues();
-          for (let key of keys) GMdeleteValue(key);
+          keys.forEach(key => GMdeleteValue(key));
           isAutoUpdate = true;
           keywordHighlight = false;
           isHotkey = true;
@@ -3411,7 +3474,8 @@
         return { isAutoUpdate, keywordHighlight, isHotkey, selectedEngine, localWindow, googleJump, antiLinkRedirect, antiAds, customColor };
       },
       (s => {
-        switch (navigator.language) {
+        const lang = navigator.language || navigator.userLanguage || "en-US";
+        switch (lang) {
           case "zh":
           case "zh-CN":
           case "zh-HK":
