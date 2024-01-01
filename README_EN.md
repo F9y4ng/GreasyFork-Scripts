@@ -1,4 +1,4 @@
-# [**GreasyFork-Scripts**](https://f9y4ng.github.io/GreasyFork-Scripts/) - F9y4ng - [![WIKI](https://img.shields.io/badge/WIKI-GREASYFORK%20SCRIPTS-brightgreen.svg?logo=github "wiki")](https://github.com/F9y4ng/GreasyFork-Scripts/wiki)
+# [**GreasyFork-Scripts**](https://f9y4ng.github.io/GreasyFork-Scripts/index_en.html) - F9y4ng - [![WIKI](https://img.shields.io/badge/WIKI-GREASYFORK%20SCRIPTS-brightgreen.svg?logo=github "wiki")](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Home_EN)
 
 **页面语言** (**Language**) |  [中文 (Chinese)](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/README.md) | 英语 (English)
 
@@ -17,15 +17,18 @@
 
 **Introduction:** Without MacType, improve browser displaying more textured. "Microsoft Yahei" is used by default. For browser displaying, the script provides advanced features such as font rewriting, smoothing, scaling, stroke, shadow, special style elements, custom monospaced, etc. It can configure by "click Script Manager icon" or "use hotkeys" to call out the setup. The script is already compatible with major browsers and userscript managers, also commonly used Greasemonkey scripts and browser extensions.
 
-* [Before using, please read the introduction in Wiki and the related precautions on this page.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89)
+* [Before using, please read the introduction in Wiki and the related precautions on this page.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font-Rendering-(Customized))
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data promptly and don't use backup files from unknown sources!
 
-### version 2023.12.12.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2024.01.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ Fixed the infinite loop problem caused by script conflicts under notion.so.
-@ Fix some known problems, optimize styles, and optimize code.
+# ✨🎉🧡 Happy New Year To All Users 🧡🎉✨
++ Added Chinese and English bilingual features.
+@ Optimize bold-style fixed for conflict detection.
+@ Compatible with more browsers and extensions.
+@ Fix some known issues, Optimize styles & code.
 ```
 
 ### Please note the following before using the new version:
@@ -117,22 +120,21 @@ Font scaling (experimental feature) BETA version, off by default, please turn on
 
 ---
 
-## SearchEngine Assistants [`Google & Baidu Switcher.user.js`](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Google%20%26%20Baidu%20Switcher.user.js)
+## Search Engine Assistants [`Google & Baidu Switcher.user.js`](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Google%20%26%20Baidu%20Switcher.user.js)
 
-**Introduction:** "Elegant search engine Jump Assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
+**Introduction:** "Elegant search engine assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
 
-* [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E8%B7%B3%E8%BD%AC%E5%8A%A9%E6%89%8B)
+* [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-### version 2023.12.02.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2024.01.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-+ Update greasyfork.org new version @require address.
-+ Added search results filtering function to reject spam and content farms.
-@ Remove the invalid Fsoufsou, add Chinese search: wuzhuiso.com.
-@ Reconstruct the de-redirect function and optimize the efficiency of redirect link parsing.
-@ Reconstruct the ad removal function to optimize ad blocking efficiency and effectiveness.
-@ Fix some known issues, optimize styles, and optimize code.
+# ✨🎉🧡 Happy New Year To All Users 🧡🎉✨
+@ Optimize the ad removal function of some search engines.
+@ Optimize the detection effect of keyword filtering in search results.
+@ Improved compatibility with more browsers and script managers.
+@ Fix some known issues, Optimize styles & code.
 ```
 
 ### Latest feature introduction
@@ -159,10 +161,11 @@ The "**Automatic Update**" function is enabled by default. If not required, plea
 
 **Introduction:** "Autoclose Zhihu Login Prompt" is only used to close the automatically pop-up login prompt. It does nothing else and will not do anything else in the future.
 
-### version 2023.11.04.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
+### version 2024.01.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
 
 ```log
-@ Fixed a bug that caused the script to fail to load in document-start in Safari.
+# ✨🎉🧡 Happy New Year To All Users 🧡🎉✨
++ Added the automatic jump function of Zhihu jump links.
 ```
 
 ### Important
