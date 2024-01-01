@@ -25,10 +25,13 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2023.12.12.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2024.01.01.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 修正在notion.so下脚本冲突造成的死循环问题。
+# ✨🎉🧡 祝新年快乐、身体健康、万事如意 🧡🎉✨
++ 新增脚本中英文双语，非中文系统默认使用英语界面。
+@ 优化粗体修正功能针对脚本冲突问题的检测机制。
+@ 提升代码兼容性，兼容更多浏览器与脚本管理器。
 @ 修正一些已知的问题，优化样式，优化代码。
 ```
 
@@ -104,14 +107,13 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2023.12.02.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2024.01.01.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-+ 更新 greasyfork.org 新版本 @require 地址。
-+ 新增搜索结果过滤功能，拒绝垃圾与内容农场。
-@ 移除失效的Fsou,新增中文搜索：无追搜索。
-@ 重构去重定向功能，优化重定向链接解析效率。
-@ 重构去广告功能，优化广告屏蔽效率和效果。
+# ✨🎉祝新年快乐，身体健康，万事如意🎉✨
+@ 优化部分搜索引擎的去广告功能。
+@ 优化搜索结果关键词过滤的检测效果。
+@ 提升对更多浏览器及脚本管理器的兼容性。
 @ 修正一些已知问题，优化样式，优化代码。
 ```
 
@@ -139,10 +141,11 @@
 
 简介：自动关闭知乎登录提示，仅仅用于关闭自动弹出的登录提示，不干别的，未来也不会去干别的。
 
-## version 2023.11.04.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
+## version 2024.01.01.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
 
 ```log
-@ 修正脚本在safari中无法在document-start加载而造成的bug.
+# ✨🎉祝新年快乐，身体健康，万事如意🎉✨
++ 新增知乎跳转链接的自动跳转功能。
 ```
 
 ## 重要说明
