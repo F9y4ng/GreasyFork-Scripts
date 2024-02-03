@@ -21,13 +21,12 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data promptly and don't use backup files from unknown sources!
 
-### version 2024.01.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2024.02.03.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-# ✨🎉🧡 Happy New Year To All Users 🧡🎉✨
-+ Added Chinese and English bilingual features.
-@ Optimize bold-style fixed for conflict detection.
-@ Compatible with more browsers and extensions.
+@ Optimize bold-stroke-style correction under Blink.
+@ Fix the Bug#304 caused by hijacking 'JSON.parse'.
+@ Update script internal link source to github.com.
 @ Fix some known issues, Optimize styles & code.
 ```
 
@@ -127,13 +126,11 @@ Font scaling (experimental feature) BETA version, off by default, please turn on
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-### version 2024.01.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2024.02.03.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-# ✨🎉🧡 Happy New Year To All Users 🧡🎉✨
-@ Optimize the ad removal function of some search engines.
-@ Optimize the detection effect of keyword filtering in search results.
-@ Improved compatibility with more browsers and script managers.
+@ Fix style bug of the jump button in some search engines.
+@ Update script internal link source to github.com.
 @ Fix some known issues, Optimize styles & code.
 ```
 
