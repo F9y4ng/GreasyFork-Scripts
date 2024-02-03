@@ -25,13 +25,12 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2024.01.01.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2024.02.03.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-# ✨🎉🧡 祝新年快乐、身体健康、万事如意 🧡🎉✨
-+ 新增脚本中英文双语，非中文系统默认使用英语界面。
-@ 优化粗体修正功能针对脚本冲突问题的检测机制。
-@ 提升代码兼容性，兼容更多浏览器与脚本管理器。
+@ 优化在 Blink 内核下粗体样式附加描边的渲染修正。
+@ 修正'JSON.parse'被劫持后数据被初始化的Bug#304.
+@ 更新脚本内部链接地址引用源至 github.com 域。
 @ 修正一些已知的问题，优化样式，优化代码。
 ```
 
@@ -107,13 +106,11 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2024.01.01.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2024.02.03.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-# ✨🎉祝新年快乐，身体健康，万事如意🎉✨
-@ 优化部分搜索引擎的去广告功能。
-@ 优化搜索结果关键词过滤的检测效果。
-@ 提升对更多浏览器及脚本管理器的兼容性。
+@ 修复部分搜索引擎的跳转按钮的显示BUG。
+@ 置换脚本引用源地址至github.com域内。
 @ 修正一些已知问题，优化样式，优化代码。
 ```
 
