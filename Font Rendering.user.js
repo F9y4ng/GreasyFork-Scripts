@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング
 // @name:en            Font Rendering (Customized)
-// @version            2024.01.01.1
+// @version            2024.02.03.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -30,6 +30,7 @@
 // @grant              GM.deleteValue
 // @grant              GM_openInTab
 // @grant              GM.openInTab
+// @grant              GM_addElement
 // @grant              GM_registerMenuCommand
 // @grant              GM.registerMenuCommand
 // @grant              GM_unregisterMenuCommand
@@ -68,6 +69,7 @@
   const GMdeleteValue = gmSelector("deleteValue");
   const GMlistValues = gmSelector("listValues");
   const GMopenInTab = gmSelector("openInTab");
+  const GMaddElement = gmSelector("addElement");
   const GMregisterMenuCommand = gmSelector("registerMenuCommand");
   const GMunregisterMenuCommand = gmSelector("unregisterMenuCommand");
   const GMunsafeWindow = gmSelector("unsafeWindow");
@@ -96,10 +98,9 @@
       cssAttrName: `fr-css-${generateRandomString(8, "hex")}`,
       boldAttrName: `fr-fix-${generateRandomString(8, "hex")}`,
       frameAttrName: `fr-frames-${generateRandomString(8, "hex")}`,
-      greasyfork: decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkY0MTY2ODg="),
-      defaultFont: decrypt(IS_CHN ? "JUU3JUJEJTkxJUU3JUFCJTk5JUU5JUJCJTk4JUU4JUFFJUE0JUU1JUFEJTk3JUU0JUJEJTkz" : "V2Vic2l0ZSUyMEZvbnRz"),
       fontlistImg: decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjIlMkYwNCUyRjAyJTJGcW9SZldkLmdpZg=="),
       loadingImg: decrypt("aHR0cHMlM0ElMkYlMkZpbWcuemNvb2wuY24lMkZjb21tdW5pdHklMkYwMzhkZGU0NThmOWE4NzRhODAxMjE2MGY3NDE3ZjZlLmdpZg=="),
+      defaultFont: decrypt(IS_CHN ? "JUU3JUJEJTkxJUU3JUFCJTk5JUU5JUJCJTk4JUU4JUFFJUE0JUU1JUFEJTk3JUU0JUJEJTkz" : "V2Vic2l0ZSUyMEZvbnRz"),
       exQueryString: `html,head,head *,base,meta,style,link,script,noscript,iframe,img,br,hr,map,area,canvas,svg,svg *,defs,symbol,g,path,polygon,polyline,rect,ellipse,circle,line,text,tspan,tref,textpath,lineargradient,radialgradient,use,images,clippath,mask,pattern,filter,stop,picture,form,object,param,embed,audio,video,source,track,progress,fr-colorpicker,fr-colorpicker *,fr-configure,fr-configure *,fr-dialogbox,fr-dialogbox *,gb-notice,gb-notice *`,
     },
     variable: {
@@ -109,7 +110,7 @@
         getClientRects: Element.prototype.getClientRects,
         getBoundingClientRect: Element.prototype.getBoundingClientRect,
       },
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.01.01.0",
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.02.03.0",
       scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
       scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("\x52\x6a\x6c\x35\x4e\x47\x35\x6e"),
       feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRnN1cHBvcnQ="),
@@ -278,6 +279,7 @@
     constructor(targetNode) {
       this.targetNode = targetNode ?? (() => document.documentElement);
       this.callbackSet = new Set();
+      this.observer = null;
     }
     getNodeAndObserve({ name, callback, config } = {}) {
       return new Promise(resolve => {
@@ -285,7 +287,7 @@
         this.config = config ?? { attributes: true, childList: true, subtree: true };
         this.target = this.targetNode();
         if (this.target) {
-          resolve(this._observeElement({ node: this.target, callbackSet: this.callbackSet, config: this.config }));
+          resolve(this._observeElement(this.target));
           return;
         }
         this.observer = new MutationObserver(mutationsList => {
@@ -295,7 +297,7 @@
             const addedNodes = mutation.addedNodes;
             for (let addedNode of addedNodes) {
               if (addedNode.nodeType !== Node.ELEMENT_NODE || !addedNode.contains(this.target)) continue;
-              resolve(this._observeElement({ node: this.target, callbackSet: this.callbackSet, config: this.config }));
+              resolve(this._observeElement(this.target));
               this.observer.disconnect();
               return;
             }
@@ -304,19 +306,19 @@
         this.observer.observe(document, { childList: true, subtree: true });
       });
     }
-    _observeElement({ node, callbackSet, config }) {
+    _observeElement(node) {
       const result = new Map([[undefined, node]]);
-      if (callbackSet.size === 0) return Promise.resolve(result);
+      if (this.callbackSet.size === 0) return Promise.resolve(result);
       else {
         return new Promise(resolve => {
           const elementObserver = new MutationObserver((mutations, obs) => {
-            for (const { name, callback } of callbackSet) {
+            for (const { name, callback } of this.callbackSet) {
               const rst = callback({ node, mutations, obs }) ?? node;
               result.set(name, rst);
             }
             resolve(result);
           });
-          elementObserver.observe(node, config);
+          elementObserver.observe(node, this.config);
         });
       }
     }
@@ -331,6 +333,7 @@
       deleteValue: typeof GM_deleteValue !== "undefined" ? GM_deleteValue : GM?.deleteValue ?? localStorage.removeItem.bind(localStorage),
       listValues: typeof GM_listValues !== "undefined" ? GM_listValues : GM?.listValues ?? (() => []),
       openInTab: typeof GM_openInTab !== "undefined" ? GM_openInTab : GM?.openInTab ?? open.bind(w),
+      addElement: typeof GM_addElement !== "undefined" ? GM_addElement : addElementFunc,
       registerMenuCommand: typeof GM_registerMenuCommand !== "undefined" ? GM_registerMenuCommand : GM?.registerMenuCommand ?? (() => {}),
       unregisterMenuCommand: typeof GM_unregisterMenuCommand !== "undefined" ? GM_unregisterMenuCommand : GM?.unregisterMenuCommand ?? (() => {}),
       unsafeWindow: typeof unsafeWindow !== "undefined" ? unsafeWindow : w,
@@ -338,6 +341,26 @@
       cachedPrototype: { decrypt: atob.bind(w), encrypt: btoa.bind(w), console: Object.assign({}, w.console) },
     };
     return gmFunctions[rec] ?? (() => {});
+  }
+
+  function addElementFunc(parent_node, tag_name, attributes) {
+    try {
+      if (!parent_node) throw new Error("No parent_node");
+      if (typeof parent_node === "string") {
+        if (!["[object Object]", "[object Undefined]"].includes(Object.prototype.toString.call(tag_name))) throw new Error("Invalid attributes");
+        attributes = tag_name;
+        tag_name = parent_node;
+        parent_node = null;
+      }
+      if (!tag_name || typeof tag_name !== "string") throw new Error("No tag_name");
+      const node = cE(tag_name);
+      for (let key of Object.keys(attributes ?? {})) {
+        node[key] = attributes[key];
+      }
+      (parent_node ?? document.body ?? document.documentElement).appendChild(node);
+    } catch (e) {
+      ERROR("addElement:", e.message);
+    }
   }
 
   function __console(act, argm, ...args) {
@@ -417,6 +440,19 @@
       configurable: false,
       enumerable: false,
     });
+  }
+
+  function requestNonHijackedOriginalJSON() {
+    try {
+      if (JSON.parse.toString().includes("[native code]") && JSON.stringify.toString().includes("[native code]")) return JSON;
+      else throw new Error("JSON.Hijacked");
+    } catch (e) {
+      ERROR("patchJSON:", e.name, e.message);
+      const f = GMaddElement(document.documentElement, "iframe");
+      const { JSON } = f.contentWindow;
+      f.remove();
+      return JSON;
+    }
   }
 
   function checkLocalChineseLanguage() {
@@ -907,21 +943,20 @@
     const IS_GREASEMONKEY = GMscriptHandler === "Greasemonkey";
     const IS_INTERNALSTYLE_ALLOWED = await isInternalStyleAllowed();
     const CAN_I_USE = detectBrowserCompatibility();
+    const JSON = requestNonHijackedOriginalJSON();
 
     /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
     const UPDATE_VERSION_NOTICE = String(
       IS_CHN
-        ? `<li class="${def.const.seed}_info">✨🎉🧡 祝新年快乐、身体健康、万事如意 🧡🎉✨</li>
-            <li class="${def.const.seed}_add">新增脚本中英文双语，非中文系统默认使用英语界面。</li>
-            <li class="${def.const.seed}_fix">优化粗体修正功能针对脚本冲突问题的检测机制。</li>
-            <li class="${def.const.seed}_fix">提升代码兼容性，兼容更多浏览器与脚本管理器。</li>
-            <li class="${def.const.seed}_fix">修正一些已知的问题，优化样式，优化代码。</li>`
-        : `<li class="${def.const.seed}_info">✨🎉🧡 Happy New Year To All Users 🧡🎉✨</li>
-            <li class="${def.const.seed}_add">Added Chinese and English bilingual features. </li>
-            <li class="${def.const.seed}_fix">Optimize bold-style fixed for conflict detection.</li>
-            <li class="${def.const.seed}_fix">Compatible with more browsers and extensions.</li>
-            <li class="${def.const.seed}_fix">Fix some known issues, Optimize styles & code.</li>`
+        ? `<li class="${def.const.seed}_fix">优化在 Blink 内核下粗体样式附加描边的渲染修正。</li>
+          <li class="${def.const.seed}_fix">修正'JSON.parse'被劫持后数据被初始化的Bug<a target="_blank" href="${def.variable.feedback}/304">#304</a>.</li>
+          <li class="${def.const.seed}_fix">更新脚本内部链接地址引用源至 github.com 域。</li>
+          <li class="${def.const.seed}_fix">修正一些已知的问题，优化样式，优化代码。</li>`
+        : `<li class="${def.const.seed}_fix">Optimize bold-stroke-style correction under Blink.</li>
+          <li class="${def.const.seed}_fix">Fix the Bug<a target="_blank" href="${def.variable.feedback}/304">#304</a> caused by hijacking 'JSON.parse'.</li>
+          <li class="${def.const.seed}_fix">Update script internal link source to github.com.</li>
+          <li class="${def.const.seed}_fix">Fix some known issues, Optimize styles & code.</li>`
     );
 
     /* INITIALIZE_FONT_LIBRARY */
@@ -978,8 +1013,13 @@
       fontEx: `progress,meter,datalist,samp,kbd,pre,pre *,code,code *`,
       monospacedFont: `'Operator Mono Lig','Fira Code','Source Code Pro','DejaVu Sans Mono','Anonymous Pro','Ubuntu Mono','Roboto Mono','JetBrains Mono','Droid Sans Mono','Mono','Monaco','Menlo','Inconsolata','Liberation Mono'`,
       monospacedFeature: `"liga" 0,"tnum","zero"`,
-      editorialSites: `vscode.dev|github.dev|github1s.com|kdocs.cn|docs.qq.com|cdn.addon.tencentsuite.com|yuque.com|xiezuocat.com|wolai.com|shimo.im|note.youdao.com|feishu.cn|docs.google.com|newassets.hcaptcha.com|image.baidu.com|weread.qq.com|.notion.so|.notion.site|wqxuetang.com`,
+      editorialSites: `vscode.dev|github.dev|github1s.com|kdocs.cn|docs.qq.com|cdn.addon.tencentsuite.com|yuque.com|xiezuocat.com|wolai.com|shimo.im|note.youdao.com|feishu.cn|docs.google.com|newassets.hcaptcha.com|image.baidu.com|weread.qq.com|.notion.so|.notion.site|wqxuetang.com|youtube.com`,
     };
+
+    /* INITIALIZE_OUTSIDE_URI */
+
+    def.const.guideURI = `${def.variable.feedback}/../wiki/${IS_CHN ? encodeURIComponent("字体渲染（自用脚本）") : "Font-Rendering-(Customized)"}`;
+    def.const.installURI = `${def.variable.homepage}${IS_CHN ? "index.html#字体渲染自用脚本" : "index_en.html#font-rendering-customized"}-font-renderinguserjs`;
 
     /* INITIALIZE_SHADOWROOT_STYLE */
 
@@ -1683,7 +1723,7 @@
 
     ~(async function (requestCodeAndFunc, configureData, customMonoData, excludeSiteData, fontCustomSetData, fontScaleDef, fontOverrideDef) {
       const { code: ROOT_SECRET_KEY, func: callback } = requestCodeAndFunc();
-      if (!inspectLicense()?.inspect()) return callback(IS_DEBUG);
+      if (!inspectLicense()?.inspect()) return callback();
       let exSite = await excludeSiteData();
       let _config_data_ = await configureData();
       let { maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, isFixViewport, isCloseTip, isCustomMono, rebuild, curVersion, globalDisable } = _config_data_;
@@ -1925,8 +1965,8 @@
             __console(
               "shown-system-info",
               IS_CHN
-                ? `%c${def.variable.scriptName}\r\n%cINTRO.URL:\u0020https://f9y4ng.likes.fans/FontRendering\r\n%c\u259e\u0020脚本版本\uff1a%cV%s%c%s%c\r\n\u259e\u0020个性化设置\uff1a%c%s%c/%s（当前设置：%s）\r\n%c\u259e\u0020本地备份\uff1a%s\u3000\u259a\u0020字体缩放\uff1a%s\r\n\u259e\u0020保存预览\uff1a%s\u3000\u259a\u0020视口修正\uff1a%s\r\n%c\u259e\u0020渲染字体\uff1a%s\r\n\u259e\u0020字体平滑\uff1a%s\u3000\u259a\u0020字体重写\uff1a%s\r\n\u259e\u0020字体描边\uff1a%s\u3000\u259a\u0020字体阴影\uff1a%s`
-                : `%c${def.variable.scriptName}\r\n%cINTRO.URL: https://f9y4ng.likes.fans/FontRendering\r\n%c\u259e Script Version: %cV%s%c%s%c\r\n\u259e Customize Total: %c%s%c/%s (current: %s)\r\n%c\u259e Backups: %s\u3000\u259a Font Scaling: %s\r\n\u259e Preview: %s\u3000\u259a Fix Viewport: %s\r\n%c\u259e Rendering Font: %s\r\n\u259e Font Smooth: %s\u3000\u259a Font Rewrite: %s\r\n\u259e Font Stroke: %s\u3000\u259a Font Shadow: %s`,
+                ? `%c${def.variable.scriptName}\r\n%cINTRO.URL:\u0020https://f9y4ng.likes.fans/Font-Rendering\r\n%c\u259e\u0020脚本版本\uff1a%cV%s%c%s%c\r\n\u259e\u0020个性化设置\uff1a%c%s%c/%s（当前设置：%s）\r\n%c\u259e\u0020本地备份\uff1a%s\u3000\u259a\u0020字体缩放\uff1a%s\r\n\u259e\u0020保存预览\uff1a%s\u3000\u259a\u0020视口修正\uff1a%s\r\n%c\u259e\u0020渲染字体\uff1a%s\r\n\u259e\u0020字体平滑\uff1a%s\u3000\u259a\u0020字体重写\uff1a%s\r\n\u259e\u0020字体描边\uff1a%s\u3000\u259a\u0020字体阴影\uff1a%s`
+                : `%c${def.variable.scriptName}\r\n%cINTRO.URL: https://f9y4ng.likes.fans/Font-Rendering\r\n%c\u259e Script Version: %cV%s%c%s%c\r\n\u259e Customize Total: %c%s%c/%s (current: %s)\r\n%c\u259e Backups: %s\u3000\u259a Font Scaling: %s\r\n\u259e Preview: %s\u3000\u259a Fix Viewport: %s\r\n%c\u259e Rendering Font: %s\r\n\u259e Font Smooth: %s\u3000\u259a Font Rewrite: %s\r\n\u259e Font Stroke: %s\u3000\u259a Font Shadow: %s`,
               "color:#dc143c;font:normal 700 16px/150% system-ui,-apple-system,BlinkMacSystemFont,sans-serif",
               "color:#777777;font:italic 400 10px/180% monospace",
               "color:#708090;font-size:12px;line-height:180%",
@@ -2025,7 +2065,7 @@
               }
               checkLimitCount++;
             }
-            if (IS_REAL_BLINK && condition === "addedNodes") correctBoldStrokeProcess({ Fixedstyle: fixBoldTextStyle, Scenes: "iframe", target: doc });
+            if (IS_REAL_BLINK && condition === "addedNodes") correctBoldStrokeProcess({ Fixedstyle: fixBoldTextStyle, Scenes: "iframe", Target: doc });
           }
         } catch (e) {
           ERROR("FramesInsertStyle.%s:", condition, e.message);
@@ -2303,17 +2343,17 @@
         return Boolean(keys.length);
       }
 
-      async function hintUpdateInfo(url, curVersion) {
+      async function hintUpdateInfo(url, savedVersion) {
         const CANDIDATE_FIELD =
-          typeof curVersion === "undefined"
+          typeof savedVersion === "undefined"
             ? IS_CHN
               ? "新安装首次运行"
               : "new-install excuted"
-            : curVersion === null
+            : savedVersion === null
             ? IS_CHN
               ? "数据被重置后运行"
               : "data-rebuilt excute"
-            : curVersion === def.variable.curVersion
+            : savedVersion === def.variable.curVersion
             ? IS_CHN
               ? "您通过历史查询"
               : "historical query for"
@@ -2321,7 +2361,7 @@
             ? "更新后首次运行"
             : "update first excute";
         const FIRST_INSTALL_NOTICE_WARNING =
-          typeof curVersion === "undefined"
+          typeof savedVersion === "undefined"
             ? IS_CHN
               ? `<li class="${def.const.seed}_init"><strong>温馨提示</strong> 首次加载此脚本时，默认使用内置参数进行渲染，若显示效果不佳，<b>属于正常情况</b>。请根据您的显示器及浏览器的本地配置，<b>重新设定</b>渲染参数以达到最佳效果！</li>`
               : `<li class="${def.const.seed}_init" style="word-break:keep-all;"><strong>Kind Tips</strong> When first loaded, built-in parameters are used for rendering. If the effect is weak, it's <b>NORMAL</b>! Please <b>Reset</b> the parameters according to the your local monitor & browser to achieve the best effect!</li>`
@@ -2331,7 +2371,7 @@
             ? IS_CHN
               ? `<li class="${def.const.seed}_warn"><strong>数据重置警告</strong> 由于检测到本地运行的存储数据解析异常或被非法篡改，为确保程序正常运行，所有设置数据已初始化，请您手动还原正确的本地备份数据！</li>`
               : `<li class="${def.const.seed}_warn" style="word-break:keep-all;"><strong>Data Reset Warning</strong> Due to the detection of abnormal parsing or illegal tampering of local storage data, all config data has been initialized, please restore the correct local backup-data manually!</li>`
-            : curVersion === null
+            : savedVersion === null
             ? IS_CHN
               ? `<li class="${def.const.seed}_warn" style="color:indigo!important"><strong>数据已重建</strong> 脚本开启升级后数据重建选项，所有数据已初始化。您仍可通过备份还原之前的设置数据，但<b>强烈建议</b>您重新配置参数，以使用新功能！记得及时重新备份哟！</li>`
               : `<li class="${def.const.seed}_warn" style="color:indigo!important;word-break:keep-all;"><strong>Data has been reconstructed</strong> The script has turned on reconstruct option after upgrade, and all data has been initialized. You can still restore the previous config data through backup, but it's <b>strongly recommended</b> that reconfigure data to use the new features! Remember to backup again in time!</li>`
@@ -2346,18 +2386,17 @@
         });
         if (await frDialog.respond()) GMopenInTab(url, false);
         frDialog = null;
-        sleep(5e2).then(() => curVersion === null && location.reload(true));
+        sleep(5e2).then(() => savedVersion === null && location.reload(true));
       }
 
-      function showUpdateInfo() {
-        if (curVersion === def.variable.curVersion) return;
-        addLoadEvents.addFn(async () => {
-          DEBUG(`Update.Info.[${!curVersion ? "new-deploy" : "up-to-date"}]: %cV${def.variable.curVersion}`, "color:crimson;font-weight:600");
-          if (!isCloseTip || curVersion === null) await hintUpdateInfo(`${def.const.greasyfork}#update`, curVersion);
+      function showUpdateInfo(version) {
+        if (version === def.variable.curVersion) return;
+        addLoadEvents.addFn(() => {
           _config_data_.curVersion = def.variable.curVersion;
           saveData("_CONFIGURE_", _config_data_);
           cache.remove("_FONTCHECKLIST_");
-          return true;
+          if (!isCloseTip || version === null) hintUpdateInfo(def.const.guideURI, version);
+          DEBUG(`Update.Info.[${!version ? "new-deploy" : "up-to-date"}]: %cV${def.variable.curVersion}`, "color:crimson;font-weight:600");
         });
       }
 
@@ -2382,11 +2421,10 @@
                   DEBUG("configure<errorCount>:", r.e.length);
                   r.e.length > 0 && reportErrorToAuthor(r.e, true);
                 });
-              qS(`.${def.class.title} span.${def.class.guide}`, def.const.configIf)?.addEventListener("click", () => GMopenInTab(`${def.const.greasyfork}#guide`, false));
+              qS(`.${def.class.title} span.${def.class.guide}`, def.const.configIf)?.addEventListener("click", () => GMopenInTab(def.const.guideURI, false));
               qS(`#${def.id.render}`, def.const.configIf)?.addEventListener("dblclick", () => GMopenInTab(`${def.variable.feedback}/42`, false));
               qS(`#${def.id.field} #${def.const.seed}_scriptname`, def.const.configIf)?.addEventListener("dblclick", async function () {
-                const uri = IS_CHN ? "字体渲染（自用脚本）" : "Font-Rendering-(Customized)";
-                await hintUpdateInfo(`${def.variable.feedback}/../wiki/${encodeURI(uri)}`, def.variable.curVersion);
+                await hintUpdateInfo(def.const.guideURI, def.variable.curVersion);
                 this.style.userSelect = "none";
               });
             } catch (e) {
@@ -2655,7 +2693,7 @@
             if (await frDialog.respond()) closeConfigurePage({ isReload: true });
             frDialog = null;
           } else {
-            GMopenInTab(`${def.variable.homepage}${IS_CHN ? "#字体渲染自用脚本" : "index_en.html#font-rendering-customized"}-font-renderinguserjs`, false);
+            GMopenInTab(def.const.installURI, false);
           }
           frDialog = null;
         },
@@ -3355,8 +3393,7 @@
               break;
             }
           }
-          const isCMEditor = qS(".cm-editor.ͼ1");
-          if (!isCMEditor) correctCoordinateOffset(scale, { deleteOriginal: false });
+          correctCoordinateOffset(scale, { deleteOriginal: false });
         });
       }
 
@@ -3520,8 +3557,8 @@
                 falseButtonText: IS_CHN ? "帮助文档" : "Help",
                 neutralButtonText: IS_CHN ? "取 消" : "Cancel",
                 messageText: IS_CHN
-                  ? `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式增加自定义字体。请用小贴士或按样例填写，输入有误将被自动过滤。与『<a href="${def.const.greasyfork}#fontlist" title="查看内置字体表" target="_blank">内置字体表</a>』重复的字体将被自动剔除。【功能小贴士\uff1a<span id="${def.const.seed}_addTools" title="点击开启工具" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${def.const.seed}_custom_Fontlist" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下\uff1a\r\n{ "ch":"中文字体名一","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"中文字体名二","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n(注一\uff1a如无中文字体名，可用英文或其他语言名称替代)\r\n(注二\uff1a“ps:” 该项为字体的PostScript名称，可选填写)'>${received_Fontlist}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`
-                  : `<p style="color:#555555;font-size:14px!important">Add customized fonts in a predetermined format. Please use the tip or fill in the sample, any input errors will be filtered. With '<a href="${def.const.greasyfork}#fontlist" title="Viewing the built-in font library" Target="_blank">Built-in Font library</a>' duplicate fonts will be eliminated automatically. [TIP: <span id="${def.const.seed}_addTools" title="Click to open tool" style="color:crimson;cursor:pointer">Font Adding Aid</span>]</p><p><textarea id="${def.const.seed}_custom_Fontlist" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain" placeholder='One set of Fontname data per line, as follow:\r\n{ "ch":"CHN Fontname 1","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"CHN Fontname 2","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n(Note1: If no Chinese fontname, use another instead) \r\n (Note2: "ps:" for the font PostScript name, optional)'>${received_Fontlist}</textarea></p><p style="display:block;margin:-2px 0 0 0px!important;height:max-content;color:#dc143c;font-size:14px!important">(Don't add too many custom fonts to avoid slowly load)</p>`,
+                  ? `<p style="color:#555555;font-size:14px!important">以下文本域可按预定格式增加自定义字体。请用小贴士或按样例填写，输入有误将被自动过滤。与『<a href="${def.const.guideURI}#既定的字体表" title="查看内置字体表" target="_blank">内置字体表</a>』重复的字体将被自动剔除。【功能小贴士\uff1a<span id="${def.const.seed}_addTools" title="点击开启工具" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${def.const.seed}_custom_Fontlist" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下\uff1a\r\n{ "ch":"中文字体名一","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"中文字体名二","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n(注一\uff1a如无中文字体名，可用英文或其他语言名称替代)\r\n(注二\uff1a“ps:” 该项为字体的PostScript名称，可选填写)'>${received_Fontlist}</textarea></p><p style="display:block;margin:-5px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`
+                  : `<p style="color:#555555;font-size:14px!important">Add customized fonts in a predetermined format. Please use the tip or fill in the sample, any input errors will be filtered. With '<a href="${def.const.guideURI}#built-in-font-library" title="Viewing the built-in font library" Target="_blank">Built-in Font library</a>' duplicate fonts will be eliminated automatically. [TIP: <span id="${def.const.seed}_addTools" title="Click to open tool" style="color:crimson;cursor:pointer">Font Adding Aid</span>]</p><p><textarea id="${def.const.seed}_custom_Fontlist" style="box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:none!important;border:1px solid #999999;border-radius:6px;white-space:pre;font:normal 400 14px/150% monospace,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;resize:vertical;scrollbar-width:thin;overscroll-behavior:contain" placeholder='One set of Fontname data per line, as follow:\r\n{ "ch":"CHN Fontname 1","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"CHN Fontname 2","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n(Note1: If no Chinese fontname, use another instead) \r\n (Note2: "ps:" for the font PostScript name, optional)'>${received_Fontlist}</textarea></p><p style="display:block;margin:-2px 0 0 0px!important;height:max-content;color:#dc143c;font-size:14px!important">(Don't add too many custom fonts to avoid slowly load)</p>`,
                 titleText: IS_CHN ? "自定义字体表" : "Custom Font Library",
               });
               const customFontlistNode = qS(`#${def.const.seed}_custom_Fontlist`, def.const.dialogIf);
@@ -3626,8 +3663,8 @@
                   frDialog = null;
                 }
               } else {
-                const uri = IS_CHN ? "字体渲染（自用脚本）#自定义字体的添加" : "Font-Rendering-(Customized)#adding-custom-fonts";
-                GMopenInTab(`${def.variable.feedback}/../wiki/${encodeURI(uri)}`, false);
+                const hash = IS_CHN ? "#自定义字体的添加" : "#adding-custom-fonts";
+                GMopenInTab(def.const.guideURI + hash, false);
               }
               frDialog = null;
             });
@@ -4982,24 +5019,20 @@
 
       /* FIX_FONT_BOLD_STROKE_STYLE_ERRORS 2023-04-08 F9Y4NG */
 
-      function correctBoldStrokeProcess({ Fixedstyle, Scenes, Permit, target } = {}) {
-        const MAX_MODIFIED_NODES = 100;
-        const MAX_REPEATED_NODES = 5;
-        const MAX_TIME_INTERVAL = 50;
-        const shadowRootSet = new Set();
-        const styleMap = new WeakMap();
-        const changeAttribute = {
-          add: el => el.classList.add(def.const.boldAttrName),
-          del: el => el.classList.remove(def.const.boldAttrName),
-        };
-        const repeatedModifiedNodes = { childList: [], attributes: [] };
-        const fixBoldObserver = new MutationObserver(fixBoldProcess);
-        const config = { attributeOldValue: true, childList: true, subtree: true };
-        const excludeNodeSet = new Set(def.const.exQueryString.split(",").filter(i => i.indexOf("*") === -1));
+      const MAX_MODIFIED_NODES = 100;
+      const MAX_REPEATED_NODES = 5;
+      const MAX_TIME_INTERVAL = 50;
+      const shadowRootSet = new Set();
+      const styleMap = new WeakMap();
+      const repeatedModifiedNodes = { childList: [], attributes: [] };
+      const changeAttribute = createChangeAttribute(def.const.boldAttrName);
+      const excludeNodeSet = new Set(def.const.exQueryString.split(",").filter(i => i.indexOf("*") === -1));
+      let fixBoldObserver, fixBoldConfig;
 
+      function correctBoldStrokeProcess({ Fixedstyle, Scenes, Permit, Target } = {}) {
         switch (Scenes) {
           case "iframe":
-            return isFixStrokeTask(Scenes) && correctBoldManual(target);
+            return isFixStrokeTask(Scenes) && correctBoldManual(Target);
           case "preview":
             return isFixStrokeTask(Scenes) && correctBoldManual();
           case "recover":
@@ -5007,6 +5040,8 @@
             return isFixStrokeTask(Scenes) && correctBoldManual();
           default:
             if (!isFixStrokeTask(IS_CURRENTSITE_ALLOWED && CONST_VALUES.fixStroke)) return;
+            fixBoldObserver = new MutationObserver(fixBoldProcess);
+            fixBoldConfig = { attributeOldValue: true, childList: true, subtree: true };
             Fixedstyle = Fixedstyle ?? fixBoldTextStyle;
             w.addEventListener("pushState", correctBoldManual);
             w.addEventListener("replaceState", correctBoldManual);
@@ -5014,39 +5049,6 @@
             document.addEventListener("mouseout", handlingMouseEvents);
             addLoadEvents.addFinalFn(correctBoldManual);
             return observeBoldElements();
-        }
-
-        function isFixStrokeTask(condition) {
-          return Boolean(IS_INTERNALSTYLE_ALLOWED && !IS_CHEAT_UA && IS_REAL_BLINK && parseFloat(brandversion) >= 96 && condition);
-        }
-
-        function isBold(element) {
-          if (element.nodeType !== Node.ELEMENT_NODE) return false;
-          if (styleMap.has(element)) {
-            return styleMap.get(element).fontWeight >= 600;
-          }
-          const style = gCS(element);
-          styleMap.set(element, style);
-          return style.fontWeight >= 600;
-        }
-
-        function getBoldStyles(elementsArray) {
-          const boldStyles = [];
-          const els = uniq(elementsArray);
-          for (let index = 0, len = els.length; index < len; index++) {
-            const node = els[index];
-            const isbold = isBold(node);
-            boldStyles.push({ isbold, node });
-          }
-          return boldStyles;
-        }
-
-        function getAndProcessBoldStyles(nodes) {
-          const items = getBoldStyles(nodes);
-          for (let i = 0; i < items.length; i++) {
-            const checkedNode = items[i];
-            boldFixedHandler({ checkedNode });
-          }
         }
 
         function shadowRootNodeFixStroke(host, syncStyle) {
@@ -5067,38 +5069,17 @@
               if (!shadow) return;
               shadowRootNodeFixStroke(shadow, Fixedstyle);
               if (Permit || typeof Scenes === "undefined") {
-                fixBoldObserver.observe(shadow, config);
+                fixBoldObserver.observe(shadow, fixBoldConfig);
                 shadowRootSet.add(shadow);
               } else {
                 fixBoldObserver.disconnect();
               }
-              return true;
+              return shadow;
             })
             .filter(Boolean);
           const childResults = childShadows.map(child => querySelectorAllShadows(selector, child));
           const resultNodes = docNodes.concat(childResults.flat());
           return resultNodes;
-        }
-
-        function getSuitableElements(expr, node) {
-          switch (node.nodeType) {
-            case Node.ELEMENT_NODE:
-              return [...qA(expr, node), node];
-            case Node.DOCUMENT_NODE:
-            case Node.DOCUMENT_FRAGMENT_NODE:
-              return qA(expr, node);
-            default:
-              return [];
-          }
-        }
-
-        function boldFixedHandler({ checkedNode, uncheckedNode }) {
-          const item = checkedNode?.node ?? uncheckedNode;
-          if (!item) return;
-          const bold = checkedNode?.isbold ?? isBold(uncheckedNode);
-          const attr = item.classList.contains(def.const.boldAttrName);
-          if (!attr && bold) changeAttribute.add(item);
-          if (attr && !bold) changeAttribute.del(item);
         }
 
         function processNodes(treeNode, obs) {
@@ -5109,7 +5090,7 @@
             const shadow = item.shadowRoot;
             if (shadow) {
               shadowRootNodeFixStroke(shadow, Fixedstyle);
-              obs.observe(shadow, config);
+              obs.observe(shadow, fixBoldConfig);
               shadowRootSet.add(shadow);
               mutationListMonitor([shadow], obs);
             } else {
@@ -5192,7 +5173,7 @@
               subtrees.add(target);
             }
             mutationListMonitor(Array.from(subtrees), observer);
-            shadowRootSet.forEach(target => observer.observe(target, config));
+            shadowRootSet.forEach(target => target && observer.observe(target, fixBoldConfig));
             subtrees.clear();
           } catch (e) {
             if (e.message.includes("LoopLimitError")) {
@@ -5204,37 +5185,8 @@
           }
         }
 
-        function runLoopLimitChecker(node, mode) {
-          repeatedModifiedNodes[mode].push({ node, previousTime: performance.now() });
-          if (repeatedModifiedNodes[mode].length > MAX_MODIFIED_NODES) repeatedModifiedNodes[mode].length = 0;
-          if (defineLoopLimitChecker(node, performance.now(), mode)) return true;
-        }
-
-        function defineLoopLimitChecker(node, currentTime, mode) {
-          const modifiedNodes = repeatedModifiedNodes[mode];
-          if (modifiedNodes.length < MAX_MODIFIED_NODES) return;
-          const groups = modifiedNodes.reduce((acc, cur) => {
-            const key = String(cur.node.outerHTML);
-            acc[key] = (acc[key] || 0) + 1;
-            return acc;
-          }, {});
-          const object = Object.keys(groups);
-          const count = object.length;
-          if (count > MAX_REPEATED_NODES) return false;
-          const maxKey = object.reduce((a, b) => (groups[a] > groups[b] ? a : b));
-          const findFixedBold = item => qS(`.${def.const.boldAttrName}`, item) || item.classList.contains(def.const.boldAttrName);
-          const filterNodeRules = r =>
-            currentTime - r.previousTime <= MAX_TIME_INTERVAL &&
-            (mode === "attributes" ? String(r.node.outerHTML) === maxKey : r.node.isEqualNode(node) && String(r.node.outerHTML) === maxKey && findFixedBold(node));
-          const repeatedNodes = modifiedNodes.filter(filterNodeRules);
-          if (repeatedNodes.length < MAX_MODIFIED_NODES / count) return false;
-          repeatedModifiedNodes[mode].length = 0;
-          __console("warn", "Ignored:", capitalize(mode), "loop limit exceeded", IS_IN_FRAMES);
-          return true;
-        }
-
         function observeBoldElements() {
-          fixBoldObserver.observe(document, config);
+          fixBoldObserver.observe(document, fixBoldConfig);
           shadowRootSet.add(document);
           correctBoldManual();
         }
@@ -5246,37 +5198,127 @@
           if (Permit === false) return;
           getAndProcessBoldStyles(els);
         }
+      }
 
-        function mouseEventsHandler(event) {
-          const target = event.target;
-          if (target.nodeType !== Node.ELEMENT_NODE) return;
-          const computedStyle = gCS(target);
-          const transition = computedStyle?.transition;
-          if (!transition || transition === "none" || transition === "all 0s ease 0s") {
+      function isFixStrokeTask(condition) {
+        return !IS_CHEAT_UA && IS_REAL_BLINK && IS_INTERNALSTYLE_ALLOWED && parseFloat(brandversion) >= 96 && Boolean(condition);
+      }
+
+      function createChangeAttribute(className) {
+        return {
+          add: el => el.classList.add(className),
+          del: el => el.classList.remove(className),
+        };
+      }
+
+      function isBold(element) {
+        if (element.nodeType !== Node.ELEMENT_NODE) return false;
+        if (styleMap.has(element)) {
+          return styleMap.get(element).fontWeight >= 600;
+        }
+        const style = gCS(element);
+        styleMap.set(element, style);
+        return style.fontWeight >= 600;
+      }
+
+      function getBoldStyles(elementsArray) {
+        const boldStyles = [];
+        const els = uniq(elementsArray);
+        for (let index = 0, len = els.length; index < len; index++) {
+          const node = els[index];
+          const isbold = isBold(node);
+          boldStyles.push({ isbold, node });
+        }
+        return boldStyles;
+      }
+
+      function getSuitableElements(expr, node) {
+        switch (node.nodeType) {
+          case Node.ELEMENT_NODE:
+            return [...qA(expr, node), node];
+          case Node.DOCUMENT_NODE:
+          case Node.DOCUMENT_FRAGMENT_NODE:
+            return qA(expr, node);
+          default:
+            return [];
+        }
+      }
+
+      function getAndProcessBoldStyles(nodes) {
+        const items = getBoldStyles(nodes);
+        for (let i = 0; i < items.length; i++) {
+          const checkedNode = items[i];
+          boldFixedHandler({ checkedNode });
+        }
+      }
+
+      function boldFixedHandler({ checkedNode, uncheckedNode }) {
+        const item = checkedNode?.node ?? uncheckedNode;
+        if (!item) return;
+        const bold = checkedNode?.isbold ?? isBold(uncheckedNode);
+        const attr = item.classList.contains(def.const.boldAttrName);
+        if (!attr && bold) changeAttribute.add(item);
+        if (attr && !bold) changeAttribute.del(item);
+      }
+
+      function runLoopLimitChecker(node, mode) {
+        repeatedModifiedNodes[mode].push({ node, previousTime: performance.now() });
+        if (repeatedModifiedNodes[mode].length > MAX_MODIFIED_NODES) repeatedModifiedNodes[mode].length = 0;
+        if (defineLoopLimitChecker(node, performance.now(), mode)) return true;
+      }
+
+      function defineLoopLimitChecker(node, currentTime, mode) {
+        const modifiedNodes = repeatedModifiedNodes[mode];
+        if (modifiedNodes.length < MAX_MODIFIED_NODES) return;
+        const groups = modifiedNodes.reduce((acc, cur) => {
+          const key = String(cur.node.outerHTML);
+          acc[key] = (acc[key] || 0) + 1;
+          return acc;
+        }, {});
+        const object = Object.keys(groups);
+        const count = object.length;
+        if (count > MAX_REPEATED_NODES) return false;
+        const maxKey = object.reduce((a, b) => (groups[a] > groups[b] ? a : b));
+        const findFixedBold = item => qS(`.${def.const.boldAttrName}`, item) || item.classList.contains(def.const.boldAttrName);
+        const filterNodeRules = r =>
+          currentTime - r.previousTime <= MAX_TIME_INTERVAL &&
+          (mode === "attributes" ? String(r.node.outerHTML) === maxKey : r.node.isEqualNode(node) && String(r.node.outerHTML) === maxKey && findFixedBold(node));
+        const repeatedNodes = modifiedNodes.filter(filterNodeRules);
+        if (repeatedNodes.length < MAX_MODIFIED_NODES / count) return false;
+        repeatedModifiedNodes[mode].length = 0;
+        __console("warn", "Ignored:", capitalize(mode), "loop limit exceeded", IS_IN_FRAMES);
+        return true;
+      }
+
+      function mouseEventsHandler(event) {
+        const target = event.target;
+        if (target.nodeType !== Node.ELEMENT_NODE) return;
+        const computedStyle = gCS(target);
+        const transition = computedStyle?.transition;
+        if (!transition || transition === "none" || transition === "all 0s ease 0s") {
+          boldFixedHandler({ uncheckedNode: target });
+          return;
+        }
+        const timerName = target.innerText?.replace(/[\s.,]/g, "").slice(-16) || "transition";
+        const delayTime = 1e3 * (parseFloat(computedStyle.transitionDelay) || 0 + parseFloat(computedStyle.transitionDuration) || 0);
+        deBounce({
+          fn: () => {
             boldFixedHandler({ uncheckedNode: target });
-            return;
-          }
-          const timerName = target.innerText?.replace(/[\s.,]/g, "").slice(-16) || "transition";
-          const delayTime = 1e3 * (parseFloat(computedStyle.transitionDelay) || 0 + parseFloat(computedStyle.transitionDuration) || 0);
-          deBounce({
-            fn: () => {
+            target.addEventListener("transitionend", e => {
+              if (e.propertyName !== "font-weight") return;
               boldFixedHandler({ uncheckedNode: target });
-              target.addEventListener("transitionend", e => {
-                if (e.propertyName !== "font-weight") return;
-                boldFixedHandler({ uncheckedNode: target });
-              });
-            },
-            delay: delayTime,
-            timer: timerName,
-            once: true,
-          })();
-        }
+            });
+          },
+          delay: delayTime,
+          timer: timerName,
+          once: true,
+        })();
+      }
 
-        function handlingMouseEvents(event) {
-          const type = event.type;
-          event.stopPropagation();
-          deBounce({ fn: mouseEventsHandler, delay: def.const.ft, timer: type, immed: type === "mouseout" })(event);
-        }
+      function handlingMouseEvents(event) {
+        const type = event.type;
+        event.stopPropagation();
+        deBounce({ fn: mouseEventsHandler, delay: def.const.ft, timer: type, immed: type === "mouseout" })(event);
       }
 
       /* CSS_STYLE_PROCESSING_MAIN_THREAD */
@@ -5362,7 +5404,7 @@
         if (CUR_WINDOW_TOP) {
           // DATA_AND_UPDATE
           if (await detectAndReconstructData(SET_BOOL_FOR_UPDATE)) {
-            showUpdateInfo();
+            showUpdateInfo(curVersion);
           }
           // SYSTEM_INFO
           await getCurrentFontName(CONST_VALUES.fontFace, selectedFont, def.const.defaultFont);
@@ -5390,19 +5432,13 @@
     })(
       () => {
         const _XCode = "JUU4JUFBJUIxSlZpWSVFNyU5MCU4OSVFNiU5RiU5MyVFNSVBRCVCQSVFOCU4MiVCQXAyTyVFNiU5MyU5MzAlRTglODUlOTF0JUU1JUIyJTgwJUU1JUFFJTlBJUU4JTg2JUJBZQ==";
-        const _XFunction = s => {
+        const _XFunc = () => {
           if (!CUR_WINDOW_TOP) return;
-          const n = {
-            t: IS_CHN
-              ? "\u8bf7\u5b89\u88c5\u4f7f\u7528\u6b63\u7248\u811a\u672c"
-              : "\x50\x6c\x65\x61\x73\x65\x20\x55\x73\x65\x20\x47\x65\x6e\x75\x69\x6e\x65\x20\x53\x63\x72\x69\x70\x74",
-            o: `\r\n${IS_CHN ? "\u6b63\u7248\u5730\u5740\uff1a" : "\x47\x65\x6e\x75\x69\x6e\x65\x20\x55\x52\x4c\x3a\x20"}${def.const.greasyfork}`,
-          };
-          __console("\x65\x72\x72\x6f\x72", `${def.variable.scriptName}\r\n${n.t}\x20\x40\x20${def.const.greasyfork}`);
-          GMregisterMenuCommand(`\ufff0\ud83d\udea8\x20${n.t}`, () => GMopenInTab(def.const.greasyfork));
-          return !s && def.dialog.alert(`${def.variable.scriptName}\x20\x2d\x20${n.t}${n.o}`);
+          const message = IS_CHN ? "\u8bf7\u5b89\u88c5\u4f7f\u7528\u6b63\u7248\u811a\u672c" : "Reinstall the genuine script";
+          __console("error", `${def.variable.scriptName}\r\n${message}\x20\x40\x20${def.const.installURI}`);
+          return GMregisterMenuCommand(`\ufff0\ud83d\udea8\u0020${message}`, () => GMopenInTab(def.const.installURI));
         };
-        return { code: decrypt(_XCode), func: _XFunction };
+        return { code: decrypt(_XCode), func: _XFunc };
       },
       async () => {
         let maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, isFixViewport, isCloseTip, isCustomMono, rebuild, curVersion, globalDisable, _config_data_;
