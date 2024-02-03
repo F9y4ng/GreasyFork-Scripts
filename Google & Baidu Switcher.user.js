@@ -5,9 +5,9 @@
 // @name:zh-TW         優雅的搜索引擎助手
 // @name:ru            Поисковый помощник
 // @name:ja            優雅な検索エンジン助手
-// @version            2024.01.01.1
+// @version            2024.02.03.1
 // @author             F9y4ng
-// @description        "Assistant de moteur de recherche élégant" pour faciliter le saut dans les différents moteurs de recherche; Support des moteurs de recherche personnalisés, mise en évidence des mots clés; Fournit des fonctionnalités avancées telles que la suppression des redirections de liens et le blocage des annonces de recherche ; Compatible avec les moteurs de recherche tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage et Brave.
+// @description        Le script est alias « Elegant Search Engine Assistant », ce qui permet à l'utilisateur de passer d'un moteur de recherche à l'autre ; prise en charge de la personnalisation des moteurs de recherche couramment utilisés, effet de rendu de mise en évidence des mots clés ; fournit également la suppression de la redirection des liens de recherche, protégeant les résultats de recherche des annonces, les paramètres visuels, la détection automatique des mises à jour et d'autres fonctionnalités avancées ; compatible avec un certain nombre de moteurs de recherche connus, tels que Baidu, Google, Bing, Duckduckgo, Sogou, Wuzhuiso, Yandex, 360so, Toutiao, Baidu.dev, Ecosia, Yahoo, You, Startpage, Brave, Yep, Swisscows, etc.
 // @description:en     "Elegant search engine assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
 // @description:zh-CN  “优雅的搜索引擎助手”方便用户在不同的搜索引擎之间跳转；支持自定义常用搜索引擎、关键词高亮渲染效果；还提供去除搜索链接重定向、屏蔽搜索结果广告、可视化参数设置、及自动更新检测等高级功能；兼容多个知名搜索引擎，如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Ecosia、You、Startpage、Brave等。
 // @description:zh-TW  「優雅的搜索引擎助手」方便用戶在不同的搜索引擎之間跳轉；支持自定義常用搜索引擎、關鍵詞高亮渲染效果；還提供去除搜索鏈接重定嚮、屏蔽搜索結果廣告、可視化參數設置、及自動更新檢測等高級功能；兼容多個知名搜索引擎，如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Ecosia、You、Startpage、Brave等。
@@ -60,10 +60,8 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               ✨🎉祝新年快乐，身体健康，万事如意🎉✨
-// @note               优化部分搜索引擎的去广告功能。
-// @note               优化搜索结果关键词过滤的检测效果。
-// @note               提升对更多浏览器及脚本管理器的兼容性。
+// @note               修复部分搜索引擎的跳转按钮的显示BUG。
+// @note               置换脚本引用源地址至github.com域内。
 // @note               修正一些已知问题，优化样式，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
@@ -147,14 +145,13 @@
       scrollspan2: generateRandomString(8, "char"),
       scrollbars: generateRandomString(8, "char"),
       scrollbars2: generateRandomString(8, "char"),
-      greasyfork: decrypt("aHR0cHMlM0ElMkYlMkZncmVhc3lmb3JrLm9yZyUyRnNjcmlwdHMlMkYxMjkwOQ=="),
       yandexIcon: decrypt("aHR0cHMlM0ElMkYlMkZmYXZpY29uLnlhbmRleC5uZXQlMkZmYXZpY29uJTJGdjI="),
       backupIcon: decrypt("aHR0cHMlM0ElMkYlMkZ6MS5heDF4LmNvbSUyRjIwMjMlMkYxMSUyRjMwJTJGcGlyTTFTZy5wbmc="),
     },
     variable: {
       undef: void 0,
       refresh: () => location.reload(true),
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.01.01.0",
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.02.03.0",
       scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRnN1cHBvcnQ="),
       homepage: getMetaValue("homepage") ?? getMetaValue("homepageURL") ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcuZ2l0aHViLmlvJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJG"),
@@ -1520,7 +1517,7 @@
             ImgURL: "https://image.baidu.com/search/index?tn=baiduimage&ps=1&ie=utf-8&word=",
             IMGType: ["baiduimage", "baiduimagedetail"],
             SplitName: "tn",
-            MainType: ".s_btn_wr",
+            MainType: ".s_btn_wr,#sugOut",
             StyleCode: `a,a em{text-decoration:none!important}:not([class^="page-inner"])>a:not(.${def.notice.linkerror}):hover{text-decoration:underline!important}#form{white-space:nowrap}#u{z-index:1!important}#${def.const.rndButtonID}{position:relative;z-index:1999999995;display:inline-block;margin:0 0 0 4px;padding:0;height:40px;vertical-align:top;line-height:40px}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:40px}#${def.const.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;height:40px;min-width:100px;border:1px solid transparent;border-bottom-left-radius:10px;border-top-left-radius:10px;background:#4e6ef2;color:#fff;vertical-align:top;font-weight:600;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;height:40px;min-width:100px;border:1px solid transparent;border-top-right-radius:10px;border-bottom-right-radius:10px;background:#4e6ef2;color:#fff;vertical-align:top;font-weight:600;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background: #4662d9;border:1px solid transparent;}`,
             ResultList: { qs: `#content_left>div.c-container[tpl]:not([tpl='recommend_list'],[tpl^="rel-"])`, delay: 10 },
             KeyStyle: "#wrapper_wrapper em,.c-gap-top-small b",
@@ -1792,6 +1789,12 @@
             KeyStyle: "",
             AntiRedirect: function () {
               deBounce({
+                fn: parameters => parameters.forEach(item => localStorage.setItem(item, 1)),
+                timer: "ecosia_set",
+                immed: true,
+                once: true,
+              })(["adBlockNoticeDismissed", "personalCounterTooltipSearch"]);
+              deBounce({
                 fn: option => {
                   if (w.gbCookies.getItem("ECFG")?.includes(":nt=1:")) return;
                   w.gbCookies.setItem(option);
@@ -2043,7 +2046,7 @@
         const hostname = location.hostname;
 
         for (const regex in engineMap) {
-          if (new RegExp(regex).test(hostname)) {
+          if (engineMap.hasOwnProperty(regex) && new RegExp(regex).test(hostname)) {
             const { siteType, site } = engineMap[regex];
             currentSite = selectedEngine.includes(siteType) ? site : listSite.other;
             listCurrentSite = site;
@@ -2662,18 +2665,18 @@
               const isFavEngine = currentSite.SiteTypeID !== newSiteType.OTHERS;
               __console(
                 "shown_system_info",
-                `%c${def.variable.scriptName}\r\n%cINTRO.URL:\u0020https://f9y4ng.likes.fans/SearchEngine\r\n%c%s%cV%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s`,
+                `%c${def.variable.scriptName}\r\n%cINTRO.URL:\u0020https://f9y4ng.likes.fans/Search-Engine-Assistant\r\n%c%s%cV%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s`,
                 "font:normal 700 16px/150% system-ui,-apple-system,BlinkMacSystemFont,sans-serif;color:crimson",
-                "line-height:180%;font-size:10px;color:#777777;font-style:italic",
+                "color:#777777;font:italic 400 10px/180% monospace",
                 "font-size:12px;font-weight:700;color:steelblue",
                 isChinese ? "脚本版本：" : "Version:\u0020",
-                "color:slategrey;text-transform:capitalize;font:italic 16px/130% Candara,'Times New Roman'",
+                "color:#708090;font:italic 600 14px/150% Candara,Times New Roman",
                 def.variable.curVersion,
                 "color:darkred;font:italic 11px/150% Candara,'Times New Roman'",
                 IS_CHEAT_UA ? "\u3000(CHEAT-UA)" : "",
                 "font-size:12px;font-weight:700;color:steelblue",
                 isChinese ? "当前搜索引擎：" : "CurrentEngine:\u0020",
-                "color:crimson;text-transform:capitalize;font:italic 16px/130% Candara,'Times New Roman'",
+                "color:crimson;text-transform:capitalize;font:italic 700 16px/130% Candara,'Times New Roman'",
                 def.const.curSiteName,
                 "font-size:12px;font-weight:700;color:steelblue",
                 isChinese ? "常用的搜索引擎：" : "YourFavEngine:\u0020",
@@ -2688,9 +2691,9 @@
                 `color:${antiAds ? "green" : "blue"};text-transform:capitalize;font:italic 16px/130% Candara,'Times New Roman'`,
                 antiAds,
                 "font-size:12px;font-weight:700;color:steelblue",
-                isChinese ? "安全策略应用：" : "SecurityPolicy:\u0020",
-                `color:${def.const.isSecurityPolicy ? "green" : "blue"};text-transform:capitalize;font:italic 16px/130% Candara,'Times New Roman'`,
-                def.const.isSecurityPolicy
+                isChinese ? "搜索结果关键词过滤：" : "SearchResultFilter:\u0020",
+                `color:${antiResultsFilter ? "green" : "blue"};text-transform:capitalize;font:italic 16px/130% Candara,'Times New Roman'`,
+                antiResultsFilter
               );
             }
           }
@@ -3151,19 +3154,20 @@
               sessionStorage.setItem("_global_google_", 1);
               sleep(5e2).then(() => {
                 def.const.s = GMopenInTab(`https://${google}/ncr`, true);
+                DEBUG("getGlobalGoogle:", Boolean(def.const.s));
                 GMnotification({
                   title: isChinese ? "智能跳转" : "Google NCR",
                   text: def.notice.noticeHTML(
                     `<dd class="${def.notice.center}">
                       ${
                         isChinese
-                          ? "当前页面即将跳转至 Google.com (NCR)<br/><span>新开的后台窗口会自动关闭！</span>"
-                          : "Jump to Google.com (NCR)<br/><span>The new window will close automatically!</span>"
+                          ? "当前页面即将跳转至 Google.com (NCR)<br/><span>若新窗口未自动关闭，请手动关闭！</span>"
+                          : "Jump to Google.com (NCR)<br/><span>Please close new-tab manually if not closed!</span>"
                       }
                     </dd>`
                   ),
                   type: def.notice.info,
-                  timeout: 20,
+                  timeout: 25,
                   callbacks: { onClose: [redirectNCR] },
                 });
               });
