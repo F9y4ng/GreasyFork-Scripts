@@ -8,8 +8,8 @@
 - **Chrome**/**Firefox** recommend **Tampermonkey/Violentmonkey**, **Safari** recommend **Tampermonkey**.
 - Using **Adguard Desktop** or **Userscripts**, the script menus can be called up via **keyboard shortcuts**.
 
-> ## Declaration
-> For browsers that unofficially modify the Blink kernel and turn off DirectWrite, some fonts may not be recognized by the program, or non-ASCII characters and Emoji icons may not be rendered correctly. **Important note:** The script updates will no longer provide code compatibility and troubleshooting for browsers with _`disabled DirectWrite`_. To use the scripts in this project, it is recommended that use the official browser.
+## 🚩 Solemnly Declared
+In some unofficial modified versions of the BLINK kernel browser, `disabled DirectWrite` will cause most fonts to be unrecognized by the program, or non-ASCII characters and emoji icons will not be rendered correctly. **Important note:** The script updates will no longer provide code compatibility and troubleshooting for browsers with `disabled DirectWrite`, and it is recommended that you use a major official browser to use the user-scripts in this project.
 
 ---
 

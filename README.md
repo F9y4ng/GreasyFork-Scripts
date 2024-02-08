@@ -8,8 +8,8 @@
 - **Chrome**, **Firefox** 推荐安装 **Tampermonkey/Violentmonkey**，**Safari** 推荐安装 **Tampermonkey**.
 - 使用 **Adguard桌面版** 或 **Userscripts** 等脚本管理器，可通过**键盘快捷键**呼出脚本管理菜单。
 
-> ## 郑重声明
-> 某些魔改版本的Blink内核浏览器，关闭 **DirectWrite** 功能，会造成大部分字体无法被程序识别，或出现非ASCII字符与Emoji图标无法被正确渲染的问题。**重要提示**：后续所有脚本更新不再对应用 _`disabled DirectWrite`_ 的浏览器做代码兼容和问题解答，要使用该项目内的脚本，建议您使用主流浏览器。
+## 🚩 郑重声明
+某些非官方修改版的Blink内核浏览器，关闭 `DirectWrite` 功能，会造成大部分字体无法被程序识别，或出现非ASCII字符与Emoji图标无法被正确渲染的问题。**重要提示**：后续所有脚本更新不再对应用 `disabled DirectWrite` 的浏览器做代码兼容和问题解答，要使用该项目内的脚本，建议您使用主流官方的浏览器。
 
 ---
 
