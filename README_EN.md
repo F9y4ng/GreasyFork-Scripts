@@ -4,9 +4,9 @@
 
 [![LICENSE](https://img.shields.io/badge/License-GPL--3.0--only-blue.svg?style=for-the-badge&logo=github "LICENSE")](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/LICENSE) [![LAST COMMIT](https://img.shields.io/github/last-commit/F9y4ng/GreasyFork-Scripts?color=blue&logo=github&style=for-the-badge "LAST COMMIT")](https://github.com/F9y4ng/GreasyFork-Scripts/commits/master) [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues) [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/F9y4ng/GreasyFork-Scripts/stargazers)
 
-- Please install the **script manager extension** (_as Tampermonkey_) first, and then **install the script**.
-- **Chrome**/**Firefox** recommend **Tampermonkey/Violentmonkey**, **Safari** recommend **Tampermonkey**.
-- Using **Adguard Desktop** or **Userscripts**, the script menus can be called up via **keyboard shortcuts**.
+- Please install the **script-manager** extension first (e.g. Tampermonkey, Violentmonkey, Greasemonkey) before installing the script.
+- **Tampermonkey/Violentmonkey** is recommended for **Chrome / Firefox**, and **Tampermonkey** is recommended for **Safari.**
+- Using a script-manager such as **Adguard Desktop** or **Userscripts**, you can use **keyboard shortcuts** to call up the scripts menu.
 
 ## 🚩 Solemnly Declared
 In some unofficial modified versions of the BLINK kernel browser, `disabled DirectWrite` will cause most fonts to be unrecognized by the program, or non-ASCII characters and emoji icons will not be rendered correctly. **Important note:** The script updates will no longer provide code compatibility and troubleshooting for browsers with `disabled DirectWrite`, and it is recommended that you use a major official browser to use the user-scripts in this project.
@@ -32,27 +32,30 @@ In some unofficial modified versions of the BLINK kernel browser, `disabled Dire
 
 ### Please note the following before using the new version:
 
-- The new version of the script has a built-in **default font rendering style**, which is my local configuration and **may not be perfectly adapted to your computer**. Therefore, when using it for the first time, if the rendering effect does not reach the ideal state, **it is normal**. Please modify the rendering parameters through the script settings interface according to the configuration and settings of your local monitor to achieve the best display effect.
-- When upgrading from an older version to the latest version, if there is a style error, you can try to correct it by resetting the data to use the latest rules. however, major version (data rebuild) updates are not recommended to restore using a local backup, and it is recommended to reconfigure the parameters and backup the data.
+## Please note the following before using a new version:
+
+- The new version of the script has a **built-in default font rendering style**, which is my local configuration and **may not work perfectly on your computer**. Therefore, **it is normal** for the first time to use it if the rendering effect does not reach the desired state. According to the configuration and settings of your own monitor, correct the relevant parameters through the script setting interface to achieve the best display effect.
+
+- When upgrading from an older version to the latest version, if there are some style issues, you can try to correct it by resetting the data to use the latest rules. however, It is not recommended that you use backup restore for major version (data rebuild) updates, and it is recommended to reconfigure the parameters, save them, and back up the new data again.
 
 <details>
 <summary>Click to view - How to deal with script delayed loading?</summary>
 
-**Temporary solutions if script loading is delayed or styles are not loaded correctly:**
+**Temporary solutions for script loading delays, or styles not loading correctly:**
 
-* For **Tampermonkey**: Enter the **Dashboard**, enter the **Settings** tab, scroll down to "**Experimental**", and change the injection mode to "**Instant**".
+* For **Tampermonkey**: Go to the **Dashboard**, enter the **Settings** tab, scroll down to "**Experimental**", and change **the injection mode** to "**Instant**".
 
-* For **Violentmonkey**: Enter the **Dashboard**, enter the **Settings** tab, find and check "**Synchronous page mode**" in **Advanced - General**.
+* For **Violentmonkey**: Go to the **Dashboard**, enter the **Settings** tab, find and check "**Synchronous page mode**" in **Advanced - General**.
 
 </details>
 
-> Note: Under Win10/Win11, regardless of high or low aspect ratio, the best rendering results can be obtained as long as the system or browser applies 150% or more zoom ratio, which is determined by the default rendering mechanism of Windows.
+> **Note:** Under Win10/Win11, regardless of high or low resolution, as long as the system or browser applies a zoom ratio of more than 150%, the best rendering effect can be obtained, which is determined by the default rendering mechanism of Windows.
 
-### Feedback on issues
+### About feedback on issues
 
-**Note 1:** Unknown compatibility errors may occur when using the `Beta, Dev, Canary, Nightly` and other test branches of the browser or script manager, and the script will not correct errors in the test version. Since there is a very small probability that the data will be initialized abnormally, **please back up your local data in time**.
+**Note 1:** Unknown compatibility errors may occur when using the `Beta, Dev, Canary, Nightly` and other test branches of the browser or script manager, and the script will not correct errors of the test version. Since there is a rare chance that the data will be initialized abnormally, **please back up your local data in time**.
 
-**Note 2:** To report script errors or style issues, please provide **the URL**, **the browser and version**, **the script manager and version**, **error page screenshot**, and **operation process** or **error prompt** (if any) where the problem occurs when **using this script only**, etc., because the problem you encountered may not be reproduced locally.
+**Note 2:** To report script errors or style issues, please provide **the URL**, **the browser and version**, **the script manager and version**, **error page screenshot**, and **operation process** or **error prompt** (if any) where the problem occurs when **using this script only**, etc., because the problem you encountered may not be reproduced locally in me.
 
 * [Occasional updates: How to fix websites font style errors?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42) (Chinese)
 * [How to set custom English and Chinese fonts for the website?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83) (Chinese)
@@ -64,7 +67,7 @@ In some unofficial modified versions of the BLINK kernel browser, `disabled Dire
 **Get and upload script error logs:**
 
 1. Turn on the script debugging switch first:
-   - v2023.04.08.1 or above, add `?whoami=F9y4ng` or `&whoami=F9y4ng` to the URL to enable debugging mode.
+   - v2023.04.08.1 or later, add `?whoami=F9y4ng` or `&whoami=F9y4ng` to the URL to enable debugging mode.
    - To use the old version change the code from `const IS_OPEN_DEBUG = false` to `true` at about line 54 and save.
 2. Press **F12** in your browser to open the console, refresh, operate until the problem is reproduced, right-click in the console margin and select **Save As...**.
 3. Use **Bug report** and upload the saved log file to [Github ISSUES](https://github.com/F9y4ng/GreasyFork-Scripts/issues)。
@@ -74,9 +77,9 @@ In some unofficial modified versions of the BLINK kernel browser, `disabled Dire
 
 ### About adding custom fonts
 
-If you need to add custom fonts to the font library, please follow [Help Instructions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/64). The Chinese fonts in the built-in font library [Download](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/46).
+If you need to add custom fonts into the font library, please follow the [Help Instructions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/64). The Chinese fonts in the built-in font library [Download](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/46).
 
-If you want to add new fonts, please add complete and accurate **font names in English and Chinese**, and **PostScript names** into the customized font library in the preset format.
+If you want to add a new font, please add complete and accurate **font names in English and Chinese**, and **PostScript names** into the customized font library in the preset format.
 
 The format is as follows: ```{"ch":"鸿蒙黑体", "en":"HarmonyOS Sans SC", "ps":"HarmonyOS_Sans_SC"}```
 
@@ -85,23 +88,24 @@ The format is as follows: ```{"ch":"鸿蒙黑体", "en":"HarmonyOS Sans SC", "ps
 
 **Notes on adding custom fonts:**
 
-* When adding new fonts, fonts with font-weight of **Standard/Regular** are generally accepted. To adjust the font weight and boldness, please use the font stroke setting.
-* "ps:" indicates the PostScript name, this is an optional attribute. In order to make the font take effect globally, please fill in the "ps:" attribute as much as possible.
-* If the font does not have Chinese font name, please use the English font name or other language font name instead, and pay attention to uniqueness.
+* When adding new fonts, fonts with font-weight of **Standard/Regular** are generally accepted. please use font stroke settings to adjust the font weight and bold.
+* "ps:" indicates the PostScript name, which is an optional attribute. To ensure that the font takes effect globally, please fill in the "ps:" attribute as much as possible.
+* If the font does not have Chinese font name, please use the English font name or other language font name instead, and pay attention to the uniqueness of the name.
 
-When a new font is installed, to make it **immediately effective**, be sure to **restart your browser** and rebuild the font list cache in **Advanced Core Setting** in the script menu.
+When a new font is installed, be sure to **restart the browser** first and **rebuild the font-list cache** in the **advanced core settings** for it to take effect immediately.
 
-- Note 1: Edit and save operations of custom font library will automatically trigger the rebuild of the global cache of the font list without additional manual processing.
-- Note 2: If you only install fonts from the built-in font library, you need to manually rebuild the global cache of the font list in the **Advanced Core Setting** after restarting the browser.
+- Note 1: Editing and saving a custom font library will automatically trigger a rebuild of the font list's global cache, eliminating the need for additional manual processing.
+- Note 2: If you only install fonts defined by the built-in font library, you need to manually rebuild the global cache of the font list in the **Advanced Core Setting** after restarting the browser.
+
 </details>
 
 ### About font scaling
 
-Font scaling (experimental feature) BETA version, off by default, please turn on the font scaling feature in the **Advanced Core Setting**.
+Font scaling (experimental) BETA Version, **OFF by default**, turn on font scaling in the **Advanced core settings**.
 
-- **KNOWN ISSUES I:** Due to the compatibility of Firefox (Gecko kernel), only the internal coordinate offset problem of the script has been fixed, but it will be insufficiently compatible with some website styles and functions, so please use it according to your needs and discretion.**Strongly recommended**: Use Firefox's own zoom function instead (`Ctrl++`, `Ctrl+-`).
+- **KNOWN ISSUES I:** Due to the compatibility of Firefox (Gecko kernel), only the internal coordinate offset problem of the script has been fixed, but it will be insufficiently compatible with some website styles and functions, so please use it according to your needs and discretion. **Strongly recommended**: Use Firefox's self-scaling feature (`Ctrl++`, `Ctrl+-`) instead of this experimental feature.
 
-- **KNOWN ISSUES II:** The fix for viewport units `vw, vh, vmin, vmax` has been completed, solving the problem of inaccurate viewport unit lengths after font scaling. This feature is **experimental** and off by default, it can be turned on in the **Advanced Core Setting**.
+- **KNOWN ISSUES II:** The fix for viewport units `vw, vh, vmin, vmax` has been completed, solving the problem of inaccurate viewport unit lengths after font scaling. This feature is **experimental** and **OFF by default**, it can be turned on in the **Advanced Core Setting**.
 
     <details>
     <summary>Click to view the solution to style anomalies after turning on viewport correction.</summary>
@@ -109,13 +113,13 @@ Font scaling (experimental feature) BETA version, off by default, please turn on
     **The browser CORS/CSP policy refuses the loading of third-party styles:**
 
     1. In some sites, due to CORS policy, browsers may block access to external styles (console console will see corresponding errors, e.g. `No 'Access-Control-Allow-Origin' header is present on the requested resource.`), in this case, you can install and enable [Moesif Origin & CORS Changer](https://chromewebstore.google.com/detail/moesif-origin-cors-change/digfbfaphojjndkpccljibejjbppifbc) in the Extension Store.
-    2. On some sites which CSP policies are applied, the browser may prevent the loading and parsing of internal styles (the console will see corresponding errors, such as: `Refused to apply inline style because it violates the following Content Security Policy directive: "default -src 'self'".`), in this case, you can install and enable [Disable-CSP](https://chromewebstore.google.com/detail/disable-csp/hgegihapiofjgmmgigbblnjaicgjhoko) in the extension store.
-    3. This problem can also be solved using other disable CSP extensions. If you are concerned about security issues or have other concerns, please turn off this feature as follows:
-       1. Uncheck the **fix VPU** option in the **Font Rendering Setting Interface**, or set the **Font Scaling** to `1.0` and save it as exclusive data.
-       2. Turn off the **Fix Viewport** option individually in **Advanced Core Setting**, or simply turn off the **Font Scaling**. (Global Off)
+    2. In some sites where CSP policies are applied, the browser may prevent the loading and parsing of internal styles (the console will see corresponding errors, such as: `Refused to apply inline style because it violates the following Content Security Policy directive: "default -src 'self'".`), in this case, you can install and enable [Disable-CSP](https://chromewebstore.google.com/detail/disable-csp/hgegihapiofjgmmgigbblnjaicgjhoko) in the extension store.
+    3. This issue can also be resolved by using other CSP extensions, but if you are concerned about security issues or have other concerns, please turn off the feature as follows:
+       1. Uncheck the **fix VPU** option in the **Font Rendering Setting** Interface, or set the **Font Scaling** to `1.0` and save it as exclusive data.
+       2. Turn off the **Fix Viewport** feature separately, or simply turn off the **Font Scaling** feature directly in the **Advanced Core Setting**. (Global Off)
     </details>
 
-- **UNKNOWN ISSUES:** If you encounter style anomalies, coordinate offsets, or other problems with other conditions, please send me [feedback](https://github.com/F9y4ng/GreasyFork-Scripts/issues).
+- **UNKNOWN SITUATION:** If you encounter style anomalies, coordinate offsets, or other related problems in other situations, please send me [feedback](https://github.com/F9y4ng/GreasyFork-Scripts/issues).
 
 ---
 
@@ -134,23 +138,22 @@ Font scaling (experimental feature) BETA version, off by default, please turn on
 @ Fix some known issues, Optimize styles & code.
 ```
 
-### Latest feature introduction
-- Added a new high-efficiency keyword filtering function for search results to eliminate content farms and spam. `New!`
-- Added the function of removing search results and sidebar ads to optimize ad blocking efficiency.
+### The latest feature introduction
+- Added a new high-efficiency keyword filtering function for search results to eliminate content farms and spam. `New`
+- Added the function of removing search results and sidebar ads to optimize ad blocking efficiency of ad blocking.
 - Added custom search engine selection function (including: Baidu, Google, Bing, Duckduckgo, Sogou, Wuzhuiso, Yandex, 360 Search, Toutiao Search, Baidu Developer, Ecosia, Yahoo, You, Startpage, Brave, Yep, Swisscows)
-- Added search result link redirection function and optimized privacy parameter shielding function.
+- Added the anti-redirection function of search result links and optimized the masking function of privacy parameters.
 - Smarter update detection feature.
 
 ### Icon cache update
-Visit [any search engine](https://www.baidu.com/s?wd=greasyfork&whoami=F9y4ng), add `?whoami=F9y4ng` or `&whoami=F9y4ng` to the URL in the address bar to enable temporary debugging mode. You can automatically update the icons of the search engine site; or wait for the icon cache to expire (15 days) and automatically update the icon cache.
+Visit [any search engine](https://www.google.com/search?q=greasyfork&whoami=F9y4ng), add `?whoami=F9y4ng` or `&whoami=F9y4ng` to the URL in the address bar to enable temporary debugging mode, then you can automatically update the icons of the search engine site; or wait for the icon cache to expire (15 days) and then automatically renew the icon cache.
 
+### Important notes
+The "**Automatic Update**" function is enabled by default. If you do not need it,, please turn off **Auto Update Detect** in the "**Advanced Feature Settings**" of the script menu.
 
-### Important
-The "**Automatic Update**" function is enabled by default. If not required, please turn off **Auto Update Detect** in the "**Advanced Feature Settings**" of the script menu.
+- **Feedback Issues**: Feedback script errors or style issues, please provide **the access URL**, **the browser and version**, **the script manager and version**, **error screenshot**, and **operation process** or **error prompt** (if any) where the problem occurs when **using this script only**, etc., because the problem you encountered may not be reproduced locally in me.
 
-- **Feedback Issues**: To report script errors or style issues, please provide **the URL**, **the browser and version**, **the script manager and version**, **error page screenshot**, and **operation process** or **error prompt** (if any) where the problem occurs when **using this script only**, etc., because the problem you encountered may not be reproduced locally.
-
-- Generally, new releases will be made on **Github**, and **GreasyFork**, **OpenUserJs** will be synchronized automatically. For those who have enabled automatic update detection, scripts will be updated automatically when visit the search engine.
+- Generally, the new version will be released on **Github**, and **GreasyFork** and **OpenUserJs** will be automatically synchronized. For users who have turned on auto-update detection, scripts are automatically updated when they visit search engines.
 
 ---
 
