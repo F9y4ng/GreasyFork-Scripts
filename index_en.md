@@ -122,7 +122,7 @@ Font scaling (experimental) BETA Version, **OFF by default**, turn on font scali
 - Smarter update detection feature.
 
 ## Icon cache update
-Visit [any search engine](https://www.baidu.com/s?wd=greasyfork&whoami=F9y4ng), add `?whoami=F9y4ng` or `&whoami=F9y4ng` to the URL in the address bar to enable temporary debugging mode, then you can automatically update the icons of the search engine site; or wait for the icon cache to expire (15 days) and then automatically renew the icon cache.
+Visit [any search engine](https://www.google.com/search?q=greasyfork&whoami=F9y4ng), add `?whoami=F9y4ng` or `&whoami=F9y4ng` to the URL in the address bar to enable temporary debugging mode, then you can automatically update the icons of the search engine site; or wait for the icon cache to expire (15 days) and then automatically renew the icon cache.
 
 ## Important notes
 The "**Automatic Update**" function is enabled by default. If you do not need it,, please turn off **Auto Update Detect** in the "**Advanced Feature Settings**" of the script menu.
