@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜索引擎助手
 // @name:ru            Поисковый помощник
 // @name:ja            優雅な検索エンジン助手
-// @version            2024.02.03.1
+// @version            2024.02.12.1
 // @author             F9y4ng
 // @description        Le script est alias « Elegant Search Engine Assistant », ce qui permet à l'utilisateur de passer d'un moteur de recherche à l'autre ; prise en charge de la personnalisation des moteurs de recherche couramment utilisés, effet de rendu de mise en évidence des mots clés ; fournit également la suppression de la redirection des liens de recherche, protégeant les résultats de recherche des annonces, les paramètres visuels, la détection automatique des mises à jour et d'autres fonctionnalités avancées ; compatible avec un certain nombre de moteurs de recherche connus, tels que Baidu, Google, Bing, Duckduckgo, Sogou, Wuzhuiso, Yandex, 360so, Toutiao, Baidu.dev, Ecosia, Yahoo, You, Startpage, Brave, Yep, Swisscows, etc.
 // @description:en     "Elegant search engine assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
@@ -60,9 +60,8 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               修复部分搜索引擎的跳转按钮的显示BUG。
-// @note               置换脚本引用源地址至github.com域内。
-// @note               修正一些已知问题，优化样式，优化代码。
+// @note               更新 Google.com 搜索结果过滤的规则。
+// @note               更新 Strarpage.com 的跳转按钮的样式。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -151,7 +150,7 @@
     variable: {
       undef: void 0,
       refresh: () => location.reload(true),
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.02.03.0",
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.02.12.0",
       scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRnN1cHBvcnQ="),
       homepage: getMetaValue("homepage") ?? getMetaValue("homepageURL") ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcuZ2l0aHViLmlvJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJG"),
@@ -1547,7 +1546,10 @@
             SplitName: "tbm",
             MainType: "form button[type='submit']",
             StyleCode: `#${def.const.rndButtonID}{position:relative;z-index:100;display:flex;margin:0 4px 0 -5px;justify-content:center;align-items:center}#${def.const.rndButtonID} #${def.const.leftButton}{padding:0 2px 0 8px}.${def.const.scrollspan}{min-height:26px}.${def.const.scrollspan2}{min-height:26px;margin-top:0!important}.${def.const.scrollbars}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}.${def.const.scrollbars2}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}#${def.const.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;height:38px;min-width:90px;border:1px solid transparent;border-bottom-left-radius:24px;border-top-left-radius:24px;background:#1a73e8;box-shadow:none;color:#fff;vertical-align:top;font-weight:600;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;height:38px;min-width:90px;border:1px solid transparent;border-top-right-radius:24px;border-bottom-right-radius:24px;background:#1a73e8;box-shadow:none;color:#fff;vertical-align:top;font-weight:600;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#1b66c9;}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{background:#8ab4f8;box-shadow:0 1px 3px 1px rgba(0,0,0,.15),0 1px 2px rgba(0,0,0,.3);color:#202124}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#93baf9}}`,
-            ResultList: { qs: `div[eid][data-async-context] div.MjjYud,div[eid][data-async-context] div.hlcw0c`, delay: 10 },
+            ResultList: {
+              qs: `div.cLjAic.K7khPe[data-hveid^="C"][data-hveid$="AA"],div.g[data-hveid^="C"][data-hveid$="AA"],div.g div[data-hveid^="C"][data-hveid$="AA"]`,
+              delay: 10,
+            },
             KeyStyle: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
             AntiRedirect: function () {
               deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "google_ar" })("#rcnt div[eid][data-async-context] div.MjjYud :not([jsname='MgN2vf'])>a", "Google", {
@@ -1882,7 +1884,7 @@
             ImgURL: `https://www.startpage.com/sp/search?t=device&segment=startpage.${brand.toLowerCase()}&cat=images&query=`,
             IMGType: ["images"],
             SplitName: "cat",
-            MainType: "#search-btn",
+            MainType: "#search[role='search'] button.search-btn",
             StyleCode: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline-block;margin:-11px 4px 0 .5rem;height:20px}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:30px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:0;height:30px}#${def.const.leftButton} input{margin:0;padding:1px 10px 1px 20px!important;height:30px;min-width:85px;border:0 solid transparent;border-bottom-left-radius:2rem;border-top-left-radius:2rem;background:#f1f3ff;box-shadow:0 0 2px #a4a5bb;color:#2e39b3;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:1px 20px 1px 10px!important;height:30px;min-width:85px;border:0 solid transparent;border-top-right-radius:2rem;border-bottom-right-radius:2rem;background:#f1f3ff;box-shadow:0 0 2px #a4a5bb;color:#2e39b3;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#6573ff;color:#fff}@media (prefers-color-scheme: dark){#${def.const.leftButton} input{border:1px solid #252b3b;background:#252b3b;color:#fff}#${def.const.rightButton} input{border:1px solid #252b3b;background:#252b3b;color:#fff}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #6573ff;background:#6573ff}}`,
             ResultList: { qs: `section.w-gl>div.w-gl__result`, delay: 9e2 },
             KeyStyle: `.w-gl__result b`,
