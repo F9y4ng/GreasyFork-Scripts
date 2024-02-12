@@ -110,7 +110,7 @@ Font scaling (experimental) BETA Version, **OFF by default**, turn on font scali
 
 ```log
 @ Update rules for Google.com search results filtering.
-@ Update the style of Strarpage.com's jump buttons.
+@ Update the style of Startpage.com's jump buttons.
 ```
 
 ## The latest feature introduction
