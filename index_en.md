@@ -106,12 +106,11 @@ Font scaling (experimental) BETA Version, **OFF by default**, turn on font scali
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-## version 2024.02.03.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2024.02.12.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Fix style bug of the jump button in some search engines.
-@ Update script internal link source to github.com.
-@ Fix some known issues, Optimize styles & code.
+@ Update rules for Google.com search results filtering.
+@ Update the style of Strarpage.com's jump buttons.
 ```
 
 ## The latest feature introduction
