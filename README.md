@@ -131,7 +131,7 @@
 
 ```log
 @ 更新 Google.com 搜索结果过滤的规则。
-@ 更新 Strarpage.com 的跳转按钮的样式。
+@ 更新 Startpage.com 的跳转按钮的样式。
 ```
 
 ### 最新功能介绍

@@ -61,7 +61,7 @@
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
 // @note               更新 Google.com 搜索结果过滤的规则。
-// @note               更新 Strarpage.com 的跳转按钮的样式。
+// @note               更新 Startpage.com 的跳转按钮的样式。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
