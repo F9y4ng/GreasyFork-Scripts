@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜索引擎助手
 // @name:ru            Поисковый помощник
 // @name:ja            優雅な検索エンジン助手
-// @version            2024.02.12.1
+// @version            2024.03.02.1
 // @author             F9y4ng
 // @description        Le script est alias « Elegant Search Engine Assistant », ce qui permet à l'utilisateur de passer d'un moteur de recherche à l'autre ; prise en charge de la personnalisation des moteurs de recherche couramment utilisés, effet de rendu de mise en évidence des mots clés ; fournit également la suppression de la redirection des liens de recherche, protégeant les résultats de recherche des annonces, les paramètres visuels, la détection automatique des mises à jour et d'autres fonctionnalités avancées ; compatible avec un certain nombre de moteurs de recherche connus, tels que Baidu, Google, Bing, Duckduckgo, Sogou, Wuzhuiso, Yandex, 360so, Toutiao, Baidu.dev, Ecosia, Yahoo, You, Startpage, Brave, Yep, Swisscows, etc.
 // @description:en     "Elegant search engine assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
@@ -60,8 +60,8 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               更新 Google.com 搜索结果过滤的规则。
-// @note               更新 Startpage.com 的跳转按钮的样式。
+// @note               修正 Google.com 去除重定向引起的Bug.
+// @note               修正一些已知问题，优化样式，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -150,7 +150,7 @@
     variable: {
       undef: void 0,
       refresh: () => location.reload(true),
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.02.12.0",
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.03.02.0",
       scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRnN1cHBvcnQ="),
       homepage: getMetaValue("homepage") ?? getMetaValue("homepageURL") ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcuZ2l0aHViLmlvJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJG"),
@@ -1552,10 +1552,9 @@
             },
             KeyStyle: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
             AntiRedirect: function () {
-              deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "google_ar" })("#rcnt div[eid][data-async-context] div.MjjYud :not([jsname='MgN2vf'])>a", "Google", {
+              deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "google_ar" })("#rcnt div[data-hveid^='C'][data-hveid$='AA'] :not(h3.ob5Hkd)>a:not(.k8XOCe)", "Google", {
                 useNewTab: true,
-                forceNewTab: true,
-                cleanAttributes: ["ping"],
+                cleanAttributes: ["ping", "onmouseover"],
                 removeDataSet: true,
               });
             },
@@ -1926,7 +1925,7 @@
             IMGType: ["images"],
             SplitName: { str: "/", index: 1 },
             MainType: "#submit-button",
-            StyleCode: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:0;padding:5px 6px;height:100%;order:6}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:38px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:0px;height:38px}#${def.const.leftButton} input{margin:0;padding:4px 10px!important;height:35px;min-width:85px;border:0 solid transparent;border-bottom-left-radius:6px;border-top-left-radius:6px;background:var(--search-bgd-04);box-shadow:0 0 2px #a4a5bb;color:var(--color-primary);vertical-align:top;font-weight:600;font-size:14px!important;line-height:14px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:4px 10px!important;height:35px;min-width:85px;border:0 solid transparent;border-top-right-radius:6px;border-bottom-right-radius:6px;background:var(--search-bgd-04);box-shadow:0 0 2px #a4a5bb;color:var(--color-primary);vertical-align:top;font-weight:600;font-size:14px!important;line-height:14px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--btn-filled-bg-hover);color:var(--color,#fff)}`,
+            StyleCode: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:0;padding:4px 5px;height:100%;order:6}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:36px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:0px;height:36px}#${def.const.leftButton} input{margin:0;padding:4px 10px!important;height:38px;min-width:85px;border:0 solid transparent;border-bottom-left-radius:12px;border-top-left-radius:12px;background:var(--search-bgd-04);box-shadow:0 0 2px #a4a5bb;color:var(--color-primary);vertical-align:top;font-weight:600;font-size:14px!important;line-height:14px;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:4px 10px!important;height:38px;min-width:85px;border:0 solid transparent;border-top-right-radius:12px;border-bottom-right-radius:12px;background:var(--search-bgd-04);box-shadow:0 0 2px #a4a5bb;color:var(--color-primary);vertical-align:top;font-weight:600;font-size:14px!important;line-height:14px;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--btn-filled-bg-hover);color:var(--color,#fff)}`,
             ResultList: { qs: `#results>div.snippet[data-type="web"]`, delay: 10 },
             KeyStyle: `.snippet-content strong`,
             AntiRedirect: function () {
@@ -1981,7 +1980,7 @@
             IMGType: ["images"],
             SplitName: { str: "/", index: 2 },
             MainType: "form.form-search>button.search-submit",
-            StyleCode: `#header .form-search{max-width:35em}#${def.const.rndButtonID}{position:absolute;top:.5em;z-index:112;display:block;margin:-6px 0 0;padding:0;height:2.5em}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:2.5em}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:2.5em}#${def.const.leftButton} input{margin:0;padding:4px 12px!important;height:2.6em;min-width:85px;border:1px solid #bfc8cd;border-bottom-left-radius:1.25em;border-top-left-radius:1.25em;background:transparent;box-shadow:0 0 2px #a4a5bb;color:#252b3b;vertical-align:middle;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:4px 12px!important;height:2.6em;min-width:85px;border:1px solid #bfc8cd;border-top-right-radius:1.25em;border-bottom-right-radius:1.25em;background:transparent;box-shadow:0 0 2px #a4a5bb;color:#252b3b;vertical-align:middle;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#edf0f3;color:#df5d5d}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #99a4ab;background:#252b3b;color:#99a4ab}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#353b3e;color:#df5d5d}}`,
+            StyleCode: `#header .form-search{max-width:35em}#${def.const.rndButtonID}{position:absolute;top:0;z-index:112;display:block;margin:0;padding:0;height:2.8em}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:2.5em}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:2.5em}#${def.const.leftButton} input{margin:0;padding:4px 12px!important;height:2.8em;min-width:85px;border:1px solid #bfc8cd;border-bottom-left-radius:1.25em;border-top-left-radius:1.25em;background:transparent;box-shadow:0 0 2px #a4a5bb;color:#252b3b;vertical-align:middle;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:4px 12px!important;height:2.8em;min-width:85px;border:1px solid #bfc8cd;border-top-right-radius:1.25em;border-bottom-right-radius:1.25em;background:transparent;box-shadow:0 0 2px #a4a5bb;color:#252b3b;vertical-align:middle;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#edf0f3;color:#df5d5d}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #99a4ab;background:#252b3b;color:#99a4ab}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#353b3e;color:#df5d5d}}`,
             ResultList: { qs: `.web-results>article.item-web`, delay: 10 },
             KeyStyle: `.web-results b`,
             AntiRedirect: function () {
@@ -3156,20 +3155,20 @@
               sessionStorage.setItem("_global_google_", 1);
               sleep(5e2).then(() => {
                 def.const.s = GMopenInTab(`https://${google}/ncr`, true);
-                DEBUG("getGlobalGoogle:", Boolean(def.const.s));
+                DEBUG("Google.getGlobalGoogle: %c%s", "color:crimson;font-weight:700;", capitalize(Boolean(def.const.s)));
                 GMnotification({
-                  title: isChinese ? "智能跳转" : "Google NCR",
+                  title: "Google NCR",
                   text: def.notice.noticeHTML(
                     `<dd class="${def.notice.center}">
                       ${
                         isChinese
-                          ? "当前页面即将跳转至 Google.com (NCR)<br/><span>若新窗口未自动关闭，请手动关闭！</span>"
-                          : "Jump to Google.com (NCR)<br/><span>Please close new-tab manually if not closed!</span>"
+                          ? "<b>即将跳转至 Google.com (NCR)</b><br/>新窗口正在加载数据，如未自动关闭，请手动关闭之。"
+                          : "<b>Jump to Google.com (NCR)</b><br/>New tab is loading data, please close it if not ."
                       }
                     </dd>`
                   ),
                   type: def.notice.info,
-                  timeout: 25,
+                  timeout: 50,
                   callbacks: { onClose: [redirectNCR] },
                 });
               });
