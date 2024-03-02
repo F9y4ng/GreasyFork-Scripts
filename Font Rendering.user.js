@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング
 // @name:en            Font Rendering (Customized)
-// @version            2024.02.03.1
+// @version            2024.03.02.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -110,7 +110,7 @@
         getClientRects: Element.prototype.getClientRects,
         getBoundingClientRect: Element.prototype.getBoundingClientRect,
       },
-      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.02.03.0",
+      curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.03.02.0",
       scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
       scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("\x52\x6a\x6c\x35\x4e\x47\x35\x6e"),
       feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRnN1cHBvcnQ="),
@@ -949,14 +949,14 @@
 
     const UPDATE_VERSION_NOTICE = String(
       IS_CHN
-        ? `<li class="${def.const.seed}_fix">优化在 Blink 内核下粗体样式附加描边的渲染修正。</li>
-          <li class="${def.const.seed}_fix">修正'JSON.parse'被劫持后数据被初始化的Bug<a target="_blank" href="${def.variable.feedback}/304">#304</a>.</li>
-          <li class="${def.const.seed}_fix">更新脚本内部链接地址引用源至 github.com 域。</li>
-          <li class="${def.const.seed}_fix">修正一些已知的问题，优化样式，优化代码。</li>`
-        : `<li class="${def.const.seed}_fix">Optimize bold-stroke-style correction under Blink.</li>
-          <li class="${def.const.seed}_fix">Fix the Bug<a target="_blank" href="${def.variable.feedback}/304">#304</a> caused by hijacking 'JSON.parse'.</li>
-          <li class="${def.const.seed}_fix">Update script internal link source to github.com.</li>
-          <li class="${def.const.seed}_fix">Fix some known issues, Optimize styles & code.</li>`
+        ? `<li class="${def.const.seed}_fix">修正某些站点ShadowRoot重复插入样式的问题。</li>
+            <li class="${def.const.seed}_fix">修正数据重置后直接取消预览时的逻辑错误。</li>
+            <li class="${def.const.seed}_fix">优化应用字体重写样式重新加载时的优先级。</li>
+            <li class="${def.const.seed}_fix">修正一些已知的问题，优化样式，优化代码。</li>`
+        : `<li class="${def.const.seed}_fix">Fix duplicate style inserting bug under ShadowRoot.</li>
+            <li class="${def.const.seed}_fix">Fix logic error when cancel preview after data reset.</li>
+            <li class="${def.const.seed}_fix">Optimize style reloading priority when font rewrite.</li>
+            <li class="${def.const.seed}_fix">Fix some known issues, Optimize styles & code.</li>`
     );
 
     /* INITIALIZE_FONT_LIBRARY */
@@ -1244,8 +1244,10 @@
           style.media = "screen";
           style.textContent = css;
           const existSheet = qS(`style#${id}`, shadow);
-          if (!existSheet) shadow.appendChild(style);
-          else shadow.replaceChild(style, existSheet);
+          if (css) {
+            if (!existSheet) shadow.prepend(style);
+            else existSheet.textContent = css;
+          } else existSheet?.remove();
         }
       } catch (e) {
         ERROR("compatibleWithAdoptedStyleSheets:", e.message);
@@ -1272,7 +1274,7 @@
     }
 
     function getLastStyleNode(target) {
-      let el = qA("style,link[rel~='stylesheet' i]:not([disabled])", target ?? document.head);
+      let el = qA("style:not(.darkreader),link[rel~='stylesheet' i]:not([disabled])", target ?? document.head);
       if (el.length > 0) {
         return el[el.length - 1];
       } else {
@@ -1375,7 +1377,7 @@
 
     async function isInternalStyleAllowed() {
       return await getDocumentElement.getNodeAndObserve().then(res => {
-        const dE = res.get();
+        const dE = document.head || res.get();
         const testId = "test-internal-style";
         try {
           const style = cE("style");
@@ -1961,7 +1963,17 @@
 
       const showSystemInfo = {
         system: () => {
-          if (typeof def.const.exSitesIndex === "undefined") {
+          if (!IS_INTERNALSTYLE_ALLOWED) {
+            __console(
+              "shown-system-error",
+              IS_CHN
+                ? `%c${def.variable.scriptName}\r\n%cINTRO.URL:\u0020https://f9y4ng.likes.fans/Font-Rendering\r\n%c脚本内部样式无法被正常写入，请排查站点CSP权限或脚本冲突问题。`
+                : `%c${def.variable.scriptName}\r\n%cINTRO.URL:\u0020https://f9y4ng.likes.fans/Font-Rendering\r\n%cThe script internal styles cannot be written properly, please troubleshoot site CSP permissions or script conflict issues.`,
+              "color:#dc143c;font:normal 700 16px/150% system-ui,-apple-system,BlinkMacSystemFont,sans-serif",
+              "color:#777777;font:italic 400 10px/180% monospace",
+              "color:#d1163c;font:normal 500 14px/180% system-ui,-apple-system,BlinkMacSystemFont,sans-serif"
+            );
+          } else if (typeof def.const.exSitesIndex === "undefined") {
             __console(
               "shown-system-info",
               IS_CHN
@@ -2395,8 +2407,8 @@
           _config_data_.curVersion = def.variable.curVersion;
           saveData("_CONFIGURE_", _config_data_);
           cache.remove("_FONTCHECKLIST_");
-          if (!isCloseTip || version === null) hintUpdateInfo(def.const.guideURI, version);
           DEBUG(`Update.Info.[${!version ? "new-deploy" : "up-to-date"}]: %cV${def.variable.curVersion}`, "color:crimson;font-weight:600");
+          if (!isCloseTip || version === null) hintUpdateInfo(def.const.guideURI, version);
         });
       }
 
@@ -3382,9 +3394,9 @@
 
       async function correctScaleOffset() {
         const scaleValue = def.const.curScale;
-        if (!isFontsize || scaleValue === 1) return;
+        if (!isFontsize || scaleValue === 1 || !IS_INTERNALSTYLE_ALLOWED) return;
         const predefinedSitesProps = await fontScaleDef();
-        sleep(20, { useCachedSetTimeout: true })(scaleValue).then(scale => {
+        sleep(20, { useCachedSetTimeout: true }).then(() => {
           for (let [domain, props] of Object.entries(predefinedSitesProps)) {
             if (CUR_HOST_NAME.endsWith(domain)) {
               def.array.props.Window.push(...uniq(props.Window));
@@ -3393,7 +3405,7 @@
               break;
             }
           }
-          correctCoordinateOffset(scale, { deleteOriginal: false });
+          correctCoordinateOffset(scaleValue, { deleteOriginal: false });
         });
       }
 
@@ -3419,7 +3431,7 @@
         return codeSelector.concat(
           `{-webkit-text-stroke:var(--fr-no-stroke)!important;${monoTextShadow}font-family:var(--fr-mono-font),${base}!important;`,
           `font-feature-settings:var(--fr-mono-feature)!important;-webkit-user-select:text!important;user-select:text!important}`,
-          CUR_HOST_NAME.endsWith("github.com") ? `${codeSelection}{color:currentcolor!important;background:#71bbff6e!important}` : ``
+          CUR_HOST_NAME.endsWith("github.com") ? `${codeSelection}{color:currentcolor!important;background:#71BAFF40!important}` : ``
         );
       }
 
@@ -3960,6 +3972,7 @@
           if (!fontCssNode) return;
           fontCssNode.addEventListener("dblclick", () => {
             fontCssNode.setAttribute("class", def.class.notreadonly);
+            fontCssNode.removeAttribute("title");
             fontCssNode.readOnly = false;
           });
         }
@@ -4253,7 +4266,7 @@
                     DEBUG(`frColorPicker<Preview>: %c${fscolor}`, `${fullStyle(fscolor, cl)};border:1px solid #eee`);
                   })
                   .then(() => correctBoldStrokeProcess({ Fixedstyle: _fixfontstroke, Scenes: "preview", Permit: fixfstroke }))
-                  .catch(e => ERROR("Preview:", e.message));
+                  .catch(e => ERROR("submitPreview.then:", e.message));
               } catch (e) {
                 ERROR("SubmitPreview:", e.message);
                 def.array.exps.push(`[submitPreview]: ${e}`);
@@ -4450,22 +4463,23 @@
                 const _fontOverride_defined_ = await GMgetValue("_FONTOVERRIDE_DEF_");
                 const _fontOverride_defined__ = _fontOverride_defined_ || "";
                 const _configure__ = await GMgetValue("_CONFIGURE_");
-                const db_R = inspectLicense()?.keycode().concat(encrypt(def.variable.scriptName));
-                const db_0 = encrypt(String(new Date()));
-                const db_1 = _fonts_Set__;
-                const db_2 = _exclude_Site__;
-                const db_3 = _domains_Fonts_Set__;
-                const db_4 = _custom_Fontlist__;
-                const db_5 = _configure__;
-                const db_6 = _monospaced_Fontlist__;
-                const db_7 = _monospaced_SiteRules__;
-                const db_8 = _monospaced_feature__;
-                const db_9 = _fontScale_defined__;
-                const db_10 = _fontOverride_defined__;
-                const db = { db_R, db_0, db_1, db_2, db_3, db_4, db_5, db_6, db_7, db_8, db_9, db_10 };
-                const via = brand.toLowerCase();
+                const db = {
+                  db_R: inspectLicense()?.keycode().concat(encrypt(def.variable.scriptName)),
+                  db_0: encrypt(String(new Date())),
+                  db_1: _fonts_Set__,
+                  db_2: _exclude_Site__,
+                  db_3: _domains_Fonts_Set__,
+                  db_4: _custom_Fontlist__,
+                  db_5: _configure__,
+                  db_6: _monospaced_Fontlist__,
+                  db_7: _monospaced_SiteRules__,
+                  db_8: _monospaced_feature__,
+                  db_9: _fontScale_defined__,
+                  db_10: _fontOverride_defined__,
+                };
+                const browser = brand.toLowerCase();
                 const timeStamp = setDateFormat("yyyy-MM-ddTHH-mm-ssZ", new Date());
-                const _fileName_ = `FontRendering-backup-${via}-${timeStamp}.sqlitedb`;
+                const _fileName_ = `FontRendering-backup-${browser}-${timeStamp}.sqlitedb`;
                 dataDownload(_fileName_, sqliteDBDataAccess(JSON.stringify(db), 10086, ROOT_SECRET_KEY));
                 let frDialog = new FrDialogBox({
                   trueButtonText: IS_CHN ? "确 定" : "OK",
@@ -4573,8 +4587,7 @@
         }
 
         function controlCancelButton(cancelT) {
-          if (!cancelT) return;
-          cancelT.addEventListener("click", () => closeConfigurePage({ isReload: false }));
+          cancelT?.addEventListener("click", () => closeConfigurePage({ isReload: false }));
         }
       }
 
@@ -4864,8 +4877,9 @@
             if (mutation.type !== "childList") return;
             const addedNodes = mutation.addedNodes;
             for (let j = 0, k = addedNodes.length; j < k; j++) {
-              const nodeName = getNodeName(addedNodes[j]);
-              if (!["link", "style"].includes(nodeName)) continue;
+              const addedNode = addedNodes[j];
+              const nodeName = getNodeName(addedNode);
+              if (!["link", "style"].includes(nodeName) || (nodeName === "link" && !addedNode.getAttribute("rel")?.includes("stylesheet"))) continue;
               deBounce({ fn: fixViewportCssStyle, delay: 1e2, timer: `fix${nodeName}viewport` })(nodeName);
             }
           });
@@ -5030,18 +5044,18 @@
       let fixBoldObserver, fixBoldConfig;
 
       function correctBoldStrokeProcess({ Fixedstyle, Scenes, Permit, Target } = {}) {
+        if (!isFixStrokeTask(Scenes ?? (IS_CURRENTSITE_ALLOWED && CONST_VALUES.fixStroke))) return;
+        fixBoldObserver = fixBoldObserver ?? new MutationObserver(fixBoldProcess);
+        fixBoldConfig = fixBoldConfig ?? { attributeOldValue: true, childList: true, subtree: true };
         switch (Scenes) {
           case "iframe":
-            return isFixStrokeTask(Scenes) && correctBoldManual(Target);
+            return correctBoldManual(Target);
           case "preview":
-            return isFixStrokeTask(Scenes) && correctBoldManual();
+            return correctBoldManual();
           case "recover":
             Fixedstyle = Permit ? fixBoldTextStyle : "";
-            return isFixStrokeTask(Scenes) && correctBoldManual();
+            return correctBoldManual();
           default:
-            if (!isFixStrokeTask(IS_CURRENTSITE_ALLOWED && CONST_VALUES.fixStroke)) return;
-            fixBoldObserver = new MutationObserver(fixBoldProcess);
-            fixBoldConfig = { attributeOldValue: true, childList: true, subtree: true };
             Fixedstyle = Fixedstyle ?? fixBoldTextStyle;
             w.addEventListener("pushState", correctBoldManual);
             w.addEventListener("replaceState", correctBoldManual);
@@ -5053,8 +5067,9 @@
 
         function shadowRootNodeFixStroke(host, syncStyle) {
           if (host instanceof ShadowRoot) {
-            const curSyncStyle = syncStyle ? `:host(${getNodeName(host.host)}){--fr-no-stroke:0px transparent}` + syncStyle : "";
-            compatibleWithAdoptedStyleSheets(host, curSyncStyle, `${def.const.seed}-fixboldstroke`);
+            const hostNodeName = getNodeName(host.host);
+            const curSyncStyle = syncStyle ? `:host(${hostNodeName}){--fr-no-stroke:0px transparent}` + syncStyle : "";
+            compatibleWithAdoptedStyleSheets(host, curSyncStyle, `${hostNodeName}-fixboldstroke`);
             if (Permit === false) return;
             const nodes = getSuitableElements(`:not(${def.const.exQueryString})`, host);
             getAndProcessBoldStyles(nodes);
@@ -5131,7 +5146,6 @@
                     const node = removedNodes[k];
                     if (node.nodeType !== Node.ELEMENT_NODE || excludeNodeSet.has(getNodeName(node))) continue;
                     if (runLoopLimitChecker(node, type)) throw new Error(`LoopLimitError: ${type}`);
-                    styleMap.delete(node);
                   }
                   break;
                 }
@@ -5332,24 +5346,40 @@
             INFO(`%c[MO]${IS_IN_FRAMES}[NEWDEID]:%c#${id} <i:${def.id.rndStyle}>`, leftStyle("dodgerblue"), rightStyle("dodgerblue"));
         };
         const mainStyleProcess = mutations => {
+          let mainStyleFlag = false;
           const mainStyle = getMainStyleElements({ currentScope: true });
           mutations.forEach(mutation => {
             const target = mutation.target;
             switch (mutation.type) {
               case "childList":
-                if (!mainStyle) {
-                  const addedNodes = mutation.addedNodes;
-                  for (let j = 0; j < addedNodes.length; j++) {
-                    deBounce({ fn: insertMainStyleElement, delay: 5e2, timer: "repeatcheck", immed: true })();
+                if (target === document.documentElement) setFlagAtDocumentElement(target);
+                if (target !== document.head) return;
+                added: for (let j = 0, addedNodes = mutation.addedNodes; j < addedNodes.length; j++) {
+                  if (!mainStyle && insertMainStyleElement()) break added;
+                  else {
+                    const addedNode = addedNodes[j];
+                    const nodeName = getNodeName(addedNode);
+                    if (
+                      (nodeName === "style" && addedNode.getAttribute("id") !== def.id.rndStyle && !addedNode.className.includes("darkreader")) ||
+                      (nodeName === "link" && addedNode.getAttribute("rel")?.includes("stylesheet"))
+                    ) {
+                      mainStyleFlag = true;
+                      deBounce({ fn: INFO, delay: 8e2, timer: "newstyleorder" })(
+                        `%c[MO]${IS_IN_FRAMES}[FINALPOS]:%c<${nodeName}> ${mainStyleFlag}`,
+                        leftStyle("mediumaquamarine"),
+                        rightStyle("mediumaquamarine")
+                      );
+                      break added;
+                    }
                   }
                 }
-                if (target === document.documentElement) setFlagAtDocumentElement(target);
-                for (let k = 0, removedNodes = mutation.removedNodes; k < removedNodes.length; k++) {
+                removed: for (let k = 0, removedNodes = mutation.removedNodes; k < removedNodes.length; k++) {
                   const node = removedNodes[k];
                   const nodeName = getNodeName(node);
                   if (nodeName === "style" && node.id === def.id.rndStyle && !node.dataset.frRemoved) {
                     const result = insertMainStyleElement({ overwrite: true });
-                    return INFO(`%c[MO]${IS_IN_FRAMES}[REINSERT]:%c<${nodeName}> ${result}`, leftStyle("brown"), rightStyle("brown"));
+                    INFO(`%c[MO]${IS_IN_FRAMES}[REINSERT]:%c<${nodeName}> ${result}`, leftStyle("brown"), rightStyle("brown"));
+                    break removed;
                   }
                 }
                 break;
@@ -5367,6 +5397,7 @@
                 break;
             }
           });
+          mainStyleFlag && deBounce({ fn: insertMainStyleElement, delay: 8e2, timer: "repeatcheck" })({ overwrite: true });
         };
         const styleObserve = new MutationObserver(mainStyleProcess);
         const config = { childList: true, subtree: true, attributeOldValue: true, attributeFilter: ["id"] };
