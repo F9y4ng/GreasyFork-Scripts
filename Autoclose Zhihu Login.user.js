@@ -3,7 +3,7 @@
 // @name:en            Autoclose Zhihu Login Prompt
 // @name:zh-CN         自动关闭知乎登录提示
 // @name:zh-TW         自動關閉知乎登錄提示
-// @version            2024.01.01.1
+// @version            2024.04.06.1
 // @author             F9y4ng
 // @description        自动关闭知乎自动弹出的登录与注册提示，仅仅用于关闭自动弹出的登录提示。
 // @description:en     Autoclose Zhihu Login Prompt is only used to close the pop-up login and registration prompt.
@@ -31,7 +31,7 @@
 
 /* jshint esversion: 11 */
 
-~(function (w) {
+void (function (w) {
   "use strict";
 
   let nologin = true;
@@ -61,14 +61,12 @@
   }
 
   function hiddenFloatNode(node) {
-    const registFloatNode = node.querySelector(
-      `body>div:not([class],[style],[id]):not(:has(.Modal-content)):not(:has(img[class~='Avatar'])) div[class^='css-']:has(svg[class*='css-'])`
-    );
+    const registFloatNode = node.querySelector(`body>div:not([class],[style],[id]):not(:has(.Modal-content)):not(:has(img[class~='Avatar'])) div[class^='css-']:has(svg[class*='css-'])`);
     if (!registFloatNode) return;
     registFloatNode.style.display = "none";
   }
 
-  function hiddenLogin(mutationsList, observer) {
+  function hiddenLogin(mutationsList) {
     for (let i = 0; i < mutationsList.length; i++) {
       const mutation = mutationsList[i];
       const type = mutation.type;
