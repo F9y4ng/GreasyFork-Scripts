@@ -8,8 +8,12 @@
 - **Tampermonkey/Violentmonkey** is recommended for **Chrome / Firefox**, and **Tampermonkey** is recommended for **Safari.**
 - Using a script-manager such as **Adguard Desktop** or **Userscripts**, you can use **keyboard shortcuts** to call up the scripts menu.
 
-## 🚩 Solemnly Declared
-In some unofficial modified versions of the BLINK kernel browser, `disabled DirectWrite` will cause most fonts to be unrecognized by the program, or non-ASCII characters and emoji icons will not be rendered correctly. **Important note:** The script updates will no longer provide code compatibility and troubleshooting for browsers with `disabled DirectWrite`, and it is recommended that you use a major official browser to use the user-scripts in this project.
+---
+
+### Join Telegram Channel (Channel Name: GreasyFork-Scripts)
+* Channel: https://t.me/+1e8Ebdy-mtdhY2Rl
+* If you like this project, please ⭐Start it above, Thanks for your support.
+* This channel for discussing userscripts for desktop browsers.
 
 ---
 
@@ -21,13 +25,17 @@ In some unofficial modified versions of the BLINK kernel browser, `disabled Dire
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data promptly and don't use backup files from unknown sources!
 
-### version 2024.03.02.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2024.04.06.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ Fix duplicate style inserting bug under ShadowRoot.
-@ Fix logic error when cancel preview after data reset.
-@ Optimize style reloading priority when font rewrite.
-@ Fix some known issues, Optimize styles & code.
+# Recommend: Raise the sort order of this script to first in the Script Manager to minimize conflicts caused by other intrusive scripts. (Optional)
+@ Fixed colorpicker for font shadows conflicting with style overrides on some sites.
+@ Fixed the bug of getting hijacked JSON in different injection modes.
+@ Fixed the problem that the font scaling function corrects the wrong coordinate offset.
+@ Fixed an error in Iframe asynchronous processing of styles during preview.
+@ Improve the performance of bold stroke style correction and conflict detection.
+@ Change the expiration of the global cache for the script fontList to "30 days".
+@ Refactor the code, fix some hidden bugs, optimize style.
 ```
 
 ### Please note the following before using the new version:
@@ -130,11 +138,12 @@ Font scaling (experimental) BETA Version, **OFF by default**, turn on font scali
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-### version 2024.03.02.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2024.04.06.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Fix the bug caused by Google image removal redirection.
-@ Fix some known issues, optimize style, optimize code.
+@ Fixed the jump button style issue of search.Brave.
+@ Fixed the issue of judging the addition of valid characters for search filter keywords.
+@ Fixed some known issues, optimize style, optimize code.
 ```
 
 ### The latest feature introduction
@@ -160,11 +169,10 @@ The "**Automatic Update**" function is enabled by default. If you do not need it
 
 **Introduction:** "Autoclose Zhihu Login Prompt" is only used to close the automatically pop-up login prompt. It does nothing else and will not do anything else in the future.
 
-### version 2024.01.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
+### version 2024.04.06.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
 
 ```log
-# ✨🎉🧡 Happy New Year To All Users 🧡🎉✨
-+ Added the automatic jump function of Zhihu jump links.
+@ Fixed some known issues.
 ```
 
 ### Important

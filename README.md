@@ -8,8 +8,12 @@
 - **Chrome**, **Firefox** 推荐安装 **Tampermonkey/Violentmonkey**，**Safari** 推荐安装 **Tampermonkey**.
 - 使用 **Adguard桌面版** 或 **Userscripts** 等脚本管理器，可通过**键盘快捷键**呼出脚本管理菜单。
 
-## 🚩 郑重声明
-某些非官方修改版的Blink内核浏览器，关闭 `DirectWrite` 功能，会造成大部分字体无法被程序识别，或出现非ASCII字符与Emoji图标无法被正确渲染的问题。**重要提示**：后续所有脚本更新不再对应用 `disabled DirectWrite` 的浏览器做代码兼容和问题解答，要使用该项目内的脚本，建议您使用主流官方的浏览器。
+---
+
+### 加入 Telegram 频道（频道名称：GreasyFork-Scripts）
+* 频道地址：https://t.me/+1e8Ebdy-mtdhY2Rl
+* 如果您喜欢本项目，请在页面右上角 ⭐Start 它，感谢您的支持。
+* 此频道用于讨论桌面浏览器的用户脚本的问题反馈和功能建议。
 
 ---
 
@@ -21,13 +25,17 @@
 - 脚本错误、异常请反馈至{[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)}, 字体、渲染样式、乱码问题请反馈至{[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)}。
 - 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-### version 2024.03.02.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2024.04.06.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 修正某些站点ShadowRoot重复插入样式的问题。
-@ 修正数据重置后直接取消预览时的逻辑错误。
-@ 优化应用字体重写样式重新加载时的优先级。
-@ 修正一些已知的问题，优化样式，优化代码。
+# 在“脚本管理器”中将本脚本的排序顺序提升至首位，可以减少其他侵入性强的脚本造成的运行冲突、加载延时、页面卡顿等不正常的情况。(可选操作)
+@ 修正字体阴影拾色器在某些站点样式覆盖冲突的问题。
+@ 修正在不同注入模式下获取到被劫持JSON的错误。
+@ 修正字体比例缩放功能校正坐标偏移量错误的问题。
+@ 修正字体渲染预览时Iframe异步处理样式的错误。
+@ 提升粗体描边样式修正的性能、优化冲突检测功能。
+@ 变更脚本字体列表全局缓存的过期时间为『30天』
+@ 重构代码，修复一些深藏不露的BUG，优化样式。
 ```
 
 ### **字体渲染** 新版本，使用前请注意以下事项：
@@ -127,10 +135,11 @@
 - [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 - 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-### version 2024.03.02.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2024.04.06.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ 修正 Google.com 去除重定向引起的Bug.
+@ 修正 search.Brave 的跳转按钮样式问题。
+@ 修正搜索过滤关键词有效字符添加的判断问题。
 @ 修正一些已知问题，优化样式，优化代码。
 ```
 
@@ -158,11 +167,10 @@
 
 简介：自动关闭知乎登录提示，仅仅用于关闭自动弹出的登录提示，不干别的，未来也不会去干别的。
 
-### version 2024.01.01.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
+### version 2024.04.06.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
 
 ```log
-# ✨🎉祝新年快乐，身体健康，万事如意🎉✨
-+ 新增知乎跳转链接的自动跳转功能。
+@ 修正一些已知的问题。
 ```
 
 ### 重要说明
