@@ -14,9 +14,10 @@
 ***
 
 ### Join Telegram Channel (Channel Name: GreasyFork-Scripts)
-* Channel: https://t.me/+1e8Ebdy-mtdhY2Rl
+* Channel: [https://t.me/+1e8Ebdy-mtdhY2Rl](https://t.me/+1e8Ebdy-mtdhY2Rl)
 * If you like this project, please ⭐Start it on Github, Thanks for your support.
 * This channel for discussing userscripts for desktop browsers.
+  
 ***
 
 # Font Rendering (Customized) `Font Rendering.user.js`
