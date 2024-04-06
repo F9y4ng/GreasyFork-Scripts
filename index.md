@@ -14,7 +14,7 @@
 ***
 
 ### 加入 Telegram 频道（频道名称：GreasyFork-Scripts）
-* 频道地址：https://t.me/+1e8Ebdy-mtdhY2Rl
+* 频道地址：[https://t.me/+1e8Ebdy-mtdhY2Rl](https://t.me/+1e8Ebdy-mtdhY2Rl)
 * 如果您喜欢本项目，请在Github主页的右上角 ⭐Start 它，感谢您的支持。
 * 此频道用于讨论桌面浏览器的用户脚本的问题反馈和功能建议。
 
