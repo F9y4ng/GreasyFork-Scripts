@@ -5,9 +5,9 @@
 // @name:zh-TW         優雅的搜索引擎助手
 // @name:ru            Поисковый помощник
 // @name:ja            優雅な検索エンジン助手
-// @version            2024.03.02.1
+// @version            2024.04.06.1
 // @author             F9y4ng
-// @description        Le script est alias « Elegant Search Engine Assistant », ce qui permet à l'utilisateur de passer d'un moteur de recherche à l'autre ; prise en charge de la personnalisation des moteurs de recherche couramment utilisés, effet de rendu de mise en évidence des mots clés ; fournit également la suppression de la redirection des liens de recherche, protégeant les résultats de recherche des annonces, les paramètres visuels, la détection automatique des mises à jour et d'autres fonctionnalités avancées ; compatible avec un certain nombre de moteurs de recherche connus, tels que Baidu, Google, Bing, Duckduckgo, Sogou, Wuzhuiso, Yandex, 360so, Toutiao, Baidu.dev, Ecosia, Yahoo, You, Startpage, Brave, Yep, Swisscows, etc.
+// @description        Le script est alias «Elegant Search Engine Assistant», ce qui permet à l'utilisateur de passer d'un moteur de recherche à l'autre; prise en charge de la personnalisation des moteurs de recherche couramment utilisés, effet de rendu de mise en évidence des mots clés; fournit également la suppression de la redirection des liens de recherche, protégeant les résultats de recherche des annonces, les paramètres visuels, la détection automatique des mises à jour et d'autres fonctionnalités avancées; compatible avec un certain nombre de moteurs de recherche connus, tels que Baidu, Google, Bing, Duckduckgo, Sogou, Wuzhuiso, Yandex, 360so, Toutiao, Baidu.dev, Ecosia, Yahoo, You, Startpage, Brave, Yep, Swisscows, etc.
 // @description:en     "Elegant search engine assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
 // @description:zh-CN  “优雅的搜索引擎助手”方便用户在不同的搜索引擎之间跳转；支持自定义常用搜索引擎、关键词高亮渲染效果；还提供去除搜索链接重定向、屏蔽搜索结果广告、可视化参数设置、及自动更新检测等高级功能；兼容多个知名搜索引擎，如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Ecosia、You、Startpage、Brave等。
 // @description:zh-TW  「優雅的搜索引擎助手」方便用戶在不同的搜索引擎之間跳轉；支持自定義常用搜索引擎、關鍵詞高亮渲染效果；還提供去除搜索鏈接重定嚮、屏蔽搜索結果廣告、可視化參數設置、及自動更新檢測等高級功能；兼容多個知名搜索引擎，如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Ecosia、You、Startpage、Brave等。
@@ -20,7 +20,7 @@
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.meta.js
 // @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js
-// @require            https://update.greasyfork.org/scripts/460897/1277476/gbCookies.js#sha256-Sv+EuBerch8z/6LvAU0m/ufvjmqB1Q/kbQrX7zAvOPk=
+// @require            https://update.greasyfork.org/scripts/460897/1277476/gbCookies.js?SRI#sha256-Sv+EuBerch8z/6LvAU0m/ufvjmqB1Q/kbQrX7zAvOPk=
 // @match              *://www.baidu.com/*
 // @match              *://image.baidu.com/search*
 // @match              *://kaifa.baidu.com/searchPage*
@@ -60,7 +60,8 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               修正 Google.com 去除重定向引起的Bug.
+// @note               修正 search.Brave 的跳转按钮样式问题。
+// @note               修正搜索过滤关键词有效字符添加的判断问题。
 // @note               修正一些已知问题，优化样式，优化代码。
 // @grant              GM_getValue
 // @grant              GM.getValue
@@ -85,7 +86,7 @@
 
 /* jshint esversion: 11 */
 
-~(function (w) {
+void (function (w) {
   "use strict";
 
   /**
@@ -381,6 +382,10 @@
     } catch (e) {
       return "";
     }
+  }
+
+  function checkOwnProperty(obj, prop) {
+    return Object.prototype.hasOwnProperty.call(obj, prop);
   }
 
   function compareArray(array1, array2) {
@@ -703,7 +708,7 @@
     }
   }
 
-  ~(function (tTP, requestEnvironmentConstants) {
+  void (function (tTP, requestEnvironmentConstants) {
     const { navigatorInfo, locationInfo } = requestEnvironmentConstants();
     const { engine, brand, "trust-engine": trustengine, credit } = navigatorInfo;
     const { cP: CUR_PROTOCOL, cHN: CUR_HOST_NAME, isTop: CUR_WINDOW_TOP } = locationInfo;
@@ -754,7 +759,7 @@
     const options = defaultOpt;
 
     function getCallback(ref, eventName) {
-      if (ref.callbacks.hasOwnProperty(eventName)) {
+      if (checkOwnProperty(ref.callbacks, eventName)) {
         ref.callbacks[eventName].forEach(cb => {
           if (typeof cb === "function") cb.apply(ref);
         });
@@ -940,7 +945,7 @@
         });
       }
       on(eventName, cb = () => {}) {
-        if (typeof cb === "function" && this.options.callbacks.hasOwnProperty(eventName)) {
+        if (typeof cb === "function" && checkOwnProperty(this.options.callbacks, eventName)) {
           this.options.callbacks[eventName].push(cb);
         }
         return this;
@@ -974,9 +979,7 @@
     /* GMSET/GET/DELETEVALUE_WITH_CACHE */
 
     const cache = {
-      value: (data, eT = 6048e5) => {
-        return { data: data, expired: Date.now() + eT };
-      },
+      value: (data, eT = 6048e5) => ({ data: data, expired: Date.now() + eT }),
       set: (key, ...options) => GMsetValue(key, encrypt(JSON.stringify(cache.value(...options)))),
       get: async key => {
         const obj = await GMgetValue(key);
@@ -1043,7 +1046,7 @@
       }
     }
 
-    ~(async function (getConfigureData, isChinese) {
+    void (async function (getConfigureData, isChinese) {
       // CONFIGURE_DATA
       let config_date = await getConfigureData();
       let { isAutoUpdate, keywordHighlight, isHotkey, selectedEngine, localWindow, googleJump, antiLinkRedirect, antiAds, customColor } = config_date;
@@ -1331,7 +1334,8 @@
           case "So360":
             if (node.hasAttribute("data-mdurl")) {
               const realURL = node.dataset.mdurl;
-              setRealLink(node, realURL), DEBUG("mdurl:", realURL);
+              setRealLink(node, realURL);
+              DEBUG("mdurl:", realURL);
               IS_DEBUG && node.classList.remove(def.const.loading);
             } else {
               task = () =>
@@ -1357,7 +1361,8 @@
             if (url) {
               let realUrl = url.match(/\/search\/jump\?url=([^&]+)&/);
               realUrl = realUrl ? decodeURI(decodeURIComponent(realUrl[1])) : url;
-              setRealLink(node, realUrl), DEBUG(realUrl);
+              setRealLink(node, realUrl);
+              DEBUG(realUrl);
               IS_DEBUG && node.classList.remove(def.const.loading);
             }
             break;
@@ -1501,7 +1506,7 @@
         }
       }
 
-      ~(async function setSearchEngineConfig(checkAutoUpdate, fetchRemoteIcon, getResultFilterData) {
+      void (async function setSearchEngineConfig(checkAutoUpdate, fetchRemoteIcon, getResultFilterData) {
         const _filter_Data = await getResultFilterData();
         const antiResultsFilter = _filter_Data.trigger;
         const resultFilters = _filter_Data.filter;
@@ -1593,11 +1598,10 @@
                 cleanAttributes: ["h"],
                 useAdvancedAntiRedirect: true,
               });
-              deBounce({ fn: parsingAntiRedirect, delay: 30, timer: "bing_ar_cn" })(
-                "#b_results>li:not(.b_pag,#mfa_root) a:not([role='button']):not([href*='.bing.com/ck/a?'])",
-                "Bing",
-                { useNewTab: true, cleanAttributes: ["h"] }
-              );
+              deBounce({ fn: parsingAntiRedirect, delay: 30, timer: "bing_ar_cn" })("#b_results>li:not(.b_pag,#mfa_root) a:not([role='button']):not([href*='.bing.com/ck/a?'])", "Bing", {
+                useNewTab: true,
+                cleanAttributes: ["h"],
+              });
             },
             AntiAds: function () {
               deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "bing_ad", immed: true })({
@@ -1856,7 +1860,7 @@
             IMGType: ["isch"],
             SplitName: "tbm",
             MainType: "button[data-testid='qb_submit_button']",
-            StyleCode: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:-8px 0 0;height:36px}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:44px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:44px}#${def.const.leftButton} input{margin:0;padding:1px 10px 1px 20px!important;height:44px;min-width:110px;border:1px solid #4a72f5;border-bottom-left-radius:12px;border-top-left-radius:12px;background-color:#4a72f5;color:#fff;vertical-align:top;font-weight:500;font-size:17px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:1px 20px 1px 10px!important;height:44px;min-width:110px;border:1px solid #4a72f5;border-top-right-radius:12px;border-bottom-right-radius:12px;background-color:#4a72f5;color:#fff;vertical-align:top;font-weight:500;font-size:17px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #7897fc;background-color:#7897fc;color:#fff}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #668aff;background-color:#668aff}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#7897fc;color:#3c3c3e;font-weight:600}}`,
+            StyleCode: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:-8px 0 0;height:36px}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:44px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:44px}#${def.const.leftButton} input{margin:0;padding:0;height:44px;min-width:110px;border:1px solid #4a72f5;border-bottom-left-radius:12px;border-top-left-radius:12px;background-color:#4a72f5;color:#fff;vertical-align:top;font-weight:500;font-size:17px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0;height:44px;min-width:110px;border:1px solid #4a72f5;border-top-right-radius:12px;border-bottom-right-radius:12px;background-color:#4a72f5;color:#fff;vertical-align:top;font-weight:500;font-size:17px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #7897fc;background-color:#7897fc;color:#fff}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #668aff;background-color:#668aff}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#7897fc;color:#3c3c3e;font-weight:600}}`,
             ResultList: {
               qs: `div[data-testid="app-mainline"]>div[data-eventappname][data-testid]>ul[data-testid="web-results"],div[data-testid="Github Issues-app"]>ul>li`,
               delay: 10,
@@ -1925,7 +1929,7 @@
             IMGType: ["images"],
             SplitName: { str: "/", index: 1 },
             MainType: "#submit-button",
-            StyleCode: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:0;padding:4px 5px;height:100%;order:6}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:36px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:0px;height:36px}#${def.const.leftButton} input{margin:0;padding:4px 10px!important;height:38px;min-width:85px;border:0 solid transparent;border-bottom-left-radius:12px;border-top-left-radius:12px;background:var(--search-bgd-04);box-shadow:0 0 2px #a4a5bb;color:var(--color-primary);vertical-align:top;font-weight:600;font-size:14px!important;line-height:14px;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:4px 10px!important;height:38px;min-width:85px;border:0 solid transparent;border-top-right-radius:12px;border-bottom-right-radius:12px;background:var(--search-bgd-04);box-shadow:0 0 2px #a4a5bb;color:var(--color-primary);vertical-align:top;font-weight:600;font-size:14px!important;line-height:14px;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--btn-filled-bg-hover);color:var(--color,#fff)}`,
+            StyleCode: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:0 -3px 0 3px;padding:4px 0px;width:max-content;height:100%;order:6}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:36px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:0px;height:36px}#${def.const.leftButton} input{margin:0;padding:4px 10px!important;height:38px;min-width:85px;border:1px solid var(--color-gray-20);border-bottom-left-radius:12px;border-top-left-radius:12px;background:var(--search-bgd-04);color:var(--color-primary);vertical-align:top;font-weight:600;font-size:14px!important;line-height:14px;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:4px 10px!important;height:38px;min-width:85px;border:1px solid var(--color-gray-20);border-top-right-radius:12px;border-bottom-right-radius:12px;background:var(--search-bgd-04);color:var(--color-primary);vertical-align:top;font-weight:600;font-size:14px!important;line-height:14px;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{box-shadow:0 0 1px #a4a5bb;color:var(--color-text-secondary,#fff);text-decoration:underline;}`,
             ResultList: { qs: `#results>div.snippet[data-type="web"]`, delay: 10 },
             KeyStyle: `.snippet-content strong`,
             AntiRedirect: function () {
@@ -1984,11 +1988,10 @@
             ResultList: { qs: `.web-results>article.item-web`, delay: 10 },
             KeyStyle: `.web-results b`,
             AntiRedirect: function () {
-              deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "swisscows_ar" })(
-                ".web-results>article.item-web a,.web-results>div.widget a:not(.widget-button)",
-                "Swisscows",
-                { useNewTab: true, forceNewTab: true }
-              );
+              deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "swisscows_ar" })(".web-results>article.item-web a,.web-results>div.widget a:not(.widget-button)", "Swisscows", {
+                useNewTab: true,
+                forceNewTab: true,
+              });
             },
             AntiAds: function () {
               deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "swisscows_ad", immed: true })({
@@ -2047,7 +2050,7 @@
         const hostname = location.hostname;
 
         for (const regex in engineMap) {
-          if (engineMap.hasOwnProperty(regex) && new RegExp(regex).test(hostname)) {
+          if (checkOwnProperty(engineMap, regex) && new RegExp(regex).test(hostname)) {
             const { siteType, site } = engineMap[regex];
             currentSite = selectedEngine.includes(siteType) ? site : listSite.other;
             listCurrentSite = site;
@@ -2056,7 +2059,7 @@
         }
 
         for (let site in listSite) {
-          if (listSite.hasOwnProperty(site)) {
+          if (checkOwnProperty(listSite, site)) {
             if (listSite[site].SiteTypeID !== newSiteType.OTHERS) {
               allSiteURIs += listSite[site].SiteURI + ";";
             }
@@ -2128,8 +2131,14 @@
         }
 
         function getGlobalParameter() {
-          if (antiLinkRedirect && cachedRequestLinks.size > 0) cachedRequestLinks.clear(), DEBUG("Task Clear!");
-          if (antiResultsFilter && usedFilterWords.size > 0) usedFilterWords.clear(), DEBUG("Filter Clear!");
+          if (antiLinkRedirect && cachedRequestLinks.size > 0) {
+            cachedRequestLinks.clear();
+            DEBUG("Task Clear!");
+          }
+          if (antiResultsFilter && usedFilterWords.size > 0) {
+            usedFilterWords.clear();
+            DEBUG("Filter Clear!");
+          }
           def.const.vim = getUrlParam(currentSite.SplitName).trim();
           def.const.indexPage = () => (currentSite.SiteTypeID === newSiteType.DUCKDUCKGO ? !location.search.includes("q=") : location.pathname === "/");
           def.const.isSecurityPolicy =
@@ -2162,7 +2171,7 @@
           return iconURL;
         }
 
-        ~(async function prepareSearchParameters(responseUpdate) {
+        void (async function prepareSearchParameters(responseUpdate) {
           // UPDATE_DATA
           const AUTO_UPDATA_TRIG = await cache.get("_autoupdate_");
           // MENUS_ACTION
@@ -2175,7 +2184,7 @@
             listSearchEngine: currentSite => {
               let returnHtml = "";
               for (let site in listSite) {
-                if (listSite.hasOwnProperty(site) && listSite[site].SiteTypeID !== 0 && listSite[site].SiteTypeID !== currentSite.SiteTypeID) {
+                if (checkOwnProperty(listSite, site) && listSite[site].SiteTypeID !== 0 && listSite[site].SiteTypeID !== currentSite.SiteTypeID) {
                   const iconStyle = `background-position:0 ${(1 - listSite[site].SiteTypeID) * 24}px;background-attachment:local;background-size:cover;`;
                   returnHtml += String(
                     `<li>
@@ -2195,7 +2204,7 @@
             listSelectSearchEngine: () => {
               let returnHtml = "";
               for (let site in listSite) {
-                if (listSite.hasOwnProperty(site) && listSite[site].SiteTypeID !== 0) {
+                if (checkOwnProperty(listSite, site) && listSite[site].SiteTypeID !== 0) {
                   const iconStyle = `background-position:0 ${(1 - listSite[site].SiteTypeID) * 32}px;background-attachment:local;background-size:32px auto;`;
                   returnHtml += String(
                     `<label class="${def.notice.card}">
@@ -2373,9 +2382,7 @@
                         if (confirmColors) {
                           GMnotification({
                             title: isChinese ? "自定义颜色保存" : "Save Custom Color",
-                            text: def.notice.noticeHTML(
-                              isChinese ? "<dd>搜索关键词自定义颜色已保存，当前页面即将刷新！</dd>" : "<dd>Search keywords custom color has been saved!</dd>"
-                            ),
+                            text: def.notice.noticeHTML(isChinese ? "<dd>搜索关键词自定义颜色已保存，当前页面即将刷新！</dd>" : "<dd>Search keywords custom color has been saved!</dd>"),
                             type: def.notice.success,
                             closeWith: ["button"],
                             timeout: 10,
@@ -2461,10 +2468,12 @@
                       function (listCurrentSite, localWindow) {
                         let url;
                         for (let type in newSiteType) {
-                          if (newSiteType.hasOwnProperty(type) && newSiteType[type] === Number(item.id)) {
-                            url = listCurrentSite.IMGType.includes(getUrlParam(listCurrentSite.SplitName).trim())
-                              ? listSite[type.toLowerCase()].ImgURL
-                              : listSite[type.toLowerCase()].WebURL;
+                          if (checkOwnProperty(newSiteType, type) && newSiteType[type] === Number(item.id)) {
+                            if (listCurrentSite.IMGType.includes(getUrlParam(listCurrentSite.SplitName).trim())) {
+                              url = listSite[type.toLowerCase()].ImgURL;
+                            } else {
+                              url = listSite[type.toLowerCase()].WebURL;
+                            }
                             break;
                           }
                         }
@@ -2587,6 +2596,7 @@
                     const fitler_Trigger = qS(`#${def.notice.rf}`).checked;
                     try {
                       const _filter_String = filter_String ? uniq(JSON.parse(filter_String)) : [];
+                      if (!Array.isArray(_filter_String) || _filter_String.some(item => typeof item !== "string")) throw new Error("Format Error");
                       const _resultFilter_Data = { filter: _filter_String, trigger: fitler_Trigger };
                       GMsetValue("_resultFilter_", encrypt(JSON.stringify(_resultFilter_Data)));
                       addAction.closeConfig();
@@ -2734,12 +2744,12 @@
                     if (!qS(buttonID)) return;
                     switch (def.const.vim) {
                       case currentSite.IMGType[0]:
-                        qS(buttonID).style.marginLeft = "16px";
+                        buttonSection.style.marginLeft = "16px";
                         qS(`#${def.const.rightButton} input`).style.marginLeft = "3px";
                         document.body.style.overflowX = "clip";
                         break;
                       case currentSite.IMGType[1]:
-                        qS(buttonID).style.height = "34px";
+                        buttonSection.style.height = "34px";
                         qA(`${buttonID} input`).forEach(node => {
                           node.style.cssText = "min-width:100px;height:34px;padding:0 5px!important;color:#ffffff;background:#3388ff;border-radius:0;border:1px solid #2d78f4";
                         });
@@ -2751,12 +2761,12 @@
                     getGlobalGoogle("www.google.com", googleJump);
                     insterAfter(buttonSection, Target);
                     if (!qS(buttonID)) return;
-                    qS(buttonID).parentNode.style.width = "fit-content";
-                    qS(buttonID).parentNode.style.minWidth = "100%";
-                    qS(buttonID).parentNode.parentNode.style.width = "100%";
-                    qS(buttonID).parentNode.parentNode.parentNode.style.width = "95%";
+                    buttonSection.parentNode.style.width = "fit-content";
+                    buttonSection.parentNode.style.minWidth = "100%";
+                    buttonSection.parentNode.parentNode.style.width = "100%";
+                    buttonSection.parentNode.parentNode.parentNode.style.width = "95%";
                     if (currentSite.IMGType.includes(def.const.vim)) {
-                      qS(buttonID).parentNode.firstElementChild.style.width = "400px";
+                      buttonSection.parentNode.firstElementChild.style.width = "400px";
                     }
                     break;
                   case newSiteType.BING: {
@@ -2787,15 +2797,15 @@
                       resolve();
                     } else if (def.const.vim.endsWith("weixin")) {
                       insterAfter(buttonSection, Target);
-                      qS(buttonID).style = "position:relative";
+                      buttonSection.style = "position:relative";
                       qA(`${buttonID} input`).forEach(node => node.classList.add(`${def.notice.random}_weixin`));
                     } else {
                       insterAfter(buttonSection, Target);
                       qS(`#searchBtn2[value="\u5168\u7f51\u641c\u7d22"]`)?.remove();
                       sleep(0).then(() => {
                         const btn2 = qS(`#searchBtn2`);
-                        qS(buttonID).style.right = `-${Number(qS(buttonID).getBoundingClientRect().width) + 10}px`;
-                        if (btn2) btn2.style.right = `-${Number(qS(buttonID).getBoundingClientRect().width) + 120}px`;
+                        buttonSection.style.right = `-${Number(buttonSection.getBoundingClientRect().width) + 10}px`;
+                        if (btn2) btn2.style.right = `-${Number(buttonSection.getBoundingClientRect().width) + 120}px`;
                       });
                     }
                     break;
@@ -2812,17 +2822,17 @@
                     Target.parentNode.appendChild(buttonSection);
                     Target.parentNode.appendChild(Target.cloneNode(true));
                     Target.remove();
-                    sleep(0).then(() => (qS(buttonID).style.right = `-${Number(qS(buttonID).getBoundingClientRect().width) + 8}px`));
+                    sleep(0).then(() => (buttonSection.style.right = `-${Number(buttonSection.getBoundingClientRect().width) + 8}px`));
                     break;
                   case newSiteType.TOUTIAO:
                     insterAfter(buttonSection, Target);
-                    sleep(0).then(() => (qS(buttonID).style.right = `-${Number(qS(buttonID).getBoundingClientRect().width) + 10}px`));
+                    sleep(0).then(() => (buttonSection.style.right = `-${Number(buttonSection.getBoundingClientRect().width) + 10}px`));
                     break;
                   case newSiteType.YANDEX:
                     insterAfter(buttonSection, Target);
                     sleep(0).then(() => {
-                      const width = Number(qS(buttonID).getBoundingClientRect().width) || 202;
-                      qS(buttonID).style.right = `-${width + 10}px`;
+                      const width = Number(buttonSection.getBoundingClientRect().width) || 202;
+                      buttonSection.style.right = `-${width + 10}px`;
                       if (currentSite.IMGType.includes(def.const.vim)) {
                         const node = qS(`div.HeaderDesktopActions.HeaderDesktop-Actions`);
                         if (node) node.style.cssText = `position:relative;right:-${width}px`;
@@ -2864,11 +2874,11 @@
                     try {
                       if (currentSite.IMGType.includes(def.const.vim)) {
                         const node = qS("#sbx")?.getBoundingClientRect() ?? { width: 0, left: 0 };
-                        qS(buttonID).style.cssText = `position:absolute;left:${node.width + node.left}px`;
+                        buttonSection.style.cssText = `position:absolute;left:${node.width + node.left}px`;
                       } else {
-                        qS(buttonID).style.cssText = `position:absolute;top:0;left:${qS("#hd div.sbx").getBoundingClientRect().width}px`;
+                        buttonSection.style.cssText = `position:absolute;top:0;left:${qS("#hd div.sbx").getBoundingClientRect().width}px`;
                         new MutationObserver(() => {
-                          qS(buttonID).style.left = `${qS("#hd div.sbx").getBoundingClientRect().width}px`;
+                          buttonSection.style.left = `${qS("#hd div.sbx").getBoundingClientRect().width}px`;
                         }).observe(qS("#hd div.sbx"), { attributes: true });
                       }
                     } catch (e) {
@@ -2877,36 +2887,24 @@
                     break;
                   case newSiteType.YOU:
                     insterAfter(buttonSection, Target);
-                    sleep(0)(parseFloat(gCS(document.body, "zoom") ?? 1)).then(
-                      radius => radius !== 1 && (qS(`#section div[data-testid="bottom-bar"]`).style.width = `${100 / radius}vw`)
-                    );
+                    sleep(0)(parseFloat(gCS(document.body, "zoom") ?? 1)).then(radius => radius !== 1 && (qS(`#section div[data-testid="bottom-bar"]`).style.width = `${100 / radius}vw`));
                     break;
                   case newSiteType.STARTPAGE: {
                     insterAfter(buttonSection, Target);
                     const search = qS("#search");
-                    if (search) search.parentNode.style.maxWidth = `${630 + (qS(buttonID)?.getBoundingClientRect().width ?? 170)}px`;
+                    if (search) search.parentNode.style.maxWidth = `${630 + (buttonSection.getBoundingClientRect().width ?? 170)}px`;
                     break;
                   }
-                  case newSiteType.BRAVE: {
+                  case newSiteType.BRAVE:
                     insterAfter(buttonSection, Target);
-                    const form = qS("div.searchform-container");
-                    const button = qS("#submit-button");
-                    if (form) form.style.setProperty("--search-form-width", `${700 + (qS(buttonID)?.getBoundingClientRect().width / 2 ?? 80)}px`);
-                    button?.addEventListener("mouseover", function () {
-                      this.style.cssText = "border-radius:10px;transform:scale(0.9)";
-                    });
-                    button?.addEventListener("mouseout", function () {
-                      this.style.cssText = "";
-                    });
                     break;
-                  }
                   case newSiteType.YEP:
                     insterAfter(buttonSection, Target);
-                    buttonSection.style.right = `-${10 + (qS(buttonID)?.getBoundingClientRect().width ?? 170)}px`;
+                    buttonSection.style.right = `-${10 + (buttonSection.getBoundingClientRect().width ?? 170)}px`;
                     break;
                   case newSiteType.SWISSCOWS:
                     insterAfter(buttonSection, Target);
-                    buttonSection.style.right = `-${10 + (qS(buttonID)?.getBoundingClientRect().width ?? 170)}px`;
+                    sleep(0).then(() => (buttonSection.style.right = `-${10 + (buttonSection.getBoundingClientRect().width ?? 170)}px`));
                     break;
                 }
                 resolve({ buttonID, Selector, indexPage });
@@ -3209,7 +3207,7 @@
 
           /* SEARCH_ENGINE_ASSISTANT_MAIN_PROCESS */
 
-          !(async function searchEngineAssistant(updateRet) {
+          void (async function searchEngineAssistant(updateRet) {
             if (CUR_WINDOW_TOP) {
               // CHECK_FOR_UPDATES
               responseUpdate(updateRet);
