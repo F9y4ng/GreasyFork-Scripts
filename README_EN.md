@@ -40,8 +40,6 @@
 
 ### Please note the following before using the new version:
 
-## Please note the following before using a new version:
-
 - The new version of the script has a **built-in default font rendering style**, which is my local configuration and **may not work perfectly on your computer**. Therefore, **it is normal** for the first time to use it if the rendering effect does not reach the desired state. According to the configuration and settings of your own monitor, correct the relevant parameters through the script setting interface to achieve the best display effect.
 
 - When upgrading from an older version to the latest version, if there are some style issues, you can try to correct it by resetting the data to use the latest rules. however, It is not recommended that you use backup restore for major version (data rebuild) updates, and it is recommended to reconfigure the parameters, save them, and back up the new data again.
