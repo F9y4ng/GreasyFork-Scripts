@@ -29,17 +29,14 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data in a timely manner. Do not use backup files from unknown sources!
 
-## version 2024.04.06.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2024.05.04.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-# Recommend: Raise the sort order of this script to first in the Script Manager to minimize conflicts caused by other intrusive scripts. (Optional)
-@ Fixed colorpicker for font shadows conflicting with style overrides on some sites.
-@ Fixed the bug of getting hijacked JSON in different injection modes.
-@ Fixed the problem that the font scaling function corrects the wrong coordinate offset.
-@ Fixed an error in Iframe asynchronous processing of styles during preview.
-@ Improve the performance of bold stroke style correction and conflict detection.
-@ Change the expiration of the global cache for the script fontList to "30 days".
-@ Refactor the code, fix some hidden bugs, optimize style.
+@ Fixed color & shadow render issues when selecting.
+@ Fixed scrollbar style parsing issue in Blink V120+.
+@ Fixed stuck issue when dynamic loading shadowRoot.
+@ Optimize the rendering of code fonts under Firefox.
+@ Fixed known issues, optimize code, optimize style.
 ```
 
 ## Please note the following before using a new version:
@@ -114,12 +111,10 @@ Font scaling (experimental) BETA Version, **OFF by default**, turn on font scali
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-## version 2024.04.06.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2024.05.04.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Fixed the jump button style issue of search.Brave.
-@ Fixed the issue of judging the addition of valid characters for search filter keywords.
-@ Fixed some known issues, optimize style, optimize code.
+@ Refactor the code, fix some hidden bugs, optimize style.
 ```
 
 ## The latest feature introduction
