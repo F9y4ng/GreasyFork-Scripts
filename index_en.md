@@ -50,7 +50,8 @@
 
 **Temporary solutions for script loading delays, or styles not loading correctly:**
 
-* For **Tampermonkey**: Go to the **Dashboard**, enter the **Settings** tab, scroll down to "**Experimental**", and change **the injection mode** to "**Instant**".
+* For **Tampermonkey v5.2 and later** (Manifest V3): Go to the **Dashboard**, enter the **Settings** tab, pull down to "**Security**", and change "**Content Script API:**" to `UserScripts API Dynamic`.
+* For **Tampermonkey v5.1.1 and older**: Go to the **Dashboard**, enter the **Settings** tab, scroll down to "**Experimental**", and change **the injection mode** to "**Instant**".
 * For **Violentmonkey**: Go to the **Dashboard**, enter the **Settings** tab, find and check "**Synchronous page mode**" in **Advanced - General**.
 
 ## About feedback on issues
