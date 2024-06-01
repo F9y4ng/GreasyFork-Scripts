@@ -4,7 +4,7 @@
 // @name:zh-TW         字體渲染（自用腳本）
 // @name:ja            フォントレンダリング
 // @name:en            Font Rendering (Customized)
-// @version            2024.05.04.1
+// @version            2024.06.01.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -142,7 +142,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         getScreenCTM: SVGGraphicsElement.prototype.getScreenCTM,
         getClientRects: Element.prototype.getClientRects,
         getBoundingClientRect: Element.prototype.getBoundingClientRect,
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.05.04.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.06.01.0",
         scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
         scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("Rjl5NG5n"),
       },
@@ -220,7 +220,9 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         strokeSize: generateRandomString(8, "mix"),
         stroke: generateRandomString(8, "char"),
         fstroke: generateRandomString(8, "mix"),
+        fshadow: generateRandomString(8, "mix"),
         fixStroke: generateRandomString(8, "mix"),
+        fixShadow: generateRandomString(8, "mix"),
         shadowSize: generateRandomString(8, "mix"),
         shadow: generateRandomString(8, "char"),
         color: generateRandomString(8, "char"),
@@ -852,6 +854,10 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
       }
     }
 
+    function stopPropagations(event) {
+      event.stopImmediatePropagation();
+    }
+
     function convertToUnicode(str) {
       if (typeof str !== "string") return "";
       return str
@@ -880,19 +886,20 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
       const SUPPORT_IS_PSEUDOCLASS = checkBrowserCompatibility({ WEBKIT: 14, BLINK: 88, GECKO: 82, suspend: true });
       const IS_COMPATIBLE_ADOPTEDSTYLE = checkBrowserCompatibility({ WEBKIT: 16.4, BLINK: 73, GECKO: 101 });
       const IS_CAUSED_BOLDSTROKEERROR = checkBrowserCompatibility({ BLINK: 96 });
+      const IS_CAUSED_BOLDSHADOWERROR = checkBrowserCompatibility({ BLINK: 123 });
 
       /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
       const UPDATE_VERSION_NOTICE = IS_CHN
-        ? `<li class="${def.const.seed}_fix">修正文本选取时的颜色渲染以及文本阴影渲染问题。</li>
-            <li class="${def.const.seed}_fix">修正在 Blink 浏览器V120+下滚动条样式的解析问题。</li>
-            <li class="${def.const.seed}_fix">修正 ShadowRoot 节点动态并发加载时的卡顿问题。</li>
-            <li class="${def.const.seed}_fix">优化 Firefox 下代码区域英文等宽字体的渲染效果。</li>
+        ? `<li class="${def.const.seed}_fix">修正在某些编辑型站点因监听事件劫持造成的问题。</li>
+            <li class="${def.const.seed}_fix">改进粗体修正在延时加载时渲染时机过慢的问题。</li>
+            <li class="${def.const.seed}_fix">修正Blink v123+对粗体阴影渲染造成的问题。<a href="https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89#%E9%99%84%E5%8A%A0%E9%98%B4%E5%BD%B1%E6%A0%B7%E5%BC%8F%E4%BF%AE%E6%AD%A3" target="_blank">#Wiki</a></li>
+            <li class="${def.const.seed}_fix">修正字体列表在重置还原数据时已选字体丢失的Bug.</li>
             <li class="${def.const.seed}_fix">修正一些已知的问题，优化代码，优化样式。</li>`
-        : `<li class="${def.const.seed}_fix">Fixed color & shadow render issues when selecting.</li>
-            <li class="${def.const.seed}_fix">Fixed scrollbar style parsing issue in Blink V120+.</li>
-            <li class="${def.const.seed}_fix">Fixed stuck issue when dynamic loading shadowRoot.</li>
-            <li class="${def.const.seed}_fix">Optimize the rendering of code fonts under Firefox.</li>
+        : `<li class="${def.const.seed}_fix">Fixed issue caused by event hijacking on some sites.</li>
+            <li class="${def.const.seed}_fix">Improved bold fixed slowly rendering on lazyload.</li>
+            <li class="${def.const.seed}_fix">Fixed Blink v123+ rendering issue for <a href="https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font-Rendering-(Customized)#add-shadow-fix" target="_blank">#bold shadow</a>.</li>
+            <li class="${def.const.seed}_fix">Fixed fontlist losing font data when reset/restore.</li>
             <li class="${def.const.seed}_fix">Fixed known issues, optimize code, optimize style.</li>`;
 
       /* INITIALIZE_FONT_LIBRARY */
@@ -936,14 +943,15 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
       const INITIAL_VALUES = {
         fontBase: `system-ui,-apple-system,BlinkMacSystemFont,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','Android Emoji','EmojiSymbols','EmojiOne Mozilla','Twemoji Mozilla','Segoe UI Symbol','Noto Color Emoji Compat',emoji,'Font Awesome 6 Pro','Font Awesome 5 Pro',FontAwesome,iconfont,icomoon,IcoFont,fontello,themify,bootstrap-icons,'Segoe Fluent Icons',Material-Design-Iconic-Font`,
-        fontSelect: IS_REAL_WEBKIT ? `'PingFang SC'` : `'Microsoft YaHei UI'`,
+        fontSelect: IS_REAL_WEBKIT || (!IS_CHEAT_UA && os === "MacOS") ? `'PingFang SC'` : `'Microsoft YaHei UI'`,
         fontFace: true,
         fontSmooth: true,
         fontSize: 1.0,
         fixViewport: true,
         fontStroke: IS_REAL_GECKO ? 0.08 : IS_REAL_BLINK ? 0.015 : 0.0,
-        fixStroke: IS_REAL_BLINK,
+        fixStroke: IS_CAUSED_BOLDSTROKEERROR,
         fontShadow: IS_REAL_GECKO ? 0.36 : 0.75,
+        fixShadow: false,
         shadowColor: IS_REAL_GECKO ? "#7C7C7C70" : "#7C7C7CDD",
         fontCSS: `:not(i,head *):not([class*='glyph']):not([class*='symbols' i]):not([class*='icon' i]):not([class*='fa-']):not([class*='vjs-'])`,
         fontEx: `progress,meter,datalist,samp,kbd,pre,pre *,code,code *`,
@@ -973,15 +981,16 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         frConfigure:
           `:host(#${def.id.configure}){position:fixed!important;top:0;left:0;width:100%;height:100%;background:0 0!important;pointer-events:none;z-index:2147483646}#${def.id.container}{position:absolute;top:10px;right:24px;z-index:99999;overflow-x:hidden;overflow-y:auto;box-sizing:content-box;padding:4px;max-height:calc(100% - 40px);min-height:10%;border-radius:12px;background:#f0f6ff!important;box-shadow:0 0 4px 0 rgb(0 0 0/30%);color:#333;text-align:left;font-weight:700;font-size:16px!important;opacity:0;transition:opacity .5s;width:auto;overscroll-behavior:contain;pointer-events:auto}#${def.id.container}::-webkit-scrollbar{width:10px;height:1px}#${def.id.container}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container}::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container} *{text-shadow:none!important;font-weight:700;font-size:16px;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji,Android Emoji,EmojiSymbols!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}#${def.id.container} fieldset{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;min-height:475px;border:2px groove #67a5df!important;border-radius:10px;background:#f0f6ff!important}#${def.id.container} legend{position:relative!important;float:none!important;display:block!important;visibility:visible!important;box-sizing:content-box;margin:0;padding:0 32px 0 8px;width:auto!important;height:auto!important;border:none!important;background:#f0f6ff!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.container} fieldset ul{margin:0;padding:0;background:#f0f6ff!important}#${def.id.container} ul li{float:none;display:inherit;box-sizing:content-box;margin:3px 0;min-width:-webkit-fill-available;min-width:-moz-available;border:none;background:#f0f6ff!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none}#${def.id.container} ul li:before{display:none}` +
           `#${def.id.container} .${def.class.rotation} svg{visibility:visible!important;overflow:hidden;width:24px;height:24px;vertical-align:initial!important;fill:#67a5df;}#${def.id.container} .${def.class.rotation} svg:hover{cursor:help}#${def.const.seed}_scriptname{display:inline-block;vertical-align:bottom;overflow:hidden;min-width:130px;max-width:225px;text-overflow:ellipsis;white-space:nowrap;font-weight:700!important;-webkit-user-select:all;user-select:all}#${def.const.seed}_scriptname:hover{cursor:help}#${def.id.container} .${def.class.title} .${def.class.guide}{position:absolute;display:inline-block;cursor:pointer}@keyframes rotation{0%{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(1turn)}}.${def.class.title} .${def.class.rotation}{top:auto;right:auto;bottom:auto;left:auto;margin:0;padding:0;width:24px;height:24px;-webkit-transform:rotate(1turn);transform-origin:center 50% 0;animation:rotation 6s linear infinite}#${def.id.container} input:not([type='range'],[type='checkbox']):focus,#${def.id.container} textarea:focus{box-shadow:inset 0 1px 3px rgb(0 0 0/10%),0 0 6px rgb(82 168 236/60%)!important}#${def.id.fontList}{padding:2px 10px 0;min-height:73px}#${def.id.fontFace},#${def.id.fontSmooth}{display:flex!important;padding:2px 10px;width:calc(100% - 18px);height:40px;min-width:auto;align-items:center;justify-content:space-between}#${def.id.fontSize}{padding:2px 10px;height:60px}#${def.id.fontStroke}{padding:2px 10px;height:60px}#${def.id.fontShadow}{padding:2px 10px;height:60px}#${def.id.shadowColor}{display:flex;margin:4px;padding:2px 10px;width:auto;min-height:45px;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}#${def.id.fontCss},#${def.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${def.id.submit}{padding:2px 10px;height:40px}#${def.id.fontList} .${def.class.selector} a{text-decoration:none;font-weight:400}#${def.id.fontList} .${def.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${def.id.fontList} .${def.class.label} span{display:inline-block;overflow:hidden;box-sizing:border-box;padding:5px;width:max-content;height:max-content;max-width:200px;min-width:12px;background:#67a5df;color:#fff;text-overflow:ellipsis;white-space:nowrap;font-weight:400;font-size:16px!important}#${def.id.fontList} .${def.class.close}{width:12px}#${def.id.fontList} .${def.class.close}:hover{border-radius:2px;background-color:#2d7dca;color:tomato}` +
-          `#${def.id.selector}{width:100%;max-width:100%}#${def.id.selector} label{display:block;margin:0 0 4px;color:#333;cursor:auto}#${def.id.selector} #${def.id.cleaner}{margin-left:5px;cursor:pointer}#${def.id.selector} #${def.id.cleaner}:hover{color:#ff0000;}#${def.id.fontList} .${def.class.selector}{overflow-x:hidden;box-sizing:border-box;margin:0 0 6px;padding:6px 6px 0;width:100%;max-width:min-content;max-width:-moz-min-content;max-height:90px;min-width:100%;min-height:45px;border:2px solid #67a5df!important;border-radius:6px;overscroll-behavior:contain;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontList} .${def.class.selectFontId} span.${def.class.spanlabel},#${def.id.selector} span.${def.class.spanlabel}{display:block!important;margin:0!important;padding:0 0 4px;width:auto;border:0;background-color:transparent!important;color:#333;text-align:left!important}#${def.id.fontList} .${def.class.selectFontId}{width:auto}#${def.id.fontList} .${def.class.selectFontId} input{overflow:hidden;box-sizing:border-box;margin:0;padding:1px 23px 1px 2px;width:230px;height:42px!important;max-width:100%;min-width:100%;outline:none!important;outline-color:#67a5df;border:2px solid #67a5df!important;border-radius:6px;background:#fafafa;text-indent:8px;text-overflow:ellipsis;font-weight:700;font-size:16px!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.fontList} .${def.class.selectFontId} input[disabled]{pointer-events:none!important}#${def.id.fontList} input[disabled]::placeholder{color:#444!important}#${def.id.fontList} .${def.class.selectFontId} input::-webkit-search-cancel-button{margin:0 7px}#${def.const.seed}_fontoverride_defined:hover,#${def.const.seed}_fontscale_defined:hover{cursor:help;color:#8b0000}.${def.class.placeholder}::placeholder{color:#369!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;opacity:.65}` +
+          `#${def.id.selector}{width:100%;max-width:100%}#${def.id.selector} label{display:block;margin:0 0 4px;color:#333;cursor:auto}#${def.id.selector} #${def.id.cleaner}{margin-left:5px;cursor:pointer}#${def.id.selector} #${def.id.cleaner}:hover{color:#ff0000;}#${def.id.fontList} .${def.class.selector}{overflow-x:hidden;box-sizing:border-box;margin:0 0 6px;padding:6px 6px 0;width:100%;max-width:min-content;max-width:-moz-min-content;max-height:90px;min-width:100%;min-height:45px;border:2px solid #67a5df!important;border-radius:6px;overscroll-behavior:contain;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontList} .${def.class.selectFontId} span.${def.class.spanlabel},#${def.id.selector} span.${def.class.spanlabel}{display:block!important;margin:0!important;padding:0 0 4px;width:auto;border:0;background-color:transparent!important;color:#333;text-align:left!important}#${def.id.fontList} .${def.class.selectFontId}{width:auto}#${def.id.fontList} .${def.class.selectFontId} input{overflow:hidden;box-sizing:border-box;margin:0;padding:1px 23px 1px 2px;width:230px;height:42px!important;max-width:100%;min-width:100%;outline:none!important;outline-color:#67a5df;border:2px solid #67a5df!important;border-radius:6px;background:#fafafa;text-indent:8px;text-overflow:ellipsis;color:#333;font-weight:700;font-size:16px!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.fontList} .${def.class.selectFontId} input[disabled]{pointer-events:none!important}#${def.id.fontList} input[disabled]::placeholder{color:#444!important}#${def.id.fontList} .${def.class.selectFontId} input::-webkit-search-cancel-button{margin:0 7px}#${def.const.seed}_fontoverride_defined:hover,#${def.const.seed}_fontscale_defined:hover{cursor:help;color:#8b0000}.${def.class.placeholder}::placeholder{color:#369!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;opacity:.65}` +
           `#${def.id.fontList} .${def.class.selectFontId} dl{position:absolute;z-index:1000;overflow-x:hidden;box-sizing:content-box;margin:4px 0 0;padding:4px 8px;width:auto;max-width:calc(100% - 68px);max-height:298px;min-width:60%;border:2px solid #67a5df!important;border-radius:6px;background-color:#fff;white-space:nowrap;font-size:18px!important;overscroll-behavior:contain}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontId} dl dd{display:block;overflow-x:hidden;box-sizing:content-box;margin:1px 8px;padding:5px 0;width:-moz-available;width:-webkit-fill-available;max-width:100%;min-width:100%;text-overflow:ellipsis;font-weight:400;font-size:21px!important}#${def.id.fontList} .${def.class.selectFontId} dl dd:hover{overflow-x:hidden;box-sizing:content-box;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff;text-overflow:ellipsis}.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);color:#fff;content:" "}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#fff;content:"OFF";font-weight:700;font-style:normal;font-size:16px}.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4);cursor:pointer}` +
           `.${def.class.checkbox}:checked+label::after{left:10px;content:"ON"}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}#${def.id.fface} label,#${def.id.fface}+label::after,#${def.id.fface}+label::before,#${def.id.smooth} label,#${def.id.smooth}+label::after,#${def.id.smooth}+label::before{-webkit-transition:all .3s ease-in;transition:all .3s ease-in}#${def.id.fontShadow} div.${def.class.flex}:before,#${def.id.fontShadow} div.${def.class.flex}:after,#${def.id.fontStroke} div.${def.class.flex}:before,#${def.id.fontStroke} div.${def.class.flex}:after,#${def.id.fontSize} div.${def.class.flex}:before,#${def.id.fontSize} div.${def.class.flex}:after{display:none}#${def.id.fontShadow} #${def.id.shadowSize},#${def.id.fontStroke} #${def.id.strokeSize},#${def.id.fontSize} #${def.id.fontScale}{box-sizing:content-box;margin:0 10px 0 0!important;padding:0;width:56px!important;height:32px!important;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:#fafafa!important;color:#111!important;text-align:center;text-indent:0;font-weight:400!important;font-size:17px!important;font-family:Impact,Times,serif!important}#${def.id.fontSize} #${def.id.fontScale}[disabled]{background-color:rgba(228,231,237,.82)!important;color:#555!important;filter:grayscale(.9)}#${def.id.fontSize} #${def.id.fviewport}>label,#${def.id.fontStroke} #${def.id.fstroke}>label{float:none!important;display:inline!important;margin:0!important;padding:0 0 0 2px!important;color:#666!important;font-size:12px!important;cursor:help!important}#${def.id.fixViewport},#${def.id.fixStroke}{display:inline-block;margin:0 2px 0 0!important;width:14px!important;height:14px!important;vertical-align:text-bottom;cursor:pointer;-webkit-appearance:none!important}#${def.id.fixViewport}::after,#${def.id.fixStroke}::after{position:relative;top:0;display:inline-block;margin:0;padding:0;width:14px;height:14px;border-radius:3px;background-color:#aaa;color:#fff;content:"\u2717";vertical-align:top;text-align:center;font-weight:700;font-size:10px;line-height:14px}#${def.id.fixViewport}:checked::after,#${def.id.fixStroke}:checked::after{border:0!important;background-color:#65a0db;color:#fff;content:"\u2713";font-weight:700;font-size:12px;line-height:14px}` +
           `.${def.class.flex}{display:flex;width:auto;min-width:100%;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}.${def.class.slider} input{visibility:hidden}#${def.id.shadowColor} *{box-sizing:content-box}#${def.id.shadowColor} .${def.class.frColorPicker}{margin:0;padding:0;width:auto}#${def.id.shadowColor} .${def.class.frColorPicker} #${def.id.color}{box-sizing:border-box;margin:0;padding:0 8px 0 0;width:160px!important;height:35px!important;min-width:160px;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:rgba(253,253,255,.69);color:#333!important;text-align:center;text-indent:0;font-weight:400!important;font-size:18px!important;font-family:Impact,Times,serif!important;cursor:pointer}#${def.id.fontCss} textarea,#${def.id.fontEx} textarea{box-sizing:border-box;margin:0;padding:5px;width:calc(100% - 2px)!important;height:78px;max-width:calc(100% - 2px);max-height:78px;min-width:calc(100% - 2px);min-height:78px;outline:none!important;border:2px solid #67a5df!important;border-radius:6px;color:#0b5b9c!important;font:normal 700 14px/150% ui-monospace,'Roboto Mono','Liberation Mono',Consolas,'Courier New',${INITIAL_VALUES.fontSelect},monospace!important;resize:none;cursor:auto;word-break:break-all;overscroll-behavior:contain}#${def.id.fontCss} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontCss} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontCss} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px rgba(0,0,0,.2);}#${def.id.fontCss} textarea::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontEx} textarea{background:#fafafa!important}#${def.id.fontEx} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontEx} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontEx} textarea::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}.${def.class.switcher}{float:right;box-sizing:border-box;margin:-2px 4px 0 0;padding:0 6px;border:2px double #67a5df;border-radius:4px;color:#0a68c1;}` +
           `#${def.id.fontCss} textarea::placeholder,#${def.id.fontEx} textarea::placeholder{color:#555;font:italic 500 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;opacity:.85}#${def.id.cSwitch}:hover,#${def.id.eSwitch}:hover{cursor:pointer;-webkit-user-select:none;user-select:none}.${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}.${def.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9,#e9ffe9 25%,transparent 0,transparent 50%,#e9ffe9 0,#e9ffe9 75%,transparent 0,transparent)!important;background-color:#f7fff7!important;background-size:50px 50px}#${def.id.submit} button{box-sizing:border-box;margin:0;padding:5px 10px;width:auto;height:35px;min-width:min-content;min-height:35px;border:2px solid #6ba7e0;border-radius:6px;background-color:#67a5df;background-image:none;color:#fff!important;font:normal 600 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;cursor:pointer}#${def.id.submit} button:hover{box-shadow:0 0 5px rgba(0,0,0,.4)!important}#${def.id.submit} .${def.class.cancel},#${def.id.submit} .${def.class.reset}{float:left;margin-right:10px}#${def.id.submit} .${def.class.submit}{float:right}#${def.id.submit} #${def.id.backup}{display:none;margin:0 10px 0 0}.${def.class.anim}{border:2px solid #dc143c!important;background:#dc143c!important;animation:jiggle 1.8s ease-in infinite}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}.${def.class.tooltip}{position:relative;cursor:help;-webkit-user-select:none;user-select:none}.${def.class.tooltip} span.${def.class.emoji}{font-weight:400!important}.${def.class.tooltip}:active .${def.class.tooltip}{display:block}.${def.class.tooltip} .${def.class.tooltip}{position:absolute;z-index:999999;display:none;box-sizing:content-box;padding:10px;width:234px;max-width:234px;border:2px solid #b8c4ce;border-radius:6px;background-color:#54a2ec;color:#fff;font-weight:400;opacity:.92;word-break:break-all}.${def.class.tooltip} .${def.class.tooltip} *{font-size:14px!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}` +
-          `.${def.class.tooltip} .${def.class.tooltip} em{font-style:normal!important}.${def.class.tooltip} .${def.class.tooltip} strong{color:darkorange;font-size:18px!important}.${def.class.tooltip} .${def.class.tooltip} p{display:block;margin:0 0 10px;color:#fff;text-indent:0!important;line-height:150%}.${def.class.ps1}{position:relative;top:-33px;right:5px;float:right;margin:0;padding:0;width:24px;height:0}.${def.class.ps2}{top:35px;right:-7px}.${def.class.ps3},.${def.class.ps4},.${def.class.ps5}{bottom:25px;left:auto}@-moz-document url-prefix() {#${def.id.container},#${def.id.fontList} .${def.class.selector},#${def.id.fontList} .${def.class.selectFontId} dl,#${def.id.fontCss} textarea,#${def.id.fontEx} textarea{scrollbar-color:#487baf #f1f0f0;scrollbar-width:thin}}.${def.class.range}{--primary-color:#67a5df;--value-offset-y:var(--ticks-gap);--value-active-color:white;--value-background:transparent;--value-background-hover:var(--primary-color);--value-font:italic 700 14px/14px ui-monospace,Consolas,monospace;--fill-color:var(--primary-color);--progress-background:rgb(223, 223, 223);--progress-radius:20px;--show-min-max:none;--track-height:calc(var(--thumb-size) / 2);--min-max-font:12px serif;--min-max-opacity:0.5;--min-max-x-offset:10%;--thumb-size:22px;--thumb-color:white;--thumb-shadow:0 0 3px rgba(0, 0, 0, 0.4),0 0 1px rgba(0, 0, 0, 0.5) inset,0 0 0 99px var(--thumb-color) inset;--thumb-shadow-active:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px var(--primary-color) inset,0 0 3px rgba(0, 0, 0, 0.4);--thumb-shadow-hover:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px darkorange inset,0 0 3px rgba(0, 0, 0, 0.4);--ticks-thickness:1px;--ticks-height:5px;--ticks-gap:var(--ticks-height, 0);--ticks-color:transparent;--step:1;--ticks-count:(var(--max) - var(--min))/var(--step);--maxTicksAllowed:1000;--too-many-ticks:Min(1, Max(var(--ticks-count) - var(--maxTicksAllowed), 0));--x-step:Max(var(--step), var(--too-many-ticks) * (var(--max) - var(--min)));--tickIntervalPerc_1:Calc((var(--max) - var(--min)) / var(--x-step));--tickIntervalPerc:calc((100% - var(--thumb-size)) / var(--tickIntervalPerc_1) * var(--tickEvery, 1));--value-a:Clamp(var(--min), var(--value, 0), var(--max));--value-b:var(--value, 0);--text-value-a:var(--text-value, "");--completed-a:calc((var(--value-a) - var(--min)) / (var(--max) - var(--min)) * 100);--completed-b:calc((var(--value-b) - var(--min)) / (var(--max) - var(--min)) * 100);}` +
-          `.${def.class.range}{--ca:Min(var(--completed-a), var(--completed-b));--cb:Max(var(--completed-a), var(--completed-b));--thumbs-too-close:Clamp(-1, 1000 * (Min(1, Max(var(--cb) - var(--ca) - 5, -1)) + 0.001), 1);--thumb-close-to-min:Min(1, Max(var(--ca) - 5, 0));--thumb-close-to-max:Min(1, Max(95 - var(--cb), 0))}.${def.class.range}{width:auto;min-width:105%!important;margin:-3px 0 0 -7px;box-sizing:content-box;display:inline-block;height:Max(var(--track-height),var(--thumb-size));background:linear-gradient(to right,var(--ticks-color) var(--ticks-thickness),transparent 1px) repeat-x;background-size:var(--tickIntervalPerc) var(--ticks-height);background-position-x:calc(var(--thumb-size)/ 2 - var(--ticks-thickness)/ 2);background-position-y:var(--flip-y,bottom);padding-bottom:var(--flip-y,var(--ticks-gap));padding-top:calc(var(--flip-y) * var(--ticks-gap));position:relative;z-index:1}.${def.class.range}[disabled]{filter:grayscale(0.9);}.${def.class.range}[data-ticks-position=top]{--flip-y:1}.${def.class.range}::after,.${def.class.range}::before{--offset:calc(var(--thumb-size) / 2);content:counter(x);display:var(--show-min-max,block);font:var(--min-max-font);position:absolute;bottom:var(--flip-y,-2.5ch);top:calc(-2.5ch * var(--flip-y));opacity:Clamp(0,var(--at-edge),var(--min-max-opacity));transform:translateX(calc(var(--min-max-x-offset) * var(--before,-1) * -1)) scale(var(--at-edge));pointer-events:none}.${def.class.range}::before{--before:1;--at-edge:var(--thumb-close-to-min);counter-reset:x var(--min);left:var(--offset)}.${def.class.range}::after{--at-edge:var(--thumb-close-to-max);counter-reset:x var(--max);right:var(--offset)}.${def.class.rangeProgress}{--start-end:calc(var(--thumb-size) / 2);--clip-end:calc(100% - (var(--cb)) * 1%);--clip-start:calc(var(--ca) * 1%);--clip:inset(-20px var(--clip-end) -20px var(--clip-start));position:absolute;left:var(--start-end);right:var(--start-end);top:calc(var(--ticks-gap) * var(--flip-y,0) + var(--thumb-size)/ 2 - var(--track-height)/ 2);height:calc(var(--track-height));background:var(--progress-background,#eee);pointer-events:none;z-index:-1;border-radius:var(--progress-radius)}.${def.class.rangeProgress}::before{content:"";position:absolute;left:0;right:0;clip-path:var(--clip);top:0;bottom:0;background:var(--fill-color,#000);box-shadow:var(--progress-flll-shadow);z-index:1;border-radius:inherit}` +
-          `.${def.class.rangeProgress}::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;box-shadow:var(--progress-shadow);pointer-events:none;border-radius:inherit}.${def.class.range}>input:only-of-type~.${def.class.rangeProgress}{--clip-start:0}.${def.class.range}>input::-webkit-slider-runnable-track{background:transparent!important;box-shadow:none!important;border:none!important}.${def.class.range}>input{-webkit-appearance:none;box-shadow:none!important;width:100%;height:var(--thumb-size)!important;margin:0!important;padding:0!important;position:absolute!important;left:0;top:calc(50% - Max(var(--track-height),var(--thumb-size))/ 2 + calc(var(--ticks-gap)/ 2 * var(--flip-y,-1)))!important;border:0!important;cursor:grab;outline:0!important;background:0 0!important;--thumb-shadow:var(--thumb-shadow-active)}.${def.class.range}>input:not(:only-of-type){pointer-events:none}.${def.class.range}>input::-webkit-slider-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${def.class.range}>input::-moz-range-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${def.class.range}>input::-ms-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${def.class.range}>input:hover{--thumb-shadow:var(--thumb-shadow-active)}.${def.class.range}>input:hover+output{--value-background:var(--value-background-hover);--y-offset:-1px;color:var(--value-active-color);box-shadow:0 0 0 3px var(--value-background)}.${def.class.range}>input:active{--thumb-shadow:var(--thumb-shadow-hover);cursor:grabbing;z-index:2}.${def.class.range}>input:active+output{transition:0s;opacity:0.9;display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;-moz-box-orient:horizontal;-moz-box-pack:center;-moz-box-align:center}` +
-          `.${def.class.range}>input:nth-of-type(1){--is-left-most:Clamp(0, (var(--value-a) - var(--value-b)) * 99999, 1)}.${def.class.range}>input:nth-of-type(1)+output{--value:var(--value-a);--x-offset:calc(var(--completed-a) * -1%)}.${def.class.range}>input:nth-of-type(1)+output:not(:only-of-type){--flip:calc(var(--thumbs-too-close) * -1)}.${def.class.range}>input:nth-of-type(1)+output::after{content:var(--prefix, "") var(--text-value-a) var(--suffix, "")}.${def.class.range}>input:nth-of-type(2){--is-left-most:Clamp(0, (var(--value-b) - var(--value-a)) * 99999, 1)}.${def.class.range}>input:nth-of-type(2)+output{--value:var(--value-b)}.${def.class.range}>input+output{--flip:-1;--x-offset:calc(var(--completed-b) * -1%);--pos:calc(((var(--value) - var(--min)) / (var(--max) - var(--min))) * 100%);pointer-events:none;width:auto;min-width:40px;height:24px;min-height:24px;text-align:center;position:absolute;z-index:5;background:var(--value-background);border-radius:4px;padding:0 6px;left:var(--pos);transform:translate(var(--x-offset),calc(150% * var(--flip) - (var(--y-offset,0) + var(--value-offset-y)) * var(--flip)));transition:all .12s ease-out,left 0s;opacity:0;box-sizing:content-box}.${def.class.range}>input+output::after{content:var(--prefix, "") var(--text-value-b) var(--suffix, "");font:var(--value-font)}`,
+          `.${def.class.tooltip} .${def.class.tooltip} em{font-style:normal!important}.${def.class.tooltip} .${def.class.tooltip} strong{color:darkorange;font-size:18px!important}.${def.class.tooltip} .${def.class.tooltip} p{display:block;margin:0 0 10px;color:#fff;text-indent:0!important;line-height:150%}.${def.class.ps1}{position:relative;top:-33px;right:5px;float:right;margin:0;padding:0;width:24px;height:0}.${def.class.ps2}{top:35px;right:-7px}.${def.class.ps3},.${def.class.ps4},.${def.class.ps5}{bottom:25px;left:auto}@-moz-document url-prefix() {#${def.id.container},#${def.id.fontList} .${def.class.selector},#${def.id.fontList} .${def.class.selectFontId} dl,#${def.id.fontCss} textarea,#${def.id.fontEx} textarea{scrollbar-color:#487baf #f1f0f0;scrollbar-width:thin}}#${def.id.fshadow}{visibility:hidden;margin-top:5px;position:absolute;z-index:999;box-sizing:content-box;padding:10px;width:234px;max-width:234px;border:2px solid #67a5df;border-radius:6px;background-color:#f0f6ff;color:#333;opacity:.92;left:21px}#${def.id.fshadow} .${def.id.fshadow}-label{display:flex;align-items:center;justify-content:space-around}#${def.id.fshadow} .${def.id.fshadow}-text{padding:5px;font-size:12px;font-weight:400;line-height:170%!important;color:#808287;word-break:break-all}` +
+          `.${def.class.range}{--primary-color:#67a5df;--value-offset-y:var(--ticks-gap);--value-active-color:white;--value-background:transparent;--value-background-hover:var(--primary-color);--value-font:italic 700 14px/14px ui-monospace,Consolas,monospace;--fill-color:var(--primary-color);--progress-background:rgb(223, 223, 223);--progress-radius:20px;--show-min-max:none;--track-height:calc(var(--thumb-size) / 2);--min-max-font:12px serif;--min-max-opacity:0.5;--min-max-x-offset:10%;--thumb-size:22px;--thumb-color:white;--thumb-shadow:0 0 3px rgba(0, 0, 0, 0.4),0 0 1px rgba(0, 0, 0, 0.5) inset,0 0 0 99px var(--thumb-color) inset;--thumb-shadow-active:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px var(--primary-color) inset,0 0 3px rgba(0, 0, 0, 0.4);--thumb-shadow-hover:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px darkorange inset,0 0 3px rgba(0, 0, 0, 0.4);--ticks-thickness:1px;--ticks-height:5px;--ticks-gap:var(--ticks-height, 0);--ticks-color:transparent;--step:1;--ticks-count:(var(--max) - var(--min))/var(--step);--maxTicksAllowed:1000;--too-many-ticks:Min(1, Max(var(--ticks-count) - var(--maxTicksAllowed), 0));--x-step:Max(var(--step), var(--too-many-ticks) * (var(--max) - var(--min)));--tickIntervalPerc_1:Calc((var(--max) - var(--min)) / var(--x-step));--tickIntervalPerc:calc((100% - var(--thumb-size)) / var(--tickIntervalPerc_1) * var(--tickEvery, 1));--value-a:Clamp(var(--min), var(--value, 0), var(--max));--value-b:var(--value, 0);--text-value-a:var(--text-value, "");--completed-a:calc((var(--value-a) - var(--min)) / (var(--max) - var(--min)) * 100);--completed-b:calc((var(--value-b) - var(--min)) / (var(--max) - var(--min)) * 100);}.${def.class.range}{width:auto;min-width:105%!important;margin:-3px 0 0 -7px;box-sizing:content-box;display:inline-block;height:Max(var(--track-height),var(--thumb-size));background:linear-gradient(to right,var(--ticks-color) var(--ticks-thickness),transparent 1px) repeat-x;background-size:var(--tickIntervalPerc) var(--ticks-height);background-position-x:calc(var(--thumb-size)/ 2 - var(--ticks-thickness)/ 2);background-position-y:var(--flip-y,bottom);padding-bottom:var(--flip-y,var(--ticks-gap));padding-top:calc(var(--flip-y) * var(--ticks-gap));position:relative;z-index:1}` +
+          `.${def.class.range}{--ca:Min(var(--completed-a), var(--completed-b));--cb:Max(var(--completed-a), var(--completed-b));--thumbs-too-close:Clamp(-1, 1000 * (Min(1, Max(var(--cb) - var(--ca) - 5, -1)) + 0.001), 1);--thumb-close-to-min:Min(1, Max(var(--ca) - 5, 0));--thumb-close-to-max:Min(1, Max(95 - var(--cb), 0))}.${def.class.range}[disabled]{filter:grayscale(0.9);}.${def.class.range}[data-ticks-position=top]{--flip-y:1}.${def.class.range}::after,.${def.class.range}::before{--offset:calc(var(--thumb-size) / 2);content:counter(x);display:var(--show-min-max,block);font:var(--min-max-font);position:absolute;bottom:var(--flip-y,-2.5ch);top:calc(-2.5ch * var(--flip-y));opacity:Clamp(0,var(--at-edge),var(--min-max-opacity));transform:translateX(calc(var(--min-max-x-offset) * var(--before,-1) * -1)) scale(var(--at-edge));pointer-events:none}.${def.class.range}::before{--before:1;--at-edge:var(--thumb-close-to-min);counter-reset:x var(--min);left:var(--offset)}.${def.class.range}::after{--at-edge:var(--thumb-close-to-max);counter-reset:x var(--max);right:var(--offset)}.${def.class.rangeProgress}{--start-end:calc(var(--thumb-size) / 2);--clip-end:calc(100% - (var(--cb)) * 1%);--clip-start:calc(var(--ca) * 1%);--clip:inset(-20px var(--clip-end) -20px var(--clip-start));position:absolute;left:var(--start-end);right:var(--start-end);top:calc(var(--ticks-gap) * var(--flip-y,0) + var(--thumb-size)/ 2 - var(--track-height)/ 2);height:calc(var(--track-height));background:var(--progress-background,#eee);pointer-events:none;z-index:-1;border-radius:var(--progress-radius)}.${def.class.rangeProgress}::before{content:"";position:absolute;left:0;right:0;clip-path:var(--clip);top:0;bottom:0;background:var(--fill-color,#000);box-shadow:var(--progress-flll-shadow);z-index:1;border-radius:inherit}.${def.class.rangeProgress}::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;box-shadow:var(--progress-shadow);pointer-events:none;border-radius:inherit}.${def.class.range}>input:only-of-type~.${def.class.rangeProgress}{--clip-start:0}.${def.class.range}>input::-webkit-slider-runnable-track{background:transparent!important;box-shadow:none!important;border:none!important}` +
+          `.${def.class.range}>input{-webkit-appearance:none;box-shadow:none!important;width:100%;height:var(--thumb-size)!important;margin:0!important;padding:0!important;position:absolute!important;left:0;top:calc(50% - Max(var(--track-height),var(--thumb-size))/ 2 + calc(var(--ticks-gap)/ 2 * var(--flip-y,-1)))!important;border:0!important;cursor:grab;outline:0!important;background:0 0!important;--thumb-shadow:var(--thumb-shadow-active)}.${def.class.range}>input:not(:only-of-type){pointer-events:none}.${def.class.range}>input::-webkit-slider-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${def.class.range}>input::-moz-range-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${def.class.range}>input::-ms-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${def.class.range}>input:hover{--thumb-shadow:var(--thumb-shadow-active)}.${def.class.range}>input:hover+output{--value-background:var(--value-background-hover);--y-offset:-1px;color:var(--value-active-color);box-shadow:0 0 0 3px var(--value-background)}.${def.class.range}>input:active{--thumb-shadow:var(--thumb-shadow-hover);cursor:grabbing;z-index:2}.${def.class.range}>input:active+output{transition:0s;opacity:0.9;display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;-moz-box-orient:horizontal;-moz-box-pack:center;-moz-box-align:center}.${def.class.range}>input:nth-of-type(1){--is-left-most:Clamp(0, (var(--value-a) - var(--value-b)) * 99999, 1)}.${def.class.range}>input:nth-of-type(1)+output{--value:var(--value-a);--x-offset:calc(var(--completed-a) * -1%)}.${def.class.range}>input:nth-of-type(1)+output:not(:only-of-type){--flip:calc(var(--thumbs-too-close) * -1)}.${def.class.range}>input:nth-of-type(1)+output::after{content:var(--prefix, "") var(--text-value-a) var(--suffix, "")}` +
+          `.${def.class.range}>input:nth-of-type(2){--is-left-most:Clamp(0, (var(--value-b) - var(--value-a)) * 99999, 1)}.${def.class.range}>input:nth-of-type(2)+output{--value:var(--value-b)}.${def.class.range}>input+output{--flip:-1;--x-offset:calc(var(--completed-b) * -1%);--pos:calc(((var(--value) - var(--min)) / (var(--max) - var(--min))) * 100%);pointer-events:none;width:auto;min-width:40px;height:24px;min-height:24px;text-align:center;position:absolute;z-index:5;background:var(--value-background);border-radius:4px;padding:0 6px;left:var(--pos);transform:translate(var(--x-offset),calc(150% * var(--flip) - (var(--y-offset,0) + var(--value-offset-y)) * var(--flip)));transition:all .12s ease-out,left 0s;opacity:0;box-sizing:content-box}.${def.class.range}>input+output::after{content:var(--prefix, "") var(--text-value-b) var(--suffix, "");font:var(--value-font)}`,
       };
       const hostStyle = s => `:host(${s}){display:block!important;visibility:visible!important;opacity:1!important}`;
       const fullStyle = (b, c) => `${def.const.style.main};background-color:${b};color:${c};border-radius:4px;padding:4px 8px`;
@@ -1121,6 +1130,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         _destroy() {
           if (!this.container) return;
           this.frDialog.style.opacity = 0;
+          if (!qS("fr-configure")) document.removeEventListener("blur", stopPropagations, true);
           sleep(2e2).then(() => void DEBUG("FrDialogBox.Destroy.status: %o", safeRemove(this.container)));
         }
         respond() {
@@ -1640,26 +1650,28 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         const selectionWebkitCSS = `${selection_IS_PseudoClass}::selection{color:#fff!important;background:#3367d1de!important}`;
         const selection = textStroke ? (IS_REAL_GECKO ? selectionGeckoCSS : selectionWebkitCSS) : "";
         const cssExclude = exText && (textShadow || textStroke) ? exSelector.concat("{-webkit-text-stroke:var(--fr-no-stroke)!important;text-shadow:none!important}") : "";
-        const codeFonts = exText ? funcCodefont(exText, fontface_i) : "";
-        const fixBoldTextStyle = CONST_VALUES.fixStroke ? `.${def.const.boldAttrName}{-webkit-text-stroke:var(--fr-no-stroke)!important}` : ``;
+        const codeFonts = exText ? funcCodefont(exText, fontface_i, CONST_VALUES.fixShadow) : "";
+        const noTextShadowCss = IS_CAUSED_BOLDSHADOWERROR && CONST_VALUES.fixShadow ? `;text-shadow:var(--fr-fix-shadow)!important;` : ``;
+        const fixBoldTextStyle = IS_CAUSED_BOLDSTROKEERROR && CONST_VALUES.fixStroke ? `.${def.const.boldAttrName}{-webkit-text-stroke:var(--fr-no-stroke)!important${noTextShadowCss}}` : ``;
         const curEmptyConfig = !fontface_i && !smooth_i && !textShadow && !textStroke && fontsize_r === 1;
         const IS_CURRENTSITE_ALLOWED = typeof exSitesIndex === "undefined" && !curEmptyConfig;
         const fontStyle = `${fontFaces}${bodyScalecssText}${inSelector}{${fontFamily}${textShadow}${textStroke}${smoothing}${textrender}}${selection}${cssExclude}${codeFonts}${fixBoldTextStyle}`;
         const isEditorBlock = Boolean(CONST_VALUES.isMatchEditorialSite);
+        const textShadowFix = `0 0 ${shadow_r}px ${shadow_c.toLowerCase().slice(0, 7).concat("2b")}`;
         const globalCssText = IS_REAL_GECKO && fontface_i ? def.const.style.firefox : "";
         const monoAllowed = _config_data_.isCustomMono ?? false;
         const monoFontText = monoAllowed ? `--fr-mono-font:${monoFontList || INITIAL_VALUES.monospacedFont};` : ``;
         const monoShadow = monoAllowed ? `--fr-mono-shadow:0 0 0 currentcolor;` : ``;
         const monoFeatureText = monoAllowed ? `--fr-mono-feature:${monoFeature || INITIAL_VALUES.monospacedFeature};` : ``;
-        const rootPseudoClass = `:root{--fr-font-basefont:${INITIAL_VALUES.fontBase};--fr-font-fontscale:${fontsize_r};--fr-font-family:${CONST_VALUES.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-no-stroke:0px transparent;${monoFontText}${monoShadow}${monoFeatureText}}`;
+        const rootPseudoClass = `:root{--fr-font-basefont:${INITIAL_VALUES.fontBase};--fr-font-fontscale:${fontsize_r};--fr-font-family:${CONST_VALUES.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-no-stroke:0px transparent;--fr-fix-shadow:${textShadowFix};${monoFontText}${monoShadow}${monoFeatureText}}`;
         const tStyle = IS_CURRENTSITE_ALLOWED ? `@charset "UTF-8";${rootPseudoClass}${globalCssText}${fontStyle}` : ``;
 
         /* FR_CONFIGURE_SHADOWROOT_CONTENT */
 
-        const isDisabled = isEditorBlock ? `disabled="disabled" title="${IS_CHN ? "图文/编辑网站自动禁用" : "Graphic/editing websites are automatically disabled"}" ` : ``;
+        const isDisabled = isEditorBlock ? `disabled title="${IS_CHN ? "图文/编辑网站自动禁用" : "Graphic/editing websites are automatically disabled"}" ` : ``;
         const fixViewportLabel = IS_CHN
-          ? "<label title='如果开启后出现样式问题，请关闭之。'>视口修正</label>"
-          : "<label title='Fix Viewport Unit, if occurs style error, please turn it off.'>Fix VPU</label>";
+          ? "<label title='修正字体比例缩放后视口单位出现的数据偏移问题。如果开启后页面出现异常样式问题，请关闭之。'>视口修正</label>"
+          : "<label title='Fixed the problem of data offset in viewport units after font scaling. Please turn it off if occurs style error.'>Fix VPU</label>";
         const tFixViewport = isFixViewport
           ? `<span id="${def.id.fviewport}" style="width:auto;color:#666;font-size:12px">
             (${fixViewportLabel} <input type="checkbox" id="${def.id.fixViewport}" ${CONST_VALUES.fixViewport ? "checked" : ""}/>)
@@ -1683,11 +1695,24 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             </li>`
           : ``;
         const FixStrokeLabel = IS_CHN
-          ? `<label title="如果开启后出现卡顿现象，请关闭之。">粗体修正</label>`
-          : `<label title="Fix bold style with stroke, if occurs obvious lagging, please turn it off.">Fix Bold</label>`;
-        const tFixStrokeHTML = IS_REAL_BLINK
+          ? `<label title="修正 Ver 96.0 以上版本的 Blink 浏览器对粗体样式附加描边的渲染错误。默认开启，如出现卡顿问题请关闭之。">粗体修正</label>`
+          : `<label title="Fix rendering issues of Blink browsers above Ver 96.0 on bold with text-stroke. ON by default, please turn it off if lagging.">Fix Bold</label>`;
+        const fixShadowLabel = IS_CHN
+          ? "修正 Ver 123.0 以上版本的 Blink 浏览器（默认参数）对粗体样式附加阴影效果的渲染错误。该选项默认关闭（随粗体修正关闭），如样式异常请单独关闭之。"
+          : "Fix rendering issues of Blink browsers above Ver 123.0 on bold with text-shadow. OFF by default, Please turn it off if the style is abnormal.";
+        const tFixShadowHTML = IS_CAUSED_BOLDSHADOWERROR
+          ? `<div id="${def.id.fshadow}">
+              <div class="${def.id.fshadow}-label">
+                <span>${IS_CHN ? "附加阴影样式修正：" : "Add Shadow Fix: "}</span>
+                <input type="checkbox" class="${def.class.checkbox}" id="${def.id.fixShadow}" ${CONST_VALUES.fixShadow ? "checked" : ""} ${CONST_VALUES.fixStroke ? "" : "disabled"} />
+                <label for="${def.id.fixShadow}" ${CONST_VALUES.fixStroke ? "" : "style='filter:grayscale(1)'"}></label>
+              </div>
+              <div class="${def.id.fshadow}-text">${fixShadowLabel}</div>
+            </div>`
+          : ``;
+        const tFixStrokeHTML = IS_CAUSED_BOLDSTROKEERROR
           ? `<span id="${def.id.fstroke}" style="width:auto;color:#666;font-size:12px">
-            (${FixStrokeLabel} <input type="checkbox" id="${def.id.fixStroke}" ${CONST_VALUES.fixStroke ? "checked" : ""} />)
+            (${FixStrokeLabel} <input type="checkbox" id="${def.id.fixStroke}" ${CONST_VALUES.fixStroke ? "checked" : ""} />)${tFixShadowHTML}
             </span>`
           : ``;
         const fontfaceHTML = IS_CHN
@@ -1898,12 +1923,13 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         };
 
         function insertPreviewStyletoFrame(node, style) {
-          const doc = node.contentWindow.document || node.contentDocument;
-          const body = doc.body?.innerText?.replace(/\s/g, "") ?? "";
-          if (body.length === 0) return false;
-          const { css, id } = getFrameStyleFixerName(style, doc.head);
-          const rst = insertStyle({ target: doc.head, styleId: id, styleContent: css, isOverwrite: true });
-          rst && correctBoldStrokeProcess({ Fixedstyle: fixBoldTextStyle, Scenes: "iframe" })(doc);
+          const doc = node.contentWindow?.document || node.contentDocument;
+          const body = doc?.body?.innerText?.replace(/\s/g, "") ?? "";
+          const target = doc?.head;
+          if (!target || body.length === 0) return false;
+          const { css, id } = getFrameStyleFixerName(style, target);
+          const rst = insertStyle({ target, styleId: id, styleContent: css, isOverwrite: true });
+          rst && correctBoldStrokeProcess({ Fixedstyle: fixBoldTextStyle, Scenes: "iframe" })(node.contentWindow?.event, doc);
           return rst;
         }
 
@@ -1915,7 +1941,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           const { css, id } = getFrameStyleFixerName(style, target);
           while (getMainStyleElements({ currentScope: false, target }).length === 0 && checkLimitCount < 50) {
             if (insertStyle({ target, styleId: id, styleContent: css })) {
-              condition === "addedNodes" && correctBoldStrokeProcess({ Fixedstyle: fixBoldTextStyle, Scenes: "iframe" })(doc);
+              condition === "addedNodes" && correctBoldStrokeProcess({ Fixedstyle: fixBoldTextStyle, Scenes: "iframe" })(node.contentWindow?.event, doc);
               return true;
             }
             checkLimitCount++;
@@ -2063,10 +2089,10 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
         function removeKeyboardEvent(target) {
           if (!target) return;
-          const stopPropagation = e => void e.stopImmediatePropagation();
-          target.addEventListener("keydown", stopPropagation);
-          target.addEventListener("keyup", stopPropagation);
-          target.addEventListener("keypress", stopPropagation);
+          document.addEventListener("blur", stopPropagations, true);
+          target.addEventListener("keydown", stopPropagations, true);
+          target.addEventListener("keyup", stopPropagations, true);
+          target.addEventListener("keypress", stopPropagations, true);
         }
 
         function getBrightness(hexa) {
@@ -2409,7 +2435,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             ctNode?.addEventListener("click", function () {
               const info = IS_CHN
                 ? `我们强烈地不建议您关闭更新提示功能，那样您将不能及时获得更新内容和重要的功能提示，特殊情况下甚至会影响您的正常使用。双击字体渲染设置界面顶部的脚本名称（或访问Github主页），可查看历史更新内容。\r\n\r\n请确认是否“关闭更新提示功能”？`
-                : `We strongly do not recommend that you turn off the update prompt, as you will not be able to get updates and important prompts in time, and in special cases may even affect your normal use. Double-click the script-name at font rendering settings interface (or visit Github) to see the history updates.\r\n𝐏𝐥𝐞𝐚𝐬𝐞 𝐜𝐨𝐧𝐟𝐢𝐫𝐦 𝐭𝐨 𝐜𝐥𝐨𝐬𝐞 𝐭𝐡𝐞 𝐮𝐩𝐝𝐚𝐭𝐞 𝐩𝐫𝐨𝐦𝐩𝐭?`;
+                : `We strongly do not recommend that you turn off the update prompt, as you will not be able to get updates and important prompts in time, and in special cases may even affect your normal use. Double-click the script-name at font rendering settings interface (or visit Github) to see the update history.\r\n𝐏𝐥𝐞𝐚𝐬𝐞 𝐜𝐨𝐧𝐟𝐢𝐫𝐦 𝐭𝐨 𝐜𝐥𝐨𝐬𝐞 𝐭𝐡𝐞 𝐮𝐩𝐝𝐚𝐭𝐞 𝐩𝐫𝐨𝐦𝐩𝐭?`;
               if (this.checked) this.checked = Boolean(confirm(info));
             });
             const fsNode = qS(`#${def.id.isfontsize}`, def.const.dialogIf);
@@ -2421,8 +2447,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                     ? `由于Firefox(Gecko内核)的兼容性原因，会对部分网站样式、功能兼容不足，从而造成样式错乱、页面动作缺失等问题，如果同时使用Greasemonkey扩展则会造成无法修复的错误。\r\n\r\n强烈建议您：使用“浏览器缩放”替代 (快捷键：ctrl+-/ctrl++)`
                     : `Due to the compatibility of Firefox (Gecko kernel), may cause lack of compatibility with some websites, and if using the 'Greasemonkey' at the same time can cause unfixable errors. \r\nRecommended: use 'Browser Zoom' instead. \r\nBrowser Shortcut Key: ( Ctrl+- / Ctrl++ )`
                   : IS_CHN
-                  ? `脚本已新增视口单位修正功能，在某些站点会因为CORS或CSP而被浏览器阻止，可通过扩展'Allow CORS'或'Allow CSP'来解决。如有安全顾虑，请关闭字体缩放功能，或单独关闭视口修正功能(全局)（这可能导致字体缩放后在某些站点出现样式异常）`
-                  : `The script added the 'Fix Viewport' feature, browser may block it due to CORS or CSP, which can be resolved by extending 'Allow CORS' and 'Allow CSP'. If you have security concerns, please turn off 'Font Scaling', or separately turn off 'Fix Viewport' (which may cause style issues).`,
+                  ? `脚本已新增视口单位修正功能，在某些站点会因为CORS或CSP而被浏览器阻止，可通过扩展'Disable CORS'或'Disable CSP'来解决。如有安全顾虑，请关闭字体缩放功能，或单独关闭视口修正功能(全局)（这可能导致字体缩放后在某些站点出现样式异常）`
+                  : `The script added the 'Fix Viewport' feature, browser may block it due to CORS or CSP, which can be resolved by extending 'Disable CORS' and 'Disable CSP'. If you have security concerns, please turn off 'Font Scaling', or separately turn off 'Fix Viewport' (which may cause style issues).`,
                 IS_CHN ? "\r\n\r\n请确认是否开启字体缩放功能？" : "\r\n𝐏𝐥𝐞𝐚𝐬𝐞 𝐜𝐨𝐧𝐟𝐢𝐫𝐦 𝐭𝐨 𝐞𝐧𝐚𝐛𝐥𝐞 𝐅𝐨𝐧𝐭 𝐒𝐜𝐚𝐥𝐢𝐧𝐠?"
               );
               if (this.checked) this.checked = Boolean(confirm(info));
@@ -2544,10 +2570,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 });
                 if (await panDomainDialog.respond()) {
                   const { exSite } = await getExSitesData();
-                  for (let i = exSite.length - 1; i >= 0; i--) {
-                    if (exSite[i].endsWith(panDomain.slice(1))) exSite.splice(i, 1);
-                  }
-                  const exSiteData = uniq(exSite.sort());
+                  const exSiteData = uniq(exSite.filter(item => !item.endsWith(panDomain.slice(1))).sort());
                   saveData("_EXCLUDE_SITES_", exSiteData);
                   closeConfigurePage({ isReload: true });
                 } else addAction.customExsite();
@@ -2876,7 +2899,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
         /* FONT_LIST_GENERATION_AND_SELECTION */
 
-        function fontSet(expr) {
+        function fontSet({ expr, fontData }) {
+          if (!expr || typeof expr !== "string" || !Array.isArray(fontData)) return;
           return {
             fdeleteList: deleteFontSelectList,
             fresetList: resetFontSelectList,
@@ -2889,7 +2913,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             qA(expr, def.const.configIf).forEach(item => void (item.style.display = disp));
           }
 
-          async function closeFontSelected(item, fontData) {
+          function closeFontSelected(item) {
             ddRemove(item.parentNode);
             const value = item.parentNode.children[1].value;
             const sort = Number(item.parentNode.children[1].attributes.sort.value) || -1;
@@ -2907,7 +2931,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               qS(`#${def.id.selector}`, def.const.configIf).style.display = "none";
               const ffaceT = qS(`#${def.id.fface}`, def.const.configIf);
               const inputFont = qS(`#${def.id.fontList} .${def.class.selectFontId} input`, def.const.configIf);
-              if (ffaceT.checked) {
+              void (async function (isFaced) {
+                if (!isFaced) return;
                 const fontCheckList = await getMergedFontCheckList();
                 for (let i = 0, l = fontCheckList.length; i < l; i++) {
                   if (fontCheckList[i].en === selectedFont || convertToUnicode(fontCheckList[i].ch) === selectedFont) {
@@ -2916,31 +2941,24 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   }
                 }
                 inputFont.setAttribute("placeholder", `${def.var.fontNamePh + def.var.curFont}`);
-              }
+              })(ffaceT.checked);
             } else if (isPreview) changePreviewButtonStyle(submitButton, def.array.values);
           }
 
-          function deleteFontSelectList(fontData) {
-            if (!Array.isArray(fontData)) return;
+          function deleteFontSelectList() {
             const closeNodes = qA(`#${def.id.fontList} .${def.class.close}`, def.const.configIf);
             closeNodes.forEach(item => void closeFontSelected(item, fontData));
           }
 
-          function resetFontSelectList(fontData) {
-            if (!Array.isArray(fontData)) return;
+          function resetFontSelectList() {
             deleteFontSelectList(fontData);
             const fontlistSelectorNode = qS(`#${def.id.fontList} .${def.class.selector}`, def.const.configIf);
             const resetDefaultFont = INITIAL_VALUES.fontSelect.replace(/'|"/g, "");
-            const resetFontCHN = IS_REAL_WEBKIT ? "\u82f9\u65b9\u002d\u7b80" : "\u5fae\u8f6f\u96c5\u9ed1";
+            const resetFontCHN = IS_REAL_WEBKIT || (!IS_CHEAT_UA && os === "MacOS") ? "\u82f9\u65b9\u002d\u7b80" : "\u5fae\u8f6f\u96c5\u9ed1";
             const fontlistSelectorHTML = `<a class="${def.class.label}"><span style="border-bottom-left-radius:4px;border-top-left-radius:4px;font-family:${INITIAL_VALUES.fontSelect}!important">${resetFontCHN}</span><input type="hidden" name="${def.id.fontName}" sort="0" value="${resetDefaultFont}"/><span class="${def.class.close}" style="border-top-right-radius:4px;border-bottom-right-radius:4px;font-family:system-ui,-apple-system,BlinkMacSystemFont,serif!important;cursor:pointer">\u0026\u0023\u0032\u0031\u0035\u003b</span></a>`;
             fontlistSelectorNode.insertAdjacentHTML("beforeend", tTP.createHTML(fontlistSelectorHTML));
             fontlistSelectorNode.parentNode.style.display = "block";
-            for (let i = 0; i < fontData.length; i++) {
-              if (fontData[i].en === resetDefaultFont) {
-                fontData.splice(i, 1);
-                break;
-              }
-            }
+            fontData = fontData.filter(item => item.en !== resetDefaultFont);
             !def.array.values.includes(def.id.fontName) && def.array.values.push(def.id.fontName);
             const submitButton = qS(`#${def.id.submit} .${def.class.submit}`, def.const.configIf);
             isPreview && submitButton && changePreviewButtonStyle(submitButton, def.array.values);
@@ -2951,13 +2969,11 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           }
 
           function getFontSearchList(name) {
-            let arr = [];
-            qA(`#${def.id.selector} .${def.class.selector} input[name="${name}"]`, def.const.configIf).forEach(item => void arr.push(item.value));
+            const arr = Array.from(qA(`#${def.id.selector} .${def.class.selector} input[name="${name}"]`, def.const.configIf), item => item.value);
             return uniq(arr);
           }
 
-          function fontSearch(fontData) {
-            if (!expr || typeof expr !== "string" || !Array.isArray(fontData)) return;
+          function fontSearch() {
             const btnNodesHTML = IS_CHN
               ? `<span class="${def.class.spanlabel}">已选择字体：<span id="${def.id.cleaner}">[清空]</span></span>`
               : `<span class="${def.class.spanlabel}">Selected Fonts: <span id="${def.id.cleaner}">[Clear]</span></span>`;
@@ -3013,15 +3029,17 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 const selector = `#${def.id.fontList} .${def.class.selectFontId} dl`;
                 const selectFontNode = qS(selector, def.const.configIf);
                 fontListShown(selector);
-                if (fontData.length === 0 && selectFontNode) {
-                  selectFontNode.innerHTML = tTP.createHTML(`<dd>${IS_CHN ? "\u6570\u636e\u6e90\u6682\u65e0\u6570\u636e" : "Not Available!"}</dd>`);
-                } else {
-                  selectFontNode.textContent = "";
-                  fontData = getUniqueFontlist(fontData).sort((a, b) => a.sort - b.sort);
-                  fontData.forEach(item => {
-                    const nodeContent = `<dd title="${item.ch}" style="font-family:'${item.en}'!important" sort="${item.sort}" value="${item.en}">${item.ch}</dd>`;
-                    selectFontNode.insertAdjacentHTML("beforeend", tTP.createHTML(nodeContent));
-                  });
+                if (selectFontNode) {
+                  if (fontData.length === 0) {
+                    selectFontNode.innerHTML = tTP.createHTML(`<dd>${IS_CHN ? "\u6570\u636e\u6e90\u6682\u65e0\u6570\u636e" : "Not Available!"}</dd>`);
+                  } else {
+                    selectFontNode.textContent = "";
+                    fontData = getUniqueFontlist(fontData).sort((a, b) => a.sort - b.sort);
+                    fontData.forEach(item => {
+                      const nodeContent = `<dd title="${item.ch}" style="font-family:'${item.en}'!important" sort="${item.sort}" value="${item.en}">${item.ch}</dd>`;
+                      selectFontNode.insertAdjacentHTML("beforeend", tTP.createHTML(nodeContent));
+                    });
+                  }
                 }
                 clickEvents();
               } else searchEvents(_this.value);
@@ -3053,7 +3071,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               fontListShown(selector, false);
               if (fontData.length > 0 && selectFontNode) {
                 fontListShown(selector);
-                const sText = searchText.replace(/([.:?*+^$[\-=\](){}\\/|])/g, "\\$1");
+                const sText = searchText.replace(/[.:?*+^$[\-=\](){}\\/|]/g, "\\$1");
                 const sRegExp = new RegExp(sText, "i");
                 let sMatched = false;
                 selectFontNode.textContent = "";
@@ -3084,12 +3102,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   selector.insertAdjacentHTML("beforeend", tTP.createHTML(nodeHTML));
                   selector.parentNode.style.display = "block";
                   fontData = getUniqueFontlist(fontData).sort((a, b) => a.sort - b.sort);
-                  for (let i = 0, l = fontData.length; i < l; i++) {
-                    if (fontData[i].en === value) {
-                      fontData.splice(i, 1);
-                      break;
-                    }
-                  }
+                  fontData = fontData.filter(item => item.en !== value);
                   const cleanerNode = qS(`#${def.id.selector} #${def.id.cleaner}`, def.const.configIf);
                   if (cleanerNode) cleanerNode.onclick = () => void deleteFontSelectList(fontData);
                   const closeNode = qS(`#${def.id.fontList} input[name="${def.id.fontName}"][sort="${sort}"]~.${def.class.close}`, def.const.configIf);
@@ -3132,6 +3145,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         }
 
         function overlayColor(size, color) {
+          if (size <= 0 || size > 4 || !color) return "revert";
           return color.substring(1) !== "FFFFFFFF" ? `0 0 ${size}px ${color}` : `0 0 ${size}px currentcolor`;
         }
 
@@ -3152,7 +3166,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           adjustCoordinateOffset({ cur: def.var.curScale });
         }
 
-        function funcCodefont(text, isOverride) {
+        function funcCodefont(text, isOverride, isFixShadow) {
           if (!isCustomMono) return "";
           let customMonoRules = [];
           const pre = text.search(/\bpre\b/gi) !== -1 ? ["pre", "pre *"] : [];
@@ -3173,6 +3187,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           return codeSelector.concat(
             `{-webkit-text-stroke:var(--fr-no-stroke)!important;text-shadow:var(--fr-mono-shadow)!important;font-family:var(--fr-mono-font),${base}!important;`,
             `font-feature-settings:var(--fr-mono-feature)!important;-webkit-user-select:text!important;user-select:text!important}`,
+            IS_CAUSED_BOLDSHADOWERROR && isFixShadow ? `${codeSelector}.${def.const.boldAttrName}{text-shadow:var(--fr-fix-shadow)!important}` : ``,
             CUR_HOST_NAME.endsWith("github.com") ? `${codeSelection}{color:currentcolor!important;background:#71baff45!important}` : ``
           );
         }
@@ -3196,8 +3211,9 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           try {
             // set fontData with cache expires
             const fontData = await detectFontData();
+            def.var.fontSet = fontSet({ expr: `#${def.id.fontList} .${def.class.fontList}`, fontData });
             // Fonts selection
-            fontSelectionAndCustomFonts(fontData);
+            fontSelectionAndCustomFonts(def.var.fontSet);
             // selector placeholder style
             const ffaceT = qS(`#${def.id.fface}`, def.const.configIf);
             const inputFont = qS(`#${def.id.fontList} .${def.class.selectFontId} input`, def.const.configIf);
@@ -3220,7 +3236,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             const drawStrock = getFontsStroke(strokeT, submitButton);
             removeKeyboardEvent(strokeT);
             // Fix Fonts stroke
-            const fixStrokeT = getFixStrokeBool(strokeT, submitButton) ?? {};
+            const { fixStrokeT, fixShadowT } = getFixStrokeBool(strokeT, submitButton) ?? {};
             // Fonts shadow
             const shadowsT = qS(`#${def.id.shadowSize}`, def.const.configIf);
             const shadowColorNode = qS(`#${def.id.shadowColor}`, def.const.configIf);
@@ -3247,14 +3263,11 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             customMonospceFont(customMonoNode);
             // Reset Button control
             const resetButtonNode = qS(`#${def.id.submit} .${def.class.reset}`, def.const.configIf);
-            controlResetButton(
-              resetButtonNode,
-              { ffaceT, smoothT, fontScaleT, fixViewportT, strokeT, fixStrokeT, shadowsT, colorPickerT, colorshowT, fontCssT, fontExT },
-              { fontData, drawScale, drawStrock, drawShadow, submitButton }
-            );
+            const submitSet = { ffaceT, smoothT, fontScaleT, fixViewportT, strokeT, fixStrokeT, shadowsT, fixShadowT, colorshowT, colorReg, fontCssT, fontExT, colorPickerT };
+            controlResetButton(resetButtonNode, def.var.fontSet, submitSet, { drawScale, drawStrock, drawShadow, submitButton });
             // Submit Button control
             const submitButtonNode = qS(`#${def.id.submit} .${def.class.submit}`, def.const.configIf);
-            controlSubmitButton(submitButtonNode, { ffaceT, smoothT, fontScaleT, fixViewportT, strokeT, fixStrokeT, shadowsT, colorshowT, colorReg, fontCssT, fontExT });
+            controlSubmitButton(submitButtonNode, def.var.fontSet, submitSet);
             // Backup Button control
             const backupButtonNode = qS(`#${def.id.backup}`, def.const.configIf);
             controlBackupButton(backupButtonNode, isBackupFunction);
@@ -3285,11 +3298,11 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             }
           }
 
-          function fontSelectionAndCustomFonts(fontData) {
+          function fontSelectionAndCustomFonts(fontSet) {
             try {
               const fontlistNode = qS(`#${def.id.fontList} .${def.class.fontList}`, def.const.configIf);
               if (!fontlistNode) return;
-              fontSet(`#${def.id.fontList} .${def.class.fontList}`).fsearch(fontData);
+              fontSet?.fsearch();
               const tooltipNode = qS(`#${def.id.fonttooltip}`, def.const.configIf);
               tooltipNode?.addEventListener("dblclick", async () => {
                 let savedFontListString = "";
@@ -3618,22 +3631,44 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           }
 
           function getFixStrokeBool(strokeNode, submitButton) {
-            if (!IS_REAL_BLINK || !strokeNode) return;
+            if (!IS_CAUSED_BOLDSTROKEERROR || !strokeNode) return;
             const fixStrokeT = qS(`#${def.id.fixStroke}`, def.const.configIf);
+            const fixShadowT = qS(`#${def.id.fixShadow}`, def.const.configIf);
+            const fstrokeNode = qS(`#${def.id.fstroke}`, def.const.configIf);
+            const fshadowNode = qS(`#${def.id.fshadow}`, def.const.configIf);
             try {
-              const fstrokeNode = qS(`#${def.id.fstroke}`, def.const.configIf);
               if (fstrokeNode) {
                 fstrokeNode.style.visibility = strokeNode.value === "OFF" ? "hidden" : "visible";
                 strokeNode.addEventListener("change", function () {
                   fstrokeNode.style.visibility = this.value === "OFF" ? "hidden" : "visible";
                 });
               }
-              return fixStrokeT;
+              if (IS_CAUSED_BOLDSHADOWERROR) {
+                fixStrokeT?.addEventListener("mouseenter", () => {
+                  if (!Number(qS(`#${def.id.shadowSize}`, def.const.configIf)?.value)) return;
+                  qS(`#${def.id.fshadow}`, def.const.configIf).style.visibility = "visible";
+                });
+                fixStrokeT?.addEventListener("click", () => {
+                  if (fixStrokeT.checked) {
+                    fixShadowT.removeAttribute("disabled");
+                    fixShadowT.nextElementSibling.style.cssText = "";
+                    !fixShadowT.checked && fixShadowT.click();
+                  }
+                  if (!fixStrokeT.checked) {
+                    fixShadowT.checked && fixShadowT.click();
+                    fixShadowT.setAttribute("disabled", "");
+                    fixShadowT.nextElementSibling.style.filter = "grayscale(1)";
+                  }
+                });
+                fshadowNode?.addEventListener("mouseleave", () => void (fshadowNode.style.visibility = "hidden"));
+              }
+              return { fixStrokeT, fixShadowT };
             } catch (e) {
               ERROR("Fix Stroke:", e.message);
               def.array.exps.push(`[Fix Stroke]: ${e}`);
             } finally {
               saveChangeStatus(fixStrokeT, CONST_VALUES.fixStroke, submitButton, def.array.values);
+              if (fshadowNode) saveChangeStatus(fixShadowT, CONST_VALUES.fixShadow, submitButton, def.array.values);
             }
           }
 
@@ -3838,12 +3873,9 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             });
           }
 
-          function controlResetButton(
-            resetT,
-            { smoothT, ffaceT, fontScaleT, fixViewportT, strokeT, fixStrokeT, shadowsT, colorPickerT, colorshowT, fontCssT, fontExT },
-            { fontData, drawScale, drawStrock, drawShadow, submitButton }
-          ) {
+          function controlResetButton(resetT, fontSet, submitSet, { drawScale, drawStrock, drawShadow, submitButton }) {
             if (!resetT) return;
+            const { smoothT, ffaceT, fontScaleT, fixViewportT, strokeT, fixStrokeT, fixShadowT, shadowsT, colorPickerT, colorshowT, fontCssT, fontExT } = submitSet;
             resetT.addEventListener("click", async () => {
               let frDialog = new FrDialogBox({
                 trueButtonText: IS_CHN ? "重 置" : "Reset",
@@ -3857,7 +3889,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               if (await frDialog.respond()) {
                 smoothT.checked !== INITIAL_VALUES.fontSmooth ? smoothT.click() : DEBUG("<fontSmooth> NOT MODIFIED");
                 ffaceT.checked !== INITIAL_VALUES.fontFace ? ffaceT.click() : DEBUG("<fontFace> NOT MODIFIED");
-                CONST_VALUES.fontSelect.split(",")[0] !== INITIAL_VALUES.fontSelect ? fontSet().fresetList(fontData) : fontSet().fdeleteList(fontData);
+                CONST_VALUES.fontSelect.split(",")[0] !== INITIAL_VALUES.fontSelect ? fontSet?.fresetList() : fontSet?.fdeleteList();
                 if (isFontsize) {
                   fontScaleT.value = INITIAL_VALUES.fontSize === 1 ? "OFF" : INITIAL_VALUES.fontSize.toFixed(3);
                   fontScaleT._value_ = INITIAL_VALUES.fontSize;
@@ -3872,7 +3904,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 strokeT.value = INITIAL_VALUES.fontStroke === 0 ? "OFF" : INITIAL_VALUES.fontStroke.toFixed(3);
                 strokeT._value_ = INITIAL_VALUES.fontStroke;
                 setSliderProperty(drawStrock, INITIAL_VALUES.fontStroke, 3);
-                if (IS_REAL_BLINK) {
+                if (IS_CAUSED_BOLDSTROKEERROR) {
                   fixStrokeT.checked !== INITIAL_VALUES.fixStroke ? fixStrokeT.click() : DEBUG("<fixStroke> NOT MODIFIED");
                   const fstrokeNode = qS(`#${def.id.fstroke}`, def.const.configIf);
                   fstrokeNode && (fstrokeNode.style.visibility = strokeT.value === "OFF" ? "hidden" : "visible");
@@ -3880,6 +3912,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 shadowsT.value = INITIAL_VALUES.fontShadow === 0 ? "OFF" : INITIAL_VALUES.fontShadow.toFixed(2);
                 shadowsT._value_ = INITIAL_VALUES.fontShadow;
                 setSliderProperty(drawShadow, INITIAL_VALUES.fontShadow, 2);
+                if (IS_CAUSED_BOLDSHADOWERROR) fixShadowT.checked !== INITIAL_VALUES.fixShadow ? fixShadowT.click() : DEBUG("<fixShadow> NOT MODIFIED");
                 qS(`#${def.id.shadowColor}`, def.const.configIf).style.display = shadowsT.value === "OFF" ? "none" : "flex";
                 colorPickerT.fromString(INITIAL_VALUES.shadowColor);
                 colorshowT.value = INITIAL_VALUES.shadowColor;
@@ -3894,7 +3927,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               } else {
                 smoothT.checked !== CONST_VALUES.fontSmooth ? smoothT.click() : DEBUG("<fontSmooth> NOT MODIFIED");
                 ffaceT.checked !== CONST_VALUES.fontFace ? ffaceT.click() : DEBUG("<fontFace> NOT MODIFIED");
-                fontSet().fdeleteList(fontData);
+                fontSet?.fdeleteList();
                 if (isFontsize) {
                   fontScaleT.value = CONST_VALUES.fontSize === 1 ? "OFF" : CONST_VALUES.fontSize.toFixed(3);
                   fontScaleT._value_ = CONST_VALUES.fontSize;
@@ -3909,7 +3942,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 strokeT.value = CONST_VALUES.fontStroke === 0 ? "OFF" : CONST_VALUES.fontStroke.toFixed(3);
                 strokeT._value_ = CONST_VALUES.fontStroke;
                 setSliderProperty(drawStrock, CONST_VALUES.fontStroke, 3);
-                if (IS_REAL_BLINK) {
+                if (IS_CAUSED_BOLDSTROKEERROR) {
                   fixStrokeT.checked !== CONST_VALUES.fixStroke ? fixStrokeT.click() : DEBUG("<fixStroke> NOT MODIFIED");
                   const fstrokeNode = qS(`#${def.id.fstroke}`, def.const.configIf);
                   fstrokeNode && (fstrokeNode.style.visibility = strokeT.value === "OFF" ? "hidden" : "visible");
@@ -3917,6 +3950,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 shadowsT.value = CONST_VALUES.fontShadow === 0 ? "OFF" : CONST_VALUES.fontShadow.toFixed(2);
                 shadowsT._value_ = CONST_VALUES.fontShadow;
                 setSliderProperty(drawShadow, CONST_VALUES.fontShadow, 2);
+                if (IS_CAUSED_BOLDSHADOWERROR) fixShadowT.checked !== CONST_VALUES.fixShadow ? fixShadowT.click() : DEBUG("<fixShadow> NOT MODIFIED");
                 const shadowColorNode = qS(`#${def.id.shadowColor}`, def.const.configIf);
                 shadowColorNode && (shadowColorNode.style.display = shadowsT.value === "OFF" ? "none" : "flex");
                 colorPickerT.fromString(CONST_VALUES.shadowColor);
@@ -3934,10 +3968,11 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             });
           }
 
-          function controlSubmitButton(submitT, { ffaceT, smoothT, fontScaleT, fixViewportT, strokeT, fixStrokeT, shadowsT, colorshowT, colorReg, fontCssT, fontExT }) {
+          function controlSubmitButton(submitT, fontSet, submitSet) {
             if (!submitT) return;
+            const { ffaceT, smoothT, fontScaleT, fixViewportT, strokeT, fixStrokeT, shadowsT, fixShadowT, colorshowT, colorReg, fontCssT, fontExT } = submitSet;
             submitT.addEventListener("click", async function () {
-              const fontlists = fontSet().fsearchList(def.id.fontName);
+              const fontlists = fontSet?.fsearchList(def.id.fontName);
               const fontselect = fontlists.length > 0 ? addSingleQuoteForItem(fontlists) : CONST_VALUES.fontSelect;
               const fontface = ffaceT.checked;
               const smooth = smoothT.checked;
@@ -3945,8 +3980,9 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               const fscale = isEditorBlock ? 1 : prefscale < 0.8 ? 0.8 : prefscale > 1.5 ? 1.5 : prefscale;
               const fixfviewport = isFixViewport && fscale !== 1 && fixViewportT.checked;
               const fstroke = /^[0-1](\.[0-9]{1,3})?$/.test(strokeT.value) ? Number(strokeT.value) : strokeT.value === "OFF" ? 0 : INITIAL_VALUES.fontStroke;
-              const fixfstroke = IS_REAL_BLINK && fstroke && fixStrokeT.checked;
+              const fixfstroke = IS_CAUSED_BOLDSTROKEERROR && fstroke && fixStrokeT.checked;
               const fshadow = /^[0-8](\.[0-9]{1,2})?$/.test(shadowsT.value) ? Number(shadowsT.value) : shadowsT.value === "OFF" ? 0 : INITIAL_VALUES.fontShadow;
+              const fixfshadow = IS_CAUSED_BOLDSHADOWERROR && fixfstroke && fshadow && fixShadowT.checked;
               const pickedcolor = colorshowT.value;
               const fscolor = colorReg.test(pickedcolor) ? (pickedcolor.toLowerCase() === "currentcolor" ? "#FFFFFFFF" : pickedcolor) : INITIAL_VALUES.shadowColor;
               const fcss = fontCssT.value;
@@ -3968,15 +4004,14 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   const _fontfaces = !fontface ? "" : _refont ? await funcFontface(_refont) : "";
                   const _exselector = SUPPORT_IS_PSEUDOCLASS ? `${globalPrefix}:is(${convertHtmlToText(fontex)})` : formatSelectors(convertHtmlToText(fontex), globalPrefix);
                   const _exclude = !fontex || (!fshadow && !fstroke) ? "" : _exselector.concat("{-webkit-text-stroke:var(--fr-no-stroke)!important;text-shadow:none!important}");
-                  const _codefont = !fontex ? "" : funcCodefont(fontex, fontface);
-                  const _fixfontstroke = fixfstroke ? `.${def.const.boldAttrName}{-webkit-text-stroke:var(--fr-no-stroke)!important}` : ``;
-                  const _tshadow = `${_fontfaces}${_bodyscale}`.concat(
-                    SUPPORT_IS_PSEUDOCLASS ? `${globalPrefix}:is(${convertHtmlToText(fontcss)})` : formatSelectors(convertHtmlToText(fontcss), globalPrefix),
-                    `{${_fontfamily}${_shadow}${_stroke}${_smoothing}${_textrender}}`,
-                    `${_exclude}${_codefont}${_fixfontstroke}`
-                  );
+                  const _codefont = !fontex ? "" : funcCodefont(fontex, fontface, fixfshadow);
+                  const _noTextShadowCss = IS_CAUSED_BOLDSHADOWERROR && fixfshadow ? `;text-shadow:var(--fr-fix-shadow)!important;` : ``;
+                  const _fixfontstroke = fixfstroke ? `.${def.const.boldAttrName}{-webkit-text-stroke:var(--fr-no-stroke)!important${_noTextShadowCss}}` : ``;
+                  const _selectors = SUPPORT_IS_PSEUDOCLASS ? `${globalPrefix}:is(${convertHtmlToText(fontcss)})` : formatSelectors(convertHtmlToText(fontcss), globalPrefix);
+                  const _tshadow = `${_fontfaces}${_bodyscale}${_selectors}{${_fontfamily}${_shadow}${_stroke}${_smoothing}${_textrender}}${_exclude}${_codefont}${_fixfontstroke}`;
                   const _globalCssText = IS_REAL_GECKO && fontface ? def.const.style.firefox : "";
-                  const _rootpseudoclass = `:root{--fr-font-basefont:${INITIAL_VALUES.fontBase};--fr-font-fontscale:${fscale};--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-no-stroke:0px transparent;${monoFontText}${monoShadow}${monoFeatureText}}`;
+                  const _textShadowFix = `0 0 ${fshadow}px ${fscolor.toLowerCase().slice(0, 7).concat("2b")}`;
+                  const _rootpseudoclass = `:root{--fr-font-basefont:${INITIAL_VALUES.fontBase};--fr-font-fontscale:${fscale};--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-no-stroke:0px transparent;--fr-fix-shadow:${_textShadowFix};${monoFontText}${monoShadow}${monoFeatureText}}`;
                   const __tshadow = _curEmptyConfig ? `/* BLANK_STYLE_SHEET */` : `@charset "UTF-8";${_rootpseudoclass}${_globalCssText}${_tshadow}`;
                   this.textContent = IS_CHN ? "\u4fdd\u5b58" : "\ud835\udc7a\ud835\udc82\ud835\udc97\ud835\udc86";
                   this.removeAttribute("style");
@@ -4051,6 +4086,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                       fontStroke: Number(fstroke),
                       fixStroke: Boolean(fixfstroke),
                       fontShadow: Number(fshadow),
+                      fixShadow: Boolean(fixfshadow),
                       shadowColor: convertHtmlToText(fscolor),
                       fontCSS: convertHtmlToText(fontcss),
                       fontEx: convertHtmlToText(fontex),
@@ -4077,6 +4113,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                       fontStroke: Number(fstroke),
                       fixStroke: Boolean(fixfstroke),
                       fontShadow: Number(fshadow),
+                      fixShadow: Boolean(fixfshadow),
                       shadowColor: convertHtmlToText(fscolor),
                       fontCSS: convertHtmlToText(fontcss),
                       fontEx: convertHtmlToText(fontex),
@@ -4166,8 +4203,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   const prekey = ["_FONTS_SET_", "_EXCLUDE_SITES_", "_DOMAINS_FONTS_SET_", "_CUSTOM_FONTLIST_", "_MONOSPACED_FONTLIST_"];
                   const allkey = [...prekey, "_MONOSPACED_SITERULES_", "_MONOSPACED_FEATURE_", "_FONTSCALE_DEF_", "_FONTOVERRIDE_DEF_", "_CONFIGURE_"];
                   const backendData = await Promise.all(allkey.map(key => GMgetValue(key)));
-                  const [fontSet, excludeSites, domainFontSet, customFonts, monoFonts, monoRules, monoFeature, fontScaleDef, fontOverrideDef, configure] = backendData;
-                  const domainSetDefault = domainFontSet || encrypt(JSON.stringify([]));
+                  const [fontSets, excludeSites, domainFontSets, customFonts, monoFonts, monoRules, monoFeature, fontScaleDef, fontOverrideDef, configure] = backendData;
+                  const domainSetsDefault = domainFontSets || encrypt(JSON.stringify([]));
                   const customFontsDefault = customFonts || encrypt(JSON.stringify([]));
                   const monoFontsDefault = monoFonts || "";
                   const monoRulesDefault = monoRules || "";
@@ -4177,9 +4214,9 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   const db = {
                     db_R: inspectLicense()?.keycode().concat(encrypt(def.var.scriptName)),
                     db_0: encrypt(String(new Date())),
-                    db_1: fontSet,
+                    db_1: fontSets,
                     db_2: excludeSites,
-                    db_3: domainSetDefault,
+                    db_3: domainSetsDefault,
                     db_4: customFontsDefault,
                     db_5: configure,
                     db_6: monoFontsDefault,
@@ -4356,6 +4393,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             if (isReload === false && isPreview) restoreSavedPreview();
           }
           FrDialogBox.closure();
+          document.removeEventListener("blur", stopPropagations, true);
           isReload === true && refresh();
         }
 
@@ -4569,7 +4607,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           function shadowRootNodeInsertCss(host, syncStyle) {
             if (host instanceof ShadowRoot) {
               const hostNodeName = getNodeName(host.host);
-              const curSyncStyle = syncStyle ? `:host(${hostNodeName}){--fr-no-stroke:0px transparent}${syncStyle}` : ``;
+              const curSyncStyle = syncStyle ? `:host(${hostNodeName}){--fr-no-stroke:0px transparent;--fr-fix-shadow:${textShadowFix}}${syncStyle}` : ``;
               applyStylesToShadowRoot(host, curSyncStyle, `${hostNodeName}-fixboldstroke`);
             }
           }
@@ -4606,6 +4644,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               subtreeNodes.forEach(item => {
                 const shadow = item.shadowRoot;
                 if (shadow) {
+                  pendingNodes.push(shadow.host);
                   shadowRootNodeInsertCss(shadow, Fixedstyle);
                   obs.observe(shadow, def.var.fixCfg);
                   observeNodeSet.add(shadow);
@@ -4617,9 +4656,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           }
 
           function mutationListMonitor(treeNodes, obs) {
-            for (const treeNode of treeNodes) {
-              processNodes(treeNode, obs);
-            }
+            for (const treeNode of treeNodes) processNodes(treeNode, obs);
             return treeNodes.size;
           }
 
@@ -4694,8 +4731,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           function compareNodeLists(nodeList1, nodeList2) {
             if (nodeList1.length !== nodeList2.length) return false;
             for (let i = 0; i < nodeList1.length; i++) {
-              const [node1, node2] = [nodeList1[i], nodeList2[i]];
-              if (compareNodes(node1, node2)) return false;
+              if (compareNodes(nodeList1[i], nodeList2[i])) return false;
             }
             return true;
           }
@@ -4721,21 +4757,26 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             }
           }
 
+          function handleHistoryEvents() {
+            const historyEventFn = event => correctBoldPassive(event);
+            deBounce({ fn: historyEventFn, timer: "history", delay: 16.7 })(w.event);
+          }
+
           function observeBoldElements() {
             addLoadEvents.addFinalFn(correctBoldPassive);
-            w.addEventListener("pushState", correctBoldPassive);
-            w.addEventListener("replaceState", correctBoldPassive);
-            document.addEventListener("mouseover", handlingMouseEvents);
-            document.addEventListener("mouseout", handlingMouseEvents);
+            w.addEventListener("pushState", handleHistoryEvents);
+            w.addEventListener("replaceState", handleHistoryEvents);
+            document.addEventListener("mouseover", handleMouseEvents);
+            document.addEventListener("mouseout", handleMouseEvents);
             def.var.fixObs.observe(document, def.var.fixCfg);
             DEBUG(`CorrectBold.stroke.Active${IS_IN_FRAMES}:`, { eventType: "init" });
             observeNodeSet.add(document);
           }
 
-          function correctBoldPassive(target = document) {
+          function correctBoldPassive(event = w.event, target = document) {
             try {
               const els = querySelectorAllShadows(`:not(${def.const.queryString})`, target);
-              DEBUG(`CorrectBold.stroke.Passive${IS_IN_FRAMES}:`, { eventType: Scenes ?? w.event?.type });
+              DEBUG(`CorrectBold.stroke.Passive${IS_IN_FRAMES}:`, { eventType: Scenes ?? event?.type ?? "unknown" });
               if (Permit !== false) getAndProcessBoldStyles(els);
             } catch (e) {
               ERROR("correctBoldPassive:", e.message);
@@ -4777,16 +4818,17 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           }
 
           function hasFixedBoldFlagChange(newValue, oldValue, className) {
-            if (!oldValue.includes(className) && newValue.includes(className)) return true;
-            if (oldValue.includes(className) && !newValue.includes(className)) return true;
+            const [parsedNewValue, parsedOldValue] = [String(newValue), String(oldValue)];
+            if (!parsedOldValue.includes(className) && parsedNewValue.includes(className)) return true;
+            if (parsedOldValue.includes(className) && !parsedNewValue.includes(className)) return true;
           }
 
           function handleCallbackLimit(observer) {
             observer.disconnect();
-            w.removeEventListener("pushState", correctBoldPassive);
-            w.removeEventListener("replaceState", correctBoldPassive);
-            document.removeEventListener("mouseover", handlingMouseEvents);
-            document.removeEventListener("mouseout", handlingMouseEvents);
+            w.removeEventListener("pushState", handleHistoryEvents);
+            w.removeEventListener("replaceState", handleHistoryEvents);
+            document.removeEventListener("mouseover", handleMouseEvents);
+            document.removeEventListener("mouseout", handleMouseEvents);
             delete def.var.fixObs && observeNodeSet.clear();
             delete def.var.fixCfg && exNodeSet.clear();
           }
@@ -4814,30 +4856,22 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           }
 
           function isBold(element) {
-            if (styleMap.has(element)) {
-              return styleMap.get(element).fontWeight >= 600;
-            }
+            if (styleMap.has(element)) return styleMap.get(element).fontWeight >= 600;
             const style = gCS(element);
             styleMap.set(element, style);
             return style.fontWeight >= 600;
           }
 
           function getBoldStyles(elementsArray) {
-            const boldStyles = [];
             const elements = uniq(elementsArray);
-            for (let node of elements) {
-              boldStyles.push({ isbold: isBold(node), node });
-            }
+            const boldStyles = elements.map(node => ({ isbold: isBold(node), node }));
             return boldStyles;
           }
 
           function getAndProcessBoldStyles(nodes) {
             if (!Array.isArray(nodes) || nodes.length === 0) return;
             const items = getBoldStyles(nodes);
-            for (let i = 0; i < items.length; i++) {
-              const checkedNode = items[i];
-              boldFixedHandler({ checkedNode });
-            }
+            items.forEach(checkedNode => void boldFixedHandler({ checkedNode }));
           }
 
           function boldFixedHandler({ checkedNode, uncheckedNode }) {
@@ -4852,7 +4886,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           }
 
           function handleLazyLoad(func) {
-            lazyLoadFlag ? setTimeout(func, 0) : func();
+            lazyLoadFlag ? raf.setTimeout(func, 0) : func();
           }
 
           function mouseEventsHandler(event) {
@@ -4864,10 +4898,10 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               return;
             }
             const delayTime = (parseFloat(transitionDelay) || 0 + parseFloat(transitionDuration) || 0) * 1e3;
-            setTimeout(() => void boldFixedHandler({ uncheckedNode: target }), delayTime);
+            setTimeout(boldFixedHandler, delayTime, { uncheckedNode: target });
           }
 
-          function handlingMouseEvents(event) {
+          function handleMouseEvents(event) {
             const type = event.type;
             event.stopPropagation();
             mouseEventHandlers[type] = mouseEventHandlers[type] || deBounce({ fn: mouseEventsHandler, delay: 16.7, timer: type, immed: type === "mouseout" });
@@ -5067,14 +5101,11 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               switch (type) {
                 case "childList":
                   for (const node of mutation.addedNodes) {
-                    const nodeName = getNodeName(node);
-                    if (nodeName === "iframe") insertStyleInFrames({ condition: "addedNodes", nodeArray: [node] });
+                    if (getNodeName(node) === "iframe") insertStyleInFrames({ condition: "addedNodes", nodeArray: [node] });
                   }
                   break;
                 case "attributes":
-                  if (getNodeName(target) === "iframe" && mutation.attributeName === "src" && target.src) {
-                    insertStyleInFrames({ condition: type, nodeArray: [target] });
-                  }
+                  if (getNodeName(target) === "iframe" && mutation.attributeName === "src" && target.src) insertStyleInFrames({ condition: type, nodeArray: [target] });
                   break;
               }
             });
@@ -5203,7 +5234,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           return { exSite, exSitesIndex };
         },
         async (isFontsize, isFixViewport) => {
-          let fontValue, domainValue, domainValueIndex, fontSelect, fontFace, fontSmooth, fontSize, fixViewport, fontStroke, fixStroke, fontShadow, shadowColor, fontCSS, fontEx;
+          let fontValue, domainValue, domainValueIndex;
+          let fontSelect, fontFace, fontSmooth, fontSize, fixViewport, fontStroke, fixStroke, fixShadow, fontShadow, shadowColor, fontCSS, fontEx;
           const [savedDomains, savedFonts] = await Promise.all(["_DOMAINS_FONTS_SET_", "_FONTS_SET_"].map(key => GMgetValue(key)));
           const isMatchEditorialSite = matchEditorialSites(INITIAL_VALUES.editorialSites);
           if (def.var.JSONValid !== true) JSON = getRawJSONInNewContext(w);
@@ -5221,20 +5253,6 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             def.var.domainIndex = domainValueIndex;
           }
           if (!savedFonts) {
-            const fontSetData = {
-              fontSelect: INITIAL_VALUES.fontSelect,
-              fontFace: INITIAL_VALUES.fontFace,
-              fontSmooth: INITIAL_VALUES.fontSmooth,
-              fontSize: INITIAL_VALUES.fontSize,
-              fixViewport: INITIAL_VALUES.fixViewport,
-              fontStroke: INITIAL_VALUES.fontStroke,
-              fixStroke: INITIAL_VALUES.fixStroke,
-              fontShadow: INITIAL_VALUES.fontShadow,
-              shadowColor: INITIAL_VALUES.shadowColor,
-              fontCSS: INITIAL_VALUES.fontCSS,
-              fontEx: INITIAL_VALUES.fontEx,
-            };
-            saveData("_FONTS_SET_", fontSetData);
             fontSelect = INITIAL_VALUES.fontSelect;
             fontFace = INITIAL_VALUES.fontFace;
             fontSmooth = INITIAL_VALUES.fontSmooth;
@@ -5243,9 +5261,11 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             fontStroke = INITIAL_VALUES.fontStroke;
             fixStroke = INITIAL_VALUES.fixStroke;
             fontShadow = INITIAL_VALUES.fontShadow;
+            fixShadow = INITIAL_VALUES.fixShadow;
             shadowColor = INITIAL_VALUES.shadowColor;
             fontCSS = INITIAL_VALUES.fontCSS;
             fontEx = INITIAL_VALUES.fontEx;
+            saveData("_FONTS_SET_", { fontSelect, fontFace, fontSmooth, fontSize, fixViewport, fontStroke, fixStroke, fontShadow, fixShadow, shadowColor, fontCSS, fontEx });
           } else {
             try {
               fontValue = JSON.parse(decrypt(savedFonts));
@@ -5261,8 +5281,9 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               fontSize = !isFontsize ? Number(domainValue[domainValueIndex].fontSize ?? 1) : isMatchEditorialSite ? 1 : Number(domainValue[domainValueIndex].fontSize) || 1;
               fixViewport = isFixViewport && fontSize !== 1 && Boolean(domainValue[domainValueIndex].fixViewport ?? true);
               fontStroke = Number(domainValue[domainValueIndex].fontStroke) || 0;
-              fixStroke = Boolean(IS_REAL_BLINK && fontStroke && (domainValue[domainValueIndex].fixStroke ?? true));
+              fixStroke = Boolean(IS_CAUSED_BOLDSTROKEERROR && fontStroke && (domainValue[domainValueIndex].fixStroke ?? true));
               fontShadow = Number(domainValue[domainValueIndex].fontShadow) || 0;
+              fixShadow = Boolean(IS_CAUSED_BOLDSHADOWERROR && fixStroke && fontShadow && (domainValue[domainValueIndex].fixShadow ?? false));
               shadowColor = convertHtmlToText(domainValue[domainValueIndex].shadowColor);
               fontCSS = convertHtmlToText(domainValue[domainValueIndex].fontCSS) || INITIAL_VALUES.fontCSS;
               fontEx = convertHtmlToText(domainValue[domainValueIndex].fontEx) || "";
@@ -5273,14 +5294,15 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               fontSize = !isFontsize ? Number(fontValue.fontSize ?? 1) : isMatchEditorialSite ? 1 : Number(fontValue.fontSize) || 1;
               fixViewport = isFixViewport && fontSize !== 1 && Boolean(fontValue.fixViewport ?? true);
               fontStroke = Number(fontValue.fontStroke) || 0;
-              fixStroke = Boolean(IS_REAL_BLINK && fontStroke && (fontValue.fixStroke ?? true));
+              fixStroke = Boolean(IS_CAUSED_BOLDSTROKEERROR && fontStroke && (fontValue.fixStroke ?? true));
               fontShadow = Number(fontValue.fontShadow) || 0;
+              fixShadow = Boolean(IS_CAUSED_BOLDSHADOWERROR && fixStroke && fontShadow && (fontValue.fixShadow ?? false));
               shadowColor = convertHtmlToText(fontValue.shadowColor);
               fontCSS = convertHtmlToText(fontValue.fontCSS) || INITIAL_VALUES.fontCSS;
               fontEx = convertHtmlToText(fontValue.fontEx) || "";
             }
           }
-          return { fontSelect, fontFace, fontSmooth, fontSize, fixViewport, fontStroke, fixStroke, fontShadow, shadowColor, fontCSS, fontEx, isMatchEditorialSite };
+          return { fontSelect, fontFace, fontSmooth, fontSize, fixViewport, fontStroke, fixStroke, fixShadow, fontShadow, shadowColor, fontCSS, fontEx, isMatchEditorialSite };
         },
         async () => {
           const defaultScaleRule = {
@@ -5340,11 +5362,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         ["FindIndex", findIndexProxy],
         ["Remove", removeProxy],
       ],
-      __protos__: {
-        a: Array.prototype.slice,
-        o: Object.prototype.toString,
-        f: Function.prototype.toString,
-      },
+      __protos__: { a: Array.prototype.slice, o: Object.prototype.toString, f: Function.prototype.toString },
     };
 
     function defineMethod(property, methodFunction) {
