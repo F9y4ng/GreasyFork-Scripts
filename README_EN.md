@@ -25,13 +25,13 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data promptly and don't use backup files from unknown sources!
 
-### version 2024.05.04.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2024.06.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ Fixed color & shadow render issues when selecting.
-@ Fixed scrollbar style parsing issue in Blink V120+.
-@ Fixed stuck issue when dynamic loading shadowRoot.
-@ Optimize the rendering of code fonts under Firefox.
+@ Fixed issue caused by event hijacking on some sites.
+@ Improved bold fixed slowly rendering on lazyload.
+@ Fixed Blink v123+ rendering issue for bold shadow. (Read Wiki for details)
+@ Fixed fontlist losing font data when reset/restore.
 @ Fixed known issues, optimize code, optimize style.
 ```
 
@@ -45,8 +45,9 @@
 <summary>Click to view - How to deal with script delayed loading?</summary>
 
 **Temporary solutions for script loading delays, or styles not loading correctly:**
+* For **Tampermonkey v5.2 and later** (Manifest V3): Go to the **Dashboard**, enter the **Settings** tab, pull down to "**Security**", and change "**Content Script API:**" to `UserScripts API Dynamic`.
 
-* For **Tampermonkey**: Go to the **Dashboard**, enter the **Settings** tab, scroll down to "**Experimental**", and change **the injection mode** to "**Instant**".
+* For **Tampermonkey v5.1.1 and older**: Go to the **Dashboard**, enter the **Settings** tab, scroll down to "**Experimental**", and change **the injection mode** to "**Instant**".
 
 * For **Violentmonkey**: Go to the **Dashboard**, enter the **Settings** tab, find and check "**Synchronous page mode**" in **Advanced - General**.
 
@@ -133,10 +134,11 @@ Font scaling (experimental) BETA Version, **OFF by default**, turn on font scali
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-### version 2024.05.04.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2024.06.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Refactor the code, fix some hidden bugs, optimize style.
+@ Fixed the issue where Google search pagination links opened in a new window.
+@ Fixed known issues, optimize code and style.
 ```
 
 ### The latest feature introduction
