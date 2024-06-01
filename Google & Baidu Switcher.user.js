@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜索引擎助手
 // @name:ru            Поисковый помощник
 // @name:ja            優雅な検索エンジン助手
-// @version            2024.05.04.1
+// @version            2024.06.01.1
 // @author             F9y4ng
 // @description        "Elegant Search Engine Assistant" facilite le passage d'un moteur de recherche à l'autre, prend en charge la personnalisation des moteurs de recherche couramment utilisés, la mise en évidence des mots-clés, la suppression de la redirection des liens de recherche, la protection des publicités des résultats de recherche, le réglage des paramètres visuels, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
 // @description:en     "Elegant search engine assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
@@ -61,7 +61,8 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               重构代码，修复一些深藏不露的BUG，优化样式。 (Refactor the code, fix some hidden bugs, optimize style.)
+// @note               {"CN":"修正Google搜索分页链接开新窗口的问题。","EN":"Fixed the issue where Google search pagination links opened in a new window."}
+// @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed known issues, optimize code and style."}
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -178,10 +179,10 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
       },
       var: {
         undef: void 0,
-        disappear: "ͽZ2tB4nͼ",
-        translucent: "ͼX5b8Zqͽ",
+        disappear: "ͽXa40C9nͼ",
+        translucent: "ͼmD9X3jsͽ",
         securityPolicy: false,
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.05.04.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.06.01.0",
         scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       },
       url: {
@@ -793,7 +794,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           body.appendChild(content);
           if (this.options.scroll?.maxHeight) {
             body.style.overflowY = "auto";
-            body.style.maxHeight = `min(calc(95vh - 100px), ${this.options.scroll.maxHeight}px)`;
+            body.style.maxHeight = `min(calc(92vh - 50px), ${this.options.scroll.maxHeight}px)`;
             if (this.options.scroll?.showOnHover) body.style.visibility = "hidden";
           }
           return body;
@@ -1433,7 +1434,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               },
               keywords: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
               antiRedirectFn: function () {
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "google_ar" })("#rcnt div[data-hveid^='C'][data-hveid$='AA'] :not(h3.ob5Hkd)>a:not(.k8XOCe)", "Google", {
+                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "google_ar" })("#rcnt div[data-hveid^='C'][data-hveid$='AA'] :not(h3.ob5Hkd)>a:not(.k8XOCe,.fl,#pnnext)", "Google", {
                   useNewTab: true,
                   cleanAttributes: ["ping", "onmouseover"],
                   removeDataSet: true,
@@ -1733,7 +1734,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               imageType: ["isch"],
               splitTypeName: "tbm",
               mainSelector: "button[data-testid='qb_submit_button']",
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:-8px 0 0;height:36px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:44px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:44px}#${def.const.leftButton} input{margin:0;padding:0;height:44px;min-width:110px;border:1px solid #4a72f5;border-bottom-left-radius:12px;border-top-left-radius:12px;background-color:#4a72f5;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0;height:44px;min-width:110px;border:1px solid #4a72f5;border-top-right-radius:12px;border-bottom-right-radius:12px;background-color:#4a72f5;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #7897fc;background-color:#7897fc;color:#fff}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #668aff;background-color:#668aff}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#7897fc;color:#3c3c3e;font-weight:600}}`,
+              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:-9px 0 0;height:34px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:44px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:44px}#${def.const.leftButton} input{margin:0;padding:0;height:44px;min-width:110px;border:1px solid #4a72f5;border-bottom-left-radius:12px;border-top-left-radius:12px;background-color:#4a72f5;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0;height:44px;min-width:110px;border:1px solid #4a72f5;border-top-right-radius:12px;border-bottom-right-radius:12px;background-color:#4a72f5;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #7897fc;background-color:#7897fc;color:#fff}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #668aff;background-color:#668aff}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#7897fc;color:#3c3c3e;font-weight:600}}`,
               resultListProp: {
                 qs: `div[data-testid="app-mainline"]>div[data-eventappname][data-testid]>ul[data-testid="web-results"],div[data-testid="Github Issues-app"]>ul>li`,
                 delay: 10,
@@ -1956,7 +1957,6 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               `.${def.notice.card}__input{position:absolute;display:block;margin:0;padding:0;outline:none;border:none;background:none;-webkit-appearance:none}.${def.notice.card}__input:checked ~ .${def.notice.card}__body{--shadow:0 0 0 3px var(--card-shadow);}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox{--chack-bg:var(--background-chackbox);--chack-border:#fff;--chack-scale:1;--chack-opacity:1;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox--svg{--stroke-color:#fff;--stroke-dashoffset:0;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover:after{--opacity-bg:0;}.${def.notice.random}_iconText{color:#333}.${def.notice.random}_iconText:hover{color:crimson}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body{cursor:not-allowed;opacity:0.5;}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body:active{--scale:1;}.${def.notice.card}__body{position:relative;display:grid;overflow:hidden;width:var(--card-witght);height:var(--card-height);border-radius:var(--card-radius);background:var(--background);box-shadow:var(--shadow,1px 1px 3px 1px #ccc);cursor:pointer;-webkit-transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:transform var(--transition),box-shadow var(--transition);transition:transform var(--transition),box-shadow var(--transition),-webkit-transform var(--transition);-webkit-transform:scale(var(--scale,1)) translateZ(0);transform:scale(var(--scale,1)) translateZ(0);grid-auto-rows:calc(var(--card-height) - var(--header-height)) auto}` +
               `.${def.notice.card}__body:active{--scale:0.96;}.${def.notice.card}__body-cover-image{position:absolute;top:8px;left:10px;z-index:100;width:32px;height:32px}.${def.notice.card}__body-cover-image span.${def.notice.favicons}{display:block;width:32px;height:32px}.${def.notice.card}__body-cover-chackbox{position:absolute;top:10px;right:10px;z-index:1;width:28px;height:28px;border:2px solid var(--chack-border,#fff);border-radius:50%;background:var(--chack-bg,var(--background-chackbox));opacity:var(--chack-opacity,0);transition:transform var(--transition),opacity calc(var(--transition)*1.2) linear,-webkit-transform var(--transition) ease;-webkit-transform:scale(var(--chack-scale,0));transform:scale(var(--chack-scale,0))}.${def.notice.card}__body-cover-chackbox--svg{display:inline-block;visibility:visible!important;margin:8px 0 0 7px;width:13px;height:11px;vertical-align:top;-webkit-transition:stroke-dashoffset .4s ease var(--transition);transition:stroke-dashoffset .4s ease var(--transition);fill:none;stroke:var(--stroke-color,#fff);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16px;stroke-dashoffset:var(--stroke-dashoffset,16px)}.${def.notice.card}__body-header{padding:4px 10px 6px 50px;height:var(--header-height);background:var(--background)}.${def.notice.card}__body-header-title{margin-bottom:0!important;color:var(--text-headline);font-weight:700!important;font-size:15px!important}.${def.notice.card}__body-header-subtitle{color:var(--text-color);font-weight:500;font-size:13px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{display:grid;grid-template-columns:repeat(1, 1fr);grid-gap:10px;}.${def.notice.gberror}{display:block;margin:0 0 4px -6px;padding:6px;width:max-content;border:1px dashed #ffb78c;border-radius:4px;color:#ffb78c}`
           );
-
           def.const.iconbg = iconBase64Data ? `url('${iconBase64Data}')` : `url('${def.url.backupIcon}'),url('${yandexIconsAPIUrl}')`;
           def.const.button = `${currentSite.siteTypeID === newSiteType.GOOGLE ? "<span jsname='s1VaRe' class='ACRAdd M2vV3'></span>" : ""}
             <span id="${def.const.leftButton}" sn="${selectedSite[0].siteTypeID}">
@@ -2375,10 +2375,10 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               const textarea = qS(`.${def.notice.random}_filter_textarea .${def.notice.random}_filter_content`);
               if (this.checked) {
                 textarea.classList.remove(def.notice.readonly);
-                textarea.removeAttribute("readonly", true);
+                textarea.removeAttribute("disabled");
               } else {
                 textarea.classList.add(def.notice.readonly);
-                textarea.setAttribute("readonly", true);
+                textarea.setAttribute("disabled", "");
               }
             }
 
@@ -2448,7 +2448,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
             }
 
             function openHomePage() {
-              const hash = IS_CHN ? "#%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B" : "index_en.html#searchengine-assistants";
+              const hash = IS_CHN ? "#%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B" : "index_en.html#search-engine-assistant";
               GMopenInTab(`${def.url.homepage}${hash}-google--baidu-switcheruserjs`, false);
             }
 
@@ -3246,21 +3246,20 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
         },
         options => {
           try {
-            const { title, text, type, scroll, width, closeWith, newestOnTop, progressBar, timeout, callbacks, position } = options;
-            const parseOptions = {
-              title: title || "",
-              text: text || "",
-              type: type || def.notice.success,
-              width: width || 400,
-              newestOnTop: newestOnTop || false,
-              closeWith: closeWith || ["button"],
-              progressBar: progressBar ?? true,
-              timeout: timeout ?? 2e3,
-              scroll: scroll || { maxHeight: 400, showOnHover: true },
-              callbacks: callbacks ? { ...callbacks } : {},
-              position: position || "bottomRight",
+            const parsedOptions = {
+              title: options.title || "",
+              text: options.text || "",
+              type: options.type || def.notice.success,
+              width: options.width || 400,
+              newestOnTop: options.newestOnTop || false,
+              closeWith: options.closeWith || ["button"],
+              progressBar: options.progressBar ?? true,
+              timeout: options.timeout ?? 2e3,
+              scroll: options.scroll || { maxHeight: 400, showOnHover: true },
+              callbacks: options.callbacks ? { ...options.callbacks } : {},
+              position: options.position || "bottomRight",
             };
-            const noticeX = new NoticeX(parseOptions).show();
+            const noticeX = new NoticeX(parsedOptions).show();
             return noticeX;
           } catch (e) {
             ERROR("GMnotification:", e.message);
@@ -3276,11 +3275,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
         ["Some", someProxy],
         ["Find", findProxy],
       ],
-      __protos__: {
-        a: Array.prototype.slice,
-        s: Object.prototype.toString,
-        h: Object.prototype.hasOwnProperty,
-      },
+      __protos__: { a: Array.prototype.slice, s: Object.prototype.toString, h: Object.prototype.hasOwnProperty },
     };
 
     function defineMethod(property, methodFunction) {
