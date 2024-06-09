@@ -96,7 +96,7 @@
 - **已知问题一：** 由于 Firefox (Gecko 内核) 的兼容性原因，仅修正了脚本内部坐标偏移问题，但会对部分网站样式、功能兼容不足，请根据需求酌情使用。**强烈建议您**：使用 Firefox 自身缩放功能替代(`Ctrl++`, `Ctrl+-`)。
 - **已知问题二：** 针对视口单位 `vw, vh, vmin, vmax` 的修正已完成，解决了在字体缩放后视口单位长度不准确的问题。该功能为**实验性功能**，默认关闭，可在**高级核心功能设置**中开启。
   1. 部分站点因配置相关 CORS 策略，会使浏览器阻止对外部样式的获取（控制台 console 会看到相应报错，如：`No 'Access-Control-Allow-Origin' header is present on the requested resource.`），此时，可在扩展商店安装并开启 [Moesif Origin & CORS Changer](https://chromewebstore.google.com/detail/moesif-origin-cors-change/digfbfaphojjndkpccljibejjbppifbc)。
-  2. 在部分应用了 CSP 策略的站点，浏览器可能会阻止内部样式的加载和解析（控制台 console 会看到相应的报错，如：`Refused to apply inline style because it violates the following Content Security Policy directive: "default-src 'self'".`），此时，可在扩展商店安装并开启 [Disable-CSP](https://chromewebstore.google.com/detail/disable-csp/hgegihapiofjgmmgigbblnjaicgjhoko)
+  2. 在部分应用了 CSP 策略的站点，浏览器可能会阻止内部样式的加载和解析（控制台 console 会看到相应的报错，如：`Refused to apply inline style because it violates the following Content Security Policy directive: "default-src 'self'".`），此时，可在扩展商店安装并开启 [Allow CSP: Content-Security-Policy](https://chromewebstore.google.com/detail/allow-csp-content-securit/hnojoemndpdjofcdaonbefcfecpjfflh)
   3. 使用其他CSP扩展也可解决此问题，如介意安全问题或有其他顾虑，请按以下方法关闭该功能：
      1. 在**字体渲染设置界面**内取消勾选**视口修正**选项，或将**字体缩放**设置为`1.0`后保存为独享数据。
      2. 在**高级核心功能设置**中单独关闭**视口单位修正**选项，或直接关闭**字体缩放功能**。（全局关闭）
