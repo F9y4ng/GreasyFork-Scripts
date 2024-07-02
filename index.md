@@ -121,7 +121,7 @@
 ## 最新功能介绍
 - 新增搜索结果关键词高效过滤功能，杜绝内容农场与垃圾信息。`New!`
 - 新增去除搜索结果及侧栏广告功能，优化广告屏蔽效率。
-- 新增自定义搜索引擎选取功能（包含：百度、Google、Bing、Duckduckgo、搜狗、无追搜索、Yandex、360 搜索、头条搜索、百度开发者、Ecosia、Yahoo、You、Startpage、Brave、Yep、Swisscows等搜索引擎）
+- 新增自定义搜索引擎选取功能（包含：百度、Google、Bing、Duckduckgo、搜狗、Qwant、Yandex、360 搜索、头条搜索、百度开发者、Ecosia、Yahoo、You、Startpage、Brave、Yep、Swisscows、searXNG等搜索引擎）
 - 新增搜索结果链接去重定向功能，优化隐私参数屏蔽功能。
 - 更智能的更新检测功能。
 
