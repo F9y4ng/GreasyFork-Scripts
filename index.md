@@ -63,7 +63,7 @@
 * [分享：关于分别设置英文字体和中文字体的方法。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83)
 * [如何正确地对不同显示器、浏览器设定字体渲染参数？](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160)
 
-> ### 如何提供脚本错误日志？
+> ### 如何提供脚本错误日志？ `New`
 >
 > 1. 先打开脚本调试开关：
 >    - v2023.04.08.1以上版本，向URL添加`?whoami=F9y4ng`或`&whoami=F9y4ng`，开启调试模式。
