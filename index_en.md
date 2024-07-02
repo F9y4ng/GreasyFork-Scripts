@@ -23,7 +23,7 @@
 # Font Rendering (Customized) `Font Rendering.user.js`
  　[[View source code](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Font%20Rendering.user.js)] 　[[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)] 　[[Visit GreasyFork](https://greasyfork.org/scripts/416688)] _（Issues aren't processed at GreasyFork）_
 
-**Introduction:** Without MacType, improve browser displaying more textured. "Microsoft Yahei" is used by default. For browser displaying, the script provides advanced features such as font rewriting, smoothing, scaling, stroke, shadow, special style elements, custom monospaced, etc. It can configure by "click Script Manager icon" or "use hotkeys" to call out the setup. The script is already compatible with major browsers and userscript managers, also commonly used Greasemonkey scripts and browser extensions.
+**Introduction:** Enhance browser’s font rendering without installing MacType. This script offers a high-quality, customizable experience with default ‘Microsoft YaHei’ font. It provides advanced features like font rewriting, smoothing, scaling, stroking, shadowing, and filtering of special style elements. It supports global and personalized rendering, compatible with most mainstream browsers, script managers, and common userscripts & browser extensions. Configure parameters via the script manager icon or shortcuts.
 
 * [Before using, please read the introduction in Wiki and the related precautions on this page.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font-Rendering-(Customized))
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
@@ -43,10 +43,9 @@
 
 - The new version of the script has a **built-in default font rendering style**, which is my local configuration and **may not work perfectly on your computer**. Therefore, **it is normal** for the first time to use it if the rendering effect does not reach the desired state. According to the configuration and settings of your own monitor, correct the relevant parameters through the script setting interface to achieve the best display effect.
 - When upgrading from an older version to the latest version, if there are some style issues, you can try to correct it by resetting the data to use the latest rules. however, It is not recommended that you use backup restore for major version (data rebuild) updates, and it is recommended to reconfigure the parameters, save them, and back up the new data again.
+- **Note**: Under Win10/Win11, regardless of high or low resolution, as long as the system or browser applies a zoom ratio of more than 150%, the best rendering effect can be obtained, which is determined by the default rendering mechanism of Windows.
 
-> Note: Under Win10/Win11, regardless of high or low resolution, as long as the system or browser applies a zoom ratio of more than 150%, the best rendering effect can be obtained, which is determined by the default rendering mechanism of Windows.
-
-## How to deal with script loading delay?
+### How to deal with script loading delay?
 
 **Temporary solutions for script loading delays, or styles not loading correctly:**
 
@@ -107,7 +106,7 @@ Font scaling (experimental) BETA Version, **OFF by default**, turn on font scali
 # Search Engine Assistant `Google & Baidu Switcher.user.js`
  　[[View source code](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Google%20%26%20Baidu%20Switcher.user.js)] 　[[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)] 　[[Visit GreasyFork](https://greasyfork.org/scripts/12909)]  _（Issues aren't processed at GreasyFork）_
 
-**Introduction:** "Elegant search engine Assistant" facilitates users to jump between different search engines; supports custom commonly used search engines and search keyword highlighting effects; provides advanced functions such as removing search link redirection, blocking search results advertisements, etc.; it is compatible with well-known search engines such as Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Ecosia, You, Startpage, Brave, etc.
+**Introduction:** "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG and more.
 
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
@@ -122,7 +121,7 @@ Font scaling (experimental) BETA Version, **OFF by default**, turn on font scali
 ## The latest feature introduction
 - Added a new high-efficiency keyword filtering function for search results to eliminate content farms and spam. `New`
 - Added the function of removing search results and sidebar ads to optimize ad blocking efficiency of ad blocking.
-- Added custom search engine selection function (including: Baidu, Google, Bing, Duckduckgo, Sogou, Wuzhuiso, Yandex, 360 Search, Toutiao Search, Baidu Developer, Ecosia, Yahoo, You, Startpage, Brave, Yep, Swisscows)
+- Added custom search engine selection function (including: Baidu, Google, Bing, Duckduckgo, Sogou, Qwant, Yandex, 360 Search, Toutiao Search, Baidu Developer, Ecosia, Yahoo, You, Startpage, Brave, Yep, Swisscows, searXNG)
 - Added the anti-redirection function of search result links and optimized the masking function of privacy parameters.
 - Smarter update detection feature.
 
