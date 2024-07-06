@@ -2717,7 +2717,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                   const formNode = qS(`form#sb_form`);
                   qA(`#b_header .b_searchbox[name="q"]`).forEach(input => {
                     const inputLength = parseFloat(gCS(input).width) || 500;
-                    input.style.maxWidth = `${inputLength - sectionWidth + 60}px`;
+                    input.style.maxWidth = `${inputLength - sectionWidth + 50}px`;
                   });
                   if (textarea) {
                     const inputs = qA(`#${def.const.rndButtonID} input`);
@@ -2738,7 +2738,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                     qA(`#b_header .b_searchbox[name="q"]`).forEach(input => {
                       input.style.maxWidth = "";
                       const inputLength = parseFloat(gCS(input).width) || 500;
-                      input.style.maxWidth = `${inputLength - sectionWidth + 60}px`;
+                      input.style.maxWidth = `${inputLength - sectionWidth + 50}px`;
                     });
                   }).observe(formNode, { attributeOldValue: true, attributeFilter: ["aria-owns"] });
                 },
