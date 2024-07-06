@@ -29,13 +29,13 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2024.06.01.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2024.07.06.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 修正在某些编辑型站点因监听事件劫持造成的问题。
-@ 改进粗体修正在延时加载时渲染时机过慢的问题。
-@ 修正Blink v123+对粗体阴影渲染造成的问题。（推荐阅读Wiki）
-@ 修正字体列表在重置还原数据时已选字体丢失的Bug.
+@ 优化更新脚本的 `MetaString` 的相关信息。
+@ 修正字体缩放后 Discourse 的 sticky 布局失效的问题。
+@ 优化粗体修正 Lazyload 实现方法以减少冲突。[推荐阅读Wiki]
+@ 改进因站点应用 CSP 造成程序无法运行时的处置方案。
 @ 修正一些已知的问题，优化代码，优化样式。
 ```
 
@@ -111,10 +111,16 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2024.06.01.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2024.07.06.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ 修正Google搜索分页链接开新窗口的问题。
+- 删除已失效的无追搜索跳转及相关功能。
++ 新增 SearXNG 搜索引擎的跳转及相关功能。
++ 新增 Qwant 搜索引擎的跳转及相关功能。
+@ 修正 Yandex/Brave 搜索引擎跳转按钮的错误。
+@ 修正 Bing 搜索链接重定向错误及样式异常。
+@ 修正 Tampermonkey5.2.1 去除百度重定向的错误。
+@ 修正 Yahoo 国家子域名下跳转按钮未加载的问题。
 @ 修正一些已知问题，优化代码，优化样式。
 ```
 
