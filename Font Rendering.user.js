@@ -2,15 +2,17 @@
 // @name               字体渲染（自用脚本）
 // @name:zh-CN         字体渲染（自用脚本）
 // @name:zh-TW         字體渲染（自用腳本）
-// @name:ja            フォントレンダリング
 // @name:en            Font Rendering (Customized)
-// @version            2024.06.01.1
+// @name:ko            글꼴 렌더링(자체 스크립트)
+// @name:ja            フォントレンダリング
+// @version            2024.07.06.1
 // @author             F9y4ng
-// @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
-// @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑字体”，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
-// @description:zh-TW  無需安裝MacType，優化瀏覽器字體渲染效果，讓每個頁面的字體變得更有質感。默認使用“微軟雅黑字體”，也可根據喜好自定義其他字體使用。腳本針對瀏覽器字體渲染提供了字體重寫、字體平滑、字體縮放、字體描邊、字體陰影、對特殊樣式元素的過濾和許可、自定義等寬字體等高級功能。腳本支持全局渲染與個性化渲染功能，可通過「單擊腳本管理器圖標」或「使用快捷鍵」呼出配置界面進行參數配置。腳本已兼容絕大部分主流瀏覽器及主流腳本管理器，且兼容常用的油猴腳本和瀏覽器擴展。
-// @description:ja     MacTypeを実装することなく，ブラウザフォントレンダリング効果を最適化し，ページごとのフォントをより質感にする.。デフォルトでは“Microsoft雅黒フォント”を使用しており、好みに応じて他のフォントをカスタマイズして使用することもできます。スクリプトは，ブラウザフォントレンダリングに対して，フォント書き換え，フォント平滑化，フォントスケーリング，フォント描画エッジ，フォント陰影，特殊パターン要素のフィルタリングと許可，カスタマイズなどの広いフォントなどの高度な機能を提供している.。スクリプトは、グローバルレンダリングと個人化レンダリング機能を提供し、“スクリプトマネージャアイコンをクリックする”または“ショートカットキーを使用して”構成インタフェースを呼び出すことでパラメータ構成を行うことができます。スクリプトは，ほとんどの主流ブラウザと主流スクリプトマネージャに対応しており，通常のGreasemonkeyスクリプトやブラウザ拡張に対応している.
-// @description:en     Without MacType, improve browser displaying more textured. "Microsoft Yahei" is used by default. For browser displaying, the script provides advanced features such as font rewriting, smoothing, scaling, stroke, shadow, special style elements, custom monospaced, etc. It can configure by "click Script Manager icon" or "use hotkeys" to call out the setup. The script is already compatible with major browsers and userscript managers, also commonly used Greasemonkey scripts and browser extensions.
+// @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
+// @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
+// @description:zh-TW  無需安裝 MacType，優化瀏覽器字體渲染效果，讓每個頁面的字體變得更有質感。預設使用「微軟雅黑」字體，也可根據喜好自訂其他字體使用。腳本針對瀏覽器字體渲染提供了字體重寫、字體平滑、字體縮放、字體描邊、字體陰影、對特殊樣式元素的過濾和許可、自訂等寬字體等高級功能。腳本支持全局渲染與個性化渲染功能，可通過「點擊腳本管理器圖示」或「使用快捷鍵」呼出配置界面進行參數配置。腳本已兼容絕大部分主流瀏覽器及主流腳本管理器，且兼容常用的油猴腳本和瀏覽器擴展。
+// @description:en     Enhance browser’s font rendering without installing MacType. This script offers a high-quality, customizable experience with default ‘Microsoft YaHei’ font. It provides advanced features like font rewriting, smoothing, scaling, stroking, shadowing, and filtering of special style elements. It supports global and personalized rendering, compatible with most mainstream browsers, script managers, and common userscripts & browser extensions. Configure parameters via the script manager icon or shortcuts.
+// @description:ko     이 스크립트는 MacType을 설치하지 않고도 브라우저의 글꼴 렌더링을 최적화하여 각 페이지의 글꼴을 더 질감 있게 만듭니다. 기본적으로 "Microsoft YaHei"를 사용하며, 사용자의 취향에 따라 다른 글꼴을 사용자 정의할 수 있습니다. 스크립트는 글꼴 재작성, 스무딩, 스케일링, 아웃라인, 그림자, 특수 스타일 요소 필터링 등 고급 기능을 제공합니다. 스크립트 관리자 아이콘을 클릭하거나 단축키를 사용하여 설정 화면을 열 수 있습니다. 대부분의 주요 브라우저와 스크립트 관리자, 일반적인 확장 프로그램과 호환됩니다.
+// @description:ja     このスクリプトは、MacTypeをインストールせずにブラウザのフォントレンダリングを最適化し、各ページのフォントをより質感のあるものにします。デフォルトでは「Microsoft YaHei」を使用し、好みに応じて他のフォントをカスタマイズできます。スクリプトは、フォントの書き換え、スムージング、スケーリング、アウトライン、シャドウ、特殊スタイル要素のフィルタリングなどの高度な機能を提供します。スクリプトマネージャのアイコンをクリックするか、ショートカットを使用して設定画面を呼び出すことができます。ほとんどの主流のブラウザやスクリプトマネージャ、一般的な拡張機能と互換性があります。
 // @namespace          https://openuserjs.org/scripts/f9y4ng/Font_Rendering_(Customized)
 // @icon               https://img.icons8.com/stickers/48/font-style-formatting.png
 // @homepage           https://f9y4ng.github.io/GreasyFork-Scripts/
@@ -138,11 +140,10 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         queryString: `html,head,head *,title,base,meta,style,link,script,noscript,iframe,img,canvas,svg,svg *,defs,symbol,g,path,rect,ellipse,circle,line,text,tspan,textpath,use,image,clippath,mask,pattern,filter,stop,picture,form,object,param,embed,audio,video,source,track,progress,fr-colorpicker,fr-colorpicker *,fr-configure,fr-configure *,fr-dialogbox,fr-dialogbox *,gb-notice,gb-notice *`,
       },
       var: {
-        undef: void 0,
         getScreenCTM: SVGGraphicsElement.prototype.getScreenCTM,
         getClientRects: Element.prototype.getClientRects,
         getBoundingClientRect: Element.prototype.getBoundingClientRect,
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.06.01.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.07.06.0",
         scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
         scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("Rjl5NG5n"),
       },
@@ -150,7 +151,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         introURL: decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRkZvbnQtUmVuZGVyaW5n"),
         fontlistImg: decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjIlMkYwNCUyRjAyJTJGcW9SZldkLmdpZg=="),
         loadingImg: decrypt("aHR0cHMlM0ElMkYlMkZpbWcuemNvb2wuY24lMkZjb21tdW5pdHklMkYwMzhkZGU0NThmOWE4NzRhODAxMjE2MGY3NDE3ZjZlLmdpZg=="),
-        feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRnN1cHBvcnQ="),
+        disableCSP: decrypt("aHR0cHMlM0ElMkYlMkZjaHJvbWV3ZWJzdG9yZS5nb29nbGUuY29tJTJGZGV0YWlsJTJGYWxsb3ctY3NwLWNvbnRlbnQtc2VjdXJpdCUyRmhub2pvZW1uZHBkam9mY2Rhb25iZWZjZmVjcGpmZmxo"),
+        feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? decrypt("aHR0cHMlM0ElMkYlMkZnaXRodWIuY29tJTJGRjl5NG5nJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJGaXNzdWVz"),
         homepage: getMetaValue("homepage") ?? getMetaValue("homepageURL") ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcuZ2l0aHViLmlvJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJG"),
       },
       class: {
@@ -222,6 +224,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         fstroke: generateRandomString(8, "mix"),
         fshadow: generateRandomString(8, "mix"),
         fixStroke: generateRandomString(8, "mix"),
+        lazyload: generateRandomString(8, "mix"),
         fixShadow: generateRandomString(8, "mix"),
         shadowSize: generateRandomString(8, "mix"),
         shadow: generateRandomString(8, "char"),
@@ -384,7 +387,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         });
       }
       _observeElement(node) {
-        this.result.set(def.var.undef, node);
+        this.result.set(void 0, node);
         if (this.callbackSet.size === 0) return Promise.resolve(this.result);
         return new Promise(resolve => {
           const elementObserver = new MutationObserver((mutations, obs) => {
@@ -542,12 +545,13 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
     function createTrustedTypePolicy() {
       const defaultPolicy = { createHTML: string => string };
-      if (typeof w.trustedTypes === "undefined" || typeof w.trustedTypes.createPolicy !== "function") return defaultPolicy;
+      if (typeof w.trustedTypes?.createPolicy !== "function") return defaultPolicy;
       const currentHostName = w.location.hostname;
       const whitelist = [
         { host: "teams.live.com", policy: "goog#html" },
         { host: "github.dev", policy: "safeInnerHtml" },
         { host: "vscode.dev", policy: "safeInnerHtml" },
+        { host: "bing.com", policy: "rwflyoutDefault" },
       ];
       const matchingEntry = whitelist.Find(entry => currentHostName.endsWith(entry.host));
       const policyName = matchingEntry ? matchingEntry.policy : "fr#safeInnerHtml";
@@ -572,8 +576,6 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         CUR_WINDOW_TOP && __console("warn", contextWarnText);
       }
       updateFlagAtRootElement(document.documentElement);
-      const value = new URLSearchParams(w.location.search).get("lazyload");
-      return ["true", "false"].includes(value) && void w.localStorage.setItem("fontrendering_lazyload_flag", value);
 
       function scriptRedundanceError() {
         if (!CUR_WINDOW_TOP) return true;
@@ -891,15 +893,15 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
       /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
       const UPDATE_VERSION_NOTICE = IS_CHN
-        ? `<li class="${def.const.seed}_fix">修正在某些编辑型站点因监听事件劫持造成的问题。</li>
-            <li class="${def.const.seed}_fix">改进粗体修正在延时加载时渲染时机过慢的问题。</li>
-            <li class="${def.const.seed}_fix">修正Blink v123+对粗体阴影渲染造成的问题。<a href="https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89#%E9%99%84%E5%8A%A0%E9%98%B4%E5%BD%B1%E6%A0%B7%E5%BC%8F%E4%BF%AE%E6%AD%A3" target="_blank">#Wiki</a></li>
-            <li class="${def.const.seed}_fix">修正字体列表在重置还原数据时已选字体丢失的Bug.</li>
+        ? `<li class="${def.const.seed}_fix">优化更新脚本的 \`MetaString\` 的相关信息。</li>
+            <li class="${def.const.seed}_fix">修正字体缩放后 Discourse 的 sticky 布局失效的问题。</li>
+            <li class="${def.const.seed}_fix">优化粗体修正 Lazyload 实现方法以减少冲突。[<a href="${def.url.feedback}/../wiki/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89#%E4%BF%AE%E6%AD%A3%E5%BB%B6%E8%BF%9F%E5%8A%A0%E8%BD%BD" target="_blank">Wiki</a>]</li>
+            <li class="${def.const.seed}_fix">改进因站点应用 CSP 造成程序无法运行时的处置方案。</li>
             <li class="${def.const.seed}_fix">修正一些已知的问题，优化代码，优化样式。</li>`
-        : `<li class="${def.const.seed}_fix">Fixed issue caused by event hijacking on some sites.</li>
-            <li class="${def.const.seed}_fix">Improved bold fixed slowly rendering on lazyload.</li>
-            <li class="${def.const.seed}_fix">Fixed Blink v123+ rendering issue for <a href="https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font-Rendering-(Customized)#add-shadow-fix" target="_blank">#bold shadow</a>.</li>
-            <li class="${def.const.seed}_fix">Fixed fontlist losing font data when reset/restore.</li>
+        : `<li class="${def.const.seed}_fix">Optimized the \`MetaString\` information of the script.</li>
+            <li class="${def.const.seed}_fix">Fixed Discourse‘s sticky layout issue when font scaling.</li>
+            <li class="${def.const.seed}_fix">Improved the implementation method of Bold Fix with Lazyload to reduce runtime conflicts. [<a href="${def.url.feedback}/../wiki/Font-Rendering-(Customized)#lazyload" target="_blank">Wiki</a>]</li>
+            <li class="${def.const.seed}_fix">Improved handling of code not running due to CSP.</li>
             <li class="${def.const.seed}_fix">Fixed known issues, optimize code, optimize style.</li>`;
 
       /* INITIALIZE_FONT_LIBRARY */
@@ -950,6 +952,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         fixViewport: true,
         fontStroke: IS_REAL_GECKO ? 0.08 : IS_REAL_BLINK ? 0.015 : 0.0,
         fixStroke: IS_CAUSED_BOLDSTROKEERROR,
+        lazyload: false,
         fontShadow: IS_REAL_GECKO ? 0.36 : 0.75,
         fixShadow: false,
         shadowColor: IS_REAL_GECKO ? "#7C7C7C70" : "#7C7C7CDD",
@@ -977,7 +980,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           `#${def.const.seed}_monospaced_siterules::placeholder,#${def.const.seed}_monospaced_font::placeholder,#${def.const.seed}_monospaced_feature::placeholder{color:#aaa!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} a{color:#0969da;text-decoration:none!important;font-style:inherit}.${def.class.dbm} a:hover{color:#dc143c;text-decoration:underline}.${def.class.dbm} #${def.id.feedback}{box-sizing:content-box;margin:0;padding:2px 10px;width:max-content;height:22px;min-width:auto;font-style:normal;font-size:16px;cursor:pointer}.${def.class.dbm} #${def.id.files}{display:none}.${def.class.dbm} #${def.id.feedback}:hover{color:crimson!important}.${def.class.dbm} #${def.id.feedback}:after{width:0;height:0;background:url('${def.url.loadingImg}') no-repeat -400px -300px;content:""}#${def.id.flcid}{width:max-content;height:max-content;min-width:70px;min-height:32px}#${def.id.maxps}{box-sizing:border-box;padding:4px 5px;width:70px;min-width:70px;border:2px solid #b8860b;border-radius:4px;background:#efefef;color:#333;text-align:center;font:normal 500 16px/150% Impact,Times,serif!important}.${def.class.dbm} ul.${def.class.main}{overflow-x:hidden;box-sizing:content-box;margin:0;padding:5px 0;max-height:255px;overscroll-behavior:contain}#${def.id.globaldisable}{width:max-content;height:max-content;min-width:70px;min-height:32px}#${def.const.seed}_c_w_d_d_{box-sizing:border-box;margin-left:15px;padding:3px 5px;width:max-content;height:max-content;max-width:120px;min-height:30px;border:1px solid #777;border-radius:4px;background-color:#eee;color:#333!important;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_a_w_d_l_>span{margin:0;padding:0 2px;color:#3e3e3e;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_c_w_d_{color:indigo;cursor:help;word-break:break-all}p.${def.const.seed}_exclusion{font:italic 700 24px/150% Candara,'Times New Roman'!important;word-break:break-all}#${def.const.seed}_d_s_{box-sizing:content-box;margin:4px 6px;padding:2px 6px;width:57%;height:22px;outline:none!important;border:2px solid #777;border-radius:4px;font:normal 400 16px/150% ui-monospace,'Roboto Mono','Liberation Mono',Consolas,'Courier New',${INITIAL_VALUES.fontSelect},monospace!important}` +
           `#${def.const.seed}_d_s_s_{box-sizing:border-box;margin:0;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#333!important;outline:none!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_d_s_c_{box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#333!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_d_s_a_{box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#8b0000!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_d_d_{overflow-x:hidden;margin:0!important;padding:0!important;max-height:190px;list-style:none!important;overscroll-behavior:contain}#${def.const.seed}_d_d_ li[id^='${def.const.seed}_d_d_l_']{display:flex;overflow:hidden;margin:0;padding:5px;max-width:364px;color:#555;list-style:none;white-space:nowrap;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,-apple-system,BlinkMacSystemFont!important;justify-content:space-between}#${def.const.seed}_d_d_ span.${def.const.seed}_domainlist{overflow:hidden;margin-right:auto;padding-left:5px;width:85%;text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all}#${def.const.seed}_d_d_ .${def.const.seed}_customdomain{overflow:hidden;margin-left:5px;width:57%;text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all}#${def.const.seed}_custom_Fontlist{box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;max-height:457px;outline:none!important;border:1px solid #999;border-radius:6px;white-space:pre;font:normal 400 14px/150% ui-monospace,'Roboto Mono','Liberation Mono',Consolas,'Courier New',${INITIAL_VALUES.fontSelect},monospace!important;resize:vertical;overscroll-behavior:contain}` +
           `#${def.const.seed}_d_d_ a[id^='${def.const.seed}_d_d_l_s_']{padding:2px;background:0 0;color:#8b0000;font-size:14px!important;cursor:pointer}#${def.const.seed}_exSite_add{font:italic 700 24px/150% Candara,Times New Roman!important;word-break:break-all}#${def.const.seed}_fontoverride_def_array,#${def.const.seed}_fontscale_def_json{box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:0!important;border:1px solid #999;border-radius:6px;white-space:pre;font:normal 400 14px/150% ui-monospace,'Roboto Mono','Liberation Mono',Consolas,'Courier New',${INITIAL_VALUES.fontSelect},monospace!important;resize:vertical;overscroll-behavior:contain}#${def.const.seed}_warning_chn{display:block;margin:-2px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important}#${def.const.seed}_warning_en{display:block;margin:0!important;height:max-content;color:#dc143c;font-size:14px!important}#${def.const.seed}_monospaced_font,#${def.const.seed}_monospaced_feature{box-sizing:border-box;padding:5px;width:380px;outline:0!important;border:1px solid #999;border-radius:6px;font:normal 400 14px/150% ui-monospace,'Roboto Mono','Liberation Mono',Consolas,'Courier New',${INITIAL_VALUES.fontSelect},monospace!important}#${def.const.seed}_monospaced_siterules{box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:140px!important;max-height:256px;outline:0!important;border:1px solid #999;border-radius:6px;white-space:pre;font:normal 400 14px/150% ui-monospace,'Roboto Mono','Liberation Mono',Consolas,'Courier New',${INITIAL_VALUES.fontSelect},monospace!important;resize:vertical;overscroll-behavior:contain;word-break:keep-all!important}.${def.class.dbm} p.${def.const.seed}_mono_notify{display:block;margin-top:10px!important;color:#555;font-size:14px!important}#${def.id.cm}{margin:0 0 8px;width:97%!important;border-bottom:1px groove #ccc}.${def.class.dbm} span.${def.const.seed}_cusmono{color:#555!important;font-weight:700!important}#${def.const.seed}_kbd{display:inline-block;box-sizing:content-box;margin:4px 0 0;padding:3px 10px;width:94%;border:1px solid rgba(175,184,193,.4);border-radius:6px;background-color:#f6f8fa;color:#666;vertical-align:middle;text-align:center;font-size:14px!important}` +
-          `#${def.const.seed}_copy_to_author{overflow-y:auto;margin:0!important;padding:0!important;max-height:300px;list-style-position:outside}#${def.const.seed}_copy_to_author li{padding:2px}.${def.class.dbm} #${def.const.seed}_custom_Fontlist::placeholder{color:#aaa!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;word-break:break-all!important}.${def.class.dbm} #${def.const.seed}_update li{margin:0;padding:1px 0;color:gray;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} .${def.const.seed}_add:before{display:inline;margin:0 4px 0 -10px;content:'+'}.${def.class.dbm} .${def.const.seed}_del:before{display:inline;margin:0 4px 0 -10px;content:'-'}.${def.class.dbm} .${def.const.seed}_fix:before{display:inline;margin:0 4px 0 -10px;content:'@'}.${def.class.dbm} .${def.const.seed}_info{color:#daa520!important;word-break:break-word;}.${def.class.dbm} .${def.const.seed}_info:before{display:inline;margin:0 4px 0 -10px;content:'#'}.${def.class.dbm} .${def.const.seed}_warn{color:#e90000!important;word-break:break-word;}.${def.class.dbm} .${def.const.seed}_warn:before{display:inline;margin:0 4px 0 -10px;content:'!'}.${def.class.dbm} .${def.const.seed}_init{color:#65a16a!important;word-break:break-word;}.${def.class.dbm} .${def.const.seed}_init:before{display:inline;margin:0 4px 0 -10px;content:'$'}.${def.class.dbm} input:focus,.${def.class.dbm} textarea:focus{box-shadow:inset 0 1px 3px rgb(0 0 0/10%),0 0 4px rgb(110 111 112/60%)!important}@-moz-document url-prefix() {.${def.class.dbm} textarea,.${def.class.dbm} ul,#${def.const.seed}_custom_Fontlist,#${def.const.seed}_monospaced_siterules,#${def.const.seed}_fontoverride_def_array,#${def.const.seed}_fontscale_def_json{scrollbar-color:#bbbb #eee1;scrollbar-width:thin}}`,
+          `#${def.const.seed}_copy_to_author{overflow-y:auto;margin:0!important;padding:0!important;max-height:300px;list-style-position:outside}#${def.const.seed}_copy_to_author li{padding:2px}.${def.class.dbm} #${def.const.seed}_custom_Fontlist::placeholder{color:#aaa!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;word-break:break-all!important}.${def.class.dbm} #${def.const.seed}_update li{margin:0;padding:1px 4px;color:gray;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} .${def.const.seed}_add{list-style-type:'\uff0b'}.${def.class.dbm} .${def.const.seed}_del{list-style-type:'\uff0d'}.${def.class.dbm} .${def.const.seed}_fix{list-style-type:'\uff20'}.${def.class.dbm} .${def.const.seed}_info{color:#daa520!important;word-break:break-word;list-style-type:'\u266f'}.${def.class.dbm} .${def.const.seed}_warn{color:#e90000!important;word-break:break-word;list-style-type:'\u2718'}.${def.class.dbm} .${def.const.seed}_init{color:#65a16a!important;word-break:break-word;list-style-type:'\u2691'}.${def.class.dbm} input:focus,.${def.class.dbm} textarea:focus{box-shadow:inset 0 1px 3px rgb(0 0 0/10%),0 0 4px rgb(110 111 112/60%)!important}@-moz-document url-prefix() {.${def.class.dbm} textarea,.${def.class.dbm} ul,#${def.const.seed}_custom_Fontlist,#${def.const.seed}_monospaced_siterules,#${def.const.seed}_fontoverride_def_array,#${def.const.seed}_fontscale_def_json{scrollbar-color:#bbbb #eee1;scrollbar-width:thin}}`,
         frConfigure:
           `:host(#${def.id.configure}){position:fixed!important;top:0;left:0;width:100%;height:100%;background:0 0!important;pointer-events:none;z-index:2147483646}#${def.id.container}{position:absolute;top:10px;right:24px;z-index:99999;overflow-x:hidden;overflow-y:auto;box-sizing:content-box;padding:4px;max-height:calc(100% - 40px);min-height:10%;border-radius:12px;background:#f0f6ff!important;box-shadow:0 0 4px 0 rgb(0 0 0/30%);color:#333;text-align:left;font-weight:700;font-size:16px!important;opacity:0;transition:opacity .5s;width:auto;overscroll-behavior:contain;pointer-events:auto}#${def.id.container}::-webkit-scrollbar{width:10px;height:1px}#${def.id.container}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container}::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container} *{text-shadow:none!important;font-weight:700;font-size:16px;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji,Android Emoji,EmojiSymbols!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}#${def.id.container} fieldset{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;min-height:475px;border:2px groove #67a5df!important;border-radius:10px;background:#f0f6ff!important}#${def.id.container} legend{position:relative!important;float:none!important;display:block!important;visibility:visible!important;box-sizing:content-box;margin:0;padding:0 32px 0 8px;width:auto!important;height:auto!important;border:none!important;background:#f0f6ff!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.container} fieldset ul{margin:0;padding:0;background:#f0f6ff!important}#${def.id.container} ul li{float:none;display:inherit;box-sizing:content-box;margin:3px 0;min-width:-webkit-fill-available;min-width:-moz-available;border:none;background:#f0f6ff!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none}#${def.id.container} ul li:before{display:none}` +
           `#${def.id.container} .${def.class.rotation} svg{visibility:visible!important;overflow:hidden;width:24px;height:24px;vertical-align:initial!important;fill:#67a5df;}#${def.id.container} .${def.class.rotation} svg:hover{cursor:help}#${def.const.seed}_scriptname{display:inline-block;vertical-align:bottom;overflow:hidden;min-width:130px;max-width:225px;text-overflow:ellipsis;white-space:nowrap;font-weight:700!important;-webkit-user-select:all;user-select:all}#${def.const.seed}_scriptname:hover{cursor:help}#${def.id.container} .${def.class.title} .${def.class.guide}{position:absolute;display:inline-block;cursor:pointer}@keyframes rotation{0%{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(1turn)}}.${def.class.title} .${def.class.rotation}{top:auto;right:auto;bottom:auto;left:auto;margin:0;padding:0;width:24px;height:24px;-webkit-transform:rotate(1turn);transform-origin:center 50% 0;animation:rotation 6s linear infinite}#${def.id.container} input:not([type='range'],[type='checkbox']):focus,#${def.id.container} textarea:focus{box-shadow:inset 0 1px 3px rgb(0 0 0/10%),0 0 6px rgb(82 168 236/60%)!important}#${def.id.fontList}{padding:2px 10px 0;min-height:73px}#${def.id.fontFace},#${def.id.fontSmooth}{display:flex!important;padding:2px 10px;width:calc(100% - 18px);height:40px;min-width:auto;align-items:center;justify-content:space-between}#${def.id.fontSize}{padding:2px 10px;height:60px}#${def.id.fontStroke}{padding:2px 10px;height:60px}#${def.id.fontShadow}{padding:2px 10px;height:60px}#${def.id.shadowColor}{display:flex;margin:4px;padding:2px 10px;width:auto;min-height:45px;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}#${def.id.fontCss},#${def.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${def.id.submit}{padding:2px 10px;height:40px}#${def.id.fontList} .${def.class.selector} a{text-decoration:none;font-weight:400}#${def.id.fontList} .${def.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${def.id.fontList} .${def.class.label} span{display:inline-block;overflow:hidden;box-sizing:border-box;padding:5px;width:max-content;height:max-content;max-width:200px;min-width:12px;background:#67a5df;color:#fff;text-overflow:ellipsis;white-space:nowrap;font-weight:400;font-size:16px!important}#${def.id.fontList} .${def.class.close}{width:12px}#${def.id.fontList} .${def.class.close}:hover{border-radius:2px;background-color:#2d7dca;color:tomato}` +
@@ -1323,8 +1326,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             return rules.length > 0 && rules[0].cssText.includes("background-color: rebeccapurple");
           } catch (e) {
             const internalStyleError = IS_CHN
-              ? `站点CSP策略阻止警告:\r\n当前站点CSP阻止内部样式的加载与解析，可尝试通过“Disable-CSP”扩展获取相应权限。`
-              : `CSP Blocking Warning:\r\nThe current site CSP is blocking the loading and parsing of internal styles, get permissions by 'Disable-CSP'.`;
+              ? `站点CSP策略阻止警告:\r\n当前站点CSP阻止内部样式的加载与解析，可尝试通过“Allow CSP: Content-Security-Policy”扩展获取相应权限。`
+              : `CSP Blocking Warning:\r\nThe current site CSP is blocking the loading and parsing of internal styles, get permissions by 'Allow CSP: Content-Security-Policy'.`;
             return __console("error", internalStyleError) ?? false;
           } finally {
             safeRemove(`style#${testId}`, dE);
@@ -1649,14 +1652,14 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         const selectionGeckoCSS = `${selection_IS_PseudoClass}::-moz-selection{color:currentcolor!important;background:#1ebee34a!important}`;
         const selectionWebkitCSS = `${selection_IS_PseudoClass}::selection{color:#fff!important;background:#3367d1de!important}`;
         const selection = textStroke ? (IS_REAL_GECKO ? selectionGeckoCSS : selectionWebkitCSS) : "";
-        const cssExclude = exText && (textShadow || textStroke) ? exSelector.concat("{-webkit-text-stroke:var(--fr-no-stroke)!important;text-shadow:none!important}") : "";
+        const cssExclude = exText && (textShadow || textStroke) ? exSelector + "{-webkit-text-stroke:var(--fr-no-stroke)!important;text-shadow:none!important}" : "";
         const codeFonts = exText ? funcCodefont(exText, fontface_i, CONST_VALUES.fixShadow) : "";
         const noTextShadowCss = IS_CAUSED_BOLDSHADOWERROR && CONST_VALUES.fixShadow ? `;text-shadow:var(--fr-fix-shadow)!important;` : ``;
         const fixBoldTextStyle = IS_CAUSED_BOLDSTROKEERROR && CONST_VALUES.fixStroke ? `.${def.const.boldAttrName}{-webkit-text-stroke:var(--fr-no-stroke)!important${noTextShadowCss}}` : ``;
         const curEmptyConfig = !fontface_i && !smooth_i && !textShadow && !textStroke && fontsize_r === 1;
         const IS_CURRENTSITE_ALLOWED = typeof exSitesIndex === "undefined" && !curEmptyConfig;
         const fontStyle = `${fontFaces}${bodyScalecssText}${inSelector}{${fontFamily}${textShadow}${textStroke}${smoothing}${textrender}}${selection}${cssExclude}${codeFonts}${fixBoldTextStyle}`;
-        const isEditorBlock = Boolean(CONST_VALUES.isMatchEditorialSite);
+        const isEditorBlock = Boolean(CONST_VALUES.isEditorBlock);
         const textShadowFix = `0 0 ${shadow_r}px ${shadow_c.toLowerCase().slice(0, 7).concat("2b")}`;
         const globalCssText = IS_REAL_GECKO && fontface_i ? def.const.style.firefox : "";
         const monoAllowed = _config_data_.isCustomMono ?? false;
@@ -1698,21 +1701,27 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           ? `<label title="修正 Ver 96.0 以上版本的 Blink 浏览器对粗体样式附加描边的渲染错误。默认开启，如出现卡顿问题请关闭之。">粗体修正</label>`
           : `<label title="Fix rendering issues of Blink browsers above Ver 96.0 on bold with text-stroke. ON by default, please turn it off if lagging.">Fix Bold</label>`;
         const fixShadowLabel = IS_CHN
-          ? "修正 Ver 123.0 以上版本的 Blink 浏览器（默认参数）对粗体样式附加阴影效果的渲染错误。该选项默认关闭（随粗体修正关闭），如样式异常请单独关闭之。"
-          : "Fix rendering issues of Blink browsers above Ver 123.0 on bold with text-shadow. OFF by default, Please turn it off if the style is abnormal.";
+          ? "修正 Blink 浏览器 Ver 123.0+ 对粗体样式附加阴影效果的渲染错误，默认关闭。"
+          : "Fix rendering issues of Blink browsers Ver 123.0+ on bold with text-shadow.";
+        const lazyloadLabel = IS_CHN
+          ? "延迟加载修正程序，默认关闭，请注意：仅在出现样式异常或修正冲突时开启。"
+          : "Lazy loading the fixer, Only turn it on when style loading error or conflict.";
         const tFixShadowHTML = IS_CAUSED_BOLDSHADOWERROR
-          ? `<div id="${def.id.fshadow}">
-              <div class="${def.id.fshadow}-label">
-                <span>${IS_CHN ? "附加阴影样式修正：" : "Add Shadow Fix: "}</span>
-                <input type="checkbox" class="${def.class.checkbox}" id="${def.id.fixShadow}" ${CONST_VALUES.fixShadow ? "checked" : ""} ${CONST_VALUES.fixStroke ? "" : "disabled"} />
-                <label for="${def.id.fixShadow}" ${CONST_VALUES.fixStroke ? "" : "style='filter:grayscale(1)'"}></label>
-              </div>
-              <div class="${def.id.fshadow}-text">${fixShadowLabel}</div>
-            </div>`
+          ? `<div id="${def.id.fshadow}-shadow-label" class="${def.id.fshadow}-label">
+              <span>${IS_CHN ? "附加阴影样式修正：" : "Add Shadow Fix: "}</span>
+              <input type="checkbox" class="${def.class.checkbox}" id="${def.id.fixShadow}" ${CONST_VALUES.fixShadow ? "checked" : ""} ${CONST_VALUES.fixStroke ? "" : "disabled"} />
+              <label for="${def.id.fixShadow}" ${CONST_VALUES.fixStroke ? "" : "style='filter:grayscale(1)'"}></label></div>
+            <div id="${def.id.fshadow}-shadow-text" class="${def.id.fshadow}-text">${fixShadowLabel}</div>`
           : ``;
+        const tLazyloadHTML = `<div class="${def.id.fshadow}-label">
+          <span>${IS_CHN ? "启用修正延迟加载：" : "Use lazy loading: "}</span>
+          <input type="checkbox" class="${def.class.checkbox}" id="${def.id.lazyload}" ${CONST_VALUES.lazyload ? "checked" : ""} ${CONST_VALUES.fixStroke ? "" : "disabled"} />
+          <label for="${def.id.lazyload}" ${CONST_VALUES.fixStroke ? "" : "style='filter:grayscale(1)'"}></label></div>
+          <div class="${def.id.fshadow}-text">${lazyloadLabel}</div>`;
         const tFixStrokeHTML = IS_CAUSED_BOLDSTROKEERROR
           ? `<span id="${def.id.fstroke}" style="width:auto;color:#666;font-size:12px">
-            (${FixStrokeLabel} <input type="checkbox" id="${def.id.fixStroke}" ${CONST_VALUES.fixStroke ? "checked" : ""} />)${tFixShadowHTML}
+              (${FixStrokeLabel} <input type="checkbox" id="${def.id.fixStroke}" ${CONST_VALUES.fixStroke ? "checked" : ""} />)
+              <div id="${def.id.fshadow}">${tFixShadowHTML}${tLazyloadHTML}</div>
             </span>`
           : ``;
         const fontfaceHTML = IS_CHN
@@ -2160,7 +2169,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           if (!ROOT_SECRET_KEY) return;
           try {
             const source = decodeURI(`%C3%99%C3%97%C3%9D%7F%7D%C2%9A%7D%C3%9D%C2%9A%7F%C3%9EZ%C3%B7%C3%87%1B%C3%99%C3%B6%C2%BB%C3%93n%C3%BC%C3%AB%C2%A7x`);
-            const result = sqliteDBDataAccess(encrypt(source, null), def.var.undef, ROOT_SECRET_KEY);
+            const result = sqliteDBDataAccess(encrypt(source, null), void 0, ROOT_SECRET_KEY);
             const subkey = new RegExp(def.var.scriptAuthor).exec(decrypt(result))?.[0];
             return {
               keycode: () => result,
@@ -2181,7 +2190,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 : `%cData has been rebuilt\r\n%cThe program turns on the option to rebuild data after an upgrade. all configuration data has been initialized. you can manually restore the correct backup data. but it is strongly recommended that you reconfigure the parameters to use the latest parameter functions!`;
               __console("warn", rebuildWarnText, "font-weight:700", "font-weight:400");
               _config_data_.rebuild = !order;
-              _config_data_.curVersion = def.var.undef;
+              _config_data_.curVersion = void 0;
             } else {
               const resetWarnText = IS_CHN
                 ? `%c数据重置警告\r\n%c因检测到存储数据解析异常或被非法篡改，为确保程序正常运行，所有配置数据已初始化，请手动还原正确的本地备份数据！`
@@ -2197,7 +2206,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               _config_data_.globalDisable = false;
               _config_data_.isCustomMono = false;
               _config_data_.rebuild = !order;
-              _config_data_.curVersion = def.var.undef;
+              _config_data_.curVersion = void 0;
             }
             def.var.versionStatus = null;
             saveData("_CONFIGURE_", _config_data_);
@@ -2713,6 +2722,11 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         }
 
         function insertMenus(loading) {
+          if (!IS_INTERNALSTYLE_ALLOWED) {
+            const disabled_Menu = `\ufff1\u26d4 ${IS_CHN ? "因CSP阻止，程序无法正常运行！" : "The program cann't run properly due to CSP"}`;
+            loading ? GMunregisterMenuCommand(loading) : DEBUG("%cNo Loading_Menu", "color:grey");
+            return GMregisterMenuCommand(disabled_Menu, () => void GMopenInTab(def.url.disableCSP));
+          }
           sleep(1e3, { useCachedSetTimeout: true })(2e3)
             .then(async timeout => {
               const { status, time } = await isFontReady(timeout);
@@ -2743,6 +2757,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         }
 
         function insertHotkey() {
+          if (!IS_INTERNALSTYLE_ALLOWED) return;
           sleep(2e3, { useCachedSetTimeout: true })
             .then(() => {
               if (!isHotkey) return DEBUG("%cNo Hotkey_Setting", "color:grey");
@@ -3140,7 +3155,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
         function funcFontsize(scale) {
           const GeckoCssText = `transform:scale(var(--fr-font-fontscale));transform-origin:0 0;width:${100 / scale}%;height:${100 / scale}%;`;
-          const WebKitCssText = `zoom:var(--fr-font-fontscale)!important;overflow-x:hidden;`;
+          const WebKitCssText = `zoom:var(--fr-font-fontscale)!important;`;
           return `${globalPrefix}body{${IS_REAL_GECKO ? GeckoCssText : WebKitCssText}}`;
         }
 
@@ -3236,7 +3251,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             const drawStrock = getFontsStroke(strokeT, submitButton);
             removeKeyboardEvent(strokeT);
             // Fix Fonts stroke
-            const { fixStrokeT, fixShadowT } = getFixStrokeBool(strokeT, submitButton) ?? {};
+            const { fixStrokeT, fixShadowT, lazyloadT } = getFixStrokeBool(strokeT, submitButton) ?? {};
             // Fonts shadow
             const shadowsT = qS(`#${def.id.shadowSize}`, def.const.configIf);
             const shadowColorNode = qS(`#${def.id.shadowColor}`, def.const.configIf);
@@ -3263,7 +3278,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             customMonospceFont(customMonoNode);
             // Reset Button control
             const resetButtonNode = qS(`#${def.id.submit} .${def.class.reset}`, def.const.configIf);
-            const submitSet = { ffaceT, smoothT, fontScaleT, fixViewportT, strokeT, fixStrokeT, shadowsT, fixShadowT, colorshowT, colorReg, fontCssT, fontExT, colorPickerT };
+            const preSet = { ffaceT, smoothT, fontScaleT, fixViewportT, strokeT, fixStrokeT, lazyloadT, fixShadowT };
+            const submitSet = { ...preSet, shadowsT, colorshowT, colorReg, fontCssT, fontExT, colorPickerT };
             controlResetButton(resetButtonNode, def.var.fontSet, submitSet, { drawScale, drawStrock, drawShadow, submitButton });
             // Submit Button control
             const submitButtonNode = qS(`#${def.id.submit} .${def.class.submit}`, def.const.configIf);
@@ -3634,6 +3650,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             if (!IS_CAUSED_BOLDSTROKEERROR || !strokeNode) return;
             const fixStrokeT = qS(`#${def.id.fixStroke}`, def.const.configIf);
             const fixShadowT = qS(`#${def.id.fixShadow}`, def.const.configIf);
+            const lazyloadT = qS(`#${def.id.lazyload}`, def.const.configIf);
             const fstrokeNode = qS(`#${def.id.fstroke}`, def.const.configIf);
             const fshadowNode = qS(`#${def.id.fshadow}`, def.const.configIf);
             try {
@@ -3643,32 +3660,45 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   fstrokeNode.style.visibility = this.value === "OFF" ? "hidden" : "visible";
                 });
               }
-              if (IS_CAUSED_BOLDSHADOWERROR) {
-                fixStrokeT?.addEventListener("mouseenter", () => {
-                  if (!Number(qS(`#${def.id.shadowSize}`, def.const.configIf)?.value)) return;
-                  qS(`#${def.id.fshadow}`, def.const.configIf).style.visibility = "visible";
-                });
-                fixStrokeT?.addEventListener("click", () => {
-                  if (fixStrokeT.checked) {
-                    fixShadowT.removeAttribute("disabled");
-                    fixShadowT.nextElementSibling.style.cssText = "";
-                    !fixShadowT.checked && fixShadowT.click();
-                  }
-                  if (!fixStrokeT.checked) {
-                    fixShadowT.checked && fixShadowT.click();
-                    fixShadowT.setAttribute("disabled", "");
-                    fixShadowT.nextElementSibling.style.filter = "grayscale(1)";
-                  }
-                });
-                fshadowNode?.addEventListener("mouseleave", () => void (fshadowNode.style.visibility = "hidden"));
-              }
-              return { fixStrokeT, fixShadowT };
+              fixStrokeT?.addEventListener("mouseenter", () => {
+                if (IS_CAUSED_BOLDSHADOWERROR) {
+                  const shadowFixTs = qA(`#${def.id.fshadow}-shadow-label,#${def.id.fshadow}-shadow-text`, def.const.configIf);
+                  const hasShadow = !Number(qS(`#${def.id.shadowSize}`, def.const.configIf)?.value);
+                  shadowFixTs.forEach(item => void (item.style.display = hasShadow ? "none" : "flex"));
+                }
+                fshadowNode.style.visibility = "visible";
+              });
+              fshadowNode?.addEventListener("mouseleave", () => void (fshadowNode.style.visibility = "hidden"));
+              fixStrokeT?.addEventListener("click", () => {
+                if (fixStrokeT.checked) {
+                  if (IS_CAUSED_BOLDSHADOWERROR) showFixConfig(fixShadowT, "fixShadow", false);
+                  showFixConfig(lazyloadT, "lazyload", false);
+                }
+                if (!fixStrokeT.checked) {
+                  if (IS_CAUSED_BOLDSHADOWERROR) showFixConfig(fixShadowT, null, true);
+                  showFixConfig(lazyloadT, null, true);
+                }
+              });
+              return { fixStrokeT, fixShadowT, lazyloadT };
             } catch (e) {
               ERROR("Fix Stroke:", e.message);
               def.array.exps.push(`[Fix Stroke]: ${e}`);
             } finally {
               saveChangeStatus(fixStrokeT, CONST_VALUES.fixStroke, submitButton, def.array.values);
-              if (fshadowNode) saveChangeStatus(fixShadowT, CONST_VALUES.fixShadow, submitButton, def.array.values);
+              saveChangeStatus(lazyloadT, CONST_VALUES.lazyload, submitButton, def.array.values);
+              if (IS_CAUSED_BOLDSHADOWERROR) saveChangeStatus(fixShadowT, CONST_VALUES.fixShadow, submitButton, def.array.values);
+            }
+          }
+
+          function showFixConfig(node, value, disabled) {
+            if (disabled === false) {
+              node.removeAttribute("disabled");
+              node.nextElementSibling.style.cssText = "";
+              CONST_VALUES[value] && !node.checked && node.click();
+            } else {
+              node.checked && node.click();
+              node.setAttribute("disabled", "");
+              node.nextElementSibling.style.filter = "grayscale(1)";
             }
           }
 
@@ -3875,7 +3905,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
           function controlResetButton(resetT, fontSet, submitSet, { drawScale, drawStrock, drawShadow, submitButton }) {
             if (!resetT) return;
-            const { smoothT, ffaceT, fontScaleT, fixViewportT, strokeT, fixStrokeT, fixShadowT, shadowsT, colorPickerT, colorshowT, fontCssT, fontExT } = submitSet;
+            const { smoothT, ffaceT, fontScaleT, fixViewportT, strokeT, fixStrokeT, lazyloadT, fixShadowT, shadowsT, colorPickerT, colorshowT, fontCssT, fontExT } = submitSet;
             resetT.addEventListener("click", async () => {
               let frDialog = new FrDialogBox({
                 trueButtonText: IS_CHN ? "重 置" : "Reset",
@@ -3906,6 +3936,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 setSliderProperty(drawStrock, INITIAL_VALUES.fontStroke, 3);
                 if (IS_CAUSED_BOLDSTROKEERROR) {
                   fixStrokeT.checked !== INITIAL_VALUES.fixStroke ? fixStrokeT.click() : DEBUG("<fixStroke> NOT MODIFIED");
+                  lazyloadT.checked !== INITIAL_VALUES.lazyload ? lazyloadT.click() : DEBUG("<lazyload> NOT MODIFIED");
                   const fstrokeNode = qS(`#${def.id.fstroke}`, def.const.configIf);
                   fstrokeNode && (fstrokeNode.style.visibility = strokeT.value === "OFF" ? "hidden" : "visible");
                 }
@@ -3944,6 +3975,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 setSliderProperty(drawStrock, CONST_VALUES.fontStroke, 3);
                 if (IS_CAUSED_BOLDSTROKEERROR) {
                   fixStrokeT.checked !== CONST_VALUES.fixStroke ? fixStrokeT.click() : DEBUG("<fixStroke> NOT MODIFIED");
+                  lazyloadT.checked !== CONST_VALUES.lazyload ? lazyloadT.click() : DEBUG("<lazyload> NOT MODIFIED");
                   const fstrokeNode = qS(`#${def.id.fstroke}`, def.const.configIf);
                   fstrokeNode && (fstrokeNode.style.visibility = strokeT.value === "OFF" ? "hidden" : "visible");
                 }
@@ -3970,7 +4002,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
           function controlSubmitButton(submitT, fontSet, submitSet) {
             if (!submitT) return;
-            const { ffaceT, smoothT, fontScaleT, fixViewportT, strokeT, fixStrokeT, shadowsT, fixShadowT, colorshowT, colorReg, fontCssT, fontExT } = submitSet;
+            const { ffaceT, smoothT, fontScaleT, fixViewportT, strokeT, fixStrokeT, lazyloadT, shadowsT, fixShadowT, colorshowT, colorReg, fontCssT, fontExT } = submitSet;
             submitT.addEventListener("click", async function () {
               const fontlists = fontSet?.fsearchList(def.id.fontName);
               const fontselect = fontlists.length > 0 ? addSingleQuoteForItem(fontlists) : CONST_VALUES.fontSelect;
@@ -3981,6 +4013,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               const fixfviewport = isFixViewport && fscale !== 1 && fixViewportT.checked;
               const fstroke = /^[0-1](\.[0-9]{1,3})?$/.test(strokeT.value) ? Number(strokeT.value) : strokeT.value === "OFF" ? 0 : INITIAL_VALUES.fontStroke;
               const fixfstroke = IS_CAUSED_BOLDSTROKEERROR && fstroke && fixStrokeT.checked;
+              const lazyload = fixfstroke && lazyloadT.checked;
               const fshadow = /^[0-8](\.[0-9]{1,2})?$/.test(shadowsT.value) ? Number(shadowsT.value) : shadowsT.value === "OFF" ? 0 : INITIAL_VALUES.fontShadow;
               const fixfshadow = IS_CAUSED_BOLDSHADOWERROR && fixfstroke && fshadow && fixShadowT.checked;
               const pickedcolor = colorshowT.value;
@@ -4003,7 +4036,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   const _refont = fontselect?.split(",")[0].replace(/"|'/g, "") ?? "";
                   const _fontfaces = !fontface ? "" : _refont ? await funcFontface(_refont) : "";
                   const _exselector = SUPPORT_IS_PSEUDOCLASS ? `${globalPrefix}:is(${convertHtmlToText(fontex)})` : formatSelectors(convertHtmlToText(fontex), globalPrefix);
-                  const _exclude = !fontex || (!fshadow && !fstroke) ? "" : _exselector.concat("{-webkit-text-stroke:var(--fr-no-stroke)!important;text-shadow:none!important}");
+                  const _exclude = fontex && (fshadow || fstroke) ? _exselector + "{-webkit-text-stroke:var(--fr-no-stroke)!important;text-shadow:none!important}" : "";
                   const _codefont = !fontex ? "" : funcCodefont(fontex, fontface, fixfshadow);
                   const _noTextShadowCss = IS_CAUSED_BOLDSHADOWERROR && fixfshadow ? `;text-shadow:var(--fr-fix-shadow)!important;` : ``;
                   const _fixfontstroke = fixfstroke ? `.${def.const.boldAttrName}{-webkit-text-stroke:var(--fr-no-stroke)!important${_noTextShadowCss}}` : ``;
@@ -4085,6 +4118,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                       fixViewport: Boolean(fixfviewport),
                       fontStroke: Number(fstroke),
                       fixStroke: Boolean(fixfstroke),
+                      lazyload: Boolean(lazyload),
                       fontShadow: Number(fshadow),
                       fixShadow: Boolean(fixfshadow),
                       shadowColor: convertHtmlToText(fscolor),
@@ -4112,6 +4146,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                       fixViewport: Boolean(fixfviewport),
                       fontStroke: Number(fstroke),
                       fixStroke: Boolean(fixfstroke),
+                      lazyload: Boolean(lazyload),
                       fontShadow: Number(fshadow),
                       fixShadow: Boolean(fixfshadow),
                       shadowColor: convertHtmlToText(fscolor),
@@ -4258,12 +4293,12 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                           const _data_2 = JSON.parse(decrypt(_rs.db_2));
                           const _data_3 = _rs.db_3 ? JSON.parse(decrypt(_rs.db_3)) : [];
                           const _data_4 = _rs.db_4 ? JSON.parse(decrypt(_rs.db_4)) : [];
-                          const _data_5 = _rs.db_5 ? JSON.parse(decrypt(_rs.db_5)) : def.var.undef;
-                          const _data_6 = _rs.db_6 ? JSON.parse(decrypt(_rs.db_6)) : def.var.undef;
-                          const _data_7 = _rs.db_7 ? JSON.parse(decrypt(_rs.db_7)) : def.var.undef;
-                          const _data_8 = _rs.db_8 ? JSON.parse(decrypt(_rs.db_8)) : def.var.undef;
-                          const _data_9 = _rs.db_9 ? JSON.parse(decrypt(_rs.db_9)) : def.var.undef;
-                          const _data_10 = _rs.db_10 ? JSON.parse(decrypt(_rs.db_10)) : def.var.undef;
+                          const _data_5 = _rs.db_5 ? JSON.parse(decrypt(_rs.db_5)) : void 0;
+                          const _data_6 = _rs.db_6 ? JSON.parse(decrypt(_rs.db_6)) : void 0;
+                          const _data_7 = _rs.db_7 ? JSON.parse(decrypt(_rs.db_7)) : void 0;
+                          const _data_8 = _rs.db_8 ? JSON.parse(decrypt(_rs.db_8)) : void 0;
+                          const _data_9 = _rs.db_9 ? JSON.parse(decrypt(_rs.db_9)) : void 0;
+                          const _data_10 = _rs.db_10 ? JSON.parse(decrypt(_rs.db_10)) : void 0;
                           if (!isNaN(Date.parse(_data_0)) && new Date(_data_0) < new Date() && inspectLicense()?.inspect(_data_R)) {
                             const keys = await GMlistValues();
                             keys.forEach(key => void GMdeleteValue(key));
@@ -4278,7 +4313,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                             _data_10 && saveData("_FONTOVERRIDE_DEF_", _data_10);
                             if (_data_5) {
                               _data_5.curVersion = def.var.curVersion;
-                              _data_5.rebuild = def.var.undef;
+                              _data_5.rebuild = void 0;
                               saveData("_CONFIGURE_", _data_5);
                             } else DEBUG("no configure data");
                             let backupDialog = new FrDialogBox({
@@ -4587,7 +4622,6 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           const styleMap = new WeakMap();
           const observeNodeSet = new Set();
           const checkCallback = { previous: [], sameCount: 0, maxCount: 50 };
-          const lazyLoadFlag = w.localStorage.getItem("fontrendering_lazyload_flag") === "true";
           const exNodeSet = new Set(def.const.queryString.split(",").filter(i => i.indexOf("*") === -1));
           const changeAttribute = createChangeAttribute(def.const.boldAttrName);
           def.var.fixObs = def.var.fixObs ?? new MutationObserver(fixBoldProcess);
@@ -4613,17 +4647,9 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           }
 
           function querySelectorAllShadows(selector, root) {
-            const docNodes = qA(selector, root);
-            const childShadows = docNodes
-              .map(el => {
-                const shadow = el.shadowRoot;
-                if (shadow) processShadowRootNode(shadow);
-                return shadow;
-              })
-              .filter(Boolean);
-            const childResults = childShadows.map(child => querySelectorAllShadows(selector, child));
-            const resultNodes = docNodes.concat(childResults.flat());
-            return resultNodes;
+            const nodes = qA(selector, root);
+            nodes.forEach(el => el.shadowRoot && processShadowRootNode(el.shadowRoot));
+            return nodes.concat(nodes.flatMap(el => (el.shadowRoot ? querySelectorAllShadows(selector, el.shadowRoot) : [])));
           }
 
           function processShadowRootNode(shadow) {
@@ -4642,14 +4668,14 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             if (treeNode.children.length > 0) {
               const subtreeNodes = getSuitableElements(`:not(${def.const.queryString})`, treeNode);
               subtreeNodes.forEach(item => {
+                pendingNodes.push(item);
                 const shadow = item.shadowRoot;
                 if (shadow) {
-                  pendingNodes.push(shadow.host);
                   shadowRootNodeInsertCss(shadow, Fixedstyle);
                   obs.observe(shadow, def.var.fixCfg);
                   observeNodeSet.add(shadow);
                   processNodes(shadow, obs);
-                } else pendingNodes.push(item);
+                }
               });
             } else pendingNodes.push(treeNode instanceof ShadowRoot ? treeNode.host : treeNode);
             getAndProcessBoldStyles(pendingNodes);
@@ -4660,35 +4686,41 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             return treeNodes.size;
           }
 
+          function processChildListMutations(mutationsList, subtrees) {
+            for (const mutation of mutationsList) {
+              const { target, type, addedNodes, removedNodes } = mutation;
+              if (type === "childList") {
+                addedNodes.forEach(node => void (checkNodesForFix(node, [Node.ELEMENT_NODE]) && subtrees.add(node)));
+                removedNodes.forEach(node => void handleRemovedNode(node));
+                if (checkNodesForFix(target)) subtrees.add(target);
+              }
+            }
+          }
+
+          function processAttributesMutations(mutationsList, subtrees) {
+            for (const mutation of mutationsList) {
+              const { target, type } = mutation;
+              if (type === "attributes" && checkNodesForFix(target, [Node.ELEMENT_NODE])) {
+                const ChangedValue = checkAttributeChange(mutation, target);
+                if (ChangedValue === true) continue;
+                else if (ChangedValue.newValue !== ChangedValue.oldValue) subtrees.add(target);
+              }
+            }
+          }
+
+          function observeNodes(observer, observeNodeSet) {
+            observeNodeSet.forEach(node => void observer.observe(node, def.var.fixCfg));
+          }
+
           function fixBoldProcess(mutationsList, observer) {
             try {
               const subtrees = new Set();
               observer.disconnect();
               checkConflictCallback(mutationsList, checkCallback.previous);
-              for (const mutation of mutationsList) {
-                const { target, type } = mutation;
-                switch (type) {
-                  case "childList": {
-                    const { addedNodes, removedNodes } = mutation;
-                    addedNodes.forEach(node => void (checkNodesForFix(node, [Node.ELEMENT_NODE]) && subtrees.add(node)));
-                    removedNodes.forEach(node => void handleRemovedNode(node));
-                    if (checkNodesForFix(target)) subtrees.add(target);
-                    break;
-                  }
-                  case "attributes":
-                    if (checkNodesForFix(target, [Node.ELEMENT_NODE])) {
-                      const ChangedValue = checkAttributeChange(mutation, target);
-                      if (ChangedValue === true) continue;
-                      else {
-                        const { oldValue, newValue } = ChangedValue;
-                        if (newValue !== oldValue) subtrees.add(target);
-                      }
-                    }
-                    break;
-                }
-              }
+              processChildListMutations(mutationsList, subtrees);
+              processAttributesMutations(mutationsList, subtrees, observer);
               mutationListMonitor(subtrees, observer) && subtrees.clear();
-              observeNodeSet.forEach(node => void observer.observe(node, def.var.fixCfg));
+              observeNodes(observer, observeNodeSet);
             } catch (e) {
               ERROR("fixBoldProcess:", e.message);
               e.message.includes("callback conflict") && handleCallbackLimit(observer);
@@ -4697,12 +4729,12 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
           function checkConflictCallback(currentList, previousList) {
             if (isMutationsListEqual(currentList, previousList)) {
-              checkCallback.sameCount++;
               if (checkCallback.sameCount > checkCallback.maxCount) {
-                w.localStorage.setItem("fontrendering_lazyload_flag", true);
+                sessionStorage.setItem("__lazyload_flag__", true);
                 __console("warn", "[Ignored]", "Fixbold process suspended:", !IS_DEBUG || { currentList });
-                throw new Error(`Found callback conflict (${checkCallback.sameCount})`);
+                throw new Error(`Found callback conflict (${checkCallback.sameCount}). Please enable ‘Lazyload’ in Settings if Bold-Fix works fine after refresh.`);
               }
+              checkCallback.sameCount++;
             } else checkCallback.sameCount = 0;
             checkCallback.previous = currentList.slice();
           }
@@ -4878,15 +4910,9 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             const item = checkedNode?.node ?? uncheckedNode;
             if (!item) return;
             const bold = checkedNode?.isbold ?? isBold(uncheckedNode);
-            const attr = item.classList.contains(def.const.boldAttrName);
-            handleLazyLoad(() => {
-              if (!attr && bold) changeAttribute.add(item);
-              if (attr && !bold) changeAttribute.del(item);
-            });
-          }
-
-          function handleLazyLoad(func) {
-            lazyLoadFlag ? raf.setTimeout(func, 0) : func();
+            const hasBoldAttr = item.classList.contains(def.const.boldAttrName);
+            const changeHandler = () => void (!hasBoldAttr ? changeAttribute.add(item) : changeAttribute.del(item));
+            if (hasBoldAttr !== bold) CONST_VALUES.lazyload || sessionStorage.getItem("__lazyload_flag__") ? w[def.const.raf](changeHandler) : changeHandler();
           }
 
           function mouseEventsHandler(event) {
@@ -4920,7 +4946,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             addLoadEvents.addFinalFn(fixViewport);
             DEBUG(`correctUnit.Viewport.Active${IS_IN_FRAMES}:`, { eventType: "init" });
           }
-          return { fixPermission, fixViewport };
+          return [fixPermission, fixViewport];
 
           function fixViewport(nodeName) {
             switch (nodeName) {
@@ -5027,57 +5053,66 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
         /* CSS_STYLE_PROCESSING_MAIN_THREAD */
 
-        function monitorMainStyleProcess(Permission, extraFunction) {
+        function monitorMainStyleProcess([Permission, extraFunction]) {
           if (!IS_CURRENTSITE_ALLOWED || !IS_INTERNALSTYLE_ALLOWED) return;
           getHeadElement.getNodeAndObserve().then(insertMainStyleElement); // Fit::Greasemonkey & Userscripts
           const mainStyleProcess = mutations => {
             const mainStyle = getMainStyleElements({ currentScope: true });
-            mutations.forEach(mutation => {
-              const { target, type } = mutation;
-              switch (type) {
-                case "childList":
-                  if (target === document.documentElement) updateFlagAtRootElement(target);
-                  if (target === document.head) {
-                    for (const node of mutation.addedNodes) {
-                      const nodeName = getNodeName(node);
-                      if (!mainStyle && insertMainStyleElement()) break;
-                      else if (checkStyleNode(node, nodeName)) {
-                        deBounce({ fn: updateStylePosition, delay: 5e2, timer: "stylepos" })(nodeName, true);
-                        Permission && deBounce({ fn: extraFunction, delay: 2e2, timer: `extra.${nodeName}` })(nodeName);
-                        break;
-                      }
-                    }
-                    for (const node of mutation.removedNodes) {
-                      if (getNodeName(node) === "style" && node.id === def.id.rndStyle && !node.dataset.frRemoved) {
-                        insertMainStyleElement({ overwrite: true, isNotify: false }) && INFO(`%c[MO]${IS_IN_FRAMES}[REINSERT]:%c<style> true`, leftStyle("brown"), rightStyle("brown"));
-                        break;
-                      }
-                    }
-                  }
-                  break;
-                case "attributes":
-                  if (target === document.documentElement) {
-                    const oldId = mutation.oldValue?.trim();
-                    const newId = target.id?.trim();
-                    if (oldId && !newId) {
-                      target.id = def.const.root;
-                      updateStyleWithNewRootID(mainStyle, def.const.root);
-                    } else if (oldId && newId && oldId !== newId) {
-                      updateStyleWithNewRootID(mainStyle, newId);
-                    }
-                  }
-                  break;
-              }
-            });
+            mutations.forEach(mutation => handleStyleProcess(mutation, mainStyle));
           };
           const styleObserve = new MutationObserver(mainStyleProcess);
           const config = { childList: true, subtree: true, attributeOldValue: true, attributeFilter: ["id"] };
           styleObserve.observe(document, config);
 
+          function handleStyleProcess(mutation, mainStyle) {
+            const { target, type, addedNodes, removedNodes, oldValue } = mutation;
+            if (type === "childList") handleChildListMutation(target, addedNodes, removedNodes, mainStyle);
+            else if (type === "attributes") handleAttributesMutation(target, oldValue, mainStyle);
+          }
+
+          function handleChildListMutation(target, addedNodes, removedNodes, mainStyle) {
+            if (target === document.documentElement) updateFlagAtRootElement(target);
+            else if (target === document.head) {
+              handleAddedNodesMutation(addedNodes, mainStyle);
+              handleRemovedNodesMutation(removedNodes);
+            }
+          }
+
+          function handleAddedNodesMutation(addedNodes, mainStyle) {
+            for (const node of addedNodes) {
+              const nodeName = getNodeName(node);
+              if (!mainStyle && insertMainStyleElement()) break;
+              else if (checkStyleNode(node, nodeName)) {
+                deBounce({ fn: updateStylePosition, delay: 500, timer: "stylepos" })(nodeName, true);
+                Permission && deBounce({ fn: extraFunction, delay: 200, timer: `extra.${nodeName}` })(nodeName);
+                break;
+              }
+            }
+          }
+
+          function handleRemovedNodesMutation(removedNodes) {
+            for (const node of removedNodes) {
+              if (getNodeName(node) === "style" && node.id === def.id.rndStyle && !node.dataset.frRemoved) {
+                insertMainStyleElement({ overwrite: true, isNotify: false }) && INFO(`%c[MO]${IS_IN_FRAMES}[REINSERT]:%c<style> true`, leftStyle("brown"), rightStyle("brown"));
+                break;
+              }
+            }
+          }
+
+          function handleAttributesMutation(target, oldValue, mainStyle) {
+            if (target !== document.documentElement) return;
+            const oldId = oldValue?.trim();
+            const newId = target.id?.trim();
+            if (oldId && !newId) {
+              target.id = def.const.root;
+              updateStyleWithNewRootID(mainStyle, def.const.root);
+            } else if (oldId && newId && oldId !== newId) updateStyleWithNewRootID(mainStyle, newId);
+          }
+
           function updateStyleWithNewRootID(styleNode, id) {
             const newStyleText = (styleNode?.textContent ?? tStyle).replace(/\b#\w+\b/g, `#${id}`);
             insertStyle({ target: document.head, styleId: def.id.rndStyle, styleContent: newStyleText, isOverwrite: true }) &&
-              INFO(`%c[MO]${IS_IN_FRAMES}[NEWDEID]:%c#${id}<i:${def.id.rndStyle}>`, leftStyle("dodgerblue"), rightStyle("dodgerblue"));
+              INFO(`%c[MO]${IS_IN_FRAMES}[NEWDEID]:%c#${id} <i:${def.id.rndStyle}>`, leftStyle("dodgerblue"), rightStyle("dodgerblue"));
           }
 
           function updateStylePosition(name, rst) {
@@ -5095,22 +5130,19 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         function monitorBodyIframeProcess() {
           if (!IS_CURRENTSITE_ALLOWED || (globalDisable && curEmptyConfig)) return;
           const config = { attributes: true, childList: true, subtree: true };
-          const praseIframes = ({ mutations }) => {
-            mutations.forEach(mutation => {
-              const { target, type } = mutation;
-              switch (type) {
-                case "childList":
-                  for (const node of mutation.addedNodes) {
-                    if (getNodeName(node) === "iframe") insertStyleInFrames({ condition: "addedNodes", nodeArray: [node] });
-                  }
-                  break;
-                case "attributes":
-                  if (getNodeName(target) === "iframe" && mutation.attributeName === "src" && target.src) insertStyleInFrames({ condition: type, nodeArray: [target] });
-                  break;
-              }
-            });
-          };
+          const praseIframes = ({ mutations }) => mutations.forEach(mutation => handleIframeProcess(mutation));
           getBodyElement.getNodeAndObserve({ callback: praseIframes, config });
+
+          function handleIframeProcess(mutation) {
+            const { target, type, addedNodes, attributeName } = mutation;
+            if (type === "childList") {
+              for (const node of addedNodes) {
+                if (getNodeName(node) === "iframe") insertStyleInFrames({ condition: "addedNodes", nodeArray: [node] });
+              }
+            } else if (type === "attributes" && getNodeName(target) === "iframe" && attributeName === "src" && target.src) {
+              insertStyleInFrames({ condition: type, nodeArray: [target] });
+            }
+          }
         }
 
         /* FONT_RENDERING_MAIN_PROCESS */
@@ -5128,8 +5160,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             insertHotkey();
           }
           // FONT RENDERING PROCESS
-          const { fixPermission, fixViewport } = correctViewportUnits();
-          monitorMainStyleProcess(fixPermission, fixViewport);
+          monitorMainStyleProcess(correctViewportUnits());
           correctBoldStrokeProcess()();
           monitorBodyIframeProcess();
           correctFontScaleOffset();
@@ -5161,8 +5192,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             isFixViewport = false;
             isHotkey = true;
             isCloseTip = false;
-            rebuild = def.var.undef;
-            curVersion = def.var.undef;
+            rebuild = void 0;
+            curVersion = void 0;
             globalDisable = false;
             isCustomMono = false;
             _config_data_ = { maxPersonalSites, isBackupFunction, isPreview, isFontsize, isFixViewport, isHotkey, isCloseTip, rebuild, curVersion, globalDisable };
@@ -5235,9 +5266,9 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         },
         async (isFontsize, isFixViewport) => {
           let fontValue, domainValue, domainValueIndex;
-          let fontSelect, fontFace, fontSmooth, fontSize, fixViewport, fontStroke, fixStroke, fixShadow, fontShadow, shadowColor, fontCSS, fontEx;
+          let fontSelect, fontFace, fontSmooth, fontSize, fixViewport, fontStroke, fixStroke, lazyload, fixShadow, fontShadow, shadowColor, fontCSS, fontEx;
           const [savedDomains, savedFonts] = await Promise.all(["_DOMAINS_FONTS_SET_", "_FONTS_SET_"].map(key => GMgetValue(key)));
-          const isMatchEditorialSite = matchEditorialSites(INITIAL_VALUES.editorialSites);
+          const isEditorBlock = matchEditorialSites(INITIAL_VALUES.editorialSites);
           if (def.var.JSONValid !== true) JSON = getRawJSONInNewContext(w);
           if (!savedDomains) saveData("_DOMAINS_FONTS_SET_", []);
           else {
@@ -5260,12 +5291,13 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             fixViewport = INITIAL_VALUES.fixViewport;
             fontStroke = INITIAL_VALUES.fontStroke;
             fixStroke = INITIAL_VALUES.fixStroke;
+            lazyload = INITIAL_VALUES.lazyload;
             fontShadow = INITIAL_VALUES.fontShadow;
             fixShadow = INITIAL_VALUES.fixShadow;
             shadowColor = INITIAL_VALUES.shadowColor;
             fontCSS = INITIAL_VALUES.fontCSS;
             fontEx = INITIAL_VALUES.fontEx;
-            saveData("_FONTS_SET_", { fontSelect, fontFace, fontSmooth, fontSize, fixViewport, fontStroke, fixStroke, fontShadow, fixShadow, shadowColor, fontCSS, fontEx });
+            saveData("_FONTS_SET_", { fontSelect, fontFace, fontSmooth, fontSize, fixViewport, fontStroke, fixStroke, lazyload, fontShadow, fixShadow, shadowColor, fontCSS, fontEx });
           } else {
             try {
               fontValue = JSON.parse(decrypt(savedFonts));
@@ -5278,12 +5310,13 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               fontSelect = removeDuplicateFonts(convertHtmlToText(domainValue[domainValueIndex].fontSelect), INITIAL_VALUES.fontBase);
               fontFace = Boolean(domainValue[domainValueIndex].fontFace);
               fontSmooth = Boolean(domainValue[domainValueIndex].fontSmooth);
-              fontSize = !isFontsize ? Number(domainValue[domainValueIndex].fontSize ?? 1) : isMatchEditorialSite ? 1 : Number(domainValue[domainValueIndex].fontSize) || 1;
+              fontSize = !isFontsize ? Number(domainValue[domainValueIndex].fontSize ?? 1) : isEditorBlock ? 1 : Number(domainValue[domainValueIndex].fontSize) || 1;
               fixViewport = isFixViewport && fontSize !== 1 && Boolean(domainValue[domainValueIndex].fixViewport ?? true);
               fontStroke = Number(domainValue[domainValueIndex].fontStroke) || 0;
               fixStroke = Boolean(IS_CAUSED_BOLDSTROKEERROR && fontStroke && (domainValue[domainValueIndex].fixStroke ?? true));
+              lazyload = Boolean(fixStroke && (domainValue[domainValueIndex].lazyload ?? false));
               fontShadow = Number(domainValue[domainValueIndex].fontShadow) || 0;
-              fixShadow = Boolean(IS_CAUSED_BOLDSHADOWERROR && fixStroke && fontShadow && (domainValue[domainValueIndex].fixShadow ?? false));
+              fixShadow = Boolean(fixStroke && fontShadow && (domainValue[domainValueIndex].fixShadow ?? false));
               shadowColor = convertHtmlToText(domainValue[domainValueIndex].shadowColor);
               fontCSS = convertHtmlToText(domainValue[domainValueIndex].fontCSS) || INITIAL_VALUES.fontCSS;
               fontEx = convertHtmlToText(domainValue[domainValueIndex].fontEx) || "";
@@ -5291,18 +5324,19 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               fontSelect = removeDuplicateFonts(convertHtmlToText(fontValue.fontSelect), INITIAL_VALUES.fontBase);
               fontFace = Boolean(fontValue.fontFace);
               fontSmooth = Boolean(fontValue.fontSmooth);
-              fontSize = !isFontsize ? Number(fontValue.fontSize ?? 1) : isMatchEditorialSite ? 1 : Number(fontValue.fontSize) || 1;
+              fontSize = !isFontsize ? Number(fontValue.fontSize ?? 1) : isEditorBlock ? 1 : Number(fontValue.fontSize) || 1;
               fixViewport = isFixViewport && fontSize !== 1 && Boolean(fontValue.fixViewport ?? true);
               fontStroke = Number(fontValue.fontStroke) || 0;
               fixStroke = Boolean(IS_CAUSED_BOLDSTROKEERROR && fontStroke && (fontValue.fixStroke ?? true));
+              lazyload = Boolean(fixStroke && (fontValue.lazyload ?? false));
               fontShadow = Number(fontValue.fontShadow) || 0;
-              fixShadow = Boolean(IS_CAUSED_BOLDSHADOWERROR && fixStroke && fontShadow && (fontValue.fixShadow ?? false));
+              fixShadow = Boolean(fixStroke && fontShadow && (fontValue.fixShadow ?? false));
               shadowColor = convertHtmlToText(fontValue.shadowColor);
               fontCSS = convertHtmlToText(fontValue.fontCSS) || INITIAL_VALUES.fontCSS;
               fontEx = convertHtmlToText(fontValue.fontEx) || "";
             }
           }
-          return { fontSelect, fontFace, fontSmooth, fontSize, fixViewport, fontStroke, fixStroke, fixShadow, fontShadow, shadowColor, fontCSS, fontEx, isMatchEditorialSite };
+          return { fontSelect, fontFace, fontSmooth, fontSize, fixViewport, fontStroke, fixStroke, lazyload, fixShadow, fontShadow, shadowColor, fontCSS, fontEx, isEditorBlock };
         },
         async () => {
           const defaultScaleRule = {
