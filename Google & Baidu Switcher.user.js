@@ -2104,7 +2104,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
 
           function setupGlobalParameterListener() {
             if (GMcontentMode && document.body) {
-              const observer = new MutationObserver(deBounce({ fn: getGlobalParameter, delay: 2e2, timer: "globalParameter" }));
+              const observer = new MutationObserver(deBounce({ fn: getGlobalParameter, delay: 50, timer: "globalParameter" }));
               observer.observe(document.body, { childList: true, subtree: true });
             } else {
               w.addEventListener("pushState", getGlobalParameter);
