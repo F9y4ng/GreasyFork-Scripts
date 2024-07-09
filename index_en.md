@@ -111,17 +111,11 @@ Font scaling (experimental) BETA Version, **OFF by default**, turn on font scali
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-## version 2024.07.06.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2024.07.09.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-- Removed invalid search engine and related feats.
-+ Added SearXNG search engine and related feats.
-+ Added Qwant search engine and related feats.
-@ Fixed Yandex/Brave search engine button errors.
-@ Fixed Bing link redirection and style errors.
-@ Fixed the bug of removing Baidu link redirection in Tampermonkey 5.2.1.
-@ Fixed Yahoo.Search jump buttons not load under the country subdomain.
-@ Fixed known issues, optimize code and style.
+@ Fixed Baidu redirection not resolving some links when using Violentmonkey in Edge.
+@ Fixed some known issues, optimized code & style.
 ```
 
 ## The latest feature introduction
