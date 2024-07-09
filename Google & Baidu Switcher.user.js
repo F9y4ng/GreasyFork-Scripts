@@ -5,12 +5,12 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            помощник поисковых систем
 // @name:ja            優雅な検索エンジン助手
-// @version            2024.07.06.1
+// @version            2024.07.09.1
 // @author             F9y4ng
 // @description        “Elegant Search Engine Assistant” facilite la navigation entre moteurs de recherche, personnalise les préférences, met en évidence les mots-clés, élimine les redirections et publicités, et filtre les résultats. Compatible avec divers moteurs tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, etc.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG and more.
 // @description:zh-CN  “优雅的搜索引擎助手”方便用户在不同的搜索引擎之间跳转；支持自定义常用搜索引擎、关键词高亮渲染；还提供去除搜索链接重定向、屏蔽搜索结果广告、使用关键词过滤搜索结果、和自动更新检测等高级功能；兼容如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、You、Startpage、Brave、Yahoo、Yep、Swisscows、searXNG等多个搜索引擎。
-// @description:zh-TW  「優雅的搜尋引擎助手」方便使用者在不同的搜尋引擎之間跳轉；支援自定義常用搜索引擎、關鍵詞高亮渲染；還提供去除搜尋連結重定向、遮蔽搜尋結果廣告、使用關鍵詞過濾搜尋結果、和自動更新檢測等高階功能；相容如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、You、Startpage、Brave、Yahoo、Yep、Swisscows、searXNG等多個搜尋引擎。
+// @description:zh-TW  「優雅的搜尋引擎助手」方便使用者在不同的搜尋引擎之間跳轉；支援自定義常用搜尋引擎、關鍵詞高亮渲染；還提供去除搜尋連結重定向、遮蔽搜尋結果廣告、使用關鍵詞過濾搜尋結果、和自動更新檢測等高階功能；相容如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、You、Startpage、Brave、Yahoo、Yep、Swisscows、searXNG等多個搜尋引擎。
 // @description:ru     “Элегантный помощник поисковых систем” обеспечивает удобное переключение между поисковыми системами, поддерживает настройку, выделение ключевых слов и продвинутые функции.  совместим с Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG и другими поисковыми системами.
 // @description:ja     「優雅な検索エンジン助手」は、検索エンジン間の切り替えを容易にし、カスタムエンジン、キーワードハイライト、リダイレクト削除、広告ブロック、キーワードフィルタリング、自動更新をサポートし、Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、You、Startpage、Brave、Yahoo、Yep、Swisscows、searXNGなどと互換性があります。
 // @namespace          https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
@@ -63,14 +63,8 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               {"CN":"删除已失效的无追搜索跳转及相关功能。","EN":"Removed invalid search engine and related feats."}
-// @note               {"CN":"新增 SearXNG 搜索引擎的跳转及相关功能。","EN":"Added SearXNG search engine and related feats."}
-// @note               {"CN":"新增 Qwant 搜索引擎的跳转及相关功能。","EN":"Added Qwant search engine and related feats."}
-// @note               {"CN":"修正 Yandex/Brave 搜索引擎跳转按钮的错误。","EN":"Fixed Yandex/Brave search engine button errors."}
-// @note               {"CN":"修正 Bing 搜索链接重定向错误及样式异常。","EN":"Fixed Bing link redirection and style errors."}
-// @note               {"CN":"修正 Tampermonkey5.2.1 去除百度重定向的错误。","EN":"Fixed the bug of removing Baidu link redirection in Tampermonkey 5.2.1."}
-// @note               {"CN":"修正 Yahoo 国家子域名下跳转按钮未加载的问题。","EN":"Fixed Yahoo.Search jump buttons not load under the country subdomain."}
-// @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed known issues, optimize code and style."}
+// @note               {"CN":"修复在 Edge 使用 Violentmonkey 造成 Baidu 搜索重定向对某些链接无法解析的问题。","EN":"Fixed Baidu redirection not resolving some links when using Violentmonkey in Edge."}
+// @note               {"CN":"修复一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -1162,7 +1156,12 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                 onreadystatechangeFunc: (resolve, reject) => response => {
                   if (response.readyState !== 4) return;
                   if (response.status === 200) {
-                    const resUrl = response.finalUrl || response.responseURL || url;
+                    let resUrl = response.finalUrl || response.responseURL || url;
+                    if (resUrl === url) {
+                      const responseHeader = response.responseHeaders?.match(/Location:\s*([\S]+)/);
+                      if (responseHeader) resUrl = responseHeader[1];
+                      else reject(new Error("URLNotExistError"));
+                    }
                     resolve(resUrl);
                   } else rejectResponse(response, resolve, reject, url);
                 },
@@ -1456,7 +1455,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "google_ar" })(
                   "#rcnt div[data-hveid^='C'][data-hveid$='AA'] :not(h3.ob5Hkd,.d0fCJc)>a:not(.ngTNl,.oRJe3d,.k8XOCe,[jsname='ZWuC2'],.fl,#pnprev,#pnnext)",
                   "Google",
-                  { useNewTab: true, cleanAttributes: ["ping", "onmouseover"], removeDataSet: true }
+                  { useNewTab: true, cleanAttributes: ["ping"], removeDataSet: true }
                 );
               },
               antiAdsFn: function () {
@@ -2740,7 +2739,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                       const inputLength = parseFloat(gCS(input).width) || 500;
                       input.style.maxWidth = `${inputLength - sectionWidth + 50}px`;
                     });
-                  }).observe(formNode, { attributeOldValue: true, attributeFilter: ["aria-owns"] });
+                  }).observe(formNode, { attributeFilter: ["aria-owns"] });
                 },
               },
               google: {
