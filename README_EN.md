@@ -25,14 +25,10 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data promptly and don't use backup files from unknown sources!
 
-### version 2024.07.06.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2024.07.16.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ Optimized the `MetaString` information of the script.
-@ Fixed Discourse‘s sticky layout issue when font scaling.
-@ Improved the implementation method of Bold Fix with Lazyload to reduce runtime conflicts. [Wiki]
-@ Improved handling of code not running due to CSP.
-@ Fixed known issues, optimize code, optimize style.
+@ Fixed an issue that the cache of GM Value failed to be updated in time in Tampermonkey 5.2.1 in UserScripts API Dynamic mode.
 ```
 
 ### Please note the following before using the new version:
@@ -132,11 +128,10 @@ Font scaling (experimental) BETA Version, **OFF by default**, turn on font scali
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-### version 2024.07.09.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2024.07.16.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Fixed Baidu redirection not resolving some links when using Violentmonkey in Edge.
-@ Fixed some known issues, optimized code & style.
+@ Fixed an issue that the cache of GM Value failed to be updated in time in Tampermonkey 5.2.1 in UserScripts API Dynamic mode.
 ```
 
 ### The latest feature introduction
