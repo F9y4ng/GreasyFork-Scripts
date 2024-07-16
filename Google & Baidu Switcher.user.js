@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            помощник поисковых систем
 // @name:ja            優雅な検索エンジン助手
-// @version            2024.07.09.1
+// @version            2024.07.16.1
 // @author             F9y4ng
 // @description        “Elegant Search Engine Assistant” facilite la navigation entre moteurs de recherche, personnalise les préférences, met en évidence les mots-clés, élimine les redirections et publicités, et filtre les résultats. Compatible avec divers moteurs tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, etc.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG and more.
@@ -63,8 +63,7 @@
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
 // @compatible         Opera 兼容Tampermonkey, Violentmonkey
 // @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               {"CN":"修复在 Edge 使用 Violentmonkey 造成 Baidu 搜索重定向对某些链接无法解析的问题。","EN":"Fixed Baidu redirection not resolving some links when using Violentmonkey in Edge."}
-// @note               {"CN":"修复一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
+// @note               {"CN":"修正 Tampermonkey 5.2.1 在 UserScripts API Dynamic 模式下 GM Value 的缓存未及时更新的问题。","EN":"Fixed an issue that the cache of GM Value failed to be updated in time in Tampermonkey 5.2.1 in UserScripts API Dynamic mode."}
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -435,7 +434,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
     }
 
     function refresh() {
-      w.location.reload(true);
+      return sleep(5e2).then(() => w.location.reload(true));
     }
 
     function escapeHTML(string) {
