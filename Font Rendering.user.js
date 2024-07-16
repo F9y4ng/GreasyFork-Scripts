@@ -1,16 +1,16 @@
 // ==UserScript==
 // @name               字体渲染（自用脚本）
 // @name:zh-CN         字体渲染（自用脚本）
-// @name:zh-TW         字體渲染（自用腳本）
+// @name:zh-TW         字型渲染（自用指令碼）
 // @name:en            Font Rendering (Customized)
 // @name:ko            글꼴 렌더링(자체 스크립트)
 // @name:ja            フォントレンダリング
-// @version            2024.07.06.1
+// @version            2024.07.16.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
-// @description:zh-TW  無需安裝 MacType，優化瀏覽器字體渲染效果，讓每個頁面的字體變得更有質感。預設使用「微軟雅黑」字體，也可根據喜好自訂其他字體使用。腳本針對瀏覽器字體渲染提供了字體重寫、字體平滑、字體縮放、字體描邊、字體陰影、對特殊樣式元素的過濾和許可、自訂等寬字體等高級功能。腳本支持全局渲染與個性化渲染功能，可通過「點擊腳本管理器圖示」或「使用快捷鍵」呼出配置界面進行參數配置。腳本已兼容絕大部分主流瀏覽器及主流腳本管理器，且兼容常用的油猴腳本和瀏覽器擴展。
-// @description:en     Enhance browser’s font rendering without installing MacType. This script offers a high-quality, customizable experience with default ‘Microsoft YaHei’ font. It provides advanced features like font rewriting, smoothing, scaling, stroking, shadowing, and filtering of special style elements. It supports global and personalized rendering, compatible with most mainstream browsers, script managers, and common userscripts & browser extensions. Configure parameters via the script manager icon or shortcuts.
+// @description:zh-TW  無需安裝MacType，最佳化瀏覽器字型渲染效果，讓每個頁面的字型變得更有質感。預設使用“微軟雅黑”字型，也可根據喜好自定義其他字型使用。指令碼針對瀏覽器字型渲染提供了字型重寫、字型平滑、字型縮放、字型描邊、字型陰影、對特殊樣式元素的過濾和許可、自定義等寬字型等高階功能。指令碼支援全域性渲染與個性化渲染功能，可透過“單擊指令碼管理器圖示”或“使用快捷鍵”撥出配置介面進行引數配置。指令碼已相容絕大部分主流瀏覽器及主流指令碼管理器，且相容常用的油猴指令碼和瀏覽器擴充套件。
+// @description:en     Enhance browser’s font rendering without installing MacType. This script offers a high-quality, customizable experience with ‘Microsoft YaHei’ font by default. It provides advanced features such as font rewriting, smoothing, scaling, stroking, shadowing, selective element handling and more. Designed for both general and personalized rendering, compatible with popular browsers, script managers & extensions. Configure via the script manager icon or keyboard shortcuts.
 // @description:ko     이 스크립트는 MacType을 설치하지 않고도 브라우저의 글꼴 렌더링을 최적화하여 각 페이지의 글꼴을 더 질감 있게 만듭니다. 기본적으로 "Microsoft YaHei"를 사용하며, 사용자의 취향에 따라 다른 글꼴을 사용자 정의할 수 있습니다. 스크립트는 글꼴 재작성, 스무딩, 스케일링, 아웃라인, 그림자, 특수 스타일 요소 필터링 등 고급 기능을 제공합니다. 스크립트 관리자 아이콘을 클릭하거나 단축키를 사용하여 설정 화면을 열 수 있습니다. 대부분의 주요 브라우저와 스크립트 관리자, 일반적인 확장 프로그램과 호환됩니다.
 // @description:ja     このスクリプトは、MacTypeをインストールせずにブラウザのフォントレンダリングを最適化し、各ページのフォントをより質感のあるものにします。デフォルトでは「Microsoft YaHei」を使用し、好みに応じて他のフォントをカスタマイズできます。スクリプトは、フォントの書き換え、スムージング、スケーリング、アウトライン、シャドウ、特殊スタイル要素のフィルタリングなどの高度な機能を提供します。スクリプトマネージャのアイコンをクリックするか、ショートカットを使用して設定画面を呼び出すことができます。ほとんどの主流のブラウザやスクリプトマネージャ、一般的な拡張機能と互換性があります。
 // @namespace          https://openuserjs.org/scripts/f9y4ng/Font_Rendering_(Customized)
@@ -610,7 +610,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
     }
 
     function refresh() {
-      w.location.reload(true);
+      return sleep(5e2).then(() => w.location.reload(true));
     }
 
     function updateFlagAtRootElement(target) {
@@ -893,16 +893,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
       /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
       const UPDATE_VERSION_NOTICE = IS_CHN
-        ? `<li class="${def.const.seed}_fix">优化更新脚本的 \`MetaString\` 的相关信息。</li>
-            <li class="${def.const.seed}_fix">修正字体缩放后 Discourse 的 sticky 布局失效的问题。</li>
-            <li class="${def.const.seed}_fix">优化粗体修正 Lazyload 实现方法以减少冲突。[<a href="${def.url.feedback}/../wiki/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89#%E4%BF%AE%E6%AD%A3%E5%BB%B6%E8%BF%9F%E5%8A%A0%E8%BD%BD" target="_blank">Wiki</a>]</li>
-            <li class="${def.const.seed}_fix">改进因站点应用 CSP 造成程序无法运行时的处置方案。</li>
-            <li class="${def.const.seed}_fix">修正一些已知的问题，优化代码，优化样式。</li>`
-        : `<li class="${def.const.seed}_fix">Optimized the \`MetaString\` information of the script.</li>
-            <li class="${def.const.seed}_fix">Fixed Discourse‘s sticky layout issue when font scaling.</li>
-            <li class="${def.const.seed}_fix">Improved the implementation method of Bold Fix with Lazyload to reduce runtime conflicts. [<a href="${def.url.feedback}/../wiki/Font-Rendering-(Customized)#lazyload" target="_blank">Wiki</a>]</li>
-            <li class="${def.const.seed}_fix">Improved handling of code not running due to CSP.</li>
-            <li class="${def.const.seed}_fix">Fixed known issues, optimize code, optimize style.</li>`;
+        ? `<li class="${def.const.seed}_fix">修正 Tampermonkey 5.2.1 在 UserScripts API Dynamic 模式下 GM Value 的缓存未能及时更新的问题。</li>`
+        : `<li class="${def.const.seed}_fix">Fixed an issue that the cache of GM Value failed to be updated in time in Tampermonkey 5.2.1 in UserScripts API Dynamic mode.</li>`;
 
       /* INITIALIZE_FONT_LIBRARY */
 
