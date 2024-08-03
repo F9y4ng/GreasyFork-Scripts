@@ -5,7 +5,7 @@
 // @name:en            Font Rendering (Customized)
 // @name:ko            글꼴 렌더링(자체 스크립트)
 // @name:ja            フォントレンダリング
-// @version            2024.07.16.1
+// @version            2024.08.03.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -20,7 +20,7 @@
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.meta.js
 // @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
-// @require            https://update.greasyfork.org/scripts/437214/1353168/frColorPicker.js?SRI#sha256-qxfR8trovM4XP+e+/qDSbWR+ccbee5P4YWQyO10l7Z0=
+// @require            https://update.greasyfork.org/scripts/437214/1420586/frColorPicker.js#sha256-+fYggVYDMI9VciV8WTQXWNbiXMTVJxKTDn3j19W4kXU=
 // @match              *://*/*
 // @grant              GM_getValue
 // @grant              GM.getValue
@@ -33,6 +33,8 @@
 // @grant              GM_openInTab
 // @grant              GM.openInTab
 // @grant              GM_addElement
+// @grant              GM_setClipboard
+// @grant              GM.setClipboard
 // @grant              GM_registerMenuCommand
 // @grant              GM.registerMenuCommand
 // @grant              GM_unregisterMenuCommand
@@ -101,7 +103,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
     /* PERFECTLY COMPATIBLE FOR GREASEMONKEY, TAMPERMONKEY, VIOLENTMONKEY, USERSCRIPTS 2024-03-15 F9Y4NG */
 
     const { atob, btoa, alert, prompt, confirm, console, reconstruct, debugging, gm: GMinfo } = secures;
-    const { a: arrSlice, o: objToString, f: fnToString } = protoMethods;
+    const { a: arrSlice, o: objToString, f: fnToString, h: hasOwnProp, m: arrayFrom } = protoMethods;
     const GMversion = GMinfo.version ?? GMinfo.scriptHandlerVersion ?? "unknown";
     const GMscriptHandler = GMinfo.scriptHandler;
     const GMsetValue = gmSelector("setValue");
@@ -110,6 +112,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
     const GMlistValues = gmSelector("listValues");
     const GMopenInTab = gmSelector("openInTab");
     const GMaddElement = gmSelector("addElement");
+    const GMsetClipboard = gmSelector("setClipboard");
     const GMregisterMenuCommand = gmSelector("registerMenuCommand");
     const GMunregisterMenuCommand = gmSelector("unregisterMenuCommand");
     const GMunsafeWindow = gmSelector("unsafeWindow");
@@ -134,6 +137,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         root: generateRandomString(6, "char"),
         raf: Symbol(`𐠱${generateRandomString(8, "hex")}`),
         caf: Symbol(`𐠱${generateRandomString(8, "hex")}`),
+        dialog: `fr-dialog-${generateRandomString(8, "hex")}`,
         cssAttrName: `fr-css-${generateRandomString(8, "hex")}`,
         boldAttrName: `fr-bold-${generateRandomString(8, "hex")}`,
         iframeAttrName: `fr-iframe-${generateRandomString(8, "hex")}`,
@@ -143,15 +147,15 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         getScreenCTM: SVGGraphicsElement.prototype.getScreenCTM,
         getClientRects: Element.prototype.getClientRects,
         getBoundingClientRect: Element.prototype.getBoundingClientRect,
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.07.06.0",
-        scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.08.03.0",
+        scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
         scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("Rjl5NG5n"),
       },
       url: {
         introURL: decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRkZvbnQtUmVuZGVyaW5n"),
-        fontlistImg: decrypt("aHR0cHMlM0ElMkYlMkZzMS5heDF4LmNvbSUyRjIwMjIlMkYwNCUyRjAyJTJGcW9SZldkLmdpZg=="),
+        fontlistImg: decrypt("aHR0cHMlM0ElMkYlMkZzMy5ibXAub3ZoJTJGaW1ncyUyRjIwMjQlMkYwNyUyRjIyJTJGMDEyYmRkOWMxNzMzMDlmOS5naWY="),
         loadingImg: decrypt("aHR0cHMlM0ElMkYlMkZpbWcuemNvb2wuY24lMkZjb21tdW5pdHklMkYwMzhkZGU0NThmOWE4NzRhODAxMjE2MGY3NDE3ZjZlLmdpZg=="),
-        disableCSP: decrypt("aHR0cHMlM0ElMkYlMkZjaHJvbWV3ZWJzdG9yZS5nb29nbGUuY29tJTJGZGV0YWlsJTJGYWxsb3ctY3NwLWNvbnRlbnQtc2VjdXJpdCUyRmhub2pvZW1uZHBkam9mY2Rhb25iZWZjZmVjcGpmZmxo"),
+        Anton: decrypt("aHR0cHMlM0ElMkYlMkZmb250cy5nc3RhdGljLmNvbSUyRnMlMkZhbnRvbiUyRnYyNSUyRjFQdGdnODdMUk95QW0zS3otQzgud29mZjI="),
         feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? decrypt("aHR0cHMlM0ElMkYlMkZnaXRodWIuY29tJTJGRjl5NG5nJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJGaXNzdWVz"),
         homepage: getMetaValue("homepage") ?? getMetaValue("homepageURL") ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcuZ2l0aHViLmlvJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJG"),
       },
@@ -366,7 +370,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           if (this.target) return this._observeElement(this.target);
           const raceResult = await Promise.race([this._waitForTarget(), sleep(1e4, { useCachedSetTimeout: true })]);
           if (raceResult) return this._observeElement(raceResult);
-          else throw new Error("Timed out waiting for target node.");
+          else throw new Error("Target node wait timeout!");
         } catch (e) {
           this.isCancelled = true;
           ERROR("getNodeAndObserve:", e.message);
@@ -419,6 +423,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         listValues: typeof GM_listValues !== "undefined" ? GM_listValues : GM?.listValues ?? (() => []),
         openInTab: typeof GM_openInTab !== "undefined" ? GM_openInTab : GM?.openInTab ?? open.bind(w),
         addElement: typeof GM_addElement !== "undefined" ? GM_addElement : addElementFunc,
+        setClipboard: typeof GM_setClipboard !== "undefined" ? GM_setClipboard : GM?.setClipboard ?? copyToClipboard,
         registerMenuCommand: typeof GM_registerMenuCommand !== "undefined" ? GM_registerMenuCommand : GM?.registerMenuCommand ?? (() => {}),
         unregisterMenuCommand: typeof GM_unregisterMenuCommand !== "undefined" ? GM_unregisterMenuCommand : GM?.unregisterMenuCommand ?? (() => {}),
         contextMode: GMinfo.injectInto === "content" || GMinfo.script["inject-into"] === "content" || ["dom", "js"].includes(GMinfo.sandboxMode),
@@ -472,8 +477,27 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
       }
     }
 
-    function cE(nodeName) {
-      return document.createElement(nodeName);
+    function cE(nodeName, attr = {}) {
+      const el = document.createElement(nodeName);
+      if (objToString.call(attr) !== "[object Object]") return el;
+      for (const key in attr) {
+        if (!hasOwnProp.call(attr, key)) continue;
+        const value = attr[key];
+        switch (key) {
+          case "class":
+            if (Array.isArray(value)) el.classList.add(...value);
+            else el.classList.add(value);
+            break;
+          case "innerHTML":
+          case "textContent":
+            el[key] = value;
+            break;
+          default:
+            el.setAttribute(key, value);
+            break;
+        }
+      }
+      return el;
     }
 
     function aS(target) {
@@ -491,12 +515,17 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
     function uniq(array) {
       if (!Array.isArray(array)) return [];
-      return Array.from(new Set(array)).filter(Boolean);
+      return arrayFrom(new Set(array)).filter(Boolean);
     }
 
     function capitalize(string) {
-      string = String(string ?? "").toLowerCase();
+      string = toString(string ?? "").toLowerCase();
       return string.replace(/\b[a-z]|\s[a-z]/g, str => str.toUpperCase());
+    }
+
+    function toString(value) {
+      if (typeof value === "symbol") return value.description;
+      return String(value);
     }
 
     function getNodeName(node) {
@@ -525,8 +554,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
     function compareArray(array1, array2) {
       if (!Array.isArray(array1) || !Array.isArray(array2) || array1.length !== array2.length) return false;
-      const sortedArray1 = array1.slice().sort();
-      const sortedArray2 = array2.slice().sort();
+      const sortedArray1 = arrSlice.call(array1).sort();
+      const sortedArray2 = arrSlice.call(array2).sort();
       return sortedArray1.every((element, index) => element === sortedArray2[index]);
     }
 
@@ -539,7 +568,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
       };
       const prefix = "UKZJHQTRCSBFAYDMEVPXNWG".split("");
       const charactersArray = characters[type].split("");
-      const randomString = Array.from({ length }, () => charactersArray[random(charactersArray.length, "floor")]).join("");
+      const randomString = arrayFrom({ length }, () => charactersArray[random(charactersArray.length, "floor")]).join("");
       return type === "mix" ? prefix[random(prefix.length, "floor")] + randomString : randomString;
     }
 
@@ -559,7 +588,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
     }
 
     function getMainStyleElements({ currentScope, target = document }) {
-      return currentScope ? qS(`#${def.id.rndStyle}`) : qA("style[id]", target).filter(item => item.attributes[0]?.name.startsWith("fr-css-"));
+      return currentScope ? qS(`#${def.id.rndStyle}`) : qA("style[id]", target).filter(item => arrayFrom(item.attributes).Find(i => /^fr-css-\w{8}$/.test(i.name)));
     }
 
     function checkRedundantScript(global) {
@@ -599,8 +628,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         }
         if (!tag_name || typeof tag_name !== "string") throw new Error("No tag_name");
         const parent = parent_node || (/^(script|style|link|meta)$/i.test(tag_name) && document.head) || document.body || document.documentElement;
-        const node = cE(tag_name);
-        Object.keys(attributes ?? {}).forEach(key => void node.setAttribute(key, attributes[key]));
+        const node = cE(tag_name, attributes);
         parent.appendChild(node);
         return node;
       } catch (e) {
@@ -610,7 +638,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
     }
 
     function refresh() {
-      return sleep(5e2).then(() => w.location.reload(true));
+      return sleep(5e2, { useCachedSetTimeout: true }).then(() => w.location.reload(true));
     }
 
     function updateFlagAtRootElement(target) {
@@ -781,6 +809,11 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
       return metaValue?.[1];
     }
 
+    function getLanguages(lang = navigator.language) {
+      const languages = new Set(["zh-CN", "zh-TW", "en", "ja", "ko"]);
+      return languages.has(lang) ? lang : lang.includes("zh") ? "zh-CN" : "en";
+    }
+
     function setDebuggerMode() {
       const key = decrypt("\u0052\u006a\u006c\u0035\u004e\u0047\u0035\u006e");
       const value = new URLSearchParams(w.location.search).get("whoami");
@@ -805,7 +838,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
       return function () {
         const context = this;
         const args = arguments;
-        const name = Symbol.for(String(timer));
+        const name = Symbol.for(toString(timer));
         if (typeof def.count[name] === "undefined") {
           if (immed === true) {
             fn.apply(context, args);
@@ -869,6 +902,20 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         .toUpperCase();
     }
 
+    function copyToClipboard(text, type = "text/plain") {
+      try {
+        navigator.clipboard.writeText(text);
+      } catch (e) {
+        const handler = event => {
+          event.preventDefault();
+          event.clipboardData.setData(type, text);
+          document.removeEventListener("copy", handler, true);
+        };
+        document.addEventListener("copy", handler, true);
+        document.execCommand("copy");
+      }
+    }
+
     /* ENVIRONMENT_VARIABLE_PREPROCESSING */
 
     void (async function (tTP, getRawJSONInNewContext, requestBrowserEnvironment) {
@@ -893,8 +940,18 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
       /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
       const UPDATE_VERSION_NOTICE = IS_CHN
-        ? `<li class="${def.const.seed}_fix">修正 Tampermonkey 5.2.1 在 UserScripts API Dynamic 模式下 GM Value 的缓存未能及时更新的问题。</li>`
-        : `<li class="${def.const.seed}_fix">Fixed an issue that the cache of GM Value failed to be updated in time in Tampermonkey 5.2.1 in UserScripts API Dynamic mode.</li>`;
+        ? `<li class="${def.const.seed}_fix">优化脚本设置界面的窗口显示优先级。</li>
+            <li class="${def.const.seed}_fix">优化粗体修正功能对某些在线视频组件的兼容性。</li>
+            <li class="${def.const.seed}_fix">改进脚本被 CSP 策略阻止的提示方案。</li>
+            <li class="${def.const.seed}_fix">修复在某些站点因 Array.from 方法被重写造成的错误。</li>
+            <li class="${def.const.seed}_fix">修复粗体修正功能与 Cubox 扩展对鼠标事件的冲突。</li>
+            <li class="${def.const.seed}_fix">修复一些已知的问题，优化代码，优化样式。</li>`
+        : `<li class="${def.const.seed}_fix">Optimized display priority of settings interface.</li>
+            <li class="${def.const.seed}_fix">Optimized the compatibility of Bold-Fix feature for some online video components. (Chrome)</li>
+            <li class="${def.const.seed}_fix">Improved prompts for scripts blocked by CSP.</li>
+            <li class="${def.const.seed}_fix">Fixed errors caused by 'Array.from' being overridden.</li>
+            <li class="${def.const.seed}_fix">Fixed Bold-Fix conflicts with Cubox for MouseEvents.</li>
+            <li class="${def.const.seed}_fix">Fixed some known issues, optimized code & style.</li>`;
 
       /* INITIALIZE_FONT_LIBRARY */
 
@@ -936,7 +993,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
       /* INITIALIZE_FONT_RENDERING_PARAMETERS */
 
       const INITIAL_VALUES = {
-        fontBase: `system-ui,-apple-system,BlinkMacSystemFont,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','Android Emoji','EmojiSymbols','EmojiOne Mozilla','Twemoji Mozilla','Segoe UI Symbol','Noto Color Emoji Compat',emoji,'Font Awesome 6 Pro','Font Awesome 5 Pro',FontAwesome,iconfont,icomoon,IcoFont,fontello,themify,bootstrap-icons,'Segoe Fluent Icons',Material-Design-Iconic-Font`,
+        fontBase: `system-ui,-apple-system,BlinkMacSystemFont,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','Android Emoji','EmojiSymbols','EmojiOne Mozilla','Twemoji Mozilla','Segoe UI Symbol','Noto Color Emoji Compat',emoji,'Font Awesome 6 Pro','Font Awesome 5 Pro',FontAwesome,iconfont,icomoon,IcoFont,fontello,themify,'Segoe Fluent Icons','Material Design Icons',bootstrap-icons`,
         fontSelect: IS_REAL_WEBKIT || (!IS_CHEAT_UA && os === "MacOS") ? `'PingFang SC'` : `'Microsoft YaHei UI'`,
         fontFace: true,
         fontSmooth: true,
@@ -965,23 +1022,25 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
       def.const.style = {
         main: `display:inline-block;font-family:ui-monospace,monospace`,
         firefox: `:root input:is([type='text'],[type='password'],[type='search']),input:not([type]){font-family:initial!important}`,
+        frDialog: `:root>#${def.const.dialog}{display:block!important;width:auto!important;height:auto!important;background:0 0!important;opacity:1!important;border-width:0!important;outline:0!important;z-index:2147483647!important}:root>#${def.const.dialog}::backdrop{background:transparent!important}@font-face{font-family:Anton;font-style:normal;font-weight:400;font-display:swap;src:local("Impact"),url(${def.url.Anton}) format("woff2");unicode-range:U+00??,U+0131,U+0152-0153,U+02bb-02bc,U+02c6,U+02da,U+02dc,U+0304,U+0308,U+0329,U+2000-206f,U+2074,U+20ac,U+2122,U+2191,U+2193,U+2212,U+2215,U+feff,U+fffd}`,
         frDialogBox:
-          `:host(#${def.id.dialogbox}){position:fixed!important;top:0;left:0;width:100%;height:100%;background:0 0!important;pointer-events:none;z-index:2147483647}div.${def.class.db}{position:absolute;top:calc(12% + 10px);right:15px;z-index:99999;display:block;overflow:hidden;box-sizing:content-box;width:100%;max-width:420px;border:2px solid #efefef;border-radius:6px;background:#fff;box-shadow:0 0 10px 0 rgba(0,0,0,.3);color:#444;transition:opacity .5s;pointer-events:auto}.${def.class.db} *{text-shadow:0 0 1px #777!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}.${def.class.dbt}{display:flex;margin-top:0;padding:10px 15px;width:auto;background:#efefef;text-align:left;font-weight:700;font-size:18px!important;flex-wrap:wrap;justify-content:space-between;align-items:center;align-content:center}.${def.class.dbt},.${def.class.dbt} *{font-weight:700;font-size:20px!important;font-family:Candara,'Times New Roman',${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm}{margin:5px;padding:10px;color:#444;text-align:left;font-weight:500;font-size:16px!important}.${def.class.dbb}{display:inline-block;box-sizing:content-box;margin:2px 1%;padding:8px 12px;min-width:12%;border-radius:4px;text-align:center;text-decoration:none!important;letter-spacing:0;font-weight:400;cursor:pointer}.${def.class.db} .${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}.${def.class.db} .${def.const.seed}_gradient_bg{background:#e7ffd9;animation:gradient 2s ease-in-out forwards}@keyframes gradient{0%{background:#e7ffd9}to{background:transparent}}.${def.class.db} .${def.class.dbt},.${def.class.db} .${def.class.dbb}{text-shadow:none!important;-webkit-text-stroke:0 transparent!important;-webkit-user-select:none;user-select:none}.${def.class.db} .${def.class.dbb}:hover{box-sizing:content-box;color:#fff;text-decoration:none!important;font-weight:700;opacity:.8}.${def.class.db} .${def.class.dbbf}{border:1px solid #d93223!important;border-radius:6px;background:#d93223!important;color:#fff!important;font-size:14px!important}.${def.class.db} .${def.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}` +
-          `.${def.class.db} .${def.class.dbbt}{border:1px solid #038c5a!important;border-radius:6px;background:#038c5a!important;color:#fff!important;font-size:14px!important}.${def.class.db} .${def.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${def.class.dbbn}{border:1px solid #777!important;border-radius:6px;background:#777!important;color:#fff!important;font-size:14px!important}.${def.class.db} .${def.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${def.class.dbbc}{padding:2.5%;background:#efefef;color:#fff;text-align:right;font-size:initial}.${def.class.dbm} textarea{cursor:auto;overscroll-behavior:contain}.${def.class.dbm} textarea::-webkit-scrollbar{width:8px;height:8px}.${def.class.dbm} textarea::-webkit-scrollbar-corner{border-radius:2px;background:#efefef;box-shadow:inset 0 0 3px #aaa}.${def.class.dbm} textarea::-webkit-scrollbar-thumb{border-radius:2px;background:#cfcfcf;box-shadow:inset 0 0 5px #999}.${def.class.dbm} textarea::-webkit-scrollbar-track{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}.${def.class.dbm} textarea::-webkit-scrollbar-track-piece{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaa}.${def.class.dbm} button:hover{background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important;cursor:pointer}.${def.class.dbm} p{margin:5px 0!important;text-align:left;text-indent:0!important;font-weight:400;font-size:16px!important;line-height:1.5!important;-webkit-user-select:none;user-select:none}.${def.class.dbm} ul{margin:0 0 0 10px!important;padding:2px;color:gray;list-style:none;font:italic 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-user-select:none;user-select:none}.${def.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${def.class.dbm} ul::-webkit-scrollbar-thumb{border-radius:10px;background:#cfcfcf;box-shadow:inset 0 0 5px #999;}.${def.class.dbm} ul::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}.${def.class.dbm} ul::-webkit-scrollbar-track-piece{border-radius:6px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}.${def.class.dbm} ul li{display:list-item;list-style-type:none;word-break:break-all}.${def.class.dbm} li:before{display:none}.${def.class.dbm} ul#${def.const.seed}_d_d_ li:hover{background-color:#fdf6eccc!important}` +
+          `:host(#${def.id.dialogbox}){position:fixed!important;top:0;left:0;width:100%;height:100%;background:0 0!important;pointer-events:none;z-index:2147483647}div.${def.class.db}{position:absolute;top:calc(12% + 10px);right:15px;z-index:99999;display:block;overflow:hidden;box-sizing:content-box;width:100%;max-width:420px;border:2px solid #efefef;border-radius:6px;background:#fff;box-shadow:0 0 10px 0 rgba(0,0,0,.3);color:#444;transition:opacity .5s;pointer-events:auto;opacity:0}.${def.class.db} *{text-shadow:0 0 1px #777!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}.${def.class.dbt}{display:flex;margin-top:0;padding:10px 15px;width:auto;background:#efefef;text-align:left;font-weight:700;font-size:18px!important;flex-wrap:wrap;justify-content:space-between;align-items:center;align-content:center}.${def.class.dbt},.${def.class.dbt} *{font-weight:700;font-size:20px!important;font-family:Candara,Times,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm}{margin:5px;padding:10px;color:#444;text-align:left;font-weight:500;font-size:16px!important}.${def.class.dbb}{display:inline-block;box-sizing:content-box;margin:2px 1%;padding:8px 12px;min-width:12%;border-radius:4px;text-align:center;text-decoration:none!important;letter-spacing:0;font-weight:400;cursor:pointer}.${def.class.db} .${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}.${def.class.db} .${def.const.seed}_gradient_bg{background:#e7ffd9;animation:gradient 2s ease-in-out forwards}@keyframes gradient{0%{background:#e7ffd9}to{background:transparent}}.${def.class.db} .${def.class.dbt},.${def.class.db} .${def.class.dbb}{text-shadow:none!important;-webkit-text-stroke:0 transparent!important;-webkit-user-select:none;user-select:none}.${def.class.db} .${def.class.dbb}:hover{box-sizing:content-box;color:#fff;text-decoration:none!important;font-weight:700;opacity:.8}.${def.class.db} .${def.class.dbbf}{border:1px solid #d93223!important;border-radius:6px;background:#d93223!important;color:#fff!important;font-size:14px!important}.${def.class.db} .${def.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}` +
+          `.${def.class.db} .${def.class.dbbt}{border:1px solid #038c5a!important;border-radius:6px;background:#038c5a!important;color:#fff!important;font-size:14px!important}.${def.class.db} .${def.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${def.class.dbbn}{border:1px solid #777!important;border-radius:6px;background:#777!important;color:#fff!important;font-size:14px!important}.${def.class.db} .${def.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${def.class.dbbc}{padding:2.5%;background:#efefef;color:#fff;text-align:right;font-size:initial}.${def.class.dbm} textarea{cursor:auto;overscroll-behavior:contain}.${def.class.dbm} textarea::-webkit-scrollbar{width:8px;height:8px}.${def.class.dbm} textarea::-webkit-scrollbar-corner{border-radius:2px;background:#efefef;box-shadow:inset 0 0 3px #aaa}.${def.class.dbm} textarea::-webkit-scrollbar-thumb{border-radius:2px;background:#cfcfcf;box-shadow:inset 0 0 5px #999}.${def.class.dbm} textarea::-webkit-scrollbar-track{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}.${def.class.dbm} textarea::-webkit-scrollbar-track-piece{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaa}.${def.class.dbm} button:hover{background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important;cursor:pointer}.${def.class.dbm} p{margin:5px 0!important;text-align:left;text-indent:0;font-weight:400;font-size:16px;line-height:1.5!important;-webkit-user-select:none;user-select:none}.${def.class.dbm} ul{margin:0 0 0 10px!important;padding:2px;color:gray;list-style:none;font:italic 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-user-select:none;user-select:none}.${def.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${def.class.dbm} ul::-webkit-scrollbar-thumb{border-radius:10px;background:#cfcfcf;box-shadow:inset 0 0 5px #999;}.${def.class.dbm} ul::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}.${def.class.dbm} ul::-webkit-scrollbar-track-piece{border-radius:6px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}.${def.class.dbm} ul li{display:list-item;list-style-type:none;word-break:break-all}.${def.class.dbm} li:before{display:none}.${def.class.dbm} ul#${def.const.seed}_d_d_ li:hover{background-color:#fdf6eccc!important}` +
           `.${def.class.dbm} #${def.const.seed}_temporary{padding:18px 8px;text-align:center;color:#555;font-size:14px!important}.${def.class.dbm} #${def.id.bk},.${def.class.dbm} #${def.id.pv},.${def.class.dbm} #${def.id.fs},.${def.class.dbm} #${def.id.fvp},.${def.class.dbm} #${def.id.hk},.${def.class.dbm} #${def.id.ct},.${def.class.dbm} #${def.id.mps},.${def.class.dbm} #${def.id.flc},.${def.class.dbm} #${def.id.gc},.${def.class.dbm} #${def.id.cm}{display:flex;box-sizing:content-box;margin:0;padding:2px 4px!important;width:calc(96% - 10px);height:max-content;min-width:auto;min-height:40px;list-style:none;font-style:normal;justify-content:space-between;align-items:flex-start;word-break:break-word}.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);color:#fff;content:' '}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#fff;content:'OFF';font-weight:700;font-style:normal;font-size:16px}.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4);cursor:pointer}.${def.class.checkbox}:checked+label::after{left:10px;content:'ON'}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:' '}.${def.class.dbm} .${def.const.seed}_VIP,.${def.class.dbm} .${def.const.seed}_cusmono{margin:2px 0 0 0;color:#b8860b!important;font:normal 400 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${def.class.dbm} #${def.id.flc} button,.${def.class.dbm} #${def.id.gc} button{box-sizing:border-box!important;margin:0 5px 0 0!important;padding:5px!important;border:1px solid #999!important;border-radius:4px!important;background-color:#eee;color:#444!important;letter-spacing:normal!important;font-weight:400!important;font-size:14px!important}` +
-          `#${def.const.seed}_monospaced_siterules::placeholder,#${def.const.seed}_monospaced_font::placeholder,#${def.const.seed}_monospaced_feature::placeholder{color:#aaa!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} a{color:#0969da;text-decoration:none!important;font-style:inherit}.${def.class.dbm} a:hover{color:#dc143c;text-decoration:underline}.${def.class.dbm} #${def.id.feedback}{box-sizing:content-box;margin:0;padding:2px 10px;width:max-content;height:22px;min-width:auto;font-style:normal;font-size:16px;cursor:pointer}.${def.class.dbm} #${def.id.files}{display:none}.${def.class.dbm} #${def.id.feedback}:hover{color:crimson!important}.${def.class.dbm} #${def.id.feedback}:after{width:0;height:0;background:url('${def.url.loadingImg}') no-repeat -400px -300px;content:""}#${def.id.flcid}{width:max-content;height:max-content;min-width:70px;min-height:32px}#${def.id.maxps}{box-sizing:border-box;padding:4px 5px;width:70px;min-width:70px;border:2px solid #b8860b;border-radius:4px;background:#efefef;color:#333;text-align:center;font:normal 500 16px/150% Impact,Times,serif!important}.${def.class.dbm} ul.${def.class.main}{overflow-x:hidden;box-sizing:content-box;margin:0;padding:5px 0;max-height:255px;overscroll-behavior:contain}#${def.id.globaldisable}{width:max-content;height:max-content;min-width:70px;min-height:32px}#${def.const.seed}_c_w_d_d_{box-sizing:border-box;margin-left:15px;padding:3px 5px;width:max-content;height:max-content;max-width:120px;min-height:30px;border:1px solid #777;border-radius:4px;background-color:#eee;color:#333!important;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_a_w_d_l_>span{margin:0;padding:0 2px;color:#3e3e3e;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_c_w_d_{color:indigo;cursor:help;word-break:break-all}p.${def.const.seed}_exclusion{font:italic 700 24px/150% Candara,'Times New Roman'!important;word-break:break-all}#${def.const.seed}_d_s_{box-sizing:content-box;margin:4px 6px;padding:2px 6px;width:57%;height:22px;outline:none!important;border:2px solid #777;border-radius:4px;font:normal 400 16px/150% ui-monospace,'Roboto Mono','Liberation Mono',Consolas,'Courier New',${INITIAL_VALUES.fontSelect},monospace!important}` +
-          `#${def.const.seed}_d_s_s_{box-sizing:border-box;margin:0;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#333!important;outline:none!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_d_s_c_{box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#333!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_d_s_a_{box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#8b0000!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_d_d_{overflow-x:hidden;margin:0!important;padding:0!important;max-height:190px;list-style:none!important;overscroll-behavior:contain}#${def.const.seed}_d_d_ li[id^='${def.const.seed}_d_d_l_']{display:flex;overflow:hidden;margin:0;padding:5px;max-width:364px;color:#555;list-style:none;white-space:nowrap;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,-apple-system,BlinkMacSystemFont!important;justify-content:space-between}#${def.const.seed}_d_d_ span.${def.const.seed}_domainlist{overflow:hidden;margin-right:auto;padding-left:5px;width:85%;text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all}#${def.const.seed}_d_d_ .${def.const.seed}_customdomain{overflow:hidden;margin-left:5px;width:57%;text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all}#${def.const.seed}_custom_Fontlist{box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;max-height:457px;outline:none!important;border:1px solid #999;border-radius:6px;white-space:pre;font:normal 400 14px/150% ui-monospace,'Roboto Mono','Liberation Mono',Consolas,'Courier New',${INITIAL_VALUES.fontSelect},monospace!important;resize:vertical;overscroll-behavior:contain}` +
-          `#${def.const.seed}_d_d_ a[id^='${def.const.seed}_d_d_l_s_']{padding:2px;background:0 0;color:#8b0000;font-size:14px!important;cursor:pointer}#${def.const.seed}_exSite_add{font:italic 700 24px/150% Candara,Times New Roman!important;word-break:break-all}#${def.const.seed}_fontoverride_def_array,#${def.const.seed}_fontscale_def_json{box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:0!important;border:1px solid #999;border-radius:6px;white-space:pre;font:normal 400 14px/150% ui-monospace,'Roboto Mono','Liberation Mono',Consolas,'Courier New',${INITIAL_VALUES.fontSelect},monospace!important;resize:vertical;overscroll-behavior:contain}#${def.const.seed}_warning_chn{display:block;margin:-2px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important}#${def.const.seed}_warning_en{display:block;margin:0!important;height:max-content;color:#dc143c;font-size:14px!important}#${def.const.seed}_monospaced_font,#${def.const.seed}_monospaced_feature{box-sizing:border-box;padding:5px;width:380px;outline:0!important;border:1px solid #999;border-radius:6px;font:normal 400 14px/150% ui-monospace,'Roboto Mono','Liberation Mono',Consolas,'Courier New',${INITIAL_VALUES.fontSelect},monospace!important}#${def.const.seed}_monospaced_siterules{box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:140px!important;max-height:256px;outline:0!important;border:1px solid #999;border-radius:6px;white-space:pre;font:normal 400 14px/150% ui-monospace,'Roboto Mono','Liberation Mono',Consolas,'Courier New',${INITIAL_VALUES.fontSelect},monospace!important;resize:vertical;overscroll-behavior:contain;word-break:keep-all!important}.${def.class.dbm} p.${def.const.seed}_mono_notify{display:block;margin-top:10px!important;color:#555;font-size:14px!important}#${def.id.cm}{margin:0 0 8px;width:97%!important;border-bottom:1px groove #ccc}.${def.class.dbm} span.${def.const.seed}_cusmono{color:#555!important;font-weight:700!important}#${def.const.seed}_kbd{display:inline-block;box-sizing:content-box;margin:4px 0 0;padding:3px 10px;width:94%;border:1px solid rgba(175,184,193,.4);border-radius:6px;background-color:#f6f8fa;color:#666;vertical-align:middle;text-align:center;font-size:14px!important}` +
-          `#${def.const.seed}_copy_to_author{overflow-y:auto;margin:0!important;padding:0!important;max-height:300px;list-style-position:outside}#${def.const.seed}_copy_to_author li{padding:2px}.${def.class.dbm} #${def.const.seed}_custom_Fontlist::placeholder{color:#aaa!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;word-break:break-all!important}.${def.class.dbm} #${def.const.seed}_update li{margin:0;padding:1px 4px;color:gray;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} .${def.const.seed}_add{list-style-type:'\uff0b'}.${def.class.dbm} .${def.const.seed}_del{list-style-type:'\uff0d'}.${def.class.dbm} .${def.const.seed}_fix{list-style-type:'\uff20'}.${def.class.dbm} .${def.const.seed}_info{color:#daa520!important;word-break:break-word;list-style-type:'\u266f'}.${def.class.dbm} .${def.const.seed}_warn{color:#e90000!important;word-break:break-word;list-style-type:'\u2718'}.${def.class.dbm} .${def.const.seed}_init{color:#65a16a!important;word-break:break-word;list-style-type:'\u2691'}.${def.class.dbm} input:focus,.${def.class.dbm} textarea:focus{box-shadow:inset 0 1px 3px rgb(0 0 0/10%),0 0 4px rgb(110 111 112/60%)!important}@-moz-document url-prefix() {.${def.class.dbm} textarea,.${def.class.dbm} ul,#${def.const.seed}_custom_Fontlist,#${def.const.seed}_monospaced_siterules,#${def.const.seed}_fontoverride_def_array,#${def.const.seed}_fontscale_def_json{scrollbar-color:#bbbb #eee1;scrollbar-width:thin}}`,
+          `#${def.const.seed}_monospaced_siterules::placeholder,#${def.const.seed}_monospaced_font::placeholder,#${def.const.seed}_monospaced_feature::placeholder{color:#aaa!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} a{color:#0969da;text-decoration:none!important;font-style:inherit}.${def.class.dbm} a:hover{color:#dc143c;text-decoration:underline}.${def.class.dbm} #${def.id.feedback}{box-sizing:content-box;margin:0;padding:2px 10px;width:max-content;height:22px;min-width:auto;font-style:normal;font-size:16px;cursor:pointer}.${def.class.dbm} #${def.id.files}{display:none}.${def.class.dbm} #${def.id.feedback}:hover{color:crimson!important}.${def.class.dbm} #${def.id.feedback}:after{width:0;height:0;background:url('${def.url.loadingImg}') no-repeat -400px -300px;content:""}#${def.id.flcid}{width:max-content;height:max-content;min-width:70px;min-height:32px}#${def.id.maxps}{box-sizing:border-box;padding:4px 5px;width:70px;min-width:70px;border:2px solid #b8860b;border-radius:4px;background:#efefef;color:#333;text-align:center;font:normal 400 16px/150% 'Anton',Times,serif!important}.${def.class.dbm} ul.${def.class.main}{overflow-x:hidden;box-sizing:content-box;margin:0;padding:5px 0;max-height:255px;overscroll-behavior:contain}#${def.id.globaldisable}{width:max-content;height:max-content;min-width:70px;min-height:32px}#${def.const.seed}_c_w_d_d_{box-sizing:border-box;margin-left:15px;padding:3px 5px;width:max-content;height:max-content;max-width:120px;min-height:30px;border:1px solid #777;border-radius:4px;background-color:#eee;color:#333!important;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_a_w_d_l_>span{margin:0;padding:0 2px;color:#3e3e3e;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_c_w_d_{color:indigo;cursor:help;word-break:break-all}p.${def.const.seed}_exclusion{font:italic 700 24px/150% Candara,Times!important;word-break:break-all}#${def.const.seed}_d_s_{box-sizing:content-box;margin:4px 6px;padding:2px 6px;width:57%;height:22px;outline:none!important;border:2px solid #777;border-radius:4px;font:normal 400 16px/150% ui-monospace,'Operator Mono Lig','JetBrains Mono',monospace,${INITIAL_VALUES.fontSelect}!important}` +
+          `#${def.const.seed}_d_s_s_{box-sizing:border-box;margin:0;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#333!important;outline:none!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_d_s_c_{box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#333!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_d_s_a_{box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#8b0000!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_d_d_{overflow-x:hidden;margin:0!important;padding:0!important;max-height:190px;list-style:none!important;overscroll-behavior:contain}#${def.const.seed}_d_d_ li[id^='${def.const.seed}_d_d_l_']{display:flex;overflow:hidden;margin:0;padding:5px;max-width:364px;color:#555;list-style:none;white-space:nowrap;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,-apple-system,BlinkMacSystemFont!important;justify-content:space-between}#${def.const.seed}_d_d_ span.${def.const.seed}_domainlist{overflow:hidden;margin-right:auto;padding-left:5px;width:85%;text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all}#${def.const.seed}_d_d_ .${def.const.seed}_customdomain{overflow:hidden;margin-left:5px;width:57%;text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all}#${def.const.seed}_custom_Fontlist{box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;max-height:457px;outline:none!important;border:1px solid #999;border-radius:6px;white-space:pre;font:normal 400 14px/150% ui-monospace,'Operator Mono Lig','JetBrains Mono',monospace,${INITIAL_VALUES.fontSelect}!important;resize:vertical;overscroll-behavior:contain}` +
+          `#${def.const.seed}_d_d_ a[id^='${def.const.seed}_d_d_l_s_']{padding:2px;background:0 0;color:#8b0000;font-size:14px!important;cursor:pointer}#${def.const.seed}_exSite_add{font:italic 700 24px/150% Candara,Times!important;word-break:break-all}#${def.const.seed}_fontoverride_def_array,#${def.const.seed}_fontscale_def_json{box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:0!important;border:1px solid #999;border-radius:6px;white-space:pre;font:normal 400 14px/150% ui-monospace,'Operator Mono Lig','JetBrains Mono',monospace,${INITIAL_VALUES.fontSelect}!important;resize:vertical;overscroll-behavior:contain}#${def.const.seed}_warning_chn{display:block;margin:-2px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important}#${def.const.seed}_warning_en{display:block;margin:0!important;height:max-content;color:#dc143c;font-size:14px!important}#${def.const.seed}_monospaced_font,#${def.const.seed}_monospaced_feature{box-sizing:border-box;padding:5px;width:380px;outline:0!important;border:1px solid #999;border-radius:6px;font:normal 400 14px/150% ui-monospace,'Operator Mono Lig',monospace,${INITIAL_VALUES.fontSelect}!important}#${def.const.seed}_monospaced_siterules{box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:140px!important;max-height:256px;outline:0!important;border:1px solid #999;border-radius:6px;white-space:pre;font:normal 400 14px/150% ui-monospace,'Operator Mono Lig','JetBrains Mono',monospace,${INITIAL_VALUES.fontSelect}!important;resize:vertical;overscroll-behavior:contain;word-break:keep-all!important}.${def.class.dbm} p.${def.const.seed}_mono_notify{display:block;margin-top:10px!important;color:#555;font-size:14px!important}#${def.id.cm}{margin:0 0 8px;width:97%!important;border-bottom:1px groove #ccc}.${def.class.dbm} span.${def.const.seed}_cusmono{color:#555!important;font-weight:700!important}#${def.const.seed}_kbd{display:inline-block;box-sizing:content-box;margin:4px 0 0;padding:3px 10px;width:94%;border:1px solid rgba(175,184,193,.4);border-radius:6px;background-color:#f6f8fa;color:#666;vertical-align:middle;text-align:center;font-size:14px!important}` +
+          `.${def.const.seed}_cga{color:gray!important}.${def.const.seed}_cge{color:grey!important}.${def.const.seed}_cdc1{color:#dc143c!important}.${def.const.seed}_fsn{font-style:normal!important}.${def.const.seed}_fsi{font-style:italic!important}.${def.const.seed}_f20{font-size:20px!important}.${def.const.seed}_save_p{display:flex;height:30px;align-items:center}.${def.const.seed}_mh22{min-height:22px}.${def.const.seed}_op1{opacity:1!important}.${def.const.seed}_ti6{text-indent:6px!important}.${def.const.seed}_m0500{margin:0 5px 0 0}.${def.const.seed}_p0{padding:0}.${def.const.seed}_f14{font-size:14px!important}.${def.const.seed}_f11{font-size:11px!important}.${def.const.seed}_cce{color:#cecece!important}.${def.const.seed}_ccr{color:crimson!important}.${def.const.seed}_cp{cursor:pointer}.${def.const.seed}_wbka{word-wrap:break-word;word-break:break-all!important}.${def.const.seed}_idg{color:indigo!important}.${def.const.seed}_cdg{color:darkgreen!important}.${def.const.seed}_cb8{color:#8b0000!important}.${def.const.seed}_c55{color:#555!important}.${def.const.seed}_fb{font-weight:700!important}.${def.const.seed}_f12{font-size:12px!important}.${def.const.seed}_ctan{color:tan!important}.${def.const.seed}_csg{color:slategray!important}.${def.const.seed}_cco{color:coral!important}.${def.const.seed}_list_p{display:flex;justify-content:left;align-items:center}.${def.const.seed}_m05{margin:0 5px}.${def.const.seed}_cto{color:tomato!important}.${def.const.seed}_v_en{padding:0px 4px;font:italic 700 20px/130% Candara,Times New Roman!important}.${def.const.seed}_v_cn{padding:4px;font:italic 700 22px/150% Candara,Times!important}.${def.const.seed}_hi_cn{font:italic 700 22px/150% ${INITIAL_VALUES.fontSelect},Arial!important}.${def.const.seed}_hi_en{font:normal 700 20px/150% ${INITIAL_VALUES.fontSelect},Arial!important}.${def.const.seed}_pd4{padding:4px}.${def.const.seed}_lh180{line-height:180%!important}.${def.const.seed}_cb88{color:#b8860b!important}.${def.const.seed}_tac{text-align:center!important}.${def.const.seed}_cps{padding-bottom:6px;font-size:18px!important}.${def.const.seed}_cpsa{display:inline-block;overflow:hidden;width:302px;height:237px;border:2px solid #b8860b;border-radius:8px;background:url('${def.url.loadingImg}') 50% 50% no-repeat}.${def.const.seed}_bdcr{border-color:red!important}.${def.const.seed}_bdcdo{border-color:darkorange!important}` +
+          `.${def.const.seed}_tabd{border:2px solid #dc143c!important}.${def.const.seed}_inline_block{display:inline-block!important}.${def.const.seed}_block{display:block!important}.${def.const.seed}_none{display:none!important}.${def.const.seed}_visible{visibility:visible!important}.${def.const.seed}_hidden{visibility:hidden!important}.${def.const.seed}_list_reset{text-decoration:line-through;font-style:italic}#${def.const.seed}_copy_to_author{overflow-y:auto;margin:0!important;padding:0!important;max-height:300px;list-style-position:outside}#${def.const.seed}_copy_to_author li{padding:2px}.${def.class.dbm} #${def.const.seed}_custom_Fontlist::placeholder{color:#aaa!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;word-break:break-all!important}.${def.class.dbm} #${def.const.seed}_update li{margin:0;padding:1px 4px;color:gray;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} .${def.const.seed}_add{list-style-type:'\uff0b'}.${def.class.dbm} .${def.const.seed}_del{list-style-type:'\uff0d'}.${def.class.dbm} .${def.const.seed}_fix{list-style-type:'\uff20'}.${def.class.dbm} .${def.const.seed}_info{color:#daa520!important;word-break:break-word;list-style-type:'\u266f'}.${def.class.dbm} .${def.const.seed}_warn{color:#e90000!important;word-break:break-word;list-style-type:'\u2718'}.${def.class.dbm} .${def.const.seed}_init{color:#65a16a!important;word-break:break-word;list-style-type:'\u2691'}.${def.class.dbm} input:focus,.${def.class.dbm} textarea:focus{box-shadow:inset 0 1px 3px rgb(0 0 0/10%),0 0 4px rgb(110 111 112/60%)!important}@-moz-document url-prefix() {.${def.class.dbm} textarea,.${def.class.dbm} ul,#${def.const.seed}_custom_Fontlist,#${def.const.seed}_monospaced_siterules,#${def.const.seed}_fontoverride_def_array,#${def.const.seed}_fontscale_def_json{scrollbar-color:#bbbb #eee1;scrollbar-width:thin}}`,
         frConfigure:
-          `:host(#${def.id.configure}){position:fixed!important;top:0;left:0;width:100%;height:100%;background:0 0!important;pointer-events:none;z-index:2147483646}#${def.id.container}{position:absolute;top:10px;right:24px;z-index:99999;overflow-x:hidden;overflow-y:auto;box-sizing:content-box;padding:4px;max-height:calc(100% - 40px);min-height:10%;border-radius:12px;background:#f0f6ff!important;box-shadow:0 0 4px 0 rgb(0 0 0/30%);color:#333;text-align:left;font-weight:700;font-size:16px!important;opacity:0;transition:opacity .5s;width:auto;overscroll-behavior:contain;pointer-events:auto}#${def.id.container}::-webkit-scrollbar{width:10px;height:1px}#${def.id.container}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container}::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container} *{text-shadow:none!important;font-weight:700;font-size:16px;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji,Android Emoji,EmojiSymbols!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}#${def.id.container} fieldset{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;min-height:475px;border:2px groove #67a5df!important;border-radius:10px;background:#f0f6ff!important}#${def.id.container} legend{position:relative!important;float:none!important;display:block!important;visibility:visible!important;box-sizing:content-box;margin:0;padding:0 32px 0 8px;width:auto!important;height:auto!important;border:none!important;background:#f0f6ff!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.container} fieldset ul{margin:0;padding:0;background:#f0f6ff!important}#${def.id.container} ul li{float:none;display:inherit;box-sizing:content-box;margin:3px 0;min-width:-webkit-fill-available;min-width:-moz-available;border:none;background:#f0f6ff!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none}#${def.id.container} ul li:before{display:none}` +
-          `#${def.id.container} .${def.class.rotation} svg{visibility:visible!important;overflow:hidden;width:24px;height:24px;vertical-align:initial!important;fill:#67a5df;}#${def.id.container} .${def.class.rotation} svg:hover{cursor:help}#${def.const.seed}_scriptname{display:inline-block;vertical-align:bottom;overflow:hidden;min-width:130px;max-width:225px;text-overflow:ellipsis;white-space:nowrap;font-weight:700!important;-webkit-user-select:all;user-select:all}#${def.const.seed}_scriptname:hover{cursor:help}#${def.id.container} .${def.class.title} .${def.class.guide}{position:absolute;display:inline-block;cursor:pointer}@keyframes rotation{0%{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(1turn)}}.${def.class.title} .${def.class.rotation}{top:auto;right:auto;bottom:auto;left:auto;margin:0;padding:0;width:24px;height:24px;-webkit-transform:rotate(1turn);transform-origin:center 50% 0;animation:rotation 6s linear infinite}#${def.id.container} input:not([type='range'],[type='checkbox']):focus,#${def.id.container} textarea:focus{box-shadow:inset 0 1px 3px rgb(0 0 0/10%),0 0 6px rgb(82 168 236/60%)!important}#${def.id.fontList}{padding:2px 10px 0;min-height:73px}#${def.id.fontFace},#${def.id.fontSmooth}{display:flex!important;padding:2px 10px;width:calc(100% - 18px);height:40px;min-width:auto;align-items:center;justify-content:space-between}#${def.id.fontSize}{padding:2px 10px;height:60px}#${def.id.fontStroke}{padding:2px 10px;height:60px}#${def.id.fontShadow}{padding:2px 10px;height:60px}#${def.id.shadowColor}{display:flex;margin:4px;padding:2px 10px;width:auto;min-height:45px;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}#${def.id.fontCss},#${def.id.fontEx}{padding:2px 10px;height:110px;min-height:110px}#${def.id.submit}{padding:2px 10px;height:40px}#${def.id.fontList} .${def.class.selector} a{text-decoration:none;font-weight:400}#${def.id.fontList} .${def.class.label}{display:inline-block;margin:0 4px 14px 0;padding:0;height:24px;line-height:24px!important}#${def.id.fontList} .${def.class.label} span{display:inline-block;overflow:hidden;box-sizing:border-box;padding:5px;width:max-content;height:max-content;max-width:200px;min-width:12px;background:#67a5df;color:#fff;text-overflow:ellipsis;white-space:nowrap;font-weight:400;font-size:16px!important}#${def.id.fontList} .${def.class.close}{width:12px}#${def.id.fontList} .${def.class.close}:hover{border-radius:2px;background-color:#2d7dca;color:tomato}` +
-          `#${def.id.selector}{width:100%;max-width:100%}#${def.id.selector} label{display:block;margin:0 0 4px;color:#333;cursor:auto}#${def.id.selector} #${def.id.cleaner}{margin-left:5px;cursor:pointer}#${def.id.selector} #${def.id.cleaner}:hover{color:#ff0000;}#${def.id.fontList} .${def.class.selector}{overflow-x:hidden;box-sizing:border-box;margin:0 0 6px;padding:6px 6px 0;width:100%;max-width:min-content;max-width:-moz-min-content;max-height:90px;min-width:100%;min-height:45px;border:2px solid #67a5df!important;border-radius:6px;overscroll-behavior:contain;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontList} .${def.class.selectFontId} span.${def.class.spanlabel},#${def.id.selector} span.${def.class.spanlabel}{display:block!important;margin:0!important;padding:0 0 4px;width:auto;border:0;background-color:transparent!important;color:#333;text-align:left!important}#${def.id.fontList} .${def.class.selectFontId}{width:auto}#${def.id.fontList} .${def.class.selectFontId} input{overflow:hidden;box-sizing:border-box;margin:0;padding:1px 23px 1px 2px;width:230px;height:42px!important;max-width:100%;min-width:100%;outline:none!important;outline-color:#67a5df;border:2px solid #67a5df!important;border-radius:6px;background:#fafafa;text-indent:8px;text-overflow:ellipsis;color:#333;font-weight:700;font-size:16px!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.fontList} .${def.class.selectFontId} input[disabled]{pointer-events:none!important}#${def.id.fontList} input[disabled]::placeholder{color:#444!important}#${def.id.fontList} .${def.class.selectFontId} input::-webkit-search-cancel-button{margin:0 7px}#${def.const.seed}_fontoverride_defined:hover,#${def.const.seed}_fontscale_defined:hover{cursor:help;color:#8b0000}.${def.class.placeholder}::placeholder{color:#369!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;opacity:.65}` +
-          `#${def.id.fontList} .${def.class.selectFontId} dl{position:absolute;z-index:1000;overflow-x:hidden;box-sizing:content-box;margin:4px 0 0;padding:4px 8px;width:auto;max-width:calc(100% - 68px);max-height:298px;min-width:60%;border:2px solid #67a5df!important;border-radius:6px;background-color:#fff;white-space:nowrap;font-size:18px!important;overscroll-behavior:contain}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontId} dl dd{display:block;overflow-x:hidden;box-sizing:content-box;margin:1px 8px;padding:5px 0;width:-moz-available;width:-webkit-fill-available;max-width:100%;min-width:100%;text-overflow:ellipsis;font-weight:400;font-size:21px!important}#${def.id.fontList} .${def.class.selectFontId} dl dd:hover{overflow-x:hidden;box-sizing:content-box;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff;text-overflow:ellipsis}.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);color:#fff;content:" "}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#fff;content:"OFF";font-weight:700;font-style:normal;font-size:16px}.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4);cursor:pointer}` +
-          `.${def.class.checkbox}:checked+label::after{left:10px;content:"ON"}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}#${def.id.fface} label,#${def.id.fface}+label::after,#${def.id.fface}+label::before,#${def.id.smooth} label,#${def.id.smooth}+label::after,#${def.id.smooth}+label::before{-webkit-transition:all .3s ease-in;transition:all .3s ease-in}#${def.id.fontShadow} div.${def.class.flex}:before,#${def.id.fontShadow} div.${def.class.flex}:after,#${def.id.fontStroke} div.${def.class.flex}:before,#${def.id.fontStroke} div.${def.class.flex}:after,#${def.id.fontSize} div.${def.class.flex}:before,#${def.id.fontSize} div.${def.class.flex}:after{display:none}#${def.id.fontShadow} #${def.id.shadowSize},#${def.id.fontStroke} #${def.id.strokeSize},#${def.id.fontSize} #${def.id.fontScale}{box-sizing:content-box;margin:0 10px 0 0!important;padding:0;width:56px!important;height:32px!important;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:#fafafa!important;color:#111!important;text-align:center;text-indent:0;font-weight:400!important;font-size:17px!important;font-family:Impact,Times,serif!important}#${def.id.fontSize} #${def.id.fontScale}[disabled]{background-color:rgba(228,231,237,.82)!important;color:#555!important;filter:grayscale(.9)}#${def.id.fontSize} #${def.id.fviewport}>label,#${def.id.fontStroke} #${def.id.fstroke}>label{float:none!important;display:inline!important;margin:0!important;padding:0 0 0 2px!important;color:#666!important;font-size:12px!important;cursor:help!important}#${def.id.fixViewport},#${def.id.fixStroke}{display:inline-block;margin:0 2px 0 0!important;width:14px!important;height:14px!important;vertical-align:text-bottom;cursor:pointer;-webkit-appearance:none!important}#${def.id.fixViewport}::after,#${def.id.fixStroke}::after{position:relative;top:0;display:inline-block;margin:0;padding:0;width:14px;height:14px;border-radius:3px;background-color:#aaa;color:#fff;content:"\u2717";vertical-align:top;text-align:center;font-weight:700;font-size:10px;line-height:14px}#${def.id.fixViewport}:checked::after,#${def.id.fixStroke}:checked::after{border:0!important;background-color:#65a0db;color:#fff;content:"\u2713";font-weight:700;font-size:12px;line-height:14px}` +
-          `.${def.class.flex}{display:flex;width:auto;min-width:100%;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}.${def.class.slider} input{visibility:hidden}#${def.id.shadowColor} *{box-sizing:content-box}#${def.id.shadowColor} .${def.class.frColorPicker}{margin:0;padding:0;width:auto}#${def.id.shadowColor} .${def.class.frColorPicker} #${def.id.color}{box-sizing:border-box;margin:0;padding:0 8px 0 0;width:160px!important;height:35px!important;min-width:160px;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:rgba(253,253,255,.69);color:#333!important;text-align:center;text-indent:0;font-weight:400!important;font-size:18px!important;font-family:Impact,Times,serif!important;cursor:pointer}#${def.id.fontCss} textarea,#${def.id.fontEx} textarea{box-sizing:border-box;margin:0;padding:5px;width:calc(100% - 2px)!important;height:78px;max-width:calc(100% - 2px);max-height:78px;min-width:calc(100% - 2px);min-height:78px;outline:none!important;border:2px solid #67a5df!important;border-radius:6px;color:#0b5b9c!important;font:normal 700 14px/150% ui-monospace,'Roboto Mono','Liberation Mono',Consolas,'Courier New',${INITIAL_VALUES.fontSelect},monospace!important;resize:none;cursor:auto;word-break:break-all;overscroll-behavior:contain}#${def.id.fontCss} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontCss} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontCss} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px rgba(0,0,0,.2);}#${def.id.fontCss} textarea::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontEx} textarea{background:#fafafa!important}#${def.id.fontEx} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontEx} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontEx} textarea::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}.${def.class.switcher}{float:right;box-sizing:border-box;margin:-2px 4px 0 0;padding:0 6px;border:2px double #67a5df;border-radius:4px;color:#0a68c1;}` +
-          `#${def.id.fontCss} textarea::placeholder,#${def.id.fontEx} textarea::placeholder{color:#555;font:italic 500 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;opacity:.85}#${def.id.cSwitch}:hover,#${def.id.eSwitch}:hover{cursor:pointer;-webkit-user-select:none;user-select:none}.${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}.${def.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9,#e9ffe9 25%,transparent 0,transparent 50%,#e9ffe9 0,#e9ffe9 75%,transparent 0,transparent)!important;background-color:#f7fff7!important;background-size:50px 50px}#${def.id.submit} button{box-sizing:border-box;margin:0;padding:5px 10px;width:auto;height:35px;min-width:min-content;min-height:35px;border:2px solid #6ba7e0;border-radius:6px;background-color:#67a5df;background-image:none;color:#fff!important;font:normal 600 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;cursor:pointer}#${def.id.submit} button:hover{box-shadow:0 0 5px rgba(0,0,0,.4)!important}#${def.id.submit} .${def.class.cancel},#${def.id.submit} .${def.class.reset}{float:left;margin-right:10px}#${def.id.submit} .${def.class.submit}{float:right}#${def.id.submit} #${def.id.backup}{display:none;margin:0 10px 0 0}.${def.class.anim}{border:2px solid #dc143c!important;background:#dc143c!important;animation:jiggle 1.8s ease-in infinite}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}.${def.class.tooltip}{position:relative;cursor:help;-webkit-user-select:none;user-select:none}.${def.class.tooltip} span.${def.class.emoji}{font-weight:400!important}.${def.class.tooltip}:active .${def.class.tooltip}{display:block}.${def.class.tooltip} .${def.class.tooltip}{position:absolute;z-index:999999;display:none;box-sizing:content-box;padding:10px;width:234px;max-width:234px;border:2px solid #b8c4ce;border-radius:6px;background-color:#54a2ec;color:#fff;font-weight:400;opacity:.92;word-break:break-all}.${def.class.tooltip} .${def.class.tooltip} *{font-size:14px!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}` +
-          `.${def.class.tooltip} .${def.class.tooltip} em{font-style:normal!important}.${def.class.tooltip} .${def.class.tooltip} strong{color:darkorange;font-size:18px!important}.${def.class.tooltip} .${def.class.tooltip} p{display:block;margin:0 0 10px;color:#fff;text-indent:0!important;line-height:150%}.${def.class.ps1}{position:relative;top:-33px;right:5px;float:right;margin:0;padding:0;width:24px;height:0}.${def.class.ps2}{top:35px;right:-7px}.${def.class.ps3},.${def.class.ps4},.${def.class.ps5}{bottom:25px;left:auto}@-moz-document url-prefix() {#${def.id.container},#${def.id.fontList} .${def.class.selector},#${def.id.fontList} .${def.class.selectFontId} dl,#${def.id.fontCss} textarea,#${def.id.fontEx} textarea{scrollbar-color:#487baf #f1f0f0;scrollbar-width:thin}}#${def.id.fshadow}{visibility:hidden;margin-top:5px;position:absolute;z-index:999;box-sizing:content-box;padding:10px;width:234px;max-width:234px;border:2px solid #67a5df;border-radius:6px;background-color:#f0f6ff;color:#333;opacity:.92;left:21px}#${def.id.fshadow} .${def.id.fshadow}-label{display:flex;align-items:center;justify-content:space-around}#${def.id.fshadow} .${def.id.fshadow}-text{padding:5px;font-size:12px;font-weight:400;line-height:170%!important;color:#808287;word-break:break-all}` +
+          `:host(#${def.id.configure}){position:fixed!important;top:0;left:0;width:100%;height:100%;background:0 0!important;pointer-events:none;z-index:2147483645}#${def.id.container}{position:absolute;top:10px;right:24px;z-index:99999;overflow-x:hidden;overflow-y:auto;box-sizing:content-box;padding:4px;max-height:calc(100% - 40px);min-height:10%;border-radius:12px;background:#f0f6ff!important;box-shadow:0 0 4px 0 rgb(0 0 0/30%);color:#333;text-align:left;font-weight:700;font-size:16px!important;opacity:0;transition:opacity .5s;width:auto;overscroll-behavior:contain;pointer-events:auto}#${def.id.container}::-webkit-scrollbar{width:10px;height:1px}#${def.id.container}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container}::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.container} *{text-shadow:none!important;font-weight:700;font-size:16px;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji,Android Emoji,EmojiSymbols!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}#${def.id.container} fieldset{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;min-height:475px;border:2px groove #67a5df!important;border-radius:10px;background:#f0f6ff!important}#${def.id.container} legend{position:relative!important;float:none!important;display:block!important;visibility:visible!important;box-sizing:content-box;margin:0;padding:0 32px 0 8px;width:auto!important;height:auto!important;border:none!important;background:#f0f6ff!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.container} fieldset ul{margin:0;padding:0;background:#f0f6ff!important}#${def.id.container} ul li{float:none;display:inherit;box-sizing:content-box;margin:3px 0;min-width:-webkit-fill-available;min-width:-moz-available;border:none;background:#f0f6ff!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none}#${def.id.container} ul li:before{display:none}` +
+          `#${def.id.container} .${def.class.rotation} svg{visibility:visible!important;overflow:hidden;width:24px;height:24px;vertical-align:initial!important;fill:#67a5df}#${def.id.container} .${def.class.rotation} svg:hover{cursor:help}#${def.const.seed}_scriptname{display:inline-block;margin:0 4px 0 0;vertical-align:bottom;overflow:hidden;min-width:130px;max-width:225px;text-overflow:ellipsis;white-space:nowrap;font-weight:700!important;-webkit-user-select:all;user-select:all}#${def.const.seed}_scriptname:hover{cursor:help}#${def.id.container} .${def.class.title} .${def.class.guide}{position:absolute;display:inline-block;cursor:pointer}@keyframes rotation{0%{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(1turn)}}.${def.class.title} .${def.class.rotation}{top:auto;right:auto;bottom:auto;left:auto;margin:0;padding:0;width:24px;height:24px;-webkit-transform:rotate(1turn);transform-origin:center 50% 0;animation:rotation 6s linear infinite}#${def.id.container} input:not([type='range'],[type='checkbox']):focus,#${def.id.container} textarea:focus{box-shadow:inset 0 1px 3px rgb(0 0 0/10%),0 0 6px rgb(82 168 236/60%)!important}#${def.id.fontList}{padding:2px 10px 0;min-height:73px}#${def.id.fontFace},#${def.id.fontSmooth}{display:flex!important;padding:2px 10px;width:calc(100% - 18px);height:40px;min-width:auto;align-items:center;justify-content:space-between}#${def.id.fontSize}{padding:2px 10px;height:60px}#${def.id.fontStroke}{padding:2px 10px;height:60px}#${def.id.fontShadow}{padding:2px 10px;height:60px}#${def.id.container} #${def.id.shadowColor}{display:flex;margin:4px;padding:2px 10px;width:auto;min-height:45px;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}#${def.id.fontCss},#${def.id.fontEx}{padding:2px 10px;height:110px;min-height:110px;min-width:254px!important}#${def.id.submit}{padding:2px 10px;height:40px}#${def.id.fontList} .${def.class.selector} a{text-decoration:none;font-weight:400}#${def.id.fontList} .${def.class.label}{display:inline-block;margin:-1px 4px 5px 0;padding:0;height:34px;line-height:100%!important}#${def.id.fontList} .${def.class.label} span{display:inline-block;overflow:hidden;box-sizing:border-box;padding:5px;width:max-content;height:max-content;max-width:200px;min-width:12px;background:#67a5df;color:#fff;text-overflow:ellipsis;white-space:nowrap;font-weight:400;font-size:16px!important` +
+          `}#${def.id.fontList} .${def.class.close}:hover{border-radius:2px;background-color:#2d7dca;color:tomato}@-moz-document url-prefix() {#${def.id.fontList} .${def.class.label}{margin:-1px 0 4px 0}}#${def.id.fontList} .${def.class.close}{width:12px}#${def.id.selector}{width:100%;max-width:100%;display:none}#${def.id.selector} label{display:block;margin:0 0 4px;color:#333;cursor:auto}#${def.id.selector} #${def.id.cleaner}{margin-left:5px;cursor:pointer}#${def.id.selector} #${def.id.cleaner}:hover{color:#dc143c}#${def.id.fontList} .${def.class.selector}{overflow-x:hidden;box-sizing:border-box;margin:0 0 6px 0;padding:6px 0 0 6px;width:100%;max-width:254px;max-height:90px;min-width:100%;min-height:45px;border:2px solid #67a5df!important;border-radius:6px;overscroll-behavior:contain;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontList} .${def.class.selectFontId} span.${def.class.spanlabel},#${def.id.selector} span.${def.class.spanlabel}{display:block!important;margin:0!important;padding:0 0 4px;width:auto;border:0;background-color:transparent!important;color:#333;text-align:left!important}#${def.id.fontList} .${def.class.selectFontId}{width:auto}#${def.id.fontList} .${def.class.selectFontId} input{overflow:hidden;box-sizing:border-box;margin:0;padding:1px 23px 1px 2px;width:230px;height:42px!important;max-width:100%;min-width:100%;outline:none!important;outline-color:#67a5df;border:2px solid #67a5df!important;border-radius:6px;background:#fafafa;text-indent:8px;text-overflow:ellipsis;color:#333;font-weight:700;font-size:16px!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.fontList} .${def.class.selectFontId} input[disabled]{pointer-events:none!important}#${def.id.fontList} input[disabled]::placeholder{color:#444!important}#${def.id.fontList} .${def.class.selectFontId} input::-webkit-search-cancel-button{margin:0 7px}` +
+          `#${def.const.seed}_fontoverride_defined:hover,#${def.const.seed}_fontscale_defined:hover{cursor:help;color:#8b0000}.${def.class.placeholder}::placeholder{color:#369!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;opacity:.65}#${def.id.fontList} .${def.class.selectFontId} dl{display:none;position:absolute;z-index:1000;overflow-x:hidden;box-sizing:content-box;margin:4px 0 0;padding:4px 8px;width:auto;max-width:calc(100% - 68px);max-height:298px;min-width:60%;border:2px solid #67a5df!important;border-radius:6px;background-color:#fff;white-space:nowrap;font-size:18px!important;overscroll-behavior:contain}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar{width:10px;height:1px}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontId} dl::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontId} dl dd{display:block;overflow-x:hidden;box-sizing:content-box;margin:1px 8px;padding:5px 0;width:-moz-available;width:-webkit-fill-available;max-width:100%;min-width:100%;text-overflow:ellipsis;font-weight:400;font-size:21px!important}#${def.id.fontList} .${def.class.selectFontId} dl dd:hover{overflow-x:hidden;box-sizing:content-box;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff;text-overflow:ellipsis}.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);color:#fff;content:" "}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#fff;content:"OFF";font-weight:700;font-style:normal;font-size:16px}` +
+          `.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146,196,245,.4);cursor:pointer}.${def.class.checkbox}:checked+label::after{left:10px;content:"ON"}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}#${def.id.fface} label,#${def.id.fface}+label::after,#${def.id.fface}+label::before,#${def.id.smooth} label,#${def.id.smooth}+label::after,#${def.id.smooth}+label::before{-webkit-transition:all .3s ease-in;transition:all .3s ease-in}#${def.id.fontShadow} div.${def.class.flex}:before,#${def.id.fontShadow} div.${def.class.flex}:after,#${def.id.fontStroke} div.${def.class.flex}:before,#${def.id.fontStroke} div.${def.class.flex}:after,#${def.id.fontSize} div.${def.class.flex}:before,#${def.id.fontSize} div.${def.class.flex}:after{display:none}#${def.id.fontShadow} #${def.id.shadowSize},#${def.id.fontStroke} #${def.id.strokeSize},#${def.id.fontSize} #${def.id.fontScale}{box-sizing:content-box;margin:0 10px 0 0!important;padding:0;width:56px!important;height:32px!important;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:#fafafa!important;color:#111!important;text-align:center;text-indent:0;font-weight:400!important;font-size:17px!important;font-family:'Anton',Times,serif!important}#${def.id.fontSize} #${def.id.fontScale}[disabled]{background-color:rgba(228,231,237,.82)!important;color:#555!important;filter:grayscale(.9)}#${def.id.fviewport},#${def.id.fstroke}{visibility:visible;width:auto;color:#666;font-size:12px!important}#${def.id.fontSize} #${def.id.fviewport}>label,#${def.id.fontStroke} #${def.id.fstroke}>label{float:none!important;display:inline!important;margin:0!important;padding:0 0 0 2px!important;color:#666!important;font-size:12px!important;cursor:help!important}#${def.id.fixViewport},#${def.id.fixStroke}{display:inline-block;margin:0 2px 0 0!important;width:14px!important;height:14px!important;vertical-align:text-bottom;cursor:pointer;-webkit-appearance:none!important}#${def.id.fixViewport}::after,#${def.id.fixStroke}::after{position:relative;top:0;display:inline-block;margin:0;padding:0;width:14px;height:14px;border-radius:3px;background-color:#aaa;color:#fff;content:"\u2717";vertical-align:top;text-align:center;font-weight:700;font-size:10px;line-height:14px}` +
+          `#${def.id.fixViewport}:checked::after,#${def.id.fixStroke}:checked::after{border:0!important;background-color:#65a0db;color:#fff;content:"\u2713";font-weight:700;font-size:12px;line-height:14px}.${def.class.flex}{display:flex;width:auto;min-width:100%;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}.${def.class.slider} input{visibility:hidden}#${def.id.shadowColor} *{box-sizing:content-box}#${def.id.shadowColor} .${def.class.frColorPicker}{margin:0;padding:0;width:auto}#${def.id.shadowColor} .${def.class.frColorPicker} #${def.id.color}{box-sizing:border-box;margin:0;padding:0 8px 0 0;width:160px!important;height:35px!important;min-width:160px;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:rgba(253,253,255,.69);color:#333!important;text-align:center;text-indent:0;font-weight:400!important;font-size:18px!important;font-family:'Anton',Times,serif!important;cursor:pointer}#${def.id.fontCss} textarea,#${def.id.fontEx} textarea{display:block;box-sizing:border-box;margin:0;padding:5px;width:calc(100% - 2px)!important;height:78px;max-width:calc(100% - 2px);max-height:78px;min-width:calc(100% - 2px);min-height:78px;outline:none!important;border:2px solid #67a5df!important;border-radius:6px;color:#0b5b9c!important;font:normal 600 14px/150% ui-monospace,'Operator Mono Lig','JetBrains Mono',monospace,${INITIAL_VALUES.fontSelect}!important;resize:none;cursor:auto;word-break:break-all;overscroll-behavior:contain}#${def.id.fontCss} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontCss} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontCss} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px rgba(0,0,0,.2);}#${def.id.fontCss} textarea::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontEx} textarea{background:#fafafa!important}#${def.id.fontEx} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontEx} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}#${def.id.fontEx} textarea::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}` +
+          `.${def.class.switcher}{float:right;box-sizing:border-box;margin:-2px 4px 0 0;padding:0 6px;border:2px double #67a5df;border-radius:4px;color:#0a68c1;}#${def.id.fontCss} textarea::placeholder,#${def.id.fontEx} textarea::placeholder{color:#555;font:italic 500 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;opacity:.85}#${def.id.cSwitch}:hover,#${def.id.eSwitch}:hover{cursor:pointer;-webkit-user-select:none;user-select:none}.${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}.${def.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9,#e9ffe9 25%,transparent 0,transparent 50%,#e9ffe9 0,#e9ffe9 75%,transparent 0,transparent)!important;background-color:#f7fff7!important;background-size:50px 50px}#${def.id.submit} button{box-sizing:border-box;margin:0;padding:5px 10px;width:auto;height:35px;min-width:min-content;min-height:35px;border:2px solid #6ba7e0;border-radius:6px;background-color:#67a5df;background-image:none;color:#fff!important;font:normal 600 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;cursor:pointer}#${def.id.submit} button:hover{box-shadow:0 0 5px rgba(0,0,0,.4)!important}#${def.id.submit} .${def.class.cancel},#${def.id.submit} .${def.class.reset}{float:left;margin-right:10px}#${def.id.submit} .${def.class.submit}{float:right}#${def.id.submit} #${def.id.backup}{display:none;margin:0 10px 0 0}.${def.class.anim}{border:2px solid #dc143c!important;background:#dc143c!important;animation:jiggle 1.8s ease-in infinite}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}.${def.class.tooltip}{position:relative;cursor:help;-webkit-user-select:none;user-select:none}.${def.class.tooltip} span.${def.class.emoji}{font-weight:400!important}.${def.class.tooltip}:active .${def.class.tooltip}{display:block}.${def.class.tooltip} .${def.class.tooltip}{position:absolute;z-index:999999;display:none;box-sizing:content-box;padding:10px;width:234px;max-width:234px;border:2px solid #b8c4ce;border-radius:6px;background-color:#54a2ec;color:#fff;font-weight:400;opacity:.92;word-break:break-all}.${def.const.seed}_ml-5px{margin:0 0 0 -5px}` +
+          `.${def.class.tooltip} .${def.class.tooltip} *{font-size:14px!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${def.class.tooltip} .${def.class.tooltip} em{font-style:normal!important}.${def.class.tooltip} .${def.class.tooltip} strong{color:darkorange;font-size:18px!important}.${def.class.tooltip} .${def.class.tooltip} p{display:block;margin:0 0 10px;color:#fff;text-indent:0!important;line-height:150%}.${def.class.ps1}{position:relative;top:-33px;right:5px;float:right;margin:0;padding:0;width:24px;height:0}.${def.class.ps2}{top:35px;right:-7px}.${def.class.ps3},.${def.class.ps4},.${def.class.ps5}{bottom:25px;left:auto}@-moz-document url-prefix() {#${def.id.container},#${def.id.fontList} .${def.class.selector},#${def.id.fontList} .${def.class.selectFontId} dl,#${def.id.fontCss} textarea,#${def.id.fontEx} textarea{scrollbar-color:#487baf #f1f0f0;scrollbar-width:thin}}#${def.id.fshadow}{visibility:hidden;margin-top:5px;position:absolute;z-index:999;box-sizing:content-box;padding:10px;width:234px;max-width:234px;border:2px solid #67a5df;border-radius:6px;background-color:#f0f6ff;color:#333;opacity:.92;left:21px}#${def.id.fshadow} .${def.id.fshadow}-label{display:flex;align-items:center;justify-content:space-around}#${def.id.fshadow} .${def.id.fshadow}-text{padding:5px;font-size:12px;font-weight:400;line-height:170%!important;color:#808287;word-break:break-all}.${def.const.seed}_inline_block{display:inline-block!important}.${def.const.seed}_block{display:block!important}.${def.const.seed}_none{display:none!important}.${def.const.seed}_visible{visibility:visible!important}.${def.const.seed}_hidden{visibility:hidden!important}.${def.const.seed}_m0p0{margin:0;padding:0}.${def.const.seed}_checkbox{height:32px;align-self:center}.${def.const.seed}_cb8{color:#8b0000!important}.${def.const.seed}_cce{color:#cecece!important}.${def.const.seed}_ccr{color:crimson!important}.${def.const.seed}_fb{font-weight:700!important}.${def.const.seed}_f-g1{filter:grayscale(1)!important}.${def.const.seed}_m0-4p0{margin:0 -4px;padding:0}.${def.const.seed}_m0060{margin:0 0 6px 0}.${def.const.seed}_blr{border-top-left-radius:4px;border-bottom-left-radius:4px}.${def.const.seed}_brr{border-top-right-radius:4px;border-bottom-right-radius:4px}.${def.const.seed}_op1{opacity:1!important}.${def.const.seed}_usn{user-select:none!important}.${def.const.seed}_hmh35{height:35px!important;min-height:35px!important}` +
           `.${def.class.range}{--primary-color:#67a5df;--value-offset-y:var(--ticks-gap);--value-active-color:white;--value-background:transparent;--value-background-hover:var(--primary-color);--value-font:italic 700 14px/14px ui-monospace,Consolas,monospace;--fill-color:var(--primary-color);--progress-background:rgb(223, 223, 223);--progress-radius:20px;--show-min-max:none;--track-height:calc(var(--thumb-size) / 2);--min-max-font:12px serif;--min-max-opacity:0.5;--min-max-x-offset:10%;--thumb-size:22px;--thumb-color:white;--thumb-shadow:0 0 3px rgba(0, 0, 0, 0.4),0 0 1px rgba(0, 0, 0, 0.5) inset,0 0 0 99px var(--thumb-color) inset;--thumb-shadow-active:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px var(--primary-color) inset,0 0 3px rgba(0, 0, 0, 0.4);--thumb-shadow-hover:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px darkorange inset,0 0 3px rgba(0, 0, 0, 0.4);--ticks-thickness:1px;--ticks-height:5px;--ticks-gap:var(--ticks-height, 0);--ticks-color:transparent;--step:1;--ticks-count:(var(--max) - var(--min))/var(--step);--maxTicksAllowed:1000;--too-many-ticks:Min(1, Max(var(--ticks-count) - var(--maxTicksAllowed), 0));--x-step:Max(var(--step), var(--too-many-ticks) * (var(--max) - var(--min)));--tickIntervalPerc_1:Calc((var(--max) - var(--min)) / var(--x-step));--tickIntervalPerc:calc((100% - var(--thumb-size)) / var(--tickIntervalPerc_1) * var(--tickEvery, 1));--value-a:Clamp(var(--min), var(--value, 0), var(--max));--value-b:var(--value, 0);--text-value-a:var(--text-value, "");--completed-a:calc((var(--value-a) - var(--min)) / (var(--max) - var(--min)) * 100);--completed-b:calc((var(--value-b) - var(--min)) / (var(--max) - var(--min)) * 100);}.${def.class.range}{width:auto;min-width:105%!important;margin:-3px 0 0 -7px;box-sizing:content-box;display:inline-block;height:Max(var(--track-height),var(--thumb-size));background:linear-gradient(to right,var(--ticks-color) var(--ticks-thickness),transparent 1px) repeat-x;background-size:var(--tickIntervalPerc) var(--ticks-height);background-position-x:calc(var(--thumb-size)/ 2 - var(--ticks-thickness)/ 2);background-position-y:var(--flip-y,bottom);padding-bottom:var(--flip-y,var(--ticks-gap));padding-top:calc(var(--flip-y) * var(--ticks-gap));position:relative;z-index:1}` +
           `.${def.class.range}{--ca:Min(var(--completed-a), var(--completed-b));--cb:Max(var(--completed-a), var(--completed-b));--thumbs-too-close:Clamp(-1, 1000 * (Min(1, Max(var(--cb) - var(--ca) - 5, -1)) + 0.001), 1);--thumb-close-to-min:Min(1, Max(var(--ca) - 5, 0));--thumb-close-to-max:Min(1, Max(95 - var(--cb), 0))}.${def.class.range}[disabled]{filter:grayscale(0.9);}.${def.class.range}[data-ticks-position=top]{--flip-y:1}.${def.class.range}::after,.${def.class.range}::before{--offset:calc(var(--thumb-size) / 2);content:counter(x);display:var(--show-min-max,block);font:var(--min-max-font);position:absolute;bottom:var(--flip-y,-2.5ch);top:calc(-2.5ch * var(--flip-y));opacity:Clamp(0,var(--at-edge),var(--min-max-opacity));transform:translateX(calc(var(--min-max-x-offset) * var(--before,-1) * -1)) scale(var(--at-edge));pointer-events:none}.${def.class.range}::before{--before:1;--at-edge:var(--thumb-close-to-min);counter-reset:x var(--min);left:var(--offset)}.${def.class.range}::after{--at-edge:var(--thumb-close-to-max);counter-reset:x var(--max);right:var(--offset)}.${def.class.rangeProgress}{--start-end:calc(var(--thumb-size) / 2);--clip-end:calc(100% - (var(--cb)) * 1%);--clip-start:calc(var(--ca) * 1%);--clip:inset(-20px var(--clip-end) -20px var(--clip-start));position:absolute;left:var(--start-end);right:var(--start-end);top:calc(var(--ticks-gap) * var(--flip-y,0) + var(--thumb-size)/ 2 - var(--track-height)/ 2);height:calc(var(--track-height));background:var(--progress-background,#eee);pointer-events:none;z-index:-1;border-radius:var(--progress-radius)}.${def.class.rangeProgress}::before{content:"";position:absolute;left:0;right:0;clip-path:var(--clip);top:0;bottom:0;background:var(--fill-color,#000);box-shadow:var(--progress-flll-shadow);z-index:1;border-radius:inherit}.${def.class.rangeProgress}::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;box-shadow:var(--progress-shadow);pointer-events:none;border-radius:inherit}.${def.class.range}>input:only-of-type~.${def.class.rangeProgress}{--clip-start:0}.${def.class.range}>input::-webkit-slider-runnable-track{background:transparent!important;box-shadow:none!important;border:none!important}` +
           `.${def.class.range}>input{-webkit-appearance:none;box-shadow:none!important;width:100%;height:var(--thumb-size)!important;margin:0!important;padding:0!important;position:absolute!important;left:0;top:calc(50% - Max(var(--track-height),var(--thumb-size))/ 2 + calc(var(--ticks-gap)/ 2 * var(--flip-y,-1)))!important;border:0!important;cursor:grab;outline:0!important;background:0 0!important;--thumb-shadow:var(--thumb-shadow-active)}.${def.class.range}>input:not(:only-of-type){pointer-events:none}.${def.class.range}>input::-webkit-slider-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${def.class.range}>input::-moz-range-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${def.class.range}>input::-ms-thumb{appearance:none;border:none;height:var(--thumb-size);width:var(--thumb-size);transform:var(--thumb-transform);border-radius:var(--thumb-radius,50%);background:var(--thumb-color);box-shadow:var(--thumb-shadow);pointer-events:auto;transition:.1s}.${def.class.range}>input:hover{--thumb-shadow:var(--thumb-shadow-active)}.${def.class.range}>input:hover+output{--value-background:var(--value-background-hover);--y-offset:-1px;color:var(--value-active-color);box-shadow:0 0 0 3px var(--value-background)}.${def.class.range}>input:active{--thumb-shadow:var(--thumb-shadow-hover);cursor:grabbing;z-index:2}.${def.class.range}>input:active+output{transition:0s;opacity:0.9;display:-webkit-box;-webkit-box-orient:horizontal;-webkit-box-pack:center;-webkit-box-align:center;-moz-box-orient:horizontal;-moz-box-pack:center;-moz-box-align:center}.${def.class.range}>input:nth-of-type(1){--is-left-most:Clamp(0, (var(--value-a) - var(--value-b)) * 99999, 1)}.${def.class.range}>input:nth-of-type(1)+output{--value:var(--value-a);--x-offset:calc(var(--completed-a) * -1%)}.${def.class.range}>input:nth-of-type(1)+output:not(:only-of-type){--flip:calc(var(--thumbs-too-close) * -1)}.${def.class.range}>input:nth-of-type(1)+output::after{content:var(--prefix, "") var(--text-value-a) var(--suffix, "")}` +
@@ -1075,42 +1134,27 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           return status;
         }
         _create(context) {
-          this.container = cE("fr-dialogbox");
-          this.container.id = def.id.dialogbox;
-          const shadow = aS(this.container);
-          def.const.dialogIf = shadow;
-          this.frDialog = cE("div");
-          this.frDialog.classList.add(def.class.db);
-          this.frDialog.style.opacity = 0;
+          this.container = cE("fr-dialogbox", { id: def.id.dialogbox });
+          const shadow = (def.const.dialogIf = aS(this.container));
+          this.frDialog = cE("div", { class: def.class.db });
           shadow.appendChild(this.frDialog);
           applyStylesToShadowRoot(shadow, this.css, `${def.const.seed}-dialogbox`);
-          const title = cE("div");
-          title.innerHTML = tTP.createHTML(this.titleText);
-          title.classList.add(def.class.dbt);
+          const title = cE("div", { class: def.class.dbt, innerHTML: tTP.createHTML(this.titleText) });
           this.frDialog.appendChild(title);
-          const message = cE("div");
-          message.innerHTML = tTP.createHTML(this.messageText);
-          message.classList.add(def.class.dbm);
+          const message = cE("div", { class: def.class.dbm, innerHTML: tTP.createHTML(this.messageText) });
           this.frDialog.appendChild(message);
-          const buttonContainer = cE("div");
-          buttonContainer.classList.add(def.class.dbbc);
+          const buttonContainer = cE("div", { class: def.class.dbbc });
           this.frDialog.appendChild(buttonContainer);
-          this.trueButton = cE("a");
-          this.trueButton.classList.add(def.class.dbb, def.class.dbbt);
-          this.trueButton.textContent = this.trueButtonText;
+          this.trueButton = cE("a", { class: [def.class.dbb, def.class.dbbt], textContent: this.trueButtonText });
           this.trueButton.addEventListener("click", () => void context._destroy());
           buttonContainer.appendChild(this.trueButton);
           if (this.hasFalse) {
-            this.falseButton = cE("a");
-            this.falseButton.classList.add(def.class.dbb, def.class.dbbf);
-            this.falseButton.textContent = this.falseButtonText;
+            this.falseButton = cE("a", { class: [def.class.dbb, def.class.dbbf], textContent: this.falseButtonText });
             this.falseButton.addEventListener("click", () => void context._destroy());
             buttonContainer.appendChild(this.falseButton);
           }
           if (this.hasNeutral) {
-            this.neutralButton = cE("a");
-            this.neutralButton.classList.add(def.class.dbb, def.class.dbbn);
-            this.neutralButton.textContent = this.neutralButtonText;
+            this.neutralButton = cE("a", { class: [def.class.dbb, def.class.dbbn], textContent: this.neutralButtonText });
             this.neutralButton.addEventListener("click", () => void context._destroy());
             buttonContainer.appendChild(this.neutralButton);
           }
@@ -1118,15 +1162,18 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         _append() {
           const appendedNode = FrDialogBox.closure("Rebuild");
           if (CUR_WINDOW_TOP && this.container && appendedNode) {
-            this.parent.appendChild(this.container);
-            sleep(3e2)(this.frDialog).then(box => void (box && (box.style.opacity = 1)));
+            this.root = createDialogModel(this.container, this.parent);
+            sleep(3e2)(this.frDialog).then(box => box?.classList.add(`${def.const.seed}_op1`));
           }
         }
         _destroy() {
           if (!this.container) return;
-          this.frDialog.style.opacity = 0;
-          if (!qS("fr-configure")) document.removeEventListener("blur", stopPropagations, true);
+          this.frDialog.classList.remove(`${def.const.seed}_op1`);
           sleep(2e2).then(() => void DEBUG("FrDialogBox.Destroy.status: %o", safeRemove(this.container)));
+          if (!qS("fr-configure")) {
+            document.removeEventListener("blur", stopPropagations, true);
+            closeDialogModel(this.root);
+          }
         }
         respond() {
           return new Promise((resolve, reject) => {
@@ -1135,6 +1182,26 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             if (this.hasFalse) this.falseButton.addEventListener("click", () => void resolve(false));
           }).catch(e => void ERROR("FrDialogBox:", e.message));
         }
+      }
+
+      function createDialogModel(container, parent) {
+        let dialog = qS(`dialog#${def.const.dialog}`);
+        if (!dialog) {
+          dialog = cE("dialog", { id: def.const.dialog });
+          parent.appendChild(dialog);
+        }
+        dialog.appendChild(container);
+        dialog.hasAttribute("open") && dialog.close?.();
+        dialog.inert = true;
+        dialog.showModal?.();
+        dialog.removeAttribute("inert");
+        dialog.focus();
+        return dialog;
+      }
+
+      function closeDialogModel(dialog) {
+        dialog?.close?.();
+        return safeRemove(dialog ?? `dialog#${def.const.dialog}`);
       }
 
       function applyStylesToShadowRoot(shadow, css, id) {
@@ -1171,11 +1238,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
       }
 
       function updateInlineStyle(shadow, css, id) {
-        const style = cE("style");
-        style.id = id;
-        style.type = "text/css";
-        style.media = "screen";
-        style.textContent = css;
+        const style = cE("style", { id, media: "screen", type: "text/css", textContent: css });
         const existSheet = qS(`style#${id}`, shadow);
         if (css) {
           if (!existSheet) shadow.prepend(style);
@@ -1197,11 +1260,11 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
       function checkBlinkCheatingUA() {
         if (typeof NavigatorUAData === "undefined") return false;
         if (CUR_PROTOCOL === "https:" && !navigator.userAgentData) return true;
-        return Boolean(navigator.userAgentData) && !(navigator.userAgentData instanceof NavigatorUAData);
+        return Boolean(navigator.userAgentData) && !(navigator.userAgentData instanceof NavigatorUAData); // eslint-disable-line no-undef
       }
 
       function getscaleValueMatrix(scaleMatrix) {
-        const [o, t] = (def.array.scaleMatrix = scaleMatrix.slice(-2));
+        const [o, t] = (def.array.scaleMatrix = arrSlice.call(scaleMatrix, -2));
         return { prev: o || 1, cur: t || 1 };
       }
 
@@ -1231,12 +1294,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           if (!isOverwrite) return true;
         }
         try {
-          const newStyle = cE("style");
-          newStyle.setAttribute(def.const.cssAttrName, isOverwrite ?? false);
-          newStyle.id = styleId;
-          newStyle.media = "screen";
-          newStyle.type = "text/css";
-          newStyle.textContent = styleContent;
+          const newStyle = cE("style", { id: styleId, media: "screen", type: "text/css", textContent: styleContent, [def.const.cssAttrName]: isOverwrite ?? false });
           const lastStyle = getLastStyleNode(target);
           insertAfter(target, newStyle, lastStyle);
           return true;
@@ -1292,12 +1350,10 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
       }
 
       function dataDownload(fileName, data) {
-        const encryptedData = encrypt(String(data));
+        const encryptedData = encrypt(toString(data));
         const fileBlob = new Blob([encryptedData], { type: "text/plain;charset=utf-8" });
         const url = URL.createObjectURL(fileBlob);
-        const link = cE("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", fileName);
+        const link = cE("a", { href: url, download: fileName });
         link.click();
         URL.revokeObjectURL(url);
       }
@@ -1307,10 +1363,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           const dE = document.head || res.get();
           const testId = "test-internal-style";
           try {
-            const style = cE("style");
-            style.id = testId;
-            style.type = "text/css";
-            style.textContent = `#${testId} { background-color: rebeccapurple; }`;
+            const style = cE("style", { id: testId, type: "text/css", textContent: `#${testId} { background-color: rebeccapurple; }` });
             dE.appendChild(style);
             const styleSheet = style.sheet;
             if (typeof styleSheet === "undefined") return false;
@@ -1318,7 +1371,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             return rules.length > 0 && rules[0].cssText.includes("background-color: rebeccapurple");
           } catch (e) {
             const internalStyleError = IS_CHN
-              ? `站点CSP策略阻止警告:\r\n当前站点CSP阻止内部样式的加载与解析，可尝试通过“Allow CSP: Content-Security-Policy”扩展获取相应权限。`
+              ? `站点 CSP 策略阻止警告:\r\n当前站点 CSP 阻止内部样式的加载与解析，可尝试通过 “Allow CSP: Content-Security-Policy” 扩展获取相应权限。`
               : `CSP Blocking Warning:\r\nThe current site CSP is blocking the loading and parsing of internal styles, get permissions by 'Allow CSP: Content-Security-Policy'.`;
             return __console("error", internalStyleError) ?? false;
           } finally {
@@ -1401,14 +1454,14 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             },
           }) &&
             IS_DEBUG &&
-            results.add({ obj: String(SVGGraphicsElement.prototype), prop: "getScreenCTM()" });
+            results.add({ obj: toString(SVGGraphicsElement.prototype), prop: "getScreenCTM()" });
         }
 
         function overrideGetDOMRects() {
           Reflect.defineProperty(Element.prototype, "getClientRects", { value: overrideGetClientRects }) &&
             Reflect.defineProperty(Element.prototype, "getBoundingClientRect", { value: overrideGetBoundingClientRect }) &&
             IS_DEBUG &&
-            results.add({ obj: String(Element.prototype), prop: "getDOMRects" });
+            results.add({ obj: toString(Element.prototype), prop: "getDOMRects" });
         }
 
         function createProxy(T) {
@@ -1469,7 +1522,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           FontFaceSetObserver.instance = this;
         }
         _createCanvasContext() {
-          const canvas = document.createElement("canvas");
+          const canvas = cE("canvas");
           canvas.width = this.canvasWidth;
           canvas.height = this.canvasHeight;
           const canvasContext = canvas.getContext("2d", { willReadFrequently: true });
@@ -1485,11 +1538,16 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             this.canvasContext.fillText(this.fontText, this.canvasWidth / 2, this.canvasHeight / 2);
             const fontData = this.canvasContext.getImageData(0, 0, this.canvasWidth, this.canvasHeight).data;
             const fontWidth = this.canvasContext.measureText(this.fontText).width;
-            return { fontData: JSON.stringify(Array.from(fontData).filter(Boolean)), fontWidth };
+            return { fontData: arrayFrom(fontData).filter(Boolean).join(), fontWidth };
           } catch (e) {
             ERROR("FontFaceSetObserver.checkFont:", e.message);
             return null;
           }
+        }
+        destroy() {
+          this.canvasContext = null;
+          this.detectFontData = null;
+          this.originFontData = null;
         }
         detect(font) {
           if (typeof font !== "string" || !font) return false;
@@ -1515,7 +1573,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         } catch (e) {
           ERROR("getMergedFontCheckList:", e.message);
         }
-        return getUniqueFontlist([...defFontCheck, ...cusFontCheck].slice(0));
+        return getUniqueFontlist(arrSlice.call([...defFontCheck, ...cusFontCheck], 0));
       }
 
       function getUniqueFontlist(arr) {
@@ -1531,8 +1589,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
       }
 
       function getNonDuplicateFontArray(arra, arrb) {
-        arrb = Array.from(arrb);
-        return Array.from(arra).filter(x => !arrb.Some(y => y.en === x.en || y.ch === x.ch));
+        arrb = arrayFrom(arrb);
+        return arrayFrom(arra).filter(x => !arrb.Some(y => y.en === x.en || y.ch === x.ch));
       }
 
       function updateDomainsIndex(domains, curHost = CUR_HOST) {
@@ -1542,7 +1600,11 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
       }
 
       function updateExsitesIndex(sites) {
-        const siteArray = sites.map(site => (site.indexOf("*") === -1 ? site : new RegExp(`^[a-z0-9][-a-z0-9]{0,62}${site.slice(1).replace(/\./g, "\\.")}(\\:\\d{2,5})?$`)));
+        const wildcard = site => {
+          if (typeof site !== "string") return null;
+          return site.indexOf("*") === -1 ? site : new RegExp(`^[a-z0-9][-a-z0-9]{0,62}${site.slice(1).replace(/\./g, "\\.")}(\\:\\d{2,5})?$`);
+        };
+        const siteArray = sites.map(wildcard).filter(Boolean);
         for (let i = 0, l = siteArray.length; i < l; i++) {
           if (siteArray[i] instanceof RegExp && siteArray[i].test(CUR_HOST)) return i;
           if (siteArray[i] === CUR_HOST) return i;
@@ -1567,8 +1629,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
       function convertHtmlToText(htmlString) {
         if (typeof htmlString !== "string") return "";
         htmlString = htmlString.replace(/expression\([^)]*\)|url\(.*?\)|\\u[0-9a-fA-F]{4}|\\x[0-9a-fA-F]{2}|`|{|}/gi, "");
-        const temp = cE("fr-safeInner");
-        temp.innerHTML = tTP.createHTML(htmlString);
+        const temp = cE("fr-safeInner", { innerHTML: tTP.createHTML(htmlString) });
         return temp.textContent.trim().replace(/(\s*,\s*)+$/, "");
       }
 
@@ -1633,11 +1694,11 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         const strokeCssText = `${stroke_r}px currentcolor`;
         const textStroke = !isNaN(stroke_r) && stroke_r > 0 && stroke_r <= 1.0 ? "-webkit-text-stroke:var(--fr-font-stroke);" : "";
         const shadow_r = parseFloat(CONST_VALUES.fontShadow);
-        const shadow_c = String(CONST_VALUES.shadowColor) || INITIAL_VALUES.shadowColor;
+        const shadow_c = toString(CONST_VALUES.shadowColor) || INITIAL_VALUES.shadowColor;
         const shadowCssText = overlayColor(shadow_r, shadow_c.toLowerCase());
         const textShadow = !isNaN(shadow_r) && shadow_r > 0 && shadow_r <= 4 ? "text-shadow:var(--fr-font-shadow);" : "";
-        const inText = String(CONST_VALUES.fontCSS);
-        const exText = String(CONST_VALUES.fontEx);
+        const inText = toString(CONST_VALUES.fontCSS);
+        const exText = toString(CONST_VALUES.fontEx);
         const inSelector = SUPPORT_IS_PSEUDOCLASS ? `${globalPrefix}:is(${inText})` : formatSelectors(inText, globalPrefix);
         const exSelector = SUPPORT_IS_PSEUDOCLASS ? `${globalPrefix}:is(${exText})` : formatSelectors(exText, globalPrefix);
         const selection_IS_PseudoClass = SUPPORT_IS_PSEUDOCLASS ? `:is(:not(${exText}))` : ``;
@@ -1659,7 +1720,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         const monoShadow = monoAllowed ? `--fr-mono-shadow:0 0 0 currentcolor;` : ``;
         const monoFeatureText = monoAllowed ? `--fr-mono-feature:${monoFeature || INITIAL_VALUES.monospacedFeature};` : ``;
         const rootPseudoClass = `:root{--fr-font-basefont:${INITIAL_VALUES.fontBase};--fr-font-fontscale:${fontsize_r};--fr-font-family:${CONST_VALUES.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-no-stroke:0px transparent;--fr-fix-shadow:${textShadowFix};${monoFontText}${monoShadow}${monoFeatureText}}`;
-        const tStyle = IS_CURRENTSITE_ALLOWED ? `@charset "UTF-8";${rootPseudoClass}${globalCssText}${fontStyle}` : ``;
+        const tStyle = `@charset "UTF-8";` + (CUR_WINDOW_TOP ? def.const.style.frDialog : ``) + (IS_CURRENTSITE_ALLOWED ? `${rootPseudoClass}${globalCssText}${fontStyle}` : ``);
 
         /* FR_CONFIGURE_SHADOWROOT_CONTENT */
 
@@ -1668,13 +1729,13 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           ? "<label title='修正字体比例缩放后视口单位出现的数据偏移问题。如果开启后页面出现异常样式问题，请关闭之。'>视口修正</label>"
           : "<label title='Fixed the problem of data offset in viewport units after font scaling. Please turn it off if occurs style error.'>Fix VPU</label>";
         const tFixViewport = isFixViewport
-          ? `<span id="${def.id.fviewport}" style="width:auto;color:#666;font-size:12px">
+          ? `<span id="${def.id.fviewport}">
             (${fixViewportLabel} <input type="checkbox" id="${def.id.fixViewport}" ${CONST_VALUES.fixViewport ? "checked" : ""}/>)
             </span>`
           : ``;
         const fontSizeSpan = IS_CHN
-          ? `<span style="margin:0;padding:0" title="双击编辑站点缩放修正设置数据" id="${def.const.seed}_fontscale_defined">字体比例缩放</span>`
-          : `<span style="margin:0;padding:0" title="Double-click to edit the site scaling correction setting" id="${def.const.seed}_fontscale_defined">Font Scaling</span>`;
+          ? `<span class="${def.const.seed}_m0p0" title="双击编辑站点缩放修正设置数据" id="${def.const.seed}_fontscale_defined">字体比例缩放</span>`
+          : `<span class="${def.const.seed}_m0p0" title="Double-click to edit the site scaling correction setting" id="${def.const.seed}_fontscale_defined">Font Scaling</span>`;
         const tFontSizeHTML = isFontsize
           ? `<li id="${def.id.fontSize}">
               <div class="${def.class.flex}">
@@ -1682,7 +1743,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 <input id="${def.id.fontScale}" type="text" data-fr-type="number" maxlength="5" ${isDisabled}/>
               </div>
               <div class="${def.class.range}" data-ticks-position="top" ${isDisabled}
-                style="--min:.8;--max:1.5;--step:.001;--value:${CONST_VALUES.fontSize};--text-value:'${String(CONST_VALUES.fontSize.toFixed(3))}'">
+                style="--min:.8;--max:1.5;--step:.001;--value:${CONST_VALUES.fontSize};--text-value:'${toString(CONST_VALUES.fontSize.toFixed(3))}'">
                 <input id="${def.id.scaleSize}" type="range" min=".8" max="1.5" step=".001" value="${CONST_VALUES.fontSize.toFixed(3)}" ${isDisabled}/>
                 <output></output>
                 <div class='${def.class.rangeProgress}'></div>
@@ -1702,16 +1763,16 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           ? `<div id="${def.id.fshadow}-shadow-label" class="${def.id.fshadow}-label">
               <span>${IS_CHN ? "附加阴影样式修正：" : "Add Shadow Fix: "}</span>
               <input type="checkbox" class="${def.class.checkbox}" id="${def.id.fixShadow}" ${CONST_VALUES.fixShadow ? "checked" : ""} ${CONST_VALUES.fixStroke ? "" : "disabled"} />
-              <label for="${def.id.fixShadow}" ${CONST_VALUES.fixStroke ? "" : "style='filter:grayscale(1)'"}></label></div>
+              <label for="${def.id.fixShadow}" ${CONST_VALUES.fixStroke ? `` : `class="${def.const.seed}_f-g1"`}></label></div>
             <div id="${def.id.fshadow}-shadow-text" class="${def.id.fshadow}-text">${fixShadowLabel}</div>`
           : ``;
         const tLazyloadHTML = `<div class="${def.id.fshadow}-label">
           <span>${IS_CHN ? "启用修正延迟加载：" : "Use lazy loading: "}</span>
           <input type="checkbox" class="${def.class.checkbox}" id="${def.id.lazyload}" ${CONST_VALUES.lazyload ? "checked" : ""} ${CONST_VALUES.fixStroke ? "" : "disabled"} />
-          <label for="${def.id.lazyload}" ${CONST_VALUES.fixStroke ? "" : "style='filter:grayscale(1)'"}></label></div>
+          <label for="${def.id.lazyload}" ${CONST_VALUES.fixStroke ? `` : `class="${def.const.seed}_f-g1"`}></label></div>
           <div class="${def.id.fshadow}-text">${lazyloadLabel}</div>`;
         const tFixStrokeHTML = IS_CAUSED_BOLDSTROKEERROR
-          ? `<span id="${def.id.fstroke}" style="width:auto;color:#666;font-size:12px">
+          ? `<span id="${def.id.fstroke}">
               (${FixStrokeLabel} <input type="checkbox" id="${def.id.fixStroke}" ${CONST_VALUES.fixStroke ? "checked" : ""} />)
               <div id="${def.id.fshadow}">${tFixShadowHTML}${tLazyloadHTML}</div>
             </span>`
@@ -1720,20 +1781,20 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           ? `<span title="双击编辑自定义字体重写数据"  id="${def.const.seed}_fontoverride_defined">字体重写</span>（默认：开）`
           : `<span title="Double-click to edit custom font rewrite data"  id="${def.const.seed}_fontoverride_defined">Font Rewrite (ON*)</span>`;
         const shadowColorTipHTML = IS_CHN
-          ? `<p>阴影颜色可通过点击色块激活拾色器选择，也可自定义填写，格式支持: <em style="color:#cecece">RGB, RGBA, HEX, HEXA.</em> 纯白色的所有格式表示自身颜色 <em style="color:#cecece">currentcolor.</em></p><p><em style="color:darkred">注意：输入数值会自动转化为HEXA格式，但数值保持一致性。错误格式会被替换为刚刚正确显示的数值。</em></p>`
-          : `<p>Shadow colors can be selected by clicking color-block to activate the colorpicker, or custom filled in format that supports: <em style="color:#cecece">RGB, RGBA, HEX, HEXA.</em> Pure white in all formats resolves to its own color <em style="color:#cecece">currentcolor</em></p><p><em style="color:darkred">Note: The value is converted to HEXA. The incorrect value is replaced with the final correct value.</em></p>`;
+          ? `<p>阴影颜色可通过点击色块激活拾色器选择，也可自定义填写，格式支持: <em class="${def.const.seed}_cce">RGB, RGBA, HEX, HEXA.</em> 纯白色的所有格式表示自身颜色 <em class="${def.const.seed}_cce">currentcolor.</em></p><p><em class="${def.const.seed}_cb8">注意：输入数值会自动转化为HEXA格式，但数值保持一致性。错误格式会被替换为刚刚正确显示的数值。</em></p>`
+          : `<p>Shadow colors can be selected by clicking color-block to activate the colorpicker, or custom filled in format that supports: <em class="${def.const.seed}_cce">RGB, RGBA, HEX, HEXA.</em> Pure white in all formats resolves to its own color <em class="${def.const.seed}_cce">currentcolor</em></p><p><em class="${def.const.seed}_cb8">Note: The value is converted to HEXA. The incorrect value is replaced with the final correct value.</em></p>`;
         const fontCSSTipHTML = IS_CHN
-          ? `<p>默认为排除大多数网站常用的特殊CSS样式后需要渲染的页面元素。填写格式：<em style="color:#cecece">:not(.fa)</em> 或 <em style="color:#cecece">:not([class*="fa"])</em> 或 <em style="color:#cecece">,#id.className</em></p><p><em style="color:darkred">该选项为重要参数，默认只读，双击解锁。请尽量不要修改，避免造成样式失效。若失效请重置。</em></p><p>如果发现网站部分文字变为乱码或方块，请双击\ud83d\udd14打开修正帮助页面。</p>`
-          : `<p>Defaults to page elements that need to be rendered after excluding special CSS styles used on websites. Fill format: <em style="color:#cecece">:not(.fa)</em> or <em style="color:#cecece">:not([class*="fa"])</em></p><p><em style="color:darkred">This option is an important parameter, read-only by default, double-click to unlock.</em></p><p>If some of the text becomes garbled or squares, please double-click \ud83d\udd14 to open the help page.</p>`;
+          ? `<p>默认为排除大多数网站常用的特殊CSS样式后需要渲染的页面元素。填写格式：<em class="${def.const.seed}_cce">:not(.fa)</em> 或 <em class="${def.const.seed}_cce">:not([class*="fa"])</em> 或 <em class="${def.const.seed}_cce">,div.className</em></p><p><em class="${def.const.seed}_cb8">该选项为重要参数，默认只读，双击解锁。请尽量不要修改，避免造成样式失效。若失效请重置。</em></p><p>如果发现部分文字或图标变为乱码，请双击 \ud83d\udd14 打开样式修复帮助页面。</p>`
+          : `<p>Defaults to page elements that need to be rendered after excluding special CSS styles used on websites. Fill format: <em class="${def.const.seed}_cce">:not(.fa)</em> or <em class="${def.const.seed}_cce">:not([class*="fa"])</em></p><p><em class="${def.const.seed}_cb8">This option is an important parameter, read-only by default, double-click to unlock.</em></p><p>If part of text becomes garbled, Please double-click \ud83d\udd14 to open the style-fix help page.</p>`;
         const fontExTipHTML = IS_CHN
-          ? `<p>该选项排除渲染字体描边、字体阴影效果，请将排除渲染的HTML标签用逗号分隔。具体规则请点击顶部旋转的帮助文件图标。</p><p><em style="color:darkred">编辑该选项需要CSS知识，如需要排除复杂的样式或标签可通过这里进行添加，样式若混乱请重置。</em></p><p>双击\ud83d\udd14可打开自定义等宽字体添加工具，设置您需要的等宽字体。</p><p><em style="color:darkred">请注意：使用自定义等宽字体时，请谨慎删除该文本域中的重要代码：<br/>『 <em style="color:#ededed">pre,pre *,code,code *</em> 』</em></p>`
-          : `<p>This option excludes the rendering of font stroke, font shadow effects, please separate the excluded HTML tags with commas.</p><p><em style="color:darkred">Knowledge of CSS is required to edit, If you need to exclude complex styles or tags you can add them here.</em></p><p>Double-click \ud83d\udd14 to open the Custom monospace Font Tool and set the isometric font you need.</p><p><em style="color:darkred">Note: if using custom monospace fonts, Please be careful to delete important codes in this textarea:『 <em style="color:#ededed">pre,pre *,code,code *</em> 』</em></p>`;
+          ? `<p>该选项排除渲染字体描边、字体阴影效果，请将排除渲染的HTML标签用逗号分隔。具体规则请点击顶部旋转的帮助文件图标。</p><p><em class="${def.const.seed}_cb8">编辑该选项需要CSS知识，如需要排除复杂的样式或标签可通过这里进行添加，样式若混乱请重置。</em></p><p>双击 \ud83d\udd14 可打开自定义等宽字体添加工具，设置您需要的等宽字体。</p><p><em class="${def.const.seed}_cb8">请注意：使用自定义等宽字体时，请谨慎删除该文本域中的重要代码：<br/>『 <em class="${def.const.seed}_cce">pre,pre *,code,code *</em> 』</em></p>`
+          : `<p>This option excludes the rendering of font stroke, font shadow effects, please separate the excluded HTML tags with commas.</p><p><em class="${def.const.seed}_cb8">Knowledge of CSS is required to edit, If you need to exclude complex styles or tags you can add them here.</em></p><p>Double-click \ud83d\udd14 to open the Custom monospace Font Tool and set the isometric font you need.</p><p><em class="${def.const.seed}_cb8">Note: if using custom monospace fonts, Please be careful to delete important codes in this textarea:『 <em class="${def.const.seed}_cce">pre,pre *,code,code *</em> 』</em></p>`;
         const title = IS_CHN ? "双击查看更新历史" : "Double-click to view the update history of";
         const tHTML = String(
           `<div id="${def.id.container}">
-            <fieldset id="${def.id.field}" style="display:block">
+            <fieldset id="${def.id.field}">
               <legend class="${def.class.title}">
-                <span id="${def.const.seed}_scriptname" title='${title} v${curVersion}' style="color:#8b0000!important">${def.var.scriptName}</span>
+                <span id="${def.const.seed}_scriptname" title='${title} v${curVersion}' class="${def.const.seed}_cb8">${def.var.scriptName}</span>
                 <span class="${def.class.guide}">
                   <div class="${def.class.rotation}" title="${IS_CHN ? "单击查看脚本使用帮助文档" : "Click to Open Usage Document"}" height="24" width="24">
                     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48px" height="48px" viewBox="0,0,255.99431,255.99431"><g transform="scale(0.5,0.5)"><path d="M504.1,256c0,-137 -111.1,-248.1 -248.1,-248.1c-137,0 -248.1,111.1 -248.1,248.1c0,137 111.1,248.1 248.1,248.1c137,0 248.1,-111.1 248.1,-248.1z" fill="#67a5df"/><path d="M146.1,181.5c0,-13.9 4.5,-28 13.4,-42.3c8.9,-14.3 22,-26.1 39.1,-35.5c17.1,-9.4 37.1,-14.1 60,-14.1c21.2,0 40,3.9 56.2,11.8c16.3,7.8 28.8,18.5 37.7,32c8.9,13.5 13.3,28.1 13.3,43.9c0,12.5 -2.5,23.4 -7.6,32.7c-5.1,9.4 -11.1,17.5 -18,24.3c-7,6.8 -19.4,18.3 -37.5,34.4c-5,4.5 -9,8.5 -12,12c-3,3.4 -5.2,6.6 -6.7,9.4c-1.5,2.9 -2.6,5.7 -3.4,8.6c-0.8,2.9 -2,7.9 -3.6,15.1c-2.8,15.2 -11.5,22.9 -26.1,22.9c-7.6,0 -14,-2.5 -19.2,-7.5c-5.2,-5 -7.8,-12.4 -7.8,-22.2c0,-12.3 1.9,-23 5.7,-32c3.8,-9 8.9,-16.9 15.2,-23.7c6.3,-6.8 14.8,-14.9 25.5,-24.3c9.4,-8.2 16.1,-14.4 20.3,-18.6c4.2,-4.2 7.7,-8.8 10.5,-14c2.9,-5.1 4.3,-10.7 4.3,-16.7c0,-11.7 -4.4,-21.6 -13.1,-29.7c-8.7,-8.1 -20,-12.1 -33.7,-12.1c-16.1,0 -28,4.1 -35.6,12.2c-7.6,8.1 -14.1,20.1 -19.3,35.9c-5,16.6 -14.4,24.8 -28.3,24.8c-8.2,0 -15.1,-2.9 -20.8,-8.7c-5.6,-5.6 -8.5,-11.8 -8.5,-18.6zM253.4,422.3c-8.9,0 -16.7,-2.9 -23.4,-8.7c-6.7,-5.8 -10,-13.9 -10,-24.3c0,-9.2 3.2,-17 9.7,-23.3c6.4,-6.3 14.4,-9.4 23.7,-9.4c9.2,0 17,3.2 23.3,9.4c6.3,6.3 9.4,14.1 9.4,23.3c0,10.3 -3.3,18.3 -9.9,24.2c-6.6,5.9 -14.2,8.8 -22.8,8.8z" fill="#fff"/></g></svg>
@@ -1745,17 +1806,17 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   <div class="${def.class.fontList}"></div>
                 </li>
                 <li id="${def.id.fontFace}">
-                  <div style="margin:0;padding:0">
+                  <div class="${def.const.seed}_m0p0">
                     ${fontfaceHTML}
                   </div>
-                  <div style="margin:0;padding:0;height:32px;align-self:center">
+                  <div class="${def.const.seed}_m0p0 ${def.const.seed}_checkbox">
                     <input type="checkbox" id="${def.id.fface}" class="${def.class.checkbox}" ${CONST_VALUES.fontFace ? "checked" : ""} />
                     <label for="${def.id.fface}"></label>
                   </div>
                 </li>
                 <li id="${def.id.fontSmooth}">
-                  <div style="margin:0;padding:0">${IS_CHN ? "字体平滑（默认：开）" : "Font Smooth (ON*)"}</div>
-                  <div style="margin:0;padding:0;height:32px;align-self:center">
+                  <div class="${def.const.seed}_m0p0">${IS_CHN ? "字体平滑（默认：开）" : "Font Smooth (ON*)"}</div>
+                  <div class="${def.const.seed}_m0p0 ${def.const.seed}_checkbox">
                     <input type="checkbox" id="${def.id.smooth}" class="${def.class.checkbox}" ${CONST_VALUES.fontSmooth ? "checked" : ""} />
                     <label for="${def.id.smooth}"></label>
                   </div>
@@ -1763,12 +1824,12 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 ${tFontSizeHTML}
                 <li id="${def.id.fontStroke}">
                   <div class="${def.class.flex}">
-                    <span style="margin:0;padding:0">${IS_CHN ? "字体描边尺寸" : "Font Stroke"}</span>
+                    <span class="${def.const.seed}_m0p0">${IS_CHN ? "字体描边尺寸" : "Font Stroke"}</span>
                     ${tFixStrokeHTML}
                     <input id="${def.id.strokeSize}" type="text" data-fr-type="number" maxlength="5" />
                   </div>
                   <div class="${def.class.range}" data-ticks-position="top"
-                    style="--step:.001;--min:0;--max:1;--value:${CONST_VALUES.fontStroke};--text-value:'${String(CONST_VALUES.fontStroke.toFixed(3))}'">
+                    style="--step:.001;--min:0;--max:1;--value:${CONST_VALUES.fontStroke};--text-value:'${toString(CONST_VALUES.fontStroke.toFixed(3))}'">
                     <input id="${def.id.stroke}" type="range" min="0" max="1" step=".001" value="${CONST_VALUES.fontStroke.toFixed(3)}" />
                     <output></output>
                     <div class="${def.class.rangeProgress}"></div>
@@ -1776,22 +1837,22 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 </li>
                 <li id="${def.id.fontShadow}">
                   <div class="${def.class.flex}">
-                    <span style="margin:0;padding:0">${IS_CHN ? "字体阴影尺寸" : "Font Shadow"}</span>
+                    <span class="${def.const.seed}_m0p0">${IS_CHN ? "字体阴影尺寸" : "Font Shadow"}</span>
                     <input id="${def.id.shadowSize}" type="text" data-fr-type="number" maxlength="4" />
                   </div>
                   <div class="${def.class.range}" data-ticks-position="top"
-                    style="--step:.01;--min:0;--max:4;--value:${CONST_VALUES.fontShadow};--text-value:'${String(CONST_VALUES.fontShadow.toFixed(2))}'">
+                    style="--step:.01;--min:0;--max:4;--value:${CONST_VALUES.fontShadow};--text-value:'${toString(CONST_VALUES.fontShadow.toFixed(2))}'">
                     <input id="${def.id.shadow}" type="range" min="0" max="4" step=".01" value="${CONST_VALUES.fontShadow.toFixed(2)}" />
                     <output></output>
                     <div class="${def.class.rangeProgress}"></div>
                   </div>
                 </li>
                 <li id="${def.id.shadowColor}">
-                  <div style="margin:0;padding:0">
-                    <span style="margin:0;padding:0">${IS_CHN ? "阴影颜色" : "SDColor"}</span>
+                  <div class="${def.const.seed}_m0p0">
+                    <span class="${def.const.seed}_m0-4p0">${IS_CHN ? "阴影颜色" : "SDColor"}</span>
                     <span class="${def.class.tooltip}">
                       <span class="${def.class.emoji}" title="${IS_CHN ? "按住查看帮助" : "Hold down for help"}">\ud83d\udd14</span>
-                      <span class="${def.class.tooltip} ${def.class.ps3}">
+                      <span class="${def.class.tooltip} ${def.class.ps3} ${def.const.seed}_ml-5px">
                         ${shadowColorTipHTML}
                       </span>
                     </span>
@@ -1800,8 +1861,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                     <input title="${IS_CHN ? "输入颜色代码" : "Input color code"}" type="text" id="${def.id.color}" />
                   </div>
                 </li>
-                <li id="${def.id.fontCss}" style="min-width:254px">
-                  <div style="margin: 0 0 6px 0">${IS_CHN ? "需要渲染的网页元素：" : "Rendered Elements:"}
+                <li id="${def.id.fontCss}">
+                  <div class="${def.const.seed}_m0060">${IS_CHN ? "需要渲染的网页元素：" : "Rendered Elements:"}
                     <span id="${def.id.render}" class="${def.class.tooltip}">
                       <span class="${def.class.emoji}" title="${IS_CHN ? "按住查看帮助" : "Hold down for help"}">\ud83d\udd14</span>
                       <span class="${def.class.tooltip} ${def.class.ps4}">
@@ -1814,8 +1875,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                     class="${def.class.readonly}" title="${IS_CHN ? "重要参数，默认只读，双击解锁。" : "Read-only by default, Double-click to unlock."}"
                     id="${def.id.cssinclued}" readonly="readonly">${CONST_VALUES.fontCSS}</textarea>
                 </li>
-                <li id="${def.id.fontEx}" style="min-width:254px">
-                  <div style="margin: 0 0 6px 0">${IS_CHN ? "排除渲染的HTML标签：" : "Exclude HTML Labels:"}
+                <li id="${def.id.fontEx}">
+                  <div class="${def.const.seed}_m0060">${IS_CHN ? "排除渲染的HTML标签：" : "Exclude HTML Labels:"}
                     <span id="${def.id.mono}" class="${def.class.tooltip}">
                       <span class="${def.class.emoji}" title="${IS_CHN ? "按住查看帮助" : "Hold down for help"}">\ud83d\udd14</span>
                       <span class="${def.class.tooltip} ${def.class.ps5}">
@@ -1844,12 +1905,13 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           system: () => {
             if (!IS_INTERNALSTYLE_ALLOWED) {
               const troubleshoot = IS_CHN
-                ? `脚本内部样式无法被正常写入，请排查站点CSP权限或脚本冲突问题。`
+                ? `脚本内部样式无法被正常写入，请排查站点 CSP 权限或脚本冲突问题。`
                 : `The script internal styles cannot be written properly, please troubleshoot site CSP permissions or script conflict issues.`;
               __console(
                 "shown-system-error",
-                `%c${def.var.scriptName}\r\n%c${troubleshoot}`,
+                `%c${def.var.scriptName}\r\n%cINTRO.URL: ${def.url.introURL}\r\n%c${troubleshoot}`,
                 "color:#dc143c;font:normal 700 16px/150% ui-monospace,monospace",
+                "color:#777;font:italic 400 10px/180% ui-monospace,monospace",
                 "color:#d11696;font:normal 500 12px/180% ui-monospace,monospace"
               );
             } else if (globalDisable && curEmptyConfig) {
@@ -1858,8 +1920,9 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 : "Global font rendering is disabled! To enable it please reconfigure to save global data.";
               __console(
                 "shown-system-disabled",
-                `%c${def.var.scriptName}\r\n%c${disabledText}`,
+                `%c${def.var.scriptName}\r\n%cINTRO.URL: ${def.url.introURL}\r\n%c${disabledText}`,
                 "color:#dc143c;font:normal 700 16px/150% ui-monospace,monospace",
+                "color:#777;font:italic 400 10px/180% ui-monospace,monospace",
                 "color:#5e0d1c;font:italic 500 12px/180% ui-monospace,monospace"
               );
             } else if (typeof exSitesIndex === "undefined") {
@@ -1871,9 +1934,9 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 "color:#dc143c;font:normal 700 16px/150% ui-monospace,monospace",
                 "color:#777;font:italic 400 10px/180% ui-monospace,monospace",
                 "color:#708090;font-size:12px;line-height:180%",
-                "color:#708090;font:italic 600 14px/150% Candara,Times New Roman",
+                "color:#708090;font:italic 600 14px/150% Candara,Times",
                 def.var.curVersion,
-                "color:#8b0000;font:italic 400 11px/150% Candara,Times New Roman",
+                "color:#8b0000;font:italic 400 11px/150% Candara,Times",
                 IS_CHEAT_UA ? "\u3000(CHEAT-UA)" : "",
                 "color:#4682b4;font-size:12px;line-height:180%",
                 def.count.domainCount > maxPersonalSites ? "color:#dc143c" : "color:#4682b4",
@@ -1897,10 +1960,12 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               const rerenderText = IS_CHN
                 ? `已在排除渲染列表内，若要重新渲染，请在脚本菜单中打开重新渲染。`
                 : `is already in the excluded rendering list. To re-render, please turn it on in the script menu.`;
+              const hotkey = isHotkey && !IS_CHEAT_UA ? `(${os.startsWith("Mac") ? "Option" : "Alt"}+X)` : ``;
               __console(
                 "shown-exclude-info",
-                `%c${def.var.scriptName}\r\n%c${TOP_HOST.toUpperCase()} ${rerenderText} ${isHotkey && !IS_CHEAT_UA ? `(${os.startsWith("Mac") ? "Option" : "Alt"}+X)` : ``}`,
+                `%c${def.var.scriptName}\r\n%cINTRO.URL: ${def.url.introURL}\r\n%c${TOP_HOST.toUpperCase()} ${rerenderText} ${hotkey}`,
                 "color:#dc143c;font:normal 700 16px/150% ui-monospace,monospace",
+                "color:#777;font:italic 400 10px/180% ui-monospace,monospace",
                 "color:indigo;font:italic 500 12px/180% ui-monospace,monospace"
               );
             }
@@ -1910,7 +1975,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             const trim = IS_REAL_GECKO ? "" : "\r\n";
             INFO(
               `%c${brand.toUpperCase()} BROWSER WARNING%c${trim}This script (fully functional) only supports desktop browsers ` +
-                `(Version: Edge>=88, Chrome>=88, Opera>=75, Firefox>=84, Safari>=14) %c${trim}${JSON.stringify(navigatorInfo)}`,
+                `(Version: Edge>=88, Chrome>=88, Opera>=75, Firefox>=98, Safari>=15.4) %c${trim}${JSON.stringify(navigatorInfo)}`,
               `${fullStyle("crimson", "snow")};text-transform:uppercase`,
               "display:block;margin:4px 0;color:0;font-family:ui-monospace,monospace;line-height:150%",
               "color:grey;font:italic 400 12px/150% ui-monospace,monospace"
@@ -1979,7 +2044,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         }
 
         function insertStyleInFrames({ condition, nodeArray, style } = {}) {
-          if ((globalDisable && curEmptyConfig) || !IS_CURRENTSITE_ALLOWED) return;
+          if (!IS_CURRENTSITE_ALLOWED) return;
           const cssText = style ?? tStyle;
           const allFrames = nodeArray ?? [];
           !nodeArray &&
@@ -2049,14 +2114,12 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
         function insertHTML(htmlText) {
           try {
-            const section = cE("fr-configure");
-            section.id = def.id.configure;
-            const shadow = aS(section);
-            def.const.configIf = shadow;
+            const section = cE("fr-configure", { id: def.id.configure });
+            const shadow = (def.const.configIf = aS(section));
             shadow.innerHTML = tTP.createHTML(htmlText);
             const cssText = hostStyle("fr-configure") + def.const.style.frConfigure;
             applyStylesToShadowRoot(shadow, cssText, `${def.const.seed}-configure`);
-            document.documentElement.appendChild(section);
+            createDialogModel(section, document.documentElement);
           } catch (e) {
             ERROR("InsertHTML:", e.message);
           }
@@ -2091,9 +2154,9 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         function removeKeyboardEvent(target) {
           if (!target) return;
           document.addEventListener("blur", stopPropagations, true);
-          target.addEventListener("keydown", stopPropagations, true);
-          target.addEventListener("keyup", stopPropagations, true);
-          target.addEventListener("keypress", stopPropagations, true);
+          target.addEventListener("keydown", stopPropagations);
+          target.addEventListener("keyup", stopPropagations);
+          target.addEventListener("keypress", stopPropagations);
         }
 
         function getBrightness(hexa) {
@@ -2125,20 +2188,6 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             if (fontname.en === checkFontName && fontname.ps) return fontname.ps;
           }
           return checkFontName;
-        }
-
-        function copyToClipboard(text) {
-          try {
-            navigator.clipboard.writeText(text);
-          } catch (e) {
-            const handler = event => {
-              event.preventDefault();
-              event.clipboardData.setData("text/plain", text);
-              document.removeEventListener("copy", handler, true);
-            };
-            document.addEventListener("copy", handler, true);
-            document.execCommand("copy");
-          }
         }
 
         function setDateFormat(fmt, date) {
@@ -2221,40 +2270,40 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             typeof savedVersion === "undefined"
               ? IS_CHN
                 ? "新安装首次运行"
-                : "new-install excuted"
+                : "new-install execute"
               : savedVersion === null
               ? IS_CHN
                 ? "数据重置后运行"
-                : "data-rebuilt excute"
+                : "data-rebuilt execute"
               : savedVersion === def.var.curVersion
               ? IS_CHN
                 ? "您通过历史查询"
                 : "historical query for"
               : IS_CHN
               ? "更新后首次运行"
-              : "update first excute";
+              : "update first execute";
           const FIRST_INSTALL_NOTICE_WARNING =
             typeof savedVersion === "undefined"
               ? IS_CHN
                 ? `<li class="${def.const.seed}_init"><strong>温馨提示</strong> 首次加载此脚本时，默认使用内置参数进行渲染，若显示效果不佳，<b>属于正常情况</b>。请根据您的显示器及浏览器的本地配置，<b>重新设定</b>渲染参数以达到最佳效果！</li>`
-                : `<li class="${def.const.seed}_init" style="word-break:keep-all;"><strong>Tips</strong> When first loaded, it's rendered by default with built-in parameters, and it's <b>Normal</b> if it doesn't work well. Please according to the local configuration of your monitor and browser, <b>Reset</b> the parameters to achieve the best rendering effect!</li>`
+                : `<li class="${def.const.seed}_init ${def.const.seed}_wbka"><strong>Tips</strong> When first loaded, it's rendered by default with built-in parameters, and it's <b>Normal</b> if it doesn't work well. Please according to the local configuration of your monitor and browser, <b>Reset</b> the parameters to achieve the best rendering effect!</li>`
               : ``;
           const STRUCTURE_ERROR_NOTICE_WARNING =
             def.var.structureError === true
               ? IS_CHN
                 ? `<li class="${def.const.seed}_warn"><strong>数据重置警告</strong> 检测到本地运行的存储数据解析异常或被非法篡改，为确保程序正常运行，所有设置数据已初始化，请您手动还原正确的本地备份数据！</li>`
-                : `<li class="${def.const.seed}_warn" style="word-break:keep-all;"><strong>Data Reset Warning</strong> Detected abnormal parsing or illegal tampering of locally run storage data, all setting data has been initialized, please manually restore the correct local backup data.</li>`
+                : `<li class="${def.const.seed}_warn ${def.const.seed}_wbka"><strong>Data Reset Warning</strong> Detected abnormal parsing or illegal tampering of locally run storage data, all setting data has been initialized, please manually restore the correct local backup data.</li>`
               : savedVersion === null
               ? IS_CHN
-                ? `<li class="${def.const.seed}_warn" style="color:indigo!important"><strong>数据已重建</strong> 脚本开启升级后数据重建选项，所有数据已初始化。您仍可通过备份还原之前的设置数据，但<b>强烈建议</b>您重新配置参数，以使用新功能！记得及时重新备份哟！</li>`
-                : `<li class="${def.const.seed}_warn" style="color:indigo!important;word-break:keep-all;"><strong>Data has been reconstructed</strong> The script enables the post-upgrade data reconstruction option, and all data has been initialized. You can still restore the previous settings data through backup, but it's <b>recommended</b> that you re-configure the parameters to use the new features! <b>Remember to re-backup in time!</b></li>`
+                ? `<li class="${def.const.seed}_warn ${def.const.seed}_idg"><strong>数据已重建</strong> 脚本开启升级后数据重建选项，所有数据已初始化。您仍可通过备份还原之前的设置数据，但<b>强烈建议</b>您重新配置参数，以使用新功能！记得及时重新备份哟！</li>`
+                : `<li class="${def.const.seed}_warn ${def.const.seed}_idg ${def.const.seed}_wbka"><strong>Data has been reconstructed</strong> The script enables the post-upgrade data reconstruction option, and all data has been initialized. You can still restore the previous settings data through backup, but it's <b>recommended</b> that you re-configure the parameters to use the new features! <b>Remember to re-backup in time!</b></li>`
               : ``;
           let frDialog = new FrDialogBox({
             trueButtonText: IS_CHN ? "好，去看看" : "Yes, Let's go",
             falseButtonText: IS_CHN ? "不，算了吧" : "No, Thanks",
             messageText: IS_CHN
-              ? `<p style="word-break:break-all;"><span style="color:tomato;font:italic 700 22px/150% ${INITIAL_VALUES.fontSelect},Arial">您好！</span>这是${CANDIDATE_FIELD}<span style="padding:4px;font-weight:700;">${def.var.scriptName}</span>更新版本<span style="padding:4px;color:tomato;font:italic 700 22px/150% Candara,Times New Roman!important">V${def.var.curVersion}</span>，更新内容如下：</p><p><ul id="${def.const.seed}_update">${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}${UPDATE_VERSION_NOTICE}</ul></p><p>建议您先去查阅 <strong style="color:tomato;font-weight:700;font-style:italic">新版使用文档</strong> ，要去看一下吗？</p>`
-              : `<p style="word-break:break-all;line-height:180%!important;"><span style="color:tomato;font:normal 700 20px/150% ${INITIAL_VALUES.fontSelect},Arial">Hi! </span>This is ${CANDIDATE_FIELD} "<span style="padding:4px;font-weight:700;">${def.var.scriptName}</span>" in Version<span style="padding:0px 4px;color:tomato;font:italic 700 20px/130% Candara,Times New Roman!important">V${def.var.curVersion}</span>, and the update details are as follows:</p><p><ul id="${def.const.seed}_update">${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}${UPDATE_VERSION_NOTICE}</ul></p><p>Suggest you to view <strong style="color:tomato;font-weight:700;font-style:italic">Usage Document,</strong> okay?</p></p>`,
+              ? `<p class="${def.const.seed}_wbka"><span class="${def.const.seed}_cto ${def.const.seed}_hi_cn">您好！</span>这是${CANDIDATE_FIELD}<span class="${def.const.seed}_pd4 ${def.const.seed}_fb">${def.var.scriptName}</span>的新版本<span class="${def.const.seed}_cto ${def.const.seed}_v_cn">${def.var.curVersion}</span>，以下为更新细则：</p><p><ul id="${def.const.seed}_update">${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}${UPDATE_VERSION_NOTICE}</ul></p><p>建议您先去查阅 <strong class="${def.const.seed}_cto ${def.const.seed}_fb ${def.const.seed}_fsi">新版使用文档</strong> ，要去看一下吗？</p>`
+              : `<p class="${def.const.seed}_wbka" class="${def.const.seed}_lh180"><span class="${def.const.seed}_cto ${def.const.seed}_hi_en">Hi! </span>This is ${CANDIDATE_FIELD} "<span class="${def.const.seed}_pd4 ${def.const.seed}_fb">${def.var.scriptName}</span>" in Version<span class="${def.const.seed}_cto ${def.const.seed}_v_en">${def.var.curVersion}</span>, and the update details are as follows:</p><p><ul id="${def.const.seed}_update">${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}${UPDATE_VERSION_NOTICE}</ul></p><p>Suggest you to view <strong class="${def.const.seed}_cto ${def.const.seed}_fb ${def.const.seed}_fsi">Usage Document,</strong> okay?</p></p>`,
             titleText: IS_CHN ? "脚本更新 - 温馨提示" : "Script Updates - Update Tips",
           });
           if (await frDialog.respond()) GMopenInTab(url, false);
@@ -2267,7 +2316,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           saveData("_CONFIGURE_", _config_data_);
           cache.remove("_FONTCHECKLIST_");
           DEBUG(`Update.info.[${typeof version === "undefined" ? "New-install" : !version ? "Reconstruct" : "Up-to-date"}]: %cV${def.var.curVersion}`, "color:crimson;font-weight:600");
-          if (!isCloseTip || version === null) hintUpdateInfo(def.url.guideURI, version);
+          if (IS_INTERNALSTYLE_ALLOWED && (!isCloseTip || version === null)) hintUpdateInfo(def.url.guideURI, version);
         }
 
         /* SCRIPT_MENU_INSERT_PACKAGE */
@@ -2284,14 +2333,15 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                     return { e: def.array.exps, n: qS(`#${def.id.container}`, def.const.configIf) };
                   })
                   .then(r => {
-                    r.n && (r.n.style.opacity = 1) && DEBUG("configure<errorCount>:", (r.c = r.e.length));
+                    r.n && !r.n.classList.add(`${def.const.seed}_op1`) && DEBUG("configure<errorCount>:", (r.c = r.e.length));
                     r.c > 0 && reportErrorToAuthor(r.e, true);
                   });
                 qS(`.${def.class.title} span.${def.class.guide}`, def.const.configIf)?.addEventListener("click", () => void GMopenInTab(def.url.guideURI, false));
-                qS(`#${def.id.render}`, def.const.configIf)?.addEventListener("dblclick", () => void GMopenInTab(`${def.url.feedback}/42`, false));
-                qS(`#${def.id.field} #${def.const.seed}_scriptname`, def.const.configIf)?.addEventListener("dblclick", function () {
+                qS(`#${def.id.render}`, def.const.configIf)?.addEventListener("dblclick", e => void (e.stopImmediatePropagation(), GMopenInTab(`${def.url.feedback}/42`, false)));
+                qS(`#${def.id.field} #${def.const.seed}_scriptname`, def.const.configIf)?.addEventListener("dblclick", function (e) {
+                  e.stopImmediatePropagation();
+                  this.classList.add(`${def.const.seed}_usn`);
                   hintUpdateInfo(def.url.guideURI, def.var.curVersion);
-                  this.style.userSelect = "none";
                 });
               } catch (e) {
                 ERROR("SetConfigure:", e.message);
@@ -2304,8 +2354,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               falseButtonText: IS_CHN ? "自定义排除" : "Exclusion",
               neutralButtonText: IS_CHN ? "取 消" : "Cancel",
               messageText: IS_CHN
-                ? `<p id="${def.const.seed}_exSite_add">${TOP_HOST}</p><p style="color:#8b0000">该域名下所有页面将被禁止字体渲染！</p><p>确定后当前页面将自动刷新，请确认是否排除？</p>`
-                : `<p id="${def.const.seed}_exSite_add">${TOP_HOST}</p><p style="color:#8b0000">All the webpages under this domain name will be prohibited from font rendering!</p><p>Please confirm to exclude?</p>`,
+                ? `<p id="${def.const.seed}_exSite_add">${TOP_HOST}</p><p class="${def.const.seed}_cb8">该域名下所有页面将被禁止字体渲染！</p><p>确定后当前页面将自动刷新，请确认是否排除？</p>`
+                : `<p id="${def.const.seed}_exSite_add">${TOP_HOST}</p><p class="${def.const.seed}_cb8">All the webpages under this domain name will be prohibited from font rendering!</p><p>Please confirm to exclude?</p>`,
               titleText: IS_CHN ? "排除字体渲染" : "Exclude Font Rendering",
             });
             if (await frDialog.respond()) {
@@ -2364,49 +2414,49 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 `<ul class="${def.class.main}">
                   <li id="${def.id.bk}">
                     ${backupNodeHTML}
-                    <div style="margin:0;padding:0">
+                    <div class="${def.const.seed}_m0p0">
                       <input type="checkbox" id="${def.id.isbackup}" class="${def.class.checkbox}" ${isBackupFunction ? "checked" : ""} />
                       <label for="${def.id.isbackup}"></label>
                     </div>
                   </li>
                   <li id="${def.id.pv}">
                     ${previewNodeHTML}
-                    <div style="margin:0;padding:0">
+                    <div class="${def.const.seed}_m0p0">
                       <input type="checkbox" id="${def.id.ispreview}" class="${def.class.checkbox}" ${isPreview ? "checked" : ""} />
                       <label for="${def.id.ispreview}"></label>
                     </div>
                   </li>
                   <li id="${def.id.fs}">
                     ${scaleNodeHTML}
-                    <div style="margin:0;padding:0">
+                    <div class="${def.const.seed}_m0p0">
                       <input type="checkbox" id="${def.id.isfontsize}" class="${def.class.checkbox}" ${isFontsize ? "checked" : ""} />
                       <label for="${def.id.isfontsize}"></label>
                     </div>
                   </li>
                   <li id="${def.id.fvp}">
                     ${viewportNodeHTML}
-                    <div style="margin:0;padding:0">
+                    <div class="${def.const.seed}_m0p0">
                       <input type="checkbox" id="${def.id.isfixviewport}" class="${def.class.checkbox}" ${isFixViewport ? "checked" : ""} />
                       <label for="${def.id.isfixviewport}"></label>
                     </div>
                   </li>
                   <li id="${def.id.hk}">
                     ${shortcutNodeHTML}
-                    <div style="margin:0;padding:0">
+                    <div class="${def.const.seed}_m0p0">
                       <input type="checkbox" id="${def.id.ishotkey}" class="${def.class.checkbox}" ${isHotkey ? "checked" : ""} />
                       <label for="${def.id.ishotkey}"></label>
                     </div>
                   </li>
                   <li id="${def.id.ct}">
                     ${nopromptNodeHTML}
-                    <div style="margin:0;padding:0">
+                    <div class="${def.const.seed}_m0p0">
                       <input type="checkbox" id="${def.id.isclosetip}" class="${def.class.checkbox}" ${isCloseTip ? "checked" : ""} />
                       <label for="${def.id.isclosetip}"></label>
                     </div>
                   </li>
                   <li id="${def.id.mps}">
                     ${mpsNodeHTML}
-                    <div style="margin:0 5px 0 0;padding:0">
+                    <div class="${def.const.seed}_m0500 ${def.const.seed}_p0">
                       <input maxlength="4" id="${def.id.maxps}" placeholder="100" value="${maxPersonalSites}" />
                     </div>
                   </li>
@@ -2418,7 +2468,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 </ul>
                 <div id="${def.id.feedback}">\ud83e\udde1<span><b> ${feedbackNodeText} </b></span>\ud83e\udde1</div>`
               ),
-              titleText: String(`<span>${title}</span><span style="font-size:14px!important">- Version ${def.var.curVersion} -</span>`),
+              titleText: String(`<span>${title}</span><span class="${def.const.seed}_f14">- Version ${def.var.curVersion} -</span>`),
             });
             let _bk = Boolean(qS(`#${def.id.isbackup}`, def.const.dialogIf)?.checked);
             let _pv = Boolean(qS(`#${def.id.ispreview}`, def.const.dialogIf).checked);
@@ -2448,8 +2498,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                     ? `由于Firefox(Gecko内核)的兼容性原因，会对部分网站样式、功能兼容不足，从而造成样式错乱、页面动作缺失等问题，如果同时使用Greasemonkey扩展则会造成无法修复的错误。\r\n\r\n强烈建议您：使用“浏览器缩放”替代 (快捷键：ctrl+-/ctrl++)`
                     : `Due to the compatibility of Firefox (Gecko kernel), may cause lack of compatibility with some websites, and if using the 'Greasemonkey' at the same time can cause unfixable errors. \r\nRecommended: use 'Browser Zoom' instead. \r\nBrowser Shortcut Key: ( Ctrl+- / Ctrl++ )`
                   : IS_CHN
-                  ? `脚本已新增视口单位修正功能，在某些站点会因为CORS或CSP而被浏览器阻止，可通过扩展'Disable CORS'或'Disable CSP'来解决。如有安全顾虑，请关闭字体缩放功能，或单独关闭视口修正功能(全局)（这可能导致字体缩放后在某些站点出现样式异常）`
-                  : `The script added the 'Fix Viewport' feature, browser may block it due to CORS or CSP, which can be resolved by extending 'Disable CORS' and 'Disable CSP'. If you have security concerns, please turn off 'Font Scaling', or separately turn off 'Fix Viewport' (which may cause style issues).`,
+                  ? `脚本已新增视口单位修正功能，在某些站点会因为CORS或CSP而被浏览器阻止，可通过扩展'Disable-CORS'或'Disable-CSP'来解决。如有安全顾虑，请关闭字体缩放功能，或单独关闭视口修正功能(全局)（这可能导致字体缩放后在某些站点出现样式异常）`
+                  : `The script added the 'Fix Viewport' feature, browser may block it due to CORS or CSP, which can be resolved by extending 'Disable-CORS' and 'Disable-CSP'. If you have security concerns, please turn off 'Font Scaling', or separately turn off 'Fix Viewport' (which may cause style issues).`,
                 IS_CHN ? "\r\n\r\n请确认是否开启字体缩放功能？" : "\r\n𝐏𝐥𝐞𝐚𝐬𝐞 𝐜𝐨𝐧𝐟𝐢𝐫𝐦 𝐭𝐨 𝐞𝐧𝐚𝐛𝐥𝐞 𝐅𝐨𝐧𝐭 𝐒𝐜𝐚𝐥𝐢𝐧𝐠?"
               );
               if (this.checked) this.checked = Boolean(confirm(info));
@@ -2465,8 +2515,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 trueButtonText: IS_CHN ? "确 定" : "OK",
                 neutralButtonText: IS_CHN ? "取 消" : "Cancel",
                 messageText: IS_CHN
-                  ? `<p style="color:darkred">下一步操作将关闭默认的全局设置数据，您可以仅在指定的域名保存需要渲染的站点独享数据。请注意，全局数据禁用后，您需要重新配置并保存为全局数据才能启用默认全局渲染规则。</p><p>请确认您是否要禁用全局设置？</p>`
-                  : `<p style="color:darkred">The next step will clear the global data and you can save site data only on the specified domain name. Note that after global data is disabled, you need to reconfigure and save as global data to re-enable global rendering.</p><p>Please confirm to disable global settings?</p>`,
+                  ? `<p class="${def.const.seed}_cb8">下一步操作将关闭默认的全局设置数据，您可以仅在指定的域名保存需要渲染的站点独享数据。请注意，全局数据禁用后，您需要重新配置并保存为全局数据才能启用默认全局渲染规则。</p><p>请确认您是否要禁用全局设置？</p>`
+                  : `<p class="${def.const.seed}_cb8">The next step will clear the global data and you can save site data only on the specified domain name. Note that after global data is disabled, you need to reconfigure and save as global data to re-enable global rendering.</p><p>Please confirm to disable global settings?</p>`,
                 titleText: IS_CHN ? "禁用全局设置数据" : "Disable Global Settings",
               });
               if (await disableDialog.respond()) {
@@ -2493,7 +2543,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               const successText = IS_CHN ? "字体列表全局缓存已重建，当前页面即将刷新！" : "Rebuilt Fontlist cache and refresh soon!";
               let rebuiltDialog = new FrDialogBox({
                 trueButtonText: IS_CHN ? "确 定" : "OK",
-                messageText: `<p style="padding-bottom:6px;color:#b8860b;text-align:center;font-size:18px!important">${successText}</p><p style="text-align:center"><a style="display:inline-block;overflow:hidden;width:302px;height:237px;border:2px solid #b8860b;border-radius:8px;background:url('${def.url.loadingImg}') 50% 50% no-repeat"><img src='${def.url.fontlistImg}' /></a></p>`,
+                messageText: `<p class="${def.const.seed}_cb88 ${def.const.seed}_tac ${def.const.seed}_cps">${successText}</p><p class="${def.const.seed}_tac"><a class="${def.const.seed}_cpsa"><img src='${def.url.fontlistImg}' /></a></p>`,
                 titleText: IS_CHN ? "字体列表全局缓存已重建" : "Rebuilt Fontlist Cache",
               });
               cache.remove("_FONTCHECKLIST_");
@@ -2525,7 +2575,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               const successText = IS_CHN ? "高级核心功能参数已成功保存，当前页面即将刷新！" : "Advanced Core Data was saved and refresh soon!";
               let successDialog = new FrDialogBox({
                 trueButtonText: IS_CHN ? "确 定" : "OK",
-                messageText: `<p style='color:darkgoldenrod'>${successText}</p>`,
+                messageText: `<p class="${def.const.seed}_cb88">${successText}</p>`,
                 titleText: IS_CHN ? "高级核心功能设置保存" : "Advanced Core Data Save",
               });
               if (await successDialog.respond()) closeConfigurePage({ isReload: true });
@@ -2539,14 +2589,15 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               falseButtonText: IS_CHN ? "自定义排除" : "Exclusion",
               neutralButtonText: IS_CHN ? "取 消" : "Cancel",
               messageText: IS_CHN
-                ? `<p class="${def.const.seed}_exclusion">${TOP_HOST}</p><p style="color:darkgreen">该域名下所有页面将重新进行字体渲染！</p><p>确定后当前页面将自动刷新，请确认是否恢复？</p>`
-                : `<p class="${def.const.seed}_exclusion">${TOP_HOST}</p><p style="color:darkgreen">All the webpages under this domain name will be allowed from font rendering!</p><p>Please confirm to re-render?</p>`,
+                ? `<p class="${def.const.seed}_exclusion">${TOP_HOST}</p><p class="${def.const.seed}_cdg">该域名下所有页面将重新进行字体渲染！</p><p>确定后当前页面将自动刷新，请确认是否恢复？</p>`
+                : `<p class="${def.const.seed}_exclusion">${TOP_HOST}</p><p class="${def.const.seed}_cdg">All the webpages under this domain name will be allowed from font rendering!</p><p>Please confirm to re-render?</p>`,
               titleText: IS_CHN ? "恢复字体渲染" : "Allow Font Rendering",
             });
             if (await frDialog.respond()) {
               let panDomain;
               const { exSite, exSitesIndex } = await getExSitesData();
-              let regexArr = exSite.map(site => !site.indexOf("*") && new RegExp(`^[a-z0-9][-a-z0-9]{0,62}${site.slice(1).replace(/\./g, "\\.")}(\\:\\d{2,5})?$`));
+              const wildcard = site => typeof site === "string" && !site.indexOf("*") && new RegExp(`^[a-z0-9][-a-z0-9]{0,62}${site.slice(1).replace(/\./g, "\\.")}(\\:\\d{2,5})?$`);
+              let regexArr = exSite.map(wildcard);
               for (let i = 0, l = exSite.length; i < l; i++) {
                 if (exSite[i].indexOf("*") === 0 && regexArr[i].test(CUR_HOST)) {
                   panDomain = exSite[i];
@@ -2565,8 +2616,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   falseButtonText: IS_CHN ? "管 理" : "Manage",
                   neutralButtonText: IS_CHN ? "取 消" : "Cancel",
                   messageText: IS_CHN
-                    ? `<p class="${def.const.seed}_exclusion">${panDomain}</p><p style="color:darkred">该网站是被以上包含通配符的泛域名所排除渲染的。</p><p>『确定』将自动取消该泛域名下所有的排除项。</p><p>『管理』您将进入自定义排除站点列表手动处理。</p>`
-                    : `<p class="${def.const.seed}_exclusion">${panDomain}</p><p style="color:darkred">This site is excluded by Pan-domain name.</p><p>『OK』Allow all under this Pan-domain name.</p><p>『Manage』Enter the customized exclusion list.`,
+                    ? `<p class="${def.const.seed}_exclusion">${panDomain}</p><p class="${def.const.seed}_cb8">该网站是被以上包含通配符的泛域名所排除渲染的。</p><p>『确定』将自动取消该泛域名下所有的排除项。</p><p>『管理』您将进入自定义排除站点列表手动处理。</p>`
+                    : `<p class="${def.const.seed}_exclusion">${panDomain}</p><p class="${def.const.seed}_cb8">This site is excluded by Pan-domain name.</p><p>『OK』Allow all under this Pan-domain name.</p><p>『Manage』Enter the customized exclusion list.`,
                   titleText: IS_CHN ? "恢复泛域名下的字体渲染" : "Allow Pan-domain Font Rendering",
                 });
                 if (await panDomainDialog.respond()) {
@@ -2596,12 +2647,12 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             const searchBtn = IS_CHN ? "查 询" : "Search";
             const addBtn = IS_CHN ? "添 加" : "Add";
             const customExsiteHTML = IS_CHN
-              ? `<p style="color:#555;font-size:14px!important"><b style="color:#8b0000">添加自定义排除站点</b>：在文本框中输入正确的域名，点击添加按钮，支持首位通配符的泛域名，如：*.example.com</p><p style="color:#555;font-size:14px!important"><b style="color:#8b0000">数据保存</b>：完成所有添加、删除操作后需点击保存按钮才会使数据保存生效，保存数据后不能撤回，请谨慎操作。</p>`
-              : `<p style="color:#555;font-size:14px!important"><b style="color:#8b0000">Add</b>: Enter domain-name and click the Add button. Supports wildcard domain as: *.example.com</p><p style="color:#555;font-size:14px!important"><b style="color:#8b0000">Save</b>: Click the Save button after finishing adding and deleting to make it effective.</p>`;
+              ? `<p class="${def.const.seed}_c55 ${def.const.seed}_f14"><b class="${def.const.seed}_cb8">添加自定义排除站点</b>：在文本框中输入正确的域名，点击添加按钮，支持首位通配符的泛域名，如：*.example.com</p><p class="${def.const.seed}_c55 ${def.const.seed}_f14"><b class="${def.const.seed}_cb8">数据保存</b>：完成所有添加、删除操作后需点击保存按钮才会使数据保存生效，保存数据后不能撤回，请谨慎操作。</p>`
+              : `<p class="${def.const.seed}_c55 ${def.const.seed}_f14"><b class="${def.const.seed}_cb8">Add</b>: Enter domain-name and click the Add button. Supports wildcard domain as: *.example.com</p><p class="${def.const.seed}_c55 ${def.const.seed}_f14"><b class="${def.const.seed}_cb8">Save</b>: Click the Save button after finishing adding and deleting to make it effective.</p>`;
             let frDialog = new FrDialogBox({
               trueButtonText: IS_CHN ? "保存数据" : "Save",
               neutralButtonText: IS_CHN ? "取 消" : "Cancel",
-              messageText: `${customExsiteHTML}<p style="display:flex;justify-content:left;align-items:center"><input id="${def.const.seed}_d_s_"><button id="${def.const.seed}_d_s_s_">${searchBtn}</button><button id="${def.const.seed}_d_s_a_">${addBtn}</button></p><ul id="${def.const.seed}_d_d_">${listContents}</ul>`,
+              messageText: `${customExsiteHTML}<p class="${def.const.seed}_list_p"><input id="${def.const.seed}_d_s_"><button id="${def.const.seed}_d_s_s_">${searchBtn}</button><button id="${def.const.seed}_d_s_a_">${addBtn}</button></p><ul id="${def.const.seed}_d_d_">${listContents}</ul>`,
               titleText: IS_CHN ? "自定义排除站点管理" : "Manage Customized Exclusions",
             });
             const dsNode = qS(`#${def.const.seed}_d_s_`, def.const.dialogIf);
@@ -2617,21 +2668,20 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 dssNode.click();
               });
               removeKeyboardEvent(dsNode);
-              dsNode.addEventListener("input", () => void (dsNode.value = dsNode.value.replace(/[^-a-z0-9.*:]|^https?:\/\//gi, "").toLowerCase()));
-              dsNode.addEventListener("focus", () => void (dsNode.style.borderColor = "#777"));
+              dsNode.addEventListener("input", () => void (dsNode.value = dsNode.value.replace(/[^-a-z0-9.*:\][]|^https?:\/\//gi, "").toLowerCase()));
+              dsNode.addEventListener("focus", () => void dsNode.removeAttribute("class"));
               dsaNode.addEventListener("click", () => {
                 const resDomain = dsNode.value.trim().toLowerCase();
-                const domainRegex = /^(?=^.{3,255}$)(\*\.)?[a-z0-9][-a-z0-9]{0,62}(\.[a-z0-9][-a-z0-9]{0,62})+(:[0-9]{1,5})?$/;
+                const domainRegex =
+                  /^(?=^.{3,255}$)(\*\.)?[a-z0-9][-a-z0-9]{0,62}(\.[a-z0-9][-a-z0-9]{0,62})+(:[0-9]{1,5})?$|^(?![0-9])(?!-)(?!.*--)[A-Za-z0-9-]{2,62}[a-zA-Z0-9](:[0-9]{1,5})?$|^\[(([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4}|:)|(([0-9a-fA-F]{1,4}:){0,5}([0-9a-fA-F]{1,4})?::([0-9a-fA-F]{1,4}:){0,5}([0-9a-fA-F]{1,4})?)|::([0-9a-fA-F]{1,4}:){0,6}([0-9a-fA-F]{1,4})?)\](:[0-9]{1,5})?$/;
                 const exDomain = resDomain.replace(/:(80|443)$/g, "");
                 if (!domainRegex.test(exDomain) || _temp_.includes(exDomain)) {
-                  dsNode.style.borderColor = "#ff0000";
+                  dsNode.className = `${def.const.seed}_bdcr`;
                   return;
                 }
                 if (tpNode) safeRemove(tpNode);
                 exSiteLength++;
-                const newNode = cE("li");
-                newNode.id = `${def.const.seed}_d_d_l_${exSiteLength - 1}`;
-                newNode.className = `${def.const.seed}_gradient_bg`;
+                const newNode = cE("li", { id: `${def.const.seed}_d_d_l_${exSiteLength - 1}`, class: `${def.const.seed}_gradient_bg` });
                 const domainName = convertHtmlToText(exDomain);
                 newNode.innerHTML =
                   `<span>${exSiteLength > 9 ? exSiteLength : "0" + exSiteLength}. </span><span class="${def.const.seed}_domainlist" title="${domainName}">` +
@@ -2652,14 +2702,14 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   if (!_temp_.Remove(nodeDomain)) return;
                   target.dataset.del = isNaN(_list_Id_) ? -1 : _list_Id_;
                   target.textContent = IS_CHN ? "恢复" : "Reset";
-                  target.style.color = "darkgreen";
-                  target.parentNode.previousElementSibling.style.cssText += "text-decoration:line-through;font-style:italic";
+                  target.className = `${def.const.seed}_cdg`;
+                  target.parentNode.previousElementSibling.classList.add(`${def.const.seed}_list_reset`);
                 } else {
                   !_temp_.includes(nodeDomain) && _temp_.push(nodeDomain);
                   delete target.dataset.del;
                   target.textContent = IS_CHN ? "删除" : "Del";
-                  target.style.color = "darkred";
-                  target.parentNode.previousElementSibling.style.cssText += "text-decoration:none;font-style:normal";
+                  target.className = `${def.const.seed}_cb8`;
+                  target.parentNode.previousElementSibling.classList.remove(`${def.const.seed}_list_reset`);
                 }
               }
             });
@@ -2669,8 +2719,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               let successDialog = new FrDialogBox({
                 trueButtonText: IS_CHN ? "感谢使用" : "Thanks",
                 messageText: IS_CHN
-                  ? `<p style="color:darkgreen">自定义排除网站数据已成功保存！</p><p>页面将在您确认后自动刷新。</p>`
-                  : `<p style="color:darkgreen">Customized Exclusion Data Saved!</p><p>Page refreshes after confirming.</p>`,
+                  ? `<p class="${def.const.seed}_cdg">自定义排除网站数据已成功保存！</p><p>页面将在您确认后自动刷新。</p>`
+                  : `<p class="${def.const.seed}_cdg">Customized Exclusion Data Saved!</p><p>Page refreshes after confirming.</p>`,
                 titleText: IS_CHN ? "自定义排除网站数据保存" : "Customized Exclusions Data Save",
               });
               if (await successDialog.respond()) closeConfigurePage({ isReload: true });
@@ -2709,15 +2759,21 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               const _clientHeight = Number(_sNode?.clientHeight) || 0;
               target.scrollTop = _rows * _clientHeight;
             }
-            input.style.borderColor = "#777";
-          } else input.style.borderColor = "darkorange";
+            input.removeAttribute("class");
+          } else input.className = `${def.const.seed}_bdcdo`;
         }
 
         function insertMenus(loading) {
           if (!IS_INTERNALSTYLE_ALLOWED) {
-            const disabled_Menu = `\ufff1\u26d4 ${IS_CHN ? "因CSP阻止，程序无法正常运行！" : "The program cann't run properly due to CSP"}`;
+            const disabled_Menu = `\ufff1\u26d4 ${IS_CHN ? "因 CSP 限制，程序已停止运行。" : "𝑻𝒉𝒆 𝒔𝒄𝒓𝒊𝒑𝒕 𝒔𝒕𝒐𝒑𝒔 𝒓𝒖𝒏𝒏𝒊𝒏𝒈 𝒅𝒖𝒆 𝒕𝒐 𝑪𝑺𝑷."}`;
+            const prompt_Msg = IS_CHN
+              ? "发现 CSP 安全策略的阻止，请安装 “𝗔𝗹𝗹𝗼𝘄 𝗖𝗦𝗣: 𝗖𝗼𝗻𝘁𝗲𝗻𝘁-𝗦𝗲𝗰𝘂𝗿𝗶𝘁𝘆-𝗣𝗼𝗹𝗶𝗰𝘆” 等类型的浏览器扩展来尝试获取相应权限。点击「确定」将会自动复制扩展名称到您的剪切板。"
+              : "Due to CSP, Please install an extension such as '𝗔𝗹𝗹𝗼𝘄 𝗖𝗦𝗣: 𝗖𝗼𝗻𝘁𝗲𝗻𝘁-𝗦𝗲𝗰𝘂𝗿𝗶𝘁𝘆-𝗣𝗼𝗹𝗶𝗰𝘆' to try to get the permissions. Clicking \"OK\" will copy the extension name to your clipboard.";
             loading ? GMunregisterMenuCommand(loading) : DEBUG("%cNo Loading_Menu", "color:grey");
-            return GMregisterMenuCommand(disabled_Menu, () => void GMopenInTab(def.url.disableCSP));
+            return GMregisterMenuCommand(disabled_Menu, () => {
+              const extName = prompt(prompt_Msg, "Allow CSP: Content-Security-Policy");
+              if (extName) GMsetClipboard(extName);
+            });
           }
           sleep(1e3, { useCachedSetTimeout: true })(2e3)
             .then(async timeout => {
@@ -2813,20 +2869,20 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             const searchBtn = IS_CHN ? "查 询" : "Search";
             const clearBtn = IS_CHN ? "清 除" : "Clear";
             const delBtn = IS_CHN ? "删除" : "Del";
-            const searchBtnLabel = `<p style="display:flex;justify-content:left;align-items:center"><input id="${def.const.seed}_d_s_"><button id="${def.const.seed}_d_s_s_">${searchBtn}</button><button id="${def.const.seed}_d_s_c_">${clearBtn}</button></p>`;
+            const searchBtnLabel = `<p class="${def.const.seed}_list_p"><input id="${def.const.seed}_d_s_"><button id="${def.const.seed}_d_s_s_">${searchBtn}</button><button id="${def.const.seed}_d_s_c_">${clearBtn}</button></p>`;
             const searchBtnHTML = domainValue.length > 6 ? searchBtnLabel : ``;
             for (let i = 0, l = domainValue.length; i < l; i++) {
               const domainName = convertHtmlToText(domainValue[i].domain);
               const number = i + 1 > 9 ? i + 1 : "0" + (i + 1);
               const _fontData_ = new Date(domainValue[i].fontDate);
               const date = setDateFormat("yyyy-MM-dd", _fontData_);
-              listContents += `<li id="${def.const.seed}_d_d_l_${i}"><span>[<a id="${def.const.seed}_d_d_l_s_${i}">${delBtn}</a>]<span> ${number}.</span></span><span class="${def.const.seed}_customdomain" title="${domainName}">${domainName}</span><span style="margin:0 5px" title="${_fontData_}">${date}</span></li>`;
+              listContents += `<li id="${def.const.seed}_d_d_l_${i}"><span>[<a id="${def.const.seed}_d_d_l_s_${i}">${delBtn}</a>]<span> ${number}.</span></span><span class="${def.const.seed}_customdomain" title="${domainName}">${domainName}</span><span class="${def.const.seed}_m05" title="${_fontData_}">${date}</span></li>`;
             }
             const noticeText = IS_CHN ? "请谨慎操作，保存后生效，已删除的数据将不可恢复！" : "Operate with caution, effective after saving, good luck!";
             let frDialog = new FrDialogBox({
               trueButtonText: IS_CHN ? "确认操作，保存数据" : "Save",
               neutralButtonText: IS_CHN ? "取 消" : "Cancel",
-              messageText: `<p style="color:#8b0000;text-indent:6px!important;font-size:14px!important">${noticeText}</p>${searchBtnHTML}<ul id="${def.const.seed}_d_d_">${listContents}</ul>`,
+              messageText: `<p class="${def.const.seed}_cb8 ${def.const.seed}_f14 ${def.const.seed}_ti6">${noticeText}</p>${searchBtnHTML}<ul id="${def.const.seed}_d_d_">${listContents}</ul>`,
               titleText: IS_CHN ? "网站个性化设置数据列表" : "Customized Sites Data",
             });
             const dsNode = qS(`#${def.const.seed}_d_s_`, def.const.dialogIf);
@@ -2841,10 +2897,11 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 dssNode.click();
               });
               removeKeyboardEvent(dsNode);
+              dsNode.addEventListener("focus", () => void dsNode.removeAttribute("class"));
               dsNode.addEventListener("input", () => void (dsNode.value = dsNode.value.replace(/[^-a-z0-9.]/gi, "").toLowerCase()));
               dscNode.addEventListener("click", () => {
                 dsNode.value = "";
-                dsNode.style.borderColor = "#777";
+                dsNode.removeAttribute("class");
                 ddNode.scrollTop = 0;
                 dsNode.focus();
               });
@@ -2859,15 +2916,15 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   _temp_.push(domainValue[_listId].domain);
                   target.dataset.del = domainValue[_listId].domain;
                   target.textContent = IS_CHN ? "恢复" : "Reset";
-                  target.style.color = "darkgreen";
-                  target.parentNode.nextElementSibling.style.cssText += "text-decoration:line-through;font-style:italic";
-                  target.parentNode.nextElementSibling.nextElementSibling.style.cssText += "text-decoration:line-through;font-style:italic";
+                  target.className = `${def.const.seed}_cdg`;
+                  target.parentNode.nextElementSibling.classList.add(`${def.const.seed}_list_reset`);
+                  target.parentNode.nextElementSibling.nextElementSibling.classList.add(`${def.const.seed}_list_reset`);
                 } else if (_temp_.Remove(target.dataset.del)) {
                   delete target.dataset.del;
                   target.textContent = IS_CHN ? "删除" : "Del";
-                  target.style.color = "darkred";
-                  target.parentNode.nextElementSibling.style.cssText += "text-decoration:none;font-style:normal";
-                  target.parentNode.nextElementSibling.nextElementSibling.style.cssText += "text-decoration:none;font-style:normal";
+                  target.className = `${def.const.seed}_cb8`;
+                  target.parentNode.nextElementSibling.classList.remove(`${def.const.seed}_list_reset`);
+                  target.parentNode.nextElementSibling.nextElementSibling.classList.remove(`${def.const.seed}_list_reset`);
                 }
               }
             });
@@ -2890,7 +2947,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               const changeNotice = def.var.isCurSite ? changedText : nochangedText;
               let successDialog = new FrDialogBox({
                 trueButtonText: IS_CHN ? "感谢使用" : "Thanks",
-                messageText: `<p style="color:darkgreen">${IS_CHN ? "网站个性化设置数据已成功保存！" : "Customize data save succeeded!"}</p><p>${changeNotice}</p>`,
+                messageText: `<p class="${def.const.seed}_cdg">${IS_CHN ? "网站个性化设置数据已成功保存！" : "Customize data save succeeded!"}</p><p>${changeNotice}</p>`,
                 titleText: IS_CHN ? "个性化数据保存" : "Customize Data Save",
               });
               if (await successDialog.respond()) def.var.isCurSite && closeConfigurePage({ isReload: true });
@@ -2916,8 +2973,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           };
 
           function fontListShown(expr, shown = true) {
-            const disp = shown ? "block" : "none";
-            qA(expr, def.const.configIf).forEach(item => void (item.style.display = disp));
+            qA(expr, def.const.configIf).forEach(item => void (shown ? item.classList.add(`${def.const.seed}_block`) : item.classList.remove(`${def.const.seed}_block`)));
           }
 
           function closeFontSelected(item) {
@@ -2935,7 +2991,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 submitButton.classList.contains(def.class.anim) && submitButton.classList.remove(def.class.anim);
                 isPreview && restoreSaveButton(submitButton, def.array.values);
               } else if (isPreview) changePreviewButtonStyle(submitButton, def.array.values);
-              qS(`#${def.id.selector}`, def.const.configIf).style.display = "none";
+              const selector = qS(`#${def.id.selector}`, def.const.configIf);
+              selector.classList.remove(`${def.const.seed}_block`);
               const ffaceT = qS(`#${def.id.fface}`, def.const.configIf);
               const inputFont = qS(`#${def.id.fontList} .${def.class.selectFontId} input`, def.const.configIf);
               void (async function (isFaced) {
@@ -2962,9 +3019,9 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             const fontlistSelectorNode = qS(`#${def.id.fontList} .${def.class.selector}`, def.const.configIf);
             const resetDefaultFont = INITIAL_VALUES.fontSelect.replace(/'|"/g, "");
             const resetFontCHN = IS_REAL_WEBKIT || (!IS_CHEAT_UA && os === "MacOS") ? "\u82f9\u65b9\u002d\u7b80" : "\u5fae\u8f6f\u96c5\u9ed1";
-            const fontlistSelectorHTML = `<a class="${def.class.label}"><span style="border-bottom-left-radius:4px;border-top-left-radius:4px;font-family:${INITIAL_VALUES.fontSelect}!important">${resetFontCHN}</span><input type="hidden" name="${def.id.fontName}" sort="0" value="${resetDefaultFont}"/><span class="${def.class.close}" style="border-top-right-radius:4px;border-bottom-right-radius:4px;font-family:system-ui,-apple-system,BlinkMacSystemFont,serif!important;cursor:pointer">\u0026\u0023\u0032\u0031\u0035\u003b</span></a>`;
+            const fontlistSelectorHTML = `<a class="${def.class.label}"><span class="${def.const.seed}_blr" style="font-family:${INITIAL_VALUES.fontSelect}!important">${resetFontCHN}</span><input type="hidden" name="${def.id.fontName}" sort="0" value="${resetDefaultFont}"/><span class="${def.class.close} ${def.const.seed}_cp ${def.const.seed}_brr" style="font-family:sans-serif!important">\u0026\u0023\u0032\u0031\u0035\u003b</span></a>`;
             fontlistSelectorNode.insertAdjacentHTML("beforeend", tTP.createHTML(fontlistSelectorHTML));
-            fontlistSelectorNode.parentNode.style.display = "block";
+            fontlistSelectorNode.parentNode.classList.add(`${def.const.seed}_block`);
             fontData = fontData.filter(item => item.en !== resetDefaultFont);
             !def.array.values.includes(def.id.fontName) && def.array.values.push(def.id.fontName);
             const submitButton = qS(`#${def.id.submit} .${def.class.submit}`, def.const.configIf);
@@ -2976,7 +3033,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           }
 
           function getFontSearchList(name) {
-            const arr = Array.from(qA(`#${def.id.selector} .${def.class.selector} input[name="${name}"]`, def.const.configIf), item => item.value);
+            const arr = arrayFrom(qA(`#${def.id.selector} .${def.class.selector} input[name="${name}"]`, def.const.configIf), item => item.value);
             return uniq(arr);
           }
 
@@ -2986,17 +3043,17 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               : `<span class="${def.class.spanlabel}">Selected Fonts: <span id="${def.id.cleaner}">[Clear]</span></span>`;
             const selectFontTipHTML = IS_CHN
               ? `<p><strong>温馨提示 </strong>脚本预载了常用的中文字体，下拉菜单中所罗列的字体是在代码字体表中您已安装过的字体，没有安装过则不会显示。</p>
-                  <p><em style="color:darkred">（注一）</em>如果没有重新选择字体，则使用上一次保存的字体。首次使用默认为${INITIAL_VALUES.fontSelect}字体。</p>
-                  <p><em style="color:darkred">（注二）</em>输入框可输入关键字进行搜索，支持中文和英文字体名。</p>
-                  <p><em style="color:darkred">（注三）</em>字体是按您选择的先后顺序进行优先渲染的，所以多选不如只选一个您最想要的。</p>
-                  <p><em style="color:darkred">（注四）</em>如果“字体重写”被关闭，那么本功能将自动禁用，网页字体将采用“网站默认”的字体设置。</p>
-                  <p><em style="color:darkred">（注五）</em>双击\ud83d\udd14可以打开自定义字体的添加工具，以使用更多新字体。</p>`
+                  <p><em class="${def.const.seed}_cb8">（注一）</em>如果没有重新选择字体，则使用上一次保存的字体。首次使用默认为${INITIAL_VALUES.fontSelect}字体。</p>
+                  <p><em class="${def.const.seed}_cb8">（注二）</em>输入框可输入关键字进行搜索，支持中文和英文字体名。</p>
+                  <p><em class="${def.const.seed}_cb8">（注三）</em>字体是按您选择的先后顺序进行优先渲染的，所以多选不如只选一个您最想要的。</p>
+                  <p><em class="${def.const.seed}_cb8">（注四）</em>如果“字体重写”被关闭，那么本功能将自动禁用，网页字体将采用“网站默认”的字体设置。</p>
+                  <p><em class="${def.const.seed}_cb8">（注五）</em>双击 \ud83d\udd14 可以打开自定义字体的添加工具，以使用更多新字体。</p>`
               : `<p><strong>Tips: </strong>The fonts shown in the list are the fonts were installed on your system in font-library. No install & add-lib, No display.</p>
-                  <p><em style="color:darkred">(ACT1)</em> If this option is not reselected, the last saved is used. Default by ${INITIAL_VALUES.fontSelect}.</p>
-                  <p><em style="color:darkred">(ACT2)</em> Enter keywords in the inputbox to quickly search for your favorite fonts.</p>
-                  <p><em style="color:darkred">(ACT3)</em> Fonts are rendered first in the order you choose, so just pick the one you want the most.</p>
-                  <p><em style="color:darkred">(ACT4)</em> If "Font Rewrite" is turned off, this option will be disabled and the webpage will use "website-defined font".</p>
-                  <p><em style="color:darkred">(ACT5)</em> Double-click \ud83d\udd14 to open the custom font-library adding tool to use more custom fonts.</p>`;
+                  <p><em class="${def.const.seed}_cb8">(ACT1)</em> If this option is not reselected, the last saved is used. Default by ${INITIAL_VALUES.fontSelect}.</p>
+                  <p><em class="${def.const.seed}_cb8">(ACT2)</em> Enter keywords in the inputbox to quickly search for your favorite fonts.</p>
+                  <p><em class="${def.const.seed}_cb8">(ACT3)</em> Fonts are rendered first in the order you choose, so just pick the one you want the most.</p>
+                  <p><em class="${def.const.seed}_cb8">(ACT4)</em> If "Font Rewrite" is turned off, this option will be disabled and the webpage will use "website-defined font".</p>
+                  <p><em class="${def.const.seed}_cb8">(ACT5)</em> Double-click \ud83d\udd14 to open the custom font-library adding tool to use more custom fonts.</p>`;
             const fHtml = String(
               `<div id="${def.id.selector}">
                 ${btnNodesHTML}
@@ -3005,7 +3062,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               <div class="${def.class.selectFontId}">
                 <span class="${def.class.spanlabel}">${IS_CHN ? "设置字体，请选择：" : "Set Fonts, Please Select:"}</span>
                 <input type="search" placeholder="${IS_CHN ? "输入关键字可检索字体" : "Enter some keywords"}" autocomplete="off" class="${def.class.placeholder}">
-                <dl style="display:none"></dl>
+                <dl></dl>
                 <span class="${def.class.tooltip} ${def.class.ps1}" id="${def.id.fonttooltip}">
                   <span class="${def.class.emoji}" title="${IS_CHN ? "按住查看帮助" : "Hold down for help"}">\ud83d\udd14</span>
                   <span class="${def.class.tooltip} ${def.class.ps2}">
@@ -3018,7 +3075,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             const selectorNode = qS(`#${def.id.selector}`, def.const.configIf);
             if (!selectorNode && fontListNode) {
               fontListNode.innerHTML = tTP.createHTML(fHtml);
-              qS(`#${def.id.selector}`, def.const.configIf).style.display = "none";
+              qS(`#${def.id.selector}`, def.const.configIf).classList.remove(`${def.const.seed}_block`);
             }
             const ffaceT = qS(`#${def.id.fface}`, def.const.configIf);
             const fselectorT = qS(`#${def.id.fontList} .${def.class.selectFontId} input`, def.const.configIf);
@@ -3105,9 +3162,9 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 const value = _this.attributes.value?.value;
                 const sort = _this.attributes.sort?.value;
                 if (value && sort && selector) {
-                  const nodeHTML = `<a class="${def.class.label}"><span style="border-bottom-left-radius:4px;border-top-left-radius:4px;font-family:'${value}'!important">${_this.textContent}</span><input type="hidden" name="${def.id.fontName}" sort="${sort}" value="${value}"/><span class="${def.class.close}" style="border-bottom-right-radius:4px;border-top-right-radius:4px;cursor:pointer;font-family:system-ui,-apple-system,BlinkMacSystemFont,serif!important">\u0026\u0023\u0032\u0031\u0035\u003b</span></a>`;
+                  const nodeHTML = `<a class="${def.class.label}"><span class="${def.const.seed}_blr" style="font-family:'${value}'!important">${_this.textContent}</span><input type="hidden" name="${def.id.fontName}" sort="${sort}" value="${value}"/><span class="${def.class.close} ${def.const.seed}_cp ${def.const.seed}_brr" style="font-family:Times,monospace!important">\u0026\u0023\u0032\u0031\u0035\u003b</span></a>`;
                   selector.insertAdjacentHTML("beforeend", tTP.createHTML(nodeHTML));
-                  selector.parentNode.style.display = "block";
+                  selector.parentNode.classList.add(`${def.const.seed}_block`);
                   fontData = getUniqueFontlist(fontData).sort((a, b) => a.sort - b.sort);
                   fontData = fontData.filter(item => item.en !== value);
                   const cleanerNode = qS(`#${def.id.selector} #${def.id.cleaner}`, def.const.configIf);
@@ -3195,12 +3252,12 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             `{-webkit-text-stroke:var(--fr-no-stroke)!important;text-shadow:var(--fr-mono-shadow)!important;font-family:var(--fr-mono-font),${base}!important;`,
             `font-feature-settings:var(--fr-mono-feature)!important;-webkit-user-select:text!important;user-select:text!important}`,
             IS_CAUSED_BOLDSHADOWERROR && isFixShadow ? `${codeSelector}.${def.const.boldAttrName}{text-shadow:var(--fr-fix-shadow)!important}` : ``,
-            CUR_HOST_NAME.endsWith("github.com") ? `${codeSelection}{color:currentcolor!important;background:#71baff45!important}` : ``
+            CUR_HOST_NAME.endsWith("github.com") ? `${codeSelection}{color:#fff!important;background:#fe7300ee!important}` : ``
           );
         }
 
         function insertMainStyleElement({ overwrite, isNotify = true } = {}) {
-          if (!IS_INTERNALSTYLE_ALLOWED || !IS_CURRENTSITE_ALLOWED) return;
+          if (!IS_INTERNALSTYLE_ALLOWED) return;
           const styleNode = getMainStyleElements({ currentScope: true });
           if (!overwrite && styleNode) return;
           const insertResult = insertStyle({
@@ -3211,6 +3268,10 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           });
           insertResult && isNotify && COUNT(`[INSERTSTYLE]${IS_IN_FRAMES}[i:${def.id.rndStyle}]`);
           return insertResult;
+        }
+
+        function changeNodeClass(comparison, targetNode, className) {
+          comparison ? targetNode?.classList.add(className) : targetNode?.classList.remove(className);
         }
 
         async function operateConfigure() {
@@ -3312,7 +3373,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               if (!fontlistNode) return;
               fontSet?.fsearch();
               const tooltipNode = qS(`#${def.id.fonttooltip}`, def.const.configIf);
-              tooltipNode?.addEventListener("dblclick", async () => {
+              tooltipNode?.addEventListener("dblclick", async e => {
+                e.stopImmediatePropagation();
                 let savedFontListString = "";
                 let cusFontCheck = [];
                 const cusFontList = await GMgetValue("_CUSTOM_FONTLIST_");
@@ -3330,8 +3392,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   falseButtonText: IS_CHN ? "帮助文档" : "Help",
                   neutralButtonText: IS_CHN ? "取 消" : "Cancel",
                   messageText: IS_CHN
-                    ? `<p style="color:#555;font-size:14px!important">以下文本域可按预定格式增加自定义字体。请用小贴士或按样例填写，输入有误将被自动过滤。与『<a href="${def.url.guideURI}#既定的字体表" title="查看内置字体表" target="_blank">内置字体表</a>』重复的字体将被自动剔除。【功能小贴士：<span id="${def.const.seed}_addTools" title="点击开启工具" style="color:crimson;cursor:pointer">字体添加辅助工具</span>】</p><p><textarea id="${def.const.seed}_custom_Fontlist" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下：\r\n{ "ch":"中文字体名一","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"中文字体名二","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n(注一：如无中文字体名，可用英文或其他语言名称替代)\r\n(注二：“ps:” 该项为字体的PostScript名称，可选填写)'>${savedFontListString}</textarea></p><p id="${def.const.seed}_warning_chn">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`
-                    : `<p style="color:#555;font-size:14px!important">Add custom fonts in a predefined format. Please use tips or fill in the examples. Incorrect entries will be filtered. The fonts that duplicate '<a href="${def.url.guideURI}#built-in-font-library" title="Viewing the built-in font library" Target="_blank">the Built-in Font library</a>' will be automatically deleted. (𝐓𝐈𝐏: <span id="${def.const.seed}_addTools" title="Click to open the aid tool" style="color:crimson;cursor:pointer">𝐅𝐨𝐧𝐭 𝐀𝐝𝐝𝐢𝐧𝐠 𝐀𝐢𝐝</span>)</p><p><textarea id="${def.const.seed}_custom_Fontlist" placeholder='One set of Fontname data per line, as follow:\r\n{ "ch":"CHN Fontname 1","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"CHN Fontname 2","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n(Note1: If no Chinese fontname, use another instead) \r\n (Note2: "ps:" for the font PostScript name, optional)'>${savedFontListString}</textarea></p><p id="${def.const.seed}_warning_en">(Don't add too many custom fonts to avoid slowly load)</p>`,
+                    ? `<p class="${def.const.seed}_c55 ${def.const.seed}_f14">以下文本域可按预定格式增加自定义字体。请用小贴士或按样例填写，输入有误将被自动过滤。与『<a href="${def.url.guideURI}#既定的字体表" title="查看内置字体表" target="_blank">内置字体表</a>』重复的字体将被自动剔除。【功能小贴士：<span id="${def.const.seed}_addTools" title="点击开启工具" class="${def.const.seed}_ccr ${def.const.seed}_cp">字体添加辅助工具</span>】</p><p><textarea id="${def.const.seed}_custom_Fontlist" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下：\r\n{ "ch":"中文字体名一","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"中文字体名二","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n(注一：如无中文字体名，可用英文或其他语言名称替代)\r\n(注二：“ps:” 该项为字体的PostScript名称，可选填写)'>${savedFontListString}</textarea></p><p id="${def.const.seed}_warning_chn">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`
+                    : `<p class="${def.const.seed}_c55 ${def.const.seed}_f14">Add custom fonts in a predefined format. Please use tips or fill in the examples. Incorrect entries will be filtered. The fonts that duplicate '<a href="${def.url.guideURI}#built-in-font-library" title="Viewing the built-in font library" Target="_blank">the Built-in Font library</a>' will be automatically deleted. (𝐓𝐈𝐏: <span id="${def.const.seed}_addTools" title="Click to open the aid tool" class="${def.const.seed}_ccr ${def.const.seed}_cp">𝐅𝐨𝐧𝐭 𝐀𝐝𝐝𝐢𝐧𝐠 𝐀𝐢𝐝</span>)</p><p><textarea id="${def.const.seed}_custom_Fontlist" placeholder='One set of Fontname data per line, as follow:\r\n{ "ch":"CHN Fontname 1","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"CHN Fontname 2","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n(Note1: If no Chinese fontname, use another instead) \r\n (Note2: "ps:" for the font PostScript name, optional)'>${savedFontListString}</textarea></p><p id="${def.const.seed}_warning_en">(Don't add too many custom fonts to avoid slowly load)</p>`,
                   titleText: IS_CHN ? "自定义字体表" : "Custom Font Library",
                 });
                 const customFontlistNode = qS(`#${def.const.seed}_custom_Fontlist`, def.const.dialogIf);
@@ -3389,8 +3451,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                     let successDialog = new FrDialogBox({
                       trueButtonText: IS_CHN ? "确 定" : "OK",
                       messageText: IS_CHN
-                        ? `<p style="color:indigo">自定义字体表已初始化成功！<p><p>字体列表全局缓存已自动重建，当前页面即将刷新。</p>`
-                        : `<p style="color:indigo">Custom font library initialized successfully!<p><p>The Fontlist cache has been rebuilt and reload.</p>`,
+                        ? `<p class="${def.const.seed}_idg">自定义字体表已初始化成功！<p><p>字体列表全局缓存已自动重建，当前页面即将刷新。</p>`
+                        : `<p class="${def.const.seed}_idg">Custom font library initialized successfully!<p><p>The Fontlist cache has been rebuilt and reload.</p>`,
                       titleText: IS_CHN ? "自定义字体数据重置" : "Customized FontData Reset",
                     });
                     cache.remove("_FONTCHECKLIST_");
@@ -3405,20 +3467,20 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                     let successDialog = new FrDialogBox({
                       trueButtonText: IS_CHN ? "确 定" : "OK",
                       messageText: IS_CHN
-                        ? `<p style="color:darkgreen">您所提交的自定义字体已保存成功！<p><p>字体列表全局缓存已自动重建，当前页面即将刷新。</p><p style='color:coral;font-size:12px!important'>注：格式错误或重复的字体代码将被自动过滤。</p>`
-                        : `<p style="color:darkgreen">The customized font saved successfully!<p><p>The Fontlist cache has been rebuilt and reload.</p><p style='color:coral;font-size:12px!important'>Note: Incorrectly or duplicate fonts were filtered.</p>`,
+                        ? `<p class="${def.const.seed}_cdg">您所提交的自定义字体已保存成功！<p><p>字体列表全局缓存已自动重建，当前页面即将刷新。</p><p class="${def.const.seed}_cco ${def.const.seed}_f12">注：格式错误或重复的字体代码将被自动过滤。</p>`
+                        : `<p class="${def.const.seed}_cdg">The customized font saved successfully!<p><p>The Fontlist cache has been rebuilt and reload.</p><p class="${def.const.seed}_cco ${def.const.seed}_f12">Note: Incorrectly or duplicate fonts were filtered.</p>`,
                       titleText: IS_CHN ? "自定义字体数据保存" : "Customized FontData Save",
                     });
                     cache.remove("_FONTCHECKLIST_");
                     if (await successDialog.respond()) closeConfigurePage({ isReload: true });
                     successDialog = null;
                   } else {
-                    copyToClipboard(custom_Fontlist);
+                    GMsetClipboard(custom_Fontlist);
                     let errorDialog = new FrDialogBox({
                       trueButtonText: IS_CHN ? "确 定" : "OK",
                       messageText: IS_CHN
-                        ? `<p style="color:crimson">您所提交的自定义字体数据格式有误，请重新输入。<p><p>注意：先前提交的信息已自动保存至剪切板中。</p>`
-                        : `<p style="color:crimson">The custom Fontdata is incorrectly.<p><p>Note: Previous content saved to the clipboard.</p>`,
+                        ? `<p class="${def.const.seed}_ccr">您所提交的自定义字体数据格式有误，请重新输入。<p><p>注意：先前提交的信息已自动保存至剪切板中。</p>`
+                        : `<p class="${def.const.seed}_ccr">The custom Fontdata is incorrectly.<p><p>Note: Previous content saved to the clipboard.</p>`,
                       titleText: IS_CHN ? "字体表数据格式错误" : "Font Library Data Format Error",
                     });
                     if (await errorDialog.respond()) {
@@ -3453,26 +3515,27 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 const newCursorPosition = previousCursorPosition + diff;
                 const currentScrollTop = this.scrollTop;
                 this.value = formattedValue;
-                this.style.border = "1px solid #999";
+                this.classList.remove(`${def.const.seed}_tabd`);
                 sleep(0)([currentScrollTop, newCursorPosition]).then(([top, pos]) => {
                   this.scrollTop = top;
                   this.setSelectionRange(pos, pos);
                 });
               } catch (e) {
-                this.style.border = "2px solid #dc143c";
+                this.classList.add(`${def.const.seed}_tabd`);
               }
             });
           }
 
           function setFontOverrideDefTrigger(savedData) {
-            qS(`#${def.const.seed}_fontoverride_defined`, def.const.configIf)?.addEventListener("dblclick", async () => {
+            qS(`#${def.const.seed}_fontoverride_defined`, def.const.configIf)?.addEventListener("dblclick", async e => {
+              e.stopImmediatePropagation();
               const _fontOverrideDef = JSON.stringify(savedData, null, "    ");
               let frDialog = new FrDialogBox({
                 trueButtonText: IS_CHN ? "确 定" : "OK",
                 neutralButtonText: IS_CHN ? "取 消" : "Cancel",
                 messageText: IS_CHN
-                  ? `<p style="color:#555;font-size:14px!important">以下文本域可按预定格式填写字体重写的自定义数据。整体为数组类型，每个字体名称占一行，并使用半角双引号包括；如字体名称包含中文等双字节文本时，请在双引号内使用半角花括号包括。如您不了解该数据的含义，请勿修改，以免造成全局字体重写出错。<span style="color:#dc143c">(强烈建议您：按 <a href="${def.url.feedback}/267#discussion-5692372" target="_blank">作者提议</a> 填写此内容)</span></p><p><textarea id="${def.const.seed}_fontoverride_def_array">${_fontOverrideDef}</textarea></p><p id="${def.const.seed}_warning_chn">（请勿添加脚本字体表已存在的字体，如重复将自动删除）</p>`
-                  : `<p style="color:#555;font-size:14px!important">Predefined format overall array type, one Fontname per line, and the use of half-width double quotes include; If the fontname contains double-byte text such as Chinese, please use half-width brackets within the double quotes include. <span style="color:#dc143c">(Suggestion: "<a href="${def.url.feedback}/267#discussion-5692372" target="_blank">Author's proposal</a>")</span></p><p><textarea id="${def.const.seed}_fontoverride_def_array">${_fontOverrideDef}</textarea></p><p id="${def.const.seed}_warning_en">(Duplicate Fontname in the Font Library will be deleted)</p>`,
+                  ? `<p class="${def.const.seed}_c55 ${def.const.seed}_f14">以下文本域可按预定格式填写字体重写的自定义数据。整体为数组类型，每个字体名称占一行，并使用半角双引号包括；如字体名称包含中文等双字节文本时，请在双引号内使用半角花括号包括。如您不了解该数据的含义，请勿修改，以免造成全局字体重写出错。<span class="${def.const.seed}_cdc1">(强烈建议您：按 <a href="${def.url.feedback}/267#discussion-5692372" target="_blank">作者提议</a> 填写此内容)</span></p><p><textarea id="${def.const.seed}_fontoverride_def_array">${_fontOverrideDef}</textarea></p><p id="${def.const.seed}_warning_chn">（请勿添加脚本字体表已存在的字体，如重复将自动删除）</p>`
+                  : `<p class="${def.const.seed}_c55 ${def.const.seed}_f14">Predefined format overall array type, one Fontname per line, and the use of half-width double quotes include; If the fontname contains double-byte text such as Chinese, please use half-width brackets within the double quotes include. <span class="${def.const.seed}_cdc1">(Suggestion: "<a href="${def.url.feedback}/267#discussion-5692372" target="_blank">Author's proposal</a>")</span></p><p><textarea id="${def.const.seed}_fontoverride_def_array">${_fontOverrideDef}</textarea></p><p id="${def.const.seed}_warning_en">(Duplicate Fontname in the Font Library will be deleted)</p>`,
                 titleText: IS_CHN ? "自定义字体重写数据" : "Customized Font-Rewrite Data",
               });
               const fontOverrideNode = qS(`#${def.const.seed}_fontoverride_def_array`, def.const.dialogIf);
@@ -3496,8 +3559,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   let successDialog = new FrDialogBox({
                     trueButtonText: IS_CHN ? "确 定" : "OK",
                     messageText: IS_CHN
-                      ? `<p style="color:darkgreen">自定义字体重写数据已成功保存！</p><p>当前页面将在您确认后自动刷新。</p>`
-                      : `<p style="color:darkgreen">Customized Font Rewrite Data was saved!</p><p>The page will be refreshed after confirming.</p>`,
+                      ? `<p class="${def.const.seed}_cdg">自定义字体重写数据已成功保存！</p><p>当前页面将在您确认后自动刷新。</p>`
+                      : `<p class="${def.const.seed}_cdg">Customized Font Rewrite Data was saved!</p><p>The page will be refreshed after confirming.</p>`,
                     titleText: IS_CHN ? "自定义字体重写数据设置成功" : "Customized Font-Rewrite Data Save",
                   });
                   if (await successDialog.respond()) closeConfigurePage({ isReload: true });
@@ -3506,8 +3569,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   let errorDialog = new FrDialogBox({
                     trueButtonText: IS_CHN ? "确 定" : "OK",
                     messageText: IS_CHN
-                      ? `<p style="color:darkred">自定义字体重写数据格式错误，请重新输入！</p>`
-                      : `<p style="color:darkred">Customized font rewrite data error, Please refill!</p>`,
+                      ? `<p class="${def.const.seed}_cb8">自定义字体重写数据格式错误，请重新输入！</p>`
+                      : `<p class="${def.const.seed}_cb8">Customized font rewrite data error, Please refill!</p>`,
                     titleText: IS_CHN ? "重写数据格式错误" : "Customized Font-Rewrite Data Error",
                   });
                   if (await errorDialog.respond()) {
@@ -3553,15 +3616,16 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           }
 
           function setFontScaleDefTrigger() {
-            qS(`#${def.const.seed}_fontscale_defined`, def.const.configIf)?.addEventListener("dblclick", async () => {
+            qS(`#${def.const.seed}_fontscale_defined`, def.const.configIf)?.addEventListener("dblclick", async e => {
+              e.stopImmediatePropagation();
               const fontScaleDefJSON = await getFontScaleDef();
               const fontScaleDefString = JSON.stringify(fontScaleDefJSON, null, "    ");
               let frDialog = new FrDialogBox({
                 trueButtonText: IS_CHN ? "确 定" : "OK",
                 neutralButtonText: IS_CHN ? "取 消" : "Cancel",
                 messageText: IS_CHN
-                  ? `<p style="color:#555;font-size:14px!important">以下文本域可按预定格式填写“字体比例缩放功能”所需的自定义站点缩放数据配置。由于该数据为脚本核心设置数据，如果您不了解该设置数据的格式要求或数据含义，请勿修改该数据！<span style="color:#dc143c">（强烈建议您：按 <a href="${def.url.feedback}/267#discussioncomment-7161615" target="_blank">作者提议</a> 填写此内容）</span></p><p><textarea id="${def.const.seed}_fontscale_def_json">${fontScaleDefString}</textarea></p><p id="${def.const.seed}_warning_chn">（如果以上JSON内容格式错误，会造成脚本出错使渲染失效）</p>`
-                  : `<p style="color:#555;font-size:14px!important">Fill in the custom site scaling data configuration of the "Font Scaling" in a predetermined format. If you do not understand the meaning of the data, please do not modify it! <span style="color:#dc143c">(Suggestion: "<a href="${def.url.feedback}/267#discussioncomment-7161615" target="_blank">Author's proposal</a>")</span></p><p><textarea id="${def.const.seed}_fontscale_def_json">${fontScaleDefString}</textarea></p><p id="${def.const.seed}_warning_en">(If the above JSON format is incorrect, rendering will fail)</p>`,
+                  ? `<p class="${def.const.seed}_c55 ${def.const.seed}_f14">以下文本域可按预定格式填写“字体比例缩放功能”所需的自定义站点缩放数据配置。由于该数据为脚本核心设置数据，如果您不了解该设置数据的格式要求或数据含义，请勿修改该数据！<span class="${def.const.seed}_cdc1">（强烈建议您：按 <a href="${def.url.feedback}/267#discussioncomment-7161615" target="_blank">作者提议</a> 填写此内容）</span></p><p><textarea id="${def.const.seed}_fontscale_def_json">${fontScaleDefString}</textarea></p><p id="${def.const.seed}_warning_chn">（如果以上JSON内容格式错误，会造成脚本出错使渲染失效）</p>`
+                  : `<p class="${def.const.seed}_c55 ${def.const.seed}_f14">Fill in the custom site scaling data configuration of the "Font Scaling" in a predetermined format. If you do not understand the meaning of the data, please do not modify it! <span class="${def.const.seed}_cdc1">(Suggestion: "<a href="${def.url.feedback}/267#discussioncomment-7161615" target="_blank">Author's proposal</a>")</span></p><p><textarea id="${def.const.seed}_fontscale_def_json">${fontScaleDefString}</textarea></p><p id="${def.const.seed}_warning_en">(If the above JSON format is incorrect, rendering will fail)</p>`,
                 titleText: IS_CHN ? "站点缩放修正设置数据" : "Sites Scaling Setting Data",
               });
               const fontScaleNode = qS(`#${def.const.seed}_fontscale_def_json`, def.const.dialogIf);
@@ -3576,8 +3640,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   let successDialog = new FrDialogBox({
                     trueButtonText: IS_CHN ? "确 定" : "OK",
                     messageText: IS_CHN
-                      ? `<p style="color:darkgreen">站点缩放修正设置数据已成功保存！</p><p>当前页面将在您确认后自动刷新。</p>`
-                      : `<p style="color:darkgreen">Sites scaling setting data saved succeeded!</p><p>The page will be refreshed after confirming.</p>`,
+                      ? `<p class="${def.const.seed}_cdg">站点缩放修正设置数据已成功保存！</p><p>当前页面将在您确认后自动刷新。</p>`
+                      : `<p class="${def.const.seed}_cdg">Sites scaling setting data saved succeeded!</p><p>The page will be refreshed after confirming.</p>`,
                     titleText: IS_CHN ? "站点缩放修正数据设置成功" : "Sites Scaling Setting Data Save",
                   });
                   if (await successDialog.respond()) closeConfigurePage({ isReload: true });
@@ -3586,8 +3650,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   let errorDialog = new FrDialogBox({
                     trueButtonText: IS_CHN ? "确 定" : "OK",
                     messageText: IS_CHN
-                      ? `<p style="color:darkred">站点缩放修正设置数据格式错误，请重新输入！</p>`
-                      : `<p style="color:darkred">Sites scaling setting data error, Please refill!</p>`,
+                      ? `<p class="${def.const.seed}_cb8">站点缩放修正设置数据格式错误，请重新输入！</p>`
+                      : `<p class="${def.const.seed}_cb8">Sites scaling setting data error, Please refill!</p>`,
                     titleText: IS_CHN ? "设置数据格式错误" : "Sites Scaling Setting Data Error",
                   });
                   if (await errorDialog.respond()) {
@@ -3608,9 +3672,9 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             try {
               const fviewportNode = qS(`#${def.id.fviewport}`, def.const.configIf);
               if (fviewportNode) {
-                fviewportNode.style.visibility = fontScaleNode.value === "OFF" ? "hidden" : "visible";
+                changeNodeClass(fontScaleNode.value === "OFF", fviewportNode, `${def.const.seed}_hidden`);
                 fontScaleNode.addEventListener("change", function () {
-                  fviewportNode.style.visibility = this.value === "OFF" ? "hidden" : "visible";
+                  changeNodeClass(this.value === "OFF", fviewportNode, `${def.const.seed}_hidden`);
                 });
               }
               return fixViewportT;
@@ -3647,20 +3711,20 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             const fshadowNode = qS(`#${def.id.fshadow}`, def.const.configIf);
             try {
               if (fstrokeNode) {
-                fstrokeNode.style.visibility = strokeNode.value === "OFF" ? "hidden" : "visible";
+                changeNodeClass(strokeNode.value === "OFF", fstrokeNode, `${def.const.seed}_hidden`);
                 strokeNode.addEventListener("change", function () {
-                  fstrokeNode.style.visibility = this.value === "OFF" ? "hidden" : "visible";
+                  changeNodeClass(this.value === "OFF", fstrokeNode, `${def.const.seed}_hidden`);
                 });
               }
               fixStrokeT?.addEventListener("mouseenter", () => {
                 if (IS_CAUSED_BOLDSHADOWERROR) {
                   const shadowFixTs = qA(`#${def.id.fshadow}-shadow-label,#${def.id.fshadow}-shadow-text`, def.const.configIf);
                   const hasShadow = !Number(qS(`#${def.id.shadowSize}`, def.const.configIf)?.value);
-                  shadowFixTs.forEach(item => void (item.style.display = hasShadow ? "none" : "flex"));
+                  shadowFixTs.forEach(item => changeNodeClass(hasShadow, item, `${def.const.seed}_none`));
                 }
-                fshadowNode.style.visibility = "visible";
+                fshadowNode.classList.add(`${def.const.seed}_visible`);
               });
-              fshadowNode?.addEventListener("mouseleave", () => void (fshadowNode.style.visibility = "hidden"));
+              fshadowNode?.addEventListener("mouseleave", () => void fshadowNode.classList.remove(`${def.const.seed}_visible`));
               fixStrokeT?.addEventListener("click", () => {
                 if (fixStrokeT.checked) {
                   if (IS_CAUSED_BOLDSHADOWERROR) showFixConfig(fixShadowT, "fixShadow", false);
@@ -3685,12 +3749,12 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           function showFixConfig(node, value, disabled) {
             if (disabled === false) {
               node.removeAttribute("disabled");
-              node.nextElementSibling.style.cssText = "";
+              node.nextElementSibling.classList.remove(`${def.const.seed}_f-g1`);
               CONST_VALUES[value] && !node.checked && node.click();
             } else {
               node.checked && node.click();
               node.setAttribute("disabled", "");
-              node.nextElementSibling.style.filter = "grayscale(1)";
+              node.nextElementSibling.classList.add(`${def.const.seed}_f-g1`);
             }
           }
 
@@ -3701,9 +3765,9 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               shadowNode.value = CONST_VALUES.fontShadow === 0 ? "OFF" : CONST_VALUES.fontShadow.toFixed(2);
               rangeSliderWidget(drawShadow, shadowNode, 2);
               checkInputValue(shadowNode, drawShadow, /^[0-8](\.[0-9]{1,2})?$/, 2);
-              shadowColorNode.style.display = shadowNode.value === "OFF" ? "none" : "flex";
+              changeNodeClass(shadowNode?.value === "OFF", shadowColorNode, `${def.const.seed}_none`);
               shadowNode.addEventListener("change", function () {
-                shadowColorNode.style.display = this.value === "OFF" ? "none" : "flex";
+                changeNodeClass(this?.value === "OFF", shadowColorNode, `${def.const.seed}_none`);
               });
               return drawShadow;
             } catch (e) {
@@ -3723,7 +3787,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 format: "hexa",
                 previewSize: 35,
                 position: "top",
-                zIndex: 2147483647,
+                zIndex: 2147483646,
                 backgroundColor: "rgba(206,226,237,0.91)",
                 controlBorderColor: "rgba(187,187,187,0.7)",
                 pointerBorderColor: "rgba(255,255,255,0.6)",
@@ -3754,7 +3818,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
           function doubleClickToEdit(fontCssNode) {
             if (!fontCssNode) return;
-            fontCssNode.addEventListener("dblclick", () => {
+            fontCssNode.addEventListener("dblclick", e => {
+              e.stopImmediatePropagation();
               fontCssNode.classList.add(def.class.notreadonly);
               fontCssNode.removeAttribute("title");
               fontCssNode.readOnly = false;
@@ -3763,15 +3828,16 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
           function customMonospceFont(monoNode) {
             if (!monoNode) return;
-            monoNode.addEventListener("dblclick", async () => {
+            monoNode.addEventListener("dblclick", async e => {
               try {
+                e.stopImmediatePropagation();
                 const [_config_data_, { monoSiteRules: siteRule, monoFontList: fontlist, monoFeature: feature }] = await Promise.all([getConfigureData(), getCustomMonoData()]);
                 const monospacedsiterules = siteRule.join("\r\n").trim();
                 const monospacedfont = fontlist.trim();
                 const monospacedfeature = feature.trim();
                 const customMonoTextareasHTML = IS_CHN
-                  ? `<p class="${def.const.seed}_mono_notify">\u2474 以下文本域可设置需应用等宽字体的根域及元素选择器。<br><em style="color:#dc143c">如果您不熟悉CSS语法规则，请保持留空，避免样式失效。</em></p><p><textarea id="${def.const.seed}_monospaced_siterules" placeholder="每行只能允许一组规则，相同站点不同规则可重复添加。\r\n格式如：@网站域名##元素选择器1,元素选择器2,……\r\n例如：\r\n@github.com##[class~='blob-code'] *\r\n@github.com##.example,#abc,div:not(.test)\r\n@github.dev###test:not([class*='test'])">${monospacedsiterules}\r\n</textarea></p><p class="${def.const.seed}_mono_notify">\u2475 以下可设置自定义英文等宽字体，请按示例格式填写。<br><em style="color:#dc143c">请注意：monospace字体族已程序内置，无需重复添加。</em></p><p><input id="${def.const.seed}_monospaced_font" placeholder="例如：'Source Code Pro','Mono','Monaco'" value="${monospacedfont}"></p><p class="${def.const.seed}_mono_notify">\u2476 以下可设置OpenType字体font-feature-settings属性。<br><em style="color:#dc143c">如果您不了解该属性，请保持留空，以免造成样式错误。</em></p><p><input id="${def.const.seed}_monospaced_feature" placeholder='例如："liga" 0,"tnum","zero"' value='${monospacedfeature}'></p>`
-                  : `<p class="${def.const.seed}_mono_notify">\u2474 Set the root field and selector for monospaced font.<br><em style="color:#dc143c">If not familiar with CSS syntax, please leave it blank.</em></p><p><textarea id="${def.const.seed}_monospaced_siterules" placeholder="Only One set of rules per line, different rules for the same site can be repeated. Such as:\r\n@github.com##[class~='blob-code'] *\r\n@github.com##.example,#abc,div:not(.test)\r\n@github.dev###test:not([class*='test'])">${monospacedsiterules}\r\n</textarea></p><p class="${def.const.seed}_mono_notify">\u2475 Set custom monospaced font according to example.<br><em style="color:#dc143c">Note: monospace is built-in, don't add repeatedly.</em></p><p><input id="${def.const.seed}_monospaced_font" placeholder="Such as: 'Source Code Pro','Mono','Monaco'" value="${monospacedfont}"></p><p class="${def.const.seed}_mono_notify">\u2476 Set OpenType font font-feature-settings property.<br><em style="color:#dc143c">If you don't know the attribute, leave it blank.</em></p><p><input id="${def.const.seed}_monospaced_feature" placeholder='Such as: "liga" 0,"tnum","zero"' value='${monospacedfeature}'></p>`;
+                  ? `<p class="${def.const.seed}_mono_notify">\u2474 以下文本域可设置需应用等宽字体的根域及元素选择器。<br><em class="${def.const.seed}_cdc1">如果您不了解站点样式规则，请保持留空【<a href="${def.url.feedback}/74" target="_blank">查看推荐规则</a>】</em></p><p><textarea id="${def.const.seed}_monospaced_siterules" placeholder="每行只能允许一组规则，相同站点不同规则可重复添加。\r\n格式如：@网站域名##元素选择器1,元素选择器2,……\r\n例如：\r\n@github.com##[class~='blob-code'] *\r\n@github.com##.example,#abc,div:not(.test)\r\n@github.dev###test:not([class*='test'])">${monospacedsiterules}\r\n</textarea></p><p class="${def.const.seed}_mono_notify">\u2475 以下可设置自定义英文等宽字体，请按示例格式填写。<br><em class="${def.const.seed}_cdc1">请注意：monospace字体族已程序内置，无需重复添加。</em></p><p><input id="${def.const.seed}_monospaced_font" placeholder="例如：'Source Code Pro','Mono','Monaco'" value="${monospacedfont}"></p><p class="${def.const.seed}_mono_notify">\u2476 以下可设置OpenType字体font-feature-settings属性。<br><em class="${def.const.seed}_cdc1">如果您不了解该属性，请保持留空，以免造成样式错误。</em></p><p><input id="${def.const.seed}_monospaced_feature" placeholder='例如："liga" 0,"tnum","zero"' value='${monospacedfeature}'></p>`
+                  : `<p class="${def.const.seed}_mono_notify">\u2474 Set the root field and selector for monospaced font.<br><em class="${def.const.seed}_cdc1">Please leave blank if don't know the rules. [<a href="${def.url.feedback}/74" target="_blank">Usage Rules</a>]</em></p><p><textarea id="${def.const.seed}_monospaced_siterules" placeholder="Only One set of rules per line, different rules for the same site can be repeated. Such as:\r\n@github.com##[class~='blob-code'] *\r\n@github.com##.example,#abc,div:not(.test)\r\n@github.dev###test:not([class*='test'])">${monospacedsiterules}\r\n</textarea></p><p class="${def.const.seed}_mono_notify">\u2475 Set custom monospaced font according to example.<br><em class="${def.const.seed}_cdc1">Note: monospace is built-in, don't add repeatedly.</em></p><p><input id="${def.const.seed}_monospaced_font" placeholder="Such as: 'Source Code Pro','Mono','Monaco'" value="${monospacedfont}"></p><p class="${def.const.seed}_mono_notify">\u2476 Set OpenType font font-feature-settings property.<br><em class="${def.const.seed}_cdc1">If you don't know the attribute, leave it blank.</em></p><p><input id="${def.const.seed}_monospaced_feature" placeholder='Such as: "liga" 0,"tnum","zero"' value='${monospacedfeature}'></p>`;
                 let frDialog = new FrDialogBox({
                   trueButtonText: IS_CHN ? "保存数据" : "Save",
                   neutralButtonText: IS_CHN ? "取 消" : "Cancel",
@@ -3834,12 +3900,12 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 if (await frDialog.respond()) {
                   const monospaced_SiteRulesArray = custom_MonospacedSiteRules.match(/@[\w\-.:]+##(?!.*(?<sp>[#])\k<sp>{1})[\w\-*.#:+>()~[\]=^$|,' ]+/g);
                   if (custom_MonospacedSiteRules && !monospaced_SiteRulesArray) {
-                    copyToClipboard(custom_MonospacedSiteRules);
+                    GMsetClipboard(custom_MonospacedSiteRules);
                     let errorDialog = new FrDialogBox({
                       trueButtonText: IS_CHN ? "确 定" : "OK",
                       messageText: IS_CHN
-                        ? `<p style="color:crimson">自定义根域及元素选择器有误，请重新输入。</p><p>注意：先前提交的信息已自动保存至剪切板中。</p>`
-                        : `<p style="color:crimson">Custom Root/Selectors data error, Please refill!</p><p>Note: Previous content saved to the clipboard.</p>`,
+                        ? `<p class="${def.const.seed}_ccr">自定义根域及元素选择器有误，请重新输入。</p><p>注意：先前提交的信息已自动保存至剪切板中。</p>`
+                        : `<p class="${def.const.seed}_ccr">Custom Root/Selectors data error, Please refill!</p><p>Note: Previous content saved to the clipboard.</p>`,
                       titleText: IS_CHN ? "自定义根域及元素选择器数据错误" : "Custom Root/Selectors Data Error",
                     });
                     if (await errorDialog.respond()) {
@@ -3852,12 +3918,12 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   }
                   const monospaced_FontListArray = custom_MonospacedFontList.match(/'@?[\w\-.()!/ ]+'/g);
                   if (custom_MonospacedFontList && !monospaced_FontListArray) {
-                    copyToClipboard(custom_MonospacedFontList);
+                    GMsetClipboard(custom_MonospacedFontList);
                     let errorDialog = new FrDialogBox({
                       trueButtonText: IS_CHN ? "确 定" : "OK",
                       messageText: IS_CHN
-                        ? `<p style="color:crimson">您提交的自定义等宽字体数据有误，请重新输入。</p><p>注意：先前提交的信息已自动保存至剪切板中。</p>`
-                        : `<p style="color:crimson">Custom Monospaced Font Data error, Please refill!</p><p>Note: Previous content saved to the clipboard.</p>`,
+                        ? `<p class="${def.const.seed}_ccr">您提交的自定义等宽字体数据有误，请重新输入。</p><p>注意：先前提交的信息已自动保存至剪切板中。</p>`
+                        : `<p class="${def.const.seed}_ccr">Custom Monospaced Font Data error, Please refill!</p><p>Note: Previous content saved to the clipboard.</p>`,
                       titleText: IS_CHN ? "自定义等宽字体数据错误" : "Custom Monospaced Font Data Error",
                     });
                     if (await errorDialog.respond()) {
@@ -3880,8 +3946,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                     let successDialog = new FrDialogBox({
                       trueButtonText: IS_CHN ? "确 定" : "OK",
                       messageText: IS_CHN
-                        ? `<p style="color:darkgreen">您提交的自定义等宽字体相关数据已保存成功！</p><p>当前页面将在您确认后自动刷新。</p><p style="color:coral;font-size:12px!important">注：格式错误的输入内容将被自动过滤。</p>`
-                        : `<p style="color:darkgreen">Custom Monospaced Font Data Save succeeded!</p><p>The page will be refreshed after confirming.</p><p style="color:coral;font-size:12px!important">Note: Incorrect content will be filtered.</p>`,
+                        ? `<p class="${def.const.seed}_cdg">您提交的自定义等宽字体相关数据已保存成功！</p><p>当前页面将在您确认后自动刷新。</p><p class="${def.const.seed}_cco ${def.const.seed}_f12">注：格式错误的输入内容将被自动过滤。</p>`
+                        : `<p class="${def.const.seed}_cdg">Custom Monospaced Font Data Save succeeded!</p><p>The page will be refreshed after confirming.</p><p class="${def.const.seed}_cco ${def.const.seed}_f12">Note: Incorrect content will be filtered.</p>`,
                       titleText: IS_CHN ? "自定义等宽字体相关数据保存" : "Custom Monospaced Font Data Save",
                     });
                     if (await successDialog.respond()) closeConfigurePage({ isReload: true });
@@ -3904,10 +3970,11 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 falseButtonText: IS_CHN ? "恢 复" : "Restore",
                 neutralButtonText: IS_CHN ? "取 消" : "Cancel",
                 messageText: IS_CHN
-                  ? `<p>『重置/恢复』将当前设置初始化为 <span style="color:slategray">程序默认的初始数据</span> 或 <span style="color:slategrey">上次正确保存的数据</span>。一般是在您配置错误或需使用新功能参数的情况下才进行重置参数的操作。</p><p style="color:darkgreen">重置：重置当前数据为程序初始值，手动保存生效。</p><p style="color:darkred">恢复：替换为上次正确保存的数据，自动恢复预览。</p><p style="color:gray">取消：放弃重置操作。</p>`
-                  : `<p>『Reset/Restore』Initializes the current settings to <span style="color:slategray">the program's default initial data</span> or <span style="color:slategrey">the last saved data</span>. The reset is usually done when configuration error or new feature is needed. </p><p style="color:darkgreen"><b>Reset:</b> Reset the current data to the initial value of the program, and save data manually.</p><p style="color:darkred"><b>Restore:</b> Replace all with the last correctly saved data, and automatically restore preview. </p><p style="color:gray"><b>Cancel:</b> Abort the reset operation. </p>`,
+                  ? `<p>『重置/恢复』将当前设置初始化为 <span class="${def.const.seed}_csg">程序默认的初始数据</span> 或 <span class="${def.const.seed}_csg">上次正确保存的数据</span>。一般是在您配置错误或需使用新功能参数的情况下才进行重置参数的操作。</p><p class="${def.const.seed}_cdg">重置：重置当前数据为程序初始值，手动保存生效。</p><p class="${def.const.seed}_cb8">恢复：替换为上次正确保存的数据，自动恢复预览。</p><p class="${def.const.seed}_cga">取消：放弃重置操作。</p>`
+                  : `<p>『Reset/Restore』Initializes the current settings to <span class="${def.const.seed}_csg">the program's default initial data</span> or <span class="${def.const.seed}_csg">the last saved data</span>. The reset is usually done when configuration error or new feature is needed. </p><p class="${def.const.seed}_cdg"><b>Reset:</b> Reset the current data to the initial value of the program, and save data manually.</p><p class="${def.const.seed}_cb8"><b>Restore:</b> Replace all with the last correctly saved data, and automatically restore preview. </p><p class="${def.const.seed}_cga"><b>Cancel:</b> Abort the reset operation. </p>`,
                 titleText: IS_CHN ? "参数重置确认" : "Confirm To Reset Settings",
               });
+              const shadowColorNode = qS(`#${def.id.shadowColor}`, def.const.configIf);
               if (await frDialog.respond()) {
                 smoothT.checked !== INITIAL_VALUES.fontSmooth ? smoothT.click() : DEBUG("<fontSmooth> NOT MODIFIED");
                 ffaceT.checked !== INITIAL_VALUES.fontFace ? ffaceT.click() : DEBUG("<fontFace> NOT MODIFIED");
@@ -3920,7 +3987,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   if (isFixViewport) {
                     fixViewportT.checked !== INITIAL_VALUES.fixViewport ? fixViewportT.click() : DEBUG("<fixViewport> NOT MODIFIED");
                     const fviewportNode = qS(`#${def.id.fviewport}`, def.const.configIf);
-                    fviewportNode && (fviewportNode.style.visibility = fontScaleT.value === "OFF" ? "hidden" : "visible");
+                    changeNodeClass(fontScaleT.value === "OFF", fviewportNode, `${def.const.seed}_hidden`);
                   }
                 }
                 strokeT.value = INITIAL_VALUES.fontStroke === 0 ? "OFF" : INITIAL_VALUES.fontStroke.toFixed(3);
@@ -3930,13 +3997,13 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   fixStrokeT.checked !== INITIAL_VALUES.fixStroke ? fixStrokeT.click() : DEBUG("<fixStroke> NOT MODIFIED");
                   lazyloadT.checked !== INITIAL_VALUES.lazyload ? lazyloadT.click() : DEBUG("<lazyload> NOT MODIFIED");
                   const fstrokeNode = qS(`#${def.id.fstroke}`, def.const.configIf);
-                  fstrokeNode && (fstrokeNode.style.visibility = strokeT.value === "OFF" ? "hidden" : "visible");
+                  changeNodeClass(strokeT.value === "OFF", fstrokeNode, `${def.const.seed}_hidden`);
                 }
                 shadowsT.value = INITIAL_VALUES.fontShadow === 0 ? "OFF" : INITIAL_VALUES.fontShadow.toFixed(2);
                 shadowsT._value_ = INITIAL_VALUES.fontShadow;
                 setSliderProperty(drawShadow, INITIAL_VALUES.fontShadow, 2);
                 if (IS_CAUSED_BOLDSHADOWERROR) fixShadowT.checked !== INITIAL_VALUES.fixShadow ? fixShadowT.click() : DEBUG("<fixShadow> NOT MODIFIED");
-                qS(`#${def.id.shadowColor}`, def.const.configIf).style.display = shadowsT.value === "OFF" ? "none" : "flex";
+                changeNodeClass(shadowsT.value === "OFF", shadowColorNode, `${def.const.seed}_none`);
                 colorPickerT.fromString(INITIAL_VALUES.shadowColor);
                 colorshowT.value = INITIAL_VALUES.shadowColor;
                 colorshowT._value_ = INITIAL_VALUES.shadowColor;
@@ -3959,7 +4026,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   if (isFixViewport) {
                     fixViewportT.checked !== CONST_VALUES.fixViewport ? fixViewportT.click() : DEBUG("<fixViewport> NOT MODIFIED");
                     const fviewportNode = qS(`#${def.id.fviewport}`, def.const.configIf);
-                    fviewportNode && (fviewportNode.style.visibility = fontScaleT.value === "OFF" ? "hidden" : "visible");
+                    changeNodeClass(fontScaleT.value === "OFF", fviewportNode, `${def.const.seed}_hidden`);
                   }
                 }
                 strokeT.value = CONST_VALUES.fontStroke === 0 ? "OFF" : CONST_VALUES.fontStroke.toFixed(3);
@@ -3969,14 +4036,13 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   fixStrokeT.checked !== CONST_VALUES.fixStroke ? fixStrokeT.click() : DEBUG("<fixStroke> NOT MODIFIED");
                   lazyloadT.checked !== CONST_VALUES.lazyload ? lazyloadT.click() : DEBUG("<lazyload> NOT MODIFIED");
                   const fstrokeNode = qS(`#${def.id.fstroke}`, def.const.configIf);
-                  fstrokeNode && (fstrokeNode.style.visibility = strokeT.value === "OFF" ? "hidden" : "visible");
+                  changeNodeClass(strokeT.value === "OFF", fstrokeNode, `${def.const.seed}_hidden`);
                 }
                 shadowsT.value = CONST_VALUES.fontShadow === 0 ? "OFF" : CONST_VALUES.fontShadow.toFixed(2);
                 shadowsT._value_ = CONST_VALUES.fontShadow;
                 setSliderProperty(drawShadow, CONST_VALUES.fontShadow, 2);
                 if (IS_CAUSED_BOLDSHADOWERROR) fixShadowT.checked !== CONST_VALUES.fixShadow ? fixShadowT.click() : DEBUG("<fixShadow> NOT MODIFIED");
-                const shadowColorNode = qS(`#${def.id.shadowColor}`, def.const.configIf);
-                shadowColorNode && (shadowColorNode.style.display = shadowsT.value === "OFF" ? "none" : "flex");
+                changeNodeClass(shadowsT.value === "OFF", shadowColorNode, `${def.const.seed}_none`);
                 colorPickerT.fromString(CONST_VALUES.shadowColor);
                 colorshowT.value = CONST_VALUES.shadowColor === "#FFFFFFFF" ? "currentcolor" : colorPickerT.toHEXAString();
                 colorshowT._value_ = colorshowT.value;
@@ -4037,7 +4103,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   const _globalCssText = IS_REAL_GECKO && fontface ? def.const.style.firefox : "";
                   const _textShadowFix = `0 0 ${fshadow}px ${fscolor.toLowerCase().slice(0, 7).concat("2b")}`;
                   const _rootpseudoclass = `:root{--fr-font-basefont:${INITIAL_VALUES.fontBase};--fr-font-fontscale:${fscale};--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-no-stroke:0px transparent;--fr-fix-shadow:${_textShadowFix};${monoFontText}${monoShadow}${monoFeatureText}}`;
-                  const __tshadow = _curEmptyConfig ? `/* BLANK_STYLE_SHEET */` : `@charset "UTF-8";${_rootpseudoclass}${_globalCssText}${_tshadow}`;
+                  const __tshadow = `@charset "UTF-8";` + def.const.style.frDialog + (_curEmptyConfig ? `` : `${_rootpseudoclass}${_globalCssText}${_tshadow}`);
                   this.textContent = IS_CHN ? "\u4fdd\u5b58" : "\ud835\udc7a\ud835\udc82\ud835\udc97\ud835\udc86";
                   this.removeAttribute("style");
                   this.removeAttribute("v-Preview");
@@ -4062,8 +4128,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                     falseButtonText: IS_CHN ? "保存到网站数据" : "Website Save",
                     neutralButtonText: IS_CHN ? "取 消" : "Cancel",
                     messageText: IS_CHN
-                      ? `<p style="color:darkgreen;font-weight:700">保存到全局数据：</p><p>将当前设置保存为全局设置，默认使用全局参数。</p><p style="color:#8b0000;font-weight:700">保存到当前网站数据：<span id="${def.const.seed}_a_w_d_l_">[<span>全部数据列表</span>]</span></p><p style="min-height:22px"><span title="保存到网站数据会自动覆盖之前的数据" id="${def.const.seed}_c_w_d_">为 ${TOP_HOST} 保存独立的设置数据。</span>`
-                      : `<p style="color:darkgreen;font-weight:700">Save to Global Data:</p><p>Save as global setting, using global by default. </p><p style="color:#8b0000;font-weight:700">Save to Current Website Data: <span id="${def.const.seed}_a_w_d_l_">[<span> All Data List </span>]</span></p><p style="min-height:22px"><span title="Data saved to the website will automatically overwrite the previous data" id="${def.const.seed}_c_w_d_">Save to website data for ${TOP_HOST}</span>`,
+                      ? `<p class="${def.const.seed}_cdg ${def.const.seed}_fb">保存到全局数据：</p><p>将当前设置保存为全局设置，默认使用全局参数。</p><p class="${def.const.seed}_cb8 ${def.const.seed}_fb">保存到当前网站数据：<span id="${def.const.seed}_a_w_d_l_">[<span>全部数据列表</span>]</span></p><p class="${def.const.seed}_mh22"><span title="保存到网站数据会自动覆盖之前的数据" id="${def.const.seed}_c_w_d_">为 ${TOP_HOST} 保存独立的设置数据。</span>`
+                      : `<p class="${def.const.seed}_cdg ${def.const.seed}_fb">Save to Global Data:</p><p>Save as global setting, using global by default. </p><p class="${def.const.seed}_cb8 ${def.const.seed}_fb">Save to Current Website Data: <span id="${def.const.seed}_a_w_d_l_">[<span> All Data List </span>]</span></p><p class="${def.const.seed}_mh22"><span title="Data saved to the website will automatically overwrite the previous data" id="${def.const.seed}_c_w_d_">Save to website data for ${TOP_HOST}</span>`,
                     titleText: IS_CHN ? "保存设置数据" : "Save Settings Data",
                   });
                   let domainValue;
@@ -4076,7 +4142,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   }
                   const _awdl = qS(`#${def.const.seed}_a_w_d_l_`, def.const.dialogIf);
                   if (_awdl) {
-                    _awdl.style.display = domainValue.length > 0 ? "line-block" : "none";
+                    _awdl.classList.add(domainValue.length > 0 ? `${def.const.seed}_inline_block` : `${def.const.seed}_none`);
                     _awdl.addEventListener("click", () => void manageDomainsList());
                   }
                   let domainValueIndex = updateDomainsIndex(domainValue);
@@ -4084,8 +4150,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   if (typeof domainValueIndex !== "undefined" && cwdNode) {
                     const fontDate = setDateFormat("yyyy-MM-dd HH:mm:ss", new Date(domainValue[domainValueIndex].fontDate));
                     const cwdNodeHTML = IS_CHN
-                      ? `<p style="display:flex;height:30px;align-items:center"><span style="color:indigo"><strong>上次保存：</strong>${fontDate} </span><button id="${def.const.seed}_c_w_d_d_" title="删除数据后将刷新页面">删除当前网站数据</button></p>`
-                      : `<p style="display:flex;height:30px;align-items:center"><span style="color:indigo"><strong>The last saved</strong>: ${fontDate} </span><button id="${def.const.seed}_c_w_d_d_" title="The page will be refreshed after deleting the data">Delete Data</button></p>`;
+                      ? `<p class="${def.const.seed}_save_p"><span class="${def.const.seed}_idg"><strong>上次保存：</strong>${fontDate} </span><button id="${def.const.seed}_c_w_d_d_" title="删除数据后将刷新页面">删除当前网站数据</button></p>`
+                      : `<p class="${def.const.seed}_save_p"><span class="${def.const.seed}_idg"><strong>The last saved</strong>: ${fontDate} </span><button id="${def.const.seed}_c_w_d_d_" title="The page will be refreshed after deleting the data">Delete Data</button></p>`;
                     cwdNode.innerHTML = tTP.createHTML(cwdNodeHTML);
                     qS(`#${def.const.seed}_c_w_d_d_`, def.const.dialogIf)?.addEventListener("click", async () => {
                       if (typeof domainValueIndex !== "undefined") domainValue.splice(domainValueIndex, 1);
@@ -4093,8 +4159,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                       let successDialog = new FrDialogBox({
                         trueButtonText: IS_CHN ? "感谢使用" : "Thanks",
                         messageText: IS_CHN
-                          ? `<p style="color:darkred">当前网站的个性化数据已成功删除！</p><p>当前页面将在您确认后自动刷新。</p>`
-                          : `<p style="color:darkred">The current siteData was deleted!</p><p>The page will be refreshed after confirming.</p>`,
+                          ? `<p class="${def.const.seed}_cb8">当前网站的个性化数据已成功删除！</p><p>当前页面将在您确认后自动刷新。</p>`
+                          : `<p class="${def.const.seed}_cb8">The current siteData was deleted!</p><p>The page will be refreshed after confirming.</p>`,
                         titleText: IS_CHN ? "个性化数据删除" : "Personalized Data Deletion",
                       });
                       if (await successDialog.respond()) closeConfigurePage({ isReload: true });
@@ -4163,8 +4229,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                         falseButtonText: IS_CHN ? "管理列表" : "Manage",
                         neutralButtonText: IS_CHN ? "我放弃" : "Abort",
                         messageText: IS_CHN
-                          ? `<p style="color:gray">您已经保存超过<span style="color:#dc143c;font-weight:700;font-style:italic;font-size:20px">${maxPersonalSites} </span>个网站的个性化数据了，过多的数据会使脚本运行速度过慢，进而会影响您浏览网页的响应速度，建议您及时删除一些平时访问较少的站点设置，然后再进行新网站设置的数据保存。</p><p style="color:crimson">您确认要继续保存吗？</p>`
-                          : `<p style="color:gray">You have saved more than <span style="color:#dc143c;font-weight:700;font-style:normal;font-size:20px">${maxPersonalSites}</span > Personalized data. Too much data will make script run slowly. It's recommended that you delete some site settings that are rarely visited in time. </p><p style="color:crimson">Are you sure you want to continue saving? </p>`,
+                          ? `<p class="${def.const.seed}_cga">您已经保存超过<span class="${def.const.seed}_cdc1 ${def.const.seed}_fb ${def.const.seed}_fsi ${def.const.seed}_f20">${maxPersonalSites} </span>个网站的个性化数据了，过多的数据会使脚本运行速度过慢，进而会影响您浏览网页的响应速度，建议您及时删除一些平时访问较少的站点设置，然后再进行新网站设置的数据保存。</p><p class="${def.const.seed}_ccr">您确认要继续保存吗？</p>`
+                          : `<p class="${def.const.seed}_cga">You have saved more than <span class="${def.const.seed}_cdc1 ${def.const.seed}_fb ${def.const.seed}_fsn ${def.const.seed}_f20">${maxPersonalSites}</span > Personalized data. Too much data will make script run slowly. It's recommended that you delete some site settings that are rarely visited in time. </p><p class="${def.const.seed}_ccr">Are you sure you want to continue saving? </p>`,
                         titleText: IS_CHN ? "数据过多的提示" : "Too Much Data",
                       });
                       if (await warnDialog.respond()) {
@@ -4188,8 +4254,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                     let successDialog = new FrDialogBox({
                       trueButtonText: IS_CHN ? "感谢使用" : "Thanks",
                       messageText: IS_CHN
-                        ? `<p style="color:darkgreen">您设置的字体渲染数据已成功保存！</p><p>当前页面将在您确认后自动刷新。</p>`
-                        : `<p style="color:darkgreen">The Font Rendering data has been saved!</p><p>The page will be refreshed after confirming.</p>`,
+                        ? `<p class="${def.const.seed}_cdg">您设置的字体渲染数据已成功保存！</p><p>当前页面将在您确认后自动刷新。</p>`
+                        : `<p class="${def.const.seed}_cdg">The Font Rendering data has been saved!</p><p>The page will be refreshed after confirming.</p>`,
                       titleText: IS_CHN ? "字体渲染数据保存" : "Font Rendering Data Save",
                     });
                     if (await successDialog.respond()) closeConfigurePage({ isReload: true });
@@ -4202,7 +4268,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
           function controlBackupButton(backupT, needBackup) {
             if (!needBackup || !backupT) return;
-            backupT.style.display = "inline-block";
+            backupT.classList.add(`${def.const.seed}_inline_block`);
             backupT.addEventListener("click", async () => {
               try {
                 let frDialog = new FrDialogBox({
@@ -4210,8 +4276,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   falseButtonText: IS_CHN ? "还 原" : "Restore",
                   neutralButtonText: IS_CHN ? "取 消" : "Cancel",
                   messageText: IS_CHN
-                    ? `<p style="color:darkgreen;font-weight:700">备份到本地文件：</p><p>备份到本地，自动下载 backup.*.sqlitedb 文件。</p><p style="color:#8b0000;font-weight:700">从本地文件还原：</p><p><span style="color:indigo;cursor:pointer" id="${def.id.tfiles}">\ud83d\udd0e [点击这里载入*.sqlitedb备份文件]</span><input accept=".sqlitedb" type="file" id="${def.id.files}"/></p>`
-                    : `<p style="color:darkgreen;font-weight:700">Backup to local file:</p><p>Backup and download the backup.*.sqlitedb file.</p><p style="color:#8b0000;font-weight:700">Restore from local file:</p><p><span style="color:indigo;cursor:pointer" id="${def.id.tfiles}">\ud83d\udd0e [Click here to load *.sqlitedb backup file]</span><input accept=".sqlitedb" type="file" id="${def.id.files}"/></p>`,
+                    ? `<p class="${def.const.seed}_cdg ${def.const.seed}_fb">备份到本地文件：</p><p>备份到本地，自动下载 backup.*.sqlitedb 文件。</p><p class="${def.const.seed}_cb8 ${def.const.seed}_fb">从本地文件还原：</p><p><span class="${def.const.seed}_idg ${def.const.seed}_cp" id="${def.id.tfiles}">\ud83d\udd0e [点击这里载入*.sqlitedb备份文件]</span><input accept=".sqlitedb" type="file" id="${def.id.files}"/></p>`
+                    : `<p class="${def.const.seed}_cdg ${def.const.seed}_fb">Backup to local file:</p><p>Backup and download the backup.*.sqlitedb file.</p><p class="${def.const.seed}_cb8 ${def.const.seed}_fb">Restore from local file:</p><p><span class="${def.const.seed}_idg ${def.const.seed}_cp" id="${def.id.tfiles}">\ud83d\udd0e [Click here to load *.sqlitedb backup file]</span><input accept=".sqlitedb" type="file" id="${def.id.files}"/></p>`,
                   titleText: IS_CHN ? "备份与还原数据" : "Backup and Restore Data",
                 });
                 const messageNode = qS(`#${def.id.tfiles}`, def.const.dialogIf);
@@ -4220,8 +4286,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   messageNode.addEventListener("click", () => void inputNode.click());
                   inputNode.addEventListener("change", () => {
                     const messageNodeHTML = inputNode.files[0]
-                      ? `<em style="color:indigo;font-size:11px!important;word-break:break-all">${inputNode.files[0].name}</em><br/>` +
-                        `<span style="color:crimson"> \ud83d\udd0e [${IS_CHN ? "重新选择" : "Reselect"}]</span>`
+                      ? `<em class="${def.const.seed}_idg ${def.const.seed}_f11 ${def.const.seed}_wbka">${inputNode.files[0].name}</em><br/>` +
+                        `<span class="${def.const.seed}_ccr"> \ud83d\udd0e [${IS_CHN ? "重新选择" : "Reselect"}]</span>`
                       : `\ud83d\udd0e [${IS_CHN ? "点击这里载入*.sqlitedb备份文件" : "Click here to load *.sqlitedb backup file"}]`;
                     messageNode.innerHTML = tTP.createHTML(messageNodeHTML);
                   });
@@ -4240,7 +4306,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   const fontOverrideDefault = fontOverrideDef || "";
                   const db = {
                     db_R: inspectLicense()?.keycode().concat(encrypt(def.var.scriptName)),
-                    db_0: encrypt(String(new Date())),
+                    db_0: encrypt(toString(new Date())),
                     db_1: fontSets,
                     db_2: excludeSites,
                     db_3: domainSetsDefault,
@@ -4259,8 +4325,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                   let downloadDialog = new FrDialogBox({
                     trueButtonText: IS_CHN ? "确 定" : "OK",
                     messageText: IS_CHN
-                      ? `<p style="color:darkgreen">备份数据已归档，备份文件导出下载中……</p><p style="color:#8b0000;font-style:italic;font-size:12px!important;word-break:break-all">${fileName}</p>`
-                      : `<p style="color:darkgreen">The data archived and being downloaded…</p><p style="color:#8b0000;font-style:italic;font-size:12px!important;word-break:break-all">${fileName}</p>`,
+                      ? `<p class="${def.const.seed}_cdg">备份数据已归档，备份文件导出下载中……</p><p class="${def.const.seed}_cb8 ${def.const.seed}_fsi ${def.const.seed}_f12 ${def.const.seed}_wbka">${fileName}</p>`
+                      : `<p class="${def.const.seed}_cdg">The data archived and being downloaded…</p><p class="${def.const.seed}_cb8 ${def.const.seed}_fsi ${def.const.seed}_f12 ${def.const.seed}_wbka">${fileName}</p>`,
                     titleText: IS_CHN ? "数据备份" : "Data Backup",
                   });
                   if (await downloadDialog.respond()) {
@@ -4277,7 +4343,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                       "load",
                       async function () {
                         try {
-                          const _file = decrypt(String(this.result));
+                          const _file = decrypt(toString(this.result));
                           const _rs = JSON.parse(sqliteDBDataAccess(_file, null, ROOT_SECRET_KEY));
                           const _data_R = decrypt(_rs.db_R);
                           const _data_0 = decrypt(_rs.db_0);
@@ -4311,8 +4377,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                             let backupDialog = new FrDialogBox({
                               trueButtonText: IS_CHN ? "确 定" : "OK",
                               messageText: IS_CHN
-                                ? `<p style="color:darkgreen">本地备份数据还原完毕！</p><p>当前页面将在您确认后自动刷新。</p>`
-                                : `<p style="color:darkgreen">Local backup data restored completly!</p><p>The page will be refreshed after confirming.</p>`,
+                                ? `<p class="${def.const.seed}_cdg">本地备份数据还原完毕！</p><p>当前页面将在您确认后自动刷新。</p>`
+                                : `<p class="${def.const.seed}_cdg">Local backup data restored completly!</p><p>The page will be refreshed after confirming.</p>`,
                               titleText: IS_CHN ? "数据还原成功" : "Data Restored Successfully",
                             });
                             if (await backupDialog.respond()) closeConfigurePage({ isReload: true });
@@ -4323,8 +4389,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                           let errorDialog = new FrDialogBox({
                             trueButtonText: IS_CHN ? "确 定" : "OK",
                             messageText: IS_CHN
-                              ? `<p style="color:red">数据校验错误，请选择正确的本地备份文件！</p>`
-                              : `<p style="color:red">Data validation error, please recheck the file!</p>`,
+                              ? `<p class="${def.const.seed}_cb8">数据校验错误，请选择正确的本地备份文件！</p>`
+                              : `<p class="${def.const.seed}_cb8">Data validation error, please recheck the file!</p>`,
                             titleText: IS_CHN ? "数据文件错误" : "Data File Error",
                           });
                           if (await errorDialog.respond()) qS(`#${def.id.backup}`, def.const.configIf)?.click();
@@ -4340,8 +4406,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                     let nothingDialog = new FrDialogBox({
                       trueButtonText: IS_CHN ? "确 定" : "OK",
                       messageText: IS_CHN
-                        ? `<p style="color:indigo">载入文件不存在，请选择要还原的备份文件！</p>`
-                        : `<p style="color:indigo">Load file not exist, please select one to restore!</p>`,
+                        ? `<p class="${def.const.seed}_idg">载入文件不存在，请选择要还原的备份文件！</p>`
+                        : `<p class="${def.const.seed}_idg">Load file not exist, please select one to restore!</p>`,
                       titleText: IS_CHN ? "没有文件载入" : "No File Loading",
                     });
                     if (await nothingDialog.respond()) qS(`#${def.id.backup}`, def.const.configIf)?.click();
@@ -4381,6 +4447,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
               }
               ii += 1;
             }
+            checkFont.destroy();
           }
           const fontData = [...fontAvailable.values()].sort((a, b) => a.sort - b.sort);
           checkFont = null;
@@ -4413,13 +4480,15 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
         function closeConfigurePage({ isReload }) {
           const container = qS(`#${def.id.container}`, def.const.configIf);
+          FrDialogBox.closure();
           if (container) {
             def.array.values.length = 0;
-            container.style.opacity = 0;
-            sleep(5e2)(safeRemove("fr-colorpicker")).then(r => void (r && safeRemove("fr-configure")));
+            container.classList.remove(`${def.const.seed}_op1`);
+            sleep(5e2)(safeRemove("fr-colorpicker"))
+              .then(r => r && safeRemove("fr-configure") && qS(`dialog#${def.const.dialog}`))
+              .then(closeDialogModel);
             if (isReload === false && isPreview) restoreSavedPreview();
           }
-          FrDialogBox.closure();
           document.removeEventListener("blur", stopPropagations, true);
           isReload === true && refresh();
         }
@@ -4434,15 +4503,15 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             switch (listener.id) {
               case def.id.shadow:
                 queryNode = qS(`#${def.id.shadowColor}`, def.const.configIf);
-                queryNode?.style.setProperty("display", target.value === "OFF" ? "none" : "flex");
+                changeNodeClass(target.value === "OFF", queryNode, `${def.const.seed}_none`);
                 break;
               case def.id.scaleSize:
                 queryNode = qS(`#${def.id.fviewport}`, def.const.configIf);
-                isFixViewport && queryNode?.style.setProperty("visibility", target.value === "OFF" ? "hidden" : "visible");
+                isFixViewport && changeNodeClass(target.value === "OFF", queryNode, `${def.const.seed}_hidden`);
                 break;
               case def.id.stroke:
                 queryNode = qS(`#${def.id.fstroke}`, def.const.configIf);
-                IS_REAL_BLINK && queryNode?.style.setProperty("visibility", target.value === "OFF" ? "hidden" : "visible");
+                IS_REAL_BLINK && changeNodeClass(target.value === "OFF", queryNode, `${def.const.seed}_hidden`);
                 break;
             }
             queryNode = null;
@@ -4454,14 +4523,14 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           const at = button.attributes["fr-button-switch"];
           button.addEventListener("click", () => {
             if (at.value === "ON") {
-              textarea.style = "display:none";
+              textarea.classList.add(`${def.const.seed}_none`);
               button.textContent = "\u2228";
-              node.style.cssText += "height:35px;min-height:35px";
+              node.classList.add(`${def.const.seed}_hmh35`);
               at.value = "OFF";
             } else {
-              textarea.style = "display:block";
+              textarea.classList.remove(`${def.const.seed}_none`);
               button.textContent = "\u2227";
-              node.style.cssText += "height:110px;min-height:110px";
+              node.classList.remove(`${def.const.seed}_hmh35`);
               at.value = "ON";
             }
           });
@@ -4558,14 +4627,14 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
         function reportErrorToAuthor(exps, showDialogBox = IS_DEBUG) {
           if (!showDialogBox || !Array.isArray(exps)) return;
-          sleep(random(1e3))(closeConfigurePage({ isReload: false })).then(async () => {
+          sleep(6e2)(closeConfigurePage({ isReload: false })).then(async () => {
             try {
               if (qS("fr-dialogbox[fr-error]")) return;
               let errorList = "";
               exps.forEach((exp, i, array) => void (errorList += `${i + 1}、${exp}${i + 1 !== array.length ? "\u3000<br/>" : ""}`));
               const errorNoticeHTML = IS_CHN
-                ? `<p style="color:#dc143c;font-size:14px!important">脚本在运行时发生了重大异常或错误，若在『刷新页面』后依然报错，请通过『反馈问题』及时告知作者，感谢您的反馈！<br/><kbd id="${def.const.seed}_kbd">以下信息会自动保存至您的剪切板</kbd></p>`
-                : `<p style="color:#dc143c;font-size:14px!important">If an error occured in the script and still occured after reloading, please report to the author in time, Thanks.<br/><kbd id="${def.const.seed}_kbd">The following will be saved to the clipboard</kbd></p>`;
+                ? `<p class="${def.const.seed}_ccr ${def.const.seed}_f14">脚本在运行时发生了重大异常或错误，若在『刷新页面』后依然报错，请通过『反馈问题』及时告知作者，感谢您的反馈！<br/><kbd id="${def.const.seed}_kbd">以下信息会自动保存至您的剪切板</kbd></p>`
+                : `<p class="${def.const.seed}_ccr ${def.const.seed}_f14">If an error occured in the script and still occured after reloading, please report to the author in time, Thanks.<br/><kbd id="${def.const.seed}_kbd">The following will be saved to the clipboard</kbd></p>`;
               const infoRow1 = IS_CHN
                 ? `<li>浏览器信息：${JSON.stringify(navigatorInfo)}\u3000</li><li>脚本扩展信息：${GMscriptHandler} v${GMversion}\u3000</li>`
                 : `<li><b>BrowserInfo:</b> ${JSON.stringify(navigatorInfo)}\u3000</li><li><b>ScriptManager:</b> ${GMscriptHandler} v${GMversion}\u3000</li>`;
@@ -4573,8 +4642,8 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 ? `<li>脚本版本信息：v${def.var.curVersion}\u3000</li><li>当前访问域名：${CUR_PROTOCOL}//${CUR_HOST}<span hidden> ${CUR_HOST_PATH}</span>\u3000</li>`
                 : `<li><b>ScriptVersion:</b> v${def.var.curVersion}\u3000</li><li><b>DomainName:</b> ${CUR_PROTOCOL}//${CUR_HOST}<span hidden> ${CUR_HOST_PATH}</span>\u3000</li>`;
               const infoRow3 = IS_CHN
-                ? `<li>错误信息列表：\u3000<span style="display:block;color:tan">${errorList}</span></li>`
-                : `<li><b>ErrorsList:</b>\u3000<span style="display:block;color:tan">${errorList}</span></li>`;
+                ? `<li>错误信息列表：\u3000<span class="${def.const.seed}_block ${def.const.seed}_ctan">${errorList}</span></li>`
+                : `<li><b>ErrorsList:</b>\u3000<span class="${def.const.seed}_block ${def.const.seed}_ctan">${errorList}</span></li>`;
               let frDialog = new FrDialogBox({
                 trueButtonText: IS_CHN ? "反馈问题" : "FeedBack",
                 falseButtonText: IS_CHN ? "刷新页面" : "Reload",
@@ -4589,7 +4658,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
                 .trim();
               def.array.exps.length = 0;
               if (await frDialog.respond()) {
-                copyToClipboard("```log\n" + copyText + "\n```");
+                GMsetClipboard("```log\n" + copyText + "\n```");
                 GMopenInTab(`${def.url.feedback}/new?assignees=F9y4ng&template=bug_report.md`, false);
               } else refresh();
               frDialog = null;
@@ -4657,19 +4726,18 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           function processNodes(treeNode, obs) {
             if (!checkNodesForFix(treeNode)) return;
             const pendingNodes = [];
-            if (treeNode.children.length > 0) {
-              const subtreeNodes = getSuitableElements(`:not(${def.const.queryString})`, treeNode);
-              subtreeNodes.forEach(item => {
-                pendingNodes.push(item);
-                const shadow = item.shadowRoot;
-                if (shadow) {
-                  shadowRootNodeInsertCss(shadow, Fixedstyle);
-                  obs.observe(shadow, def.var.fixCfg);
-                  observeNodeSet.add(shadow);
-                  processNodes(shadow, obs);
-                }
-              });
-            } else pendingNodes.push(treeNode instanceof ShadowRoot ? treeNode.host : treeNode);
+            const subtreeNodes = getSuitableElements(`:not(${def.const.queryString})`, treeNode);
+            subtreeNodes.forEach(item => {
+              pendingNodes.push(item);
+              const shadow = item.shadowRoot;
+              if (shadow) {
+                shadowRootNodeInsertCss(shadow, Fixedstyle);
+                obs.observe(shadow, def.var.fixCfg);
+                observeNodeSet.add(shadow);
+                processNodes(shadow, obs);
+              }
+            });
+            pendingNodes.push(treeNode instanceof ShadowRoot ? treeNode.host : treeNode);
             getAndProcessBoldStyles(pendingNodes);
           }
 
@@ -4722,13 +4790,12 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           function checkConflictCallback(currentList, previousList) {
             if (isMutationsListEqual(currentList, previousList)) {
               if (checkCallback.sameCount > checkCallback.maxCount) {
-                sessionStorage.setItem("__lazyload_flag__", true);
                 __console("warn", "[Ignored]", "Fixbold process suspended:", !IS_DEBUG || { currentList });
-                throw new Error(`Found callback conflict (${checkCallback.sameCount}). Please enable ‘Lazyload’ in Settings if Bold-Fix works fine after refresh.`);
+                throw new Error(`Found callback conflict (${checkCallback.sameCount}). Try the workaround to turn on the 'Lazyload' option.`);
               }
               checkCallback.sameCount++;
             } else checkCallback.sameCount = 0;
-            checkCallback.previous = currentList.slice();
+            checkCallback.previous = arrSlice.call(currentList);
           }
 
           function isMutationsListEqual(mutationsListA, mutationsListB) {
@@ -4739,8 +4806,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
             return (
               compareEventType(mutationA.type, mutationA.type, w.event) &&
               compareTargetNode(mutationA.target, mutationB.target) &&
-              compareNodeLists(mutationA.addedNodes, mutationB.addedNodes) &&
-              compareNodeLists(mutationA.removedNodes, mutationB.removedNodes)
+              compareNodeLists([...mutationA.addedNodes, ...mutationA.removedNodes].sort(), [...mutationB.addedNodes, ...mutationB.removedNodes].sort())
             );
           }
 
@@ -4842,7 +4908,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           }
 
           function hasFixedBoldFlagChange(newValue, oldValue, className) {
-            const [parsedNewValue, parsedOldValue] = [String(newValue), String(oldValue)];
+            const [parsedNewValue, parsedOldValue] = [toString(newValue), toString(oldValue)];
             if (!parsedOldValue.includes(className) && parsedNewValue.includes(className)) return true;
             if (parsedOldValue.includes(className) && !parsedNewValue.includes(className)) return true;
           }
@@ -4865,7 +4931,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           }
 
           function checkNodesForFix(node, checkList = [Node.ELEMENT_NODE, Node.DOCUMENT_NODE, Node.DOCUMENT_FRAGMENT_NODE]) {
-            return node.isConnected && checkList.includes(node.nodeType) && !exNodeSet.has(getNodeName(node));
+            return node.isConnected && checkList.includes(node.nodeType) && !exNodeSet.has(getNodeName(node)) && !/watermark/i.test(toString(node.id) + toString(node.className));
           }
 
           function checkCorrectPermission(flags) {
@@ -4900,11 +4966,11 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
           function boldFixedHandler({ checkedNode, uncheckedNode }) {
             const item = checkedNode?.node ?? uncheckedNode;
-            if (!item) return;
+            if (!item || !checkNodesForFix(item, [Node.ELEMENT_NODE])) return;
             const bold = checkedNode?.isbold ?? isBold(uncheckedNode);
             const hasBoldAttr = item.classList.contains(def.const.boldAttrName);
             const changeHandler = () => void (!hasBoldAttr ? changeAttribute.add(item) : changeAttribute.del(item));
-            if (hasBoldAttr !== bold) CONST_VALUES.lazyload || sessionStorage.getItem("__lazyload_flag__") ? w[def.const.raf](changeHandler) : changeHandler();
+            if (hasBoldAttr !== bold) CONST_VALUES.lazyload ? w[def.const.raf](changeHandler) : changeHandler();
           }
 
           function mouseEventsHandler(event) {
@@ -4921,7 +4987,6 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
           function handleMouseEvents(event) {
             const type = event.type;
-            event.stopPropagation();
             mouseEventHandlers[type] = mouseEventHandlers[type] || deBounce({ fn: mouseEventsHandler, delay: 16.7, timer: type, immed: type === "mouseout" });
             mouseEventHandlers[type](event);
           }
@@ -4930,7 +4995,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         /* FIX_VIEWPORT_ZOOM_STYLE_ERRORS. NEW UPDATE: 2024-03-15 F9Y4NG */
 
         function correctViewportUnits() {
-          const fixRegex = /(\.?\d+(?:\.\d+)?)([dsl]?(v[wh]|vmin|vmax))\b(?!\\)/g;
+          const fixRegex = /(\.?\d+(?:\.\d+)?)([dsl]?(v[wh]|vmin|vmax))\b(?![\\/+_-])/g;
           const base64Regex = /(?:;base64,)((?:[a-zA-Z0-9/+]+)\b\d+([dsl]?(v[wh]|vmin|vmax))\b)+/g;
           const urlRegex = /url\((?<mark>['"]?)(?!\/|https?:)([\w\-/.?=]+)\k<mark>\)/g;
           const fixPermission = IS_CURRENTSITE_ALLOWED && IS_INTERNALSTYLE_ALLOWED && isFixViewport && CONST_VALUES.fixViewport && def.var.curScale !== 1;
@@ -4982,14 +5047,12 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
 
           function applyStyleToOriginLink(styleText, url, originLink) {
             const parent = originLink.parentNode ?? document.head;
-            const style = cE("style");
-            style.textContent = `/*# sourceURL=${url} */\r\n${styleText}`;
+            const style = cE("style", { type: "text/css", textContent: `/*# sourceURL=${url} */\r\n${styleText}` });
             for (const { name, value } of originLink.attributes) {
               if (!["href", "rel"].includes(name)) style.setAttribute(name, value);
             }
             style.dataset.href = url;
             style.dataset.frProcessed = "link";
-            style.setAttribute("type", "text/css");
             try {
               parent.replaceChild(style, originLink);
               DEBUG("Fixed.viewport.Link:", { linkNode: style });
@@ -5002,7 +5065,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           function fixViewportStyles() {
             const pendingStyles = qA(`style:not([data-fr-processed]):not(.darkreader)`);
             pendingStyles.forEach(styleNode => {
-              if (styleNode.attributes[0]?.name.startsWith("fr-css-") || styleNode.id === def.id.rndStyle || /^S[ACS]\d+$/.test(styleNode.id)) return;
+              if (arrayFrom(styleNode.attributes).Find(i => /^fr-css-\w{8}$/.test(toString(i.name))) || new RegExp(`^${def.id.rndStyle}$|^S[ACS]\\d+$`).test(styleNode.id)) return;
               styleNode.dataset.frProcessed = "ignore";
               try {
                 let cssText = styleNode.textContent;
@@ -5046,7 +5109,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         /* CSS_STYLE_PROCESSING_MAIN_THREAD */
 
         function monitorMainStyleProcess([Permission, extraFunction]) {
-          if (!IS_CURRENTSITE_ALLOWED || !IS_INTERNALSTYLE_ALLOWED) return;
+          if (!IS_INTERNALSTYLE_ALLOWED || !(CUR_WINDOW_TOP || IS_CURRENTSITE_ALLOWED)) return;
           getHeadElement.getNodeAndObserve().then(insertMainStyleElement); // Fit::Greasemonkey & Userscripts
           const mainStyleProcess = mutations => {
             const mainStyle = getMainStyleElements({ currentScope: true });
@@ -5120,7 +5183,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         }
 
         function monitorBodyIframeProcess() {
-          if (!IS_CURRENTSITE_ALLOWED || (globalDisable && curEmptyConfig)) return;
+          if (!IS_CURRENTSITE_ALLOWED) return;
           const config = { attributes: true, childList: true, subtree: true };
           const praseIframes = ({ mutations }) => mutations.forEach(mutation => handleIframeProcess(mutation));
           getBodyElement.getNodeAndObserve({ callback: praseIframes, config });
@@ -5159,7 +5222,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
           addLoadEvents.addFn(insertStyleInFrames);
           addLoadEvents.addFinalFn(getStyleLoadStatus);
         })(() => {
-          if (!CUR_WINDOW_TOP || String(GMunregisterMenuCommand) === "() => {}") return;
+          if (!CUR_WINDOW_TOP || toString(GMunregisterMenuCommand) === "() => {}") return;
           return GMregisterMenuCommand(`\ufff0\ud83d\udd52 ${IS_CHN ? "正在载入脚本菜单，请稍候…" : "Loading menus, please wait..."}`, refresh);
         });
       })(
@@ -5388,7 +5451,7 @@ void (function (ctx, FontRendering, proxyArrayMethods) {
         ["FindIndex", findIndexProxy],
         ["Remove", removeProxy],
       ],
-      __protos__: { a: Array.prototype.slice, o: Object.prototype.toString, f: Function.prototype.toString },
+      __protos__: { a: Array.prototype.slice, o: Object.prototype.toString, f: Function.prototype.toString, h: Object.prototype.hasOwnProperty, m: Array.from.bind(Array) },
     };
 
     function defineMethod(property, methodFunction) {
