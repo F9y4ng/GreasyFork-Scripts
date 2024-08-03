@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            помощник поисковых систем
 // @name:ja            優雅な検索エンジン助手
-// @version            2024.07.16.1
+// @version            2024.08.03.1
 // @author             F9y4ng
 // @description        “Elegant Search Engine Assistant” facilite la navigation entre moteurs de recherche, personnalise les préférences, met en évidence les mots-clés, élimine les redirections et publicités, et filtre les résultats. Compatible avec divers moteurs tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, etc.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG and more.
@@ -20,8 +20,9 @@
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.meta.js
 // @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js
-// @require            https://update.greasyfork.org/scripts/460897/1277476/gbCookies.js?SRI#sha256-Sv+EuBerch8z/6LvAU0m/ufvjmqB1Q/kbQrX7zAvOPk=
+// @require            https://update.greasyfork.org/scripts/460897/1277476/gbCookies.js#sha256-Sv+EuBerch8z/6LvAU0m/ufvjmqB1Q/kbQrX7zAvOPk=
 // @match              *://www.baidu.com/*
+// @match              *://ipv6.baidu.com/*
 // @match              *://image.baidu.com/search*
 // @match              *://kaifa.baidu.com/searchPage*
 // @match              *://*.bing.com/*search*
@@ -34,7 +35,6 @@
 // @match              *://yandex.com/*search*
 // @match              *://yandex.ru/*search*
 // @match              *://www.ecosia.org/*
-// @match              *://search.yahoo.com/search*
 // @match              *://*.search.yahoo.com/search*
 // @match              *://*.images.search.yahoo.com/search*
 // @match              *://you.com/search*
@@ -43,27 +43,210 @@
 // @match              *://yep.com/*
 // @match              *://swisscows.com/*
 // @match              *://search.inetol.net/search*
-// @include            *://*.google.*/search*
+// @match              *://*.google.com/search*
+// @match              *://*.google.ad/search*
+// @match              *://*.google.ae/search*
+// @match              *://*.google.com.af/search*
+// @match              *://*.google.com.ag/search*
+// @match              *://*.google.com.ai/search*
+// @match              *://*.google.al/search*
+// @match              *://*.google.am/search*
+// @match              *://*.google.co.ao/search*
+// @match              *://*.google.com.ar/search*
+// @match              *://*.google.as/search*
+// @match              *://*.google.at/search*
+// @match              *://*.google.com.au/search*
+// @match              *://*.google.az/search*
+// @match              *://*.google.ba/search*
+// @match              *://*.google.com.bd/search*
+// @match              *://*.google.be/search*
+// @match              *://*.google.bf/search*
+// @match              *://*.google.bg/search*
+// @match              *://*.google.com.bh/search*
+// @match              *://*.google.bi/search*
+// @match              *://*.google.bj/search*
+// @match              *://*.google.com.bn/search*
+// @match              *://*.google.com.bo/search*
+// @match              *://*.google.com.br/search*
+// @match              *://*.google.bs/search*
+// @match              *://*.google.bt/search*
+// @match              *://*.google.co.bw/search*
+// @match              *://*.google.by/search*
+// @match              *://*.google.com.bz/search*
+// @match              *://*.google.ca/search*
+// @match              *://*.google.cd/search*
+// @match              *://*.google.cf/search*
+// @match              *://*.google.cg/search*
+// @match              *://*.google.ch/search*
+// @match              *://*.google.ci/search*
+// @match              *://*.google.co.ck/search*
+// @match              *://*.google.cl/search*
+// @match              *://*.google.cm/search*
+// @match              *://*.google.cn/search*
+// @match              *://*.google.com.co/search*
+// @match              *://*.google.co.cr/search*
+// @match              *://*.google.com.cu/search*
+// @match              *://*.google.cv/search*
+// @match              *://*.google.com.cy/search*
+// @match              *://*.google.cz/search*
+// @match              *://*.google.de/search*
+// @match              *://*.google.dj/search*
+// @match              *://*.google.dk/search*
+// @match              *://*.google.dm/search*
+// @match              *://*.google.com.do/search*
+// @match              *://*.google.dz/search*
+// @match              *://*.google.com.ec/search*
+// @match              *://*.google.ee/search*
+// @match              *://*.google.com.eg/search*
+// @match              *://*.google.es/search*
+// @match              *://*.google.com.et/search*
+// @match              *://*.google.fi/search*
+// @match              *://*.google.com.fj/search*
+// @match              *://*.google.fm/search*
+// @match              *://*.google.fr/search*
+// @match              *://*.google.ga/search*
+// @match              *://*.google.ge/search*
+// @match              *://*.google.gg/search*
+// @match              *://*.google.com.gh/search*
+// @match              *://*.google.com.gi/search*
+// @match              *://*.google.gl/search*
+// @match              *://*.google.gm/search*
+// @match              *://*.google.gr/search*
+// @match              *://*.google.com.gt/search*
+// @match              *://*.google.gy/search*
+// @match              *://*.google.hk/search*
+// @match              *://*.google.com.hk/search*
+// @match              *://*.google.hn/search*
+// @match              *://*.google.hr/search*
+// @match              *://*.google.ht/search*
+// @match              *://*.google.hu/search*
+// @match              *://*.google.co.id/search*
+// @match              *://*.google.ie/search*
+// @match              *://*.google.co.il/search*
+// @match              *://*.google.im/search*
+// @match              *://*.google.co.in/search*
+// @match              *://*.google.iq/search*
+// @match              *://*.google.is/search*
+// @match              *://*.google.it/search*
+// @match              *://*.google.je/search*
+// @match              *://*.google.com.jm/search*
+// @match              *://*.google.jo/search*
+// @match              *://*.google.jp/search*
+// @match              *://*.google.co.jp/search*
+// @match              *://*.google.co.ke/search*
+// @match              *://*.google.com.kh/search*
+// @match              *://*.google.ki/search*
+// @match              *://*.google.kg/search*
+// @match              *://*.google.co.kr/search*
+// @match              *://*.google.com.kw/search*
+// @match              *://*.google.kz/search*
+// @match              *://*.google.la/search*
+// @match              *://*.google.com.lb/search*
+// @match              *://*.google.li/search*
+// @match              *://*.google.lk/search*
+// @match              *://*.google.co.ls/search*
+// @match              *://*.google.lt/search*
+// @match              *://*.google.lu/search*
+// @match              *://*.google.lv/search*
+// @match              *://*.google.com.ly/search*
+// @match              *://*.google.co.ma/search*
+// @match              *://*.google.md/search*
+// @match              *://*.google.me/search*
+// @match              *://*.google.mg/search*
+// @match              *://*.google.mk/search*
+// @match              *://*.google.ml/search*
+// @match              *://*.google.com.mm/search*
+// @match              *://*.google.mn/search*
+// @match              *://*.google.ms/search*
+// @match              *://*.google.com.mt/search*
+// @match              *://*.google.mu/search*
+// @match              *://*.google.mv/search*
+// @match              *://*.google.mw/search*
+// @match              *://*.google.com.mx/search*
+// @match              *://*.google.com.my/search*
+// @match              *://*.google.co.mz/search*
+// @match              *://*.google.com.na/search*
+// @match              *://*.google.com.ng/search*
+// @match              *://*.google.com.ni/search*
+// @match              *://*.google.ne/search*
+// @match              *://*.google.nl/search*
+// @match              *://*.google.no/search*
+// @match              *://*.google.com.np/search*
+// @match              *://*.google.nr/search*
+// @match              *://*.google.nu/search*
+// @match              *://*.google.co.nz/search*
+// @match              *://*.google.com.om/search*
+// @match              *://*.google.com.pa/search*
+// @match              *://*.google.com.pe/search*
+// @match              *://*.google.com.pg/search*
+// @match              *://*.google.com.ph/search*
+// @match              *://*.google.com.pk/search*
+// @match              *://*.google.pl/search*
+// @match              *://*.google.pn/search*
+// @match              *://*.google.com.pr/search*
+// @match              *://*.google.ps/search*
+// @match              *://*.google.pt/search*
+// @match              *://*.google.com.py/search*
+// @match              *://*.google.com.qa/search*
+// @match              *://*.google.ro/search*
+// @match              *://*.google.ru/search*
+// @match              *://*.google.rw/search*
+// @match              *://*.google.com.sa/search*
+// @match              *://*.google.com.sb/search*
+// @match              *://*.google.sc/search*
+// @match              *://*.google.se/search*
+// @match              *://*.google.com.sg/search*
+// @match              *://*.google.sh/search*
+// @match              *://*.google.si/search*
+// @match              *://*.google.sk/search*
+// @match              *://*.google.com.sl/search*
+// @match              *://*.google.sn/search*
+// @match              *://*.google.so/search*
+// @match              *://*.google.sm/search*
+// @match              *://*.google.sr/search*
+// @match              *://*.google.st/search*
+// @match              *://*.google.com.sv/search*
+// @match              *://*.google.td/search*
+// @match              *://*.google.tg/search*
+// @match              *://*.google.co.th/search*
+// @match              *://*.google.com.tj/search*
+// @match              *://*.google.tl/search*
+// @match              *://*.google.tm/search*
+// @match              *://*.google.tn/search*
+// @match              *://*.google.to/search*
+// @match              *://*.google.com.tr/search*
+// @match              *://*.google.tt/search*
+// @match              *://*.google.com.tw/search*
+// @match              *://*.google.co.tz/search*
+// @match              *://*.google.com.ua/search*
+// @match              *://*.google.co.ug/search*
+// @match              *://*.google.co.uk/search*
+// @match              *://*.google.com.uy/search*
+// @match              *://*.google.co.uz/search*
+// @match              *://*.google.com.vc/search*
+// @match              *://*.google.co.ve/search*
+// @match              *://*.google.vg/search*
+// @match              *://*.google.co.vi/search*
+// @match              *://*.google.com.vn/search*
+// @match              *://*.google.vu/search*
+// @match              *://*.google.ws/search*
+// @match              *://*.google.rs/search*
+// @match              *://*.google.co.za/search*
+// @match              *://*.google.co.zm/search*
+// @match              *://*.google.co.zw/search*
+// @match              *://*.google.cat/search*
 // @exclude            *://www.google.com/sorry*
 // @exclude            *://www.baidu.com/link*
 // @exclude            *://www.sogou.com/link*
 // @exclude            *://www.so.com/link*
 // @exclude            *://so.toutiao.com/search/jump*
 // @connect            baidu.com
-// @connect            bing.com
 // @connect            sogou.com
 // @connect            so.com
-// @connect            search.yahoo.com
 // @connect            greasyfork.org
 // @connect            openuserjs.org
 // @connect            githubusercontent.com
 // @connect            favicon.yandex.net
-// @compatible         edge 兼容Tampermonkey, Violentmonkey
-// @compatible         Chrome 兼容Tampermonkey, Violentmonkey
-// @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
-// @compatible         Opera 兼容Tampermonkey, Violentmonkey
-// @compatible         Safari 兼容Tampermonkey, Userscripts
-// @note               {"CN":"修正 Tampermonkey 5.2.1 在 UserScripts API Dynamic 模式下 GM Value 的缓存未及时更新的问题。","EN":"Fixed an issue that the cache of GM Value failed to be updated in time in Tampermonkey 5.2.1 in UserScripts API Dynamic mode."}
 // @grant              GM_getValue
 // @grant              GM.getValue
 // @grant              GM_setValue
@@ -79,6 +262,17 @@
 // @grant              GM_unregisterMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
+// @note               {"CN":"与 Manifest V3 兼容，更改 @match 模式以匹配 Google 国家/地区域名。","EN":"Compatible with Manifest V3 Change @match patterns to match Google country domains."}
+// @note               {"CN":"修复快速自动翻页时导致链接重定向未定义的问题。","EN":"Fixed an issue that caused link redirection to be undefined during fast automatic page turning."}
+// @note               {"CN":"新增 Qwant 搜索结果广告栏目去除规则。","EN":"Added Qwant search result Ads removal rule."}
+// @note               {"CN":"修复 Bing.com 去重定向翻页开新窗口问题。","EN":"Fixed Bing.com anti-redirection causing page flips to open new windows."}
+// @note               {"CN":"修复 Startpage 搜索跳转按钮的样式问题。","EN":"Fixed style issue of Startpage search jump button."}
+// @note               {"CN":"修复一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
+// @compatible         edge 兼容Tampermonkey, Violentmonkey
+// @compatible         Chrome 兼容Tampermonkey, Violentmonkey
+// @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
+// @compatible         Opera 兼容Tampermonkey, Violentmonkey
+// @compatible         Safari 兼容Tampermonkey, Userscripts
 // @license            GPL-3.0-only
 // @create             2015-10-07
 // @copyright          2015-2024, F9y4ng
@@ -163,7 +357,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
     /* INITIALIZE_COMMON_CONSTANTS */
 
     const def = {
-      count: { clickTimer: 0 },
+      count: { clickTimer: 0, dulicate: 0 },
       const: {
         raf: Symbol(`פֿ${generateRandomString(8, "hex")}`),
         caf: Symbol(`פֿ${generateRandomString(8, "hex")}`),
@@ -185,8 +379,8 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
         disappear: "ͽXa40C9nͼ",
         translucent: "ͼmD9X3jsͽ",
         securityPolicy: false,
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.07.06.0",
-        scriptName: getMetaValue(`name:${navigator.language ?? "zh-CN"}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.08.03.0",
+        scriptName: getMetaValue(`name:${getLocalLanguages()}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       },
       url: {
         yandexIcon: decrypt("aHR0cHMlM0ElMkYlMkZmYXZpY29uLnlhbmRleC5uZXQlMkZmYXZpY29uJTJGdjI="),
@@ -370,8 +564,27 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
       }
     }
 
-    function cE(nodeName) {
-      return document.createElement(nodeName);
+    function cE(nodeName, attr = {}) {
+      const el = document.createElement(nodeName);
+      if (objToString.call(attr) !== "[object Object]") return el;
+      for (const key in attr) {
+        if (!hasOwnProp.call(attr, key)) continue;
+        const value = attr[key];
+        switch (key) {
+          case "class":
+            if (Array.isArray(value)) el.classList.add(...value);
+            else el.classList.add(value);
+            break;
+          case "innerHTML":
+          case "textContent":
+            el[key] = value;
+            break;
+          default:
+            el.setAttribute(key, value);
+            break;
+        }
+      }
+      return el;
     }
 
     function random(range, type = "round") {
@@ -410,8 +623,8 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
 
     function compareArray(array1, array2) {
       if (!Array.isArray(array1) || !Array.isArray(array2) || array1.length !== array2.length) return false;
-      const sortedArray1 = array1.slice().sort();
-      const sortedArray2 = array2.slice().sort();
+      const sortedArray1 = arrSlice.call(array1).sort();
+      const sortedArray2 = arrSlice.call(array2).sort();
       return sortedArray1.every((element, index) => element === sortedArray2[index]);
     }
 
@@ -434,13 +647,12 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
     }
 
     function refresh() {
-      return sleep(5e2).then(() => w.location.reload(true));
+      return sleep(5e2, { useCachedSetTimeout: true }).then(() => w.location.reload(true));
     }
 
     function escapeHTML(string) {
       if (typeof string !== "string") return "";
-      const element = cE("gb-escape-html");
-      element.textContent = string;
+      const element = cE("gb-escape-html", { textContent: string });
       return element.innerHTML;
     }
 
@@ -635,6 +847,11 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
       return metaValue?.[1];
     }
 
+    function getLocalLanguages(lang = navigator.language) {
+      const languages = new Set(["zh-CN", "zh-TW", "en", "ja", "ru"]);
+      return languages.has(lang) ? lang : lang.includes("zh") ? "zh-CN" : "en";
+    }
+
     function setDebuggerMode() {
       const key = decrypt("\u0052\u006a\u006c\u0035\u004e\u0047\u0035\u006e");
       const value = new URLSearchParams(w.location.search).get("whoami");
@@ -779,31 +996,24 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
         _createContainer() {
           const position = `${def.notice.noticeX}-${this.options.position}`;
           if (qS(`gb-notice.${position}`)) return;
-          const container = cE("gb-notice");
-          container.classList.add(def.notice.noticeX, position, def.notice.appear);
+          const container = cE("gb-notice", { class: [def.notice.noticeX, position, def.notice.appear] });
           document.documentElement.appendChild(container);
         }
         _createHeader() {
           let header = null;
           if (this.options.title) {
-            header = cE("div");
-            header.classList.add(`${def.notice.noticeX}-heading`);
-            header.innerHTML = tTP.createHTML(`<span class="${def.notice.noticeX}-heading-title" title="${this.options.title}">${this.options.title}</span>`);
+            const titleHTML = `<span class="${def.notice.noticeX}-heading-title" title="${this.options.title}">${this.options.title}</span>`;
+            header = cE("div", { class: `${def.notice.noticeX}-heading`, innerHTML: tTP.createHTML(titleHTML) });
           }
           if (this.options.closeWith.includes("button")) {
-            const close = cE("div");
-            close.classList.add(def.notice.close);
-            close.innerHTML = tTP.createHTML("&times;");
+            const close = cE("div", { class: def.notice.close, innerHTML: tTP.createHTML("&times;") });
             header = header ? header.appendChild(close) && header : close;
           }
           return header;
         }
         _createBody() {
-          const body = cE("div");
-          body.classList.add(`${def.notice.noticeX}-body`);
-          const content = cE("div");
-          content.classList.add(`${def.notice.noticeX}-content`);
-          content.innerHTML = tTP.createHTML(this.options.text);
+          const body = cE("div", { class: `${def.notice.noticeX}-body` });
+          const content = cE("div", { class: `${def.notice.noticeX}-content`, innerHTML: tTP.createHTML(this.options.text) });
           body.appendChild(content);
           if (this.options.scroll?.maxHeight) {
             body.style.overflowY = "auto";
@@ -813,10 +1023,8 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           return body;
         }
         _createProgressBar() {
-          const progressBar = cE("div");
-          progressBar.classList.add(`${def.notice.noticeX}-progressbar`);
-          const bar = cE("div");
-          bar.classList.add(`${def.notice.noticeX}-bar`);
+          const progressBar = cE("div", { class: `${def.notice.noticeX}-progressbar` });
+          const bar = cE("div", { class: `${def.notice.noticeX}-bar` });
           progressBar.appendChild(bar);
           if (this.options.progressBar && typeof this.options.timeout === "number") {
             progressBar.style.animation = `${def.notice.noticeX}-progress ${this.options.timeout / 1e3}s linear forwards`;
@@ -833,8 +1041,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
         }
         _appendNoticeX(noticeXHeader, noticeXBody, noticeXProgressBar) {
           const targetClass = `.${def.notice.noticeX}-${this.options.position}`;
-          const noticeItem = cE("div");
-          noticeItem.classList.add(def.notice.item, this.options.type);
+          const noticeItem = cE("div", { class: [def.notice.item, this.options.type] });
           if (this.options.width && Number.isInteger(this.options.width)) noticeItem.style.width = `${this.options.width}px`;
           if (noticeXHeader) noticeItem.appendChild(noticeXHeader);
           if (noticeXBody) noticeItem.appendChild(noticeXBody);
@@ -899,7 +1106,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
       function checkBlinkCheatingUA() {
         if (typeof NavigatorUAData === "undefined") return false;
         if (CUR_PROTOCOL === "https:" && !navigator.userAgentData) return true;
-        return Boolean(navigator.userAgentData) && !(navigator.userAgentData instanceof NavigatorUAData);
+        return Boolean(navigator.userAgentData) && !(navigator.userAgentData instanceof NavigatorUAData); // eslint-disable-line no-undef
       }
 
       function insertAfter(newElement, targetElement) {
@@ -917,12 +1124,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           else return true;
         }
         try {
-          const styleElement = cE("style");
-          styleElement.setAttribute(def.const.cssAttrName, isOverwrite ?? false);
-          styleElement.id = styleId;
-          styleElement.media = media;
-          styleElement.type = "text/css";
-          styleElement.textContent = styleContent ?? "";
+          const styleElement = cE("style", { id: styleId, media, type: "text/css", textContent: styleContent ?? "", [def.const.cssAttrName]: isOverwrite ?? false });
           target.appendChild(styleElement);
           return true;
         } catch (e) {
@@ -996,6 +1198,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
         function validateOptions(options) {
           return {
             useNewTab: options.useNewTab || false,
+            forceSelf: options.forceSelf || false,
             forceNewTab: options.forceNewTab || false,
             cleanAttributes: options.cleanAttributes || [],
             removeDataSet: options.removeDataSet || false,
@@ -1005,6 +1208,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
 
         function updateNodeAttributes(node, options) {
           if (options.useNewTab) node.setAttribute("target", "_blank");
+          if (options.forceSelf) node.setAttribute("target", "_self");
           if (Array.isArray(options.cleanAttributes) && options.cleanAttributes.length > 0) options.cleanAttributes.forEach(item => node.removeAttribute(item));
           if (options.removeDataSet) Object.keys(node.dataset).forEach(ds => delete node.dataset[ds]);
           node.setAttribute("gd-depurate-status", true);
@@ -1064,7 +1268,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           DEBUG("Parsed link:", { node, parsed: res, origin: url });
           cachedRequestLinks.set(url, res);
           setRealLink(node, res);
-          toggleLoadClass(node).remove();
+          toggleLoadClass(node)?.remove();
         }
 
         function handleError(e, url, node, name) {
@@ -1072,29 +1276,31 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           if (e?.message === "DuplicateLinksError") handleDuplicateLinksError(url, node);
           else {
             setErrorLink(node);
-            toggleLoadClass(node).remove();
+            toggleLoadClass(node)?.remove();
             ERROR("antiRedirect_%s: %s %O", name, e?.message, { Node: node, Text: node.textContent, URL: node.href });
           }
         }
 
         function handleDuplicateLinksError(url, node) {
+          def.count.dulicate++;
           const attemptToFindCacheLink = setInterval(() => {
             const cachedRealLinks = cachedRequestLinks.get(url);
-            if (cachedRealLinks === null) return;
+            if (!cachedRealLinks) return;
             if (cachedRealLinks === url) {
               setErrorLink(node);
-              toggleLoadClass(node).remove();
+              toggleLoadClass(node)?.remove();
             } else {
-              DEBUG("Duplicate link:", { node });
+              DEBUG("Duplicate link:", { node, url: cachedRealLinks });
               setRealLink(node, cachedRealLinks);
-              toggleLoadClass(node).remove();
+              toggleLoadClass(node)?.remove();
             }
+            def.count.dulicate--;
             clearInterval(attemptToFindCacheLink);
           }, 5e2);
         }
 
         function toggleLoadClass(node) {
-          return { remove: () => IS_DEBUG && node.classList.remove(def.const.loading), add: () => IS_DEBUG && node.classList.add(def.const.loading) };
+          if (node && IS_DEBUG) return { remove: () => node.classList.remove(def.const.loading), add: () => node.classList.add(def.const.loading) };
         }
 
         function setRealLink(node, url) {
@@ -1109,6 +1315,16 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           node.setAttribute("title", `${IS_CHN ? "目前来看，此链接已无法正常访问。" : "At present, this link is no longer accessible."}`);
         }
 
+        function handlePageCheck(count) {
+          DEBUG(`(${count ?? cachedRequestLinks.size}) Task Done! (${def.count.dulicate}) Dup.Task!`);
+          if (antiLinkRedirect && cachedRequestLinks.size > 0 && def.count.dulicate === 0) {
+            !cachedRequestLinks.clear() && DEBUG("Task Clear!");
+          }
+          if (antiResultsFilter && usedFilterWords.size > 0) {
+            !usedFilterWords.clear() && DEBUG("Filter Clear!");
+          }
+        }
+
         function parallelTasks(tasks, maxCount = 3) {
           const taskLength = tasks.length;
           if (taskLength === 0) return;
@@ -1121,7 +1337,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
             currentIndex++;
             task().then(result => {
               finishedCount++;
-              if (finishedCount === taskLength) IS_DEBUG && deBounce({ fn: __console, delay: 1e3, timer: "doTask" })(`doTask`, `(${result ?? cachedRequestLinks.size}) Task Done!`);
+              if (finishedCount === taskLength) deBounce({ fn: handlePageCheck, delay: 1e3, timer: "doTask" })(result);
               else executeNextTask();
             });
           }
@@ -1146,6 +1362,16 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           }
         }
 
+        function getBingDecodeURI(url) {
+          const searchParams = new URL(url).searchParams;
+          const u = searchParams.get("u");
+          if (u) {
+            const decodeURL = u.slice(2).replace(/[-_]/g, v => (v === "-" ? "+" : "/"));
+            return decrypt(decodeURL);
+          }
+          return url;
+        }
+
         function advancedAntiRedirection(siteName, node, task) {
           const url = node?.href?.replace(/^http:/i, "https:");
           if (!url) return;
@@ -1166,47 +1392,36 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                 },
                 onerrorFunc: (reject, resolve) => e => {
                   if (e.error?.includes("Request was redirected to a not whitelisted URL") || e.error?.includes("This domain is not a part of the @connect list")) {
-                    const realUrl = e.error?.toString().match(/Refused to connect to "([^"]*)"/)?.[1];
-                    if (!realUrl || realUrl.includes("www.baidu.com/search/error")) reject(new Error("URLNotExistError"));
-                    if (realUrl.toUpperCase().endsWith(".PDF")) reportIDMHijacking();
+                    const realUrl = e.error?.toString().match(/Refused to connect to "([^"]+)"/)?.[1];
+                    if (!realUrl || realUrl.includes("www.baidu.com/search/error") || realUrl.includes("wappass.baidu.com/static/captcha")) reject(new Error("URLNotExistError"));
                     resolve(realUrl);
-                  } else {
-                    const responseHeader = e.responseHeaders?.match(/Location:\s*([\S]+)/);
-                    if (responseHeader) resolve(responseHeader[1]);
-                    else {
-                      const realURL = e.finalUrl;
-                      if (realURL && realURL !== url) resolve(realURL);
-                      else reject(new Error("URLBrokenError"));
-                    }
-                  }
+                  } else reject(new Error("URLBrokenError"));
                 },
                 ontimeoutFunc: reject => () => reject(new Error("TimeoutError")),
               }),
             Bing: () =>
-              getRealUrl(url, node, siteName, {
-                onreadystatechangeFunc: (resolve, reject) => response => {
-                  if (response.readyState !== 4) return;
-                  if (response.status === 200) {
-                    const resText = response.responseText || response.response || "";
-                    const resUrl = response.finalUrl || response.responseURL || url;
-                    let res = resText.match(/var\s+u\s*=\s*"([^"]+)"\s*;\s*\r\n/i);
-                    res = res ? res[1] : resUrl;
-                    resolve(res);
-                  } else rejectResponse(response, resolve, reject, url);
-                },
-                onerrorFunc: reject => () => reject(new Error("URLBrokenError")),
-                ontimeoutFunc: reject => () => reject(new Error("TimeoutError")),
-              }),
+              new Promise((resolve, reject) => {
+                if (!cachedRequestLinks.has(url)) {
+                  cachedRequestLinks.set(url, null);
+                  const decodeURL = getBingDecodeURI(url) || url;
+                  resolve(decodeURL);
+                } else reject(new RangeError("DuplicateLinksError"));
+              })
+                .then(d => handleSuccess(d, url, node))
+                .catch(e => handleError(e, url, node, siteName)),
             Sogou: () =>
               getRealUrl(url, node, siteName, {
                 onreadystatechangeFunc: (resolve, reject) => response => {
                   if (response.readyState !== 4) return;
                   if (response.status === 200) {
                     const resText = response.responseText || response.response || "";
-                    const resUrl = response.finalUrl || response.responseURL || url;
-                    let res = resText.match(/URL\s*=\s*'([^']+)'/);
-                    res = res ? res[1] : resUrl;
-                    resolve(res);
+                    let resUrl = response.finalUrl || response.responseURL || url;
+                    if (resUrl === url) {
+                      const res = resText.match(/URL\s*=\s*'([^']+)'/);
+                      if (res) resUrl = res[1];
+                      else reject(new Error("URLNotExistError"));
+                    }
+                    resolve(resUrl);
                   } else rejectResponse(response, resolve, reject, url);
                 },
                 onerrorFunc: reject => () => reject(new Error("URLBrokenError")),
@@ -1218,10 +1433,13 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                   if (response.readyState !== 4) return;
                   if (response.status === 200) {
                     const resText = response.responseText || response.response || "";
-                    const resUrl = response.finalUrl || response.responseURL || url;
-                    let res = resText.match(/URL\s*=\s*'([^']+)'/);
-                    res = res ? res[1] : resUrl;
-                    resolve(res);
+                    let resUrl = response.finalUrl || response.responseURL || url;
+                    if (resUrl === url) {
+                      const res = resText.match(/URL\s*=\s*'([^']+)'/);
+                      if (res) resUrl = res[1];
+                      else reject(new Error("URLNotExistError"));
+                    }
+                    resolve(resUrl);
                   } else rejectResponse(response, resolve, reject, url);
                 },
                 onerrorFunc: reject => () => reject(new Error("URLBrokenError")),
@@ -1231,28 +1449,25 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               new Promise((resolve, reject) => {
                 if (!cachedRequestLinks.has(url)) {
                   cachedRequestLinks.set(url, null);
-                  const parseURL = url.match(/\/search\/jump\?url=([^&]+)&/)?.[1];
-                  const decodeURL = decodeURI(decodeURIComponent(parseURL ?? "")) || url;
+                  const decodeURL = decodeURIComponent(new URL(url).searchParams.get("url") ?? "") || url;
                   resolve(decodeURL);
                 } else reject(new RangeError("DuplicateLinksError"));
               })
                 .then(d => handleSuccess(d, url, node))
                 .catch(e => handleError(e, url, node, siteName)),
             Yahoo: () =>
-              getRealUrl(url, node, siteName, {
-                onreadystatechangeFunc: (resolve, reject) => response => {
-                  if (response.readyState !== 4) return;
-                  if (response.status === 200) {
-                    const resText = response.responseText || response.response || "";
-                    let res = resText.match(/URL\s*=\s*'([^']+)'/);
-                    resolve(res?.[1] ?? url);
-                  } else rejectResponse(response, resolve, reject, url);
-                },
-                onerrorFunc: reject => () => reject(new Error("URLBrokenError")),
-                ontimeoutFunc: reject => () => reject(new Error("TimeoutError")),
-              }),
+              new Promise((resolve, reject) => {
+                if (!cachedRequestLinks.has(url)) {
+                  cachedRequestLinks.set(url, null);
+                  const res = url.match(/\/RU=([^/]+)\//)?.[1];
+                  const decodeURL = decodeURIComponent(res ?? "") || url;
+                  resolve(decodeURL);
+                } else reject(new RangeError("DuplicateLinksError"));
+              })
+                .then(d => handleSuccess(d, url, node))
+                .catch(e => handleError(e, url, node, siteName)),
           };
-          toggleLoadClass(node).add();
+          toggleLoadClass(node)?.add();
           return tasks[siteName] ?? task;
         }
 
@@ -1307,10 +1522,11 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               });
             }
           },
+          Ecosia: () => qS(`button.banner__close[data-test-id="banner-close"][aria-label="Close"]`)?.click(),
           Qwant: () => qS(`button[class][aria-label="close"]:has(svg)`)?.click(),
           Brave: () => qS(`.promo-tooltip>button.btn--icon[aria-label="Close"]`)?.click(),
           Duckduckgo: () => qS(`button[data-testid="serp-popover-promo-close"]`)?.click(),
-          Yahoo: () => qS(".browserExtensionPromotionWrapper a.btn.notnow")?.click(),
+          Yahoo: () => qS("button.refresh-soft-intro-dismiss-button")?.click(),
           Swisscows: (siteName, clean) => {
             if (qA(".web-results>article>.site>a.ad").length > 0) {
               COUNT(`[${siteName}-Anti-Ads-Deep-exp]`);
@@ -1445,10 +1661,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               splitTypeName: ["tbm", "udm"],
               mainSelector: "form button[type='submit']",
               buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:100;display:flex;margin:0 4px 0 -5px;justify-content:center;align-items:center}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{padding:0 2px 0 8px}.${def.const.scrollspan}{min-height:26px}.${def.const.scrollspan2}{min-height:26px;margin-top:0!important}.${def.const.scrollbars}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}.${def.const.scrollbars2}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px!important;height:38px;min-width:90px;border:0;border-bottom-left-radius:24px;border-top-left-radius:24px;background:#1a73e8;box-shadow:none;color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 18px 0 12px!important;height:38px;min-width:90px;border:0;border-top-right-radius:24px;border-bottom-right-radius:24px;background:#1a73e8;box-shadow:none;color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#1b66c9;}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{background:#8ab4f8;box-shadow:0 1px 3px 1px rgba(0,0,0,.15),0 1px 2px rgba(0,0,0,.3);color:#202124}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#93baf9}}`,
-              resultListProp: {
-                qs: `div.cLjAic.K7khPe[data-hveid^="C"][data-hveid$="AA"],div.g[data-hveid^="C"][data-hveid$="AA"],div.g div[data-hveid^="C"][data-hveid$="AA"]`,
-                delay: 10,
-              },
+              resultListProp: { qs: `div.cLjAic.K7khPe[data-hveid^="C"][data-hveid$="AA"],div.g[data-hveid^="C"][data-hveid$="AA"],div.g div[data-hveid^="C"][data-hveid$="AA"]`, delay: 10 },
               keywords: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
               antiRedirectFn: function () {
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "google_ar" })(
@@ -1475,10 +1688,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               splitTypeName: { split: "/", index: 1 },
               mainSelector: `.b_searchboxForm>input[type="hidden"][name="form"]`,
               buttonCssText: `.${def.const.searchbox}{border-radius:8px!important}a,#b_results>li[class] a:not(.wiki_seemore),#b_results .b_no a,#b_context .mediumCardTitle{color:#001ba0}#${def.const.rndButtonID}{position:relative;z-index:0;display:inline-flex;margin:0;padding:0 6px 0 0;width:auto;height:38px;min-width:180px;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.leftButton},#${def.const.rightButton}{margin:0;padding:0;width:auto}#${def.const.rndButtonID} input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:600;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px;border-bottom-left-radius:24px;border-top-left-radius:24px}#${def.const.rightButton} input{margin:0 0 0 2px;padding:0 18px 0 12px;border-top-right-radius:24px;border-bottom-right-radius:24px}.${def.const.scrollspan}{margin:-14px -3px 0 0!important;max-height:28px}.${def.const.scrollbars}{max-height:28px;font-size:14px!important}.${def.const.scrollspan2}{margin:0!important;padding:4px 4px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars2}{margin-right:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#fff;background-color:#f0f3f6;box-shadow:0 0 4px #174ae4;color:#174ae4;transition:border .1s linear,box-shadow .3s linear}.${def.notice.random}_input{width:300px!important}@media (prefers-color-scheme: dark){.b_dark #b_results>li[class] a{color:#7aabeb}#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#a2b7f4;color:#333}}`,
-              resultListProp: {
-                qs: `#b_results>li.b_algo:not(.b_algoBorder,.b_topborder),#b_results>li.b_vidAns .mmlist>div[id],#b_results>li.b_mop .b_slidebar>div.slide`,
-                delay: 10,
-              },
+              resultListProp: { qs: `#b_results>li.b_algo:not(.b_algoBorder,.b_topborder),#b_results>li.b_vidAns .mmlist>div[id],#b_results>li.b_mop .b_slidebar>div.slide`, delay: 10 },
               keywords: String(
                 Number(getUrlParam("ensearch")) || Number(w.gbCookies.getItem("ENSEARCH")?.match(/[=](\d)/)?.[1])
                   ? "strong,.b_no h4,.b_strong,.b_ad .b_adlabel strong,.cbl"
@@ -1487,15 +1697,20 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               antiRedirectFn: function () {
                 GMunsafeWindow.AwayTimeScrollTopPoleRS = false;
                 GMunsafeWindow.AwayTimeThreshold = 864000;
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "bing_ar" })("#b_content a[href*='.bing.com/ck/a?']:not([role='button'])", "Bing", {
-                  useNewTab: true,
-                  cleanAttributes: ["h"],
-                  useAdvancedAntiRedirect: true,
-                });
-                deBounce({ fn: parsingAntiRedirect, delay: 30, timer: "bing_ar_cn" })("#b_results>li:not(.b_pag,#mfa_root) a:not([role='button']):not([href*='.bing.com/ck/a?'])", "Bing", {
-                  useNewTab: true,
-                  cleanAttributes: ["h"],
-                });
+                deBounce({
+                  fn: () => {
+                    parsingAntiRedirect("#b_content a[href*='.bing.com/ck/a?']:not([role='button'],.b_widePag)", "Bing", {
+                      useNewTab: true,
+                      cleanAttributes: ["h"],
+                      useAdvancedAntiRedirect: true,
+                    });
+                    parsingAntiRedirect("#b_content a.b_widePag[href*='.bing.com/ck/a?']", "Bing", { forceSelf: true, cleanAttributes: ["h"], useAdvancedAntiRedirect: true });
+                    parsingAntiRedirect("#b_results>li:not(.b_pag,#mfa_root) a:not([role='button']):not([href*='.bing.com/ck/a?'])", "Bing", { useNewTab: true, cleanAttributes: ["h"] });
+                    parsingAntiRedirect("#b_results a.b_widePag:not([href*='.bing.com/ck/a?'])", "Bing", { forceSelf: true, cleanAttributes: ["h"] });
+                  },
+                  delay: 20,
+                  timer: "bing_ar",
+                })();
               },
               antiAdsFn: function () {
                 deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "bing_ad", immed: true })({
@@ -1544,7 +1759,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               },
               antiAdsFn: function () {
                 deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "sogou_ad", immed: true })({
-                  selectors: `#biz_tip_box_tuiguang_float,.pz_pc_new_container,.share-wrap,.sponsored,.tgad-box,[class~='ext_query'][id*='sq_ext_'],div.top-better-hintBox,#right>div.rvr-model:not([tpl])`,
+                  selectors: `#biz_tip_box_tuiguang_float,.pz_pc_new_container,.share-wrap,.sponsored,.tgad-box,[class~="ext_query"][id*="sq_ext_"],div.top-better-hintBox,#right>div.rvr-model:not([tpl])`,
                   siteName: "Sogou",
                   isRemoveNodes: true,
                 });
@@ -1555,22 +1770,21 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               siteButtonName: "𝐐𝐰𝐚𝐧𝐭",
               siteNickName: IS_CHN ? "𝐐𝐰𝐚𝐧𝐭 搜索" : "𝐐𝐰𝐚𝐧𝐭.𝐜𝐨𝐦",
               siteHostName: "www.qwant.com",
-              webURL: "https://www.qwant.com/?t=web&q=",
-              imageURL: "https://www.qwant.com/?t=images&q=",
+              webURL: "https://www.qwant.com/?t=web&b=1&q=",
+              imageURL: "https://www.qwant.com/?t=images&b=1&q=",
               imageType: ["images"],
               splitTypeName: "t",
               mainSelector: "form[data-testid='mainSearchBar']",
               buttonCssText: `#${def.const.rndButtonID}{position:absolute;top:0;right:0;z-index:1999999995;display:block;height:48px}#${def.const.leftButton}{display:inline-block;height:48px}#${def.const.rightButton}{display:inline-block;margin:0 0 0 -2px;height:48px}#${def.const.leftButton} input{margin:0;padding:1px 10px 1px 15px!important;height:48px;min-width:100px;border:1px solid var(--color-border-secondary);border-bottom-left-radius:var(--border-radius-300);border-top-left-radius:var(--border-radius-300);background:transparent;box-shadow:0 2px 3px rgb(0 0 0/6%);color:var(--color-text-primary);vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:1px 15px 1px 10px!important;height:48px;min-width:100px;border:1px solid var(--color-border-secondary);border-top-right-radius:var(--border-radius-300);border-bottom-right-radius:var(--border-radius-300);background:transparent;box-shadow:0 2px 3px rgb(0 0 0/6%);color:var(--color-text-primary);vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:var(--color-background-neutral-tertiary-hovered)}`,
-              resultListProp: { qs: `div[data-testid="containerWeb"]>section div[data-testid]>div>div`, delay: 10 },
+              resultListProp: { qs: `div[data-testid="containerWeb"] div[data-testid="sectionWeb"]>div>div`, delay: 10 },
               keywords: "mark",
-              antiRedirectFn: function () {
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "qwant_ar" })("div[data-testid='containerWeb']>section div[data-testid]>div>div a.external", "Qwant", {
-                  useNewTab: true,
+              antiRedirectFn: null,
+              antiAdsFn: function () {
+                deBounce({ fn: parseAntiAdvertising, delay: 30, timer: "qwant_ad", immed: true })({
+                  selectors: `div[data-testid="containerWeb"] section div[style="display: block;"]:has([data-testid="aserpok"]),.is-sidebar>div>div:has([data-testid="aserpok"])`,
+                  siteName: "Qwant",
                   removeDataSet: true,
                 });
-              },
-              antiAdsFn: function () {
-                deBounce({ fn: parseAntiAdvertising, delay: 30, timer: "qwant_ad", immed: true })({ siteName: "Qwant" });
               },
             },
             yandex: {
@@ -1587,10 +1801,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               resultListProp: { qs: "#search-result>li[class*='_card'][data-cid]", delay: 10 },
               keywords: ".OrganicTitleContentSpan b,.OrganicTextContentSpan b",
               antiRedirectFn: function () {
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yandex_ar" })("#search-result>li.serp-item a", "Yandex", {
-                  useNewTab: true,
-                  removeDataSet: true,
-                });
+                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yandex_ar" })("#search-result>li.serp-item a", "Yandex", { useNewTab: true, removeDataSet: true });
               },
               antiAdsFn: function () {
                 deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "yandex_ad", immed: true })({
@@ -1642,10 +1853,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               resultListProp: { qs: `div.s-result-list>div.result-content[data-i]`, delay: 10 },
               keywords: "em",
               antiRedirectFn: function () {
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "toutiao_ar" })(".main a[href*='/search/jump?url=']", "Toutiao", {
-                  useNewTab: true,
-                  useAdvancedAntiRedirect: true,
-                });
+                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "toutiao_ar" })(".main a[href*='/search/jump?url=']", "Toutiao", { useNewTab: true, useAdvancedAntiRedirect: true });
               },
               antiAdsFn: null,
             },
@@ -1664,11 +1872,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               keywords: "mark",
               antiRedirectFn: null,
               antiAdsFn: function () {
-                deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "kaifa_ad", immed: true })({
-                  selectors: `#reward-entry`,
-                  siteName: "Kaifa",
-                  isRemoveNodes: true,
-                });
+                deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "kaifa_ad", immed: true })({ selectors: `#reward-entry`, siteName: "Kaifa", isRemoveNodes: true });
               },
             },
             ecosia: {
@@ -1724,14 +1928,15 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               imageType: ["images"],
               splitTypeName: () => w.location.hostname.split(".").slice(-4, -3)[0],
               mainSelector: "#hd div.sbx form#sf,header.hd form#sf #sh section#sbx",
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;position:absolute;z-index:1999999995;display:inline-block;margin-left:4px;width:max-content;height:44px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:44px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:44px}#${def.const.leftButton} input{margin:2px 0;padding:1px 12px 1px 18px!important;height:44px;min-width:100px;border:2px solid transparent;border-bottom-left-radius:100px;border-top-left-radius:100px;background:#4687f5;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:2px 0;padding:1px 18px 1px 12px!important;height:44px;min-width:100px;border:2px solid transparent;border-top-right-radius:100px;border-bottom-right-radius:100px;background:#4687f5;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:2px solid transparent;background:#1b68d2;color:#fff}`,
+              buttonCssText: `#${def.const.rndButtonID}{position:relative;position:absolute;z-index:1999999995;display:inline-block;margin-left:4px;width:max-content;height:44px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:44px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:44px}#${def.const.leftButton} input{margin:2px 0;padding:1px 12px 1px 18px!important;height:44px;min-width:100px;border:2px solid transparent;border-bottom-left-radius:100px;border-top-left-radius:100px;background:#7e1fff;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:2px 0;padding:1px 18px 1px 12px!important;height:44px;min-width:100px;border:2px solid transparent;border-top-right-radius:100px;border-bottom-right-radius:100px;background:#7e1fff;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:2px solid transparent;background:#6001d2;color:#fff}`,
               resultListProp: { qs: `#web>ol>li`, delay: 10 },
               keywords: "strong",
               antiRedirectFn: function () {
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yahoo_ar" })("#main ol a[href^='https://r.search.yahoo.com/_ylt=']", "Yahoo", {
-                  useNewTab: true,
-                  useAdvancedAntiRedirect: true,
-                });
+                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yahoo_ar" })(
+                  "#main ol a[href^='https://r.search.yahoo.com/_ylt='],#main #results #sres>li>a[href^='https://r.search.yahoo.com/_ylt=']",
+                  "Yahoo",
+                  { useNewTab: true, useAdvancedAntiRedirect: true }
+                );
               },
               antiAdsFn: function () {
                 deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "yahoo_ad", immed: true })({
@@ -1750,7 +1955,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               imageType: ["isch"],
               splitTypeName: "tbm",
               mainSelector: "button[data-testid='qb_submit_button']",
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:-9px 0 0;height:34px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:44px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:44px}#${def.const.leftButton} input{margin:0;padding:0;height:44px;min-width:110px;border:1px solid #007AFF;border-bottom-left-radius:12px;border-top-left-radius:12px;background-color:#007AFF;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0;height:44px;min-width:110px;border:1px solid #007AFF;border-top-right-radius:12px;border-bottom-right-radius:12px;background-color:#007AFF;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #3395ff;background-color:#3395ff;color:#fff}@media (prefers-color-scheme: dark){#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #0668d2;background:#0668d2}}`,
+              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:-9px 0 0;height:34px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:44px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:44px}#${def.const.leftButton} input{margin:0;padding:0;height:44px;min-width:110px;border:1px solid #596ced;border-bottom-left-radius:12px;border-top-left-radius:12px;background-color:#596ced;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0;height:44px;min-width:110px;border:1px solid #596ced;border-top-right-radius:12px;border-bottom-right-radius:12px;background-color:#596ced;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #7a89f0;background-color:#7a89f0;color:#fff}@media (prefers-color-scheme: dark){#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #4d5cc3;background-color:#4d5cc3;}}`,
               resultListProp: {
                 qs: `div[data-testid="app-mainline"]>div[data-eventappname][data-testid]>ul[data-testid="web-results"],div[data-testid="Github Issues-app"]>ul>li`,
                 delay: 10,
@@ -1778,7 +1983,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               imageType: ["images"],
               splitTypeName: "cat",
               mainSelector: "#search[role='search'] button.search-btn",
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline-block;margin:-11px 4px 0 .5rem;height:20px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:30px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:0;height:30px}#${def.const.leftButton} input{margin:0;padding:1px 10px 1px 20px!important;height:30px;min-width:85px;border:0 solid transparent;border-bottom-left-radius:2rem;border-top-left-radius:2rem;background:#f1f3ff;box-shadow:0 0 2px #a4a5bb;color:#2e39b3;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:1px 20px 1px 10px!important;height:30px;min-width:85px;border:0 solid transparent;border-top-right-radius:2rem;border-bottom-right-radius:2rem;background:#f1f3ff;box-shadow:0 0 2px #a4a5bb;color:#2e39b3;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#6573ff;color:#fff}@media (prefers-color-scheme: dark){#${def.const.leftButton} input{border:1px solid #252b3b;background:#252b3b;color:#fff}#${def.const.rightButton} input{border:1px solid #252b3b;background:#252b3b;color:#fff}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #6573ff;background:#6573ff}}`,
+              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline-block;margin:0 4px;height:40px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:40px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:0;height:40px}#${def.const.leftButton} input{margin:0;padding:1px 10px 1px 20px!important;height:40px;min-width:95px;border:0 solid transparent;border-bottom-left-radius:2rem;border-top-left-radius:2rem;background:#f1f3ff;box-shadow:0 0 2px #a4a5bb;color:#2e39b3;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:1px 20px 1px 10px!important;height:40px;min-width:95px;border:0 solid transparent;border-top-right-radius:2rem;border-bottom-right-radius:2rem;background:#f1f3ff;box-shadow:0 0 2px #a4a5bb;color:#2e39b3;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#6573ff;color:#fff}@media (prefers-color-scheme: dark){#${def.const.leftButton} input{border:1px solid #252b3b;background:#252b3b;color:#fff}#${def.const.rightButton} input{border:1px solid #252b3b;background:#252b3b;color:#fff}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #6573ff;background:#6573ff}}`,
               resultListProp: { qs: `#main>.w-gl>div.result`, delay: Infinity },
               keywords: `.result b`,
               antiRedirectFn: function () {
@@ -1833,11 +2038,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                   immed: true,
                   once: true,
                 })({ sKey: "olnt", sValue: "1", sEnd: Infinity, sDomain: "search.brave.com", sPath: "/", sSameSite: "Lax", sSecure: true });
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "brave_ar" })("#results>div#search-elsewhere a", "Brave", {
-                  useNewTab: true,
-                  forceNewTab: true,
-                  removeDataSet: true,
-                });
+                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "brave_ar" })("#results>div#search-elsewhere a", "Brave", { useNewTab: true, forceNewTab: true, removeDataSet: true });
               },
               antiAdsFn: function () {
                 deBounce({ fn: parseAntiAdvertising, delay: 50, timer: "brave_ad" })({ siteName: "Brave" });
@@ -1968,6 +2169,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               'input[type="search"][class*="input"]',
               '#search-box-container input[class~="ant-input"]',
               'input#yschsp[name="p"]',
+              'textarea#sb_form_q[name="q"]',
               'textarea[jsaction][name="q"]',
               "textarea#search-input-textarea",
             ],
@@ -1984,10 +2186,10 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           /* DEFINE_GLOBAL_STYLES */
 
           def.const.style = String(
-            `.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before {box-sizing:content-box;line-height:normal}.${def.notice.animated}{animation-duration:1s;animation-fill-mode:both}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.${def.notice.random}_fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.${def.notice.random}_fadeOut{animation-name:fadeOut}.${def.notice.appear}{display:block!important}.${def.notice.noticeX},.${def.notice.noticeX} *{text-shadow:none!important;font-family:Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:0 transparent!important}.${def.notice.noticeX}-top{top:0;width:100%}.${def.notice.noticeX}-top .${def.notice.item}{margin:0!important;border-radius:0!important}.${def.notice.noticeX}-topRight{top:10px;right:10px;z-index:10000059!important}.${def.notice.noticeX}-topLeft{top:10px;left:10px}.${def.notice.noticeX}-topCenter{top:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX}-middleLeft,.${def.notice.noticeX}-middleRight{right:10px;top:50%;transform:translateY(-50%)}.${def.notice.noticeX}-middleLeft{left:10px}.${def.notice.noticeX}-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.${def.notice.noticeX}-bottom{bottom:0;width:100%}.${def.notice.noticeX}-bottom .${def.notice.item}{border-radius:0!important;margin:0!important}.${def.notice.noticeX}-bottomRight{bottom:10px;right:10px;z-index:10000055!important}.${def.notice.noticeX}-bottomLeft{bottom:10px;left:10px}.${def.notice.noticeX}-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX} .${def.notice.item}{margin:0 0 10px;border-radius:6px;overflow:hidden}.${def.var.translucent} *{display:none!important}.${def.var.translucent} notice-label{display:block!important}.${def.var.disappear}{display:none!important}[gb-filter-notice]{display:block!important;margin:18px 0 28px 10px!important;padding:10px 2px!important;font:normal 400 14px/100% 'Times New Roman',system-ui,-apple-system,BlinkMacSystemFont,serif!important;-webkit-text-stroke:0 transparent!important;line-height:100%!important}gb-filters.code{display:block;margin:20px 0;word-break:break-word;font-size:12px!important}.${def.notice.noticeX} .${def.notice.item} .${def.notice.close}{float:right;margin-right:7px;color:#fff;text-shadow:0 1px 0 #fff;font-weight:700;font-size:18px!important;line-height:1;opacity:1}` +
-              `.${def.notice.noticeX} .${def.notice.item} .${def.notice.close}:hover{color:#000;opacity:.5;cursor:pointer}.${def.notice.noticeX} .${def.notice.item} a{border-bottom:1px dashed #fff;color:#fff}.${def.notice.noticeX} .${def.notice.item} a,.${def.notice.noticeX} .${def.notice.item} a:hover{text-decoration:none}.${def.notice.noticeX} .${def.notice.success}{background-color:#64ce83;}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-heading{padding:10px;background-color:#3da95c;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-body{padding:10px!important;color:#fff;}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.info}{background-color:#3ea2ff;}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-heading{padding:10px;background-color:#067cea;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-body{padding:10px!important;color:#fff}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.warning}{background-color:#ff7f48;}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#f97038;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-body{color:#fff;padding:10px}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.error}{background-color:#e74c3c}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#e93724;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-body{padding:10px;color:#fff}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-body:hover{visibility:visible!important}` +
+            `.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before {box-sizing:content-box;line-height:normal}.${def.notice.animated}{animation-duration:1s;animation-fill-mode:both}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.${def.notice.random}_fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.${def.notice.random}_fadeOut{animation-name:fadeOut}.${def.notice.appear}{display:block!important}.${def.notice.noticeX},.${def.notice.noticeX} *{text-shadow:none!important;font-family:Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:0 transparent!important}.${def.notice.noticeX}-top{top:0;width:100%}.${def.notice.noticeX}-top .${def.notice.item}{margin:0!important;border-radius:0!important}.${def.notice.noticeX}-topRight{top:10px;right:10px;z-index:2147483647!important}.${def.notice.noticeX}-topLeft{top:10px;left:10px}.${def.notice.noticeX}-topCenter{top:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX}-middleLeft,.${def.notice.noticeX}-middleRight{right:10px;top:50%;transform:translateY(-50%)}.${def.notice.noticeX}-middleLeft{left:10px}.${def.notice.noticeX}-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.${def.notice.noticeX}-bottom{bottom:0;width:100%}.${def.notice.noticeX}-bottom .${def.notice.item}{border-radius:0!important;margin:0!important}.${def.notice.noticeX}-bottomRight{bottom:10px;right:10px;z-index:2147483646!important}.${def.notice.noticeX}-bottomLeft{bottom:10px;left:10px}.${def.notice.noticeX}-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX} .${def.notice.item}{margin:0 0 10px;border-radius:6px;overflow:hidden}.${def.var.translucent} *{display:none!important}.${def.var.translucent} notice-label{display:block!important}.${def.var.disappear}{display:none!important}[gb-filter-notice]{display:block!important;margin:18px 0 28px 10px!important;padding:10px 2px!important;font:normal 400 14px/100% 'Times New Roman',system-ui,-apple-system,BlinkMacSystemFont,serif!important;-webkit-text-stroke:0 transparent!important;line-height:100%!important}gb-filters.code{display:block;margin:20px 0;word-break:break-word;font-size:12px!important}.${def.notice.noticeX} .${def.notice.item} .${def.notice.close}{float:right;margin-right:7px;color:#fff;text-shadow:0 1px 0 #fff;font-weight:700;font-size:18px!important;line-height:1;opacity:1}` +
+              `.${def.notice.noticeX} .${def.notice.item} .${def.notice.close}:hover{color:#000;opacity:.5;cursor:pointer}.${def.notice.noticeX} .${def.notice.item} a{border-bottom:1px dashed #fff;color:#fff}.${def.notice.noticeX} .${def.notice.item} a,.${def.notice.noticeX} .${def.notice.item} a:hover{text-decoration:none}.${def.notice.noticeX} .${def.notice.success}{background-color:#64ce83!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-heading{padding:10px;background-color:#3da95c;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-body{padding:10px!important;color:#fff;}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.info}{background-color:#3ea2ff!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-heading{padding:10px;background-color:#067cea;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-body{padding:10px!important;color:#fff}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.warning}{background-color:#ff7f48!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#f97038;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-body{color:#fff;padding:10px}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.error}{background-color:#e74c3c!important}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#e93724;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-body{padding:10px;color:#fff}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-body:hover{visibility:visible!important}` +
               `.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.configuration} input[disabled],.${def.notice.configuration} select[disabled]{color:#bbb;background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:20px 20px!important;background-color:#fff7f7!important}.${def.notice.noticeX} .${def.notice.configuration}{background:linear-gradient(to right,#fcfcfc,#f2f2f7);background:-webkit-gradient(linear,0 0,0 100%,from(#fcfcfc),to(#f2f2f7));box-shadow:0 0 5px #888}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.close}{float:right;margin-right:7px;color:#000000;text-shadow:0 1px 0 #aaa;font-weight:700;font-size:18px!important;line-height:1;opacity:1}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.close}:hover{color:#555;opacity:.5;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#e7e7e7;color:#333;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-body{padding:10px;color:#333333}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.noticeX}-heading-title{display:inline-block;vertical-align:middle;overflow:hidden;max-width:90%;text-overflow:ellipsis;white-space:nowrap}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#64ce83}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#3da95c}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#3ea2ff}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#067cea;}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#ff7f48}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#f44e06}` +
-              `.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#fd5f4e}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#ba2c1d}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#efefef}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#ccc}@keyframes ${def.notice.noticeX}-progress{0%{width:100%}to{width:0}}@keyframes ${def.notice.noticeX}-fadeOut{0%{opacity:1}to{opacity:0}}.${def.notice.noticeX}-fadeOut{animation-name:${def.notice.noticeX}-fadeOut}.${def.notice.noticeX}{position:fixed;z-index:10000051}.${def.notice.noticeX} ::-webkit-scrollbar{width:8px}.${def.notice.noticeX} ::-webkit-scrollbar-button{width:8px;height:8px}.${def.notice.noticeX} ::-webkit-scrollbar-track{border-radius:3px}.${def.notice.noticeX} ::-webkit-scrollbar-thumb{background:#e1e1e1;border-radius:3px}.${def.notice.noticeX} ::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.rName}{padding:2px!important}.${def.notice.noticeX} .${def.notice.rName} dl{margin:0!important;padding:1px!important}.${def.notice.noticeX} .${def.notice.rName} dl dt{margin:2px 0 6px!important;font-weight:900!important;font-size:16px!important}.${def.notice.noticeX} .${def.notice.rName} dl dd{margin:2px 2px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${def.notice.noticeX} .${def.notice.rName} .${def.notice.center}{width:100%;text-align:center!important}.${def.notice.noticeX} .${def.notice.rName} dl dd em{padding:0 5px;color:#fff;font-style:italic;font-size:24px!important;font-family:Candara,sans-serif!important}.${def.notice.noticeX} .${def.notice.rName} dl dd span{margin-right:8px;font-weight:700;font-size:15px!important}.${def.notice.noticeX} .${def.notice.rName} dl dd i{font-size:20px!important;font-family:Candara,sans-serif!important}.${def.notice.noticeX} .${def.notice.rName} dl dd .im{padding:0 3px;color:gold;font-weight:900;font-size:16px!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} ul{display:inline-block;margin:0 0 0 8px;padding:4px 4px 8px;width:95%;color:rgba(255, 255, 255, 0.8);counter-reset:xxx 0;vertical-align:top;text-align:left}` +
+              `.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#fd5f4e}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#ba2c1d}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#efefef}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#ccc}@keyframes ${def.notice.noticeX}-progress{0%{width:100%}to{width:0}}@keyframes ${def.notice.noticeX}-fadeOut{0%{opacity:1}to{opacity:0}}.${def.notice.noticeX}-fadeOut{animation-name:${def.notice.noticeX}-fadeOut}.${def.notice.noticeX}{position:fixed;z-index:2147483645}.${def.notice.noticeX} ::-webkit-scrollbar{width:8px}.${def.notice.noticeX} ::-webkit-scrollbar-button{width:8px;height:8px}.${def.notice.noticeX} ::-webkit-scrollbar-track{border-radius:3px}.${def.notice.noticeX} ::-webkit-scrollbar-thumb{background:#e1e1e1;border-radius:3px}.${def.notice.noticeX} ::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.rName}{padding:2px!important}.${def.notice.noticeX} .${def.notice.rName} dl{margin:0!important;padding:1px!important}.${def.notice.noticeX} .${def.notice.rName} dl dt{margin:2px 0 6px!important;font-weight:900!important;font-size:16px!important}.${def.notice.noticeX} .${def.notice.rName} dl dd{margin:2px 2px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${def.notice.noticeX} .${def.notice.rName} .${def.notice.center}{width:100%;text-align:center!important}.${def.notice.noticeX} .${def.notice.rName} dl dd em{padding:0 5px;color:#fff;font-style:italic;font-size:24px!important;font-family:Candara,sans-serif!important}.${def.notice.noticeX} .${def.notice.rName} dl dd span{margin-right:8px;font-weight:700;font-size:15px!important}.${def.notice.noticeX} .${def.notice.rName} dl dd i{font-size:20px!important;font-family:Candara,sans-serif!important}.${def.notice.noticeX} .${def.notice.rName} dl dd .im{padding:0 3px;color:gold;font-weight:900;font-size:16px!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} ul{display:inline-block;margin:0 0 0 8px;padding:4px 4px 8px;width:95%;color:rgba(255, 255, 255, 0.8);counter-reset:xxx 0;vertical-align:top;text-align:left}` +
               `.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} li{position:relative;margin:0 0 0 2px;padding:0 0 2px 2px;list-style:none;font-style:italic!important;line-height:150%;-webkit-transition:.12s;transition:.12s}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} li::before{display:inline-block;margin-left:-1.5em;width:1.5em;content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-size:14px;font-family:Candara,sans-serif;-webkit-transition:.5s;transition:.5s}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} #${def.notice.stopUpdate}{float:right;margin:0 5px!important;font-size:12px!important;cursor:help}.${def.const.loading}{position:relative;}.${def.const.loading}::after{content:" \u21ba";animation:fade 1.25s infinite;}@keyframes fade{0%{opacity:0.1}50%{opacity:0.5}to{opacity:0}}.${def.notice.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important;color:#999}#${def.notice.stopUpdate} input[type='checkbox']{box-sizing:content-box;margin:2px 4px 0 0;width:14px;height:14px;border:2px solid #fff;border-radius:50%;background:#ffa077;vertical-align:top;cursor:help;-webkit-appearance:none}#${def.notice.stopUpdate}:hover input,#${def.notice.stopUpdate} input:hover{background:#ba2c1d;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}{display:none!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label{position:relative;display:inline-block;-webkit-box-sizing:content-box;box-sizing:content-box;margin:0 0 0 25px;padding:11px 9px;width:58px;height:10px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245,146,146,.4);word-wrap:normal!important;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;-webkit-border-radius:7px;border-radius:7px;background:#fff;box-shadow:0 0 1px rgba(0,0,0,.6);color:#fff;content:" "}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label::after{position:absolute;top:2px;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;padding:5px;-webkit-border-radius:100px;border-radius:100px;color:#fff;content:"OFF";font-weight:700;font-size:14px}` +
               `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label{-webkit-box-sizing:content-box;box-sizing:content-box;margin:0 0 0 25px;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146, 196, 245, 0.4);cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label::after{top:2px;left:10px;content:"ON"}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}.${def.notice.noticeX} .${def.notice.configuration} button.${def.notice.searchButton}{display:flex;margin:0 0 10px;padding:6px 0;width:162px;height:25px;border:2px solid #eee;border-radius:6px;background:#fff;box-shadow:1px 1px 0 1px #aaa;font-size:14px!important;cursor:pointer;align-content:center;justify-content:center;align-items:center}.${def.notice.noticeX} .${def.notice.configuration} button.${def.notice.searchButton}:hover{box-shadow:1px 1px 3px 0 #888;color:red}.${def.notice.noticeX} .${def.notice.configuration} span.${def.notice.favicon}{margin:0 6px 0 0;width:24px;height:24px}.${def.notice.noticeX} .${def.notice.configuration} ul.${def.notice.searchList}{margin:5px;padding:2px;list-style:none}.${def.notice.noticeX} .${def.notice.configuration} ul.${def.notice.searchList} li{margin:0;list-style:none;font-style:normal}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.fieldset}{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;border:2px dashed #dfdfdf;border-radius:10px;background:transparent!important;text-align:left}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.legend}{display:block;margin:0;padding:0 8px;width:auto;color:#8b0000!important;font-weight:900!important;font-size:14px!important;-webkit-user-select:all;user-select:all}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList}{margin:0;padding:0;background:transparent!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li{float:none;display:flex;margin:3px 0;padding:2px 8px 2px 12px;height:36px;border:none;background:transparent!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none;align-content:center;justify-content:space-between}` +
               `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li>div{font:normal 700 14px/150% 'Microsoft YaHei UI',Helvetica Neue,sans-serif!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button{box-sizing:border-box;margin:0 0 0 8px;padding:4px 8px;height:36px;min-width:65px;border:1px solid #ccc;border-radius:8px;background:#fafafa;box-shadow:1px 1px 1px 0 #ccc;color:#5e5e5e;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info{font-weight:400!important;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info em{color:crimson!important;font-style:normal;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_textarea{padding: 6px 0;margin:0}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter{display:block;margin:0;height:100%}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar{width:8px;height:8px}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb{border-radius:4px;background:#cfcfcf}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.random}_filter_textarea textarea::placeholder{color:#555;font:normal 500 16px/150% ui-monospace,monospace,system-ui,-apple-system,BlinkMacSystemFont!important;opacity:0.85;white-space:break-spaces}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{box-sizing:border-box;margin:0!important;padding:5px!important;max-height:423px;width:100%;min-height:280px;outline:0!important;border:1px solid #bbb;border-radius:6px;white-space:pre;font:normal 400 14px/150% ui-monospace,monospace,sans-serif!important;resize:vertical;overscroll-behavior:contain;word-break:keep-all!important;cursor:auto}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content::placeholder{font:normal 400 14px/150% ui-monospace,monospace!important}.${def.notice.noticeX} .${def.notice.configuration} #${def.notice.random}_customColor{margin:0;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button:hover{background:#fff;cursor:pointer}` +
@@ -2033,7 +2235,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           function getSecurityPolicy() {
             return (
               (currentSite.siteTypeID === newSiteType.GOOGLE && (/^(lcl|flm|fin)$/.test(def.var.searchType) || getUrlParam("csui") === "1")) ||
-              (currentSite.siteTypeID === newSiteType.BING && (/^maps$/.test(def.var.searchType) || getQueryString("showconv") === "1")) ||
+              (currentSite.siteTypeID === newSiteType.BING && (/^maps$/.test(def.var.searchType) || getUrlParam("showconv") === "1")) ||
               (currentSite.siteTypeID === newSiteType.BAIDU && /^(news|vsearch)$/.test(def.var.searchType)) ||
               (currentSite.siteTypeID === newSiteType.SOGOU && /^(fanyi|hanyu|as)/.test(w.location.hostname)) ||
               (currentSite.siteTypeID === newSiteType.DUCKDUCKGO && /^maps$/.test(getUrlParam("iaxm"))) ||
@@ -2078,31 +2280,12 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
             def.var.queryString = getQueryString();
             def.var.searchType = getUrlParam(currentSite.splitTypeName);
             def.var.securityPolicy = getSecurityPolicy();
-            return (checkCurrentPage() && handlePageCheck()) || true;
-          }
-
-          function handlePageCheck() {
-            if (antiLinkRedirect && cachedRequestLinks.size > 0) {
-              cachedRequestLinks.clear();
-              DEBUG("Task Clear!");
-            }
-            if (antiResultsFilter && usedFilterWords.size > 0) {
-              usedFilterWords.clear();
-              DEBUG("Filter Clear!");
-            }
-          }
-
-          function checkCurrentPage() {
-            const currentUrl = w.location.href;
-            if (def.var.previousUrl !== currentUrl) {
-              def.var.previousUrl = currentUrl;
-              return true;
-            }
+            return true;
           }
 
           function setupGlobalParameterListener() {
             if (GMcontentMode && document.body) {
-              const observer = new MutationObserver(deBounce({ fn: getGlobalParameter, delay: 50, timer: "globalParameter" }));
+              const observer = new MutationObserver(deBounce({ fn: getGlobalParameter, delay: 2e2, timer: "globalParameter" }));
               observer.observe(document.body, { childList: true, subtree: true });
             } else {
               w.addEventListener("pushState", getGlobalParameter);
@@ -2715,16 +2898,16 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                   const formNode = qS(`form#sb_form`);
                   qA(`#b_header .b_searchbox[name="q"]`).forEach(input => {
                     const inputLength = parseFloat(gCS(input).width) || 500;
-                    input.style.maxWidth = `${inputLength - sectionWidth + 50}px`;
+                    input.style.maxWidth = `${inputLength - sectionWidth + 30}px`;
+                    input.style.overflowY = "auto";
                   });
-                  if (textarea) {
+                  if (formNode && textarea) {
                     const inputs = qA(`#${def.const.rndButtonID} input`);
-                    const changeTextarea = e => {
-                      if (e.target === textarea) inputs.forEach(input => input.classList.add(def.const.searchbox));
-                      else inputs.forEach(input => input.classList.remove(def.const.searchbox));
-                    };
+                    const changeTextarea = e => !/b_logoArea|b_phead_chat_link/.test(e.target?.className) && inputs.forEach(input => input.classList.add(def.const.searchbox));
+                    const recoverTextarea = () => textarea.getAttribute("rows") < 2 && inputs.forEach(input => input.classList.remove(def.const.searchbox));
                     textarea.getAttribute("rows") >= 2 && inputs.forEach(input => input.classList.add(def.const.searchbox));
-                    document.addEventListener("click", changeTextarea, true);
+                    formNode.addEventListener("focus", changeTextarea, true);
+                    formNode.addEventListener("blur", recoverTextarea, true);
                   }
                   if (formBox && getUrlParam("view") === "detailV2") {
                     formBox.style.cssText += "width:max-content!important;z-index:1000;position:relative;";
@@ -2736,7 +2919,8 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                     qA(`#b_header .b_searchbox[name="q"]`).forEach(input => {
                       input.style.maxWidth = "";
                       const inputLength = parseFloat(gCS(input).width) || 500;
-                      input.style.maxWidth = `${inputLength - sectionWidth + 50}px`;
+                      input.style.maxWidth = `${inputLength - sectionWidth + 30}px`;
+                      input.style.overflowY = "auto";
                     });
                   }).observe(formNode, { attributeFilter: ["aria-owns"] });
                 },
@@ -2786,7 +2970,10 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                 listTypes: { target: "div[data-testid='containerWeb']>section div[data-testid]>div>div", listName: "div" },
                 applyButton: ({ buttonSection, target }) => {
                   target.parentNode.appendChild(buttonSection);
-                  sleep(0)(buttonSection.getBoundingClientRect().width || 2e2).then(sectionWidth => (buttonSection.style.right = `-${sectionWidth + 8}px`));
+                  sleep(0)(buttonSection.getBoundingClientRect().width || 2e2).then(sectionWidth => {
+                    const llmButtonWidth = qS(`div[data-testid="llm-button-force"][class]`)?.getBoundingClientRect().width || 0;
+                    buttonSection.style.right = `-${sectionWidth + 10 + llmButtonWidth}px`;
+                  });
                 },
               },
               sogou: {
@@ -2928,9 +3115,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
             function insertButtons() {
               try {
                 const targetSelector = currentSite.mainSelector;
-                const buttonSection = cE("gb-button");
-                buttonSection.id = def.const.rndButtonID;
-                buttonSection.innerHTML = tTP.createHTML(def.const.button);
+                const buttonSection = cE("gb-button", { id: def.const.rndButtonID, innerHTML: tTP.createHTML(def.const.button) });
                 const buttonID = `#${buttonSection.id}`;
                 const target = qS(targetSelector);
                 if (def.var.indexPage || !target || !def.var.queryString || qS(buttonID)) return;
@@ -3075,9 +3260,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
             function addDebugNotice(item, filter) {
               const noticeNode = qS("notice-label", item);
               if (!noticeNode) {
-                const notice = cE("notice-label");
-                notice.classList.add("code");
-                notice.textContent = `<![CDATA[ "${filter}" ]]>`;
+                const notice = cE("notice-label", { class: "code", textContent: `<![CDATA[ "${filter}" ]]>` });
                 item.prepend(notice);
               }
             }
@@ -3096,7 +3279,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
 
             function processNode(item, returnContent) {
               if (item.nodeType !== Node.ELEMENT_NODE) return;
-              const href = qS("a:not([title^='Search']):not([aria-label^='Anonymous']):not([href*='.bing.com/ck/a?'])", item)?.href ?? "";
+              const href = qS("a:not([data-testid='result-extras-site-search-link']):not([aria-label^='Anonymous']):not([href*='.bing.com/ck/a?'])", item)?.href ?? "";
               const url = [1, 5, 8].includes(listCurrentSite.siteTypeID) ? "" : getDecodeURI(href);
               const content = item.innerText?.replace(/[\t\r\n\ue62b]/g, "").trim() + url;
               content && returnContent.set(item, content);
@@ -3121,15 +3304,8 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
             }
 
             function getDecodeURI(href) {
-              if (!href || typeof href !== "string") return "";
-              let url = href;
-              try {
-                if (listCurrentSite.siteTypeID === newSiteType.TOUTIAO) url = decodeURIComponent(new URLSearchParams(new URL(href).search).get("url"));
-              } catch (e) {
-                url = href.match(/\?url=([^&]+)/)?.[1];
-                url = url ? decodeURIComponent(url) : href;
-              }
-              return `\ue620${url}\ue620`;
+              if (typeof href !== "string" || href.startsWith("javascript:")) return ``;
+              return `\ue620${decodeURIComponent(href)}\ue620`;
             }
 
             function getGlobalGoogle(NCRHost, permission) {
@@ -3154,19 +3330,20 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               GMsetValue("_version_", encrypt(def.var.curVersion));
             }
 
+            function processMainThreadTasks() {
+              if (currentSite.siteTypeID !== newSiteType.OTHERS && !def.var.securityPolicy) {
+                if (!qS(`#${def.const.rndclassName}`)) insertCSS();
+                if (!qS(`#${def.const.rndButtonID}`)) insertButtons();
+              }
+              if (listCurrentSite.siteTypeID !== newSiteType.OTHERS) {
+                if (!qS(`#${def.const.rndstyleName}`)) insertStyle();
+                antiAds && listCurrentSite.antiAdsFn?.();
+                antiResultsFilter && filterSearchResults(listCurrentSite.resultListProp);
+                antiLinkRedirect && !def.var.indexPage && listCurrentSite.antiRedirectFn?.();
+              }
+            }
+
             function searchButtonAndStylesObserve() {
-              const processMainThreadTasks = () => {
-                if (currentSite.siteTypeID !== newSiteType.OTHERS && !def.var.securityPolicy) {
-                  if (!qS(`#${def.const.rndclassName}`)) insertCSS();
-                  if (!qS(`#${def.const.rndButtonID}`)) insertButtons();
-                }
-                if (listCurrentSite.siteTypeID !== newSiteType.OTHERS) {
-                  if (!qS(`#${def.const.rndstyleName}`)) insertStyle();
-                  antiAds && listCurrentSite.antiAdsFn?.();
-                  antiResultsFilter && filterSearchResults(listCurrentSite.resultListProp);
-                  antiLinkRedirect && !def.var.indexPage && listCurrentSite.antiRedirectFn?.();
-                }
-              };
               const observer = new MutationObserver(processMainThreadTasks);
               const config = { childList: true, subtree: true };
               observer.observe(document, config);
