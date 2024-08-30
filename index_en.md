@@ -54,7 +54,7 @@
 * For **Tampermonkey v5.1.1 and older**: Go to the **Dashboard**, enter the **Settings** tab, scroll down to "**Experimental**", and change **the injection mode** to "**Instant**".
 * For **Violentmonkey**: Go to the **Dashboard**, enter the **Settings** tab, find and check "**Synchronous page mode**" in **Advanced - General**.
 
-## About feedback on issues
+## Feedback on issues
 
 **Note 1:** Unknown compatibility errors may occur when using the `Beta, Dev, Canary, Nightly` and other test branches of the browser or script manager, and the script will not correct errors of the test version. Since there is a rare chance that the data will be initialized abnormally, **please back up your local data in time**.
 
@@ -73,7 +73,7 @@
 > 3. Use **Bug report** and upload the saved log file to [Github ISSUES](https://github.com/F9y4ng/GreasyFork-Scripts/issues)。
 > 4. During daily use, do not turn on the script debugging switch to avoid slow script executing or page lagging.
 
-## About adding custom fonts
+## Adding custom fonts
 If you need to add custom fonts into the font library, please follow the [Help Instructions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/64). The Chinese fonts in the built-in font library [Download](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/46).
 
 If you want to add a new font, please add complete and accurate **font names in English and Chinese**, and **PostScript names** into the customized font library in the preset format.
@@ -89,9 +89,9 @@ When a new font is installed, be sure to **restart the browser** first and **reb
 - Note 1: Editing and saving a custom font library will automatically trigger a rebuild of the font list's global cache, eliminating the need for additional manual processing.
 - Note 2: If you only install fonts defined by the built-in font library, you need to manually rebuild the global cache of the font list in the **Advanced Core Setting** after restarting the browser.
 
-## About font scaling
+## Font scaling (experimental)
 
-Font scaling (experimental) BETA Version, **OFF by default**, turn on font scaling in the **Advanced core settings**.
+Font scaling (experimental), **OFF by default**, turn on font scaling in the **Advanced core settings**.
 
 - **KNOWN ISSUES I:** Due to the compatibility of Firefox (Gecko kernel), only the internal coordinate offset problem of the script has been fixed, but it will be insufficiently compatible with some website styles and functions, so please use it according to your needs and discretion. **Strongly recommended**: Use Firefox's self-scaling feature (`Ctrl++`, `Ctrl+-`) instead of this experimental feature.
 - **KNOWN ISSUES II:** The fix for viewport units `vw, vh, vmin, vmax` has been completed, solving the problem of inaccurate viewport unit lengths after font scaling. This feature is **experimental** and **OFF by default**, it can be turned on in the **Advanced Core Setting**.
