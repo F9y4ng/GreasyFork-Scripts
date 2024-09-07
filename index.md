@@ -29,14 +29,17 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2024.08.03.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2024.09.07.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 优化脚本设置界面的窗口显示优先级。
-@ 优化粗体修正功能对某些在线视频组件的兼容性。
++ 新增对 Canvas 元素的字体渲染支持。(实验性功能)
 @ 改进脚本被 CSP 策略阻止的提示方案。
-@ 修复在某些站点因 Array.from 方法被重写造成的错误。
-@ 修复粗体修正功能与 Cubox 扩展对鼠标事件的冲突。
+@ 改进浏览器页面文本选取样式及代码块选取样式。
+@ 改进浏览器信息检测及解析功能的兼容性。
+@ 改进视口单位修正功能的运行效率，提高兼容性。
+@ 改进粗体修正功能的性能，提高兼容性，增强冲突检测。
+@ 修复 iframe.srcdoc 框架页面未能正常渲染的问题。
+@ 修复在 Chromium v128+ 中使用字体缩放导致的问题。(Tampermonkey5.2.3存在缓存BUG!)
 @ 修复一些已知的问题，优化代码，优化样式。
 ```
 
@@ -106,14 +109,13 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2024.08.03.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2024.09.07.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ 与 Manifest V3 兼容，更改 @match 模式以匹配 Google 国家/地区域名。
-@ 修复快速自动翻页时导致链接重定向未定义的问题。
-+ 新增 Qwant 搜索结果广告栏目去除规则。
-@ 修复 Bing.com 去重定向翻页开新窗口问题。
-@ 修复 Startpage 搜索跳转按钮的样式问题。
+@ 修复 Sogou.com 搜索跳转按钮的样式。
+@ 修复 Swisscows 搜索的跳转及过滤规则。
+@ 优化去除搜索结果链接重定向的执行效率。
+@ 改进浏览器信息检测及解析功能的兼容性。
 @ 修复一些已知问题，优化代码，优化样式。
 ```
 
