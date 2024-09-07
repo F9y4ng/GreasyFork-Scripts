@@ -25,14 +25,17 @@
 - 脚本错误、异常请反馈至{[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)}, 字体、渲染样式、乱码问题请反馈至{[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)}。
 - 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-### version 2024.08.03.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2024.09.07.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 优化脚本设置界面的窗口显示优先级。
-@ 优化粗体修正功能对某些在线视频组件的兼容性。
++ 新增对 Canvas 元素的字体渲染支持。(实验性功能)
 @ 改进脚本被 CSP 策略阻止的提示方案。
-@ 修复在某些站点因 Array.from 方法被重写造成的错误。
-@ 修复粗体修正功能与 Cubox 扩展对鼠标事件的冲突。
+@ 改进浏览器页面文本选取样式及代码块选取样式。
+@ 改进浏览器信息检测及解析功能的兼容性。
+@ 改进视口单位修正功能的运行效率，提高兼容性。
+@ 改进粗体修正功能的性能，提高兼容性，增强冲突检测。
+@ 修复 iframe.srcdoc 框架页面未能正常渲染的问题。
+@ 修复在 Chromium v128+ 中使用字体缩放导致的问题。(Tampermonkey5.2.3存在缓存BUG!)
 @ 修复一些已知的问题，优化代码，优化样式。
 ```
 
@@ -42,25 +45,16 @@
 - 老用户从旧版本升级至最新版时，如遇到样式异常，可通过重置功能重置数据来使用最新规则来尝试纠正问题。大版本（数据重建）更新不建议您使用备份还原，请重新配置渲染参数并保存，记得再次备份新数据。
 - **注意**：在Win10/Win11下，不论高分屏或低分屏，只要系统或浏览器应用150%以上缩放率即可获得最佳渲染效果，这是Windows默认渲染机制所决定的。
 
-<details>
-<summary>点击查看 - 关于脚本延迟加载的处理办法</summary>
+### 脚本延迟加载的处理办法
+* [脚本延迟加载造成页面二次渲染问题的解决办法](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/368)
 
-#### 如出现脚本加载延迟、或未正确加载样式的临时处理办法：
-* 针对**Tampermonkey v5.2 及更新版本** (Manifest V3)：进入**管理面板**，进入**设置**标签页，下拉至“**安全**”，将“**Content Script API:**”改为`UserScripts API Dynamic`。
-
-* 针对**Tampermonkey v5.1.1及更旧版本**：进入**管理面板**，进入**设置**标签页，下拉至“**实验**”，将注入模式改为“**即时**”。
-
-* 针对**Violentmonkey**：进入**控制台界面**，进入**设置**标签页，在**高级-通用**中勾选“**同步 page 模式**”。
-
- </details>
-
-### 关于问题反馈
+### 问题反馈
 
 **注意**：使用浏览器、脚本管理器的`Beta、Dev、Canary、Nightly`等测试分支可能出现未知的兼容错误，脚本不会修正测试版本的错误，**如必须使用测试版本并对脚本有极高要求，建议你选择其他同类脚本**。因有极小概率发生数据被异常初始化，**请及时备份您的本地数据！！！**
 
 **反馈问题请注意**：反馈脚本错误或样式问题，请把**仅使用本脚本**情况下发生问题的**访问网址**、使用的**浏览器版本**、**脚本管理器版本**、**错误截图**、以及**操作流程**或**错误提示**（如果有的话）发出来，你遇到的问题不一定能在我本地复现。
 
-- [关于个别网站样式错误修正的设置分享，不定期更新，自取自用。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42)
+- [特定网站样式错误修正的设置分享，不定期更新，自取自用。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42)
 - [分享：关于分别设置英文字体和中文字体的方法。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83)
 - [如何正确地对不同显示器、浏览器设定字体渲染参数？](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160)
 
@@ -80,7 +74,7 @@
 
 </details>
 
-### 关于自定义字体的添加
+### 自定义字体的添加
 
 **如果您需要向字体表添加自定义字体，请按[帮助说明](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/64)进行操作。** 字体表字体及其他中文字体分享：[点这里下载](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/46)
 
@@ -102,9 +96,9 @@
 - 注 2：若仅安装**内置字体表**定义的字体，重启浏览器后，需要**手动**重建字体列表全局缓存。
 </details>
 
-### 关于字体缩放
+### 字体比例缩放（实验性功能）
 
-字体比例缩放（实验性功能）Beta 版，默认关闭，请在 **高级核心功能设置** 中打开字体缩放功能。
+字体比例缩放功能，默认关闭，请在 **高级核心功能设置** 中打开字体缩放功能。
 
 - **已知问题一：** 由于 Firefox (Gecko 内核) 的兼容性原因，仅修正了脚本内部坐标偏移问题，但会对部分网站样式、功能兼容不足，请根据需求酌情使用。**强烈建议您**：使用 Firefox 自身缩放功能替代(`Ctrl++`, `Ctrl+-`)。
 
@@ -134,14 +128,13 @@
 - [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 - 自动更新检测默认开启，如无更新提示需求，可在“**搜索引擎助手高级设置**”中关闭它。
 
-### version 2024.08.03.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2024.09.07.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ 与 Manifest V3 兼容，更改 @match 模式以匹配 Google 国家/地区域名。
-@ 修复快速自动翻页时导致链接重定向未定义的问题。
-+ 新增 Qwant 搜索结果广告栏目去除规则。
-@ 修复 Bing.com 去重定向翻页开新窗口问题。
-@ 修复 Startpage 搜索跳转按钮的样式问题。
+@ 修复 Sogou.com 搜索跳转按钮的样式。
+@ 修复 Swisscows 搜索的跳转及过滤规则。
+@ 优化去除搜索结果链接重定向的执行效率。
+@ 改进浏览器信息检测及解析功能的兼容性。
 @ 修复一些已知问题，优化代码，优化样式。
 ```
 
