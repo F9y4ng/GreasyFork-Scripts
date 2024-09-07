@@ -29,14 +29,16 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data in a timely manner. Do not use backup files from unknown sources!
 
-## version 2024.08.03.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2024.09.07.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ Optimized display priority of settings interface.
-@ Optimized the compatibility of Bold-Fix feature for some online video components. (Chrome)
-@ Improved prompts for scripts blocked by CSP.
-@ Fixed errors caused by 'Array.from' being overridden.
-@ Fixed Bold-Fix conflicts with Cubox for MouseEvents.
++ Added font rendering support for Canvas. (Exp. Feat)
+@ Improved browser text and code block selection style.
+@ Improved the compatibility of browser-info detection.
+@ Improved the operation efficiency of viewport unit correction function and enhanced compatibility.
+@ Improved the performance of the Bold-Fixes function, enhanced compatibility, optimized conflict detection.
+@ Fixed iframe.srcdoc frame not rendering properly.
+@ Fixed font scaling feature issue in Chromium v128+. (Cache bug found in Tampermonkey 5.2.3!)
 @ Fixed some known issues, optimized code & style.
 ```
 
@@ -112,14 +114,13 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-## version 2024.08.03.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2024.09.07.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Compatible with Manifest V3 Change @match patterns to match Google country domains.
-@ Fixed an issue that caused link redirection to be undefined during fast automatic page turning.
-+ Added Qwant search result Ads removal rule.
-@ Fixed Bing.com anti-redirection causing page flips to open new windows.
-@ Fixed style issue of Startpage search jump button.
+@ Fixed Sogou.com search jump button style.
+@ Fixed jump and filter rules for swisscows search.
+@ Optimized the efficiency of removing link redirect.
+@ Improved compatibility of browser-info detection.
 @ Fixed some known issues, optimized code & style.
 ```
 
