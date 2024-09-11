@@ -25,16 +25,12 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data promptly and don't use backup files from unknown sources!
 
-### version 2024.09.07.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2024.09.11.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-+ Added font rendering support for Canvas. (Exp. Feat)
-@ Improved browser text and code block selection style.
-@ Improved the compatibility of browser-info detection.
-@ Improved the operation efficiency of viewport unit correction function and enhanced compatibility.
-@ Improved the performance of the Bold-Fixes function, enhanced compatibility, optimized conflict detection.
-@ Fixed iframe.srcdoc frame not rendering properly.
-@ Fixed font scaling feature issue in Chromium v128+. (Cache bug found in Tampermonkey 5.2.3!)
++ Added parameter switch for Canvas font rendering.
+@ Fixed exclude not working for Canvas font rendering.
+@ Fixed rendering Canvas font shadowOffset undefined.
 @ Fixed some known issues, optimized code & style.
 ```
 

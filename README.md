@@ -25,17 +25,12 @@
 - 脚本错误、异常请反馈至{[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)}, 字体、渲染样式、乱码问题请反馈至{[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)}。
 - 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-### version 2024.09.07.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2024.09.11.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-+ 新增对 Canvas 元素的字体渲染支持。(实验性功能)
-@ 改进脚本被 CSP 策略阻止的提示方案。
-@ 改进浏览器页面文本选取样式及代码块选取样式。
-@ 改进浏览器信息检测及解析功能的兼容性。
-@ 改进视口单位修正功能的运行效率，提高兼容性。
-@ 改进粗体修正功能的性能，提高兼容性，增强冲突检测。
-@ 修复 iframe.srcdoc 框架页面未能正常渲染的问题。
-@ 修复在 Chromium v128+ 中使用字体缩放导致的问题。(Tampermonkey5.2.3存在缓存BUG!)
++ 新增对 Canvas 画布字体渲染的参数开关。
+@ 修复对 Canvas 画布字体排除渲染无效的问题。
+@ 修复渲染 Canvas 元素字体阴影偏移量未定义的问题。
 @ 修复一些已知的问题，优化代码，优化样式。
 ```
 
