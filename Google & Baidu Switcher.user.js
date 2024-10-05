@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            помощник поисковых систем
 // @name:ja            優雅な検索エンジン助手
-// @version            2024.09.07.1
+// @version            2024.10.05.1
 // @author             F9y4ng
 // @description        “Elegant Search Engine Assistant” facilite la navigation entre moteurs de recherche, personnalise les préférences, met en évidence les mots-clés, élimine les redirections et publicités, et filtre les résultats. Compatible avec divers moteurs tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, etc.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG and more.
@@ -262,11 +262,10 @@
 // @grant              GM_unregisterMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
-// @note               {"CN":"修复 Sogou.com 搜索跳转按钮的样式。","EN":"Fixed Sogou.com search jump button style."}
-// @note               {"CN":"修复 Swisscows 搜索的跳转及过滤规则。","EN":"Fixed jump and filter rules for swisscows search."}
-// @note               {"CN":"优化去除搜索结果链接重定向的执行效率。","EN":"Optimized the efficiency of removing link redirect."}
-// @note               {"CN":"改进浏览器信息检测及解析功能的兼容性。","EN":"Improved compatibility of browser-info detection."}
-// @note               {"CN":"修复一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
+// @note               {"CN":"修正部分搜索引擎跳转按钮样式问题。","EN":"Fixed some search engine jump button style issue."}
+// @note               {"CN":"修正从百度首页搜索时按钮消失的问题。","EN":"Fixed buttons disappear when search from homepage."}
+// @note               {"CN":"修正页面滚动按钮样式切换函数的问题。","EN":"Fixed Bug of the page scroll style toggle function."}
+// @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         edge 兼容Tampermonkey, Violentmonkey
 // @compatible         Chrome 兼容Tampermonkey, Violentmonkey
 // @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
@@ -280,7 +279,7 @@
 
 /* jshint esversion: 11 */
 
-void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
+void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
   "use strict";
 
   /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -293,20 +292,20 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
   /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
    * LICENSE FOR OPEN SOURCE USE: `GPLv3 ONLY`.                                *
    * THE CODE IS COMPLETELY OPEN AND FREE, AND DOES NOT ACCEPT UNAUTHORIZED    *
-   * DISTRIBUTION AS THIRD-PARTY STANDALONE SCRIPTS. IF ERRORS OCCUR OR USAGE  *
-   * ISSUES OR NEW FEATURE, PLEASE FEEDBACK ON GITHUB ISSUES, THANK YOU!       *
+   * DISTRIBUTION AS THIRD-PARTY STANDALONE SCRIPTS. IN CASE OF ERRORS, USAGE  *
+   * PROBLEMS OR NEW FEATURES, PLEASE FEEDBACK IN GITHUB ISSUES, THANK YOU!    *
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-  const { __protos__, defineMethod, ArrayMethods } = proxyArrayMethods;
+  const { defineMethod, arrayMethods, obj = Object.create(null) } = arrayProxy;
   const utils = {
-    gm: GM?.info ?? GM_info,
+    info: GM?.info ?? GM_info,
     debugging: IS_OPEN_DEBUG,
     atob: atob.bind(ctx),
     btoa: btoa.bind(ctx),
     alert: alert.bind(ctx),
     prompt: prompt.bind(ctx),
     confirm: confirm.bind(ctx),
-    console: Object.assign({}, ctx.console),
+    console: Object.assign(obj, ctx.console),
   };
   const enhanceHistory = type => {
     const original = ctx.history[type];
@@ -320,18 +319,17 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
   };
   ctx.history.pushState = enhanceHistory("pushState");
   ctx.history.replaceState = enhanceHistory("replaceState");
-  ArrayMethods.forEach(method => void defineMethod(...method));
-  SearchEngineAssistant(ctx, utils, __protos__);
+  Object.entries(arrayMethods).forEach(method => void defineMethod(...method));
+  SearchEngineAssistant(ctx, utils, customFns);
 })(
   typeof window !== "undefined" ? window : this,
-  function (global, secures, protoMethods) {
+  function (global, secureVars, customFuntions) {
     "use strict";
 
     /* PERFECTLY COMPATIBLE FOR GREASEMONKEY, TAMPERMONKEY, VIOLENTMONKEY, USERSCRIPTS 2024-03-15 F9Y4NG */
 
-    const { atob, btoa, alert, prompt, confirm, console, debugging, gm: GMinfo } = secures;
-    const { a: aSlice, s: obj2Str, f: asArray, h: hasOwnProp, g: availableStorages } = protoMethods;
-    const { local: localStorages } = availableStorages;
+    const { atob, btoa, alert, prompt, confirm, console, debugging, info: GMinfo } = secureVars;
+    const { oT: getObjectType, aF: asArray, hP: hasOwnProperty, gS: localStorages } = customFuntions;
     const GMversion = GMinfo.version ?? GMinfo.scriptHandlerVersion ?? "unknown";
     const GMscriptHandler = GMinfo.scriptHandler;
     const GMsetValue = gmSelector("setValue");
@@ -355,6 +353,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
 
     /* INITIALIZE_COMMON_CONSTANTS */
 
+    const { pT: CUR_PROTOCOL, hN: CUR_HOST_NAME, pN: CUR_PATH_NAME, iT: CUR_WINDOW_TOP } = getLocationInfo();
     const def = {
       count: { clickTimer: 0, duplicate: 0 },
       const: {
@@ -375,17 +374,17 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
         searchbox: generateRandomString(7, "mix"),
       },
       var: {
-        disappear: "ͽXa40C9nͼ",
-        translucent: "ͼmD9X3jsͽ",
+        disappear: "ͽoFgZM8trͼ",
+        translucent: "ͼn8IoLXdgͽ",
         securityPolicy: false,
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.09.07.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.10.05.0",
         scriptName: getMetaValue(`name:${getLocalLanguages()}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       },
       url: {
         yandexIcon: decrypt("aHR0cHMlM0ElMkYlMkZmYXZpY29uLnlhbmRleC5uZXQlMkZmYXZpY29uJTJGdjI="),
         backupIcon: decrypt("aHR0cHMlM0ElMkYlMkZzMjEuYXgxeC5jb20lMkYyMDI0JTJGMDYlMkYzMCUyRnBrY1VWbWoucG5n"),
         feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? decrypt("aHR0cHMlM0ElMkYlMkZnaXRodWIuY29tJTJGRjl5NG5nJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJGaXNzdWVz"),
-        homepage: getMetaValue("homepage") ?? getMetaValue("homepageURL") ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcuZ2l0aHViLmlvJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJG"),
+        homepage: getMetaValue("homepageURL") ?? GMinfo.script.homepage ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcuZ2l0aHViLmlvJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJG"),
       },
       notice: {
         rName: generateRandomString(8, "char"),
@@ -432,7 +431,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
     class RAF {
       constructor(context) {
         if (RAF.instance) return RAF.instance;
-        this.global = context;
+        this.context = context;
         this._registerAnimationFrame(context);
         this.timerMap = { timeout: {}, interval: {} };
         this.setTimeout = this.setTimeout.bind(this);
@@ -442,45 +441,19 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
         RAF.instance = this;
       }
       _registerAnimationFrame(scope) {
-        scope[def.const.raf] =
-          scope.requestAnimationFrame ||
-          scope.webkitRequestAnimationFrame ||
-          scope.mozRequestAnimationFrame ||
-          scope.oRequestAnimationFrame ||
-          (function () {
-            const animationStartTime = Date.now();
-            let previousCallTime = animationStartTime;
-            return function requestAnimationFrame(callback) {
-              const requestTime = Date.now();
-              const timeout = Math.max(0, 16.7 - (requestTime - previousCallTime));
-              const timeToCall = requestTime + timeout;
-              previousCallTime = timeToCall;
-              return setTimeout(function onAnimationFrame() {
-                callback(timeToCall - animationStartTime);
-              }, timeout);
-            };
-          })();
-        scope[def.const.caf] =
-          scope.cancelAnimationFrame ||
-          scope.webkitCancelAnimationFrame ||
-          scope.mozCancelAnimationFrame ||
-          scope.oCancelAnimationFrame ||
-          scope.cancelRequestAnimationFrame ||
-          scope.webkitCancelRequestAnimationFrame ||
-          scope.mozCancelRequestAnimationFrame ||
-          scope.oCancelRequestAnimationFrame ||
-          function cancelAnimationFrame(id) {
-            clearTimeout(id);
-          };
+        const vendor = ["ms", "moz", "webkit", "o"].Find(vendor => scope[`${vendor}RequestAnimationFrame`]);
+        const raf = scope.requestAnimationFrame ?? scope[`${vendor}RequestAnimationFrame`];
+        const caf = scope.cancelAnimationFrame ?? (scope[`${vendor}CancelAnimationFrame`] || scope[`${vendor}CancelRequestAnimationFrame`]);
+        Object.assign(scope, { [def.const.raf]: raf, [def.const.caf]: caf });
       }
-      _ticking(fn, type, interval, ...args) {
-        let lastTime = Date.now();
+      _ticking(fn, type, interval = 0, ...args) {
+        let lastTime = performance.now();
         const timerSymbol = Symbol(type);
         const step = () => {
           this._setTimerMap(timerSymbol, type, step);
-          if (interval < 16.7 || Date.now() - lastTime >= interval) {
+          if (interval < 16.7 || performance.now() - lastTime >= interval) {
             if (typeof fn === "function") fn(...args);
-            if (type === "interval") lastTime = Date.now();
+            if (type === "interval") lastTime = performance.now();
             else this.clearTimeout(timerSymbol);
           }
         };
@@ -488,10 +461,10 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
         return timerSymbol;
       }
       _setTimerMap(timerSymbol, type, step) {
-        this.timerMap[type][timerSymbol] = this.global[def.const.raf](step);
+        this.timerMap[type][timerSymbol] = this.context[def.const.raf](step);
       }
       _clearTimerMap(timer, type) {
-        this.global[def.const.caf](this.timerMap[type][timer]);
+        this.context[def.const.caf](this.timerMap[type][timer]);
         delete this.timerMap[type][timer];
       }
       setTimeout(fn, interval, ...args) {
@@ -529,16 +502,16 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
     }
 
     function __console(action, message = "", ...args) {
-      const _ = this ?? console;
-      const commands = {
+      const consoleMethods = {
         log: ["log", "%c\ud83d\udd33 %c", "display:inline-block", "font-family:ui-monospace,monospace"],
         error: ["error", "%c\ud83d\udea9 ", "display:inline-block;font-family:ui-monospace,monospace"],
         warn: ["warn", "%c\ud83d\udea9 ", "display:inline-block;font-family:ui-monospace,monospace"],
         count: ["count", "\ud83d\udd33 "],
       };
-      if (!commands[action]) return _.log(message, ...args);
-      const [name, prefix, ...surfix] = commands[action];
-      return _[name](prefix + message, ...[...surfix, ...args]);
+      const [consoleMethod, _] = [consoleMethods[action], this ?? console];
+      if (!consoleMethod) return _.log(message, ...args);
+      const [method, prefix, ...surfix] = consoleMethod;
+      return _[method](prefix + message, ...surfix, ...args);
     }
 
     function checkLocalChineseLanguage() {
@@ -557,7 +530,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
 
     function qA(expr, target = document) {
       try {
-        return aSlice.call(target.querySelectorAll(expr), 0);
+        return asArray(target.querySelectorAll(expr));
       } catch (e) {
         return [];
       }
@@ -570,7 +543,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
 
     function cE(nodeName, attributes = {}) {
       const el = document.createElement(nodeName);
-      if (obj2Str.call(attributes) !== "[object Object]") return el;
+      if (getObjectType(attributes) !== "[object Object]") return el;
       for (const [key, value] of setIterator(attributes)) {
         if (key === "class") Array.isArray(value) ? el.classList.add(...value) : el.classList.add(value);
         else if (["innerHTML", "textContent"].includes(key)) el[key] = value;
@@ -583,9 +556,9 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
       return Math[type]((global.crypto.getRandomValues(new Uint32Array(1))[0] / (0xffffffff + 1)) * range);
     }
 
-    function gCS(target, opt = null) {
-      if (target instanceof Element) return getComputedStyle(target, opt);
-      return new Proxy({}, { get: () => "" });
+    function gCS(node, opt = null) {
+      if (node?.nodeType !== Node.ELEMENT_NODE) return new Proxy(Object.create(null), { get: () => NaN });
+      return global.getComputedStyle(node, opt);
     }
 
     function capitalize(string) {
@@ -631,8 +604,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
         hex: "a62f8bc07bd15c9ad3efe4",
         digit: "3927154680",
       };
-      const prefix = "UKZJHQTRCSBFAYDMEVPXNWG";
-      const chars = characters[type];
+      const [prefix, chars] = ["UKZJHQTRCSBFAYDMEVPXNWG", characters[type]];
       const randomString = asArray({ length }, () => chars[random(chars.length, "floor")]).join("");
       return type === "mix" ? prefix[random(prefix.length, "floor")] + randomString.slice(1) : randomString;
     }
@@ -649,35 +621,32 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
 
     function createTrustedTypePolicy() {
       const defaultPolicy = { createHTML: string => string };
-      if (typeof global.trustedTypes?.createPolicy !== "function") return defaultPolicy;
+      if (!global.trustedTypes?.createPolicy) return defaultPolicy;
       const currentHostName = global.location.hostname;
       const whitelist = [{ host: "bing.com", policy: "rwflyoutDefault" }];
-      const matchingEntry = whitelist.Find(entry => currentHostName.endsWith(entry.host));
-      const policyName = matchingEntry ? matchingEntry.policy : "default";
+      const policyName = whitelist.Find(entry => currentHostName.endsWith(entry.host))?.policy ?? "default";
       return global.trustedTypes.createPolicy(policyName, defaultPolicy);
     }
 
     function checkRedundantScript(global) {
-      const { isTop: CUR_WINDOW_TOP } = getLocationInfo();
       const redundantScripts = global["gb-init-redundantcheck"];
+      const scriptRedundancyWarning = () => {
+        const scriptRedundanceText = `\ud83d\udea9 [Redundant Scripts]:\r\nFound redundant-installed scripts: ${def.var.scriptName}. please reload to troubleshoot the issue.`;
+        const troubleshoot = `\ufff8\ud83d\uded1 ${IS_CHN ? "发现冗余安装的脚本，点击排查！" : "Troubleshoot Redundant"}`;
+        CUR_WINDOW_TOP && GMregisterMenuCommand(troubleshoot, () => void (GMopenInTab(`${def.url.feedback}/117`, false) && refresh())) && __console("error", scriptRedundanceText);
+        return true;
+      };
       if (redundantScripts === true) return scriptRedundancyWarning();
       global["gb-init-redundantcheck"] = true;
       if (GMcontentMode) {
-        const redundantScriptsInfo = document.documentElement?.getAttribute("gb-init-rc");
+        const redundantScriptsInfo = document.documentElement.getAttribute("gb-init-rc");
         if (redundantScriptsInfo === "true") return scriptRedundancyWarning();
       }
-      document.documentElement?.setAttribute("gb-init-rc", true);
-      return false;
-
-      function scriptRedundancyWarning() {
-        if (!CUR_WINDOW_TOP) return true;
-        __console("error", `\ud83d\udea9 [Redundant Scripts]:\r\nFound redundant-installed scripts: ${def.var.scriptName}. please reload to troubleshoot the issue.`);
-        return GMregisterMenuCommand("\ufff8\ud83d\uded1 Found redundant scripts, reload!", refresh) || true;
-      }
+      if (Object.freeze(def.const)) document.documentElement.setAttribute("gb-init-rc", true);
     }
 
     async function getNavigatorInfo() {
-      const verifiedEngine = getRealBrowserEngine(global);
+      const creditEngine = getRealBrowserEngine(global);
       const userAgentData = await getUserAgentDataFromExtension(`${GMscriptHandler} ${GMversion}`);
       return userAgentData ? getGlobalInfoFromUAD(userAgentData) : getGlobalInfoFromUA(navigator.userAgent);
 
@@ -688,20 +657,20 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
         const engineMap = { Chrome: "Blink", Chromium: "Blink", Firefox: "Gecko", Safari: "WebKit" };
         const mapEnginePath = ({ brand, version }) => /^(Chrom(?:e|ium)|Firefox|Safari)$/i.test(brand) && `${brand}\r${version}`;
         const [engine, engineVersion] = uad.brands?.map(mapEnginePath).filter(Boolean)[0]?.split("\r") ?? [brand, brandVersion];
-        const engineInfo = { engine: engineMap[capitalize(engine)] ?? getEngineFromUA(navigator.userAgent), engineVersion: parseFloat(engineVersion) || 99, verifiedEngine };
-        const browserInfo = { brand: aSlice.call(brand?.split(/\s/) ?? [], -1)[0] ?? "Unknown", brandVersion: formatVersion(brandVersion), platform };
-        return { ...engineInfo, ...browserInfo, credit: uad.credit ?? null };
+        const engineInfo = { engine: engineMap[capitalize(engine)] ?? getEngineFromUA(navigator.userAgent), engineVersion: parseFloat(engineVersion) || 99, creditEngine };
+        const browserInfo = { brand: (brand?.split(/\s/) ?? []).slice(-1)[0] ?? "Unknown", brandVersion: formatVersion(brandVersion), platform };
+        return { ...engineInfo, ...browserInfo, source: uad.voucher ? "ext" : "uad", voucher: uad.voucher ?? null };
       }
 
       function getGlobalInfoFromUA(ua) {
         const checkString = (str, exp = "") => new RegExp(str, exp).test(ua);
-        const getVersion = (str, offset) => checkString(str) && ua.substring(ua.indexOf(str) + offset).match(/\d+(\.\d+)*/)?.[0];
+        const getVersion = (str, offset) => checkString(str) && ua.slice(ua.indexOf(str) + offset).match(/\d+(\.\d+)*/)?.[0];
         const { brand, brandVersion, engine, engineVersion } = getBrowserInfoFromUA(ua, checkString, getVersion);
         const platform = getOSInfoFromUA(checkString);
-        return { engine, engineVersion, verifiedEngine, brand, brandVersion, platform, credit: null };
+        return { engine, engineVersion, creditEngine, brand, brandVersion, platform, source: "ua", voucher: null };
       }
 
-      async function getUserAgentDataFromExtension(credit) {
+      async function getUserAgentDataFromExtension(voucher) {
         const getVMUserAgentData = async uad => {
           if (!uad) return null;
           const { brand, version, browserName, browserVersion, os, arch } = uad;
@@ -712,15 +681,15 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           ];
           if (GMinfo.userAgentData?.brands?.[0]) {
             try {
-              return { ...(await getUserAgentDataHighEntropyValues(GMinfo.userAgentData)), credit };
+              return { ...(await getUserAgentDataHighEntropyValues(GMinfo.userAgentData)), voucher };
             } catch (e) {
               brands = [...GMinfo.userAgentData.brands, ...brands];
             }
           }
-          return { bitness, architecture, brands, platform: capitalize(os), credit };
+          return { bitness, architecture, brands, platform: capitalize(os), voucher };
         };
-        const vmuad = GMscriptHandler === "Violentmonkey" ? await getVMUserAgentData(GMinfo.platform) : null;
-        const tmuad = GMscriptHandler === "Tampermonkey" && GMinfo.userAgentData ? { ...GMinfo.userAgentData, credit } : null;
+        const vmuad = voucher.startsWith("Violentmonkey") && GMinfo.platform ? await getVMUserAgentData(GMinfo.platform) : null;
+        const tmuad = voucher.startsWith("Tampermonkey") && GMinfo.userAgentData ? { ...GMinfo.userAgentData, voucher } : null;
         const uad = navigator.userAgentData?.brands?.[0] ? await getUserAgentDataHighEntropyValues(navigator.userAgentData) : null;
         return vmuad ?? tmuad ?? uad;
       }
@@ -779,7 +748,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
       }
 
       function getRealBrowserEngine(w) {
-        return w.GestureEvent ? "WebKit" : w.scrollByLines || w.getDefaultComputedStyle ? "Gecko" : w.webkitRequestFileSystem || w.navigation ? "Blink" : "Unknown";
+        return w.GestureEvent ? "WebKit" : w.scrollByLines || w.getDefaultComputedStyle ? "Gecko" : w.webkitRequestFileSystem || w.queryLocalFonts ? "Blink" : "Unknown";
       }
 
       function getEngineFromUA(ua) {
@@ -787,11 +756,10 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
       }
 
       function getUnregisteredBrandAndVersionFromUA(ua) {
-        const nameOffset = ua.lastIndexOf(" ") + 1;
-        const verOffset = ua.lastIndexOf("/");
+        const [nameOffset, verOffset] = [ua.lastIndexOf(" ") + 1, ua.lastIndexOf("/")];
         if (nameOffset === 0 || verOffset === -1 || verOffset < nameOffset) return { b: "Unknown", bv: "0.0.0.0", ev: 99 };
-        const brand = ua.substring(nameOffset, verOffset).trim();
-        const brandVersion = formatVersion(ua.substring(verOffset + 1).match(/\d*\.?\d+/)?.[0]);
+        const brand = ua.slice(nameOffset, verOffset).trim();
+        const brandVersion = formatVersion(ua.slice(verOffset + 1).match(/\d*\.?\d+/)?.[0]);
         const engineVersion = parseFloat(ua.match(/(Chrom(?:e|ium)|Firefox|Version)\/(\d+(?:\.\d+)*)/i)?.[2] || brandVersion || 99);
         const validVersion = (!/version|\/|\(|\)|;/i.test(brand) && brandVersion) || "0.0.0.0";
         return { b: brand, bv: validVersion, ev: engineVersion };
@@ -805,18 +773,9 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
     }
 
     function getLocationInfo() {
-      const { pathname, host, hostname, protocol } = global.location;
-      const isTop = global.self === global.top;
-      const parentHost = global.parent !== global.self ? getParentHost() : host;
-      return { host, hostname, pathname, protocol, parentHost, isTop };
-
-      function getParentHost() {
-        try {
-          return global.parent.location.host;
-        } catch (e) {
-          return new URL(document.referrer || global.location).host;
-        }
-      }
+      const { host: h, hostname: hN, pathname: pN, protocol: pT } = global.location;
+      const iT = global.self === global.top;
+      return { h, hN, pN, pT, iT };
     }
 
     function getMetaValue(str) {
@@ -847,75 +806,41 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
       return promiseFunction;
     }
 
-    function deBounce({ fn, delay = 0, timer, immed = false, once = false } = {}) {
+    function deBounce({ fn, timer, delay, immed = false, once = false } = {}) {
       if (typeof fn !== "function" || !timer) return () => {};
-      let caller = 0;
-      const threshold = immed ? 1 : 0;
-      return function () {
-        const context = this;
-        const args = arguments;
-        const name = Symbol.for(toString(timer));
+      return function (...args) {
+        const [name, context] = [Symbol.for(toString(timer)), this];
         if (immed === true && typeof def.count[name] === "undefined") {
           fn.apply(context, args);
           if (once === true) return (def.count[name] = true);
-        } else {
-          if (once === true && def.count[name] === true) return true;
+        } else if (def.count[name]) {
+          if (def.count[name] === true) return true;
           raf.clearTimeout(def.count[name]);
-          caller++;
         }
         def.count[name] = raf.setTimeout(() => {
-          if (caller > threshold) {
-            fn.apply(context, args);
-            if (once === true) return (def.count[name] = true);
-          }
+          fn.apply(context, args);
+          if (once === true) return (def.count[name] = true);
           delete def.count[name];
         }, Number(delay) || 0);
       };
     }
 
-    function safeRemove(expr, scope) {
-      let removedNodes = [];
-      let pendingNodes = [];
-      switch (typeof expr) {
-        case "string":
-          if (!expr) return false;
-          pendingNodes = qA(expr, scope);
-          pendingNodes.forEach(item => void removeNode(item));
-          break;
-        case "object":
-          if (expr?.nodeType !== Node.ELEMENT_NODE) return false;
-          pendingNodes.push(expr);
-          removeNode(expr);
-          break;
-        default:
-          ERROR("Element not exist!");
-          return false;
-      }
-      return removedNodes.length === pendingNodes.length;
-
-      function removeNode(item) {
-        try {
-          removedNodes.push(item.parentNode.removeChild(item));
-        } catch (e) {
-          removedNodes.push(item);
-          item.remove();
-        }
-      }
+    function safeRemoveNode(expression, scope) {
+      if (!expression) return false;
+      const pendingNodes = Array.isArray(expression) ? expression : typeof expression === "string" ? qA(expression, scope) : expression?.nodeType ? [expression] : [];
+      return pendingNodes.every(el => el.remove() || el.parentNode === null);
     }
 
     function createNoticeHTML(html) {
       return `<div class="${def.notice.rName}"><dl>${html}</dl></div>`;
     }
 
-    void (async function (tTP, requestEnvironmentConstants) {
-      const { navigatorInfo, locationInfo } = await requestEnvironmentConstants();
-      const { engine, verifiedEngine, brand, credit } = navigatorInfo;
-      const { protocol: CUR_PROTOCOL, hostname: CUR_HOST_NAME, pathname: CUR_PATH_NAME, isTop: CUR_WINDOW_TOP } = locationInfo;
-      const IS_REAL_BLINK = verifiedEngine === "Blink";
-      const IS_REAL_GECKO = verifiedEngine === "Gecko";
-      const IS_REAL_WEBKIT = verifiedEngine === "WebKit";
-      const IS_CHEAT_UA = !credit && (engine !== verifiedEngine || checkBlinkCheatingUA());
-      const IS_GREASEMONKEY = GMscriptHandler === "Greasemonkey";
+    void (async function (tTP) {
+      const [CONFIGURE, VERSION, AUTOCHECK, RESULTFILTER, REMOTEICONS] = ["_configures_", "_version_", "_autoupdate_", "_resultFilter_", "_remoteicons_"];
+      const { engine, creditEngine, brand, voucher } = await getNavigatorInfo();
+      const [IS_REAL_BLINK, IS_REAL_GECKO, IS_REAL_WEBKIT] = ["Blink", "Gecko", "WebKit"].map(cE => cE === creditEngine);
+      const IS_CHEAT_UA = voucher === null && (engine !== creditEngine || checkBlinkCheatingUA(navigator.userAgentData));
+      const IS_GREASEMONKEY = ["Greasemonkey", "Userscripts"].includes(GMscriptHandler);
 
       const cache = {
         value: (data, eT = 6048e5) => ({ data, expired: Date.now() + eT }),
@@ -963,8 +888,8 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           const closetNode = item.closest(`.${def.notice.noticeX}`);
           const position = closetNode?.className.match(/\b(\w+-\w+)\b/)?.[1] || `${def.notice.noticeX}-topRight`;
           return sleep(3e2)
-            .then(() => safeRemove(item))
-            .then(() => qA(`.${position} .${def.notice.item}`).length === 0 && safeRemove(`.${position}`));
+            .then(() => safeRemoveNode(item))
+            .then(() => qA(`.${position} .${def.notice.item}`).length === 0 && safeRemoveNode(`.${position}`));
         }
         show() {
           this._createContainer();
@@ -1053,8 +978,8 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           this._executeCallbacks("beforeClose");
           sleep(3e2)
             .then(() => this._executeCallbacks("onClose"))
-            .then(() => safeRemove(item))
-            .then(() => qA(`.${position} .${def.notice.item}`).length === 0 && safeRemove(`.${position}`))
+            .then(() => safeRemoveNode(item))
+            .then(() => qA(`.${position} .${def.notice.item}`).length === 0 && safeRemoveNode(`.${position}`))
             .then(() => this._executeCallbacks("afterClose"));
         }
         _executeCallbacks(eventName) {
@@ -1072,24 +997,22 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
         }
       }
 
-      function checkBlinkCheatingUA() {
-        if (typeof NavigatorUAData === "undefined") return false;
-        if (CUR_PROTOCOL === "https:" && !navigator.userAgentData) return true;
-        return Boolean(navigator.userAgentData) && !(navigator.userAgentData instanceof NavigatorUAData); // eslint-disable-line no-undef
+      function checkBlinkCheatingUA(uad) {
+        if (!IS_REAL_BLINK) return false;
+        return (global.isSecureContext && !uad) || (uad && toString(uad) !== "[object NavigatorUAData]");
       }
 
-      function insertAfter(newElem, targetElem) {
-        if (!newElem || !targetElem) return;
-        const parentElem = targetElem.parentNode || document.head;
-        if (parentElem.lastChild === targetElem) parentElem.appendChild(newElem);
-        else parentElem.insertBefore(newElem, targetElem.nextSibling);
+      function insertAfter(newEl, target) {
+        if (!newEl || !target) return;
+        const parent = target.parentNode || document.head;
+        parent.insertBefore(newEl, target.nextSibling);
       }
 
       function addStyle({ target, styleId, styleContent, media, isOverwrite }) {
         if (!target || !styleId || !styleContent || !media) return;
         let existingStyles = qA(`#${styleId}`, target);
         if (existingStyles.length > 0) {
-          if (isOverwrite === true) existingStyles.forEach(style => void safeRemove(style));
+          if (isOverwrite === true) safeRemoveNode(existingStyles);
           else return true;
         }
         try {
@@ -1104,7 +1027,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
 
       function getUrlParam(parameter) {
         try {
-          switch (obj2Str.call(parameter)) {
+          switch (getObjectType(parameter)) {
             case "[object Object]": {
               const { split, index } = parameter;
               const keyArray = global.location.pathname.split(split);
@@ -1152,9 +1075,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
         let [_config_date_, _filter_Data_] = await Promise.all([getConfigureData(), getResultFilterData()]);
         let { isAutoUpdate, keywordHighlight, isHotkey, selectedEngine, localWindow, googleJump, antiLinkRedirect, antiAds, customColor } = _config_date_;
         const { trigger: antiResultsFilter, filter: resultFilters } = _filter_Data_;
-        const cachedRequestLinks = antiLinkRedirect ? new Map() : null;
-        const usedFilterWords = antiResultsFilter ? new Set() : null;
-        const selectedSite = [];
+        const [cachedRequestLinks, usedFilterWords, selectedSite] = [antiLinkRedirect ? new Map() : null, antiResultsFilter ? new Set() : null, []];
 
         /* ANTIREDIRECT_FUNCTIONS */
 
@@ -1211,15 +1132,9 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
         }
 
         function fetchData(url, resolve, reject, readystate, error, timeout) {
-          GMxmlhttpRequest({
-            url: url,
-            headers: { Accept: "*/*", Referer: global.location.origin.replace(/^http:/i, "https:") },
-            method: "GET",
-            timeout: 25e3,
-            onreadystatechange: readystate(resolve, reject),
-            onerror: error(reject, resolve),
-            ontimeout: timeout(reject),
-          });
+          const headers = { Accept: "*/*", Referer: global.location.origin.replace(/^http:/i, "https:") };
+          const [onreadystatechange, onerror, ontimeout] = [readystate(resolve, reject), error(reject, resolve), timeout(reject)];
+          GMxmlhttpRequest({ url, headers, method: "GET", timeout: 25e3, onreadystatechange, onerror, ontimeout });
         }
 
         async function getRealUrl(url, node, name, { onreadystatechangeFunc, onerrorFunc, ontimeoutFunc }) {
@@ -1325,9 +1240,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           if (/^2\d\d$/.test(response.status)) {
             if (response.statusText === "Intercepted by the IDM Advanced Integration") reportIDMHijacking();
             resolve(resUrl);
-          } else if (response.status !== 0) {
-            resUrl === url ? reject(new Error("ResponseError")) : resolve(resUrl);
-          }
+          } else if (response.status !== 0) resUrl === url ? reject(new Error("ResponseError")) : resolve(resUrl);
         }
 
         function getBingDecodeURI(url) {
@@ -1425,7 +1338,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               qA("div[class='Z26q7c UK95Uc']:not([data-content-feature])").forEach(node => {
                 if (qS("div[id^='eob']", node)) {
                   node.classList.add(def.var.disappear);
-                  clean === true && safeRemove(node);
+                  clean === true && safeRemoveNode(node);
                 }
               });
             }
@@ -1440,7 +1353,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                 const _moz_adsTxtNode = qS(".Organic-Subtitle>.Organic-Path~span", node);
                 if (/^(ad|[РекламPeknam]{7})$/i.test(_moz_adsTxtNode?.textContent || adsTxtNode?.textContent)) {
                   node.classList.add(def.var.disappear);
-                  clean === true && safeRemove(node);
+                  clean === true && safeRemoveNode(node);
                 }
               });
             }
@@ -1452,7 +1365,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                 const ads = qS("span[class='txt']>s", node);
                 if (!ads?.textContent?.includes("\u5e7f\u544a") && !qS("div.res-recommend-tag", node)) return;
                 node.classList.add(def.var.disappear);
-                clean === true && safeRemove(node);
+                clean === true && safeRemoveNode(node);
               });
             }
           },
@@ -1463,7 +1376,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                 const ads = qS("div>div>span[class^='sc-']", node);
                 if (!ads?.textContent?.toLowerCase().includes("ad")) return;
                 node.classList.add(def.var.disappear);
-                clean === true && safeRemove(node);
+                clean === true && safeRemoveNode(node);
               });
             }
           },
@@ -1478,7 +1391,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               qA(".web-results>article").forEach(node => {
                 if (!qS(".site>a.ad", node)) return;
                 node.classList.add(def.var.disappear);
-                clean === true && safeRemove(node);
+                clean === true && safeRemoveNode(node);
               });
             }
           },
@@ -1491,7 +1404,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               const cssText = `:root :is(${selectors}){display:none!important}`;
               addStyle({ target: document.head, styleId: def.const.rndadvName, media: "all", styleContent: cssText });
             }
-            isRemoveNodes === true && qA(selectors).forEach(node => safeRemove(node));
+            isRemoveNodes === true && safeRemoveNode(selectors);
           }
           AdvancedAntiAdvertising(siteName, isRemoveNodes);
         }
@@ -1508,28 +1421,23 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
 
         /* PRELOAD_FUNCTIONS */
 
-        async function fetchUpdateResponse(url) {
+        async function fetchUpdateResponse(url, timeout = 1e4) {
           try {
             return await new Promise((resolve, reject) => {
-              GMxmlhttpRequest({
-                url: url,
-                nocache: true,
-                headers: { Accept: "*/*", Referer: url },
-                method: "GET",
-                timeout: 1e4,
-                onreadystatechange: response_1 => {
-                  if (response_1.readyState !== 4) return;
-                  if (response_1.status === 200) {
-                    const res = response_1.responseText || response_1.response;
-                    resolve({ res, url });
-                  } else reject(new Error("NoAccessError"));
-                },
-                onerror: () => reject(new Error("NetworkError")),
-                ontimeout: () => reject(new Error("TimeoutError")),
-              });
+              const headers = { Accept: "*/*", Referer: url };
+              const onreadystatechange = response => {
+                if (response.readyState !== 4) return;
+                if (response.status === 200) {
+                  const res = response.responseText || response.response;
+                  resolve({ res, url });
+                } else reject(new Error("NoAccessError"));
+              };
+              const onerror = () => reject(new Error("NetworkError"));
+              const ontimeout = () => reject(new Error("TimeoutError"));
+              GMxmlhttpRequest({ url, headers, method: "GET", nocache: true, timeout, onreadystatechange, onerror, ontimeout });
             });
           } catch (e) {
-            return await Promise.reject(ERROR("fetchUpdateResponse:", e.message));
+            throw new Error(`fetchUpdateResponse: ${e.message}`);
           }
         }
 
@@ -1537,11 +1445,11 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           if (!CUR_WINDOW_TOP) return;
           let iconDataURL = null;
           try {
-            const iconBase64Data = await cache.get("_remoteicons_");
+            const iconBase64Data = await cache.get(REMOTEICONS);
             if (!iconBase64Data || setDebuggerMode()) {
               DEBUG("%cRequest remote icon data.", "color:#dc143c");
               iconDataURL = await requestRemoteIcon(remoteURL);
-              iconDataURL && cache.set("_remoteicons_", iconDataURL, 2592e6);
+              iconDataURL && cache.set(REMOTEICONS, iconDataURL, 2592e6);
             } else {
               DEBUG("%cGet localCache icon data.", "color:#006400");
               iconDataURL = iconBase64Data;
@@ -1619,7 +1527,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               imageType: ["images"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: `.b_searchboxForm>input[type="hidden"][name="form"]`,
-              buttonCssText: `.${def.const.searchbox}{border-radius:8px!important}a,#b_results>li[class] a:not(.wiki_seemore),#b_results .b_no a,#b_context .mediumCardTitle{color:#001ba0}#${def.const.rndButtonID}{position:relative;z-index:0;display:inline-flex;margin:0;padding:0 6px 0 0;width:auto;height:38px;min-width:180px;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.leftButton},#${def.const.rightButton}{margin:0;padding:0;width:auto}#${def.const.rndButtonID} input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:600;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px;border-bottom-left-radius:24px;border-top-left-radius:24px}#${def.const.rightButton} input{margin:0 0 0 2px;padding:0 18px 0 12px;border-top-right-radius:24px;border-bottom-right-radius:24px}.${def.const.scrollspan}{margin:-14px -3px 0 0!important;max-height:28px}.${def.const.scrollbars}{max-height:28px;font-size:14px!important}.${def.const.scrollspan2}{margin:0!important;padding:4px 4px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars2}{margin-right:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#fff;background-color:#f0f3f6;box-shadow:0 0 4px #174ae4;color:#174ae4;transition:border .1s linear,box-shadow .3s linear}.${def.notice.random}_input{width:300px!important}@media (prefers-color-scheme: dark){.b_dark #b_results>li[class] a{color:#7aabeb}#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#a2b7f4;color:#333}}`,
+              buttonCssText: `.${def.const.searchbox}{border-radius:8px!important}a,#b_results>li[class] a:not(.wiki_seemore),#b_results .b_no a,#b_context .mediumCardTitle{color:#001ba0}#${def.const.rndButtonID}{position:relative;z-index:0;display:inline-flex;margin:0;padding:0 6px 0 0;width:auto;height:38px;min-width:180px;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.leftButton},#${def.const.rightButton}{margin:0;padding:0;width:auto}#${def.const.rndButtonID} input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:600;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px;border-bottom-left-radius:24px;border-top-left-radius:24px}#${def.const.rightButton} input{margin:0 0 0 2px;padding:0 18px 0 12px;border-top-right-radius:24px;border-bottom-right-radius:24px}.${def.const.scrollspan}{/*margin:-14px -3px 0 0!important;max-height:28px*/}.${def.const.scrollbars}{/*max-height:28px;font-size:14px!important*/}.${def.const.scrollspan2}{margin:0!important;padding:4px 4px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars2}{margin-right:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#fff;background-color:#f0f3f6;box-shadow:0 0 4px #174ae4;color:#174ae4;transition:border .1s linear,box-shadow .3s linear}.${def.notice.random}_input{width:300px!important}@media (prefers-color-scheme: dark){.b_dark #b_results>li[class] a{color:#7aabeb}#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#a2b7f4;color:#333}}`,
               resultListProp: { qs: `#b_results>li.b_algo:not(.b_algoBorder,.b_topborder),#b_results>li.b_vidAns .mmlist>div[id],#b_results>li.b_mop .b_slidebar>div.slide`, delay: 10 },
               keywords: String(
                 Number(getUrlParam("ensearch")) || Number(global.gbCookies.getItem("ENSEARCH")?.match(/[=](\d)/)?.[1])
@@ -1677,9 +1585,9 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               siteHostName: "www.sogou.com",
               webURL: "https://www.sogou.com/web?query=",
               imageURL: "https://pic.sogou.com/pics?query=",
-              imageType: ["pics", "d"],
+              imageType: ["pics", "d", "v"],
               splitTypeName: { split: "/", index: 1 },
-              mainSelector: "input[type='submit'].sbtn1,input[type='button'][uigs='search_article'],input[type='submit'].search-btn",
+              mainSelector: "input#searchBtn,input[type='button'][uigs='search_article'],input[type='submit']:is(.search-btn,.sbtn1)",
               buttonCssText: `#${def.const.rndButtonID}{position:absolute;top:0;right:0;z-index:1999999995;margin:-1px 0 0;padding:0;width:auto;height:39px;cursor:pointer;-webkit-appearance:none}#${def.const.rndButtonID} *{-webkit-text-stroke:0 transparent!important}#${def.const.leftButton}{display:inline;height:39px}#${def.const.rightButton}{display:inline;height:39px}#${def.const.leftButton} input{margin:0;padding:0 18px!important;height:39px;min-width:100px;border:2px solid #222;border-radius:12px;background:#f5f5f5;color:#000;vertical-align:top;font-weight:500;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 18px!important;height:39px;min-width:100px;border:2px solid #222;border-radius:12px;background:#f5f5f5;color:#000;vertical-align:top;font-weight:500;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:2px solid #205aef;background:#e9f2ff;color:#205aef}.${def.notice.random}_images{height:34px!important;border:1px solid #ababab!important;border-radius:3px!important;background:##fafafa!important}.${def.notice.random}_weixin{height:34px!important;border:1px solid #00a06a!important;border-radius:2px!important;background:#fff!important;color:#00a06a!important;font-size:15px!important}.${def.notice.random}_weixin:hover{background:#f7fffd!important}`,
               resultListProp: { qs: `div.results>div.vrwrap,div.results>div.rb`, delay: 10 },
               keywords: "#wrapper em",
@@ -1707,7 +1615,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               imageType: ["images"],
               splitTypeName: "t",
               mainSelector: "form[data-testid='mainSearchBar']",
-              buttonCssText: `#${def.const.rndButtonID}{position:absolute;top:0;right:0;z-index:1999999995;display:block;height:48px}#${def.const.leftButton}{display:inline-block;height:48px}#${def.const.rightButton}{display:inline-block;margin:0 0 0 -2px;height:48px}#${def.const.leftButton} input{margin:0;padding:1px 10px 1px 15px!important;height:48px;min-width:100px;border:1px solid var(--color-border-secondary);border-bottom-left-radius:var(--border-radius-300);border-top-left-radius:var(--border-radius-300);background:transparent;box-shadow:0 2px 3px rgba(0, 0, 0, 0.06);color:var(--color-text-primary);vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:1px 15px 1px 10px!important;height:48px;min-width:100px;border:1px solid var(--color-border-secondary);border-top-right-radius:var(--border-radius-300);border-bottom-right-radius:var(--border-radius-300);background:transparent;box-shadow:0 2px 3px rgba(0, 0, 0, 0.06);color:var(--color-text-primary);vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:var(--color-background-neutral-tertiary-hovered)}`,
+              buttonCssText: `#${def.const.rndButtonID}{position:absolute;top:0;right:0;z-index:1999999995;display:block;height:48px}#${def.const.leftButton}{display:inline-block;height:48px}#${def.const.rightButton}{display:inline-block;margin:0;height:48px}#${def.const.leftButton} input{box-sizing:content-box;margin:1px 0;padding:0 6px 0 12px!important;height:48px;min-width:100px;box-shadow:var(--shadow-searchbar-elevation);transition:box-shadow var(--motion-duration-200) var(--motion-ease), color var(--motion-duration-300) var(--motion-ease), background-color var(--motion-duration-300) var(--motion-ease);border-bottom-left-radius:var(--border-radius-300);border-top-left-radius:var(--border-radius-300);background-color:var(--color-elevation-surface-elevation);color:var(--color-text-primary);vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{box-sizing:content-box;margin:1px 0;padding:0 12px 0 6px!important;height:48px;min-width:100px;box-shadow:var(--shadow-searchbar-elevation);transition:box-shadow var(--motion-duration-200) var(--motion-ease), color var(--motion-duration-300) var(--motion-ease), background-color var(--motion-duration-300) var(--motion-ease);border-top-right-radius:var(--border-radius-300);border-bottom-right-radius:var(--border-radius-300);background-color:var(--color-elevation-surface-elevation);color:var(--color-text-primary);vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:var(--color-elevation-surface-raised);box-shadow:var(--shadow-searchbar-raised);}`,
               resultListProp: { qs: `div[data-testid="containerWeb"] div[data-testid="sectionWeb"]>div>div`, delay: 10 },
               keywords: "mark",
               antiRedirectFn: null,
@@ -1860,7 +1768,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               imageType: ["images"],
               splitTypeName: () => CUR_HOST_NAME.split(".").slice(-4, -3)[0],
               mainSelector: "#hd div.sbx form#sf,header.hd form#sf #sh section#sbx",
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;position:absolute;z-index:1999999995;display:inline-block;margin-left:4px;width:max-content;height:44px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:44px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:44px}#${def.const.leftButton} input{margin:2px 0;padding:1px 12px 1px 18px!important;height:44px;min-width:100px;border:2px solid transparent;border-bottom-left-radius:100px;border-top-left-radius:100px;background:#7e1fff;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:2px 0;padding:1px 18px 1px 12px!important;height:44px;min-width:100px;border:2px solid transparent;border-top-right-radius:100px;border-bottom-right-radius:100px;background:#7e1fff;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:2px solid transparent;background:#6001d2;color:#fff}`,
+              buttonCssText: `#${def.const.rndButtonID}{position:relative;position:absolute;z-index:1999999995;display:inline-block;margin-left:4px;width:max-content;height:44px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:44px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:44px}#${def.const.leftButton} input{box-sizing:content-box;margin:0;padding:0 3px 0 6px!important;height:44px;min-width:100px;border:1px solid transparent;border-bottom-left-radius:100px;border-top-left-radius:100px;background:#7e1fff;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{box-sizing:content-box;margin:0;padding:0 6px 0 3px!important;height:44px;min-width:100px;border:1px solid transparent;border-top-right-radius:100px;border-bottom-right-radius:100px;background:#7e1fff;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid transparent;background:#6001d2;color:#fff}`,
               resultListProp: { qs: `#web>ol>li`, delay: 10 },
               keywords: "strong",
               antiRedirectFn: function () {
@@ -1955,7 +1863,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               imageType: ["images"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: ".searchform-container[data-testid='searchform-container']",
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:0 0 0 10px;padding:0;width:max-content;height:var(--search-form-height)}.${def.const.scrollspan},.${def.const.scrollbars}{height:var(--floating-header-search-form-height)!important}.${def.const.scrollbars}{border-radius:var(--border-radius-l)!important;box-shadow:none!important}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.rightButton},#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:100%}#${def.const.leftButton} input{margin:0;padding:0 20px!important;height:var(--search-form-height);min-width:95px;border:0;outline:1px solid var(--color-serp-divider-subtle-container);box-shadow:var(--elevation-02);border-bottom-left-radius:var(--border-radius-xl);border-top-left-radius:var(--border-radius-xl);background:var(--color-serp-bar-bg);color:var(--color-text-primary);vertical-align:top;font-weight:600;font-size:16px!important;line-height:16px;box-sizing:border-box;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 20px!important;height:var(--search-form-height);min-width:95px;border:0;outline:1px solid var(--color-serp-divider-subtle-container);box-shadow:var(--elevation-02);border-top-right-radius:var(--border-radius-xl);border-bottom-right-radius:var(--border-radius-xl);background:var(--color-serp-bar-bg);color:var(--color-text-primary);vertical-align:top;font-weight:600;font-size:16px!important;line-height:16px;box-sizing:border-box;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{color:var(--color-primitive-white, #fff);background:linear-gradient(314deg,#fa7250 8.49%,#ff1893 43.72%,#a78aff 99.51%);}`,
+              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:0 0 0 10px;padding:0;width:max-content;height:var(--search-form-height)}.${def.const.scrollspan},.${def.const.scrollbars}{height:var(--search-form-height-compact)!important}.${def.const.scrollbars}{border-radius:var(--border-radius-l)!important;box-shadow:none!important}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.rightButton},#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:100%}#${def.const.leftButton} input{margin:0;padding:0 20px!important;height:var(--search-form-height);min-width:95px;border:0;outline:1px solid var(--color-serp-divider-subtle-container);box-shadow:var(--elevation-02);border-bottom-left-radius:var(--border-radius-xl);border-top-left-radius:var(--border-radius-xl);background:var(--color-serp-bar-bg);color:var(--color-text-primary);vertical-align:top;font-weight:600;font-size:16px!important;line-height:16px;box-sizing:border-box;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 20px!important;height:var(--search-form-height);min-width:95px;border:0;outline:1px solid var(--color-serp-divider-subtle-container);box-shadow:var(--elevation-02);border-top-right-radius:var(--border-radius-xl);border-bottom-right-radius:var(--border-radius-xl);background:var(--color-serp-bar-bg);color:var(--color-text-primary);vertical-align:top;font-weight:600;font-size:16px!important;line-height:16px;box-sizing:border-box;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{color:var(--color-primitive-white, #fff);background:linear-gradient(314deg,#fa7250 8.49%,#ff1893 43.72%,#a78aff 99.51%);}`,
               resultListProp: { qs: `#results>div.snippet[data-type="web"]`, delay: 10 },
               keywords: `.snippet-content strong`,
               antiRedirectFn: function () {
@@ -2008,7 +1916,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               imageType: ["images"],
               splitTypeName: { split: "/", index: 2 },
               mainSelector: "form>.searchbar>button.erase",
-              buttonCssText: `#header .form-search{max-width:35em}#${def.const.rndButtonID}{position:absolute;top:0;z-index:112;display:block;margin:0;padding:0;height:48px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:2.5em}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:48px}#${def.const.leftButton} input{margin:0;padding:4px 12px!important;height:48px;min-width:95px;border:1px solid #bfc8cd;border-bottom-left-radius:24px;border-top-left-radius:24px;background:var(--button-primary-bg);box-shadow:0 0 2px #a4a5bb;color:var(--button-primary-color);vertical-align:middle;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:4px 12px!important;height:48px;min-width:95px;border:1px solid #bfc8cd;border-top-right-radius:24px;border-bottom-right-radius:24px;background:var(--button-primary-bg);box-shadow:0 0 2px #a4a5bb;color:var(--button-primary-color);vertical-align:middle;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--button-primary-bg-hover);color:var(--button-primary-color)}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #99a4ab;background:var(--button-primary-bg);color:#99a4ab}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--button-primary-bg-hover);color:var(--button-primary-color)}}`,
+              buttonCssText: `#header .form-search{max-width:35em}#${def.const.rndButtonID}{position:absolute;top:0;z-index:112;display:block;margin:0;padding:0;height:48px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:2.5em}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:48px}#${def.const.leftButton} input{box-sizing:content-box;margin:0;padding:0 2px 0 4px!important;height:48px;min-width:95px;border-width:0;border-bottom-left-radius:24px;border-top-left-radius:24px;background:var(--button-primary-bg);color:var(--button-primary-color);vertical-align:top;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{box-sizing:content-box;margin:0;padding:0 4px 0 2px!important;height:48px;min-width:95px;border-width:0;border-top-right-radius:24px;border-bottom-right-radius:24px;background:var(--button-primary-bg);color:var(--button-primary-color);vertical-align:top;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--button-primary-bg-hover);color:var(--button-primary-color)}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #eee;background:none;color:#eee;height:46px}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--button-primary-bg-hover);color:var(--button-primary-color)}}`,
               resultListProp: { qs: `.web-results>article.item`, delay: 10 },
               keywords: `.web-results b`,
               antiRedirectFn: function () {
@@ -2110,14 +2018,14 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
 
           const { currentSite, listCurrentSite } = findCurrentSite();
           const { currentSiteName, allSiteURIs } = updateSiteInformation();
-          const { backgroundColor: bgc, foregroundColor: fgc } = customColor;
+          const { backgroundColor: bgcolor, foregroundColor: fgcolor } = customColor;
           const updateDetectionAddress = getGlobalParameter() && getUpdateAddress();
           const yandexIconsAPIUrl = `${def.url.yandexIcon}/${allSiteURIs}?size=32&stub=1`;
           const iconBase64Data = await fetchAndCacheRemoteIcons(yandexIconsAPIUrl);
 
           /* DEFINE_GLOBAL_STYLES */
 
-          def.const.style = String(
+          def.var.style = String(
             `.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before {box-sizing:content-box;line-height:normal}.${def.notice.animated}{animation-duration:1s;animation-fill-mode:both}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.${def.notice.random}_fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.${def.notice.random}_fadeOut{animation-name:fadeOut}.${def.notice.appear}{display:block!important}.${def.notice.noticeX},.${def.notice.noticeX} *{text-shadow:none!important;font-family:Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:0 transparent!important}.${def.notice.noticeX}-top{top:0;width:100%}.${def.notice.noticeX}-top .${def.notice.item}{margin:0!important;border-radius:0!important}.${def.notice.noticeX}-topRight{top:10px;right:10px;z-index:2147483647!important}.${def.notice.noticeX}-topLeft{top:10px;left:10px}.${def.notice.noticeX}-topCenter{top:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX}-middleLeft,.${def.notice.noticeX}-middleRight{right:10px;top:50%;transform:translateY(-50%)}.${def.notice.noticeX}-middleLeft{left:10px}.${def.notice.noticeX}-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.${def.notice.noticeX}-bottom{bottom:0;width:100%}.${def.notice.noticeX}-bottom .${def.notice.item}{border-radius:0!important;margin:0!important}.${def.notice.noticeX}-bottomRight{bottom:10px;right:10px;z-index:2147483646!important}.${def.notice.noticeX}-bottomLeft{bottom:10px;left:10px}.${def.notice.noticeX}-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX} .${def.notice.item}{margin:0 0 10px;border-radius:6px;overflow:hidden}.${def.var.translucent} *{display:none!important}.${def.var.translucent} notice-label{display:block!important}.${def.var.disappear}{display:none!important}[gb-filter-notice]{display:block!important;margin:18px 0 28px 10px!important;padding:10px 2px!important;font:normal 400 14px/100% 'Times New Roman',system-ui,-apple-system,BlinkMacSystemFont,serif!important;-webkit-text-stroke:0 transparent!important;line-height:100%!important}gb-filters.code{display:block;margin:20px 0;word-break:break-word;font-size:12px!important}.${def.notice.noticeX} .${def.notice.item} .${def.notice.close}{float:right;margin-right:7px;color:#fff;text-shadow:0 1px 0 #fff;font-weight:700;font-size:18px!important;line-height:1;opacity:1}` +
               `.${def.notice.noticeX} .${def.notice.item} .${def.notice.close}:hover{color:#000;opacity:.5;cursor:pointer}.${def.notice.noticeX} .${def.notice.item} a{border-bottom:1px dashed #fff;color:#fff}.${def.notice.noticeX} .${def.notice.item} a,.${def.notice.noticeX} .${def.notice.item} a:hover{text-decoration:none}.${def.notice.noticeX} .${def.notice.success}{background-color:#64ce83!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-heading{padding:10px;background-color:#3da95c;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-body{padding:10px!important;color:#fff;}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.info}{background-color:#3ea2ff!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-heading{padding:10px;background-color:#067cea;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-body{padding:10px!important;color:#fff}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.warning}{background-color:#ff7f48!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#f97038;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-body{color:#fff;padding:10px}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.error}{background-color:#e74c3c!important}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#e93724;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-body{padding:10px;color:#fff}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-body:hover{visibility:visible!important}` +
               `.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.configuration} input[disabled],.${def.notice.configuration} select[disabled]{color:#bbb;background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:20px 20px!important;background-color:#fff7f7!important}.${def.notice.noticeX} .${def.notice.configuration}{background:linear-gradient(to right,#fcfcfc,#f2f2f7);background:-webkit-gradient(linear,0 0,0 100%,from(#fcfcfc),to(#f2f2f7));box-shadow:0 0 5px #888}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.close}{float:right;margin-right:7px;color:#000000;text-shadow:0 1px 0 #aaa;font-weight:700;font-size:18px!important;line-height:1;opacity:1}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.close}:hover{color:#555;opacity:.5;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#e7e7e7;color:#333;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-body{padding:10px;color:#333333}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.noticeX}-heading-title{display:inline-block;vertical-align:middle;overflow:hidden;max-width:90%;text-overflow:ellipsis;white-space:nowrap}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#64ce83}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#3da95c}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#3ea2ff}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#067cea;}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#ff7f48}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#f44e06}` +
@@ -2125,39 +2033,40 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               `.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} li{position:relative;margin:0 0 0 2px;padding:0 0 2px 2px;list-style:none;font-style:italic!important;line-height:150%;-webkit-transition:.12s;transition:.12s}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} li::before{display:inline-block;margin-left:-1.5em;width:1.5em;content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-size:14px;font-family:Candara,sans-serif;-webkit-transition:.5s;transition:.5s}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} #${def.notice.stopUpdate}{float:right;margin:0 5px!important;font-size:12px!important;cursor:help}.${def.const.loading}{position:relative;}.${def.const.loading}::after{content:" \u21ba";animation:fade 1.25s infinite;}@keyframes fade{0%{opacity:0.1}50%{opacity:0.5}to{opacity:0}}.${def.notice.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important;color:#999}#${def.notice.stopUpdate} input[type='checkbox']{box-sizing:content-box;margin:2px 4px 0 0;width:14px;height:14px;border:2px solid #fff;border-radius:50%;background:#ffa077;vertical-align:top;cursor:help;-webkit-appearance:none}#${def.notice.stopUpdate}:hover input,#${def.notice.stopUpdate} input:hover{background:#ba2c1d;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}{display:none!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label{position:relative;display:inline-block;-webkit-box-sizing:content-box;box-sizing:content-box;margin:0 0 0 25px;padding:11px 9px;width:58px;height:10px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245, 146, 146, 0.4);word-wrap:normal!important;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;-webkit-border-radius:7px;border-radius:7px;background:#fff;box-shadow:0 0 1px rgba(0, 0, 0, 0.6);color:#fff;content:" "}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label::after{position:absolute;top:2px;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;padding:5px;-webkit-border-radius:100px;border-radius:100px;color:#fff;content:"OFF";font-weight:700;font-size:14px}` +
               `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label{-webkit-box-sizing:content-box;box-sizing:content-box;margin:0 0 0 25px;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146, 196, 245, 0.4);cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label::after{top:2px;left:10px;content:"ON"}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}.${def.notice.noticeX} .${def.notice.configuration} button.${def.notice.searchButton}{display:flex;margin:0 0 10px;padding:6px 0;width:162px;height:25px;border:2px solid #eee;border-radius:6px;background:#fff;box-shadow:1px 1px 0 1px #aaa;font-size:14px!important;cursor:pointer;align-content:center;justify-content:center;align-items:center}.${def.notice.noticeX} .${def.notice.configuration} button.${def.notice.searchButton}:hover{box-shadow:1px 1px 3px 0 #888;color:#ff0000}.${def.notice.noticeX} .${def.notice.configuration} span.${def.notice.favicon}{margin:0 6px 0 0;width:24px;height:24px}.${def.notice.noticeX} .${def.notice.configuration} ul.${def.notice.searchList}{margin:5px;padding:2px;list-style:none}.${def.notice.noticeX} .${def.notice.configuration} ul.${def.notice.searchList} li{margin:0;list-style:none;font-style:normal}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.fieldset}{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;border:2px dashed #dfdfdf;border-radius:10px;background:transparent!important;text-align:left}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.legend}{display:block;margin:0;padding:0 8px;width:auto;color:#8b0000!important;font-weight:900!important;font-size:14px!important;-webkit-user-select:all;user-select:all}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList}{margin:0;padding:0;background:transparent!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li{float:none;display:flex;margin:3px 0;padding:2px 8px 2px 12px;height:36px;border:none;background:transparent!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none;align-content:center;justify-content:space-between}` +
               `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li>div{font:normal 700 14px/150% 'Microsoft YaHei UI',Helvetica Neue,sans-serif!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button{box-sizing:border-box;margin:0 0 0 8px;padding:4px 8px;height:36px;min-width:65px;border:1px solid #ccc;border-radius:8px;background:#fafafa;box-shadow:1px 1px 1px 0 #ccc;color:#5e5e5e;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info{font-weight:400!important;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info em{color:#dc143c!important;font-style:normal;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_textarea{padding: 6px 0;margin:0}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter{display:block;margin:0;height:100%}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar{width:8px;height:8px}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb{border-radius:4px;background:#cfcfcf}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.random}_filter_textarea textarea::placeholder{color:#555;font:normal 500 16px/150% ui-monospace,monospace,system-ui,-apple-system,BlinkMacSystemFont!important;opacity:0.85;white-space:break-spaces}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{box-sizing:border-box;margin:0!important;padding:5px!important;max-height:423px;width:100%;min-height:280px;outline:0!important;border:1px solid #bbb;border-radius:6px;white-space:pre;font:normal 400 14px/150% ui-monospace,monospace,sans-serif!important;resize:vertical;overscroll-behavior:contain;word-break:keep-all!important;cursor:auto}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content::placeholder{font:normal 400 14px/150% ui-monospace,monospace!important}.${def.notice.noticeX} .${def.notice.configuration} #${def.notice.random}_customColor{margin:0;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button:hover{background:#fff;cursor:pointer}` +
-              `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}__content{display:block;margin:0;height:268px}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{overflow-x:hidden;overflow-y:auto;box-sizing:border-box;margin:4px 0 3px;padding:8px;width:266px;max-height:237px;overscroll-behavior:contain}.${def.notice.card} h2{margin:0;padding:0;border:0;vertical-align:baseline;font:inherit;font-size:100%;line-height:135%;}#${def.notice.random}_help{position:relative;margin:0;padding:4px 15px!important;border:1px solid transparent;background:#f07f6a;box-shadow:0 0 6px 0 #f5846f;color:#fff;cursor:help}#${def.notice.random}_help:hover{background:#ed6248;box-shadow:0 0 6px 0 #f34525;}#${def.notice.random}_clear{margin:0 0 0 10px;color:#666;font-weight:500;cursor:pointer}#${def.notice.random}_clear:hover{color:#ff0000}#${def.notice.random}_clear u{padding:0 2px;text-decoration:none}.${def.notice.linkerror},.${def.notice.linkerror}:hover,.${def.notice.linkerror} *,.${def.notice.linkerror} *:hover{color:#a9a9a9!important;text-decoration-line:line-through!important;text-decoration-color:#ff0000!important;text-decoration-style:wavy!important}@-moz-document url-prefix() {.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before,.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{scrollbar-color:#bbbb #eee1;scrollbar-width:thin}}.${def.notice.card}{margin:0;padding:0;--background:#fff;--background-chackbox:#0082ff;--background-image:#fff,rgba(0, 107, 175, 0.2);--text-color:#666;--text-headline:#000;--card-shadow:#0082ff;--card-height:48px;--card-witght:240px;--card-radius:12px;--header-height:47px;--blend-mode:overlay;--transition:0.15s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}` +
-              `.${def.notice.card}__input{position:absolute;display:none;margin:0;padding:0;outline:none;border:none;background:none;-webkit-appearance:none}.${def.notice.card}__input:checked ~ .${def.notice.card}__body{--shadow:0 0 0 3px var(--card-shadow);}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox{--chack-bg:var(--background-chackbox);--chack-border:#fff;--chack-scale:1;--chack-opacity:1;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox--svg{--stroke-color:#fff;--stroke-dashoffset:0;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover:after{--opacity-bg:0;}.${def.notice.random}_iconText{color:#333}.${def.notice.random}_iconText:hover{color:#dc143c}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body{cursor:not-allowed;opacity:0.5;}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body:active{--scale:1;}.${def.notice.card}__body{position:relative;display:grid;overflow:hidden;width:var(--card-witght);height:var(--card-height);border-radius:var(--card-radius);background:var(--background);box-shadow:var(--shadow,1px 1px 3px 1px #ccc);cursor:pointer;-webkit-transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:transform var(--transition),box-shadow var(--transition);transition:transform var(--transition),box-shadow var(--transition),-webkit-transform var(--transition);-webkit-transform:scale(var(--scale,1)) translateZ(0);transform:scale(var(--scale,1)) translateZ(0);grid-auto-rows:calc(var(--card-height) - var(--header-height)) auto}` +
-              `.${def.notice.card}__body:active{--scale:0.96;}.${def.notice.card}__body-cover-image{position:absolute;top:8px;left:10px;z-index:100;width:32px;height:32px}.${def.notice.card}__body-cover-image span.${def.notice.favicons}{display:block;width:32px;height:32px}.${def.notice.card}__body-cover-chackbox{position:absolute;top:10px;right:10px;z-index:1;width:28px;height:28px;border:2px solid var(--chack-border,#fff);border-radius:50%;background:var(--chack-bg,var(--background-chackbox));opacity:var(--chack-opacity,0);transition:transform var(--transition),opacity calc(var(--transition)*1.2) linear,-webkit-transform var(--transition) ease;-webkit-transform:scale(var(--chack-scale,0));transform:scale(var(--chack-scale,0))}.${def.notice.card}__body-cover-chackbox--svg{display:inline-block;visibility:visible!important;margin:8px 0 0 7px;width:13px;height:11px;vertical-align:top;-webkit-transition:stroke-dashoffset .4s ease var(--transition);transition:stroke-dashoffset .4s ease var(--transition);fill:none;stroke:var(--stroke-color,#fff);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16px;stroke-dashoffset:var(--stroke-dashoffset,16px)}.${def.notice.card}__body-header{padding:4px 10px 6px 50px;height:var(--header-height);background:var(--background)}.${def.notice.card}__body-header-title{margin-bottom:0!important;color:var(--text-headline);font-weight:700!important;font-size:15px!important}.${def.notice.card}__body-header-subtitle{color:var(--text-color);font-weight:500;font-size:13px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{display:grid;grid-template-columns:repeat(1, 1fr);grid-gap:10px;}.${def.notice.gberror}{display:block;margin:0 0 4px -6px;padding:6px;width:max-content;border:1px dashed #ffb78c;border-radius:4px;color:#ffb78c}`
+              `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}__content{display:block;margin:0;height:268px}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{overflow-x:hidden;overflow-y:auto;box-sizing:border-box;margin:4px 0 3px;padding:8px;width:266px;max-height:237px;overscroll-behavior:contain}.${def.notice.card} h2{margin:0;padding:0;border:0;vertical-align:baseline;font:inherit;font-size:100%;line-height:135%;}#${def.notice.random}_help{position:relative;margin:0;padding:4px 15px!important;border:1px solid transparent;background:#f07f6a;box-shadow:0 0 6px 0 #f5846f;color:#fff;cursor:help}#${def.notice.random}_help:hover{background:#ed6248;box-shadow:0 0 6px 0 #f34525;}#${def.notice.random}_clear{margin:0 0 0 10px;color:#666;font-weight:500;cursor:pointer}#${def.notice.random}_clear:hover{color:#ff0000}#${def.notice.random}_clear u{padding:0 2px;text-decoration:none}.${def.notice.linkerror},.${def.notice.linkerror}:hover,.${def.notice.linkerror} *,.${def.notice.linkerror} *:hover{color:#a9a9a9!important;text-decoration-line:line-through!important;text-decoration-color:#ff0000!important;text-decoration-style:wavy!important}@-moz-document url-prefix() {.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before,.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{scrollbar-color:#bbbb #eee1;scrollbar-width:thin}}.${def.notice.card}{margin:0;padding:0;--background:#fff;--background-chackbox:#0082ff;--background-image:#fff,rgba(0, 107, 175, 0.2);--text-color:#666;--text-headline:#000;--card-shadow:#0082ff;--card-height:48px;--card-witght:240px;--card-radius:12px;--header-height:47px;--blend-mode:overlay;--transition:0.15s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.${def.notice.card}__input{position:absolute;display:none;margin:0;padding:0;outline:none;border:none;background:none;-webkit-appearance:none}.${def.notice.card}__input:checked ~ .${def.notice.card}__body{--shadow:0 0 0 3px var(--card-shadow);}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox{--chack-bg:var(--background-chackbox);--chack-border:#fff;--chack-scale:1;--chack-opacity:1;}` +
+              `.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox--svg{--stroke-color:#fff;--stroke-dashoffset:0;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover:after{--opacity-bg:0;}.${def.notice.random}_iconText{color:#333}.${def.notice.random}_iconText:hover{color:#dc143c}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body{cursor:not-allowed;opacity:0.5;}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body:active{--scale:1;}.${def.notice.card}__body{position:relative;display:grid;overflow:hidden;width:var(--card-witght);height:var(--card-height);border-radius:var(--card-radius);background:var(--background);box-shadow:var(--shadow,1px 1px 3px 1px #ccc);cursor:pointer;-webkit-transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:transform var(--transition),box-shadow var(--transition);transition:transform var(--transition),box-shadow var(--transition),-webkit-transform var(--transition);-webkit-transform:scale(var(--scale,1)) translateZ(0);transform:scale(var(--scale,1)) translateZ(0);grid-auto-rows:calc(var(--card-height) - var(--header-height)) auto}.${def.notice.card}__body:active{--scale:0.96;}.${def.notice.card}__body-cover-image{position:absolute;top:8px;left:10px;z-index:100;width:32px;height:32px}.${def.notice.card}__body-cover-image span.${def.notice.favicons}{display:block;width:32px;height:32px}.${def.notice.card}__body-cover-chackbox{position:absolute;top:10px;right:10px;z-index:1;width:28px;height:28px;border:2px solid var(--chack-border,#fff);border-radius:50%;background:var(--chack-bg,var(--background-chackbox));opacity:var(--chack-opacity,0);transition:transform var(--transition),opacity calc(var(--transition)*1.2) linear,-webkit-transform var(--transition) ease;-webkit-transform:scale(var(--chack-scale,0));transform:scale(var(--chack-scale,0))}.${def.notice.card}__body-cover-chackbox--svg{display:inline-block;visibility:visible!important;margin:8px 0 0 7px;width:13px;height:11px;vertical-align:top;-webkit-transition:stroke-dashoffset .4s ease var(--transition);transition:stroke-dashoffset .4s ease var(--transition);fill:none;stroke:var(--stroke-color,#fff);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16px;stroke-dashoffset:var(--stroke-dashoffset,16px)}` +
+              `.${def.notice.card}__body-header{padding:4px 10px 6px 50px;height:var(--header-height);background:var(--background)}.${def.notice.card}__body-header-title{margin-bottom:0!important;color:var(--text-headline);font-weight:700!important;font-size:15px!important}.${def.notice.card}__body-header-subtitle{color:var(--text-color);font-weight:500;font-size:13px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{display:grid;grid-template-columns:repeat(1, 1fr);grid-gap:10px;}.${def.notice.gberror}{display:block;margin:0 0 4px -6px;padding:6px;width:max-content;border:1px dashed #ffb78c;border-radius:4px;color:#ffb78c}`
           );
-          def.const.iconbg = iconBase64Data ? `url('${iconBase64Data}')` : `url('${def.url.backupIcon}'),url('${yandexIconsAPIUrl}')`;
-          def.const.button = `${currentSite.siteTypeID === newSiteType.GOOGLE ? "<span jsname='s1VaRe' class='ACRAdd M2vV3'></span>" : ""}
+          def.var.iconbg = iconBase64Data ? `url('${iconBase64Data}')` : `url('${def.url.backupIcon}'),url('${yandexIconsAPIUrl}')`;
+          def.var.button = `${currentSite.siteTypeID === newSiteType.GOOGLE ? "<span jsname='s1VaRe' class='ACRAdd M2vV3'></span>" : ""}
             <span id="${def.const.leftButton}" sn="${selectedSite[0].siteTypeID}">
               <input type="button" title="${selectedSite[0].siteNickName}" value="${selectedSite[0].siteButtonName}"/>
             </span>
             <span id="${def.const.rightButton}" sn="${selectedSite[1].siteTypeID}">
               <input type="button" title="${selectedSite[1].siteNickName}" value="${selectedSite[1].siteButtonName}"/>
             </span>`;
-          def.const.hlstyle = listCurrentSite.keywords ? `${listCurrentSite.keywords}{background-color:${bgc}!important;color:${fgc}!important;font-weight:600!important}` : ``;
-          def.const.iconstyle = `.${def.notice.noticeX} .${def.notice.configuration} span.${def.notice.favicon},.${def.notice.card}__body-cover-image span.${def.notice.favicons}{background-color:transparent;background-image:${def.const.iconbg};background-repeat:no-repeat;}`;
+          def.var.hlstyle = listCurrentSite.keywords ? `${listCurrentSite.keywords}{background-color:${bgcolor}!important;color:${fgcolor}!important;font-weight:600}` : ``;
+          def.var.iconstyle = `.${def.notice.noticeX} .${def.notice.configuration} span.${def.notice.favicon},.${def.notice.card}__body-cover-image span.${def.notice.favicons}{background-color:transparent;background-image:${def.var.iconbg};background-repeat:no-repeat;}`;
 
           function getQueryString() {
             const { inputArray, searchKeys } = searchProperties;
-            let returnValue = qA(inputArray.join()).Find((item, index) => item.value && !DEBUG("QueryString[INPUT]:", { current: item.value, index }))?.value;
-            if (!returnValue) {
-              for (const key of searchKeys) {
-                const queryString = getUrlParam(key);
-                if (queryString) {
-                  returnValue = queryString.replace(/\+/g, " ");
-                  DEBUG("QueryString[URL]:", { queryKey: key, returnValue });
-                  break;
-                }
-              }
+            const inputValue = qA(inputArray.join()).Find(item => item.value)?.value;
+            if (inputValue) {
+              DEBUG("QueryString[INPUT]:", { value: inputValue });
+              return encodeURIComponent(inputValue);
             }
-            return encodeURIComponent(returnValue ?? "");
+            for (const key of searchKeys) {
+              const queryString = getUrlParam(key);
+              if (!queryString) continue;
+              const decodedValue = queryString.replace(/\+/g, " ");
+              DEBUG("QueryString[URL]:", { queryKey: key, value: decodedValue });
+              return encodeURIComponent(decodedValue);
+            }
+            return "";
           }
 
           function checkIndexPage() {
-            return [newSiteType.DUCKDUCKGO, newSiteType.QWANT].includes(currentSite.siteTypeID) ? !getUrlParam("q") : CUR_PATH_NAME === "/";
+            return [newSiteType.DUCKDUCKGO, newSiteType.QWANT].includes(currentSite.siteTypeID) ? !getUrlParam("q") : location.pathname === "/";
           }
 
           function getSecurityPolicy() {
@@ -2167,7 +2076,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               (currentSite.siteTypeID === newSiteType.BAIDU && /^(news|vsearch)$/.test(def.var.searchType)) ||
               (currentSite.siteTypeID === newSiteType.SOGOU && /^(fanyi|hanyu|as)/.test(CUR_HOST_NAME)) ||
               (currentSite.siteTypeID === newSiteType.DUCKDUCKGO && /^maps$/.test(getUrlParam("iaxm"))) ||
-              (currentSite.siteTypeID === newSiteType.YANDEX && CUR_PATH_NAME.includes("/direct")) ||
+              (currentSite.siteTypeID === newSiteType.YANDEX && location.pathname.includes("/direct")) ||
               (currentSite.siteTypeID === newSiteType.YAHOO && CUR_HOST_NAME.search(/news|video/) !== -1) ||
               (currentSite.siteTypeID === newSiteType.YOU && /^youchat$/.test(def.var.searchType)) ||
               (currentSite.siteTypeID === newSiteType.SEARXNG && /^map$/.test(def.var.searchType))
@@ -2176,7 +2085,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
 
           function findCurrentSite() {
             for (const regex in engineMap) {
-              if (hasOwnProp.call(engineMap, regex) && new RegExp(regex).test(CUR_HOST_NAME)) {
+              if (hasOwnProperty(engineMap, regex) && new RegExp(regex).test(CUR_HOST_NAME)) {
                 const { siteType, site } = engineMap[regex];
                 const currentSite = selectedEngine.includes(siteType) ? site : listSite.other;
                 return { currentSite, listCurrentSite: site };
@@ -2186,10 +2095,9 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           }
 
           function updateSiteInformation() {
-            let currentSiteName = "";
-            let allSiteURIs = "";
+            let [currentSiteName, allSiteURIs] = ["", ""];
             for (let site in listSite) {
-              if (hasOwnProp.call(listSite, site)) {
+              if (hasOwnProperty(listSite, site)) {
                 if (listSite[site].siteTypeID !== newSiteType.OTHERS) allSiteURIs += listSite[site].siteHostName + ";";
                 if (listSite[site].siteTypeID === listCurrentSite.siteTypeID) currentSiteName = site;
                 if (listSite[site].siteTypeID !== currentSite.siteTypeID && selectedEngine.includes(Number(listSite[site].siteTypeID))) {
@@ -2201,11 +2109,12 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           }
 
           function getGlobalParameter() {
-            def.var.indexPage = checkIndexPage();
-            def.var.queryString = getQueryString();
-            def.var.searchType = getUrlParam(currentSite.splitTypeName);
-            def.var.securityPolicy = getSecurityPolicy();
-            return true;
+            return Object.assign(def.var, {
+              indexPage: checkIndexPage(),
+              queryString: getQueryString(),
+              searchType: getUrlParam(currentSite.splitTypeName),
+              securityPolicy: getSecurityPolicy(),
+            });
           }
 
           function setupGlobalParameterListener() {
@@ -2222,7 +2131,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           async function updateToRequestIcon(isReload = true) {
             try {
               const iconDataURL = await requestRemoteIcon(yandexIconsAPIUrl);
-              if (iconDataURL) cache.set("_remoteicons_", iconDataURL, 2592e6);
+              if (iconDataURL) cache.set(REMOTEICONS, iconDataURL, 2592e6);
             } catch (e) {
               ERROR("updateToRequestIcon: Can't fetch the iconData.");
             } finally {
@@ -2232,7 +2141,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
 
           function openUpdateWindow(url) {
             if (IS_REAL_GECKO || IS_REAL_WEBKIT || (IS_REAL_BLINK && GMscriptHandler === "Tampermonkey" && parseFloat(GMversion) >= 5.2)) {
-              def.const.updateWindow = GMopenInTab(IS_GREASEMONKEY ? url.replace(/\?\w+/g, "") : url, false);
+              def.var.updateWindow = GMopenInTab(IS_GREASEMONKEY ? url.replace(/\?\w+/g, "") : url, false);
             } else global.location.href = url;
           }
 
@@ -2244,17 +2153,17 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
             const okTip = IS_CHN ? "<dd><b>若您已更新完成</b>，请点此刷新页面，以使新版脚本生效！</dd>" : "<dd><b>If updated</b>, click here to make the script effective!</dd>";
             const text = createNoticeHTML(`<dd id="${def.notice.random}_loading" style="color:#ffff00;font-weight:600">${loadingTip}</dd>${okTip}`);
             GMnotification({ title, text, type: def.notice.info, closeWith: ["click"], timeout: false, position: "topRight", callbacks: { onClose: [updateToRequestIcon] } });
-            if (def.const.updateWindow) {
+            if (def.var.updateWindow) {
               sleep(6e3, { useCachedSetTimeout: true }).then(() => {
-                def.const.updateWindow.onclose = () => delete def.const.updateWindow;
-                def.const.updateWindow.close?.();
+                def.var.updateWindow.onclose = () => delete def.var.updateWindow;
+                def.var.updateWindow.close?.();
               });
             }
             return qS(`#${def.notice.random}_loading`);
           }
 
           function removeLoadingElement(node) {
-            sleep(4e3, { useCachedSetTimeout: true }).then(() => safeRemove(node));
+            sleep(4e3, { useCachedSetTimeout: true }).then(() => safeRemoveNode(node));
           }
 
           function preInstall(url) {
@@ -2299,7 +2208,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
             qS(`#${def.notice.stopUpdate}`)?.addEventListener("click", event => {
               event.stopPropagation();
               NoticeX.close(updateInterface);
-              cache.set("_autoupdate_", def.var.curVersion);
+              cache.set(AUTOCHECK, def.var.curVersion);
             });
             const props = ["font-weight:bold;color:#dc143c", "color:0", "color:#dc143c", "color:0"];
             __console("shown_new_update", `%c[GB-Update]%c\r\nWe found a new version: %c${version}%c, which you can update now!`, ...props);
@@ -2311,8 +2220,8 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               : `<dd style="margin: 10px 0"><span>Congratulations!</span><br/>The version <i>${def.var.curVersion}</i> is up-to-date!</dd>`;
             const title = IS_CHN ? "更新成功" : "Update Success";
             GMnotification({ title, text: createNoticeHTML(successHTML), timeout: 3e3, closeWith: ["click"] });
-            cache.set("_autoupdate_", def.var.curVersion);
-            GMsetValue("_version_", encrypt(def.var.curVersion));
+            cache.set(AUTOCHECK, def.var.curVersion);
+            GMsetValue(VERSION, encrypt(def.var.curVersion));
             const props = ["font-weight:700;color:#008b8b", "color:0", "color:#dc143c", "color:0"];
             __console("shown_update_info", `%c[GB-Update]%c\r\nCurretVersion: %c${def.var.curVersion}%c is up-to-date!`, ...props);
           }
@@ -2331,7 +2240,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               listSearchEngine: currentSite => {
                 let returnHtml = "";
                 for (let site in listSite) {
-                  if (hasOwnProp.call(listSite, site) && listSite[site].siteTypeID !== 0 && listSite[site].siteTypeID !== currentSite.siteTypeID) {
+                  if (hasOwnProperty(listSite, site) && listSite[site].siteTypeID !== 0 && listSite[site].siteTypeID !== currentSite.siteTypeID) {
                     const iconStyle = `background-position:0 ${(1 - listSite[site].siteTypeID) * 24}px;background-attachment:local;background-size:cover;`;
                     const buttonTitle = selectedEngine.includes(listSite[site].siteTypeID) ? `title="${IS_CHN ? "您常用的搜索引擎" : "Commonly used search engine"}"` : ``;
                     returnHtml += String(
@@ -2351,7 +2260,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               listSelectSearchEngine: () => {
                 let returnHtml = "";
                 for (let site in listSite) {
-                  if (hasOwnProp.call(listSite, site) && listSite[site].siteTypeID !== 0) {
+                  if (hasOwnProperty(listSite, site) && listSite[site].siteTypeID !== 0) {
                     const iconStyle = `background-position:0 ${(1 - listSite[site].siteTypeID) * 32}px;background-attachment:local;background-size:32px auto;`;
                     const inputStatus = selectedEngine.includes(listSite[site].siteTypeID) ? "checked" : "disabled";
                     returnHtml += String(
@@ -2457,17 +2366,8 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                       </ul>
                     </fieldset>`
                   );
-                  const configInterface = GMnotification({
-                    title: `${def.var.scriptName} v${def.var.curVersion}`,
-                    text: configText,
-                    type: def.notice.configuration,
-                    width: 326,
-                    closeWith: ["button"],
-                    scroll: { maxHeight: 680, showOnHover: true },
-                    progressBar: false,
-                    timeout: false,
-                    position: "topRight",
-                  });
+                  const [title, text, type, scroll] = [`${def.var.scriptName} v${def.var.curVersion}`, configText, def.notice.configuration, { maxHeight: 680, showOnHover: true }];
+                  const configInterface = GMnotification({ title, text, type, width: 326, closeWith: ["button"], scroll, progressBar: false, timeout: false, position: "topRight" });
                   qA(`input[name='${def.notice.card}_lists']`).forEach(node => void addCardClickEvent(node));
                   qS(`#${def.notice.random}_clear`)?.addEventListener("click", cleanSelectedCard);
                   qS(`#${def.notice.kh}`)?.addEventListener("click", showCustomColor);
@@ -2480,16 +2380,9 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               listEngine: () => {
                 sleep(5e2)(addAction.closeConfig()).then(isClosed => {
                   if (!isClosed) return;
-                  GMnotification({
-                    title: `\ud83d\udc4b ${IS_CHN ? "你想去哪里吖？" : "Where to visit?"}`,
-                    text: addAction.listSearchEngine(listCurrentSite),
-                    type: def.notice.configuration,
-                    width: 200,
-                    closeWith: ["button"],
-                    scroll: { maxHeight: 565, showOnHover: true },
-                    timeout: 12e3,
-                    position: "topRight",
-                  });
+                  const [title, text] = [`\ud83d\udc4b ${IS_CHN ? "你想去哪里吖？" : "Where to visit?"}`, addAction.listSearchEngine(listCurrentSite)];
+                  const [type, scroll] = [def.notice.configuration, { maxHeight: 565, showOnHover: true }];
+                  GMnotification({ title, text, type, width: 200, closeWith: ["button"], scroll, timeout: 12e3, position: "topRight" });
                   qA(`.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.searchButton}`).forEach(item => setupClickEventOnCard(item));
                 });
               },
@@ -2542,17 +2435,8 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                         </ul>
                       </fieldset>`
                   );
-                  const filterInterface = GMnotification({
-                    title: `${def.var.scriptName} v${def.var.curVersion}`,
-                    text: filterHTML,
-                    type: def.notice.configuration,
-                    width: 380,
-                    closeWith: ["button"],
-                    scroll: { maxHeight: 680, showOnHover: true },
-                    progressBar: false,
-                    timeout: false,
-                    position: "topRight",
-                  });
+                  const [title, text, type, scroll] = [`${def.var.scriptName} v${def.var.curVersion}`, filterHTML, def.notice.configuration, { maxHeight: 680, showOnHover: true }];
+                  const filterInterface = GMnotification({ title, text, type, width: 380, closeWith: ["button"], scroll, progressBar: false, timeout: false, position: "topRight" });
                   const textarea = qS(`.${def.notice.random}_filter_textarea .${def.notice.random}_filter_content`);
                   const tigger = qS(`#${def.notice.rf}`);
                   if (tigger && !tigger.checked) {
@@ -2572,9 +2456,8 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
 
             function changeEventOnTigger() {
               const textarea = qS(`.${def.notice.random}_filter_textarea .${def.notice.random}_filter_content`);
-              const isReadonly = !this.checked;
-              textarea.classList.toggle(def.notice.readonly, isReadonly);
-              textarea.toggleAttribute("readonly", isReadonly);
+              textarea?.classList.toggle(def.notice.readonly, !this.checked);
+              textarea?.toggleAttribute("readonly", !this.checked);
             }
 
             async function saveFilterResultData() {
@@ -2584,7 +2467,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                 const parsedFilterString = filterString ? JSON.parse(filterString) : [];
                 if (!Array.isArray(parsedFilterString) || parsedFilterString.some(item => typeof item !== "string")) throw new Error("Format Error");
                 const resultFilterData = { filter: uniq(parsedFilterString), trigger: filterTrigger };
-                GMsetValue("_resultFilter_", encrypt(JSON.stringify(resultFilterData)));
+                GMsetValue(RESULTFILTER, encrypt(JSON.stringify(resultFilterData)));
                 const successTitle = IS_CHN ? "保存成功！" : "Success!";
                 const successText = IS_CHN ? "<dd>设置参数已成功保存，页面稍后自动刷新！</dd>" : "<dd>The data is saved successfully, Page will refresh!</dd>";
                 if (await addAction.closeConfig()) GMnotification({ title: successTitle, text: createNoticeHTML(successText), callbacks: { onClose: [refresh] } });
@@ -2617,7 +2500,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
             }
 
             function setupClickEventOnCard(item) {
-              item.addEventListener("click", () => {
+              item?.addEventListener("click", () => {
                 const [itemID, queryString] = [Number(item.id), getQueryString()];
                 const splitTypeName = getUrlParam(listCurrentSite.splitTypeName).trim();
                 const isImageType = listCurrentSite.imageType.includes(splitTypeName);
@@ -2667,8 +2550,8 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               const saveData = async () => {
                 if (!inputFgColor || !inputBgColor) return;
                 customColor = { foregroundColor: inputFgColor.trim().toLowerCase(), backgroundColor: inputBgColor.trim().toLowerCase() };
-                _config_date_ = { isAutoUpdate, keywordHighlight: true, isHotkey, selectedEngine, localWindow, googleJump, antiLinkRedirect, antiAds, customColor };
-                GMsetValue("_configures_", encrypt(JSON.stringify(_config_date_)));
+                _config_date_ = { ..._config_date_, keywordHighlight: true, customColor };
+                GMsetValue(CONFIGURE, encrypt(JSON.stringify(_config_date_)));
               };
               inputFgColor = prompt(foregroundColorText, customColor.foregroundColor);
               if (inputFgColor === null) return;
@@ -2708,7 +2591,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               const configValues = configKeys.map(key => qS(`#${def.notice[key]}`).checked);
               const [isHotkey, googleJump, localWindow, keywordHighlight, antiLinkRedirect, antiAds, isAutoUpdate] = configValues;
               const _config_date_ = { isAutoUpdate, keywordHighlight, isHotkey, selectedEngine: selectEngineList, localWindow, googleJump, antiLinkRedirect, antiAds, customColor };
-              GMsetValue("_configures_", encrypt(JSON.stringify(_config_date_)));
+              GMsetValue(CONFIGURE, encrypt(JSON.stringify(_config_date_)));
               if (await addAction.closeConfig()) {
                 const text = createNoticeHTML(IS_CHN ? "<dd>设置参数已成功保存，页面稍后自动刷新！</dd>" : "<dd>The data is saved successfully, Page will refresh!</dd>");
                 GMnotification({ title: IS_CHN ? "保存成功！" : "Success!", text, callbacks: { onClose: [refresh] } });
@@ -2731,18 +2614,18 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               sleep(1e2, { useCachedSetTimeout: true })
                 .then(() => {
                   if (!isHotkey) return DEBUG("%cNo Hotkey_Setting", "color:#a9a9a9");
-                  document.addEventListener("keydown", event => void (event.code === "AltRight" && (def.const.AltGraph = true)));
-                  document.addEventListener("keyup", event => void (event.code === "AltRight" && delete def.const.AltGraph));
+                  document.addEventListener("keydown", event => void (event.code === "AltRight" && (def.var.AltGraph = true)));
+                  document.addEventListener("keyup", event => void (event.code === "AltRight" && delete def.var.AltGraph));
                   return DEBUG("%cInstalling Hotkey_Setting", "color:#808080") || isHotkey;
                 })
                 .then(isDeplayed => {
-                  if (!isDeplayed) return;
-                  document.addEventListener("keydown", e => {
-                    const ekey = (e.altKey || def.const.AltGraph === true) && !e.ctrlKey && !e.shiftKey && !e.metaKey;
-                    if (e.code === "KeyE" && ekey) handleClickEvent("setConfigure", 1e3, e);
-                    if (e.code === "KeyV" && ekey) handleClickEvent("listEngine", 1e3, e);
-                    if (e.code === "KeyB" && ekey) handleClickEvent("filterResult", 1e3, e);
-                  });
+                  isDeplayed &&
+                    document.addEventListener("keydown", e => {
+                      const ekey = (e.altKey || def.var.AltGraph === true) && !e.ctrlKey && !e.shiftKey && !e.metaKey;
+                      if (e.code === "KeyE" && ekey) handleClickEvent("setConfigure", 1e3, e);
+                      else if (e.code === "KeyV" && ekey) handleClickEvent("listEngine", 1e3, e);
+                      else if (e.code === "KeyB" && ekey) handleClickEvent("filterResult", 1e3, e);
+                    });
                 });
 
               function handleClickEvent(name, time, event) {
@@ -2803,7 +2686,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
             const siteConfigMap = {
               baidu: {
                 listTypes: { target: "#content_left", listName: "div", className: "result-op" },
-                clear: () => safeRemove("#con-ar"),
+                clear: () => safeRemoveNode("#con-ar"),
                 applyButton: ({ buttonSection, buttonID, target }) => {
                   insertAfter(buttonSection, target);
                   if (!qS(buttonID)) return;
@@ -2825,16 +2708,14 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               },
               bing: {
                 listTypes: { target: "#b_results", listName: "li", className: "b_algo" },
-                clear: () => safeRemove("aside>ol#b_context"),
+                clear: () => safeRemoveNode("aside>ol#b_context"),
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
                   const sectionWidth = buttonSection.getBoundingClientRect().width || 2e2;
-                  const textarea = qS(`textarea.b_searchbox[name="q"]`, target.parentNode);
-                  const formBox = qS(".b_searchboxForm");
-                  const formNode = qS(`form#sb_form`);
+                  const [textarea, formBox, formNode] = [qS(`textarea.b_searchbox[name="q"]`, target.parentNode), qS(".b_searchboxForm"), qS(`form#sb_form`)];
                   qA(`#b_header .b_searchbox[name="q"]`).forEach(input => {
                     const inputLength = parseFloat(gCS(input).width) || 500;
-                    input.style.maxWidth = `${inputLength - sectionWidth + 30}px`;
+                    input.style.maxWidth = `${inputLength - sectionWidth + 50}px`;
                     input.style.overflowY = "auto";
                   });
                   if (formNode && textarea) {
@@ -2885,11 +2766,11 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               },
               yandex: {
                 listTypes: { target: "#search-result", listName: "li" },
-                clear: () => safeRemove("div.content__right>div"),
+                clear: () => safeRemoveNode("div.content__right>div"),
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
                   sleep(0)(buttonSection.getBoundingClientRect().width || 2e2).then(sectionWidth => {
-                    buttonSection.style.width = `${sectionWidth + 3}px`;
+                    buttonSection.style.width = `${sectionWidth + 12}px`;
                   });
                 },
               },
@@ -2905,10 +2786,10 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               },
               sogou: {
                 listTypes: { target: "div.results", listName: "div", className: "vrwrap" },
-                clear: () => safeRemove("#right"),
-                applyButton: ({ resolve, buttonSection, buttonID, target }) => {
+                clear: () => safeRemoveNode("#right"),
+                applyButton: ({ buttonSection, buttonID, target }) => {
                   if (currentSite.imageType.includes(def.var.searchType)) {
-                    sleep(4e2)(resolve()).then(() => {
+                    sleep(4e2).then(() => {
                       if (!qS(buttonID) && target) {
                         insertAfter(buttonSection, target);
                         const sectionWidth = buttonSection.getBoundingClientRect().width;
@@ -2923,8 +2804,8 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                     qA(`${buttonID} input`).forEach(node => node.classList.add(`${def.notice.random}_weixin`));
                   } else {
                     insertAfter(buttonSection, target);
-                    const btn = qS(`#searchBtn2[value="\u5168\u7f51\u641c\u7d22"]`);
-                    sleep(0)(safeRemove(btn)).then(() => {
+                    safeRemoveNode(qS(`#searchBtn2[value="\u5168\u7f51\u641c\u7d22"]`));
+                    sleep(0).then(() => {
                       const sectionWidth = buttonSection.getBoundingClientRect().width || 2e2;
                       buttonSection.style.right = `-${sectionWidth + 10}px`;
                       const btn2 = qS(`#searchBtn2`);
@@ -2935,7 +2816,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               },
               toutiao: {
                 listTypes: { target: "div.s-result-list", listName: "div" },
-                clear: () => safeRemove(".main>.s-side-list>.result-content"),
+                clear: () => safeRemoveNode(".main>.s-side-list>.result-content"),
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
                   sleep(0)(buttonSection.getBoundingClientRect().width || 2e2).then(sectionWidth => (buttonSection.style.right = `-${sectionWidth + 10}px`));
@@ -2943,7 +2824,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               },
               so360: {
                 listTypes: { target: "#main>ul.result", listName: "li", className: "res-list" },
-                clear: () => safeRemove("#side_wrap"),
+                clear: () => safeRemoveNode("#side_wrap"),
                 applyButton: ({ buttonSection, buttonID, target }) => {
                   insertAfter(buttonSection, target);
                   if (currentSite.imageType.includes(def.var.searchType)) {
@@ -2962,7 +2843,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               },
               ecosia: {
                 listTypes: { target: "section.mainline>div:not([class])", listName: "div", className: "mainline__result-wrapper" },
-                applyButton: ({ resolve, buttonSection, buttonID, target }) => {
+                applyButton: ({ buttonSection, buttonID, target }) => {
                   let isLoadEventAttached = false;
                   const handleLoadEvent = () => {
                     if (!qS(buttonID) && target) insertAfter(buttonSection, target);
@@ -2974,12 +2855,11 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                     global.addEventListener("load", handleLoadEvent);
                     isLoadEventAttached = true;
                   }
-                  resolve();
                 },
               },
               yahoo: {
                 listTypes: { target: "#web>ol", listName: "li" },
-                clear: () => safeRemove("#right>ol"),
+                clear: () => safeRemoveNode("#right>ol"),
                 applyButton: ({ buttonSection, target }) => {
                   try {
                     insertAfter(buttonSection, target);
@@ -2997,7 +2877,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               },
               you: { listTypes: { target: "div[data-testid='app-mainline']>div[data-eventappname][data-testid]", listName: "ul" } },
               startpage: { listTypes: { target: "#main>div.w-gl", listName: "div", className: "result" } },
-              brave: { listTypes: { target: "#results", listName: "div", className: "snippet" }, clear: () => safeRemove("aside>div") },
+              brave: { listTypes: { target: "#results", listName: "div", className: "snippet" }, clear: () => safeRemoveNode("aside>div") },
               yep: {
                 listTypes: { target: "div[class$='-results']>div>div", listName: "div" },
                 applyButton: ({ buttonSection, target }) => {
@@ -3017,7 +2897,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               },
               searxng: {
                 listTypes: { target: "div#urls", listName: "article", className: "result" },
-                clear: () => safeRemove("#infoboxes"),
+                clear: () => safeRemoveNode("#infoboxes"),
                 applyButton: ({ buttonSection, target }) => void target.appendChild(buttonSection),
               },
             };
@@ -3033,50 +2913,45 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
 
             function insertStyle() {
               try {
-                const noticeStyle = `@charset "UTF-8";` + def.const.style + def.const.iconstyle + String(keywordHighlight ? def.const.hlstyle : "");
+                const noticeStyle = `@charset "UTF-8";` + def.var.style + def.var.iconstyle + String(keywordHighlight ? def.var.hlstyle : "");
                 addStyle({ target: document.head, styleId: def.const.rndstyleName, media: "screen", styleContent: noticeStyle, isOverwrite: false });
               } catch (e) {
                 ERROR("insertStyle:", e.message);
               }
             }
 
-            function insertButtons() {
+            async function insertButtons() {
               try {
-                const targetSelector = currentSite.mainSelector;
-                const buttonSection = cE("gb-button", { id: def.const.rndButtonID, innerHTML: tTP.createHTML(def.const.button) });
-                const buttonID = `#${buttonSection.id}`;
-                const target = qS(targetSelector);
-                if (def.var.indexPage || !target || !def.var.queryString || qS(buttonID)) return;
-                return new Promise(resolve => {
-                  applyButtons(resolve, buttonSection, target, buttonID);
-                  resolve(qA(`${buttonID} span[sn]:not([event-insert])`));
-                })
-                  .then(response => {
-                    if (!response) return;
-                    addSearchButtonEvent(response);
-                    scrollDetect();
-                  })
-                  .catch(e => ERROR("applyButtons:", e.message));
+                const target = qS(currentSite.mainSelector);
+                if (def.var.indexPage || !target || !def.var.queryString || qS(`#${def.const.rndButtonID}`)) return;
+                const buttonSection = cE("gb-button", { id: def.const.rndButtonID, innerHTML: tTP.createHTML(def.var.button) });
+                const spans = await applyButtons(buttonSection, target);
+                if (!spans) return;
+                addSearchButtonEvent(spans);
+                scrollDetect();
               } catch (e) {
                 ERROR("insertButtons:", e.message);
               }
             }
 
-            function applyButtons(resolve, buttonSection, target, buttonID) {
-              if (currentSite.siteTypeID === newSiteType.OTHERS) return;
-              const methodToCall = siteConfigMap[currentSiteName]?.applyButton;
-              if (typeof methodToCall === "function") methodToCall({ resolve, buttonSection, buttonID, target });
+            async function applyButtons(buttonSection, target) {
+              if (currentSite.siteTypeID === newSiteType.OTHERS) return null;
+              const [buttonID, applyButtonMethod] = [`#${buttonSection.id}`, siteConfigMap[currentSiteName]?.applyButton];
+              if (typeof applyButtonMethod === "function") await applyButtonMethod({ buttonSection, buttonID, target });
               else insertAfter(buttonSection, target);
+              return qA(`${buttonID} span[sn]:not([event-insert])`);
             }
 
             function setupScrollButton(selector, className, scrollOffset) {
               const element = qS(selector);
               if (!element) return;
-              const offsetTop = element.getBoundingClientRect().top + global.scrollY;
-              document.addEventListener("scroll", () => {
+              const offsetTop = element.getBoundingClientRect().top;
+              const toggleClass = () => {
                 const scrollTop = global.scrollY || document.documentElement.scrollTop;
                 element.classList.toggle(className, scrollTop > offsetTop + scrollOffset);
-              });
+              };
+              toggleClass();
+              document.addEventListener("scroll", toggleClass);
             }
 
             function scrollDetect() {
@@ -3098,7 +2973,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
                 case newSiteType.BRAVE:
                   scrollspan = def.const.scrollspan;
                   scrollbars = def.const.scrollbars;
-                  height = 100;
+                  height = 80;
                   break;
                 default:
                   return;
@@ -3154,36 +3029,27 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               if (resultFilters.length === 0) return;
               const { qs, delay } = filterObj;
               let timeout = Number.parseInt(delay);
-              if (isNaN(timeout) && !def.const.infinityFilterTimeInitiated) {
-                if (typeof def.const.infinityFilterTimeInitiated === "boolean") return;
-                global.addEventListener("load", () => {
-                  def.const.infinityFilterTimeInitiated = true;
-                  filterSearchResultsProcess(qs);
-                });
-                def.const.infinityFilterTimeInitiated = false;
+              if (isNaN(timeout) && !def.var.infinityFilterTimeInitiated) {
+                if (typeof def.var.infinityFilterTimeInitiated === "boolean") return;
+                global.addEventListener("load", () => (def.var.infinityFilterTimeInitiated = true) && filterSearchResultsProcess(qs));
+                def.var.infinityFilterTimeInitiated = false;
               } else deBounce({ fn: filterSearchResultsProcess, timer: "filterSearchResults", delay: timeout || 50 })(qs);
             }
 
-            function filterSearchResultsProcess(querystring) {
+            async function filterSearchResultsProcess(querystring) {
               if (!querystring) return;
-              const returnContent = new Map();
               const selectors = buildSelectors(querystring);
-              return new Promise(resolve => {
-                qA(`${selectors}`).forEach(item => processNode(item, returnContent));
-                resolve(returnContent);
-              })
-                .then(rtst => {
-                  if (!rtst || rtst.size === 0) return;
-                  rtst.forEach((content, item) => matchFilters(item, content));
-                  rtst.clear();
-                })
-                .then(() => sleep(1e2))
-                .then(() => {
-                  if (usedFilterWords.size === 0) return;
-                  if (qA(querystring.split(/,(?![^()]*\))/g)[0]).length < 2) return;
-                  const remainingResults = qA(selectors.split(/,(?![^()]*\))/g)[0]).length;
-                  handleRemainingResults(remainingResults);
-                });
+              const elements = qA(selectors);
+              if (elements.length === 0) return;
+              const returnContent = new Map();
+              elements.forEach(item => processNode(item, returnContent));
+              if (returnContent.size === 0) return;
+              returnContent.forEach((content, item) => matchFilters(item, content));
+              await sleep(1e2);
+              if (usedFilterWords.size > 0 && qA(querystring.split(/,(?![^()]*\))/g)[0]).length >= 2) {
+                const remainingResults = qA(selectors.split(/,(?![^()]*\))/g)[0]).length;
+                handleRemainingResults(remainingResults);
+              }
             }
 
             function processMatchedItem(item, content, filter) {
@@ -3195,11 +3061,9 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
             }
 
             function addDebugNotice(item, filter) {
-              const noticeNode = qS("notice-label", item);
-              if (!noticeNode) {
-                const notice = cE("notice-label", { class: "code", textContent: `<![CDATA[ "${filter}" ]]>` });
-                item.prepend(notice);
-              }
+              if (qS("notice-label", item)) return;
+              const notice = cE("notice-label", { class: "code", textContent: `<![CDATA[ "${filter}" ]]>` });
+              item.prepend(notice);
             }
 
             function adjustUI(siteName) {
@@ -3223,11 +3087,9 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
             }
 
             function matchFilters(item, content) {
+              if (item?.nodeType !== Node.ELEMENT_NODE) return;
               try {
-                for (let filter of resultFilters) {
-                  if (item?.nodeType !== Node.ELEMENT_NODE || !new RegExp(filter, "i").test(content)) continue;
-                  processMatchedItem(item, content, filter);
-                }
+                resultFilters.forEach(filter => new RegExp(filter, "i").test(content) && processMatchedItem(item, content, filter));
               } catch (e) {
                 ERROR("Filter.match:", e.message);
               }
@@ -3259,7 +3121,8 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               if (decrypt(requestVer) === def.var.curVersion) return;
               DEBUG("updateIconsForExtension: %cupdateToRequestIcon", "color:#dc143c");
               updateToRequestIcon(false);
-              GMsetValue("_version_", encrypt(def.var.curVersion));
+              cache.set(AUTOCHECK, def.var.curVersion);
+              GMsetValue(VERSION, encrypt(def.var.curVersion));
             }
 
             function processMainThreadTasks() {
@@ -3296,7 +3159,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
               }
               setupGlobalParameterListener();
               searchButtonAndStylesObserve();
-            })(await cache.get("_autoupdate_"), await GMgetValue("_version_"));
+            })(await cache.get(AUTOCHECK), await GMgetValue(VERSION));
           })(
             updateFlag => {
               if (CUR_WINDOW_TOP && isAutoUpdate && (!updateFlag || setDebuggerMode())) {
@@ -3342,19 +3205,16 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
             antiAds: false,
             customColor: { foregroundColor: "#f73131cd", backgroundColor: "#ffff80ad" },
           };
-          const configure = await GMgetValue("_configures_");
+          const configure = await GMgetValue(CONFIGURE);
           if (!configure) {
-            await GMlistValues().forEach(key => GMdeleteValue(key));
-            GMsetValue("_configures_", encrypt(JSON.stringify(defaults)));
+            const values = await GMlistValues();
+            values.forEach(key => GMdeleteValue(key));
+            GMsetValue(CONFIGURE, encrypt(JSON.stringify(defaults)));
             return defaults;
           }
           try {
             const config_date = JSON.parse(decrypt(configure));
-            return {
-              ...defaults,
-              ...config_date,
-              selectedEngine: Array.isArray(config_date.selectedEngine) ? config_date.selectedEngine : defaults.selectedEngine,
-            };
+            return { ...defaults, ...config_date, selectedEngine: Array.isArray(config_date.selectedEngine) ? config_date.selectedEngine : defaults.selectedEngine };
           } catch (e) {
             return defaults;
           }
@@ -3362,7 +3222,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
         async () => {
           const defaults = { filter: [], trigger: false };
           try {
-            const resultFilter = await GMgetValue("_resultFilter_");
+            const resultFilter = await GMgetValue(RESULTFILTER);
             if (!resultFilter) return defaults;
             const { filter, trigger } = JSON.parse(decrypt(resultFilter));
             return { filter: Array.isArray(filter) ? filter : [], trigger };
@@ -3370,26 +3230,18 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
             return defaults;
           }
         },
-        imgUrl => {
-          if (!CUR_WINDOW_TOP) return;
+        url => {
+          if (!CUR_WINDOW_TOP || !url) return;
           return new Promise((resolve, reject) => {
-            GMxmlhttpRequest({
-              url: imgUrl,
-              headers: { Accept: "*/*", Referer: imgUrl },
-              method: "GET",
-              timeout: 5e3,
-              responseType: "blob",
-              onreadystatechange: response => {
-                if (response.readyState !== 4) return;
-                if (response.status === 200) {
-                  let blob = response.response;
-                  DEBUG("Response.Blob:", blob);
-                  convertBlobToDataURL(blob, resolve, reject);
-                } else if (response.status !== 0) reject(new Error("NoAccessError"));
-              },
-              onerror: () => reject(new Error("NetworkError")),
-              ontimeout: () => reject(new Error("TimeoutError")),
-            });
+            const headers = { Accept: "*/*", Referer: url };
+            const onreadystatechange = response => {
+              if (response.readyState !== 4) return;
+              if (response.status === 200) convertBlobToDataURL(response.response, resolve, reject);
+              else if (response.status !== 0) reject(new Error("NoAccessError"));
+            };
+            const onerror = () => reject(new Error("NetworkError"));
+            const ontimeout = () => reject(new Error("TimeoutError"));
+            GMxmlhttpRequest({ url, headers, method: "GET", timeout: 5e3, responseType: "blob", onreadystatechange, onerror, ontimeout });
           }).catch(e => Promise.reject(ERROR("requestRemoteIcon:", e.message)));
         },
         options => {
@@ -3400,32 +3252,34 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           }
         }
       );
-    })(createTrustedTypePolicy(), async () => ({ navigatorInfo: await getNavigatorInfo(), locationInfo: getLocationInfo() }));
+    })(createTrustedTypePolicy());
   },
-  (object => {
-    return {
-      defineMethod,
-      ArrayMethods: [
-        ["Some", someProxy],
-        ["Find", findProxy],
-      ],
-      __protos__: { a: Array.prototype.slice, s: Object.prototype.toString, h: Object.prototype.hasOwnProperty, f: Array.from.bind(Array), g: getAvailableStorage() },
+  (array => {
+    const defineMethod = (property, methodFunction) => {
+      if (Reflect.getOwnPropertyDescriptor(array, property)) return;
+      Object.defineProperty(array, property, { value: methodFunction, writable: false, configurable: false, enumerable: false });
     };
-
-    function defineMethod(property, methodFunction) {
-      if (Reflect.getOwnPropertyDescriptor(object, property)) return;
-      Object.defineProperty(object, property, {
-        value: methodFunction,
-        writable: false,
-        configurable: false,
-        enumerable: false,
-      });
-    }
-
-    function getAvailableStorage() {
+    const arrayMethods = {
+      Some: function (callback, thisArg = this) {
+        for (let i = 0; i < this.length; i++) {
+          if (callback.call(thisArg, this[i], i, this)) return true;
+        }
+      },
+      Find: function (callback, thisArg = this) {
+        for (let i = 0; i < this.length; i++) {
+          if (callback.call(thisArg, this[i], i, this)) return this[i];
+        }
+      },
+    };
+    return { defineMethod, arrayMethods };
+  })(Array.prototype),
+  (() => ({
+    oT: any => Object.prototype.toString.call(any),
+    hP: (...any) => Object.prototype.hasOwnProperty.call(...any),
+    aF: Array.from.bind(Array),
+    gS: (testKey => {
       const testStorage = storageType => {
         try {
-          const testKey = "__gb_storage_test__";
           storageType.setItem(testKey, testKey);
           storageType.removeItem(testKey);
           return storageType;
@@ -3433,21 +3287,7 @@ void (function (ctx, SearchEngineAssistant, proxyArrayMethods) {
           return null;
         }
       };
-      return { local: testStorage(localStorage), session: testStorage(sessionStorage) };
-    }
-
-    function someProxy(callback, thisArg = this) {
-      for (let i = 0; i < this.length; i++) {
-        if (callback.call(thisArg, this[i], i, this)) return true;
-      }
-      return false;
-    }
-
-    function findProxy(callback, thisArg) {
-      for (let i = 0; i < this.length; i++) {
-        if (callback.call(thisArg, this[i], i, this)) return this[i];
-      }
-      return void 0;
-    }
-  })(Array.prototype)
+      return testStorage(localStorage);
+    })("__fr_storage_test__"),
+  }))()
 );
