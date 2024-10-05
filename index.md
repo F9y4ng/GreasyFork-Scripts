@@ -29,12 +29,16 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2024.09.11.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2024.10.05.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-+ 新增对 Canvas 画布字体渲染的参数开关。
-@ 修复对 Canvas 画布字体排除渲染无效的问题。
-@ 修复渲染 Canvas 元素字体阴影偏移量未定义的问题。
+# 本次更新会重置所有设置数据，如果您本地备份时长间隔超过六个月，强烈建议您重新配置渲染数据。
+- 优化精简非必要的函数方法、及无功效代码。
++ 新增 Firefox 126.0 及以上版本对字体缩放功能的支持。
++ 新增对 ShadowRoot::selection 伪元素的样式优化。
+@ 修复 iframe 异步加载内容时粗体修正失效的问题。
+@ 修复 iframe 元素在渲染预览时部分渲染失效的问题。
+@ 优化脚本数据存储结构，减少 15% 以上数据储存容量。
 @ 修复一些已知的问题，优化代码，优化样式。
 ```
 
@@ -104,14 +108,13 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2024.09.07.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2024.10.05.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ 修复 Sogou.com 搜索跳转按钮的样式。
-@ 修复 Swisscows 搜索的跳转及过滤规则。
-@ 优化去除搜索结果链接重定向的执行效率。
-@ 改进浏览器信息检测及解析功能的兼容性。
-@ 修复一些已知问题，优化代码，优化样式。
+@ 修正部分搜索引擎跳转按钮样式问题。
+@ 修正从百度首页搜索时按钮消失的问题。
+@ 修正页面滚动按钮样式切换函数的问题。
+@ 修正一些已知问题，优化代码，优化样式。
 ```
 
 ## 最新功能介绍
