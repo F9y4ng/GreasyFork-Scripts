@@ -29,12 +29,16 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data in a timely manner. Do not use backup files from unknown sources!
 
-## version 2024.09.11.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2024.10.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-+ Added parameter switch for Canvas font rendering.
-@ Fixed exclude not working for Canvas font rendering.
-@ Fixed rendering Canvas font shadowOffset undefined.
+# This update will reset all data, if your local backup is older than 6 months, it is recommended that you need to reconfigure the data.
+- Reduce unnecessary functions and ineffective code.
++ Added support for font scaling in Firefox above 126.
++ Added style optimization for ShadowRoot::selection.
+@ Fixed fix bold failure when iframe asynchronous load.
+@ Fixed iframe some effects not work when previewing.
+@ Optimized data storage by reducing capacity by 15%.
 @ Fixed some known issues, optimized code & style.
 ```
 
@@ -110,13 +114,12 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-## version 2024.09.07.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2024.10.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Fixed Sogou.com search jump button style.
-@ Fixed jump and filter rules for swisscows search.
-@ Optimized the efficiency of removing link redirect.
-@ Improved compatibility of browser-info detection.
+@ Fixed some search engine jump button style issue.
+@ Fixed buttons disappear when search from homepage.
+@ Fixed Bug of the page scroll style toggle function.
 @ Fixed some known issues, optimized code & style.
 ```
 
