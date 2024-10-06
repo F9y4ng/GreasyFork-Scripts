@@ -108,7 +108,7 @@ When a new font is installed, be sure to **restart the browser** first and **reb
 
 Font scaling (experimental), **OFF by default**, turn on font scaling in the **Advanced core settings**.
 
-- **KNOWN ISSUES I:** Due to the compatibility of Firefox (Gecko kernel), only the internal coordinate offset problem of the script has been fixed, but it will be insufficiently compatible with some website styles and functions, so please use it according to your needs and discretion. **Strongly recommended**: Use Firefox's self-scaling feature (`Ctrl++`, `Ctrl+-`) instead of this experimental feature.
+- **KNOWN ISSUES I:** Due to the compatibility of Firefox (Gecko version < 126) and Greasemonkey/Userscripts extentions, only the internal coordinate offset problem of the script has been fixed, but it will be insufficiently compatible with some website styles and functions, so please use it according to your needs and discretion. **Strongly recommended**: Use Firefox's self-scaling feature (`Ctrl++`, `Ctrl+-`) instead of this experimental feature.
 
 - **KNOWN ISSUES II:** The fix for viewport units `vw, vh, vmin, vmax` has been completed, solving the problem of inaccurate viewport unit lengths after font scaling. This feature is **experimental** and **OFF by default**, it can be turned on in the **Advanced Core Setting**.
 
