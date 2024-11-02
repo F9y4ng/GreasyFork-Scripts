@@ -263,7 +263,7 @@
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
 // @note               {"CN":"修正站点图标在非整比缩放时的样式错误。","EN":"Fixed icons scaling non-integral style error."};
-// @note               {"CN":"修正 Google 中文“下一页”的样式错误。","EN":"Fixed Google Chinese "next page" style error."};
+// @note               {"CN":"修正 Google 中文'下一页'的样式错误。","EN":"Fixed Google Chinese 'next page' style error."};
 // @note               {"CN":"修正 search.Yahoo 跳转按钮的样式问题。","EN":"Fixed style issue of search.Yahoo jump button."}
 // @note               {"CN":"修正 VM uad.getHighEntropyValues 造成的加载延迟。","EN":"Fixed load-delay caused by Violentmonkey uad.getHighEntropyValues."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
