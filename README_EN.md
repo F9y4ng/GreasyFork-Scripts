@@ -25,16 +25,17 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data promptly and don't use backup files from unknown sources!
 
-### version 2024.10.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2024.11.02.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-# This update will reset all data, if your local backup is older than 6 months, it is recommended that you need to reconfigure the data.
-- Reduce unnecessary functions and ineffective code.
-+ Added support for font scaling in Firefox above 126.
-+ Added style optimization for ShadowRoot::selection.
-@ Fixed fix bold failure when iframe asynchronous load.
-@ Fixed iframe some effects not work when previewing.
-@ Optimized data storage by reducing capacity by 15%.
++ Added font-feature-settings property settings when adding & using OpenType fonts (Non-monospace).
+@ Improved compatibility of Chinese with monospace.
+@ Improved bold-fixer performance for low-end PCs.
+@ Fixed INPUT issue caused by font HotShift in Firefox.
+@ Fixed URLs handling issue in viewport unit correction.
+@ Fixed load-delay caused by Violentmonkey uad.getHighEntropyValues.
+@ Fixed iframe asynchronous loading style not parsing.
+@ Fixed Canvas font shadow rendering is not working.
 @ Fixed some known issues, optimized code & style.
 ```
 
@@ -135,12 +136,13 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-### version 2024.10.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2024.11.02.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Fixed some search engine jump button style issue.
-@ Fixed buttons disappear when search from homepage.
-@ Fixed Bug of the page scroll style toggle function.
+@ Fixed icons scaling non-integral style error.
+@ Fixed Google Chinese "next page" style error.
+@ Fixed style issue of search.Yahoo jump button.
+@ Fixed load-delay caused by Violentmonkey uad.getHighEntropyValues.
 @ Fixed some known issues, optimized code & style.
 ```
 
