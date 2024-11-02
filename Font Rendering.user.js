@@ -5,7 +5,7 @@
 // @name:en            Font Rendering (Customized)
 // @name:ko            글꼴 렌더링(자체 스크립트)
 // @name:ja            フォントレンダリング
-// @version            2024.10.05.1
+// @version            2024.11.02.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -14,13 +14,13 @@
 // @description:ko     이 스크립트는 MacType을 설치하지 않고도 브라우저의 글꼴 렌더링을 최적화하여 각 페이지의 글꼴을 더 질감 있게 만듭니다. 기본적으로 "Microsoft YaHei"를 사용하며, 사용자의 취향에 따라 다른 글꼴을 사용자 정의할 수 있습니다. 스크립트는 글꼴 재작성, 스무딩, 스케일링, 아웃라인, 그림자, 특수 스타일 요소 필터링 등 고급 기능을 제공합니다. 스크립트 관리자 아이콘을 클릭하거나 단축키를 사용하여 설정 화면을 열 수 있습니다. 대부분의 주요 브라우저와 스크립트 관리자, 일반적인 확장 프로그램과 호환됩니다.
 // @description:ja     このスクリプトは、MacTypeをインストールせずにブラウザのフォントレンダリングを最適化し、各ページのフォントをより質感のあるものにします。デフォルトでは「Microsoft YaHei」を使用し、好みに応じて他のフォントをカスタマイズできます。スクリプトは、フォントの書き換え、スムージング、スケーリング、アウトライン、シャドウ、特殊スタイル要素のフィルタリングなどの高度な機能を提供します。スクリプトマネージャのアイコンをクリックするか、ショートカットを使用して設定画面を呼び出すことができます。ほとんどの主流のブラウザやスクリプトマネージャ、一般的な拡張機能と互換性があります。
 // @namespace          https://openuserjs.org/scripts/f9y4ng/Font_Rendering_(Customized)
-// @icon               https://img.icons8.com/stickers/48/font-style-formatting.png
+// @icon               data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAFtklEQVR4nO1WW0yURxSe1rQ1aVMbH9ukTZvG9qXxiUbTF/CCgnLRBVEQIgpdVigoCLtcRC5WvC0iN0EQ0K0uVRZQELRAAS0spIq0CHW3ihdUWFh2/xm0aXrxa2aUBQoGVmv70km+ZOfMOXO+c/acMz8h/69p1sjIiCOltIlS+lCSJEt/f3/l4ODgPPJvLMaYF6X09/v3TaiqvIi68+2wWKwYGhqiNTU1Di/UuSRJcxlj5ms9vVjtEo/ItZkI8dqHTb5pGBoahsFguEoIee2FEWCMJTLGsEV+EOkbT6Ahvk0g0icLR/KqwM+ys7ODX4hzALMlSRr8sdMI2fLtqI/X2wjoohrgsSxOZKGrq+syIWS2xWKZwxiLZYxVWyyWaqvVus1kMr3xzAQYY5/zCBNjCrE3UGNzPorwNRk4pW0ApfSRRqORM8auc32j8TZ6b9wR2RkYGLjV3Nz8/rNE/zJjzHDjeh88lqhwLrZFOM0PKYcusl78Ph5eCx+PJEgShSRJj0ymISg2qbHSSYkVi2KwRXEQZrMFPT09bYSQV+yNfhWPQL2nFDv8C2xRr3VNgnJdjm0ftGo3ztfoRbRpKV8h2GM36uJaURffioCVXyInQyfOMjMzA+wl0NLfPwi3pSqciWkWzoo2n8F6WSrclqhQq7woZAWKCgT57cG9eya4OEXbssNxIqIGbouVGB6yoLOzs33G3cIY+4yzLjpchZhx0YZ5pUOrqUNCdAHSNhyzyX1XJiMi9CAUq/ZNqpMN7rtQXHhW/EXJycluMyJAKa2wDFtF3596ElFdbCvWLNsO2fIEgTBZus1JxqZSOC2MgCbsrNiXRzXgTHSTLUOyFQmcAFpbW88TQmZN53wepfRP3akmhHqpJ0U0Fcoi6xHplWXbR6zJQKzvobG6cdmBSt0FWK3W30JDQxdORyCfUgq/1Sk4+kX1jAgcDqmw1UlVdJOoEVEnqu+E7MBGLQK8U0Ux1tfXf00IeWlK52az+U1K6S+NDZcQ6LHL5iA3pAzr3VOx3mMiAtx3QhNejcOKcptuin8R1Lu1SIotwp4ns4MPMM+lcWhqvAyz2Tzi7Oz88dOKz4OzjAnPRVbwSdulfm4pOF/bhp+NtyeAt5hi9X5UbPvWpuu5JA7uzrGie3jqR+WpAcViRvD7T58+nTclAUmS1j2e+5nIlZcJw+zgk+Lh4fK+vr673d3dXUaj8RrfNzZcxmrn+AkjunJbI3RR9QKV0Y02+TeqFqx0isGVDgP6+/uH5s+f/84kAhaL5T1Jkv5o13fBfakK/m6pohOudFzjBfSro6OjnBDyoV6vTxBEFZnY4Tc2pKZD7LpDUG49JILRarWpU2bBYDCkcQWTyYyrXdfFY8N7uLCwMJ8Q8smTQv2pp/smXJ2icU71eCCdCK/FZpkaCtn+CeCy0VauimmCi2M0bly/g97e3puEkDlTkigrK1N0dHS0GY1Gg16vb5bL5fGEkE959T548GA+J7gr6RiivMdaT+65D6rIXBTmnZ6ArWFZCPfOGHvAvDOg3l0qsqBQKDyf3o+EvE4I4a/YB+OZUkpduHFoUDr2BR4Xl2q3nIProhjcuzsgLh4P/iryqPms4LppAUcRGZYlzhITE5XE3kUpnceNK8suwG2REuGyA6LF8rMrJzkfRfqeUqHDdd0Wq1BT3SLkrq6uG+xybrVa3+JP9OjFLRd/QH5OJZoaLz3V+Sj4bDlyuArft3fbZH19fbfUavVce6IP5Ib52SeREHXguVCUVy5IlJSU7LSHQAQ38veOQ+1eX7Tl+jwTzqT5IcgvURAoLi4uIIS8bDeBS/k+uK2VPRP0OWv/TmDWjAgwxoK40Q5lDta6K58LOxPyR7+os2dM4OHDh28PDw/T6QpupjCZTJKDg4N9naDRaD4qLS3N1el0J54HJSUlhQsWLNhECHnXLgLj1qv/AKb+Lvgv1l/c+5HQxwRN2QAAAABJRU5ErkJggg==
 // @homepage           https://f9y4ng.github.io/GreasyFork-Scripts/
 // @homepageURL        https://f9y4ng.github.io/GreasyFork-Scripts/
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.meta.js
 // @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
-// @require            https://update.greasyfork.org/scripts/437214/1435000/frColorPicker.js#sha256-Rt7mY2BjCCdYkZp1frmkN/7zQ45yKn1LH5xR4oZsvps=
+// @require            https://update.greasyfork.org/scripts/437214/1467138/frColorPicker.js#sha256-koqLgrwiPGBPR6GZ69ckQskbkBPdfMKnTBSgYaMnfgo=
 // @match              *://*/*
 // @grant              GM_getValue
 // @grant              GM.getValue
@@ -68,7 +68,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
    * PROBLEMS OR NEW FEATURES, PLEASE FEEDBACK IN GITHUB ISSUES, THANK YOU!    *
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-  const { defineMethod, arrayMethods, obj = Object.create(null) } = arrayProxy;
+  const { defineMethod, arrayMethods, object } = arrayProxy;
   const utils = {
     debugging: IS_OPEN_DEBUG,
     info: GM?.info ?? GM_info,
@@ -77,7 +77,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     alert: alert.bind(sctx),
     prompt: prompt.bind(sctx),
     confirm: confirm.bind(sctx),
-    console: Object.assign(obj, ctx.console),
+    console: Object.assign(object, ctx.console),
     reconstruct: { flag: false, date: "2024.10.05" },
   };
   if (!ctx.navigation) {
@@ -115,7 +115,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     /* PERFECTLY COMPATIBLE FOR GREASEMONKEY, TAMPERMONKEY, VIOLENTMONKEY, USERSCRIPTS 2024-03-15 F9Y4NG */
 
     const { atob, btoa, alert, prompt, confirm, console, reconstruct, debugging, info: GMinfo } = secureVars;
-    const { aF: asArray, oT: getObjectType, gS: storage, object = Object.seal(Object.create(null)) } = customFuntions;
+    const { aF: asArray, oT: getObjectType, gS: storage, iO: immutObj } = customFuntions;
     const GMversion = GMinfo.version ?? GMinfo.scriptHandlerVersion ?? "unknown";
     const GMscriptHandler = GMinfo.scriptHandler;
     const GMsetValue = gmSelector("setValue");
@@ -151,13 +151,13 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         caf: Symbol(`𐠱${generateRandomString(8, "hex")}`),
         dialog: `fr-dialog-${generateRandomString(8, "hex")}`,
         cssAttrName: `fr-css-${generateRandomString(8, "hex")}`,
-        boldAttrName: `fr-bold-${generateRandomString(8, "hex")}`,
+        boldAttrName: `fr-bold-${generateRandomString(8, "date")}`,
         iframeAttrName: `fr-iframe-${generateRandomString(8, "hex")}`,
         queryString: `html,head,head *,title,base,meta,style,link,script,noscript,iframe,img,template,template *,slot,canvas,svg,svg *,rect,ellipse,circle,line,polyline,polygon,path,image,clippath,mask,pattern,filter,stop,picture,form,object,param,embed,audio,video,source,track,progress,fr-colorpicker,fr-colorpicker *,fr-configure,fr-configure *,fr-dialogbox,fr-dialogbox *,gb-notice,gb-notice *`,
         flagName: "fr-found-conflict-callback",
       },
       var: {
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.10.05.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.11.02.0",
         scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
         scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("Rjl5NG5n"),
         getScreenCTM: SVGGraphicsElement.prototype.getScreenCTM,
@@ -166,6 +166,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         fillText: CanvasRenderingContext2D.prototype.fillText,
         strokeText: CanvasRenderingContext2D.prototype.strokeText,
         stopImmediatePropagation: Event.prototype.stopImmediatePropagation,
+        stopPropagation: Event.prototype.stopPropagation,
       },
       url: {
         introURL: decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRkZvbnQtUmVuZGVyaW5n"),
@@ -256,6 +257,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         render: generateRandomString(8, "char"),
         mono: generateRandomString(8, "char"),
         cm: generateRandomString(8, "mix"),
+        fi: generateRandomString(8, "mix"),
         iscusmono: generateRandomString(6, "char"),
         selector: generateRandomString(8, "char"),
         cleaner: generateRandomString(6, "char"),
@@ -297,12 +299,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       constructor(context) {
         if (RAF.instance) return RAF.instance;
         this.context = context;
-        this._registerAnimationFrame(context);
         this.timerMap = { timeout: {}, interval: {} };
-        this.setTimeout = this.setTimeout.bind(this);
-        this.setInterval = this.setInterval.bind(this);
-        this.clearTimeout = this.clearTimeout.bind(this);
-        this.clearInterval = this.clearInterval.bind(this);
+        this._registerAnimationFrame(context);
+        ["setTimeout", "setInterval", "clearTimeout", "clearInterval"].forEach(method => (this[method] = this[method].bind(this)));
         RAF.instance = this;
       }
       _registerAnimationFrame(scope) {
@@ -315,10 +314,11 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         let lastTime = performance.now();
         const timerSymbol = Symbol(type);
         const step = () => {
+          const curentTime = performance.now();
           this._setTimerMap(timerSymbol, type, step);
-          if (interval < 16.7 || performance.now() - lastTime >= interval) {
-            if (typeof fn === "function") fn(...args);
-            if (type === "interval") lastTime = performance.now();
+          if (interval < 16.67 || curentTime - lastTime >= interval) {
+            if (typeof fn === "function") fn.apply(null, args);
+            if (type === "interval") lastTime = curentTime;
             else this.clearTimeout(timerSymbol);
           }
         };
@@ -354,19 +354,20 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       constructor(targetNode = () => document.documentElement) {
         this.targetNode = targetNode;
         this.result = new Map();
+        this.callbacks = new Map();
         this.isCancelled = false;
-        this.callbackSet = new Set();
+        this.observer = null;
         this.config = { childList: true, subtree: true, attributes: true };
       }
-      async getNodeAndObserve({ name, callback, config } = {}) {
-        if (typeof callback === "function") this.callbackSet.add({ name, callback });
+      async getNodeAndObserve({ name, callback, config, timeout = 1e4 } = {}) {
+        if (typeof callback === "function") this.callbacks.set(name, callback);
         this.config = config ?? this.config;
         this.target = this.targetNode();
         if (this.target) return this._observeElement(this.target);
         try {
-          const raceResult = await Promise.race([this._waitForTarget(), sleep(1e4, { useCachedSetTimeout: true })]);
+          const raceResult = await Promise.race([this._waitForTarget(), sleep(timeout, { useCachedSetTimeout: true, instant: true })]);
           if (raceResult) return this._observeElement(raceResult);
-          throw new Error("Target node wait timeout!");
+          throw new Error(`Target: ${toString(this.targetNode)} can not be found.`);
         } catch (e) {
           this.isCancelled = true;
           ERROR(`getNodeAndObserve${IN_FRAMES}:`, e.message);
@@ -375,19 +376,30 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       }
       _waitForTarget() {
         return new Promise(resolve => {
-          const observer = new MutationObserver(() => {
+          if (this.observer) this.observer.disconnect();
+          this.observer = new MutationObserver(() => {
             const target = this.targetNode();
             if (target || this.isCancelled) {
-              observer.disconnect();
+              this.observer.disconnect();
               resolve(target);
             }
           });
-          observer.observe(document, { childList: true, subtree: true });
+          this.observer.observe(document, { childList: true, subtree: true });
         });
+      }
+      _handleCallbacks(node, mutations, observer) {
+        for (const [name, callback] of this.callbacks) {
+          try {
+            const result = callback({ node, mutations, observer }) ?? node;
+            this.result.set(name, result);
+          } catch (e) {
+            ERROR(`Error in callback '${name}':`, e.message);
+          }
+        }
       }
       _observeElement(node) {
         this.result.set(void 0, node);
-        if (this.callbackSet.size === 0) return Promise.resolve(this.result);
+        if (this.callbacks.size === 0) return Promise.resolve(this.result);
         return new Promise(resolve => {
           const elementObserver = new MutationObserver((mutations, observer) => {
             this._handleCallbacks(node, mutations, observer);
@@ -395,16 +407,6 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           });
           elementObserver.observe(node, this.config);
         });
-      }
-      _handleCallbacks(node, mutations, observer) {
-        for (const { name, callback } of this.callbackSet) {
-          try {
-            const result = callback({ node, mutations, observer }) ?? node;
-            this.result.set(name, result);
-          } catch (e) {
-            ERROR("Error in callback for", { callback }, ":", e.message);
-          }
-        }
       }
     }
 
@@ -426,7 +428,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       return gmFunctions[rec] ?? __console("warn", `Grant 'GM.${rec}' is not available.`) ?? (() => {});
     }
 
-    function __console(action, message = "", ...args) {
+    function __console(action, message, ...args) {
       const consoleMethods = {
         log: ["log", "%c\u27A4 %c", "display:inline-block", "font-family:ui-monospace,monospace"],
         info: ["log", "%c\u27A4 ", "display:inline-block;padding:4px 0"],
@@ -434,14 +436,14 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         warn: ["warn", "%c\ud83d\udea9 ", "display:inline-block;font-family:ui-monospace,monospace"],
         count: ["count", "\u27A4 "],
       };
-      const [consoleMethod, _] = [consoleMethods[action], this ?? console];
-      if (!consoleMethod) return _.log(message, ...args);
+      const [_, msg, consoleMethod] = [this ?? console, message ?? "", consoleMethods[action]];
+      if (!consoleMethod) return _.log(msg, ...args);
       const [method, prefix, ...surfix] = consoleMethod;
-      return _[method](prefix + message, ...surfix, ...args);
+      return _[method](prefix + msg, ...surfix, ...args);
     }
 
     function checkLocalChineseLanguage() {
-      const lang = navigator.language || navigator.userLanguage || "en-US";
+      const lang = navigator.language || Intl.DateTimeFormat().resolvedOptions().locale || "en-US";
       return lang.startsWith("zh");
     }
 
@@ -462,10 +464,10 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       }
     }
 
-    function cE(nodeName, attributes = {}) {
+    function cE(nodeName, attributes) {
       const el = document.createElement(nodeName);
       if (getObjectType(attributes) !== "[object Object]") return el;
-      for (const [key, value] of setIterator(attributes)) {
+      for (const [key, value] of Object.entries(attributes)) {
         if (key === "class") Array.isArray(value) ? el.classList.add(...value) : el.classList.add(value);
         else if (["innerHTML", "textContent"].includes(key)) el[key] = value;
         else el.setAttribute(key, value);
@@ -478,7 +480,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     }
 
     function gCS(node, opt = null) {
-      if (node?.nodeType !== Node.ELEMENT_NODE) return new Proxy(object, { get: () => NaN });
+      if (node?.nodeType !== Node.ELEMENT_NODE) return new Proxy(immutObj, { get: () => NaN });
       return global.getComputedStyle(node, opt);
     }
 
@@ -486,9 +488,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       return Math[type]((global.crypto.getRandomValues(new Uint32Array(1))[0] / (0xffffffff + 1)) * range);
     }
 
-    function uniq(array) {
+    function uniq(array, predicate = Boolean) {
       if (!Array.isArray(array)) return [];
-      return asArray(new Set(array)).filter(Boolean);
+      return [...new Set(array.filter(predicate))];
     }
 
     function toString(value) {
@@ -502,13 +504,13 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     }
 
     function getNodeName(node) {
-      return (node?.nodeName ?? "").toLowerCase();
+      return node?.nodeName?.toLowerCase() ?? "";
     }
 
     function setIterator(collection) {
-      if (!collection) return [][Symbol.iterator]();
+      if (!collection) return { iterator: [][Symbol.iterator](), length: 0 };
       collection = typeof collection[Symbol.iterator] === "function" ? collection : typeof collection.length === "number" ? asArray(collection) : Object.entries(collection);
-      return collection[Symbol.iterator]();
+      return { iterator: collection[Symbol.iterator](), length: collection.size ?? collection.length ?? Object.keys(collection).length };
     }
 
     function encrypt(string, encode = true) {
@@ -532,6 +534,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     }
 
     function generateRandomString(length, type) {
+      if (type === "date") return new Date().setHours(20, 30, 40, 50).toString(20);
       const characters = {
         mix: "mYsTBgpkwNcGzFJdOMrt8n2jUC3fWRlKVA5y16oLxIXQE7Z9buvqie4PahH0SD",
         char: "zkDcUGopOvHJLfIZdPqEeRmyCSNYwrgbsFQuBXxnVWiltjMhaATK",
@@ -552,36 +555,36 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         { host: "github.dev", policy: "safeInnerHtml" },
         { host: "vscode.dev", policy: "safeInnerHtml" },
         { host: "bing.com", policy: "rwflyoutDefault" },
+        { host: "copilot.microsoft.com", policy: "@centro/hvc-loader" },
       ];
       const policyName = whitelist.Find(entry => currentHostName.endsWith(entry.host))?.policy ?? "fr#safeInnerHtml";
       return global.trustedTypes.createPolicy(policyName, defaultPolicy);
     }
 
-    function getMainStyleElements({ currentScope, target = document }) {
-      return currentScope ? qS(`#${def.id.rndStyle}`) : qA("style[id]", target).filter(item => asArray(item.attributes).Some(i => /^fr-css-[0-9a-f]{8}$/.test(toString(i.name))));
+    function getMainStyleElements({ primaryElement = false, target = document } = {}) {
+      if (primaryElement) return qS(`style#${def.id.rndStyle}`, target);
+      return qA("style[id]", target).filter(s => asArray(s.attributes).Some(a => /^fr-css-[0-9a-f]{8}$/.test(a.name)));
     }
 
     function checkRedundantScript(context) {
-      const redundantScripts = context["fr-init-redundantcheck"];
       const reportRedundanceError = () => {
-        const scriptRedundanceText = IS_CHN
+        const errorText = IS_CHN
           ? `\ud83d\udea9 [脚本冗余警告]:\r\n发现冗余安装的脚本: "${def.var.scriptName}"，如刷新后问题依旧，请访问 ${def.url.feedback}/117 排查错误。`
           : `\ud83d\udea9 [Redundant Warning]:\r\nFound Redundant Script: '${def.var.scriptName}', if persists after reloading, please visit ${def.url.feedback}/117 to troubleshoot.`;
         const troubleshoot = `\ufff8\ud83d\uded1 ${IS_CHN ? "发现冗余安装的脚本，点击排查！" : "Troubleshoot Redundant"}`;
-        CUR_WINDOW_TOP && GMregisterMenuCommand(troubleshoot, () => void (GMopenInTab(`${def.url.feedback}/117`, false) && refresh())) && __console("error", scriptRedundanceText);
+        if (CUR_WINDOW_TOP) GMregisterMenuCommand(troubleshoot, () => GMopenInTab(`${def.url.feedback}/117`, false) && refresh()) && __console("error", errorText);
         return true;
       };
-      if (redundantScripts === true) return reportRedundanceError();
+      if (context["fr-init-redundantcheck"] === true) return reportRedundanceError();
       context["fr-init-redundantcheck"] = true;
       if (GMcontextMode) {
-        const redundantScriptsInfo = document.documentElement.getAttribute("fr-init-rc");
-        if (redundantScriptsInfo === "true") return reportRedundanceError();
-        const contextWarnText = IS_CHN
+        if (document.documentElement.getAttribute("fr-init-rc") === "true") return reportRedundanceError();
+        const contextText = IS_CHN
           ? `${def.var.scriptName}警告\r\n脚本的注入模式已设置为"content"，部分脚本功能将受限制，如框架页面内部分功能失效、字体缩放后无法全局修正坐标等。`
           : `${def.var.scriptName} Warning\r\nThe injection mode of scripts has been set to "content", and some script functions will be limited.`;
-        CUR_WINDOW_TOP && __console("warn", contextWarnText);
+        CUR_WINDOW_TOP && __console("warn", contextText);
       }
-      if (Object.freeze(def.const)) updateFlagAtRootElement(document.documentElement);
+      Object.freeze(def.const) && updateFlagAtRootElement(document.documentElement);
     }
 
     function refresh() {
@@ -601,14 +604,14 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
       function getGlobalInfoFromUAD(uad) {
         const platform = getFullPlatformName(uad.platform);
-        const mapBrandPath = ({ brand: b, version: v }) => `${/Not[^a-z]*A[^a-z]*Brand/i.test(b) ? 9 : /^Chrom(?:e|ium)$/i.test(b) ? 5 : 1}${b}\r${v}`;
+        const mapBrandPath = ({ brand: b, version: v }) => `${/Not[^a-z]*A[^a-z]*Brand/i.test(b) ? 9 : /^Chrom(?:e|ium)|Firefox|Safari$/i.test(b) ? 5 : 1}${b}\r${v}`;
         const [brand, brandVersion] = uad.brands?.map(mapBrandPath).sort()[0]?.slice(1).split("\r") ?? [];
         const engineMap = { Chrome: "Blink", Chromium: "Blink", Firefox: "Gecko", Safari: "WebKit" };
         const mapEnginePath = ({ brand, version }) => /^(Chrom(?:e|ium)|Firefox|Safari)$/i.test(brand) && `${brand}\r${version}`;
         const [engine, engineVersion] = uad.brands?.map(mapEnginePath).filter(Boolean)[0]?.split("\r") ?? [brand, brandVersion];
         const engineInfo = { engine: engineMap[capitalize(engine)] ?? getEngineFromUA(navigator.userAgent), engineVersion: parseFloat(engineVersion) || 99, creditEngine };
         const browserInfo = { brand: (brand?.split(/\s/) ?? []).slice(-1)[0] ?? "Unknown", brandVersion: formatVersion(brandVersion), platform };
-        return { ...engineInfo, ...browserInfo, source: uad.voucher ? "ext" : "uad", voucher: uad.voucher ?? null };
+        return { ...engineInfo, ...browserInfo, source: uad.source ?? "uad", voucher: uad.voucher ?? null };
       }
 
       function getGlobalInfoFromUA(ua) {
@@ -620,35 +623,32 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       }
 
       async function getUserAgentDataFromExtension(voucher) {
-        const getVMUserAgentData = async uad => {
-          if (!uad) return null;
-          const { brand, version, browserName, browserVersion, os, arch } = uad;
-          const [bitness, architecture] = [arch?.split("-")[1], arch?.split("-")[0]];
-          let brands = [
-            { brand: capitalize(brand || "Not)A;Brand"), version: brand ? version : "99" },
-            { brand: capitalize(browserName), version: browserVersion },
-          ];
-          if (GMinfo.userAgentData?.brands?.[0]) {
-            try {
-              return { ...(await getUserAgentDataHighEntropyValues(GMinfo.userAgentData)), voucher };
-            } catch (e) {
-              brands = [...GMinfo.userAgentData.brands, ...brands];
-            }
+        const getVMUserAgentData = ({ browserName, browserVersion, os, arch }) => {
+          const [architecture, bitness] = arch?.split("-") ?? [];
+          let brands = [{ brand: capitalize(browserName), version: browserVersion }];
+          if (parseFloat(browserVersion) < 57.0 && GMinfo.userAgent) {
+            const [, brand, version] = GMinfo.userAgent.match(/\s(Chrom(?:e|ium)|Firefox)\/(\d+[.0-9]*)/i) ?? [];
+            if (brand) brands = [{ brand: capitalize(brand), version }, ...brands];
           }
-          return { bitness, architecture, brands, platform: capitalize(os), voucher };
+          return { bitness, architecture, brands, platform: capitalize(os), source: "ext", voucher };
         };
-        const vmuad = voucher.startsWith("Violentmonkey") && GMinfo.platform ? await getVMUserAgentData(GMinfo.platform) : null;
-        const tmuad = voucher.startsWith("Tampermonkey") && creditEngine !== "Blink" /* disabled due to issues#2164 */ && GMinfo.userAgentData ? { ...GMinfo.userAgentData, voucher } : null;
-        const uad = navigator.userAgentData?.brands?.[0] ? await getUserAgentDataHighEntropyValues(navigator.userAgentData) : null;
-        return vmuad ?? tmuad ?? uad;
-      }
-
-      async function getUserAgentDataHighEntropyValues(uad) {
-        return await uad.getHighEntropyValues(["bitness", "architecture", "fullVersionList"]).then(rst => {
-          rst.brands = rst.fullVersionList;
-          delete rst.fullVersionList;
-          return rst;
-        });
+        if (voucher.startsWith("Violentmonkey") && GMinfo.platform) return getVMUserAgentData(GMinfo.platform);
+        const getTMUserAgentData = uad => {
+          if (creditEngine === "Gecko" && parseFloat(uad.brands[0].version) < 78.0) {
+            const [, brand, version] = navigator.userAgent.match(/\s(Firefox)\/(\d+[.0-9]*)/i) ?? [];
+            if (brand) return { ...uad, brands: [{ brand: capitalize(brand), version }, ...uad.brands], source: "ua" };
+          }
+          return { ...uad, source: "ext", voucher };
+        };
+        if (voucher.startsWith("Tampermonkey") && GMinfo.userAgentData) return getTMUserAgentData(GMinfo.userAgentData);
+        const getUADHighEntropyValues = async uad =>
+          await uad.getHighEntropyValues(["bitness", "architecture", "fullVersionList"]).then(rst => {
+            rst.brands = rst.fullVersionList;
+            delete rst.fullVersionList;
+            return rst;
+          });
+        if (navigator.userAgentData?.brands?.[0]) return await getUADHighEntropyValues(navigator.userAgentData);
+        return null;
       }
 
       function getBrowserInfoFromUA(ua, checkString, getVersion) {
@@ -670,13 +670,13 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           Trident: { brand: "IE", engine: "Trident", verset: ["MSIE", "rv"] },
           Presto: { brand: "Opera", engine: "Presto" },
         };
-        for (const [key, { brand, engine, verset, as }] of setIterator(brandMap)) {
+        for (const [key, { brand, engine, verset, as }] of Object.entries(brandMap)) {
           if (!checkString(key)) continue;
-          const enVersionKey = as || key;
-          const engineVersion = parseFloat(getVersion(enVersionKey, enVersionKey.length + 1) || 99);
           const versionKey = asArray(verset ?? []).Find(k => checkString(k)) || key;
           let brandVersion = getVersion(versionKey, versionKey.length + 1);
           if (!brandVersion) continue;
+          const enVersionKey = as || key;
+          const engineVersion = parseFloat(getVersion(enVersionKey, enVersionKey.length + 1) || 99);
           return { brand, brandVersion: formatVersion(brandVersion), engine, engineVersion };
         }
         const { b: brand, bv: brandVersion, ev: engineVersion } = getUnregisteredBrandAndVersionFromUA(ua);
@@ -709,7 +709,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         if (nameOffset === 0 || verOffset === -1 || verOffset < nameOffset) return { b: "Unknown", bv: "0.0.0.0", ev: 99 };
         const brand = ua.slice(nameOffset, verOffset).trim();
         const brandVersion = formatVersion(ua.slice(verOffset + 1).match(/\d*\.?\d+/)?.[0]);
-        const engineVersion = parseFloat(ua.match(/(Chrom(?:e|ium)|Firefox|Version)\/(\d+(?:\.\d+)*)/i)?.[2] || brandVersion || 99);
+        const engineVersion = parseFloat(ua.match(/(?:Chrom(?:e|ium)|Firefox|Version)\/(\d+[.0-9]*)/i)?.[1] || brandVersion || 99);
         const validVersion = (!/version|\/|\(|\)|;/i.test(brand) && brandVersion) || "0.0.0.0";
         return { b: brand, bv: validVersion, ev: engineVersion };
       }
@@ -750,7 +750,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       return Object.is(key, value);
     }
 
-    function sleep(delay, { useCachedSetTimeout } = {}) {
+    function sleep(delay, { useCachedSetTimeout, instant } = {}) {
       const timeoutFunction = useCachedSetTimeout ? setTimeout : raf.setTimeout;
       const sleepPromise = new Promise(resolve => {
         timeoutFunction(resolve, delay);
@@ -758,26 +758,22 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       const promiseFunction = value => sleepPromise.then(() => value);
       promiseFunction.then = sleepPromise.then.bind(sleepPromise);
       promiseFunction.catch = sleepPromise.catch.bind(sleepPromise);
-      return promiseFunction;
+      return instant ? sleepPromise : promiseFunction;
     }
 
-    function deBounce({ fn, timer, delay, immed = false, once = false } = {}) {
-      if (typeof fn !== "function" || !timer) return () => {};
-      return function (...args) {
-        const [name, context] = [Symbol.for(toString(timer)), this];
-        if (immed === true && typeof def.count[name] === "undefined") {
-          fn.apply(context, args);
-          if (once === true) return (def.count[name] = true);
-        } else if (def.count[name]) {
-          if (def.count[name] === true) return true;
-          raf.clearTimeout(def.count[name]);
-        }
-        def.count[name] = raf.setTimeout(() => {
-          fn.apply(context, args);
-          if (once === true) return (def.count[name] = true);
-          delete def.count[name];
-        }, Number(delay) || 0);
-      };
+    function createDeBounce({ fn, delay, once = false, immediate = false }) {
+      if (typeof fn !== "function" || typeof delay !== "number" || delay < 0) throw new Error("createDeBounce: Invalid arguments");
+      let timeoutId;
+      function debounced(...args) {
+        const context = this;
+        const executeFunction = () => (fn.apply(context, args), (timeoutId = once || null));
+        if (timeoutId === true) return;
+        if (timeoutId) raf.clearTimeout(timeoutId);
+        else if (immediate && executeFunction()) return;
+        timeoutId = raf.setTimeout(executeFunction, delay);
+      }
+      debounced.setImmediate = immedValue => (immediate = Boolean(immedValue));
+      return debounced;
     }
 
     function safeRemoveNode(expression, scope) {
@@ -786,9 +782,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       return pendingNodes.every(el => el.remove() || el.parentNode === null);
     }
 
-    function callStopPropagations(event, prevent = false) {
-      if (prevent) event.preventDefault();
-      def.var.stopImmediatePropagation.call(event);
+    function stopEventPropagation(event, { immediate = true, preventDefault = false } = {}) {
+      if (preventDefault) event.preventDefault();
+      def.var[immediate ? "stopImmediatePropagation" : "stopPropagation"].call(event);
     }
 
     function convertToUnicode(str) {
@@ -814,10 +810,10 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     /* ENVIRONMENT_VARIABLE_PREPROCESSING */
 
     void (async function (tTP, JSON) {
-      const [EXCLUDESITES, FONTSET, DOMAINFONTSET, CUSTOMFONTS] = ["_EXCLUDE_SITES_", "_FONTS_SET_", "_DOMAINS_FONTS_SET_", "_CUSTOM_FONTLIST_"];
-      const [CONFIGURE, MONORULES, MONOFONTS, MONOFEATS] = ["_CONFIGURE_", "_MONOSPACED_SITERULES_", "_MONOSPACED_FONTLIST_", "_MONOSPACED_FEATURE_"];
-      const [FONTOVERRIDE, FONTSCALE, FONTCHECKLIST] = ["_FONTOVERRIDE_DEF_", "_FONTSCALE_DEF_", "_FONTCHECKLIST_"];
-      const [getDocumentElement, getHeadElement, getBodyElement] = [void 0, () => document.head, () => document.body].map(n => new NodeObserver(n));
+      const [CONFIGURE, EXCLUDESITES, FONTSET, DOMAINFONTSET, CUSTOMFONTS] = ["_CONFIGURE_", "_EXCLUDE_SITES_", "_FONTS_SET_", "_DOMAINS_FONTS_SET_", "_CUSTOM_FONTLIST_"];
+      const [CUSTOMPROPERTY, MONORULES, MONOFONTS, MONOFEATS] = ["_CUSTOM_PROPERTY_", "_MONOSPACED_SITERULES_", "_MONOSPACED_FONTLIST_", "_MONOSPACED_FEATURE_"];
+      const [FONTOVERRIDE, FONTSCALE, FONTCHECKLIST, FIXINPUT] = ["_FONTOVERRIDE_DEF_", "_FONTSCALE_DEF_", "_FONTCHECKLIST_", "_FR_FIREOFX_FIXINPUT_"];
+      const [getDocumentElement, getHeadElement, getBodyElement] = ["documentElement", "head", "body"].map(element => new NodeObserver(() => document[element]));
       const [IS_INTERNALSTYLE_ALLOWED, navigatorInfo] = await Promise.all([checkInternalStyleCSP(), getNavigatorInfo()]);
       const { engine, engineVersion, creditEngine, brand, platform, voucher } = navigatorInfo;
       const [IS_REAL_BLINK, IS_REAL_GECKO, IS_REAL_WEBKIT] = ["Blink", "Gecko", "WebKit"].map(cE => cE === creditEngine);
@@ -832,21 +828,23 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
       const UPDATE_VERSION_NOTICE = IS_CHN
-        ? `<li class="${def.const.seed}_info">本次更新会重置所有设置数据，如果您本地备份时长间隔超过 <b>6</b> 个月，强烈建议您重新配置渲染数据。</li>
-            <li class="${def.const.seed}_del">优化精简非必要的函数方法、及无功效代码。</li>
-            <li class="${def.const.seed}_add">新增 Firefox 126.0 及以上版本对字体缩放功能的支持。</li>
-            <li class="${def.const.seed}_add">新增对 ShadowRoot::selection 伪元素的样式优化。</li>
-            <li class="${def.const.seed}_fix">修复 iframe 异步加载内容时粗体修正失效的问题。</li>
-            <li class="${def.const.seed}_fix">修复 iframe 元素在渲染预览时部分渲染失效的问题。</li>
-            <li class="${def.const.seed}_fix">优化脚本数据存储结构，减少 15% 以上数据储存容量。</li>
+        ? `<li class="${def.const.seed}_add">新增使用 OpenType 字体（非等宽字体）时在自定义字体工具中新增 font-feature-settings 属性的设置项目。</li>
+            <li class="${def.const.seed}_fix">改进英文等宽字体与中文字体混合渲染的兼容性。</li>
+            <li class="${def.const.seed}_fix">针对低配置电脑大幅提升粗体修正功能的执行效率。</li>
+            <li class="${def.const.seed}_fix">修复在 <a href="https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89#firefox-input%E6%A0%B7%E5%BC%8F%E4%BF%AE%E5%A4%8D" target="_blank">Firefox</a> 因字体热替换导致的 INPUT 标签异常。</li>
+            <li class="${def.const.seed}_fix">修复视口单位修正中 URLs 处理的相关函数错误。</li>
+            <li class="${def.const.seed}_fix">修复 VM uad.getHighEntropyValues 引起的加载延迟。</li>
+            <li class="${def.const.seed}_fix">修复 iframe 异步加载时插入样式没有正确解析的问题。</li>
+            <li class="${def.const.seed}_fix">修复 Canvas 画布字体阴影渲染效果未生效的问题。</li>
             <li class="${def.const.seed}_fix">修复一些已知的问题，优化代码，优化样式。</li>`
-        : `<li class="${def.const.seed}_info">This update will reset all data, if your local backup is older than <b>6</b> months, it is recommended that you need to reconfigure the data.</li>
-            <li class="${def.const.seed}_del">Reduce unnecessary functions and ineffective code.</li>
-            <li class="${def.const.seed}_add">Added support for font scaling in Firefox above 126.</li>
-            <li class="${def.const.seed}_add">Added style optimization for ShadowRoot::selection.</li>
-            <li class="${def.const.seed}_fix">Fixed fix bold failure when iframe asynchronous load.</li>
-            <li class="${def.const.seed}_fix">Fixed iframe some effects not work when previewing.</li>
-            <li class="${def.const.seed}_fix">Optimized data storage by reducing capacity by 15%.</li>
+        : `<li class="${def.const.seed}_add">Added font-feature-settings property settings when adding & using OpenType fonts (Non-monospace).</li>
+            <li class="${def.const.seed}_fix">Improved compatibility of Chinese with monospace.</li>
+            <li class="${def.const.seed}_fix">Improved bold-fixer performance for low-end PCs.</li>
+            <li class="${def.const.seed}_fix">Fixed INPUT issue caused by font HotShift in <a href="https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font-Rendering-(Customized)#firefox-input-styling-fix" target="_blank">Firefox</a>.</li>
+            <li class="${def.const.seed}_fix">Fixed URLs handling issue in viewport unit correction.</li>
+            <li class="${def.const.seed}_fix">Fixed load-delay caused by VM getHighEntropyValues.</li>
+            <li class="${def.const.seed}_fix">Fixed iframe asynchronous loading style not parsing.</li>
+            <li class="${def.const.seed}_fix">Fixed Canvas font shadow rendering is not working.</li>
             <li class="${def.const.seed}_fix">Fixed some known issues, optimized code & style.</li>`;
 
       /* INITIALIZE_FONT_LIBRARY */
@@ -902,7 +900,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         renderCanvas: !IS_GREASEMONKEY,
         shadowColor: IS_REAL_GECKO ? "#7C7C7C70" : "#7C7C7CDD",
         fontCSS: `:not(i,head *):not([class*='glyph']):not([class*='symbols' i]):not([class*='icon' i]):not([class*='fa-']):not([class*='vjs-'])`,
-        fontEx: `progress,meter,datalist,samp,kbd,pre,pre *,code,code *`,
+        fontEx: `kbd,i,.textLayer *,pre,pre *,code,code *`,
       };
 
       /* INITIALIZE_CONFIGURE_AND_OTHERS */
@@ -911,9 +909,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       const INITIAL_CONFIGURE = { ...INITIAL_FEATURES, rebuild: void 0, curVersion: void 0, globalDisable: false, isCustomMono: false };
       const INITIAL_REMARKS = {
         fontBase: `system-ui,-apple-system,BlinkMacSystemFont,sans-serif,'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','Android Emoji','EmojiSymbols','EmojiOne Mozilla','Twemoji Mozilla','Segoe UI Symbol','Noto Color Emoji Compat',emoji,'Font Awesome 6 Pro','Font Awesome 5 Pro',FontAwesome,iconfont,icomoon,IcoFont,fontello,themify,'Segoe Fluent Icons','Material Design Icons',bootstrap-icons`,
-        monospacedFont: `'Operator Mono Lig','Fira Code','Source Code Pro','JetBrains Mono',Inconsolata,Monaco,'Roboto Mono','Ubuntu Mono','Anonymous Pro','Droid Sans Mono',Menlo,Consolas,'Liberation Mono'`,
+        monospacedFont: `'Operator Mono Lig','Fira Code','Source Code Pro','JetBrains Mono',Inconsolata,Monaco,'Roboto Mono','Ubuntu Mono','Anonymous Pro','Droid Sans Mono',Menlo,Consolas`,
         monospacedFeature: `"liga" 0,"tnum","zero"`,
-        editorialSiteList: `cdn.addon.tencentsuite.com|docs.google.com|docs.qq.com|feishu.cn|fonts.google.com|github.com|github.dev|github1s.com|image.baidu.com|kdocs.cn|newassets.hcaptcha.com|note.youdao.com|notion.site|notion.so|shimo.im|support.google.com|vscode.dev|weread.qq.com|wolai.com|wqxuetang.com|xiezuocat.com|youtube.com|yuque.com`,
+        editorialSiteList: `cdn.addon.tencentsuite.com|docs.google.com|docs.qq.com|feishu.cn|fonts.google.com|github.com|github.dev|github1s.com|image.baidu.com|kdocs.cn|newassets.hcaptcha.com|note.youdao.com|notion.site|notion.so|shimo.im|support.google.com|vscode.dev|weread.qq.com|wolai.com|wqxuetang.com|xiezuocat.com|youtube.com|yuque.com|regex101.com|tool.lu`,
       };
       def.url.guideURI = `${def.url.feedback}/../wiki/${IS_CHN ? encodeURIComponent("字体渲染（自用脚本）") : "Font-Rendering-(Customized)"}`;
       def.url.installURI = `${def.url.homepage}${IS_CHN ? "index.html#字体渲染自用脚本" : "index_en.html#font-rendering-customized"}-font-renderinguserjs`;
@@ -922,17 +920,17 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
       def.var.style = Object.freeze({
         main: `display:inline-block;font-family:ui-monospace,monospace`,
-        firefox: `input:is([type='text'],[type='password'],[type='search']),input:not([type]){font-family:initial!important}`,
+        firefox: `input:is([type='text'],[type='password'],[type='search'],[type='email'],[type='tel'],[type='url'],[type='number']),input:not([type]){font-family:serif!important}`,
         frDialog: `:root>#${def.const.dialog}{display:block!important;width:auto!important;height:auto!important;background:0 0!important;opacity:1!important;border-width:0!important;outline:0!important;z-index:2147483647!important}:root>#${def.const.dialog}::backdrop{background:transparent!important}@font-face{font-family:Anton;font-style:normal;font-weight:400;font-display:swap;src:local("Impact"),url(${def.url.Anton}) format("woff2");unicode-range:U+00??,U+0131,U+0152-0153,U+02bb-02bc,U+02c6,U+02da,U+02dc,U+0304,U+0308,U+0329,U+2000-206f,U+2074,U+20ac,U+2122,U+2191,U+2193,U+2212,U+2215,U+feff,U+fffd}`,
         frDialogBox:
           `:host(#${def.id.dialogbox}){position:fixed!important;top:0;left:0;width:100%;height:100%;background:0 0!important;pointer-events:none;z-index:2147483647}.${def.class.db}{position:absolute;top:calc(12% + 10px);right:20px;z-index:99999;display:block;overflow:hidden;box-sizing:content-box;width:100%;max-width:420px;border:2px solid #efefef;border-radius:6px;background:#fff;box-shadow:0 0 10px 0 rgba(0, 0, 0, 0.3);color:#444;transition:opacity .5s;pointer-events:auto;opacity:0}.${def.class.db} *{text-shadow:0 0 1px #777!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}.${def.class.dbt}{display:flex;margin-top:0;padding:10px 15px;width:auto;background:#efefef;text-align:left;font-weight:700;font-size:18px!important;flex-wrap:wrap;justify-content:space-between;align-items:center;align-content:center}.${def.class.dbt},.${def.class.dbt} *{font-weight:700;font-size:20px!important;font-family:Candara,Times,${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm}{display:block;margin:5px;padding:10px;color:#444;text-align:left;font-weight:500;font-size:16px!important}.${def.class.dbb}{display:inline-block;box-sizing:content-box;margin:2px 1%;padding:8px 12px;min-width:12%;border-radius:4px;text-align:center;text-decoration:none!important;letter-spacing:0;font-weight:400;cursor:pointer}.${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}.${def.const.seed}_gradient_bg{background:#e7ffd9;animation:gradient 2s ease-in-out forwards}@keyframes gradient{0%{background:#e7ffd9}to{background:transparent}}.${def.class.db} .${def.class.dbt},.${def.class.db} .${def.class.dbb}{text-shadow:none!important;-webkit-text-stroke:0 transparent!important;-webkit-user-select:none;user-select:none}.${def.class.db} .${def.class.dbb}:hover{box-sizing:content-box;color:#fff;text-decoration:none!important;font-weight:700;opacity:.8}.${def.class.db} .${def.class.dbbf}{border:1px solid #d93223!important;border-radius:6px;background:#d93223!important;color:#fff!important;font-size:14px!important}.${def.class.db} .${def.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}` +
           `.${def.class.db} .${def.class.dbbt}{border:1px solid #038c5a!important;border-radius:6px;background:#038c5a!important;color:#fff!important;font-size:14px!important}.${def.class.db} .${def.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}.${def.class.dbbn}{border:1px solid #777!important;border-radius:6px;background:#777!important;color:#fff!important;font-size:14px!important}.${def.class.db} .${def.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${def.class.dbbc}{display:block;padding:2.5%;background:#efefef;color:#fff;text-align:right;font-size:initial}.${def.class.dbm} textarea{cursor:auto;overscroll-behavior:contain}.${def.class.dbm} textarea::-webkit-scrollbar{width:8px;height:8px}.${def.class.dbm} textarea::-webkit-scrollbar-corner{border-radius:2px;background:#efefef;box-shadow:inset 0 0 3px #aaa}.${def.class.dbm} textarea::-webkit-scrollbar-thumb{border-radius:2px;background:#cfcfcf;box-shadow:inset 0 0 5px #999}.${def.class.dbm} textarea::-webkit-scrollbar-track{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}.${def.class.dbm} textarea::-webkit-scrollbar-track-piece{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaa}.${def.class.dbm} button:hover{background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important;cursor:pointer}.${def.class.dbm} p{margin:5px 0!important;text-align:left;text-indent:0;font-weight:400;font-size:16px;line-height:1.5!important;-webkit-user-select:none;user-select:none}.${def.class.dbm} ul{margin:0 0 0 10px!important;padding:2px;color:#808080;list-style:none;font:italic 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-user-select:none;user-select:none}.${def.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${def.class.dbm} ul::-webkit-scrollbar-thumb{border-radius:10px;background:#cfcfcf;box-shadow:inset 0 0 5px #999;}.${def.class.dbm} ul::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}.${def.class.dbm} ul::-webkit-scrollbar-track-piece{border-radius:6px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}.${def.class.dbm} ul li{display:list-item;list-style-type:none;word-break:break-all}.${def.class.dbm} li:before{display:none}.${def.class.dbm} ul#${def.const.seed}_d_d_ li:hover{background-color:rgba(253, 246, 236, 0.8)!important}` +
-          `#${def.const.seed}_temporary{padding:18px 8px;text-align:center;color:#555;font-size:14px!important}#${def.id.bk},#${def.id.pv},#${def.id.fs},#${def.id.fvp},#${def.id.hk},#${def.id.ct},#${def.id.mps},#${def.id.flc},#${def.id.gc},#${def.id.cm}{display:flex;box-sizing:content-box;margin:0;padding:2px 4px!important;width:calc(98% - 10px);height:max-content;min-width:auto;min-height:40px;list-style:none;font-style:normal;justify-content:space-between;align-items:flex-start;word-break:break-word}.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0, 0, 0, 0.1),0 0 10px rgba(245, 146, 146, 0.4);white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#fff;box-shadow:0 0 1px rgba(0, 0, 0, 0.6);color:#fff;content:' '}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#fff;content:'OFF';font-weight:700;font-style:normal;font-size:16px}.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0, 0, 0, 0.1),0 0 10px rgba(146, 196, 245, 0.4);cursor:pointer}.${def.class.checkbox}:checked+label::after{left:10px;content:'ON'}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:' '}.${def.const.seed}_VIP,.${def.const.seed}_cusmono{margin:2px 0 0 0;color:#b8860b!important;font:normal 400 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.flc} button,#${def.id.gc} button{box-sizing:border-box!important;margin:0 5px 0 0!important;padding:5px!important;border:1px solid #999!important;border-radius:4px!important;background-color:#eee;color:#444!important;letter-spacing:normal!important;font-weight:400!important;font-size:14px!important}` +
-          `#${def.const.seed}_monospaced_siterules::placeholder,#${def.const.seed}_monospaced_font::placeholder,#${def.const.seed}_monospaced_feature::placeholder{color:#aaa!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} a{color:#0969da;text-decoration:none!important;font-style:inherit}.${def.class.dbm} a:hover{color:#dc143c;text-decoration:underline}#${def.id.feedback}{box-sizing:content-box;margin:0;padding:2px 10px;width:max-content;height:22px;min-width:auto;font-style:normal;font-size:16px;cursor:pointer}.${def.class.dbm} #${def.id.files}{display:none}#${def.id.feedback}:hover{color:#dc143c!important}#${def.id.feedback}:after{width:0;height:0;background:url('${def.url.loadingImg}') no-repeat -400px -300px;content:""}#${def.id.flcid}{width:max-content;height:max-content;min-width:70px;min-height:32px}#${def.id.maxps}{box-sizing:border-box;padding:4px 5px;width:70px;min-width:70px;border:2px solid #b8860b;border-radius:4px;background:#efefef;color:#333;text-align:center;font:normal 400 16px/150% 'Anton',Times,serif!important}.${def.class.dbm} ul.${def.class.main}{overflow-x:hidden;box-sizing:content-box;margin:0;padding:5px 0;max-height:255px;overscroll-behavior:contain}#${def.id.globaldisable}{width:max-content;height:max-content;min-width:70px;min-height:32px}#${def.const.seed}_c_w_d_d_{box-sizing:border-box;margin-left:15px;padding:3px 5px;width:max-content;height:max-content;max-width:120px;min-height:30px;border:1px solid #777;border-radius:4px;background-color:#eee;color:#333!important;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_a_w_d_l_>span{margin:0;padding:0 2px;color:#3e3e3e;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_c_w_d_{color:#4b0082;cursor:help;word-break:break-all}p.${def.const.seed}_exclusion{font:italic 700 24px/150% Candara,Times!important;word-break:break-all}#${def.const.seed}_d_s_{box-sizing:content-box;margin:4px 6px;padding:2px 6px;width:57%;height:22px;outline:none!important;border:2px solid #777;border-radius:4px;font:normal 400 16px/150% ui-monospace,'Operator Mono Lig','JetBrains Mono',monospace,${INITIAL_VALUES.fontSelect}!important}` +
-          `#${def.const.seed}_d_s_s_{box-sizing:border-box;margin:0;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#333!important;outline:none!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_d_s_c_{box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#333!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_d_s_a_{box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#8b0000!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_d_d_{overflow-x:hidden;margin:0!important;padding:0!important;max-height:190px;list-style:none!important;overscroll-behavior:contain}#${def.const.seed}_d_d_ li[id^='${def.const.seed}_d_d_l_']{display:flex;overflow:hidden;margin:0;padding:5px;max-width:364px;color:#555;list-style:none;white-space:nowrap;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,-apple-system,BlinkMacSystemFont!important;justify-content:space-between}#${def.const.seed}_d_d_ span.${def.const.seed}_domainlist{overflow:hidden;margin-right:auto;padding-left:5px;width:85%;text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all}#${def.const.seed}_d_d_ .${def.const.seed}_customdomain{overflow:hidden;margin-left:5px;width:57%;text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all}#${def.const.seed}_custom_Fontlist{box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;max-height:457px;outline:none!important;border:1px solid #999;border-radius:6px;white-space:pre;font:normal 400 14px/150% ui-monospace,'Operator Mono Lig','JetBrains Mono',monospace,${INITIAL_VALUES.fontSelect}!important;resize:vertical;overscroll-behavior:contain}` +
-          `#${def.const.seed}_d_d_ a[id^='${def.const.seed}_d_d_l_s_']{padding:2px;background:0 0;color:#8b0000;font-size:14px!important;cursor:pointer}#${def.const.seed}_exSite_add{font:italic 700 24px/150% Candara,Times!important;word-break:break-all}#${def.const.seed}_fontoverride_def_array,#${def.const.seed}_fontscale_def_json{box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:160px!important;outline:0!important;border:1px solid #999;border-radius:6px;white-space:pre;font:normal 400 14px/150% ui-monospace,'Operator Mono Lig','JetBrains Mono',monospace,${INITIAL_VALUES.fontSelect}!important;resize:vertical;overscroll-behavior:contain}#${def.const.seed}_warning_chn{display:block;margin:-2px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important}#${def.const.seed}_warning_en{display:block;margin:0!important;height:max-content;color:#dc143c;text-align:center;font-size:14px!important}#${def.const.seed}_monospaced_font,#${def.const.seed}_monospaced_feature{box-sizing:border-box;padding:5px;width:380px;outline:0!important;border:1px solid #999;border-radius:6px;font:normal 400 14px/150% ui-monospace,'Operator Mono Lig',monospace,${INITIAL_VALUES.fontSelect}!important}#${def.const.seed}_monospaced_siterules{box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:140px!important;max-height:256px;outline:0!important;border:1px solid #999;border-radius:6px;white-space:pre;font:normal 400 14px/150% ui-monospace,'Operator Mono Lig','JetBrains Mono',monospace,${INITIAL_VALUES.fontSelect}!important;resize:vertical;overscroll-behavior:contain;word-break:keep-all!important}.${def.class.dbm} p.${def.const.seed}_mono_notify{display:block;margin-top:10px!important;color:#555;font-size:14px!important}#${def.id.cm}{margin:0 0 8px;width:97%!important;border-bottom:1px groove #ccc}.${def.class.dbm} span.${def.const.seed}_cusmono{color:#555!important;font-weight:700!important}#${def.const.seed}_kbd{display:inline-block;box-sizing:content-box;margin:4px 0 0;padding:3px 10px;width:94%;border:1px solid rgba(175, 184, 193, 0.4);border-radius:6px;background-color:#f6f8fa;color:#666;vertical-align:middle;text-align:center;font-size:14px!important}` +
+          `#${def.const.seed}_temporary{padding:18px 8px;text-align:center;color:#555;font-size:14px!important}#${def.id.bk},#${def.id.pv},#${def.id.fs},#${def.id.fvp},#${def.id.hk},#${def.id.ct},#${def.id.mps},#${def.id.flc},#${def.id.gc},#${def.id.cm},#${def.id.fi}{display:flex;box-sizing:content-box;margin:0;padding:2px 4px!important;width:calc(98% - 10px);height:max-content;min-width:auto;min-height:40px;list-style:none;font-style:normal;justify-content:space-between;align-items:flex-start;word-break:break-word}.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0, 0, 0, 0.1),0 0 10px rgba(245, 146, 146, 0.4);white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#fff;box-shadow:0 0 1px rgba(0, 0, 0, 0.6);color:#fff;content:' '}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#fff;content:'OFF';font-weight:700;font-style:normal;font-size:16px}.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0, 0, 0, 0.1),0 0 10px rgba(146, 196, 245, 0.4);cursor:pointer}.${def.class.checkbox}:checked+label::after{left:10px;content:'ON'}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:' '}.${def.const.seed}_VIP,.${def.const.seed}_cusmono{margin:2px 0 0 0;color:#b8860b!important;font:normal 400 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.flc} button,#${def.id.gc} button{box-sizing:border-box!important;margin:0 5px 0 0!important;padding:5px!important;border:1px solid #999!important;border-radius:4px!important;background-color:#eee;color:#444!important;letter-spacing:normal!important;font-weight:400!important;font-size:14px!important}` +
+          `#${def.const.seed}_monospaced_siterules::placeholder,#${def.const.seed}_monospaced_font::placeholder,#${def.const.seed}_monospaced_feature::placeholder,#${def.const.seed}_custom_Feature::placeholder,#${def.const.seed}_custom_Variant::placeholder{color:#aaa!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}.${def.class.dbm} a{color:#0969da;text-decoration:none!important;font-style:inherit}.${def.class.dbm} a:hover{color:#dc143c;text-decoration:underline}#${def.id.feedback}{box-sizing:content-box;margin:0;padding:2px 10px;width:max-content;height:22px;min-width:auto;font-style:normal;font-size:16px;cursor:pointer}.${def.class.dbm} #${def.id.files}{display:none}#${def.id.feedback}:hover{color:#dc143c!important}#${def.id.feedback}:after{width:0;height:0;background:url('${def.url.loadingImg}') no-repeat -400px -300px;content:""}#${def.id.flcid}{width:max-content;height:max-content;min-width:70px;min-height:32px}#${def.id.maxps}{box-sizing:border-box;padding:4px 5px;width:70px;min-width:70px;border:2px solid #b8860b;border-radius:4px;background:#efefef;color:#333;text-align:center;font:normal 400 16px/150% 'Anton',Times,serif!important}.${def.class.dbm} ul.${def.class.main}{overflow-x:hidden;box-sizing:content-box;margin:0;padding:5px 0;max-height:255px;overscroll-behavior:contain}#${def.id.globaldisable}{width:max-content;height:max-content;min-width:70px;min-height:32px}#${def.const.seed}_c_w_d_d_{box-sizing:border-box;margin-left:15px;padding:3px 5px;width:max-content;height:max-content;max-width:120px;min-height:30px;border:1px solid #777;border-radius:4px;background-color:#eee;color:#333!important;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_a_w_d_l_>span{margin:0;padding:0 2px;color:#3e3e3e;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_c_w_d_{color:#4b0082;cursor:help;word-break:break-all}p.${def.const.seed}_exclusion{font:italic 700 24px/150% Candara,Times!important;word-break:break-all}#${def.const.seed}_d_s_{box-sizing:content-box;margin:4px 6px;padding:2px 6px;width:57%;height:22px;outline:none!important;border:2px solid #777;border-radius:4px;font:normal 400 16px/150% ui-monospace,'Operator Mono Lig','JetBrains Mono',monospace,${INITIAL_VALUES.fontSelect}!important}` +
+          `#${def.const.seed}_d_s_s_{box-sizing:border-box;margin:0;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#333!important;outline:none!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_d_s_c_{box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#333!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_d_s_a_{box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#8b0000!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}_d_d_{overflow-x:hidden;margin:0!important;padding:0!important;max-height:190px;list-style:none!important;overscroll-behavior:contain}#${def.const.seed}_d_d_ li[id^='${def.const.seed}_d_d_l_']{display:flex;overflow:hidden;margin:0;padding:5px;max-width:364px;color:#555;list-style:none;white-space:nowrap;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,-apple-system,BlinkMacSystemFont!important;justify-content:space-between}#${def.const.seed}_d_d_ span.${def.const.seed}_domainlist{overflow:hidden;margin-right:auto;padding-left:5px;width:85%;text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all}#${def.const.seed}_d_d_ .${def.const.seed}_customdomain{overflow:hidden;margin-left:5px;width:57%;text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all}}#${def.const.seed}_d_d_ a[id^='${def.const.seed}_d_d_l_s_']{padding:2px;background:0 0;color:#8b0000!important;font-size:14px!important;cursor:pointer}#${def.const.seed}_exSite_add{font:italic 700 24px/150% Candara,Times!important;word-break:break-all}` +
+          `#${def.const.seed}_custom_Fontlist,#${def.const.seed}_fontoverride_def_array,#${def.const.seed}_fontscale_def_json{box-sizing:content-box;margin:0 0 4px 0;padding:5px;max-width:372px;min-width:372px;min-height:160px;max-height:457px;outline:0;border:1px solid #999;border-radius:6px;white-space:pre;font:normal 400 14px/150% ui-monospace,'Operator Mono Lig','JetBrains Mono',monospace,${INITIAL_VALUES.fontSelect}!important;resize:vertical;overscroll-behavior:contain}#${def.const.seed}_warning_chn{display:block;margin:-7px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important}#${def.const.seed}_warning_en{display:block;margin:-5px 0 0 0!important;height:max-content;color:#dc143c;font-size:14px!important}#${def.const.seed}_monospaced_font,#${def.const.seed}_monospaced_feature,#${def.const.seed}_custom_Feature,#${def.const.seed}_custom_Variant{box-sizing:border-box;padding:5px;width:380px;outline:0!important;border:1px solid #999;border-radius:6px;font:normal 400 14px/150% ui-monospace,'Operator Mono Lig',monospace,${INITIAL_VALUES.fontSelect}!important}#${def.const.seed}_monospaced_siterules{box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:140px!important;max-height:256px;outline:0!important;border:1px solid #999;border-radius:6px;white-space:pre;font:normal 400 14px/150% ui-monospace,'Operator Mono Lig','JetBrains Mono',monospace,${INITIAL_VALUES.fontSelect}!important;resize:vertical;overscroll-behavior:contain;word-break:keep-all!important}.${def.class.dbm} p:is(.${def.const.seed}_mono_notify,.${def.const.seed}_fontfeature,.${def.const.seed}_fontvariant){display:block;margin-top:10px!important;color:#555;font-size:14px!important}#${def.id.cm},#${def.id.fi}{margin:0 0 8px;width:97%!important;border-bottom:1px groove #ccc}.${def.class.dbm} span.${def.const.seed}_cusmono{color:#555!important;font-weight:700!important;user-select:none;-webkit-user-select:none}#${def.const.seed}_kbd{display:inline-block;box-sizing:content-box;margin:4px 0 0;padding:3px 10px;width:94%;border:1px solid rgba(175, 184, 193, 0.4);border-radius:6px;background-color:#f6f8fa;color:#666;vertical-align:middle;text-align:center;font-size:14px!important}` +
           `.${def.const.seed}_cga{color:#808080!important}.${def.const.seed}_cge{color:#a9a9a9!important}.${def.const.seed}_cdc1{color:#dc143c!important}.${def.const.seed}_fsn{font-style:normal!important}.${def.const.seed}_fsi{font-style:italic!important}.${def.const.seed}_f20{font-size:20px!important}.${def.const.seed}_save_p{display:flex;height:30px;align-items:center}.${def.const.seed}_mh22{min-height:22px}.${def.const.seed}_op1{opacity:1!important}.${def.const.seed}_ti6{text-indent:6px!important}.${def.const.seed}_m0500{margin:0 5px 0 0}.${def.const.seed}_p0{padding:0}.${def.const.seed}_f14{font-size:14px!important}.${def.const.seed}_f11{font-size:11px!important}.${def.const.seed}_cce{color:#cecece!important}.${def.const.seed}_ccr{color:#dc143c!important}.${def.const.seed}_cp{cursor:pointer}.${def.const.seed}_wbka{word-wrap:break-word;word-break:break-all!important}.${def.const.seed}_idg{color:#4b0082!important}.${def.const.seed}_cdg{color:#006400!important}.${def.const.seed}_cb8{color:#8b0000!important}.${def.const.seed}_c55{color:#555!important}.${def.const.seed}_fb{font-weight:700!important}.${def.const.seed}_f12{font-size:12px!important}.${def.const.seed}_ctan{color:#d2b48c!important}.${def.const.seed}_csg{color:#708090!important}.${def.const.seed}_cco{color:#ff7f50!important}.${def.const.seed}_list_p{display:flex;justify-content:left;align-items:center}.${def.const.seed}_m05{margin:0 5px}.${def.const.seed}_cto{color:#ff6347!important}.${def.const.seed}_v_en{padding:0px 4px;font:italic 700 20px/130% Candara,Times New Roman!important}.${def.const.seed}_v_cn{padding:4px;font:italic 700 22px/150% Candara,Times!important}.${def.const.seed}_hi_cn{font:italic 700 22px/150% ${INITIAL_VALUES.fontSelect},Arial!important}.${def.const.seed}_hi_en{font:normal 700 20px/150% ${INITIAL_VALUES.fontSelect},Arial!important}.${def.const.seed}_pd4{padding:4px}.${def.const.seed}_lh180{line-height:180%!important}.${def.const.seed}_cb88{color:#b8860b!important}.${def.const.seed}_tac{text-align:center!important}.${def.const.seed}_cps{padding-bottom:6px;font-size:18px!important}.${def.const.seed}_cpsa{display:inline-block;overflow:hidden;width:302px;height:237px;border:2px solid #b8860b;border-radius:8px;background:url('${def.url.loadingImg}') 50% 50% no-repeat}.${def.const.seed}_bdcr{border-color:#ff0000!important}.${def.const.seed}_bdcdo{border-color:#ff8c00!important}` +
-          `.${def.const.seed}_tabd{border:2px solid #dc143c!important}.${def.const.seed}_inline_block{display:inline-block!important}.${def.const.seed}_block{display:block!important}.${def.const.seed}_none{display:none!important}.${def.const.seed}_visible{visibility:visible!important}.${def.const.seed}_hidden{visibility:hidden!important}.${def.const.seed}_list_reset{text-decoration:line-through;font-style:italic}#${def.const.seed}_copy_to_author{overflow-y:auto;margin:0!important;padding:0!important;max-height:300px;list-style-position:outside}#${def.const.seed}_copy_to_author li{padding:2px}#${def.const.seed}_custom_Fontlist::placeholder{color:#aaa!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;word-break:break-all!important}#${def.const.seed}_update li{margin:0;padding:1px 4px;color:#808080;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}#${def.const.seed}_update .${def.const.seed}_add{list-style-type:'\uff0b'}#${def.const.seed}_update .${def.const.seed}_del{list-style-type:'\uff0d'}#${def.const.seed}_update .${def.const.seed}_fix{list-style-type:'\uff20'}#${def.const.seed}_update .${def.const.seed}_info{color:#daa520;word-break:break-word;list-style-type:'\u266f'}#${def.const.seed}_update .${def.const.seed}_warn{color:#e90000;word-break:break-word;list-style-type:'\u2718'}#${def.const.seed}_update .${def.const.seed}_init{color:#65a16a;word-break:break-word;list-style-type:'\u2691'}.${def.class.dbm} input:focus,.${def.class.dbm} textarea:focus{box-shadow:inset 0 1px 3px rgba(0, 0, 0, 0.1),0 0 4px rgba(110, 111, 112, 0.6)!important}@-moz-document url-prefix() {.${def.class.dbm} textarea,.${def.class.dbm} ul,#${def.const.seed}_custom_Fontlist,#${def.const.seed}_monospaced_siterules,#${def.const.seed}_fontoverride_def_array,#${def.const.seed}_fontscale_def_json{scrollbar-color:rgba(187, 187, 187, 0.73) rgba(238, 238, 238, 0.07);scrollbar-width:thin}}`,
+          `.${def.const.seed}_mbm5{padding-bottom:5px;width:98%;}.${def.const.seed}_tabd{border:2px solid #dc143c!important}.${def.const.seed}_inline_block{display:inline-block!important}.${def.const.seed}_block{display:block!important}.${def.const.seed}_none{display:none!important}.${def.const.seed}_visible{visibility:visible!important}.${def.const.seed}_hidden{visibility:hidden!important}.${def.const.seed}_list_reset{text-decoration:line-through;font-style:italic}#${def.const.seed}_copy_to_author{overflow-y:auto;margin:0!important;padding:0!important;max-height:300px;list-style-position:outside}#${def.const.seed}_copy_to_author li{padding:2px}#${def.const.seed}_custom_Fontlist::placeholder{color:#aaa!important;white-space:pre-line!important;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;word-break:break-all!important}#${def.const.seed}_update li{margin:0;padding:1px 4px;color:#808080;font:normal 400 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important}#${def.const.seed}_update .${def.const.seed}_add{list-style-type:'\uff0b'}#${def.const.seed}_update .${def.const.seed}_del{list-style-type:'\uff0d'}#${def.const.seed}_update .${def.const.seed}_fix{list-style-type:'\uff20'}#${def.const.seed}_update .${def.const.seed}_info{color:#daa520;word-break:break-word;list-style-type:'\u266f'}#${def.const.seed}_update .${def.const.seed}_warn{color:#e90000;word-break:break-word;list-style-type:'\u2718'}#${def.const.seed}_update .${def.const.seed}_init{color:#65a16a;word-break:break-word;list-style-type:'\u2691'}.${def.class.dbm} input:focus,.${def.class.dbm} textarea:focus{box-shadow:inset 0 1px 3px rgba(0, 0, 0, 0.1),0 0 4px rgba(110, 111, 112, 0.6)!important}@-moz-document url-prefix() {.${def.class.dbm} textarea,.${def.class.dbm} ul,#${def.const.seed}_custom_Fontlist,#${def.const.seed}_monospaced_siterules,#${def.const.seed}_fontoverride_def_array,#${def.const.seed}_fontscale_def_json{scrollbar-color:rgba(187, 187, 187, 0.73) rgba(238, 238, 238, 0.07);scrollbar-width:thin}}`,
         frConfigure:
           `:host(#${def.id.configure}){position:fixed!important;top:0;left:0;width:100%;height:100%;background:0 0!important;pointer-events:none;z-index:2147483645}#${def.id.container}{position:absolute;top:10px;right:24px;z-index:99999;overflow-x:hidden;overflow-y:auto;display:block;box-sizing:content-box;padding:4px;max-height:calc(100% - 40px);min-height:10%;border-radius:12px;background:#f0f6ff!important;box-shadow:0 0 4px 0 rgba(0, 0, 0, 0.3);color:#333;text-align:left;font-weight:700;font-size:16px!important;opacity:0;transition:opacity .5s;width:auto;overscroll-behavior:contain;pointer-events:auto}#${def.id.container}::-webkit-scrollbar{width:10px;height:1px}#${def.id.container}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df}#${def.id.container}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df}#${def.id.container}::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df}#${def.id.container} *{text-shadow:none!important;font-weight:700;font-size:16px;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji,Android Emoji,EmojiSymbols!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}#${def.id.container} fieldset{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;min-height:475px;border:2px groove #67a5df!important;border-radius:10px;background:#f0f6ff!important}#${def.id.container} legend{position:relative!important;float:none!important;display:block!important;visibility:visible!important;box-sizing:content-box;margin:0;padding:0 32px 0 8px;width:auto!important;height:auto!important;border:none!important;background:#f0f6ff!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}#${def.id.container} fieldset ul{margin:0;padding:0;background:#f0f6ff!important}#${def.id.container} ul li{float:none;display:inherit;box-sizing:content-box;margin:3px 0;min-width:-webkit-fill-available;min-width:-moz-available;border:none;background:#f0f6ff!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none}#${def.id.container} ul li:before{display:none}` +
           `#${def.id.container} .${def.class.rotation} svg{visibility:visible!important;overflow:hidden;width:24px;height:24px;vertical-align:initial!important;fill:#67a5df}#${def.id.container} .${def.class.rotation} svg:hover{cursor:help}#${def.const.seed}_scriptname{display:inline-block;margin:0 4px 0 0;vertical-align:bottom;overflow:hidden;min-width:130px;max-width:225px;text-overflow:ellipsis;white-space:nowrap;font-weight:700!important;-webkit-user-select:all;user-select:all}#${def.const.seed}_scriptname:hover{cursor:help}#${def.id.container} .${def.class.title} .${def.class.guide}{position:absolute;display:inline-block;cursor:pointer}@keyframes rotation{0%{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(1turn)}}.${def.class.title} .${def.class.rotation}{position:relative;display:block;top:auto;right:auto;bottom:auto;left:auto;margin:0;padding:0;width:24px;height:24px;-webkit-transform:rotate(1turn);transform-origin:center 50% 0;animation:rotation 6s linear infinite}#${def.id.container} input:not([type='range'],[type='checkbox']):focus,#${def.id.container} textarea:focus{box-shadow:inset 0 1px 3px rgba(0, 0, 0, 0.1),0 0 6px rgba(82, 168, 236, 0.6)!important}#${def.id.fontList}{padding:2px 10px 0;min-height:73px}#${def.id.fontFace},#${def.id.fontSmooth}{display:flex!important;padding:2px 10px;width:calc(100% - 18px);height:40px;min-width:auto;align-items:center;justify-content:space-between}#${def.id.fontSize}{padding:2px 10px;height:60px}#${def.id.fontStroke}{padding:2px 10px;height:60px}#${def.id.fontShadow}{padding:2px 10px;height:60px}#${def.id.container} #${def.id.shadowColor}{display:flex;margin:4px;padding:2px 10px;width:auto;min-height:45px;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}#${def.id.fontCss},#${def.id.fontEx}{padding:2px 10px;height:110px;min-height:110px;min-width:254px!important}#${def.id.submit}{padding:2px 10px;height:40px}#${def.id.fontList} .${def.class.selector} a{text-decoration:none;font-weight:400}#${def.id.fontList} .${def.class.label}{display:inline-block;margin:-1px 4px 5px 0;padding:0;height:34px;line-height:100%!important}#${def.id.fontList} .${def.class.label} span{display:inline-block;overflow:hidden;box-sizing:border-box;padding:5px;width:max-content;height:max-content;max-width:200px;min-width:12px;background:#67a5df;color:#fff;text-overflow:ellipsis;white-space:nowrap;font-weight:400;font-size:16px!important}` +
@@ -940,7 +938,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           `#${def.const.seed}_fontoverride_defined:hover,#${def.const.seed}_fontscale_defined:hover{cursor:help;color:#8b0000}.${def.class.placeholder}::placeholder{color:#369!important;font:normal 700 16px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;opacity:.65}#${def.id.fontList} .${def.class.selectFontID} dl{display:none;position:absolute;z-index:1000;overflow-x:hidden;box-sizing:content-box;margin:4px 0 0;padding:4px 8px;width:auto;max-width:calc(100% - 68px);max-height:298px;min-width:60%;border:2px solid #67a5df!important;border-radius:6px;background-color:#fff;white-space:nowrap;font-size:18px!important;overscroll-behavior:contain}#${def.id.fontList} .${def.class.selectFontID} dl::-webkit-scrollbar{width:10px;height:1px}#${def.id.fontList} .${def.class.selectFontID} dl::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df}#${def.id.fontList} .${def.class.selectFontID} dl::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df}#${def.id.fontList} .${def.class.selectFontID} dl::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df;}#${def.id.fontList} .${def.class.selectFontID} dl dd{display:block;overflow-x:hidden;box-sizing:content-box;margin:1px 8px;padding:5px 0;width:-moz-available;width:-webkit-fill-available;max-width:100%;min-width:100%;text-overflow:ellipsis;font-weight:400;font-size:21px!important}#${def.id.fontList} .${def.class.selectFontID} dl dd:hover{overflow-x:hidden;box-sizing:content-box;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff;text-overflow:ellipsis}.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0, 0, 0, 0.1),0 0 10px rgba(245, 146, 146, 0.4);white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#fff;box-shadow:0 0 1px rgba(0, 0, 0, 0.6);color:#fff;content:" "}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#fff;content:"OFF";font-weight:700;font-style:normal;font-size:16px}` +
           `.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0, 0, 0, 0.1),0 0 10px rgba(146, 196, 245, 0.4);cursor:pointer}.${def.class.checkbox}:checked+label::after{left:10px;content:"ON"}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}#${def.id.fface} label,#${def.id.fface}+label::after,#${def.id.fface}+label::before,#${def.id.smooth} label,#${def.id.smooth}+label::after,#${def.id.smooth}+label::before{-webkit-transition:all .3s ease-in;transition:all .3s ease-in}#${def.id.fontShadow} div.${def.class.flex}:before,#${def.id.fontShadow} div.${def.class.flex}:after,#${def.id.fontStroke} div.${def.class.flex}:before,#${def.id.fontStroke} div.${def.class.flex}:after,#${def.id.fontSize} div.${def.class.flex}:before,#${def.id.fontSize} div.${def.class.flex}:after{display:none}#${def.id.shadowSize},#${def.id.strokeSize},#${def.id.fontScale}{box-sizing:content-box;margin:0 10px 0 0!important;padding:0;width:56px!important;height:32px!important;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:#fafafa!important;color:#111!important;text-align:center;text-indent:0;font-weight:400!important;font-size:17px!important;font-family:'Anton',Times,serif!important}#${def.id.fontScale}[disabled]{background-color:rgba(228, 231, 237, 0.82)!important;color:#555!important;filter:grayscale(.9)}#${def.id.fviewport},#${def.id.fstroke},#${def.id.rdCanvas}{visibility:visible;width:auto;color:#666;font-size:12px!important}#${def.id.fviewport}>label,#${def.id.fstroke}>label,#${def.id.rdCanvas}>label{float:none!important;display:inline!important;margin:0!important;padding:0 0 0 2px!important;color:#666!important;font-size:12px!important;cursor:help!important}#${def.id.fixViewport},#${def.id.fixStroke},#${def.id.renderCanvas}{display:inline-block;margin:0 2px 0 0!important;width:14px!important;height:14px!important;vertical-align:text-bottom;cursor:pointer;-webkit-appearance:none!important}#${def.id.fixViewport}:checked::after,#${def.id.fixStroke}:checked::after,#${def.id.renderCanvas}:checked::after{border:0!important;background-color:#65a0db;color:#fff;content:"\u2713";font-weight:700;font-size:12px;line-height:14px}` +
           `#${def.id.fixViewport}::after,#${def.id.fixStroke}::after,#${def.id.renderCanvas}::after{position:relative;top:0;display:inline-block;margin:0;padding:0;width:14px;height:14px;border-radius:3px;background-color:#aaa;color:#fff;content:"\u2717";vertical-align:top;text-align:center;font-weight:700;font-size:10px;line-height:14px}.${def.class.flex}{display:flex;width:auto;min-width:100%;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}.${def.class.slider} input{visibility:hidden}#${def.id.shadowColor} *{box-sizing:content-box}#${def.id.shadowColor} .${def.class.frColorPicker}{margin:0;padding:0;width:auto}#${def.id.shadowColor} .${def.class.frColorPicker} #${def.id.color}{box-sizing:border-box;margin:0;padding:0 8px 0 0;width:160px!important;height:35px!important;min-width:160px;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:rgba(253, 253, 255, 0.69);color:#333!important;text-align:center;text-indent:0;font-weight:400!important;font-size:18px!important;font-family:'Anton',Times,serif!important;cursor:pointer}#${def.id.fontCss} textarea,#${def.id.fontEx} textarea{display:block;box-sizing:border-box;margin:0;padding:5px;width:calc(100% - 2px)!important;height:78px;max-width:calc(100% - 2px);max-height:78px;min-width:calc(100% - 2px);min-height:78px;outline:none!important;border:2px solid #67a5df!important;border-radius:6px;color:#0b5b9c!important;font:normal 600 14px/150% ui-monospace,'Operator Mono Lig','JetBrains Mono',monospace,${INITIAL_VALUES.fontSelect}!important;resize:none;cursor:auto;word-break:break-all;overscroll-behavior:contain}#${def.id.fontCss} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontCss} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontCss} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px rgba(0, 0, 0, 0.2)}#${def.id.fontCss} textarea::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontEx} textarea{background:#fafafa!important}#${def.id.fontEx} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontEx} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}` +
-          `#${def.id.fontEx} textarea::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}.${def.class.switcher}{float:right;box-sizing:border-box;margin:-2px 4px 0 0;padding:0 6px;border:2px double #67a5df;border-radius:4px;color:#0a68c1;}#${def.id.fontCss} textarea::placeholder,#${def.id.fontEx} textarea::placeholder{color:#555;font:italic 500 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;opacity:.85}#${def.id.cSwitch}:hover,#${def.id.eSwitch}:hover{cursor:pointer;-webkit-user-select:none;user-select:none}.${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}.${def.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9,#e9ffe9 25%,transparent 0,transparent 50%,#e9ffe9 0,#e9ffe9 75%,transparent 0,transparent)!important;background-color:#f7fff7!important;background-size:50px 50px}#${def.id.submit} button{box-sizing:border-box;margin:0;padding:5px 10px;width:auto;height:35px;min-width:min-content;min-height:35px;border:2px solid #6ba7e0;border-radius:6px;background-color:#67a5df;background-image:none;color:#fff!important;font:normal 600 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;cursor:pointer}#${def.id.submit} button:hover{box-shadow:0 0 5px rgba(0, 0, 0, 0.4)!important}#${def.id.submit} .${def.class.cancel},#${def.id.submit} .${def.class.reset}{float:left;margin-right:8px}#${def.id.submit} .${def.class.submit}{float:right}#${def.id.backup}{display:none;margin:0 10px 0 0}.${def.class.anim}{border:2px solid #dc143c!important;background:#dc143c!important;animation:jiggle 1.8s ease-in infinite}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}.${def.class.tooltip}{position:relative;cursor:help;-webkit-user-select:none;user-select:none}.${def.class.tooltip} span.${def.class.emoji}{font-weight:400!important}.${def.class.tooltip}:active .${def.class.tooltip}{display:block}.${def.const.seed}_ml-5px{margin:0 0 0 -5px}` +
+          `#${def.id.fontEx} textarea::-webkit-scrollbar-track-piece{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df;}.${def.class.switcher}{float:right;box-sizing:border-box;margin:-2px 4px 0 0;padding:0 6px;border:2px double #67a5df;border-radius:4px;color:#0a68c1;}#${def.id.fontCss} textarea::placeholder,#${def.id.fontEx} textarea::placeholder{color:#555;font:italic 500 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont!important;opacity:.85}#${def.id.cSwitch}:hover,#${def.id.eSwitch}:hover{cursor:pointer;-webkit-user-select:none;user-select:none}.${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}.${def.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9,#e9ffe9 25%,transparent 0,transparent 50%,#e9ffe9 0,#e9ffe9 75%,transparent 0,transparent)!important;background-color:#f7fff7!important;background-size:50px 50px}#${def.id.submit} button{box-sizing:border-box;margin:0;padding:5px 10px;width:auto;height:35px;min-width:min-content;min-height:35px;border:2px solid #6ba7e0;border-radius:6px;background-color:#67a5df;background-image:none;color:#fff!important;font:normal 600 14px/150% ${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;cursor:pointer}#${def.id.submit} button:hover{box-shadow:0 0 5px rgba(0, 0, 0, 0.4)!important}#${def.id.submit} .${def.class.cancel},#${def.id.submit} .${def.class.reset}{float:left;margin-right:8px}#${def.id.submit} .${def.class.submit}{float:right}#${def.id.backup}{display:none;margin:0 10px 0 0}.${def.class.anim}{border:2px solid #dc143c!important;background:#dc143c!important;animation:jiggle 1.8s ease-in infinite}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}.${def.class.tooltip}{position:relative;padding:0 0 0 1px;cursor:help;-webkit-user-select:none;user-select:none}.${def.class.tooltip} span.${def.class.emoji}{font-weight:400!important}.${def.class.tooltip}:active .${def.class.tooltip}{display:block}.${def.const.seed}_ml-5px{margin:0 0 0 -5px}` +
           `.${def.class.tooltip} .${def.class.tooltip}{position:absolute;z-index:999999;display:none;box-sizing:content-box;padding:10px;width:234px;max-width:234px;border:2px solid #b8c4ce;border-radius:6px;background-color:#54a2ec;color:#fff;font-weight:400;opacity:.92;word-break:break-all}.${def.class.tooltip} .${def.class.tooltip} *{font-size:14px!important;font-family:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${def.class.tooltip} .${def.class.tooltip} em{font-style:normal!important}.${def.class.tooltip} .${def.class.tooltip} strong{color:#ff8c00;font-size:18px!important}.${def.class.tooltip} .${def.class.tooltip} p{display:block;margin:0 0 10px;color:#fff;text-indent:0!important;line-height:150%}.${def.class.ps1}{position:relative;top:-33px;right:5px;float:right;margin:0;padding:0;width:24px;height:0}.${def.class.ps2}{top:35px;right:-7px}.${def.class.ps3},.${def.class.ps4},.${def.class.ps5}{bottom:25px;left:auto}@-moz-document url-prefix() {#${def.id.container},#${def.id.fontList} .${def.class.selector},#${def.id.fontList} .${def.class.selectFontID} dl,#${def.id.fontCss} textarea,#${def.id.fontEx} textarea{scrollbar-color:#487baf #f1f0f0;scrollbar-width:thin}}#${def.id.fshadow}{visibility:hidden;margin-top:5px;position:absolute;z-index:999;box-sizing:content-box;padding:10px;width:234px;max-width:234px;border:2px solid #67a5df;border-radius:6px;background-color:#f0f6ff;color:#333;opacity:.92;left:21px}#${def.id.fshadow} .${def.id.fshadow}-label{display:flex;align-items:center;justify-content:space-around}#${def.id.fshadow} .${def.id.fshadow}-text{padding:5px;font-size:12px;font-weight:400;line-height:170%!important;color:#808287;word-break:break-all}.${def.const.seed}_inline_block{display:inline-block!important}.${def.const.seed}_block{display:block!important}.${def.const.seed}_none{display:none!important}.${def.const.seed}_visible{visibility:visible!important}.${def.const.seed}_hidden{visibility:hidden!important}.${def.const.seed}_m0p0{margin:0;padding:0}.${def.const.seed}_checkbox{height:32px;align-self:center}.${def.const.seed}_cb8{color:#8b0000!important}.${def.const.seed}_cce{color:#cecece!important}.${def.const.seed}_ccr{color:#dc143c!important}.${def.const.seed}_fb{font-weight:700!important}.${def.const.seed}_f-g1{filter:grayscale(1)!important}.${def.const.seed}_m0-4p0{margin:0 -4px;padding:0}.${def.const.seed}_m0060{margin:0 0 6px 0}` +
           `.${def.const.seed}_blr{border-top-left-radius:4px;border-bottom-left-radius:4px}.${def.const.seed}_brr{border-top-right-radius:4px;border-bottom-right-radius:4px}.${def.const.seed}_op1{opacity:1!important}.${def.const.seed}_usn{user-select:none!important}.${def.const.seed}_hmh35{height:35px!important;min-height:35px!important}.${def.class.range}{--primary-color:#67a5df;--value-offset-y:var(--ticks-gap);--value-active-color:#fff;--value-background:transparent;--value-background-hover:var(--primary-color);--value-font:italic 700 14px/14px ui-monospace,Consolas,monospace;--fill-color:var(--primary-color);--progress-background:#dfdfdf;--progress-radius:20px;--show-min-max:none;--track-height:calc(var(--thumb-size) / 2);--min-max-font:12px serif;--min-max-opacity:0.5;--min-max-x-offset:10%;--thumb-size:22px;--thumb-color:#fff;--thumb-shadow:0 0 3px rgba(0, 0, 0, 0.4),0 0 1px rgba(0, 0, 0, 0.5) inset,0 0 0 99px var(--thumb-color) inset;--thumb-shadow-active:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px var(--primary-color) inset,0 0 3px rgba(0, 0, 0, 0.4);--thumb-shadow-hover:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px #ff8c00 inset,0 0 3px rgba(0, 0, 0, 0.4);--ticks-thickness:1px;--ticks-height:5px;--ticks-gap:var(--ticks-height, 0);--ticks-color:transparent;--step:1;--ticks-count:(var(--max) - var(--min))/var(--step);--maxTicksAllowed:1000;--too-many-ticks:Min(1, Max(var(--ticks-count) - var(--maxTicksAllowed), 0));--x-step:Max(var(--step), var(--too-many-ticks) * (var(--max) - var(--min)));--tickIntervalPerc_1:Calc((var(--max) - var(--min)) / var(--x-step));--tickIntervalPerc:calc((100% - var(--thumb-size)) / var(--tickIntervalPerc_1) * var(--tickEvery, 1));--value-a:Clamp(var(--min), var(--value, 0), var(--max));--value-b:var(--value, 0);--text-value-a:var(--text-value, "");--completed-a:calc((var(--value-a) - var(--min)) / (var(--max) - var(--min)) * 100);--completed-b:calc((var(--value-b) - var(--min)) / (var(--max) - var(--min)) * 100);}` +
           `.${def.class.range}{width:auto;min-width:105%!important;margin:-3px 0 0 -7px;box-sizing:content-box;display:inline-block;height:Max(var(--track-height),var(--thumb-size));background:linear-gradient(to right,var(--ticks-color) var(--ticks-thickness),transparent 1px) repeat-x;background-size:var(--tickIntervalPerc) var(--ticks-height);background-position-x:calc(var(--thumb-size)/ 2 - var(--ticks-thickness)/ 2);background-position-y:var(--flip-y,bottom);padding-bottom:var(--flip-y,var(--ticks-gap));padding-top:calc(var(--flip-y) * var(--ticks-gap));position:relative;z-index:1}.${def.class.range}{--ca:Min(var(--completed-a), var(--completed-b));--cb:Max(var(--completed-a), var(--completed-b));--thumbs-too-close:Clamp(-1, 1000 * (Min(1, Max(var(--cb) - var(--ca) - 5, -1)) + 0.001), 1);--thumb-close-to-min:Min(1, Max(var(--ca) - 5, 0));--thumb-close-to-max:Min(1, Max(95 - var(--cb), 0))}.${def.class.range}[disabled]{filter:grayscale(0.9);}.${def.class.range}[data-ticks-position=top]{--flip-y:1}.${def.class.range}::after,.${def.class.range}::before{--offset:calc(var(--thumb-size) / 2);content:counter(x);display:var(--show-min-max,block);font:var(--min-max-font);position:absolute;bottom:var(--flip-y,-2.5ch);top:calc(-2.5ch * var(--flip-y));opacity:Clamp(0,var(--at-edge),var(--min-max-opacity));transform:translateX(calc(var(--min-max-x-offset) * var(--before,-1) * -1)) scale(var(--at-edge));pointer-events:none}.${def.class.range}::before{--before:1;--at-edge:var(--thumb-close-to-min);counter-reset:x var(--min);left:var(--offset)}.${def.class.range}::after{--at-edge:var(--thumb-close-to-max);counter-reset:x var(--max);right:var(--offset)}.${def.class.rangeProgress}{--start-end:calc(var(--thumb-size) / 2);--clip-end:calc(100% - (var(--cb)) * 1%);--clip-start:calc(var(--ca) * 1%);--clip:inset(-20px var(--clip-end) -20px var(--clip-start));position:absolute;left:var(--start-end);right:var(--start-end);top:calc(var(--ticks-gap) * var(--flip-y,0) + var(--thumb-size)/ 2 - var(--track-height)/ 2);height:calc(var(--track-height));background:var(--progress-background,#eee);pointer-events:none;z-index:-1;border-radius:var(--progress-radius)}.${def.class.rangeProgress}::before{content:"";position:absolute;left:0;right:0;clip-path:var(--clip);top:0;bottom:0;background:var(--fill-color,#000);box-shadow:var(--progress-flll-shadow);z-index:1;border-radius:inherit}` +
@@ -967,12 +965,11 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         }
         _runFunctions(functionsList, background, description = "[DOM.STATE]") {
           let [runCount, errorCount] = [0, 0];
-          for (const fn of functionsList) {
+          for (const { fn, args } of functionsList) {
             try {
-              fn();
+              fn.apply(null, args);
               runCount++;
             } catch (e) {
-              ERROR("RegisterEvents.runFunctions:", e.message);
               errorCount++;
             }
           }
@@ -997,11 +994,11 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           const args = [leftStyle(background), rightStyle(background), "display:block;height:0", remarkStyle("0"), remarkStyle("#a9a9a9")];
           INFO(`%c${description}:%c${logs}!%c\r\n%c \u3000\u27A6${IN_FRAMES} ${CUR_HOST_NAME} %c${CUR_HOST_PATH}`, ...args);
         }
-        addFn(fn) {
-          if (typeof fn === "function") this.functionsToRun.push(fn);
+        addFn(fn, ...args) {
+          if (typeof fn === "function") this.functionsToRun.push({ fn, args });
         }
-        addFinalFn(fn) {
-          if (typeof fn === "function") this.finalFunctionsToRun.push(fn);
+        addFinalFn(fn, ...args) {
+          if (typeof fn === "function") this.finalFunctionsToRun.push({ fn, args });
         }
       }
 
@@ -1074,7 +1071,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           dialog = cE("dialog", { id: def.const.dialog });
           appendNode(parent, dialog);
         }
-        if (!getMainStyleElements({ currentScope: true })) dialog.style.cssText = "width:100%;height:100%;outline:0;border-width:0";
+        if (!getMainStyleElements({ primaryElement: true })) dialog.style.cssText = "width:100%;height:100%;outline:0;border-width:0";
         appendNode(dialog, container);
         dialog.hasAttribute("open") && dialog.close?.();
         dialog.inert = true;
@@ -1086,7 +1083,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
       function closeDialogModel(dialog) {
         dialog?.close?.();
-        document.removeEventListener("blur", callStopPropagations, true);
+        document.removeEventListener("blur", stopEventPropagation, true);
         return safeRemoveNode(dialog ?? `dialog#${def.const.dialog}`);
       }
 
@@ -1119,7 +1116,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       function updateAdoptedStyleSheets(shadow, sheet, writable) {
         const hostSheet = asArray(shadow.adoptedStyleSheets);
         const existIndex = hostSheet.FindIndex(s => s.id === sheet.id);
-        if (existIndex === -1) shadow.adoptedStyleSheets = [...hostSheet, sheet];
+        if (!~existIndex) shadow.adoptedStyleSheets = [...hostSheet, sheet];
         else if (writable && !compareStyleSheets(shadow.adoptedStyleSheets[existIndex], sheet)) shadow.adoptedStyleSheets[existIndex] = sheet;
       }
 
@@ -1163,15 +1160,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
       function insertStyle({ target, id, cssText, overwrite }) {
         if (!IS_INTERNALSTYLE_ALLOWED || !target || !id || !cssText) return;
-        const existingStyles = getMainStyleElements({ currentScope: false, target });
-        const styleCount = existingStyles.length;
-        if (styleCount > 0) {
-          for (let i = 0, l = styleCount - !overwrite; i < l; i++) {
-            const styleElement = existingStyles[i];
-            styleElement.dataset.frRemoved = safeRemoveNode(styleElement);
-          }
-          if (!overwrite) return true;
-        }
+        const existingStyles = getMainStyleElements({ target });
+        if (overwrite) existingStyles.forEach(style => (style.dataset.frRemoved = true) && safeRemoveNode(style));
+        else if (existingStyles.length > 0) return true;
         try {
           const newStyle = cE("style", { id, media: "screen", type: "text/css", textContent: cssText, [def.const.cssAttrName]: overwrite ?? false });
           return appendNode(target, newStyle);
@@ -1478,38 +1469,38 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
       function getFontOverrideData(fontArray) {
         if (!Array.isArray(fontArray)) return [];
-        const processFont = font => {
-          if (typeof font !== "string") return null;
+        return fontArray.reduce((acc, font) => {
+          if (typeof font !== "string") return acc;
           const chsFont = font.match(/^{([^{}]+)}$/);
-          return chsFont ? convertToUnicode(chsFont[1]) : font;
-        };
-        return fontArray.map(processFont).filter(Boolean);
+          return acc.concat([chsFont ? convertToUnicode(chsFont[1]) : font]);
+        }, []);
       }
 
       async function getRootElementSelector() {
-        const rootElementID = await getDocumentElement.getNodeAndObserve().then(res => res.get().id);
-        return ((IS_REAL_BLINK && CUR_WINDOW_TOP) || (!IS_REAL_BLINK && !IS_GREASEMONKEY)) && rootElementID ? `:root#${rootElementID} ` : `:root `; // Fit::Blink::Iframe issue
+        const rootID = await getDocumentElement.getNodeAndObserve().then(res => res.get().id);
+        return (!CUR_WINDOW_TOP && IS_BLINK_BELOW_128) || IS_GREASEMONKEY || !rootID ? `:root ` : `:root#${rootID} `; // Fit::Greasemonkey & Userscripts & Blink < 128::IFRAME_STYLE_PARSING
       }
 
       /* FONT_RENDERING_PREPROCESSING */
 
-      void (async function (requestCodeAndFunc, getConfigureData, getCustomMonoData, getExSitesData, getFontSetData, getFontScaleDef, getFontOverrideDef) {
+      void (async function (requestCodeAndFunc, getConfigureData, getCustomMonoData, getExSitesData, getFontSetData, getFontScaleDef, getFontOverrideDef, getFontProperty) {
         let font_Set, exclude_Site, parameter_Set, include_Site, feed_Back;
         const { code: ROOT_SECRET_KEY, callback } = requestCodeAndFunc();
         if (!inspectLicense()?.inspect()) return CUR_WINDOW_TOP && callback(def.url.installURI);
         const addLoadEvents = new RegisterEvents();
-        const requestBackendData = await Promise.all([getRootElementSelector(), getFontOverrideDef(), getConfigureData(), getExSitesData(), getCustomMonoData()]);
-        const [globalPrefix, fontOverrideDefData, _config_data_, { exSitesIndex }, { monoSiteRules, monoFontList, monoFeature }] = requestBackendData;
+        const requestBackendData = await Promise.all([getRootElementSelector(), getFontOverrideDef(), getConfigureData(), getExSitesData(), getCustomMonoData(), getFontProperty()]);
+        const [globalPrefix, fontOverrideDefData, _config_data_, { exSitesIndex }, { monoSiteRules, monoFontList, monoFeature }, { fontFeature, fontVariant }] = requestBackendData;
         const { maxPersonalSites, isBackupFunction, isPreview, isFontsize, isHotkey, isFixViewport, isCloseTip, isCustomMono, rebuild, curVersion, globalDisable } = _config_data_;
         const CONST_VALUES = await getFontSetData(isFontsize, isFixViewport);
 
         /* CONVERT_FONT_PARAMETERS_TO_REALTIME_STYLE */
 
         const defaultFont = IS_CHN ? "\u7f51\u7ad9\u9ed8\u8ba4\u5b57\u4f53" : "Website Font";
-        const selectedFont = CONST_VALUES.fontSelect?.split(",")[0]?.replace(/"|'/g, "") ?? "";
+        const customFontFeature = `${fontFeature ? `--fr-font-feature:${fontFeature};` : ``}${fontVariant ? `--fr-font-variant:${fontVariant};` : ``}`;
+        const selectedFont = CONST_VALUES.fontSelect?.split(",")[0]?.replace(/["']/g, "") ?? "";
         const [fontface_i, smooth_i] = [Boolean(CONST_VALUES.fontFace), Boolean(CONST_VALUES.fontSmooth)];
         const fontFamily = fontface_i ? "font-family:var(--fr-font-family),var(--fr-font-basefont);" : "";
-        const fontFaces = fontface_i && selectedFont ? await generateFontFaceCSS(selectedFont) : "";
+        const fontFaces = fontface_i && selectedFont ? await generateFontFaceCSS(selectedFont, fontOverrideDefData) : "";
         let [fontsize_r, bodyScalecssText] = [parseFloat(CONST_VALUES.fontSize), ""];
         if (!~exSitesIndex && isFontsize && fontsize_r >= 0.8 && fontsize_r <= 1.5 && fontsize_r !== 1) {
           bodyScalecssText = generateFontSizeCss(fontsize_r);
@@ -1517,7 +1508,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         def.array.scaleMatrix.push((def.var.curScale = fontsize_r));
         const smoothGecko = IS_REAL_GECKO && platform === "MacOS" ? "-moz-osx-font-smoothing:grayscale!important;" : "";
         const smoothMac = !IS_CHEAT_UA && platform === "MacOS" ? "-webkit-font-smoothing:antialiased!important;" : "";
-        const fontSmoothCssText = `font-feature-settings:unset;font-variant:unset;font-optical-sizing:auto;font-kerning:auto;${smoothGecko}${smoothMac}`;
+        const fontSmoothCssText = `font-feature-settings:var(--fr-font-feature,unset);font-variant:var(--fr-font-variant,unset);font-optical-sizing:auto;font-kerning:auto;${smoothGecko}${smoothMac}`;
         const smoothing = smooth_i ? fontSmoothCssText : "";
         const textrender = smooth_i ? "text-rendering:optimizeLegibility;" : "";
         const [stroke_r, shadow_r] = [parseFloat(CONST_VALUES.fontStroke), parseFloat(CONST_VALUES.fontShadow)];
@@ -1532,21 +1523,24 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         const selectionWebkitCSS = `:is(:not(${exText}))::selection{color:#fff!important;background:#3367d1!important;-webkit-text-fill-color:#fff!important;${excludeSplit}}`;
         const selectionCssText = textStroke ? (IS_REAL_GECKO ? selectionGeckoCSS : selectionWebkitCSS) : "";
         const cssExclude = exText && (textShadow || textStroke) ? `${globalPrefix}:is(${exText}){${excludeSplit}}` : ``;
-        const codeFonts = exText ? funcCodefont(exText, fontface_i) : "";
+        const codeFonts = exText ? funcCodefont(exText, fontface_i, isCustomMono) : "";
         const noTextShadowCss = IS_CAUSED_BOLDSHADOWERROR && CONST_VALUES.fixShadow ? "text-shadow:var(--fr-fix-shadow)!important;" : "";
-        const getBoldFixCssText = shadow => `[${def.const.boldAttrName}],.${def.const.boldAttrName}{-webkit-text-stroke:var(--fr-no-stroke)!important;${shadow ?? ""}}`;
+        const getBoldFixCssText = shadow => `[${def.const.boldAttrName}],.${def.const.boldAttrName}{-webkit-text-stroke:var(--fr-fix-stroke)!important;${shadow ?? ""}}`;
         const boldFixCSSText = IS_CAUSED_BOLDSTROKEERROR && CONST_VALUES.fixStroke ? getBoldFixCssText(noTextShadowCss) : "";
+        const processRecoverBoldStyle = correctBoldStrokeProcess({ Scenes: "recover", Permit: CONST_VALUES.fixStroke });
         const curEmptyConfig = !fontface_i && !smooth_i && !textShadow && !textStroke && fontsize_r === 1;
         const IS_CURRENTSITE_ALLOWED = !~exSitesIndex && !curEmptyConfig;
         const fontStyle = `${fontFaces}${bodyScalecssText}${globalPrefix}:is(${inText}){${fontFamily}${textShadow}${textStroke}${smoothing}${textrender}}${selectionCssText}${cssExclude}${codeFonts}${boldFixCSSText}`;
         const textShadowFix = `0 0 ${shadow_r}px ${shadow_c.toLowerCase().slice(0, 7).concat("2b")}`;
-        const firefoxInputFix = IS_REAL_GECKO && fontface_i ? def.var.style.firefox : "";
-        const [monoAllowed, isEditorBlock, supportMix] = [Boolean(_config_data_.isCustomMono), Boolean(CONST_VALUES.isEditorBlock), CSS.supports("(color:color-mix(in srgb, tan, red))")];
+        const isFixInputEnabled = fi => fi === "true" || (!fi && /;?\s*\w+_last(?:visi|ac)t=\d{10}(?:;|%)/.test(document.cookie) && !storage.local?.setItem(FIXINPUT, true));
+        const firefoxInputFix = IS_REAL_GECKO & fontface_i && isFixInputEnabled(storage.local?.getItem(FIXINPUT)) ? def.var.style.firefox : "";
+        const [monoAllowed, isEditorBlock, supportMix] = [Boolean(isCustomMono), Boolean(CONST_VALUES.isEditorBlock), CSS.supports("(color:color-mix(in srgb, tan, red))")];
         const monoShadowColor = monoAllowed && supportMix ? `--fr-mono-shadowcolor:color-mix(in srgb, rgba(0, 0, 0, 0.05) 75%, currentcolor 25%);` : ``;
         const monoFontText = monoAllowed ? `--fr-mono-font:${monoFontList || INITIAL_REMARKS.monospacedFont};` : ``;
-        const monoShadow = monoAllowed ? `--fr-mono-shadow:0 0 0 var(--fr-mono-shadowcolor, currentColor);` : ``;
+        const monoShadow = monoAllowed ? `--fr-mono-shadow:0 0 0 var(--fr-mono-shadowcolor, currentcolor);` : ``;
         const monoFeatureText = monoAllowed ? `--fr-mono-feature:${monoFeature || INITIAL_REMARKS.monospacedFeature};` : ``;
-        const rootPseudoClass = `:root{--fr-font-basefont:${INITIAL_REMARKS.fontBase};--fr-font-fontscale:${fontsize_r};--fr-font-family:${CONST_VALUES.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-no-stroke:0px transparent;--fr-fix-shadow:${textShadowFix};${monoFontText}${monoShadowColor}${monoShadow}${monoFeatureText}}`;
+        const monoFallback = monoAllowed ? `--fr-mono-fallback:'Courier New','Liberation Mono',Courier;` : ``;
+        const rootPseudoClass = `:root{--fr-font-basefont:${INITIAL_REMARKS.fontBase};${customFontFeature}--fr-font-fontscale:${fontsize_r};--fr-font-family:${CONST_VALUES.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-no-stroke:0px transparent;--fr-fix-stroke:var(--fr-no-stroke);--fr-fix-shadow:${textShadowFix};${monoFontText}${monoFallback}${monoShadowColor}${monoShadow}${monoFeatureText}}`;
         const tStyle = `@charset "UTF-8";${CUR_WINDOW_TOP ? def.var.style.frDialog : ""}${IS_CURRENTSITE_ALLOWED ? `${rootPseudoClass}${firefoxInputFix}${fontStyle}` : ``}`;
 
         /* FR_CONFIGURE_SHADOWROOT_CONTENT */
@@ -1695,7 +1689,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                   </div>
                 </li>
                 <li id="${def.id.fontCss}">
-                  <div class="${def.const.seed}_m0060">${IS_CHN ? "需要渲染的网页元素：" : "Rendered Elements:"}
+                  <div class="${def.const.seed}_m0060">${IS_CHN ? "需要渲染的网页元素" : "Rendered Elements"}
                     <span id="${def.id.render}" class="${def.class.tooltip}">
                       <span class="${def.class.emoji}" title="${IS_CHN ? "按住查看帮助" : "Hold down for help"}">\ud83d\udd14</span>
                       <span class="${def.class.tooltip} ${def.class.ps4}">
@@ -1709,7 +1703,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                     id="${def.id.cssinclued}" readonly="readonly">${CONST_VALUES.fontCSS}</textarea>
                 </li>
                 <li id="${def.id.fontEx}">
-                  <div class="${def.const.seed}_m0060">${IS_CHN ? "排除渲染的HTML标签：" : "Exclude HTML Labels:"}
+                  <div class="${def.const.seed}_m0060">${IS_CHN ? "排除渲染的HTML标签" : "Excluded HTML Labels"}
                     <span id="${def.id.mono}" class="${def.class.tooltip}">
                       <span class="${def.class.emoji}" title="${IS_CHN ? "按住查看帮助" : "Hold down for help"}">\ud83d\udd14</span>
                       <span class="${def.class.tooltip} ${def.class.ps5}">
@@ -1809,26 +1803,25 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
         function insertPreviewStyleToFrame(node, style) {
           const doc = node.contentWindow?.document || node.contentDocument;
-          if (!doc || !doc.head || !doc.body || !doc.body.innerText.trim()) return false;
-          const { css, id, name } = getFrameStyleFixerName(style, doc.head);
-          const isInserted = insertStyle({ target: doc.head, id, cssText: css, overwrite: true });
-          return isInserted && (correctBoldStrokeProcess({ Scenes: "iframe", boldAttrName: name })(null, doc) ?? true);
+          if (!doc || !doc.head || !doc.body || !doc.body.innerText.trim()) return Promise.resolve(false);
+          return new Promise(resolve => {
+            const { css, id } = getExactFrameStyle(style, doc.head);
+            const isInserted = insertStyle({ target: doc.head, id, cssText: css, overwrite: true });
+            isInserted && correctBoldStrokeProcess({ Scenes: "iframe" })(null, doc);
+            resolve(isInserted);
+          });
         }
 
-        async function insertAsyncStyleToFrame(node, style, condition) {
+        function insertAsyncStyleToFrame(node, style, condition) {
           const doc = node.contentWindow?.document || node.contentDocument;
-          if (!doc || !doc.head) return false;
-          const { css, id } = getFrameStyleFixerName(style, doc.head);
-          for (let attempt = 0; attempt < 10; attempt++) {
-            if (getMainStyleElements({ currentScope: false, target: doc.head }).length === 0) {
-              if (insertStyle({ target: doc.head, id, cssText: css })) {
-                if (condition === "childList") correctBoldStrokeProcess({ Scenes: "iframe" })(null, doc);
-                return true;
-              }
-              await sleep(10, { useCachedSetTimeout: true });
-            } else return true;
-          }
-          return false;
+          if (!doc || !doc.head) return Promise.resolve(false);
+          return new Promise(resolve => {
+            const { css, id, styles } = getExactFrameStyle(style, doc.head);
+            if (styles.length === 0 && insertStyle({ target: doc.head, id, cssText: css })) {
+              if (condition === "childList") correctBoldStrokeProcess({ Scenes: "iframe" })(null, doc);
+              resolve(true);
+            } else resolve(styles.length > 0);
+          });
         }
 
         async function processframeStyleAsync({ node, condition, cssText }) {
@@ -1842,29 +1835,21 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           }
         }
 
-        function getFrameStyleFixerName(currentStyle, target) {
-          const { id, textContent } = getMainStyleElements({ currentScope: false, target })[0] ?? object;
-          const name = IS_REAL_BLINK && textContent?.match(/\bfr-bold-[0-9a-f]{8}\b/)?.[0];
-          const rootID = target.ownerDocument.documentElement.id;
-          const filter = !IS_REAL_BLINK && !IS_GREASEMONKEY && rootID ? "#" + rootID : "";
-          const cssText = currentStyle.replace(/\b#(\w+)\b/g, filter);
-          return { name, css: name ? cssText.replace(/\bfr-bold-[0-9a-f]{8}\b/g, name) : cssText, id: id ?? generateRandomString(12, "char") };
+        function getExactFrameStyle(currentStyle, iframe) {
+          const styles = getMainStyleElements({ target: iframe });
+          const id = styles[0]?.id ?? generateRandomString(12, "char");
+          const ownerDocumentID = iframe.ownerDocument.documentElement.id;
+          const filter = IS_BLINK_BELOW_128 || IS_GREASEMONKEY || !ownerDocumentID ? "" : "#" + ownerDocumentID;
+          return { css: currentStyle.replace(/\b#(\w+)\b/g, filter), id, styles };
         }
 
-        function insertStyleInFrames({ condition, nodeArray = [], style } = {}) {
+        function applyStyleToIframes({ condition, nodeArray = [], style } = {}) {
           if (!IS_CURRENTSITE_ALLOWED) return;
-          const cssText = style ?? tStyle;
-          if (nodeArray.length === 0) {
-            qA("html>:not(head) *").forEach(el => {
-              const shadow = el.shadowRoot;
-              if (shadow) nodeArray.push(...qA("iframe", shadow));
-              else if (getNodeName(el) === "iframe") nodeArray.push(el);
-            });
-          }
-          updateFramesWithStyle(nodeArray, condition, cssText);
+          if (nodeArray.length === 0) nodeArray = qA("html>:not(head) *").flatMap(el => (el.shadowRoot ? qA("iframe", el.shadowRoot) : getNodeName(el) === "iframe" ? [el] : []));
+          updateFramesWithConditionalStyle(nodeArray, condition, style ?? tStyle);
         }
 
-        function updateFramesWithStyle(frameArray, condition, cssText) {
+        function updateFramesWithConditionalStyle(frameArray, condition, cssText) {
           const updatedCSS = IS_BLINK_BELOW_128 || IS_GECKO_ABOVE_126 ? cssText : cssText.replace("var(--fr-font-fontscale)", "initial");
           frameArray.forEach(node => {
             if (condition !== "Preview" && IS_GREASEMONKEY) node.addEventListener("load", () => applyPassiveStyleToIframe(node, updatedCSS));
@@ -1874,26 +1859,28 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
         function applyPassiveStyleToIframe(iframe, cssText) {
           try {
-            const [head, { display, visibility }] = [iframe.contentWindow.document.head || iframe.contentDocument.head, gCS(iframe)];
-            if (!head || display === "none" || visibility === "hidden" || getMainStyleElements({ currentScope: false, target: head })[0]) return;
-            const { css, id } = getFrameStyleFixerName(cssText, head);
-            if (!insertStyle({ target: head, id, cssText: css })) throw new Error("Failed to insert style");
-            iframe.setAttribute(def.const.iframeAttrName, "Passive");
-            DEBUG("[NOFRAME] Passively insert styles!");
+            const iframeHead = iframe.contentWindow.document.head || iframe.contentDocument.head;
+            const { display, visibility } = gCS(iframe);
+            if (!iframeHead || display === "none" || visibility === "hidden") return;
+            const { css, id } = getExactFrameStyle(cssText, iframeHead);
+            const result = insertStyle({ target: iframeHead, id, cssText: css });
+            result && iframe.setAttribute(def.const.iframeAttrName, "Passive");
+            DEBUG("[NOFRAME] Passively insert styles:", result);
           } catch (e) {
             ERROR("applyPassiveStyleToIframe:", { node: iframe, url: iframe.src, msg: e.message });
           }
         }
 
-        async function processActiveFramework({ node, condition = "DOMLoaded", cssText }) {
-          if (!node || !cssText) return;
+        async function processActiveFramework({ node, condition, cssText }) {
           try {
+            if (!node || !cssText) return;
             node.removeAttribute("sandbox");
-            const [{ bottom, right, width, height }, { display, visibility }] = [node.getBoundingClientRect(), gCS(node)];
+            const { display, visibility } = gCS(node);
+            const { bottom, right, width, height } = node.getBoundingClientRect();
             if (bottom < 0 || right < 0 || width < 4 || height < 4 || display === "none" || visibility === "hidden") return;
-            const result = await processframeStyleAsync({ node, condition, cssText });
-            node.setAttribute(def.const.iframeAttrName, result);
-            COUNT(`[ASYNCFRAMES][ACT:${result}]`);
+            const action = await processframeStyleAsync({ node, condition, cssText });
+            node.setAttribute(def.const.iframeAttrName, action);
+            COUNT(`[ASYNCFRAMES][ACT:${action}]`);
           } catch (e) {
             ERROR("ASYNCFRAMES:", e.message);
           }
@@ -1910,7 +1897,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               cur !== prev && adjustCoordinateOffset({ cur, prev, props: def.array.props });
               DEBUG("scale<Matrix>: %o", def.array.scaleMatrix);
             }
-            insertStyleInFrames({ condition: "Preview", style: styleText });
+            applyStyleToIframes({ condition: "Preview", style: styleText });
             def.var.preview = !shouldReturn;
           } catch (e) {
             ERROR("LoadPreview:", e.message);
@@ -1958,10 +1945,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           input.addEventListener("change", updateValues);
         }
 
-        function removeKeyboardEvent(target) {
-          document.addEventListener("blur", callStopPropagations, true);
-          const addStopPropagationListener = eventType => target?.addEventListener(eventType, callStopPropagations);
-          ["keydown", "keyup", "keypress"].forEach(addStopPropagationListener);
+        function removeKeyboardEvent(...targets) {
+          document.addEventListener("blur", stopEventPropagation, true);
+          asArray(targets).forEach(target => ["keydown", "keyup", "keypress"].forEach(eventType => target?.addEventListener(eventType, stopEventPropagation)));
         }
 
         function getBrightness(hexa) {
@@ -2119,7 +2105,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           if (await frDialog.respond()) {
             const { exSite } = await getExSitesData();
             exSite.push(TOP_HOST);
-            saveData(EXCLUDESITES, uniq(exSite).sort());
+            saveData(EXCLUDESITES, uniq(exSite, site => site && typeof site === "string").sort());
             closeConfigurePage({ isReload: true });
           } else addAction.setCustomExsite();
           frDialog = null;
@@ -2243,7 +2229,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               ? `字体缩放功能将在您确认后开启，字体缩放后造成的视口单位偏移可通过“视口单位修正”功能解决，如介意禁用 CSP 权限，该功能可在此全局关闭，也可在字体渲染设置中单独关闭。`
               : `'𝐅𝐨𝐧𝐭 𝐒𝐜𝐚𝐥𝐢𝐧𝐠' feature will be turned on after you confirm, viewport unit offset caused by font scaling could be solved by the '𝐅𝐢𝐱 𝐕𝐢𝐞𝐰𝐩𝐨𝐫𝐭' feature, which can be turned off globally here or individually in font rendering settings, If you mind disabling CSP.`;
             const confirmMessage = IS_CHN ? "\r\n\r\n请确认是否开启字体缩放功能？" : "\r\n𝐏𝐥𝐞𝐚𝐬𝐞 𝐜𝐨𝐧𝐟𝐢𝐫𝐦 𝐭𝐨 𝐞𝐧𝐚𝐛𝐥𝐞 𝐅𝐨𝐧𝐭 𝐒𝐜𝐚𝐥𝐢𝐧𝐠?";
-            const info = baseMessage.concat((IS_REAL_GECKO && engineVersion < 126) || IS_GREASEMONKEY ? geckoWarning : nonGeckoWarning, confirmMessage);
+            const info = baseMessage.concat(IS_GECKO_BELOW_126 || IS_GREASEMONKEY ? geckoWarning : nonGeckoWarning, confirmMessage);
             if (this.checked) this.checked = Boolean(confirm(info));
             if (fvpNode) fvpNode.checked = this.checked;
           });
@@ -2296,9 +2282,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           if (await frDialog.respond()) {
             const { exSite, exSitesIndex } = await getExSitesData();
             const wildcard = site => typeof site === "string" && site.startsWith("*") && new RegExp(`^[a-z0-9][-a-z0-9]{0,62}${site.slice(1).replace(/\./g, "\\.")}(\\:\\d{2,5})?$`);
-            const panDomain = exSite.Find(site => wildcard(site) && wildcard(site).test(CUR_HOST));
+            const panDomain = exSite.Find(site => (site = wildcard(site)) && site.test(CUR_HOST));
             if (!panDomain) {
-              ~exSitesIndex && exSite.splice(exSitesIndex, 1) && saveData(EXCLUDESITES, uniq(exSite).sort());
+              ~exSitesIndex && exSite.splice(exSitesIndex, 1) && saveData(EXCLUDESITES, uniq(exSite, site => site && typeof site === "string").sort());
               closeConfigurePage({ isReload: true });
             } else {
               const messageText = IS_CHN
@@ -2309,7 +2295,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               let panDomainDialog = new FrDialogBox({ trueButtonText, falseButtonText, neutralButtonText, messageText, titleText });
               if (await panDomainDialog.respond()) {
                 const { exSite } = await getExSitesData();
-                const exSiteData = uniq(exSite.filter(item => !item.endsWith(panDomain.slice(1)))).sort();
+                const exSiteData = uniq(exSite, site => site && typeof site === "string" && !site.endsWith(panDomain.slice(1))).sort();
                 saveData(EXCLUDESITES, exSiteData);
                 closeConfigurePage({ isReload: true });
               } else addAction.setCustomExsite();
@@ -2327,7 +2313,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             const domainName = convertHtmlToText(_temp_[i]);
             const number = String(i + 1).padStart(2, "0");
             listContents += `<li id="${def.const.seed}_d_d_l_${i}"><span>${number}. </span><span class="${def.const.seed}_domainlist" title="${domainName}">${domainName}</span>`;
-            listContents += `<span>[<a id="${def.const.seed}_d_d_l_s_${i}" data-fr-domain="${domainName}">${IS_CHN ? "删除" : "Del"}</a>]</span></li>`;
+            listContents += `<span>[<a id="${def.const.seed}_d_d_l_s_${i}" class="${def.const.seed}_cb8" data-fr-domain="${domainName}">${IS_CHN ? "删除" : "Del"}</a>]</span></li>`;
           }
           listContents = listContents || `<li id="${def.const.seed}_temporary">---- ${IS_CHN ? "暂时没有自定义排除站点" : "No customized exclusion"} ----</li>`;
           const [searchBtn, addBtn] = [IS_CHN ? "查 询" : "Search", IS_CHN ? "添 加" : "Add"];
@@ -2345,7 +2331,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           if (ddNode && dsNode && dssNode && dsaNode) {
             dsNode.addEventListener("keydown", e => {
               if (e.key !== "Enter") return;
-              e.preventDefault();
+              stopEventPropagation(e, { immediate: false, preventDefault: true });
               dssNode.focus();
               dssNode.click();
             });
@@ -2364,8 +2350,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               const newNode = cE("li", { id: `${def.const.seed}_d_d_l_${exSiteLength}`, class: `${def.const.seed}_gradient_bg` });
               const domainName = convertHtmlToText(exDomain);
               newNode.innerHTML =
-                `<span>${String(exSiteLength + 1).padStart(2, "0")}. </span><span class="${def.const.seed}_domainlist" title="${domainName}">` +
-                `${domainName}</span><span>[<a id="${def.const.seed}_d_d_l_s_${exSiteLength}" data-fr-domain="${domainName}">${IS_CHN ? "删除" : "Del"}</a>]</span>`;
+                `<span>${String(exSiteLength + 1).padStart(2, "0")}. </span><span class="${def.const.seed}_domainlist" title="${domainName}">${domainName}</span>` +
+                `<span>[<a id="${def.const.seed}_d_d_l_s_${exSiteLength}" class="${def.const.seed}_cb8" data-fr-domain="${domainName}">${IS_CHN ? "删除" : "Del"}</a>]</span>`;
               appendNode(ddNode, newNode);
               _temp_.push(exDomain);
               dsNode.value = "";
@@ -2387,7 +2373,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             classList.toggle(`${def.const.seed}_list_reset`, !isDeleted);
           });
           if (await frDialog.respond()) {
-            saveData(EXCLUDESITES, uniq(_temp_).sort());
+            saveData(EXCLUDESITES, uniq(_temp_, site => site && typeof site === "string").sort());
             const messageText = IS_CHN
               ? `<p class="${def.const.seed}_cdg">自定义排除网站数据已成功保存！</p><p>页面将在您确认后自动刷新</p>`
               : `<p class="${def.const.seed}_cdg">Exclusion site data was successfully saved!</p><p>The page will refresh after confirmation.</p>`;
@@ -2412,9 +2398,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
         function setConfigureListener() {
           qS(`.${def.class.title} span.${def.class.guide}`, def.var.configIf)?.addEventListener("click", () => void GMopenInTab(def.url.guideURI, false));
-          qS(`#${def.id.render}`, def.var.configIf)?.addEventListener("dblclick", e => void (callStopPropagations(e, true), GMopenInTab(`${def.url.feedback}/42`, false)));
+          qS(`#${def.id.render}`, def.var.configIf)?.addEventListener("dblclick", e => (stopEventPropagation(e, { preventDefault: true }), GMopenInTab(`${def.url.feedback}/42`, false)));
           qS(`#${def.id.field} #${def.const.seed}_scriptname`, def.var.configIf)?.addEventListener("dblclick", function (e) {
-            callStopPropagations(e, true);
+            stopEventPropagation(e, { preventDefault: true });
             this.classList.add(`${def.const.seed}_usn`);
             hintUpdateInfo(def.url.guideURI, def.var.curVersion);
           });
@@ -2509,11 +2495,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             });
 
           function handleClickEvent(name, time, event) {
-            callStopPropagations(event, true);
-            if (Date.now() - def.count.clickTimer > time) {
-              def.count.clickTimer = Date.now();
-              addAction[name]();
-            }
+            stopEventPropagation(event, { preventDefault: true });
+            const currentTime = performance.now();
+            currentTime - def.count.clickTimer > time && (def.count.clickTimer = currentTime) && addAction[name]();
           }
         }
 
@@ -2536,7 +2520,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               const number = String(i + 1).padStart(2, "0");
               const _fontData_ = new Date(domainValues[i].fontDate);
               const date = setDateFormat("yyyy-MM-dd", _fontData_);
-              listContents += `<li id="${def.const.seed}_d_d_l_${i}"><span>[<a id="${def.const.seed}_d_d_l_s_${i}">${delBtn}</a>]<span> ${number}.</span></span><span class="${def.const.seed}_customdomain" title="${domainName}">${domainName}</span><span class="${def.const.seed}_m05" title="${_fontData_}">${date}</span></li>`;
+              listContents += `<li id="${def.const.seed}_d_d_l_${i}"><span>[<a id="${def.const.seed}_d_d_l_s_${i}" class="${def.const.seed}_cb8">${delBtn}</a>]<span> ${number}.</span></span><span class="${def.const.seed}_customdomain" title="${domainName}">${domainName}</span><span class="${def.const.seed}_m05" title="${_fontData_}">${date}</span></li>`;
             }
             const titleText = IS_CHN ? "网站个性化设置数据列表" : "Customized Sites Data";
             const noticeText = IS_CHN ? "请谨慎操作，保存后生效，已删除的数据将不可恢复！" : "After saving, the deleted data will not be recoverable!";
@@ -2550,7 +2534,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             if (ddNode && dsNode && dscNode && dssNode) {
               dsNode.addEventListener("keydown", e => {
                 if (e.key !== "Enter") return;
-                e.preventDefault();
+                stopEventPropagation(e, { immediate: false, preventDefault: true });
                 dssNode.focus();
                 dssNode.click();
               });
@@ -2654,7 +2638,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           function resetFontSelectList() {
             deleteFontSelectList(fontData);
             const fontlistSelectorNode = qS(`#${def.id.fontList} .${def.class.selector}`, def.var.configIf);
-            const resetDefaultFont = INITIAL_VALUES.fontSelect.replace(/'|"/g, "");
+            const resetDefaultFont = INITIAL_VALUES.fontSelect.replace(/['"]/g, "");
             const resetFontCHN = IS_REAL_WEBKIT || (!IS_CHEAT_UA && platform === "MacOS") ? "\u82f9\u65b9\u002d\u7b80" : "\u5fae\u8f6f\u96c5\u9ed1";
             const fontlistSelectorHTML = `<a class="${def.class.label}"><span class="${def.const.seed}_blr" style="font-family:${INITIAL_VALUES.fontSelect}!important">${resetFontCHN}</span><input type="hidden" name="${def.id.fontName}" sort="0" value="${resetDefaultFont}"/><span class="${def.class.close} ${def.const.seed}_cp ${def.const.seed}_brr" style="font-family:sans-serif!important">\u0026\u0023\u0032\u0031\u0035\u003b</span></a>`;
             fontlistSelectorNode.insertAdjacentHTML("beforeend", tTP.createHTML(fontlistSelectorHTML));
@@ -2722,7 +2706,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             }
 
             function selectorEvent(event) {
-              event.stopPropagation();
+              stopEventPropagation(event);
               const _this = this ?? event.target;
               if (_this.value.length === 0) {
                 const selector = `#${def.id.fontList} .${def.class.selectFontID} dl`;
@@ -2781,6 +2765,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               document.addEventListener("click", selectorHidden);
 
               function parseClick(event) {
+                stopEventPropagation(event);
                 const _this = this ?? event.target;
                 const value = _this.attributes.value?.value;
                 const sort = _this.attributes.sort?.value;
@@ -2802,20 +2787,15 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                   }
                 }
                 selectorHidden();
-                event.stopPropagation();
               }
             }
           }
         }
 
-        async function generateFontFaceCSS(fontName) {
+        async function generateFontFaceCSS(fontName, overrideData) {
           const postscriptName = await matchByPostScriptName(fontName);
-          const fontList = getFontOverrideData(fontOverrideDefData);
-          let returnFontface = "";
-          for (let i = 0; i < fontList.length; i++) {
-            if (fontList[i] !== fontName) returnFontface += `@font-face{font-family:"${fontList[i]}";src:local("${postscriptName}");}`;
-          }
-          return returnFontface;
+          const fontList = getFontOverrideData(overrideData);
+          return fontList.reduce((css, font) => css.concat(font !== fontName ? `@font-face{font-family:"${font}";src:local("${postscriptName}");}` : ``), "");
         }
 
         function generateFontSizeCss(scale) {
@@ -2843,27 +2823,26 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           adjustCoordinateOffset({ cur: def.var.curScale, props: def.array.props });
         }
 
-        function funcCodefont(text, isOverride) {
-          if (!isCustomMono) return "";
-          let customMonoRules = [];
+        function funcCodefont(text, isOverride, isAllowCustomMonospace) {
+          if (!isAllowCustomMonospace) return "";
           const pre = text.search(/\bpre\b/gi) !== -1 ? ["pre", "pre *"] : [];
           const code = text.search(/\bcode\b/gi) !== -1 ? ["code", "code *"] : [];
           const codeStyle = [".ace_editor *", ".monaco-editor *", ".cm-editor [class*='cm-'] *", ".code", ".code *"];
           const siterules = ["@github.com##.blob-num,.blob-num *,.blob-code,.blob-code *,textarea,.react-line-numbers *,.react-code-lines *", ...monoSiteRules];
           const regexp = /@([\w[\]\-.:]+)##((?![^@]+##)[\w\-*.#:+>()~[\]=^$|,' ]+)/;
-          siterules.forEach(siterule => {
-            const rule = regexp.exec(siterule);
-            if (CUR_HOST.endsWith(rule[1])) customMonoRules.push(...rule[2].split(","));
-          });
+          const customMonoRules = siterules.reduce((rules, siterule) => {
+            const [, domain, fontRules] = regexp.exec(siterule) || [];
+            if (domain && CUR_HOST.endsWith(domain)) rules.push(...fontRules.split(","));
+            return rules;
+          }, []);
           const codeSelectors = uniq(pre.concat(code, codeStyle, customMonoRules)).join();
-          const defaultMonospace = IS_REAL_GECKO ? "'Courier New'" : "ui-monospace,monospace";
-          const baseFont = isOverride ? `${defaultMonospace},var(--fr-font-family),var(--fr-font-basefont)` : `${defaultMonospace},var(--fr-font-basefont)`;
-          return `${globalPrefix}:is(${codeSelectors}):not([class*='icon' i]){-webkit-text-stroke:var(--fr-no-stroke)!important;text-shadow:var(--fr-mono-shadow)!important;font-family:var(--fr-mono-font),${baseFont}!important;font-feature-settings:var(--fr-mono-feature)!important;-webkit-user-select:text!important;user-select:text!important}${globalPrefix}:is(${codeSelectors})::selection{color:#fff!important;background:rgba(254, 115, 0, 0.93)!important;-webkit-text-stroke-width:0!important;text-shadow:1px 1px 1px rgba(76, 76, 76, 0.9)!important}`;
+          const baseMonoFont = (isOverride ? "var(--fr-mono-fallback),var(--fr-font-family)," : "ui-monospace,monospace,") + "var(--fr-font-basefont)";
+          return `${globalPrefix}:is(${codeSelectors}):not([class*='icon' i]){-webkit-text-stroke:var(--fr-no-stroke)!important;text-shadow:var(--fr-mono-shadow)!important;font-family:var(--fr-mono-font),${baseMonoFont}!important;font-feature-settings:var(--fr-mono-feature, unset)!important;-webkit-user-select:text!important;user-select:text!important}${globalPrefix}:is(${codeSelectors})::selection{color:#fff!important;background:rgba(254, 115, 0, 0.93)!important;-webkit-text-stroke-width:0!important;text-shadow:1px 1px 1px rgba(76, 76, 76, 0.8)!important}`;
         }
 
-        function insertMainStyleElement({ overwrite, shouldNotify = true } = {}) {
+        function insertMainStyleElement({ overwrite = false, shouldNotify = true } = {}) {
           if (!IS_INTERNALSTYLE_ALLOWED) return;
-          const { id, textContent } = getMainStyleElements({ currentScope: true }) ?? object;
+          const { id, textContent } = getMainStyleElements({ primaryElement: true }) ?? immutObj;
           if (!overwrite && id) return true;
           const isInserted = insertStyle({ target: document.head, id: id ?? def.id.rndStyle, cssText: textContent ?? tStyle, overwrite: Boolean(overwrite) });
           if (isInserted && shouldNotify) COUNT(`[INSERTSTYLE]${IN_FRAMES}[i:${def.id.rndStyle}]`);
@@ -2873,73 +2852,39 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         async function operateConfigure() {
           if (!CUR_WINDOW_TOP) return;
           try {
-            // set fontData with cache expires
             const fontData = await getAvailableFontData();
             const fontSetFn = fontSet({ container: `#${def.id.fontList} .${def.class.fontList}`, fontData });
-            // Fonts selection
+            const nodeIDSet = ["fface", "smooth", "fontScale", "strokeSize", "shadowSize", "renderCanvas", "color", "cssinclued", "cssexclude"];
+            const [ffaceT, smoothT, fontScaleT, strokeT, shadowsT, canvasT, colorshowT, fontCssT, fontExT] = nodeIDSet.map(id => qS(`#${def.id[id]}`, def.var.configIf));
+            const fieldIDSet = ["shadowColor", "cSwitch", "eSwitch", "fontCss", "fontEx", "backup", "mono"];
+            const [shadowColorNode, cSwitch, eSwitch, includeNode, excludeNode, backupButton, customMonoNode] = fieldIDSet.map(id => qS(`#${def.id[id]}`, def.var.configIf));
+            const [resetButton, submitButton, cancelButton] = ["reset", "submit", "cancel"].map(type => qS(`#${def.id.submit} .${def.class[type]}`, def.var.configIf));
             fontSelectionAndCustomFonts(fontSetFn);
-            // selector placeholder style
-            const ffaceT = qS(`#${def.id.fface}`, def.var.configIf);
-            const inputFont = qS(`#${def.id.fontList} .${def.class.selectFontID} input`, def.var.configIf);
-            getAndMonitorCurrentFont(ffaceT, inputFont, defaultFont);
-            // Fonts Face
-            setFontOverrideDefTrigger(fontOverrideDefData);
-            const submitButton = qS(`#${def.id.submit} .${def.class.submit}`, def.var.configIf);
-            saveChangeStatus(ffaceT, CONST_VALUES.fontFace, submitButton);
-            // Font Smooth
-            const smoothT = qS(`#${def.id.smooth}`, def.var.configIf);
-            saveChangeStatus(smoothT, CONST_VALUES.fontSmooth, submitButton);
-            // FontSize Scale
-            const fontScaleT = qS(`#${def.id.fontScale}`, def.var.configIf);
-            const drawScale = getFontSizeScale(fontScaleT, submitButton);
-            removeKeyboardEvent(fontScaleT);
-            // Fix Viewport
-            const fixViewportT = getFixViewportBool(fontScaleT, submitButton);
-            // Fonts stroke
-            const strokeT = qS(`#${def.id.strokeSize}`, def.var.configIf);
-            const drawStrock = getFontsStroke(strokeT, submitButton);
-            removeKeyboardEvent(strokeT);
-            // Fix Fonts stroke
-            const { fixStrokeT, fixShadowT, lazyloadT } = getFixStrokeBool(strokeT, submitButton);
-            // Fonts shadow
-            const shadowsT = qS(`#${def.id.shadowSize}`, def.var.configIf);
-            const canvasT = qS(`#${def.id.renderCanvas}`, def.var.configIf);
-            const shadowColorNode = qS(`#${def.id.shadowColor}`, def.var.configIf);
-            const drawShadow = getFontShadow(shadowsT, shadowColorNode, submitButton);
-            removeKeyboardEvent(shadowsT);
-            // Fonts shadow color selection
-            const colorshowT = qS(`#${def.id.color}`, def.var.configIf);
-            const colorReg = /^#[0-9A-F]{8}$|^currentcolor$/i;
-            const colorPickerT = getColorAndColorPicker(colorshowT, submitButton);
-            removeKeyboardEvent(colorshowT);
-            // Double-click allows to edit
-            const fontCssT = qS(`#${def.id.cssinclued}`, def.var.configIf);
-            const fontExT = qS(`#${def.id.cssexclude}`, def.var.configIf);
-            removeKeyboardEvent(fontCssT);
-            doubleClickToEdit(fontCssT);
-            removeKeyboardEvent(fontExT);
+            removeKeyboardEvent(fontScaleT, strokeT, shadowsT, colorshowT, fontCssT, fontExT);
             saveChangeStatus(fontCssT, CONST_VALUES.fontCSS, submitButton);
             saveChangeStatus(fontExT, CONST_VALUES.fontEx, submitButton);
-            // Expand & Collapse
-            expandOrCollapse(qS(`#${def.id.cSwitch}`, def.var.configIf), fontCssT, qS(`#${def.id.fontCss}`, def.var.configIf));
-            expandOrCollapse(qS(`#${def.id.eSwitch}`, def.var.configIf), fontExT, qS(`#${def.id.fontEx}`, def.var.configIf));
-            // Customized monospaced fontlist
-            const customMonoNode = qS(`#${def.id.mono}`, def.var.configIf);
+            saveChangeStatus(ffaceT, CONST_VALUES.fontFace, submitButton);
+            saveChangeStatus(smoothT, CONST_VALUES.fontSmooth, submitButton);
+            const inputFont = qS(`#${def.id.fontList} .${def.class.selectFontID} input`, def.var.configIf);
+            const drawScale = getFontSizeScale(fontScaleT, submitButton);
+            const fixViewportT = getFixViewportBool(fontScaleT, submitButton);
+            const drawStrock = getFontsStroke(strokeT, submitButton);
+            const { fixStrokeT, fixShadowT, lazyloadT } = getFixStrokeBool(strokeT, submitButton);
+            const drawShadow = getFontShadow(shadowsT, shadowColorNode, submitButton);
+            const colorReg = /^#[0-9A-F]{8}$|^currentcolor$/i;
+            const colorPickerT = getColorAndColorPicker(colorshowT, submitButton);
+            const initialSettings = { ffaceT, smoothT, fontScaleT, fixViewportT, strokeT, fixStrokeT, lazyloadT, fixShadowT };
+            const finalSettings = { ...initialSettings, shadowsT, canvasT, colorshowT, colorReg, fontCssT, fontExT, colorPickerT };
+            await getAndMonitorCurrentFont(ffaceT, inputFont, defaultFont);
+            setFontOverrideDefTrigger(fontOverrideDefData);
+            doubleClickToEdit(fontCssT);
+            expandOrCollapse(cSwitch, fontCssT, includeNode);
+            expandOrCollapse(eSwitch, fontExT, excludeNode);
             customMonospceFont(customMonoNode);
-            // Reset Button control
-            const resetButtonNode = qS(`#${def.id.submit} .${def.class.reset}`, def.var.configIf);
-            const preSet = { ffaceT, smoothT, fontScaleT, fixViewportT, strokeT, fixStrokeT, lazyloadT, fixShadowT };
-            const submitSet = { ...preSet, shadowsT, canvasT, colorshowT, colorReg, fontCssT, fontExT, colorPickerT };
-            controlResetButton(resetButtonNode, fontSetFn, submitSet, { drawScale, drawStrock, drawShadow, submitButton });
-            // Submit Button control
-            const submitButtonNode = qS(`#${def.id.submit} .${def.class.submit}`, def.var.configIf);
-            controlSubmitButton(submitButtonNode, fontSetFn, submitSet);
-            // Backup Button control
-            const backupButtonNode = qS(`#${def.id.backup}`, def.var.configIf);
-            controlBackupButton(backupButtonNode, isBackupFunction);
-            // cancel Button control
-            const cancelButtonNode = qS(`#${def.id.submit} .${def.class.cancel}`, def.var.configIf);
-            controlCancelButton(cancelButtonNode);
+            controlResetButton(resetButton, fontSetFn, finalSettings, { drawScale, drawStrock, drawShadow, submitButton });
+            controlSubmitButton(submitButton, fontSetFn, finalSettings);
+            controlBackupButton(backupButton, isBackupFunction);
+            controlCancelButton(cancelButton);
           } catch (e) {
             ERROR("OperateConfigure:", e.message);
             def.array.exps.push(`[operateConfigure]: ${e}`);
@@ -2964,28 +2909,37 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             }
           }
 
+          function standardizeString(node, isDoubleQuote, isConvertHTML, filterRegex) {
+            const standardizeText = (node.value = convertFullToHalf(node.value)
+              .replace(/['"`·“”‘’]/g, isDoubleQuote ? `"` : `'`)
+              .replace(/，/g, `,`)
+              .replace(/：/g, `:`)
+              .replace(filterRegex ?? "", "")).trim();
+            return isConvertHTML ? convertHtmlToText(standardizeText) : standardizeText;
+          }
+
           function fontSelectionAndCustomFonts(fontSetFn) {
             try {
               fontSetFn?.fsearch();
               qS(`#${def.id.fonttooltip}`, def.var.configIf)?.addEventListener("dblclick", async e => {
-                callStopPropagations(e, true);
-                let [savedFontListString, cusFontCheck] = [""];
+                stopEventPropagation(e, { preventDefault: true });
+                let savedFontListString = "";
                 const cusFontList = await GMgetValue(CUSTOMFONTS);
                 try {
-                  cusFontCheck = cusFontList ? [...JSON.parse(decrypt(cusFontList))] : [];
+                  const cusFontCheck = cusFontList ? [...JSON.parse(decrypt(cusFontList))] : [];
+                  cusFontCheck.forEach(item => delete item.sort && (savedFontListString += JSON.stringify(item) + "\r\n"));
                 } catch (e) {
-                  cusFontCheck = [];
+                  ERROR("fontSelectionAndCustomFonts:", e.message);
                 }
-                cusFontCheck.forEach(item => delete item.sort && (savedFontListString += JSON.stringify(item) + "\r\n"));
                 const messageText = IS_CHN
-                  ? `<p class="${def.const.seed}_c55 ${def.const.seed}_f14">以下文本域可按预定格式增加自定义字体。请用小贴士或按样例填写，输入有误将被自动过滤。与『<a href="${def.url.guideURI}#既定的字体表" title="查看内置字体表" target="_blank">内置字体表</a>』重复的字体将被自动剔除。【功能小贴士：<span id="${def.const.seed}_addTools" title="点击开启工具" class="${def.const.seed}_ccr ${def.const.seed}_cp">字体添加辅助工具</span>】</p><p><textarea id="${def.const.seed}_custom_Fontlist" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下：\r\n{ "ch":"中文字体名一","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"中文字体名二","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n(注一：如无中文字体名，可用英文或其他语言名称替代)\r\n(注二：“ps:” 该项为字体的PostScript名称，可选填写)'>${savedFontListString}</textarea></p><p id="${def.const.seed}_warning_chn">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p>`
-                  : `<p class="${def.const.seed}_c55 ${def.const.seed}_f14">Add custom fonts in a predefined format. Please use tips or fill in the examples. Incorrect entries will be filtered. The fonts that duplicate '<a href="${def.url.guideURI}#built-in-font-library" title="Viewing the built-in font library" Target="_blank">the Built-in Font library</a>' will be automatically deleted. (𝐓𝐈𝐏: <span id="${def.const.seed}_addTools" title="Click to open the aid tool" class="${def.const.seed}_ccr ${def.const.seed}_cp">𝐅𝐨𝐧𝐭 𝐀𝐝𝐝𝐢𝐧𝐠 𝐀𝐢𝐝</span>)</p><p><textarea id="${def.const.seed}_custom_Fontlist" placeholder='One set of Fontname data per line, as follow:\r\n{ "ch":"CHN Fontname 1","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"CHN Fontname 2","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n(Note1: If no Chinese fontname, use another instead) \r\n (Note2: "ps:" for the font PostScript name, optional)'>${savedFontListString}</textarea></p><p id="${def.const.seed}_warning_en">(Adding too many custom fonts will cause slow loading)</p>`;
+                  ? `<p class="${def.const.seed}_c55 ${def.const.seed}_f14">\u2474 以下文本域可按预定格式增加自定义字体。请用小贴士或按示例填写，输入有误将被自动过滤。与『<a href="${def.url.guideURI}#既定的字体表" title="查看内置字体表" target="_blank">内置字体表</a>』重复的字体将被自动剔除。【功能小贴士：<span id="${def.const.seed}_addTools" title="点击开启工具" class="${def.const.seed}_ccr ${def.const.seed}_cp">字体添加辅助工具</span>】</p><p><textarea id="${def.const.seed}_custom_Fontlist" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下：\r\n{ "ch":"中文字体名一","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"中文字体名二","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n(注一：如无中文字体名，可用英文或其他语言名称替代)\r\n(注二：“ps:” 该项为字体的PostScript名称，可选填写)'>${savedFontListString}</textarea></p><p id="${def.const.seed}_warning_chn">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p><p class="${def.const.seed}_fontfeature">\u2475 以下设置字体的 font-variant 变体样式属性。<br/><span class="${def.const.seed}_ccr">如果您不了解该属性，请保持留空，以免造成渲染异常。</span></p><p class="${def.const.seed}_mbm5"><input id="${def.const.seed}_custom_Variant" placeholder='例如：common-ligatures small-caps' value='${fontVariant}'></p><p class="${def.const.seed}_fontvariant">\u2476 以下设置 OpenType 字体 <a href="https://learn.microsoft.com/en-us/typography/opentype/spec/featurelist" target="_blank">font-feature-settings</a> 属性。<br/><span class="${def.const.seed}_ccr">如果您设置的常规字体非 OpenType 字体，请保持留空。</span></p><p class="${def.const.seed}_mbm5"><input id="${def.const.seed}_custom_Feature" placeholder='例如："liga" 0,"tnum","zero"' value='${fontFeature}'></p>`
+                  : `<p class="${def.const.seed}_c55 ${def.const.seed}_f14">\u2474 Add custom fonts in predefined formats, either by 𝐄𝐱𝐚𝐦𝐩𝐥𝐞 or by 𝐅𝐨𝐧𝐭 𝐀𝐝𝐝𝐢𝐧𝐠 𝐀𝐢𝐝. Incorrect entries will be filtered. Fonts that duplicate the <a href="${def.url.guideURI}#built-in-font-library" title="Viewing the built-in font library" Target="_blank">built-in font library</a> will be automatically removed. (𝐓𝐈𝐏: <span id="${def.const.seed}_addTools" title="Click to open the aid tool" class="${def.const.seed}_ccr ${def.const.seed}_cp">𝐅𝐨𝐧𝐭 𝐀𝐝𝐝𝐢𝐧𝐠 𝐀𝐢𝐝</span>)</p><p><textarea id="${def.const.seed}_custom_Fontlist" placeholder='One set of Fontname data per line, as follow:\r\n{ "ch":"CHN Fontname 1","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"CHN Fontname 2","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n(Note1: If no Chinese fontname, use another instead) \r\n (Note2: "ps:" for the font PostScript name, optional)'>${savedFontListString}</textarea></p><p id="${def.const.seed}_warning_en">(Adding too many custom fonts will cause slow loading)</p><p class="${def.const.seed}_fontvariant">\u2475 Set font variants CSS shorthand property.<br/><span class="${def.const.seed}_ccr">If you do not understand this property, leave it blank.</span></p><p class="${def.const.seed}_mbm5"><input id="${def.const.seed}_custom_Variant" placeholder='Such as: common-ligatures small-caps' value='${fontVariant}'></p><p class="${def.const.seed}_fontfeature">\u2476 Set OpenType font <a href="https://learn.microsoft.com/en-us/typography/opentype/spec/featurelist" target="_blank">font-feature-settings</a> property.<br/><span class="${def.const.seed}_ccr">Leave blank if using custom font that is not OpenType.</span></p><p class="${def.const.seed}_mbm5"><input id="${def.const.seed}_custom_Feature" placeholder='Such as: "liga" 0,"tnum","zero"' value='${fontFeature}'></p>`;
                 const [trueButtonText, falseButtonText] = [IS_CHN ? "保 存" : "Save", IS_CHN ? "帮助文档" : "Help"];
                 const [neutralButtonText, titleText] = [IS_CHN ? "取 消" : "Cancel", IS_CHN ? "自定义字体表" : "Custom Font Library"];
                 let frDialog = new FrDialogBox({ trueButtonText, falseButtonText, neutralButtonText, messageText, titleText });
-                const customFontlistNode = qS(`#${def.const.seed}_custom_Fontlist`, def.var.dialogIf);
-                removeKeyboardEvent(customFontlistNode);
-                let custom_Fontlist = customFontlistNode?.value.trim() ?? "";
+                const [customFontlistNode, featureNode, variantNode] = ["custom_Fontlist", "custom_Feature", "custom_Variant"].map(i => qS(`#${def.const.seed}_${i}`, def.var.dialogIf));
+                removeKeyboardEvent(customFontlistNode, featureNode, variantNode);
+                let [customFontlist, customFeature, customVariant] = [customFontlistNode.value.trim(), featureNode.value.trim(), variantNode.value.trim()];
                 qS(`#${def.const.seed}_addTools`, def.var.dialogIf)?.addEventListener("click", () => {
                   const chNameText = IS_CHN
                     ? `请输入「中文字体家族名称」：\r\n(例如：鸿蒙黑体，仅支持半角输入模式，包括中文、日文、韩文、英文，数字、小数点、减号、下划线、空格、@)\r\n(如没有中文字体名称，可使用英文或其他语言名称来替代)`
@@ -2999,32 +2953,29 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                   let enName, psName, cusFontName;
                   let chName = prompt(chNameText, "鸿蒙黑体");
                   if (chName === null) return;
-                  else if (/^@?[\w\u2E80-\uD7FF\-.,!/（）() ]+$/.test(chName.trim())) {
+                  else if (/^@?[^"]+$/.test(chName.trim())) {
                     enName = prompt(enNameText, "HarmonyOS Sans SC");
                     if (enName === null) return;
-                    else if (/^@?[\w\-., !/()]+$/.test(enName.trim())) {
+                    else if (/^@?[^"\uFF00-\uFFEF\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]+$/.test(enName.trim())) {
                       psName = prompt(psNameText, "");
                       if (psName === null) return GMopenInTab(`${def.url.feedback}/261`, false);
-                      else if (/^[\w\u2E80-\uD7FF\-.,@!&=?|+~ ]+$/.test(psName.trim())) cusFontName = `{"ch":"${chName.trim()}","en":"${enName.trim()}","ps":"${psName.trim()}"}`;
-                      else cusFontName = `{"ch":"${chName.trim()}","en":"${enName.trim()}"}`;
+                      else if (/^[^"]+$/.test(psName.trim())) cusFontName = convertFullToHalf(`{"ch":"${chName.trim()}","en":"${enName.trim()}","ps":"${psName.trim()}"}`);
+                      else cusFontName = convertFullToHalf(`{"ch":"${chName.trim()}","en":"${enName.trim()}"}`);
                       const aTrim = customFontlistNode.value.trim() ? "\r\n" : "";
                       customFontlistNode.value = customFontlistNode.value.trim().concat(aTrim, cusFontName, "\r\n");
-                      custom_Fontlist = customFontlistNode.value.trim();
+                      customFontlist = customFontlistNode.value.trim();
                       customFontlistNode.scrollTop = customFontlistNode.scrollHeight;
                     } else alert(IS_CHN ? "英文字体家族名称 格式输入错误！" : "English Fontname Input Format Error!");
                   } else alert(IS_CHN ? "中文字体家族名称 格式输入错误！" : "Chinese Fontname Input Format Error!");
                 });
-                customFontlistNode?.addEventListener("change", function () {
-                  this.value = convertFullToHalf(this.value)
-                    .replace(/'|`|·|“|”|‘|’/g, `"`)
-                    .replace(/，/g, `,`)
-                    .replace(/：/g, `:`);
-                  custom_Fontlist = this.value.trim();
-                });
+                customFontlistNode?.addEventListener("change", () => (customFontlist = standardizeString(customFontlistNode, true, false)));
+                featureNode?.addEventListener("change", () => (customFeature = standardizeString(featureNode, true, true, /[^\w",\- ]/g)));
+                variantNode?.addEventListener("change", () => (customVariant = standardizeString(variantNode, true, true, /[^\w",\- ]/g)));
                 if (await frDialog.respond()) {
-                  const regex = /{\s*"ch":\s*"@?[\w\u2E80-\uD7FF\-.,!/（）() ]+"\s*,\s*"en":\s*"@?[\w\-., !/()]+"\s*(,\s*"ps":\s*"[\w\u2E80-\uD7FF\-.,@!&=?|+~ ]+"\s*)?}/g;
-                  const fontListArray = custom_Fontlist.match(regex);
-                  if (!custom_Fontlist.length) {
+                  customFeature || customVariant ? saveData(CUSTOMPROPERTY, { feature: customFeature, variant: customVariant }) : GMdeleteValue(CUSTOMPROPERTY);
+                  const regex = /{\s*"ch":\s*"@?[^"]+"\s*,\s*"en":\s*"@?[^"\uFF00-\uFFEF\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]+"\s*(?:,\s*"ps":\s*"[^"]+"\s*)?}/g;
+                  const fontListArray = customFontlist.match(regex);
+                  if (customFontlist.length === 0) {
                     GMdeleteValue(CUSTOMFONTS);
                     const messageText = IS_CHN
                       ? `<p class="${def.const.seed}_idg">自定义字体表已初始化成功！<p><p>字体列表全局缓存已自动重建，当前页面即将刷新。</p>`
@@ -3035,10 +2986,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                     if (await successDialog.respond()) closeConfigurePage({ isReload: true });
                     successDialog = null;
                   } else if (Array.isArray(fontListArray) && fontListArray.length > 0) {
-                    const parsedFontList = [];
-                    fontListArray.forEach(item => void parsedFontList.push(JSON.parse(item)));
-                    const unique_Save_Fontlist = getUniqueFontlist(parsedFontList);
-                    saveData(CUSTOMFONTS, getNonDuplicateFontArray(unique_Save_Fontlist, fontCheck));
+                    const parsedFontList = getUniqueFontlist(fontListArray.map(JSON.parse));
+                    saveData(CUSTOMFONTS, getNonDuplicateFontArray(parsedFontList, fontCheck));
                     const messageText = IS_CHN
                       ? `<p class="${def.const.seed}_cdg">您所提交的自定义字体已保存成功！<p><p>字体列表全局缓存已自动重建，当前页面即将刷新。</p><p class="${def.const.seed}_cco ${def.const.seed}_f12">注：格式错误或重复的字体代码将被自动过滤。</p>`
                       : `<p class="${def.const.seed}_cdg">The customized font saved successfully!<p><p>The Fontlist cache has been rebuilt and reload.</p><p class="${def.const.seed}_cco ${def.const.seed}_f12">Note: Incorrectly or duplicate fonts were filtered.</p>`;
@@ -3048,7 +2997,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                     if (await successDialog.respond()) closeConfigurePage({ isReload: true });
                     successDialog = null;
                   } else {
-                    GMsetClipboard(custom_Fontlist);
+                    GMsetClipboard(customFontlist);
                     const messageText = IS_CHN
                       ? `<p class="${def.const.seed}_ccr">您所提交的自定义字体数据格式有误，请重新输入。<p><p>注意：先前提交的信息已自动保存至剪切板中。</p>`
                       : `<p class="${def.const.seed}_ccr">The custom Fontdata is incorrectly.<p><p>Note: Previous content saved to the clipboard.</p>`;
@@ -3083,7 +3032,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                 const currentScrollTop = _this.scrollTop;
                 _this.value = formattedValue;
                 _this.classList.remove(`${def.const.seed}_tabd`);
-                await sleep(0);
+                await sleep(16.7, { instant: true });
                 _this.scrollTop = currentScrollTop;
                 _this.setSelectionRange(newCursorPosition, newCursorPosition);
               } catch (e) {
@@ -3097,28 +3046,35 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
           function setFontOverrideDefTrigger(savedData) {
             qS(`#${def.const.seed}_fontoverride_defined`, def.var.configIf)?.addEventListener("dblclick", async e => {
-              callStopPropagations(e, true);
+              stopEventPropagation(e, { preventDefault: true });
               const _fontOverrideDef = JSON.stringify(savedData, null, 4);
-              const messageText = IS_CHN
+              const rewriteText = IS_CHN
                 ? `<p class="${def.const.seed}_c55 ${def.const.seed}_f14">以下文本域可按预定格式填写字体重写的自定义数据。整体为数组类型，每个字体名称占一行，并使用半角双引号包括；如字体名称包含中文等双字节文本时，请在双引号内使用半角花括号包括。如您不了解该数据的含义，请勿修改，以免造成全局字体重写出错。<span class="${def.const.seed}_cdc1">(强烈建议您：按 <a href="${def.url.feedback}/267#discussion-5692372" target="_blank">作者提议</a> 填写此内容)</span></p><p><textarea id="${def.const.seed}_fontoverride_def_array">${_fontOverrideDef}</textarea></p><p id="${def.const.seed}_warning_chn">（请勿添加脚本字体表已存在的字体，如重复将自动删除）</p>`
                 : `<p class="${def.const.seed}_c55 ${def.const.seed}_f14">Predefined format overall array type, one Fontname per line, and the use of half-width double quotes include; If the fontname contains double-byte text such as Chinese, please use half-width brackets within the double quotes include. <span class="${def.const.seed}_cdc1">(Suggestion: "<a href="${def.url.feedback}/267#discussion-5692372" target="_blank">Author's proposal</a>")</span></p><p><textarea id="${def.const.seed}_fontoverride_def_array">${_fontOverrideDef}</textarea></p><p id="${def.const.seed}_warning_en">(Duplicate font names with font library will be removed)</p>`;
+              const messageText = IS_REAL_GECKO
+                ? `<div id="${def.id.fi}">
+                    <span class="${def.const.seed}_cusmono">${IS_CHN ? "修复当前站点 &lt;INPUT&gt; 的样式问题" : "Fix &lt;INPUT&gt; Issue For Current Site"}</span>
+                    <input type="checkbox" id="${def.const.seed}_fixinput" class="${def.class.checkbox}" ${storage.local?.getItem(FIXINPUT) === "true" ? "checked" : ""} />
+                    <label for="${def.const.seed}_fixinput"></label>
+                  </div>${rewriteText}`
+                : rewriteText;
               const [trueButtonText, neutralButtonText, titleText] = [IS_CHN ? "确 定" : "OK", IS_CHN ? "取 消" : "Cancel", IS_CHN ? "自定义字体重写数据" : "Customized Font-Rewrite Data"];
               let frDialog = new FrDialogBox({ trueButtonText, neutralButtonText, messageText, titleText });
-              const fontOverrideNode = qS(`#${def.const.seed}_fontoverride_def_array`, def.var.dialogIf);
+              const [fixInputNode, fontOverrideNode] = ["fixinput", "fontoverride_def_array"].map(s => qS(`#${def.const.seed}_${s}`, def.var.dialogIf));
               removeKeyboardEvent(fontOverrideNode);
               checkTextareaFormat(fontOverrideNode);
               if (await frDialog.respond()) {
                 const fontOverrideDefValue = fontOverrideNode.value.trim();
                 try {
-                  const parsedFontOverrideDef = fontOverrideDefValue ? uniq(JSON.parse(fontOverrideDefValue)) : [];
-                  if (!Array.isArray(parsedFontOverrideDef) || parsedFontOverrideDef.Some(item => typeof item !== "string")) throw new Error("Format Error");
+                  const parsedFontOverrideDef = fontOverrideDefValue ? uniq(JSON.parse(fontOverrideDefValue), item => item && typeof item === "string") : [];
                   let fontCheckList = await cache.get(FONTCHECKLIST);
                   fontCheckList = Array.isArray(fontCheckList) && fontCheckList.length > 0 ? fontCheckList : [];
                   const fontCheckArray = fontCheckList.filter(item => item.en !== "Microsoft YaHei").map(item => (item.en.startsWith("\\") ? `{${item.ch}}` : item.en));
-                  const baseFontArray = INITIAL_REMARKS.fontBase.replace(/'/g, "").split(",");
-                  const monoFontArray = (monoFontList || INITIAL_REMARKS.monospacedFont).replace(/'/g, "").split(",");
+                  const baseFontArray = INITIAL_REMARKS.fontBase.replaceAll("'", "").split(",");
+                  const monoFontArray = (monoFontList || INITIAL_REMARKS.monospacedFont).replaceAll("'", "").split(",");
                   const filterFonts = uniq(["Courier New", "Courier", "monospace", ...baseFontArray, ...fontCheckArray, ...monoFontArray]);
                   const fontOverrideData = parsedFontOverrideDef.filter(item => !filterFonts.includes(item)).sort();
+                  if (fixInputNode) storage.local?.setItem(FIXINPUT, fixInputNode.checked);
                   saveData(FONTOVERRIDE, fontOverrideData);
                   const messageText = IS_CHN
                     ? `<p class="${def.const.seed}_cdg">自定义字体重写数据已成功保存！</p><p>当前页面将在您确认后自动刷新。</p>`
@@ -3155,7 +3111,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               if (fontFaceNode.checked && !CONST_VALUES.fontFace) {
                 const placeholderText = IS_CHN ? "正在恢复之前设置的字体…" : "Restore previous font…";
                 inputNode.setAttribute("placeholder", placeholderText);
-                await sleep(120, { useCachedSetTimeout: true });
+                await sleep(220, { instant: true });
                 qS(`#${def.id.submit} .${def.class.submit}[v-Preview="true"]`, def.var.configIf)?.click();
               }
             };
@@ -3182,7 +3138,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
           function setFontScaleDefTrigger() {
             qS(`#${def.const.seed}_fontscale_defined`, def.var.configIf)?.addEventListener("dblclick", async e => {
-              callStopPropagations(e, true);
+              stopEventPropagation(e, { preventDefault: true });
               const fontScaleDefJSON = await getFontScaleDef();
               const fontScaleDefString = JSON.stringify(fontScaleDefJSON, null, 4);
               const messageText = IS_CHN
@@ -3196,7 +3152,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               if (await frDialog.respond()) {
                 const fontScaleDefValue = fontScaleNode.value.trim();
                 try {
-                  const fontScaleData = fontScaleDefValue ? JSON.parse(fontScaleDefValue) : object;
+                  const fontScaleData = fontScaleDefValue ? JSON.parse(fontScaleDefValue) : immutObj;
                   if (getObjectType(fontScaleData) !== "[object Object]") throw new Error("Format Error");
                   saveData(FONTSCALE, fontScaleData);
                   const messageText = IS_CHN
@@ -3258,13 +3214,13 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           }
 
           function getFixStrokeBool(strokeNode, submitButton) {
-            if (!IS_CAUSED_BOLDSTROKEERROR || !strokeNode) return object;
+            if (!IS_CAUSED_BOLDSTROKEERROR || !strokeNode) return immutObj;
             const fixStrokeT = qS(`#${def.id.fixStroke}`, def.var.configIf);
             const fixShadowT = qS(`#${def.id.fixShadow}`, def.var.configIf);
             const lazyloadT = qS(`#${def.id.lazyload}`, def.var.configIf);
             const fstrokeNode = qS(`#${def.id.fstroke}`, def.var.configIf);
             const fshadowNode = qS(`#${def.id.fshadow}`, def.var.configIf);
-            if (!fixStrokeT || !lazyloadT || !fstrokeNode || !fshadowNode) return object;
+            if (!fixStrokeT || !lazyloadT || !fstrokeNode || !fshadowNode) return immutObj;
             const handleStrokeChange = () => fstrokeNode.classList.toggle(`${def.const.seed}_hidden`, strokeNode.value === "OFF");
             const handleMouseEnter = () => {
               fshadowNode.classList.add(`${def.const.seed}_visible`);
@@ -3324,7 +3280,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           }
 
           function getColorAndColorPicker(colorshowNode, submitButton) {
-            if (!colorshowNode) return object;
+            if (!colorshowNode) return immutObj;
             try {
               const colorPicker = new global.FRColorPicker(`#${def.id.color}`, {
                 value: CONST_VALUES.shadowColor,
@@ -3363,24 +3319,24 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
           function doubleClickToEdit(fontCssNode) {
             fontCssNode?.addEventListener("dblclick", function (e) {
-              callStopPropagations(e, true);
+              stopEventPropagation(e, { preventDefault: true });
               this.classList.add(def.class.notreadonly);
               this.removeAttribute("title");
               this.readOnly = false;
             });
           }
 
-          function customMonospceFont(monoNode) {
-            monoNode?.addEventListener("dblclick", async e => {
+          function customMonospceFont(customMonoNode) {
+            customMonoNode?.addEventListener("dblclick", async e => {
               try {
-                callStopPropagations(e, true);
+                stopEventPropagation(e, { preventDefault: true });
                 const [_config_data_, { monoSiteRules: siteRule, monoFontList: fontlist, monoFeature: feature }] = await Promise.all([getConfigureData(), getCustomMonoData()]);
                 const monospacedsiterules = siteRule.join("\r\n").trim();
                 const monospacedfont = fontlist.trim();
                 const monospacedfeature = feature.trim();
                 const customMonoTextareasHTML = IS_CHN
-                  ? `<p class="${def.const.seed}_mono_notify">\u2474 以下文本域可设置需应用等宽字体的根域及元素选择器。<br/><span class="${def.const.seed}_cdc1">如果您不了解站点样式规则，请保持留空【<a href="${def.url.feedback}/74" target="_blank">查看推荐规则</a>】</span></p><p><textarea id="${def.const.seed}_monospaced_siterules" placeholder="每行只能允许一组规则，相同站点不同规则可重复添加。\r\n格式如：@网站域名##元素选择器1,元素选择器2,……\r\n例如：\r\n@github.com##[class~='blob-code'] *\r\n@github.com##.example,#abc,div:not(.test)\r\n@github.dev###test:not([class*='test'])">${monospacedsiterules}\r\n</textarea></p><p class="${def.const.seed}_mono_notify">\u2475 以下可设置自定义英文等宽字体，请按示例格式填写。<br/><span class="${def.const.seed}_cdc1">请注意：monospace字体族已程序内置，无需重复添加。</span></p><p><input id="${def.const.seed}_monospaced_font" placeholder="例如：'Source Code Pro','Mono','Monaco'" value="${monospacedfont}"></p><p class="${def.const.seed}_mono_notify">\u2476 以下可设置OpenType字体font-feature-settings属性。<br/><span class="${def.const.seed}_cdc1">如果您不了解该属性，请保持留空，以免造成样式错误。</span></p><p><input id="${def.const.seed}_monospaced_feature" placeholder='例如："liga" 0,"tnum","zero"' value='${monospacedfeature}'></p>`
-                  : `<p class="${def.const.seed}_mono_notify">\u2474 Set the root field and selector for monospaced font.<br/><span class="${def.const.seed}_cdc1">It is recommended that check out the <a href="${def.url.feedback}/74" target="_blank">Author's Proposal</a></span></p><p><textarea id="${def.const.seed}_monospaced_siterules" placeholder="Only One set of rules per line, different rules for the same site can be repeated. Such as:\r\n@github.com##[class~='blob-code'] *\r\n@github.com##.example,#abc,div:not(.test)\r\n@github.dev###test:not([class*='test'])">${monospacedsiterules}\r\n</textarea></p><p class="${def.const.seed}_mono_notify">\u2475 Set custom monospaced font according to example.<br/><span class="${def.const.seed}_cdc1">Note: monospace is built-in, do not add it repeatedly.</span></p><p><input id="${def.const.seed}_monospaced_font" placeholder="Such as: 'Source Code Pro','Mono','Monaco'" value="${monospacedfont}"></p><p class="${def.const.seed}_mono_notify">\u2476 Set OpenType font font-feature-settings property.<br/><span class="${def.const.seed}_cdc1">If you don't understand this property, leave it blank.</span></p><p><input id="${def.const.seed}_monospaced_feature" placeholder='Such as: "liga" 0,"tnum","zero"' value='${monospacedfeature}'></p>`;
+                  ? `<p class="${def.const.seed}_mono_notify">\u2474 以下文本域可设置需应用等宽字体的根域及元素选择器。<br/><span class="${def.const.seed}_cdc1">如果您不了解站点样式规则，请保持留空【<a href="${def.url.feedback}/74" target="_blank">查看推荐规则</a>】</span></p><p><textarea id="${def.const.seed}_monospaced_siterules" placeholder="每行只能允许一组规则，相同站点不同规则可重复添加。\r\n格式如：@网站域名##元素选择器1,元素选择器2,……\r\n例如：\r\n@github.com##[class~='blob-code'] *\r\n@github.com##.example,#abc,div:not(.test)\r\n@github.dev###test:not([class*='test'])">${monospacedsiterules}\r\n</textarea></p><p class="${def.const.seed}_mono_notify">\u2475 以下可设置自定义英文等宽字体，请按示例格式填写。<br/><span class="${def.const.seed}_cdc1">请注意：monospace字体族已程序内置，无需重复添加。</span></p><p><input id="${def.const.seed}_monospaced_font" placeholder="例如：'Source Code Pro','Mono','Monaco'" value="${monospacedfont}"></p><p class="${def.const.seed}_mono_notify">\u2476 以下可设置 OpenType 字体 <a href="https://learn.microsoft.com/zh-cn/typography/opentype/spec/featurelist" target="_blank">font-feature-settings</a> 属性。<br/><span class="${def.const.seed}_cdc1">如果您设置的等宽字体非 OpenType 字体，请保持留空。</span></p><p><input id="${def.const.seed}_monospaced_feature" placeholder='例如："liga" 0,"tnum","zero"' value='${monospacedfeature}'></p>`
+                  : `<p class="${def.const.seed}_mono_notify">\u2474 Set the root field and selector for monospaced font.<br/><span class="${def.const.seed}_cdc1">It is recommended that check out the <a href="${def.url.feedback}/74" target="_blank">Author's Proposal</a></span></p><p><textarea id="${def.const.seed}_monospaced_siterules" placeholder="Only One set of rules per line, different rules for the same site can be repeated. Such as:\r\n@github.com##[class~='blob-code'] *\r\n@github.com##.example,#abc,div:not(.test)\r\n@github.dev###test:not([class*='test'])">${monospacedsiterules}\r\n</textarea></p><p class="${def.const.seed}_mono_notify">\u2475 Set custom monospaced font according to example.<br/><span class="${def.const.seed}_cdc1">Note: monospace is built-in, do not add it repeatedly.</span></p><p><input id="${def.const.seed}_monospaced_font" placeholder="Such as: 'Source Code Pro','Mono','Monaco'" value="${monospacedfont}"></p><p class="${def.const.seed}_mono_notify">\u2476 Set OpenType font <a href="https://learn.microsoft.com/en-us/typography/opentype/spec/featurelist" target="_blank">font-feature-settings</a> property.<br/><span class="${def.const.seed}_cdc1">Leave blank if using custom font that is not OpenType.</span></p><p><input id="${def.const.seed}_monospaced_feature" placeholder='Such as: "liga" 0,"tnum","zero"' value='${monospacedfeature}'></p>`;
                 const titleText = IS_CHN ? "设置自定义等宽字体" : "Set Custom Monospaced Font";
                 const messageText = String(
                   `<div id="${def.id.cm}">
@@ -3391,50 +3347,25 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                 );
                 const [trueButtonText, neutralButtonText] = [IS_CHN ? "保存数据" : "Save", IS_CHN ? "取 消" : "Cancel"];
                 let frDialog = new FrDialogBox({ trueButtonText, neutralButtonText, messageText, titleText });
-                const monospacedSiteRulesNode = qS(`#${def.const.seed}_monospaced_siterules`, def.var.dialogIf);
-                const monospacedFontNode = qS(`#${def.const.seed}_monospaced_font`, def.var.dialogIf);
-                const monospacedFeatureNode = qS(`#${def.const.seed}_monospaced_feature`, def.var.dialogIf);
+                const monospaceNodes = ["monospaced_siterules", "monospaced_font", "monospaced_feature"].map(id => qS(`#${def.const.seed}_${id}`, def.var.dialogIf));
                 const customMonoSwitch = qS(`#${def.id.iscusmono}`, def.var.dialogIf);
-                removeKeyboardEvent(monospacedSiteRulesNode);
-                removeKeyboardEvent(monospacedFontNode);
-                removeKeyboardEvent(monospacedFeatureNode);
                 const changeDisabledStatus = (listenerCheck, nodes, cssName) =>
                   nodes.forEach(node => {
                     node.toggleAttribute("disabled", !listenerCheck);
                     node.classList.toggle(cssName, !listenerCheck);
                   });
-                const monoNodes = [monospacedSiteRulesNode, monospacedFontNode, monospacedFeatureNode];
-                changeDisabledStatus(customMonoSwitch.checked, monoNodes, def.class.readonly);
-                customMonoSwitch?.addEventListener("change", function () {
-                  changeDisabledStatus(this.checked, monoNodes, def.class.readonly);
-                });
-                let custom_MonospacedSiteRules = convertHtmlToText(monospacedSiteRulesNode.value.trim());
-                let custom_MonospacedFontList = convertHtmlToText(monospacedFontNode.value.trim());
-                let custom_MonospacedFontFeature = convertHtmlToText(monospacedFeatureNode.value.trim());
-                monospacedFontNode.addEventListener("change", function () {
-                  this.value = convertFullToHalf(this.value)
-                    .replace(/"|`|·|“|”|‘|’/g, `'`)
-                    .replace(/，/g, `,`)
-                    .replace(/'(ui-)?monospace',?/gi, ``);
-                  custom_MonospacedFontList = convertHtmlToText(this.value.trim());
-                });
-                monospacedSiteRulesNode.addEventListener("change", function () {
-                  this.value = convertFullToHalf(this.value)
-                    .replace(/"|`|·|“|”|‘|’/g, `'`)
-                    .replace(/，/g, `,`);
-                  custom_MonospacedSiteRules = convertHtmlToText(this.value.trim());
-                });
-                monospacedFeatureNode.addEventListener("change", function () {
-                  this.value = convertFullToHalf(this.value)
-                    .replace(/'|`|·|“|”|‘|’/g, `"`)
-                    .replace(/，/g, `,`)
-                    .replace(/[^\w", ]/g, ``);
-                  custom_MonospacedFontFeature = convertHtmlToText(this.value.trim());
-                });
+                changeDisabledStatus(customMonoSwitch.checked, monospaceNodes, def.class.readonly);
+                customMonoSwitch?.addEventListener("change", () => changeDisabledStatus(customMonoSwitch.checked, monospaceNodes, def.class.readonly));
+                let [custom_MonoSiteRules, custom_MonoFontList, custom_MonoFontFeature] = monospaceNodes.map(node => convertHtmlToText(node.value.trim()));
+                removeKeyboardEvent(...monospaceNodes);
+                const [monoSiteRulesNode, monoFontNode, monoFeatureNode] = monospaceNodes;
+                monoSiteRulesNode.addEventListener("change", () => (custom_MonoSiteRules = standardizeString(monoSiteRulesNode, false, true)));
+                monoFontNode.addEventListener("change", () => (custom_MonoFontList = standardizeString(monoFontNode, false, true, /'(?:ui-)?monospace',?/gi)));
+                monoFeatureNode.addEventListener("change", () => (custom_MonoFontFeature = standardizeString(monoFeatureNode, true, true, /[^\w",\- ]/g)));
                 if (await frDialog.respond()) {
-                  const monospaced_SiteRulesArray = custom_MonospacedSiteRules.match(/@[\w\-.:]+##(?!.*(?<sp>[#])\k<sp>{1})[\w\-*.#:+>()~[\]=^$|,' ]+/g);
-                  if (custom_MonospacedSiteRules && !monospaced_SiteRulesArray) {
-                    GMsetClipboard(custom_MonospacedSiteRules);
+                  const monoSiteRulesArray = custom_MonoSiteRules.match(/@[\w\-.:]+##(?![^@]*##)[\w\-*.#:+>()~[\]=^$|,' ]+/g);
+                  if (custom_MonoSiteRules && !monoSiteRulesArray) {
+                    GMsetClipboard(custom_MonoSiteRules);
                     const messageText = IS_CHN
                       ? `<p class="${def.const.seed}_ccr">自定义根域及元素选择器有误，请重新输入。</p><p>注意：先前提交的信息已自动保存至剪切板中。</p>`
                       : `<p class="${def.const.seed}_ccr">Custom Root/Selectors data error, Please refill!</p><p>Note: Previous content saved to the clipboard.</p>`;
@@ -3448,9 +3379,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                     errorDialog = null;
                     return;
                   }
-                  const monospaced_FontListArray = custom_MonospacedFontList.match(/'@?[\w\-.()!/ ]+'/g);
-                  if (custom_MonospacedFontList && !monospaced_FontListArray) {
-                    GMsetClipboard(custom_MonospacedFontList);
+                  const monoFontListArray = custom_MonoFontList.match(/'@?[^'\uFF00-\uFFEF\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]+'/g);
+                  if (custom_MonoFontList && !monoFontListArray) {
+                    GMsetClipboard(custom_MonoFontList);
                     const messageText = IS_CHN
                       ? `<p class="${def.const.seed}_ccr">您提交的自定义等宽字体数据有误，请重新输入。</p><p>注意：先前提交的信息已自动保存至剪切板中。</p>`
                       : `<p class="${def.const.seed}_ccr">Custom Monospaced Font Data error, Please refill!</p><p>Note: Previous content saved to the clipboard.</p>`;
@@ -3464,13 +3395,13 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                     errorDialog = null;
                     return;
                   }
-                  const isSiteRules = !custom_MonospacedSiteRules || (Array.isArray(monospaced_SiteRulesArray) && monospaced_SiteRulesArray.length > 0);
-                  const isFontList = !custom_MonospacedFontList || (Array.isArray(monospaced_FontListArray) && monospaced_FontListArray.length > 0);
+                  const isSiteRules = !custom_MonoSiteRules || (Array.isArray(monoSiteRulesArray) && monoSiteRulesArray.length > 0);
+                  const isFontList = !custom_MonoFontList || (Array.isArray(monoFontListArray) && monoFontListArray.length > 0);
                   if (isSiteRules && isFontList) {
-                    const monospaced_fontListString = uniq(monospaced_FontListArray).join();
-                    !custom_MonospacedSiteRules ? GMdeleteValue(MONORULES) : saveData(MONORULES, uniq(monospaced_SiteRulesArray));
-                    !custom_MonospacedFontList ? GMdeleteValue(MONOFONTS) : saveData(MONOFONTS, monospaced_fontListString);
-                    !custom_MonospacedFontFeature ? GMdeleteValue(MONOFEATS) : saveData(MONOFEATS, custom_MonospacedFontFeature);
+                    const monospaced_fontListString = uniq(monoFontListArray).join();
+                    !custom_MonoSiteRules ? GMdeleteValue(MONORULES) : saveData(MONORULES, uniq(monoSiteRulesArray));
+                    !custom_MonoFontList ? GMdeleteValue(MONOFONTS) : saveData(MONOFONTS, monospaced_fontListString);
+                    !custom_MonoFontFeature ? GMdeleteValue(MONOFEATS) : saveData(MONOFEATS, custom_MonoFontFeature);
                     _config_data_.isCustomMono = Boolean(qS(`#${def.id.iscusmono}`, def.var.dialogIf).checked);
                     saveData(CONFIGURE, _config_data_);
                     const messageText = IS_CHN
@@ -3489,8 +3420,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             });
           }
 
-          function controlResetButton(resetT, fontSetFn, submitSet, { drawScale, drawStrock, drawShadow, submitButton }) {
-            const { smoothT, ffaceT, fontScaleT, fixViewportT, strokeT, fixStrokeT, lazyloadT, fixShadowT, shadowsT, canvasT, colorPickerT, colorshowT, fontCssT, fontExT } = submitSet;
+          function controlResetButton(resetT, fontSetFn, finalSettings, { drawScale, drawStrock, drawShadow, submitButton }) {
+            const { smoothT, ffaceT, fontScaleT, fixViewportT, strokeT, fixStrokeT, lazyloadT, fixShadowT, shadowsT, canvasT, colorPickerT, colorshowT, fontCssT, fontExT } = finalSettings;
             resetT?.addEventListener("click", async () => {
               const messageText = IS_CHN
                 ? `<p>『重置/恢复』将当前设置初始化为 <span class="${def.const.seed}_csg">程序默认的初始数据</span> 或 <span class="${def.const.seed}_csg">上次正确保存的数据</span>。一般是在您配置错误或需使用新功能参数的情况下才进行重置参数的操作。</p><p class="${def.const.seed}_cdg">重置：重置当前数据为程序初始值，手动保存生效。</p><p class="${def.const.seed}_cb8">恢复：替换为上次正确保存的数据，自动恢复预览。</p><p class="${def.const.seed}_cga">取消：放弃重置操作。</p>`
@@ -3536,7 +3467,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                 setEffectIntoSubmit(fontCssT.value, CONST_VALUES.fontCSS, fontCssT, submitButton);
                 fontExT.value = INITIAL_VALUES.fontEx;
                 setEffectIntoSubmit(fontExT.value, CONST_VALUES.fontEx, fontExT, submitButton);
-                sleep(120)(getCurrentFontName(ffaceT.checked, INITIAL_VALUES.fontSelect.replace(/'/g, ""), defaultFont))
+                sleep(220)(getCurrentFontName(ffaceT.checked, INITIAL_VALUES.fontSelect.replaceAll("'", ""), defaultFont))
                   .then(() => qS(`#${def.id.submit} .${def.class.submit}[v-Preview="true"]`, def.var.configIf))
                   .then(submitPreview => void submitPreview?.click());
               } else {
@@ -3584,8 +3515,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             });
           }
 
-          function controlSubmitButton(submitT, fontSetFn, submitSet) {
-            const { ffaceT, smoothT, fontScaleT, fixViewportT, strokeT, fixStrokeT, lazyloadT, shadowsT, fixShadowT, canvasT, colorshowT, colorReg, fontCssT, fontExT } = submitSet;
+          function controlSubmitButton(submitT, fontSetFn, finalSettings) {
+            const { ffaceT, smoothT, fontScaleT, fixViewportT, strokeT, fixStrokeT, lazyloadT, shadowsT, fixShadowT, canvasT, colorshowT, colorReg, fontCssT, fontExT } = finalSettings;
             submitT?.addEventListener("click", async function () {
               const fontlists = fontSetFn?.fsearchList(def.id.fontName) ?? [];
               const fontselect = fontlists.length > 0 ? addSingleQuoteForItem(fontlists) : CONST_VALUES.fontSelect;
@@ -3600,8 +3531,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               const fixfshadow = IS_CAUSED_BOLDSHADOWERROR && fixfstroke && fshadow && fixShadowT.checked;
               const [rendercanvas, pickedcolor, fcss, fex] = [canvasT?.checked, colorshowT.value, fontCssT.value, fontExT.value];
               const fscolor = colorReg.test(pickedcolor) ? (pickedcolor.toLowerCase() === "currentcolor" ? "#FFFFFFFF" : pickedcolor) : INITIAL_VALUES.shadowColor;
-              const fontcss = fcss ? fcss.replace(/"|`/g, "'") : INITIAL_VALUES.fontCSS;
-              const fontex = fex ? fex.replace(/"|`/g, "'") : "";
+              const fontcss = fcss ? fcss.replace(/["`]/g, "'") : INITIAL_VALUES.fontCSS;
+              const fontex = fex ? fex.replace(/["`]/g, "'") : "";
               const _curEmptyConfig = !fontface && !smooth && !fshadow && !fstroke && fscale === 1;
               if (isPreview && this.hasAttribute("v-Preview")) {
                 try {
@@ -3613,18 +3544,18 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                   const _smoothing = smooth ? fontSmoothCssText : "";
                   const _textrender = smooth ? "text-rendering:optimizeLegibility;" : "";
                   const _fontfamily = fontface ? "font-family:var(--fr-font-family),var(--fr-font-basefont);" : "";
-                  const _refont = fontselect?.split(",")[0].replace(/"|'/g, "") ?? "";
-                  const _fontfaces = fontface && _refont ? await generateFontFaceCSS(_refont) : "";
+                  const _refont = fontselect?.split(",")[0].replace(/["']/g, "") ?? "";
+                  const _fontfaces = fontface && _refont ? await generateFontFaceCSS(_refont, fontOverrideDefData) : "";
                   const _includeSelectors = `${globalPrefix}:is(${convertHtmlToText(fontcss)})`;
                   const _excludeSplit = `${_shadow ? "text-shadow:none!important;" : ""}${_stroke ? "-webkit-text-stroke:var(--fr-no-stroke)!important;" : ""}`;
                   const _excludeCssText = fontex && (_shadow || _stroke) ? `${globalPrefix}:is(${convertHtmlToText(fontex)}){${_excludeSplit}}` : "";
-                  const _codefont = fontex ? funcCodefont(fontex, fontface) : "";
+                  const _codefont = fontex ? funcCodefont(fontex, fontface, isCustomMono) : "";
                   const _noTextShadowCss = IS_CAUSED_BOLDSHADOWERROR && fixfshadow ? "text-shadow:var(--fr-fix-shadow)!important;" : "";
                   const _fixfontstroke = fixfstroke ? getBoldFixCssText(_noTextShadowCss) : "";
                   const _tshadow = `${_fontfaces}${_bodyscale}${_includeSelectors}{${_fontfamily}${_shadow}${_stroke}${_smoothing}${_textrender}}${_excludeCssText}${_codefont}${_fixfontstroke}`;
                   const _firefoxInputFix = IS_REAL_GECKO && fontface ? def.var.style.firefox : "";
                   const _textShadowFix = `0 0 ${fshadow}px ${fscolor.toLowerCase().slice(0, 7).concat("2b")}`;
-                  const _rootpseudoclass = `:root{--fr-font-basefont:${INITIAL_REMARKS.fontBase};--fr-font-fontscale:${fscale};--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-no-stroke:0px transparent;--fr-fix-shadow:${_textShadowFix};${monoFontText}${monoShadow}${monoFeatureText}}`;
+                  const _rootpseudoclass = `:root{--fr-font-basefont:${INITIAL_REMARKS.fontBase};${customFontFeature}--fr-font-fontscale:${fscale};--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-no-stroke:0px transparent;--fr-fix-stroke:var(--fr-no-stroke);--fr-fix-shadow:${_textShadowFix};${monoFontText}${monoFallback}${monoShadow}${monoFeatureText}}`;
                   const __tshadow = `@charset "UTF-8";${def.var.style.frDialog}${_curEmptyConfig ? `` : `${_rootpseudoclass}${_firefoxInputFix}${_tshadow}`}`;
                   this.textContent = IS_CHN ? "\u4fdd\u5b58" : "\ud835\udc7a\ud835\udc82\ud835\udc97\ud835\udc86";
                   this.removeAttribute("style");
@@ -3963,6 +3894,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
         function saveChangeStatus(input, initVal, button, isOne = false) {
           if (!input) return;
+          const deBounceSetEffect = createDeBounce({ fn: setEffectIntoSubmit, delay: 2e2 });
           const handleChange = () => {
             const newVal = input.type === "checkbox" ? input.checked : input.value;
             setEffectIntoSubmit(newVal, initVal, input, button);
@@ -3976,7 +3908,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                   return this.value;
                 },
                 set(newVal) {
-                  deBounce({ fn: setEffectIntoSubmit, delay: 1e2, timer: input.id })(newVal, initVal, input, button, isOne);
+                  deBounceSetEffect(newVal, initVal, input, button, isOne);
                 },
               });
             } else {
@@ -4007,7 +3939,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
         function restoreSavedPreview() {
           def.array.scaleMatrix.push((def.var.curScale = CONST_VALUES.fontSize));
-          if (def.var.preview) correctBoldStrokeProcess({ Scenes: "recover", Permit: CONST_VALUES.fixStroke })();
+          if (def.var.preview) processRecoverBoldStyle();
           loadPreview(def.var.preview);
           delete def.var.preview;
         }
@@ -4091,39 +4023,39 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             const matches = fontText?.match(fontReg);
             return matches ? `${matches[1] ?? ""} ${matches[2] ?? ""} ${fontName}`.trim() : fontText;
           };
-          const overrideMethod = methodName => {
-            CanvasRenderingContext2D.prototype[methodName] = function (...args) {
+          const overrideMethod = methodName =>
+            (CanvasRenderingContext2D.prototype[methodName] = function (...args) {
               if (!this.frFontFace && this.font && !this.font.includes(renderFont)) {
                 this.font = modifyFont(this.font);
-                if (methodName === "fillText" && !/(?:bold|[6789]00)\s/i.test(this.font) && shadow_r > 0) {
-                  Object.assign(this, { shadowColor: shadow_c, shadowBlur: shadow_r, shadowOffsetX: 0, shadowOffsetY: 0 });
-                }
+                const applyShadow = methodName === "fillText" && shadow_r > 0 && !/(?:bold|[6789]00)\s/i.test(this.font);
+                if (applyShadow && !def.var.fillText.apply(this, args)) Object.assign(this, { shadowColor: shadow_c, shadowBlur: shadow_r, shadowOffsetX: 0, shadowOffsetY: 0 });
               }
               def.var[methodName].apply(this, args);
-            };
-          };
+            });
           ["fillText", "strokeText"].forEach(overrideMethod);
         }
 
-        /* FIX_FONT_BOLD_STROKE_STYLE_ERRORS. NEW UPDATE: 2024-09-22 F9Y4NG */
+        /* FIX_FONT_BOLD_STROKE_STYLE_ERRORS. NEW UPDATE: 2024-10-26 F9Y4NG */
 
-        function correctBoldStrokeProcess({ CorrectStyle = boldFixCSSText, boldAttrName = def.const.boldAttrName, Scenes, Permit } = {}) {
-          const [mouseEventHandlers, observeNodeSet, styleDeclarationMap] = [Object.create(null), new Set(), new WeakMap()];
+        function correctBoldStrokeProcess({ CorrectStyle = boldFixCSSText, Scenes, Permit } = {}) {
+          const [observeNodeSet, boldStatusCache] = [new Set(), new WeakMap()];
           const hasLocalFlag = Boolean(storage.local?.getItem(def.const.flagName));
           const hasSessionFlag = Boolean(storage.session?.getItem(def.const.flagName));
           const observeConfig = { attributeOldValue: true, childList: true, subtree: true };
           const checkConflict = { flag: hasLocalFlag, previous: [], sameCount: 0, maxCount: 50 };
           const excludeNodeSet = new Set(def.const.queryString.split(",").filter(string => !string.includes("*")));
-          const changeAttribute = createChangeAttribute(boldAttrName, !hasLocalFlag);
+          const changeAttribute = createChangeAttribute(def.const.boldAttrName, !hasLocalFlag);
+          const deBounceFixPassive = createDeBounce({ fn: correctBoldPassive, delay: 50 });
+          const deBounceMouseEvent = createDeBounce({ fn: mouseEventsHandler, delay: 16 });
           const hasCorrectPermission = checkCorrectPermission(Scenes ?? (IS_CURRENTSITE_ALLOWED && CONST_VALUES.fixStroke));
 
           if (["iframe", "preview", "recover"].includes(Scenes)) {
             if (!hasCorrectPermission) return () => {};
-            if (Scenes !== "iframe") updateMutationObserver();
+            if (Scenes !== "iframe") def.var.fixBoldObs = new MutationObserver(fixBoldProcess);
             if (Scenes === "recover" && Permit === false) CorrectStyle = "";
             return correctBoldPassive;
           } else {
-            updateMutationObserver();
+            def.var.fixBoldObs = new MutationObserver(fixBoldProcess);
             return observeBoldElements;
           }
 
@@ -4131,18 +4063,16 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             return IS_CAUSED_BOLDSTROKEERROR && IS_INTERNALSTYLE_ALLOWED && Boolean(conditions);
           }
 
-          function updateMutationObserver() {
-            if (def.var.boldObserver) def.var.boldObserver.disconnect();
-            def.var.boldObserver = new MutationObserver(fixBoldProcess);
+          function isShadowRoot(node) {
+            return node.nodeType === Node.DOCUMENT_FRAGMENT_NODE && Boolean(node.host);
           }
 
           function querySelectorAllShadows(selector, root) {
-            const [stack, result] = [[root], []];
+            const [stack, result] = [[root], new Set()];
             while (stack.length) {
               const node = stack.pop();
-              const nodes = qA(selector, node).filter(item => item.nodeType === Node.ELEMENT_NODE);
-              result.push(...nodes);
-              nodes.forEach(el => el.shadowRoot && stack.push(el.shadowRoot) && processShadowRootNode(el.shadowRoot));
+              const nodes = qA(selector, node).filter(item => checkNodesForFix(item, [Node.ELEMENT_NODE]));
+              nodes.forEach(el => result.add(el) && el.shadowRoot && stack.push(el.shadowRoot) && processShadowRootNode(el.shadowRoot));
             }
             return result;
           }
@@ -4156,47 +4086,36 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           }
 
           function checkNodesForFix(node, checkList = [Node.ELEMENT_NODE, Node.DOCUMENT_NODE, Node.DOCUMENT_FRAGMENT_NODE]) {
-            return node && checkList.includes(node.nodeType) && !excludeNodeSet.has(getNodeName(node)) && !/watermark/i.test(getNodeKey(node));
+            return node && checkList.includes(node.nodeType) && !excludeNodeSet.has(getNodeName(node)) && !/water.?mark/i.test(toString(node.className));
           }
 
           function getSuitableElements(expr, node) {
-            const elementsArray = qA(expr, node).filter(item => item.nodeType === Node.ELEMENT_NODE);
+            const elementsArray = qA(expr, node).filter(item => checkNodesForFix(item, [Node.ELEMENT_NODE]));
             if (node.nodeType === Node.ELEMENT_NODE) elementsArray.unshift(node);
             return elementsArray;
           }
 
-          function getNodeKey(node) {
-            const attrArray = [];
-            for (let { name, value } of setIterator(node.attributes)) {
-              if (name !== def.const.boldAttrName) attrArray.push(`${name}:${value.replace(def.const.boldAttrName, "").replace(/\s/g, "")}`);
+          function isBold(element, loadEnd = false) {
+            let boldStatus = boldStatusCache.get(element);
+            if (!boldStatus || loadEnd) {
+              boldStatus = gCS(element).fontWeight;
+              boldStatusCache.set(element, boldStatus);
             }
-            return `${getNodeName(node)}::${attrArray.join("::")}`;
-          }
-
-          function isBold(element) {
-            if (styleDeclarationMap.has(element)) return styleDeclarationMap.get(element).fontWeight >= 600;
-            const style = gCS(element);
-            styleDeclarationMap.set(element, style);
-            return style.fontWeight >= 600;
-          }
-
-          function getBoldStyles(elementsArray) {
-            return elementsArray.filter(el => el?.nodeType === Node.ELEMENT_NODE).map(node => ({ isbold: isBold(node), node }));
+            return boldStatus >= 600;
           }
 
           function boldFixedHandler({ checkedNode, uncheckedNode }) {
             const item = checkedNode?.node ?? uncheckedNode;
-            if (!item || !checkNodesForFix(item, [Node.ELEMENT_NODE])) return;
             const bold = checkedNode?.isbold ?? isBold(uncheckedNode);
             const hasFixedAttr = item.hasAttribute(def.const.boldAttrName) || item.classList.contains(def.const.boldAttrName);
-            const changeHandler = () => void (!hasFixedAttr ? changeAttribute.add(item) : changeAttribute.del(item));
-            if (hasFixedAttr !== bold) CONST_VALUES.lazyload ? global[def.const.raf](changeHandler) : changeHandler();
+            if (hasFixedAttr === bold) return;
+            const changeHandler = hasFixedAttr ? changeAttribute.del : changeAttribute.add;
+            CONST_VALUES.lazyload ? global[def.const.raf](changeHandler.bind(null, item)) : changeHandler(item);
           }
 
-          function getAndProcessBoldStyles(nodes) {
-            if (!Array.isArray(nodes) || nodes.length === 0) return;
-            const items = getBoldStyles(nodes);
-            items.forEach(checkedNode => void boldFixedHandler({ checkedNode }));
+          function getAndProcessBoldStyles(nodes, loadEnd) {
+            const processedNode = asArray(nodes, node => ({ node, isbold: isBold(node, loadEnd) }));
+            processedNode.forEach(checkedNode => boldFixedHandler({ checkedNode }));
           }
 
           function filterArrayDiffToStr(arrA, arrB) {
@@ -4211,28 +4130,26 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           }
 
           function shadowRootNodeInsertCss(shadow, syncStyle) {
-            if (shadow.nodeType !== Node.DOCUMENT_FRAGMENT_NODE || !shadow.host) return;
+            if (!isShadowRoot(shadow)) return;
             const hostNodeName = getNodeName(shadow.host);
             applyStylesToShadowRoot(shadow, selectionCssText, `${hostNodeName}-fixselection`, false);
             if (!hasCorrectPermission) return;
-            const syncCssText = syncStyle ? `:host(${hostNodeName}){--fr-no-stroke:0px transparent;--fr-fix-shadow:${textShadowFix}}${syncStyle}` : ``;
+            const syncCssText = syncStyle ? `:host(${hostNodeName}){--fr-fix-stroke:0px transparent;--fr-fix-shadow:${textShadowFix}}${syncStyle}` : ``;
             applyStylesToShadowRoot(shadow, syncCssText, `${hostNodeName}-fixboldstroke`);
           }
 
           function handleRootNodeObserve(context, observer) {
             observer.observe(context, observeConfig);
             observeNodeSet.add(context);
-            if (!hasCorrectPermission) return;
-            context.addEventListener("mouseover", handleMouseEvents);
-            context.addEventListener("mouseout", handleMouseEvents);
+            hasCorrectPermission && ["mouseover", "mouseout"].forEach(event => context.addEventListener(event, handleMouseEvents));
           }
 
-          function correctBoldPassive(event, docRoot = document) {
+          function correctBoldPassive(event, target = document, loadEnd) {
             try {
-              let allNodeElements = querySelectorAllShadows(`:not(${def.const.queryString})`, docRoot);
-              if (!hasCorrectPermission) return (allNodeElements = null);
+              let allNodeElements = querySelectorAllShadows(`:not(${def.const.queryString})`, target);
+              if (!hasCorrectPermission || hasSessionFlag) return (allNodeElements = null);
               DEBUG(`CorrectBold.stroke.Passive${IN_FRAMES}:`, { eventType: Scenes ?? event ?? global.event?.type ?? "unknown" });
-              if (Permit !== false) getAndProcessBoldStyles(allNodeElements);
+              if (Permit !== false) getAndProcessBoldStyles(allNodeElements, loadEnd);
             } catch (e) {
               ERROR("correctBoldPassive:", e.message);
             }
@@ -4258,25 +4175,24 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
           function processShadowRootNode(shadow) {
             shadowRootNodeInsertCss(shadow, CorrectStyle);
-            if (Permit === false) def.var.boldObserver.disconnect();
-            else if (Permit || typeof Scenes === "undefined") {
-              if (!observeNodeSet.has(shadow)) handleRootNodeObserve(shadow, def.var.boldObserver);
-            }
+            if (Permit === false) return def.var.fixBoldObs.disconnect();
+            if (typeof Scenes === "undefined" || Permit) !observeNodeSet.has(shadow) && handleRootNodeObserve(shadow, def.var.fixBoldObs);
           }
 
           function processNodes(treeNode, observer) {
             if (!checkNodesForFix(treeNode)) return;
-            const pendingNodes = new Set();
+            const pendingNodeSet = new Set();
             const subtreeNodes = getSuitableElements(`:not(${def.const.queryString})`, treeNode);
-            processSubtreeNodes(subtreeNodes, pendingNodes, observer);
-            addCurrentNodeToPending(treeNode, pendingNodes);
-            getAndProcessBoldStyles(asArray(pendingNodes));
+            processSubtreeNodes(subtreeNodes, pendingNodeSet, observer);
+            addCurrentNodeToPending(treeNode, pendingNodeSet);
+            getAndProcessBoldStyles(pendingNodeSet);
           }
 
           function processSubtreeNodes(subtreeNodes, pendingNodes, observer) {
-            subtreeNodes.forEach((item, shadow) => {
+            subtreeNodes.forEach(item => {
               if (hasCorrectPermission) pendingNodes.add(item);
-              if (!(shadow = item.shadowRoot)) return;
+              const shadow = item.shadowRoot;
+              if (!shadow) return;
               shadowRootNodeInsertCss(shadow, CorrectStyle);
               if (!observeNodeSet.has(shadow)) handleRootNodeObserve(shadow, observer);
               processNodes(shadow, observer);
@@ -4285,53 +4201,54 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
           function addCurrentNodeToPending(treeNode, pendingNodes) {
             if (!hasCorrectPermission) return;
-            const nodeToAdd = treeNode.nodeType === Node.DOCUMENT_FRAGMENT_NODE && treeNode.host ? treeNode.host : treeNode;
-            pendingNodes.add(nodeToAdd);
+            const nodeToAdd = isShadowRoot(treeNode) ? treeNode.host : treeNode;
+            checkNodesForFix(nodeToAdd, [Node.ELEMENT_NODE]) && pendingNodes.add(nodeToAdd);
           }
 
           function mutationListMonitor(treeNodes, observer) {
-            const iterator = setIterator(treeNodes);
-            ProcessNextBatch(iterator, 80, observer);
+            const { iterator, length } = setIterator(treeNodes);
+            if (length === 0) return;
+            const chuckSize = Math.max(length / 3, 80) | 0;
+            chunkIteratorProcess(iterator, chuckSize, value => processNodes(value, observer));
           }
 
-          function ProcessNextBatch(iterator, batchSize, observer) {
-            let result = iterator.next();
-            let count = 0;
-            while (!result.done && count < batchSize) {
-              processNodes(result.value, observer);
-              result = iterator.next();
-              count++;
-            }
-            if (!result.done) raf.setTimeout(ProcessNextBatch, 0, iterator, batchSize, observer);
+          function chunkIteratorProcess(iterator, batchSize, processFn) {
+            const processBatch = () => {
+              for (let count = 0; count < batchSize; count++) {
+                const { done, value } = iterator.next();
+                if (done) return true;
+                processFn(value);
+              }
+              setTimeout(processBatch, 0);
+            };
+            processBatch();
           }
 
           function processChildListMutations(mutation, subtrees) {
             const { target, type, addedNodes, removedNodes } = mutation;
             if (type !== "childList") return;
-            addedNodes.forEach(node => void handleAddedNode(node, subtrees));
+            addedNodes.forEach(node => checkNodesForFix(node, [Node.ELEMENT_NODE]) && subtrees.add(node));
             removedNodes.forEach(node => void handleRemovedNode(node));
-            if (checkNodesForFix(target)) subtrees.add(target);
+            checkNodesForFix(target) && subtrees.add(target);
           }
 
           function processAttributesMutations(mutation, subtrees) {
             const { target, type } = mutation;
             if (type !== "attributes" || !checkNodesForFix(target, [Node.ELEMENT_NODE])) return;
             const ChangedValue = checkAttributeChange(mutation);
-            if (ChangedValue && ChangedValue.newValue !== ChangedValue.oldValue) subtrees.add(target);
+            ChangedValue && ChangedValue.newValue !== ChangedValue.oldValue && removeBoldCache(target) && subtrees.add(target);
           }
 
-          function handleAddedNode(node, subtrees) {
-            if (checkNodesForFix(node, [Node.ELEMENT_NODE])) subtrees.add(node);
+          function removeBoldCache(target, checkChildren = true) {
+            if (checkChildren) qA(`:not(${def.const.queryString})`, target).forEach(item => boldStatusCache.delete(item));
+            return boldStatusCache.delete(target) || !boldStatusCache.has(target);
           }
 
           function handleRemovedNode(node) {
             if (!checkNodesForFix(node)) return;
             const shadow = node.shadowRoot;
             shadow && observeNodeSet.delete(shadow);
-            if (!hasCorrectPermission) return;
-            styleDeclarationMap.delete(node);
-            shadow?.removeEventListener("mouseover", handleMouseEvents);
-            shadow?.removeEventListener("mouseout", handleMouseEvents);
+            hasCorrectPermission && removeBoldCache(node) && ["mouseover", "mouseout"].forEach(event => shadow?.removeEventListener(event, handleMouseEvents));
           }
 
           function reconnectObserver(observer, observeNodeSet) {
@@ -4361,26 +4278,20 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           function mouseEventsHandler(event) {
             const target = event.composedPath()[0] ?? event.target;
             if (!checkNodesForFix(target, [Node.ELEMENT_NODE])) return;
-            const { transition, transitionDelay, transitionDuration } = getComputedStyle(target);
-            if (["all 0s ease 0s", "none"].includes(transition)) return boldFixedHandler({ uncheckedNode: target });
+            const { transition, transitionDelay, transitionDuration } = gCS(target);
+            if (["all 0s ease 0s", "none"].includes(transition)) return removeBoldCache(target, false) && boldFixedHandler({ uncheckedNode: target });
             const delayTime = (parseFloat(transitionDelay) || 0 + parseFloat(transitionDuration) || 0) * 1e3;
-            raf.setTimeout(boldFixedHandler, delayTime, { uncheckedNode: target });
+            raf.setTimeout(() => removeBoldCache(target, false) && boldFixedHandler({ uncheckedNode: target }), delayTime);
           }
 
           function handleMouseEvents(event) {
-            const { type } = event;
-            mouseEventHandlers[type] = mouseEventHandlers[type] || deBounce({ fn: mouseEventsHandler, delay: 16.7, timer: type, immed: type === "mouseout" });
-            mouseEventHandlers[type](event);
+            deBounceMouseEvent.setImmediate(event.type === "mouseout");
+            deBounceMouseEvent(event);
           }
 
           function handleNavigateEvents(event) {
-            const { isTrusted, navigationType } = event ?? object;
-            if (isTrusted) deBounce({ fn: correctBoldPassive, timer: "navigate", delay: 50 })(navigationType);
-          }
-
-          function handleHistoryEvents() {
-            const { type, isTrusted } = global.event ?? object;
-            if (isTrusted) deBounce({ fn: correctBoldPassive, timer: "history", delay: 50 })(type);
+            const { isTrusted, navigationType, type } = event ?? global.event ?? immutObj;
+            if (isTrusted || type) deBounceFixPassive(navigationType ?? type);
           }
 
           function checkConflictCallback(currentList, previousList) {
@@ -4411,51 +4322,49 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           }
 
           function isEqualMutation(mutationA, mutationB) {
-            const eventRst = compareEventType(mutationA.type, mutationA.type, global.event);
-            const nodeListRst = compareNodeLists([...mutationA.addedNodes, ...mutationA.removedNodes], [...mutationB.addedNodes, ...mutationB.removedNodes]);
-            return eventRst && nodeListRst;
+            if (!isChildListMutation(mutationA.type, mutationA.type, global.event)) return false;
+            return areNodeListsEqual([...mutationA.addedNodes, ...mutationA.removedNodes], [...mutationB.addedNodes, ...mutationB.removedNodes]);
           }
 
-          function compareEventType(type1, type2, event) {
-            return type1 === "childList" && type1 === type2 && !(event instanceof MouseEvent);
+          function isChildListMutation(type1, type2, event) {
+            if (event instanceof MouseEvent) return false;
+            return type1 === "childList" && type2 === "childList";
           }
 
-          function compareNodeLists(nodeList1, nodeList2) {
+          function areNodeListsEqual(nodeList1, nodeList2) {
             if (nodeList1.length !== nodeList2.length) return false;
-            for (let i = 0; i < nodeList1.length; i++) {
-              if (compareNodes(nodeList1[i], nodeList2[i])) return false;
-            }
-            return true;
+            return nodeList1.every((node, index) => !hasDifferentKeys(node, nodeList2[index]));
           }
 
-          function compareNodes(node1, node2) {
+          function hasDifferentKeys(node1, node2) {
             return !checkNodesForFix(node1, [Node.ELEMENT_NODE]) || !checkNodesForFix(node2, [Node.ELEMENT_NODE]) || getNodeKey(node1) !== getNodeKey(node2);
           }
 
+          function getNodeKey(node) {
+            if (!node.attributes || node.attributes.length === 0) return getNodeName(node);
+            const parts = [getNodeName(node)];
+            for (let i = 0, len = node.attributes.length; i < len; i++) {
+              const attr = node.attributes[i];
+              if (attr.name !== def.const.boldAttrName) parts.push(`${toString(attr.name)}:${attr.value.replace(def.const.boldAttrName, "")}`);
+            }
+            return parts.join("::");
+          }
+
           function observeBoldElements() {
-            addLoadEvents.addFinalFn(correctBoldPassive);
-            handleRootNodeObserve(document, def.var.boldObserver);
+            addLoadEvents.addFinalFn(correctBoldPassive, null, document, true);
+            handleRootNodeObserve(document, def.var.fixBoldObs);
             if (!hasCorrectPermission) return;
             if (global.navigation) global.navigation.addEventListener("navigate", handleNavigateEvents);
-            else {
-              global.addEventListener("pushState", handleHistoryEvents);
-              global.addEventListener("replaceState", handleHistoryEvents);
-            }
+            else ["pushState", "replaceState"].forEach(event => global.addEventListener(event, handleNavigateEvents));
             DEBUG(`CorrectBold.stroke.Active${IN_FRAMES}:`, { eventType: "init" });
           }
 
           function handleCallbackLimit(observer) {
             observer.disconnect();
             if (global.navigation) global.navigation.removeEventListener("navigate", handleNavigateEvents);
-            else {
-              global.removeEventListener("pushState", handleHistoryEvents);
-              global.removeEventListener("replaceState", handleHistoryEvents);
-            }
-            observeNodeSet.forEach(shadow => {
-              shadow.removeEventListener("mouseover", handleMouseEvents);
-              shadow.removeEventListener("mouseout", handleMouseEvents);
-            });
-            delete def.var.boldObserver && observeNodeSet.clear();
+            else ["pushState", "replaceState"].forEach(event => global.removeEventListener(event, handleNavigateEvents));
+            observeNodeSet.forEach(shadow => ["mouseover", "mouseout"].forEach(event => shadow.removeEventListener(event, handleMouseEvents)));
+            delete def.var.fixBoldObs && observeNodeSet.clear();
           }
         }
 
@@ -4463,7 +4372,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
         function correctViewportUnits() {
           const vRegexp = /(\.?\d+(?:\.\d+)?)([dsl]?(?:v[wh]|vmin|vmax))\b(?![\\=/+_-])/g;
-          const uRegexp = /url\((?<mark>['"]?)(?!\/|https?:)([\w%-/.?=]+)\k<mark>\)/g;
+          const uRegexp = /url\((?![`'"]?(?:https?:\/\/|data:|\/\/|\/\B))([^)]+)\)/g;
           const permission = IS_CURRENTSITE_ALLOWED && IS_INTERNALSTYLE_ALLOWED && isFixViewport && CONST_VALUES.fixViewport && def.var.curScale !== 1;
           if (permission) {
             addLoadEvents.addFinalFn(correctViewport);
@@ -4471,17 +4380,16 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           }
           return [permission, correctViewport];
 
-          function correctViewport(nodeName) {
-            if (nodeName !== "style") fixViewportLinks();
-            if (nodeName !== "link") fixViewportStyles();
+          async function correctViewport() {
+            return await Promise.all([fixViewportLinks(), fixViewportStyles()]);
           }
 
           function fixViewportLinks() {
-            qA(`link[rel~="stylesheet" i]:not([data-fr-processed])`).forEach(node => {
-              let url = node.href || node.dataset.href;
+            qA(`link[rel~="stylesheet" i]:not([data-fr-processed])`).forEach(async link => {
+              let url = link.href || link.dataset.href;
               if (!url) return;
-              node.dataset.frProcessed = "ignore";
-              getLinkStyleAndParseCss(url.replace(/^http:/, "https:"), node);
+              link.dataset.frProcessed = "ignore";
+              await getLinkStyleAndParseCss(url.replace(/^http:/, "https:"), link);
             });
           }
 
@@ -4502,7 +4410,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           function applyStyleToOriginLink(styleText, url, node) {
             const parent = node.parentNode ?? document.head;
             const style = cE("style", { type: "text/css", textContent: `/*# sourceURL=${url} */\r\n${styleText}` });
-            for (const { name, value } of setIterator(node.attributes)) {
+            for (const { name, value } of node.attributes) {
               if (!["href", "rel"].includes(name)) style.setAttribute(name, value);
             }
             style.dataset.href = url;
@@ -4512,19 +4420,19 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           }
 
           function fixViewportStyles() {
-            qA(`style:not([data-fr-processed]):not(.darkreader)`).forEach(styleNode => {
-              if (asArray(styleNode.attributes).Some(i => /^(?:fr|gb)-css-[0-9a-f]{8}$/.test(toString(i.name)))) return;
-              styleNode.dataset.frProcessed = "ignore";
-              const cssText = styleNode.textContent;
+            qA(`style:not([data-fr-processed]):not(.darkreader)`).forEach(style => {
+              if (asArray(style.attributes, attr => attr.name).Some(name => /^(?:fr|gb)-css-[0-9a-f]{8}$/.test(name))) return;
+              style.dataset.frProcessed = "ignore";
+              const cssText = style.textContent;
               if (!cssText || !vRegexp.test(cssText)) return;
               try {
                 const updatedCssText = replaceStyle(cssText, vRegexp, def.var.curScale);
-                styleNode.textContent = updatedCssText;
-                styleNode.dataset.frProcessed = "style";
-                styleNode.type = "text/css";
-                DEBUG("Fixed.viewport.Style:", { styleNode });
+                style.textContent = updatedCssText;
+                style.dataset.frProcessed = "style";
+                style.type = "text/css";
+                DEBUG("Fixed.viewport.Style:", { style });
               } catch (e) {
-                styleNode.dataset.frProcessed = "error";
+                style.dataset.frProcessed = "error";
                 ERROR(`fixViewportStyles:`, e.message);
               }
             });
@@ -4536,43 +4444,40 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             });
           }
 
-          function replaceBaseURL(txt, url) {
-            url = url.slice(0, url.lastIndexOf("/") + 1);
-            return txt.replace(uRegexp, function (match, mark, file) {
-              return (mark ? match.replace(new RegExp(mark, "g"), "") : match).replace(file, `${url}${file}`);
+          function replaceBaseURL(txt, baseURL) {
+            return txt.replace(uRegexp, (match, url) => {
+              const path = url.replace(/[`'"]/g, "");
+              const fullPath = new URL(path, baseURL).href;
+              return match.replace(path, fullPath);
             });
           }
         }
 
         /* CSS_STYLE_PROCESSING_MAIN_THREAD */
 
-        function monitorMainStyleProcess([Permission, extraFunction]) {
+        function monitorMainStyleProcess([Permission, correctViewport]) {
           if (!IS_INTERNALSTYLE_ALLOWED || !(CUR_WINDOW_TOP || IS_CURRENTSITE_ALLOWED)) return;
-          getHeadElement.getNodeAndObserve().then(() => insertMainStyleElement()); // Fit::Greasemonkey & Userscripts & Loading Delay.
-          const checkStyleNode = (node, nodeName) => {
+          const deBounceViewport = createDeBounce({ fn: correctViewport, delay: 5e2 });
+          const checkStyleNode = node => {
+            const nodeName = getNodeName(node);
             if (nodeName === "style") return node.id !== def.id.rndStyle && !node.classList?.contains("darkreader");
-            else if (nodeName === "link") return node.getAttribute("rel")?.includes("stylesheet");
+            if (nodeName === "link") return node.getAttribute("rel")?.includes("stylesheet") && node.getAttribute("href");
           };
           const handleAddedNodesMutation = (addedNodes, mainStyle) => {
-            for (const node of addedNodes) {
-              const nodeName = getNodeName(node);
-              if (!mainStyle && insertMainStyleElement()) break;
-              else if (Permission && checkStyleNode(node, nodeName)) deBounce({ fn: extraFunction, delay: 2e2, timer: `extra.${nodeName}` })(nodeName);
-            }
+            if (!mainStyle) return insertMainStyleElement();
+            Permission && addedNodes.forEach(node => deBounceViewport.setImmediate(checkStyleNode(node)) && deBounceViewport());
           };
           const handleRemovedNodesMutation = removedNodes => {
             for (const node of removedNodes) {
               if (getNodeName(node) !== "style" || node.id !== def.id.rndStyle || node.dataset.frRemoved) continue;
-              const isInserted = insertMainStyleElement({ overwrite: false, shouldNotify: false });
-              if (isInserted) return INFO(`%c[MO]${IN_FRAMES}[REINSERT]:%c<style> success!`, leftStyle("#a52a2a"), rightStyle("#a52a2a"));
+              if (insertMainStyleElement({ shouldNotify: false })) return INFO(`%c[MO]${IN_FRAMES}[REINSERT]:%c<style> success!`, leftStyle("#a52a2a"), rightStyle("#a52a2a"));
             }
           };
           const handleChildListMutation = (target, addedNodes, removedNodes, mainStyle) => {
-            if (target === document.documentElement) updateFlagAtRootElement(target);
-            else if (target === document.head) {
-              handleAddedNodesMutation(addedNodes, mainStyle);
-              handleRemovedNodesMutation(removedNodes);
-            }
+            if (target === document.documentElement) return updateFlagAtRootElement(target);
+            if (target !== document.head) return;
+            handleRemovedNodesMutation(removedNodes);
+            handleAddedNodesMutation(addedNodes, mainStyle);
           };
           const updateStyleWithNewRootID = (styleNode, id) => {
             const cssText = (styleNode?.textContent ?? tStyle).replace(/\b#\w+\b/g, `#${id}`);
@@ -4590,24 +4495,24 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             else if (type === "attributes") handleAttributesMutation(target, oldValue, mainStyle);
           };
           const mainStyleProcess = mutations => {
-            const mainStyle = getMainStyleElements({ currentScope: true });
+            const mainStyle = getMainStyleElements({ primaryElement: true });
             mutations.forEach(mutation => void handleStyleProcess(mutation, mainStyle));
           };
           const styleObserve = new MutationObserver(mainStyleProcess);
-          const config = { childList: true, subtree: true, attributeOldValue: true, attributeFilter: ["id"] };
-          styleObserve.observe(document, config);
+          getHeadElement.getNodeAndObserve().then(insertMainStyleElement); // Fit::Greasemonkey & Userscripts & Loading-delay.
+          styleObserve.observe(document, { childList: true, subtree: true, attributeOldValue: true, attributeFilter: ["id"] });
         }
 
         function monitorBodyIframeProcess() {
           if (!IS_CURRENTSITE_ALLOWED) return;
           const handleIframeProcess = mutation => {
-            let [{ target, type, addedNodes }, nodeArray] = [mutation, []];
-            if (type === "childList" && addedNodes.length > 0) nodeArray = qA(`iframe:not([${def.const.iframeAttrName}])`, target);
+            const [{ target, type, addedNodes }, nodeArray] = [mutation, []];
+            if (type === "childList" && addedNodes.length > 0) nodeArray.push(...qA(`iframe:not([${def.const.iframeAttrName}])`, target));
             else if (type === "attributes" && getNodeName(target) === "iframe" && (target.src || target.srcdoc)) nodeArray.push(target);
-            if (nodeArray.length > 0) insertStyleInFrames({ condition: type, nodeArray });
+            if (nodeArray.length > 0) applyStyleToIframes({ condition: type, nodeArray });
           };
           const praseIframes = ({ mutations }) => mutations.forEach(handleIframeProcess);
-          const config = { attributeFilter: ["src", "srcdoc", "style"], childList: true, subtree: true };
+          const config = { childList: true, subtree: true, attributeFilter: ["src", "srcdoc", "style"] };
           getBodyElement.getNodeAndObserve({ callback: praseIframes, config });
         }
 
@@ -4627,7 +4532,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           monitorBodyIframeProcess();
           correctFontScaleOffset();
           overrideCanvasFont(selectedFont);
-          addLoadEvents.addFn(insertStyleInFrames);
+          addLoadEvents.addFn(applyStyleToIframes, { condition: "DOMLoaded" });
         })(() => {
           if (!CUR_WINDOW_TOP || toString(GMunregisterMenuCommand) === "() => {}") return;
           return GMregisterMenuCommand(`\ufff0\ud83d\udd52 ${IS_CHN ? "正在载入脚本菜单，请稍候…" : "Loading menus, please wait..."}`, refresh);
@@ -4654,7 +4559,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             } catch (e) {
               ERROR("config.JSON.parse:", e.message);
               def.var.structureError = true;
-              config = object;
+              config = immutObj;
             }
             _config_data_ = { ...INITIAL_CONFIGURE, ...config };
           }
@@ -4759,6 +4664,15 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           }
           saveData(FONTOVERRIDE, defaultFontRule);
           return defaultFontRule;
+        },
+        async () => {
+          const customProperty = await GMgetValue(CUSTOMPROPERTY);
+          try {
+            const property = customProperty ? JSON.parse(decrypt(customProperty)) : immutObj;
+            return { fontFeature: convertHtmlToText(property.feature), fontVariant: convertHtmlToText(property.variant) };
+          } catch (e) {
+            return { fontFeature: null, fontVariant: null };
+          }
         }
       );
     })(createTrustedTypePolicy(), safeWindow.JSON.parse && safeWindow.JSON.stringify ? safeWindow.JSON : global.JSON);
@@ -4790,10 +4704,11 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         return -1;
       },
     };
-    return { defineMethod, arrayMethods };
+    return { defineMethod, arrayMethods, object: Object.create(null) };
   })(Array.prototype),
   (() => ({
     oT: any => Object.prototype.toString.call(any),
+    iO: Object.seal(Object.create(null)),
     aF: Array.from.bind(Array),
     gS: (testKey => {
       const testStorage = storageType => {
