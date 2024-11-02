@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            помощник поисковых систем
 // @name:ja            優雅な検索エンジン助手
-// @version            2024.10.05.1
+// @version            2024.11.02.1
 // @author             F9y4ng
 // @description        “Elegant Search Engine Assistant” facilite la navigation entre moteurs de recherche, personnalise les préférences, met en évidence les mots-clés, élimine les redirections et publicités, et filtre les résultats. Compatible avec divers moteurs tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, etc.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG and more.
@@ -14,7 +14,7 @@
 // @description:ru     “Элегантный помощник поисковых систем” обеспечивает удобное переключение между поисковыми системами, поддерживает настройку, выделение ключевых слов и продвинутые функции.  совместим с Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG и другими поисковыми системами.
 // @description:ja     「優雅な検索エンジン助手」は、検索エンジン間の切り替えを容易にし、カスタムエンジン、キーワードハイライト、リダイレクト削除、広告ブロック、キーワードフィルタリング、自動更新をサポートし、Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、You、Startpage、Brave、Yahoo、Yep、Swisscows、searXNGなどと互換性があります。
 // @namespace          https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
-// @icon               https://img.icons8.com/stickers/48/search-in-cloud.png
+// @icon               data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAFC0lEQVR4nO2WbUxTVxjHj8IMWZbt05Yt28y2D3yQRN0++MVsmXFbNjBixbFpkSGvXUt5GRpkgOCgIsgqOANUQCXYOQUKCMqrtDAmiorSwioIytsoIL3ce1olQ+W/3KsFlYov8yUmPsn/w725J//fec7zPPcQ8jJexoscABwsFosLpfRTq9W6CIDTMzFmWfYjSmkux3EWSilsYll2YnBwsNxsNi99auaUUn+O48ZZlkODrgW7lAVIjM9DWuohHD3yF8xmBhzHTXZ2du4B4PhEzVmWDeZ32nq+AxvESfDekIbwHbUIV51F+E4dAuTZEK2IQU3VKSEjBoNBQwiZ80TMx8bGPuY4buLsGSPc3WIQvKcVYVrMUPChAXh4JKC0uEGAKCsri/pfxgCcKKULKKXVfHo9RfGQ5Brtmk9BFJux0jUGl7r7MTAwMLR48eI3H9nYarW+c7vQrtqKTFOgxXrZ3lnNbfJNqEJq8kFhnVKplD+q+SKO40x8ofHn+dvOQuxIUsPPJwUbdttP/b2Sakbh6ZEgAJSUlPxOCJn7UOYMw7xBKb1sMo1AFrgTP/imI0ypw0+7GhG4+Q/Ij12dMgmpnoC02Axp0RUEl1sQVjc5DVE3iS8/3ygA9PT09HV3dwdbLJa3HghAKY3lF23eqIJ/bKn9HdZNIuhAH2S5fyNNewWqE2OIK+6Fb1Yb5Eett+BqJvDVsk3o7zdhdNRsmxPXurq6tswKwLKs0aC/iFWiBITV3bQLEJB3CcmVJuhHgA5mWkc7JhCkaoO8YhySQyYsWxqG1e5xcP0iEnJJOppPtgkger1+/wxjAPMopdH8ECk6rIXXpsP2K7zcgo3qi2g3321uU2HbOPxyO4VvQ6v/vZ2xm5Bnt0K0Mg5VFSeFQaVWq/3vNH+FUlrJ07WcNWJLVA7WRtgHCFL3ocAwbtec1wUzIM1pR2jtjRlrZQVDcHeNBl9fRqPRQAh5zXbuUbz5vpxyrFn9C8JTqhB8eNAugP++LtRcun5fAF7RBZeFY7C33jtcLbQzy7I35s+f/4kAwLfcuZYLELlvhbzi2qztFXigD0Xts2SAAWR8Bmqu213vta0e6cpCoRbEYvFavuff5h/2ZpfDO77igf0tO8Ih8mA3jKP2AUrPU/jsbkXocfsF/H1sJbIyjwgAy5cv/46f8R/wD9lZ5VgXV/1QQyZgfzeUx0fQdg9E7fkxRCY2Iij1DPyyO2bUQejxSazw2I7Tze0YGhoyOzo6fiZcKhiGYfifjJu7YrpyZ1PdTQTm9yBkvxGZjQz2NVMoyv6BX3oLQuL/RFiMDpLkU/DbY5w+irpJeEaWQiLPEnZfWVlZSghxFmqgv78/lX+5XVkC11VJ8EpqgM+ucw+Ut7IZXtsaIFbo4JVyAusSdfCM0EC2ueYWRMpprE9pgjhRCzfPX+ErycDw8ChMJtOos7OzFyFknq0NnXp7e/U8RK1Oj58TixAQkvNYEvumw+2bGIREVQsQPpIcfLtGgYrac3z/86lnRCJROCHkvbsGUX5+/utNTU0FDMOM33nNehztTiuEx8otiIg+BtmPGVBszRPe19fXV7u4uHgTQt6/3ySes2TJkgURERGBCoUi5nGk1+ubeDNVRilErtEI9EmZuhc4ODh8PZX2pxVardbJYDAcuzMjw8PDY1KpNJYQ8i55RjE3MzPTR6PRqFUqVebChQv5tH9InkPMIYS8+jyMyQsT/wHRI0Gp4kJwPQAAAABJRU5ErkJggg==
 // @homepage           https://f9y4ng.github.io/GreasyFork-Scripts/
 // @homepageURL        https://f9y4ng.github.io/GreasyFork-Scripts/
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
@@ -262,9 +262,10 @@
 // @grant              GM_unregisterMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
-// @note               {"CN":"修正部分搜索引擎跳转按钮样式问题。","EN":"Fixed some search engine jump button style issue."}
-// @note               {"CN":"修正从百度首页搜索时按钮消失的问题。","EN":"Fixed buttons disappear when search from homepage."}
-// @note               {"CN":"修正页面滚动按钮样式切换函数的问题。","EN":"Fixed Bug of the page scroll style toggle function."}
+// @note               {"CN":"修正站点图标在非整比缩放时的样式错误。","EN":"Fixed icons scaling non-integral style error."};
+// @note               {"CN":"修正 Google 中文“下一页”的样式错误。","EN":"Fixed Google Chinese "next page" style error."};
+// @note               {"CN":"修正 search.Yahoo 跳转按钮的样式问题。","EN":"Fixed style issue of search.Yahoo jump button."}
+// @note               {"CN":"修正 VM uad.getHighEntropyValues 造成的加载延迟。","EN":"Fixed load-delay caused by Violentmonkey uad.getHighEntropyValues."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         edge 兼容Tampermonkey, Violentmonkey
 // @compatible         Chrome 兼容Tampermonkey, Violentmonkey
@@ -296,7 +297,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
    * PROBLEMS OR NEW FEATURES, PLEASE FEEDBACK IN GITHUB ISSUES, THANK YOU!    *
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-  const { defineMethod, arrayMethods, obj = Object.create(null) } = arrayProxy;
+  const { defineMethod, arrayMethods, object } = arrayProxy;
   const utils = {
     info: GM?.info ?? GM_info,
     debugging: IS_OPEN_DEBUG,
@@ -305,7 +306,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
     alert: alert.bind(ctx),
     prompt: prompt.bind(ctx),
     confirm: confirm.bind(ctx),
-    console: Object.assign(obj, ctx.console),
+    console: Object.assign(object, ctx.console),
   };
   const enhanceHistory = type => {
     const original = ctx.history[type];
@@ -374,10 +375,9 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
         searchbox: generateRandomString(7, "mix"),
       },
       var: {
-        disappear: "ͽoFgZM8trͼ",
-        translucent: "ͼn8IoLXdgͽ",
-        securityPolicy: false,
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.10.05.0",
+        disappear: "ͽo7kAdceWqVͼ",
+        translucent: "ͼJ3fsE9CeARͽ",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.11.02.0",
         scriptName: getMetaValue(`name:${getLocalLanguages()}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       },
       url: {
@@ -432,12 +432,9 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       constructor(context) {
         if (RAF.instance) return RAF.instance;
         this.context = context;
-        this._registerAnimationFrame(context);
         this.timerMap = { timeout: {}, interval: {} };
-        this.setTimeout = this.setTimeout.bind(this);
-        this.setInterval = this.setInterval.bind(this);
-        this.clearTimeout = this.clearTimeout.bind(this);
-        this.clearInterval = this.clearInterval.bind(this);
+        this._registerAnimationFrame(context);
+        ["setTimeout", "setInterval", "clearTimeout", "clearInterval"].forEach(method => (this[method] = this[method].bind(this)));
         RAF.instance = this;
       }
       _registerAnimationFrame(scope) {
@@ -450,10 +447,11 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
         let lastTime = performance.now();
         const timerSymbol = Symbol(type);
         const step = () => {
+          const currentTime = performance.now();
           this._setTimerMap(timerSymbol, type, step);
-          if (interval < 16.7 || performance.now() - lastTime >= interval) {
+          if (interval < 16.67 || currentTime - lastTime >= interval) {
             if (typeof fn === "function") fn(...args);
-            if (type === "interval") lastTime = performance.now();
+            if (type === "interval") lastTime = currentTime;
             else this.clearTimeout(timerSymbol);
           }
         };
@@ -501,21 +499,21 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       return gmFunctions[rec] ?? __console("warn", `Grant 'GM.${rec}' is not available.`) ?? (() => {});
     }
 
-    function __console(action, message = "", ...args) {
+    function __console(action, message, ...args) {
       const consoleMethods = {
         log: ["log", "%c\ud83d\udd33 %c", "display:inline-block", "font-family:ui-monospace,monospace"],
         error: ["error", "%c\ud83d\udea9 ", "display:inline-block;font-family:ui-monospace,monospace"],
         warn: ["warn", "%c\ud83d\udea9 ", "display:inline-block;font-family:ui-monospace,monospace"],
         count: ["count", "\ud83d\udd33 "],
       };
-      const [consoleMethod, _] = [consoleMethods[action], this ?? console];
-      if (!consoleMethod) return _.log(message, ...args);
+      const [_, msg, consoleMethod] = [this ?? console, message ?? "", consoleMethods[action]];
+      if (!consoleMethod) return _.log(msg, ...args);
       const [method, prefix, ...surfix] = consoleMethod;
-      return _[method](prefix + message, ...surfix, ...args);
+      return _[method](prefix + msg, ...surfix, ...args);
     }
 
     function checkLocalChineseLanguage() {
-      const lang = navigator.language || navigator.userLanguage || "en-US";
+      const lang = navigator.language || Intl.DateTimeFormat().resolvedOptions().locale || "en-US";
       return lang.startsWith("zh");
     }
 
@@ -541,10 +539,10 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       return String(value);
     }
 
-    function cE(nodeName, attributes = {}) {
+    function cE(nodeName, attributes) {
       const el = document.createElement(nodeName);
       if (getObjectType(attributes) !== "[object Object]") return el;
-      for (const [key, value] of setIterator(attributes)) {
+      for (const [key, value] of Object.entries(attributes)) {
         if (key === "class") Array.isArray(value) ? el.classList.add(...value) : el.classList.add(value);
         else if (["innerHTML", "textContent"].includes(key)) el[key] = value;
         else el.setAttribute(key, value);
@@ -586,15 +584,9 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       }
     }
 
-    function setIterator(collection) {
-      if (!collection) return [][Symbol.iterator]();
-      collection = typeof collection[Symbol.iterator] === "function" ? collection : typeof collection.length === "number" ? asArray(collection) : Object.entries(collection);
-      return collection[Symbol.iterator]();
-    }
-
-    function uniq(array) {
+    function uniq(array, filterType = Boolean) {
       if (!Array.isArray(array)) return [];
-      return asArray(new Set(array)).filter(Boolean);
+      return [...new Set(array.filter(filterType))];
     }
 
     function generateRandomString(length, type) {
@@ -629,20 +621,16 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
     }
 
     function checkRedundantScript(global) {
-      const redundantScripts = global["gb-init-redundantcheck"];
       const scriptRedundancyWarning = () => {
         const scriptRedundanceText = `\ud83d\udea9 [Redundant Scripts]:\r\nFound redundant-installed scripts: ${def.var.scriptName}. please reload to troubleshoot the issue.`;
         const troubleshoot = `\ufff8\ud83d\uded1 ${IS_CHN ? "发现冗余安装的脚本，点击排查！" : "Troubleshoot Redundant"}`;
         CUR_WINDOW_TOP && GMregisterMenuCommand(troubleshoot, () => void (GMopenInTab(`${def.url.feedback}/117`, false) && refresh())) && __console("error", scriptRedundanceText);
         return true;
       };
-      if (redundantScripts === true) return scriptRedundancyWarning();
+      if (global["gb-init-redundantcheck"] === true) return scriptRedundancyWarning();
       global["gb-init-redundantcheck"] = true;
-      if (GMcontentMode) {
-        const redundantScriptsInfo = document.documentElement.getAttribute("gb-init-rc");
-        if (redundantScriptsInfo === "true") return scriptRedundancyWarning();
-      }
-      if (Object.freeze(def.const)) document.documentElement.setAttribute("gb-init-rc", true);
+      if (GMcontentMode && document.documentElement.getAttribute("gb-init-rc") === "true") return scriptRedundancyWarning();
+      Object.freeze(def.const) && document.documentElement.setAttribute("gb-init-rc", true);
     }
 
     async function getNavigatorInfo() {
@@ -652,14 +640,14 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
 
       function getGlobalInfoFromUAD(uad) {
         const platform = getFullPlatformName(uad.platform);
-        const mapBrandPath = ({ brand: b, version: v }) => `${/Not[^a-z]*A[^a-z]*Brand/i.test(b) ? 9 : /^Chrom(?:e|ium)$/i.test(b) ? 5 : 1}${b}\r${v}`;
+        const mapBrandPath = ({ brand: b, version: v }) => `${/Not[^a-z]*A[^a-z]*Brand/i.test(b) ? 9 : /^Chrom(?:e|ium)|Firefox|Safari$/i.test(b) ? 5 : 1}${b}\r${v}`;
         const [brand, brandVersion] = uad.brands?.map(mapBrandPath).sort()[0]?.slice(1).split("\r") ?? [];
         const engineMap = { Chrome: "Blink", Chromium: "Blink", Firefox: "Gecko", Safari: "WebKit" };
         const mapEnginePath = ({ brand, version }) => /^(Chrom(?:e|ium)|Firefox|Safari)$/i.test(brand) && `${brand}\r${version}`;
         const [engine, engineVersion] = uad.brands?.map(mapEnginePath).filter(Boolean)[0]?.split("\r") ?? [brand, brandVersion];
         const engineInfo = { engine: engineMap[capitalize(engine)] ?? getEngineFromUA(navigator.userAgent), engineVersion: parseFloat(engineVersion) || 99, creditEngine };
         const browserInfo = { brand: (brand?.split(/\s/) ?? []).slice(-1)[0] ?? "Unknown", brandVersion: formatVersion(brandVersion), platform };
-        return { ...engineInfo, ...browserInfo, source: uad.voucher ? "ext" : "uad", voucher: uad.voucher ?? null };
+        return { ...engineInfo, ...browserInfo, source: uad.source ?? "uad", voucher: uad.voucher ?? null };
       }
 
       function getGlobalInfoFromUA(ua) {
@@ -671,35 +659,32 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       }
 
       async function getUserAgentDataFromExtension(voucher) {
-        const getVMUserAgentData = async uad => {
-          if (!uad) return null;
-          const { brand, version, browserName, browserVersion, os, arch } = uad;
-          const [bitness, architecture] = [arch?.split("-")[1], arch?.split("-")[0]];
-          let brands = [
-            { brand: capitalize(brand || "Not)A;Brand"), version: brand ? version : "99" },
-            { brand: capitalize(browserName), version: browserVersion },
-          ];
-          if (GMinfo.userAgentData?.brands?.[0]) {
-            try {
-              return { ...(await getUserAgentDataHighEntropyValues(GMinfo.userAgentData)), voucher };
-            } catch (e) {
-              brands = [...GMinfo.userAgentData.brands, ...brands];
-            }
+        const getVMUserAgentData = ({ browserName, browserVersion, os, arch }) => {
+          const [architecture, bitness] = arch?.split("-") ?? [];
+          let brands = [{ brand: capitalize(browserName), version: browserVersion }];
+          if (parseFloat(browserVersion) < 57.0 && GMinfo.userAgent) {
+            const [, brand, version] = GMinfo.userAgent.match(/\s(Chrom(?:e|ium)|Firefox)\/(\d+[.0-9]*)/i) ?? [];
+            if (brand) brands = [{ brand: capitalize(brand), version }, ...brands];
           }
-          return { bitness, architecture, brands, platform: capitalize(os), voucher };
+          return { bitness, architecture, brands, platform: capitalize(os), source: "ext", voucher };
         };
-        const vmuad = voucher.startsWith("Violentmonkey") && GMinfo.platform ? await getVMUserAgentData(GMinfo.platform) : null;
-        const tmuad = voucher.startsWith("Tampermonkey") && GMinfo.userAgentData ? { ...GMinfo.userAgentData, voucher } : null;
-        const uad = navigator.userAgentData?.brands?.[0] ? await getUserAgentDataHighEntropyValues(navigator.userAgentData) : null;
-        return vmuad ?? tmuad ?? uad;
-      }
-
-      async function getUserAgentDataHighEntropyValues(uad) {
-        return await uad.getHighEntropyValues(["bitness", "architecture", "fullVersionList"]).then(rst => {
-          rst.brands = rst.fullVersionList;
-          delete rst.fullVersionList;
-          return rst;
-        });
+        if (voucher.startsWith("Violentmonkey") && GMinfo.platform) return getVMUserAgentData(GMinfo.platform);
+        const getTMUserAgentData = uad => {
+          if (creditEngine === "Gecko" && parseFloat(uad.brands[0].version) < 78.0) {
+            const [, brand, version] = navigator.userAgent.match(/\s(Firefox)\/(\d+[.0-9]*)/i) ?? [];
+            if (brand) return { ...uad, brands: [{ brand: capitalize(brand), version }, ...uad.brands], source: "ua" };
+          }
+          return { ...uad, source: "ext", voucher };
+        };
+        if (voucher.startsWith("Tampermonkey") && GMinfo.userAgentData) return getTMUserAgentData(GMinfo.userAgentData);
+        const getUADHighEntropyValues = async uad =>
+          await uad.getHighEntropyValues(["bitness", "architecture", "fullVersionList"]).then(rst => {
+            rst.brands = rst.fullVersionList;
+            delete rst.fullVersionList;
+            return rst;
+          });
+        if (navigator.userAgentData?.brands?.[0]) return await getUADHighEntropyValues(navigator.userAgentData);
+        return null;
       }
 
       function getBrowserInfoFromUA(ua, checkString, getVersion) {
@@ -721,13 +706,13 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
           Trident: { brand: "IE", engine: "Trident", verset: ["MSIE", "rv"] },
           Presto: { brand: "Opera", engine: "Presto" },
         };
-        for (const [key, { brand, engine, verset, as }] of setIterator(brandMap)) {
+        for (const [key, { brand, engine, verset, as }] of Object.entries(brandMap)) {
           if (!checkString(key)) continue;
-          const enVersionKey = as || key;
-          const engineVersion = parseFloat(getVersion(enVersionKey, enVersionKey.length + 1) || 99);
-          const versionKey = verset?.Find(k => checkString(k)) || key;
+          const versionKey = asArray(verset ?? []).Find(k => checkString(k)) || key;
           let brandVersion = getVersion(versionKey, versionKey.length + 1);
           if (!brandVersion) continue;
+          const enVersionKey = as || key;
+          const engineVersion = parseFloat(getVersion(enVersionKey, enVersionKey.length + 1) || 99);
           return { brand, brandVersion: formatVersion(brandVersion), engine, engineVersion };
         }
         const { b: brand, bv: brandVersion, ev: engineVersion } = getUnregisteredBrandAndVersionFromUA(ua);
@@ -760,7 +745,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
         if (nameOffset === 0 || verOffset === -1 || verOffset < nameOffset) return { b: "Unknown", bv: "0.0.0.0", ev: 99 };
         const brand = ua.slice(nameOffset, verOffset).trim();
         const brandVersion = formatVersion(ua.slice(verOffset + 1).match(/\d*\.?\d+/)?.[0]);
-        const engineVersion = parseFloat(ua.match(/(Chrom(?:e|ium)|Firefox|Version)\/(\d+(?:\.\d+)*)/i)?.[2] || brandVersion || 99);
+        const engineVersion = parseFloat(ua.match(/(?:Chrom(?:e|ium)|Firefox|Version)\/(\d+[.0-9]*)/i)?.[1] || brandVersion || 99);
         const validVersion = (!/version|\/|\(|\)|;/i.test(brand) && brandVersion) || "0.0.0.0";
         return { b: brand, bv: validVersion, ev: engineVersion };
       }
@@ -795,7 +780,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       return Object.is(key, value);
     }
 
-    function sleep(delay, { useCachedSetTimeout } = {}) {
+    function sleep(delay, { useCachedSetTimeout, instant } = {}) {
       const timeoutFunction = useCachedSetTimeout ? setTimeout : raf.setTimeout;
       const sleepPromise = new Promise(resolve => {
         timeoutFunction(resolve, delay);
@@ -803,7 +788,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       const promiseFunction = value => sleepPromise.then(() => value);
       promiseFunction.then = sleepPromise.then.bind(sleepPromise);
       promiseFunction.catch = sleepPromise.catch.bind(sleepPromise);
-      return promiseFunction;
+      return instant ? sleepPromise : promiseFunction;
     }
 
     function deBounce({ fn, timer, delay, immed = false, once = false } = {}) {
@@ -893,8 +878,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
         }
         show() {
           this._createContainer();
-          const noticeX = this._appendNoticeX(this._createHeader(), this._createBody(), this._createProgressBar());
-          return noticeX;
+          return this._appendNoticeX(this._createHeader(), this._createBody(), this._createProgressBar());
         }
         _createContainer() {
           const position = `${def.notice.noticeX}-${this.options.position}`;
@@ -964,10 +948,9 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
           if (this.options.closeWith.includes("click")) {
             item.style.cursor = "pointer";
             item.addEventListener("click", e => {
-              if (e.target.className !== def.notice.close) {
-                this._executeCallbacks("onClick");
-                handleClick();
-              }
+              if (e.target.className === def.notice.close) return;
+              this._executeCallbacks("onClick");
+              handleClick();
             });
           } else item.addEventListener("click", e => e.target.className !== def.notice.close && this._executeCallbacks("onClick"));
           item.addEventListener("mouseover", () => this._executeCallbacks("onHover"));
@@ -1011,17 +994,14 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       function addStyle({ target, styleId, styleContent, media, isOverwrite }) {
         if (!target || !styleId || !styleContent || !media) return;
         let existingStyles = qA(`#${styleId}`, target);
-        if (existingStyles.length > 0) {
-          if (isOverwrite === true) safeRemoveNode(existingStyles);
-          else return true;
-        }
+        if (isOverwrite) existingStyles.forEach(style => (style.dataset.frRemoved = true) && safeRemoveNode(style));
+        else if (existingStyles.length > 0) return true;
         try {
           const styleElement = cE("style", { id: styleId, media, type: "text/css", textContent: styleContent ?? "", [def.const.cssAttrName]: isOverwrite ?? false });
           target.appendChild(styleElement);
           return true;
         } catch (e) {
           ERROR("addStyle:", e.message);
-          return false;
         }
       }
 
@@ -1098,11 +1078,15 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
           node.setAttribute("gd-depurate-status", true);
         }
 
+        function stopEventPropagation(event) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+
         function setForceNewTab(options, node) {
           if (!options.forceNewTab) return;
           node.addEventListener("click", e => {
-            e.preventDefault();
-            e.stopImmediatePropagation();
+            stopEventPropagation(e);
             GMopenInTab(node.href, false);
           });
         }
@@ -1152,10 +1136,10 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
         }
 
         function handleSuccess(res, url, node) {
-          DEBUG("Parsed link:", { node, parsed: res, origin: url });
           cachedRequestLinks.set(url, res);
           setRealLink(node, res);
           toggleLoadClass(node)?.remove();
+          DEBUG("Parsed link:", { node, parsed: res, origin: url });
         }
 
         function handleError(e, url, node, name) {
@@ -1197,7 +1181,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
         function setErrorLink(node) {
           node.classList.add(def.notice.linkerror);
           node.setAttribute("gd-antiredirect-status", "failed");
-          node.setAttribute("title", `${IS_CHN ? "目前来看，此链接已无法正常访问。" : "At present, this link is no longer accessible."}`);
+          node.setAttribute("title", `${IS_CHN ? "该链接目前无法正常访问。" : "This link is currently not accessible."}`);
         }
 
         function handlePageCheck(count) {
@@ -1277,9 +1261,9 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
             onreadystatechangeFunc: (resolve, reject) => response => {
               if (response.readyState !== 4) return;
               if (response.status === 200) {
-                const resText = response.responseText || response.response || "";
                 let resUrl = response.finalUrl || response.responseURL || url;
                 if (resUrl === url) {
+                  const resText = response.responseText || response.response || "";
                   const res = resText.match(/URL\s*=\s*'([^']+)'/);
                   if (res) resUrl = res[1];
                   else reject(new Error("URLNotExistError"));
@@ -1500,7 +1484,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               imageType: ["isch", "2"],
               splitTypeName: ["tbm", "udm"],
               mainSelector: "form button[type='submit']",
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:100;display:flex;margin:0 4px 0 -5px;justify-content:center;align-items:center}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{padding:0 2px 0 8px}.${def.const.scrollspan}{min-height:26px}.${def.const.scrollspan2}{min-height:26px;margin-top:0!important}.${def.const.scrollbars}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}.${def.const.scrollbars2}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px!important;height:38px;min-width:90px;border:0;border-bottom-left-radius:24px;border-top-left-radius:24px;background:#1a73e8;box-shadow:none;color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 18px 0 12px!important;height:38px;min-width:90px;border:0;border-top-right-radius:24px;border-bottom-right-radius:24px;background:#1a73e8;box-shadow:none;color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#1b66c9;}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{background:#8ab4f8;box-shadow:0 1px 3px 1px rgba(0, 0, 0, 0.15),0 1px 2px rgba(0, 0, 0, 0.3);color:#202124}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#93baf9}}`,
+              buttonCssText: `#pnnext>span:nth-child(2){clear:left}#${def.const.rndButtonID}{position:relative;z-index:100;display:flex;margin:0 4px 0 -5px;justify-content:center;align-items:center}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{padding:0 2px 0 8px}.${def.const.scrollspan}{min-height:26px}.${def.const.scrollspan2}{min-height:26px;margin-top:0!important}.${def.const.scrollbars}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}.${def.const.scrollbars2}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px!important;height:38px;min-width:90px;border:0;border-bottom-left-radius:24px;border-top-left-radius:24px;background:#1a73e8;box-shadow:none;color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 18px 0 12px!important;height:38px;min-width:90px;border:0;border-top-right-radius:24px;border-bottom-right-radius:24px;background:#1a73e8;box-shadow:none;color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#1b66c9;}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{background:#8ab4f8;box-shadow:0 1px 3px 1px rgba(0, 0, 0, 0.15),0 1px 2px rgba(0, 0, 0, 0.3);color:#202124}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#93baf9}}`,
               resultListProp: { qs: `div.cLjAic.K7khPe[data-hveid^="C"][data-hveid$="AA"],div.g[data-hveid^="C"][data-hveid$="AA"],div.g div[data-hveid^="C"][data-hveid$="AA"]`, delay: 10 },
               keywords: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
               antiRedirectFn: function () {
@@ -1673,7 +1657,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               },
               antiAdsFn: function () {
                 deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "so360_ad", immed: true })({
-                  selectors: `#so_bd-ad,#e_idea_pp,#righttop_box,[id^='mohe-360pic_ext--'],.res-mediav,.map_business_con,.lianmeng-ad,.res-mediav-right,.atom-adv,.e-buss,.spread,ul[data-so-biz-monitor-so-display],.related_query li.cm,[class='inline-recommend'][data-url],div#so_top,div#so-activity-entry,div.mh-relate-text,.section li[data-id^="related_query_init_"]`,
+                  selectors: `#so_bd-ad,#e_idea_pp,#righttop_box,[id^='mohe-360pic_ext--'],.res-mediav,.map_business_con,.lianmeng-ad,.res-mediav-right,.atom-adv,.e-buss,.spread,ul[data-so-biz-monitor-so-display],.related_query li.cm,[class='inline-recommend'][data-url],div#so_top,div#so-activity-entry,div.mh-relate-text,.section li[data-id^="related_query_init_"],#mohe-know_side_nlp`,
                   siteName: "So360",
                   isRemoveNodes: true,
                 });
@@ -1734,11 +1718,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               antiRedirectFn: function () {
                 ["adBlockNoticeDismissed", "personalCounterTooltipSearch"].forEach(item => localStorages?.setItem(item, 1));
                 deBounce({
-                  fn: option => {
-                    if (global.gbCookies.getItem("ECFG")?.includes(":nt=1:")) return;
-                    global.gbCookies.setItem(option);
-                    refresh();
-                  },
+                  fn: option => !/:nt=1:/.test(global.gbCookies.getItem("ECFG")) && global.gbCookies.setItem(option) && refresh(),
                   timer: "ecosia_cookie",
                   immed: true,
                   once: true,
@@ -1828,18 +1808,13 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               keywords: `.result b`,
               antiRedirectFn: function () {
                 deBounce({
-                  fn: option => {
-                    const cookies = global.gbCookies.getItem("preferences");
-                    if (cookies?.includes("disable_open_in_new_windowEEE0") && cookies?.includes("enable_post_methodEEE0")) return;
-                    global.gbCookies.setItem(option);
-                    refresh();
-                  },
+                  fn: option => !/disable_open_in_new_windowEEE0|enable_post_methodEEE0/.test(global.gbCookies.getItem("preferences")) && global.gbCookies.setItem(option) && refresh(),
                   timer: "startpage_cookie",
                   immed: true,
                   once: true,
                 })({
                   sKey: "preferences",
-                  sValue: `connect_to_serverEEE0N1Ndate_timeEEEworldN1Ndisable_family_filterEEE1N1Ndisable_open_in_new_windowEEE0N1Nenable_post_methodEEE0N1Nenable_proxy_safety_suggestEEE1N1Nenable_stay_controlEEE0N1Ninstant_answersEEE1N1Nlang_homepageEEEs/device/enN1NlanguageEEEenglishN1Nlanguage_uiEEEenglishN1Nnum_of_resultsEEE10N1Nsearch_results_regionEEEallN1NsuggestionsEEE1N1Nwt_unitEEEcelsius`,
+                  sValue: `date_timeEEEworldN1Ndisable_family_filterEEE0N1Ndisable_open_in_new_windowEEE0N1Nenable_post_methodEEE0N1Nenable_proxy_safety_suggestEEE1N1Nenable_stay_controlEEE0N1Ninstant_answersEEE1N1Nlang_homepageEEEs/device/enN1NlanguageEEEenglishN1Nlanguage_uiEEEenglishN1Nnum_of_resultsEEE20N1Nsearch_results_regionEEEallN1NsuggestionsEEE1N1Nwt_unitEEEcelsius`,
                   sEnd: Infinity,
                   sDomain: ".startpage.com",
                   sPath: "/",
@@ -1869,11 +1844,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               antiRedirectFn: function () {
                 localStorages?.setItem("app.aiPromoDismissCount", 10);
                 deBounce({
-                  fn: option => {
-                    if (global.gbCookies.getItem("olnt") === "1") return;
-                    global.gbCookies.setItem(option);
-                    refresh();
-                  },
+                  fn: option => global.gbCookies.getItem("olnt") !== "1" && global.gbCookies.setItem(option) && refresh(),
                   timer: "brave_cookie",
                   immed: true,
                   once: true,
@@ -1916,7 +1887,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: { split: "/", index: 2 },
               mainSelector: "form>.searchbar>button.erase",
-              buttonCssText: `#header .form-search{max-width:35em}#${def.const.rndButtonID}{position:absolute;top:0;z-index:112;display:block;margin:0;padding:0;height:48px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:2.5em}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:48px}#${def.const.leftButton} input{box-sizing:content-box;margin:0;padding:0 2px 0 4px!important;height:48px;min-width:95px;border-width:0;border-bottom-left-radius:24px;border-top-left-radius:24px;background:var(--button-primary-bg);color:var(--button-primary-color);vertical-align:top;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{box-sizing:content-box;margin:0;padding:0 4px 0 2px!important;height:48px;min-width:95px;border-width:0;border-top-right-radius:24px;border-bottom-right-radius:24px;background:var(--button-primary-bg);color:var(--button-primary-color);vertical-align:top;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--button-primary-bg-hover);color:var(--button-primary-color)}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #eee;background:none;color:#eee;height:46px}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--button-primary-bg-hover);color:var(--button-primary-color)}}`,
+              buttonCssText: `#header .form-search{max-width:35em}#${def.const.rndButtonID}{position:absolute;top:0;z-index:112;display:block;margin:0;padding:0;height:48px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:2.5em}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:48px}#${def.const.leftButton} input{box-sizing:content-box;margin:0;padding:0 2px 0 4px!important;height:48px;min-width:95px;border-width:0;border-bottom-left-radius:24px;border-top-left-radius:24px;background:var(--button-background);color:var(--button-text-color);vertical-align:top;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{box-sizing:content-box;margin:0;padding:0 4px 0 2px!important;height:48px;min-width:95px;border-width:0;border-top-right-radius:24px;border-bottom-right-radius:24px;background:var(--button-background);color:var(--button-text-color);vertical-align:top;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--button-focus-background);color:var(--button-text-color)}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #eee;background:none;color:#eee;height:46px}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--button-focus-background);color:var(--button-text-color)}}`,
               resultListProp: { qs: `.web-results>article.item`, delay: 10 },
               keywords: `.web-results b`,
               antiRedirectFn: function () {
@@ -2031,7 +2002,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               `.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.configuration} input[disabled],.${def.notice.configuration} select[disabled]{color:#bbb;background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:20px 20px!important;background-color:#fff7f7!important}.${def.notice.noticeX} .${def.notice.configuration}{background:linear-gradient(to right,#fcfcfc,#f2f2f7);background:-webkit-gradient(linear,0 0,0 100%,from(#fcfcfc),to(#f2f2f7));box-shadow:0 0 5px #888}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.close}{float:right;margin-right:7px;color:#000000;text-shadow:0 1px 0 #aaa;font-weight:700;font-size:18px!important;line-height:1;opacity:1}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.close}:hover{color:#555;opacity:.5;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#e7e7e7;color:#333;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-body{padding:10px;color:#333333}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.noticeX}-heading-title{display:inline-block;vertical-align:middle;overflow:hidden;max-width:90%;text-overflow:ellipsis;white-space:nowrap}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#64ce83}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#3da95c}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#3ea2ff}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#067cea;}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#ff7f48}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#f44e06}` +
               `.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#fd5f4e}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#ba2c1d}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#efefef}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#ccc}@keyframes ${def.notice.noticeX}-progress{0%{width:100%}to{width:0}}@keyframes ${def.notice.noticeX}-fadeOut{0%{opacity:1}to{opacity:0}}.${def.notice.noticeX}-fadeOut{animation-name:${def.notice.noticeX}-fadeOut}.${def.notice.noticeX}{position:fixed;z-index:2147483645}.${def.notice.noticeX} ::-webkit-scrollbar{width:8px}.${def.notice.noticeX} ::-webkit-scrollbar-button{width:8px;height:8px}.${def.notice.noticeX} ::-webkit-scrollbar-track{border-radius:3px}.${def.notice.noticeX} ::-webkit-scrollbar-thumb{background:#e1e1e1;border-radius:3px}.${def.notice.noticeX} ::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.rName}{padding:2px!important}.${def.notice.noticeX} .${def.notice.rName} dl{margin:0!important;padding:1px!important}.${def.notice.noticeX} .${def.notice.rName} dl dt{margin:2px 0 6px!important;font-weight:900!important;font-size:16px!important}.${def.notice.noticeX} .${def.notice.rName} dl dd{margin:2px 2px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${def.notice.noticeX} .${def.notice.rName} .${def.notice.center}{width:100%;text-align:center!important}.${def.notice.noticeX} .${def.notice.rName} dl dd em{padding:0 5px;color:#fff;font-style:italic;font-size:24px!important;font-family:Candara,sans-serif!important}.${def.notice.noticeX} .${def.notice.rName} dl dd span{margin-right:8px;font-weight:700;font-size:15px!important}.${def.notice.noticeX} .${def.notice.rName} dl dd i{font-size:20px!important;font-family:Candara,sans-serif!important}.${def.notice.noticeX} .${def.notice.rName} dl dd .im{padding:0 3px;color:gold;font-weight:900;font-size:16px!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} ul{display:inline-block;margin:0 0 0 8px;padding:4px 4px 8px;width:95%;color:rgba(255, 255, 255, 0.8);counter-reset:xxx 0;vertical-align:top;text-align:left}` +
               `.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} li{position:relative;margin:0 0 0 2px;padding:0 0 2px 2px;list-style:none;font-style:italic!important;line-height:150%;-webkit-transition:.12s;transition:.12s}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} li::before{display:inline-block;margin-left:-1.5em;width:1.5em;content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-size:14px;font-family:Candara,sans-serif;-webkit-transition:.5s;transition:.5s}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} #${def.notice.stopUpdate}{float:right;margin:0 5px!important;font-size:12px!important;cursor:help}.${def.const.loading}{position:relative;}.${def.const.loading}::after{content:" \u21ba";animation:fade 1.25s infinite;}@keyframes fade{0%{opacity:0.1}50%{opacity:0.5}to{opacity:0}}.${def.notice.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important;color:#999}#${def.notice.stopUpdate} input[type='checkbox']{box-sizing:content-box;margin:2px 4px 0 0;width:14px;height:14px;border:2px solid #fff;border-radius:50%;background:#ffa077;vertical-align:top;cursor:help;-webkit-appearance:none}#${def.notice.stopUpdate}:hover input,#${def.notice.stopUpdate} input:hover{background:#ba2c1d;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}{display:none!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label{position:relative;display:inline-block;-webkit-box-sizing:content-box;box-sizing:content-box;margin:0 0 0 25px;padding:11px 9px;width:58px;height:10px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245, 146, 146, 0.4);word-wrap:normal!important;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;-webkit-border-radius:7px;border-radius:7px;background:#fff;box-shadow:0 0 1px rgba(0, 0, 0, 0.6);color:#fff;content:" "}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label::after{position:absolute;top:2px;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;padding:5px;-webkit-border-radius:100px;border-radius:100px;color:#fff;content:"OFF";font-weight:700;font-size:14px}` +
-              `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label{-webkit-box-sizing:content-box;box-sizing:content-box;margin:0 0 0 25px;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146, 196, 245, 0.4);cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label::after{top:2px;left:10px;content:"ON"}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}.${def.notice.noticeX} .${def.notice.configuration} button.${def.notice.searchButton}{display:flex;margin:0 0 10px;padding:6px 0;width:162px;height:25px;border:2px solid #eee;border-radius:6px;background:#fff;box-shadow:1px 1px 0 1px #aaa;font-size:14px!important;cursor:pointer;align-content:center;justify-content:center;align-items:center}.${def.notice.noticeX} .${def.notice.configuration} button.${def.notice.searchButton}:hover{box-shadow:1px 1px 3px 0 #888;color:#ff0000}.${def.notice.noticeX} .${def.notice.configuration} span.${def.notice.favicon}{margin:0 6px 0 0;width:24px;height:24px}.${def.notice.noticeX} .${def.notice.configuration} ul.${def.notice.searchList}{margin:5px;padding:2px;list-style:none}.${def.notice.noticeX} .${def.notice.configuration} ul.${def.notice.searchList} li{margin:0;list-style:none;font-style:normal}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.fieldset}{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;border:2px dashed #dfdfdf;border-radius:10px;background:transparent!important;text-align:left}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.legend}{display:block;margin:0;padding:0 8px;width:auto;color:#8b0000!important;font-weight:900!important;font-size:14px!important;-webkit-user-select:all;user-select:all}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList}{margin:0;padding:0;background:transparent!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li{float:none;display:flex;margin:3px 0;padding:2px 8px 2px 12px;height:36px;border:none;background:transparent!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none;align-content:center;justify-content:space-between}` +
+              `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label{-webkit-box-sizing:content-box;box-sizing:content-box;margin:0 0 0 25px;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146, 196, 245, 0.4);cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label::after{top:2px;left:10px;content:"ON"}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}.${def.notice.noticeX} .${def.notice.configuration} button.${def.notice.searchButton}{display:flex;margin:0 0 10px;padding:6px 0;width:162px;height:25px;border:2px solid #eee;border-radius:6px;background:#fff;box-shadow:1px 1px 0 1px #aaa;font-size:14px!important;cursor:pointer;align-content:center;justify-content:center;align-items:center}.${def.notice.noticeX} .${def.notice.configuration} button.${def.notice.searchButton}:hover{box-shadow:1px 1px 3px 0 #888;color:#ff0000}.${def.notice.noticeX} .${def.notice.configuration} span.${def.notice.favicon}{margin:0 6px 0 0;width:32px;height:32px}.${def.notice.noticeX} .${def.notice.configuration} ul.${def.notice.searchList}{margin:5px;padding:2px;list-style:none}.${def.notice.noticeX} .${def.notice.configuration} ul.${def.notice.searchList} li{margin:0;list-style:none;font-style:normal}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.fieldset}{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;border:2px dashed #dfdfdf;border-radius:10px;background:transparent!important;text-align:left}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.legend}{display:block;margin:0;padding:0 8px;width:auto;color:#8b0000!important;font-weight:900!important;font-size:14px!important;-webkit-user-select:all;user-select:all}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList}{margin:0;padding:0;background:transparent!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li{float:none;display:flex;margin:3px 0;padding:2px 8px 2px 12px;height:36px;border:none;background:transparent!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none;align-content:center;justify-content:space-between}` +
               `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li>div{font:normal 700 14px/150% 'Microsoft YaHei UI',Helvetica Neue,sans-serif!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button{box-sizing:border-box;margin:0 0 0 8px;padding:4px 8px;height:36px;min-width:65px;border:1px solid #ccc;border-radius:8px;background:#fafafa;box-shadow:1px 1px 1px 0 #ccc;color:#5e5e5e;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info{font-weight:400!important;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info em{color:#dc143c!important;font-style:normal;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_textarea{padding: 6px 0;margin:0}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter{display:block;margin:0;height:100%}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar{width:8px;height:8px}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb{border-radius:4px;background:#cfcfcf}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.random}_filter_textarea textarea::placeholder{color:#555;font:normal 500 16px/150% ui-monospace,monospace,system-ui,-apple-system,BlinkMacSystemFont!important;opacity:0.85;white-space:break-spaces}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{box-sizing:border-box;margin:0!important;padding:5px!important;max-height:423px;width:100%;min-height:280px;outline:0!important;border:1px solid #bbb;border-radius:6px;white-space:pre;font:normal 400 14px/150% ui-monospace,monospace,sans-serif!important;resize:vertical;overscroll-behavior:contain;word-break:keep-all!important;cursor:auto}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content::placeholder{font:normal 400 14px/150% ui-monospace,monospace!important}.${def.notice.noticeX} .${def.notice.configuration} #${def.notice.random}_customColor{margin:0;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button:hover{background:#fff;cursor:pointer}` +
               `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}__content{display:block;margin:0;height:268px}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{overflow-x:hidden;overflow-y:auto;box-sizing:border-box;margin:4px 0 3px;padding:8px;width:266px;max-height:237px;overscroll-behavior:contain}.${def.notice.card} h2{margin:0;padding:0;border:0;vertical-align:baseline;font:inherit;font-size:100%;line-height:135%;}#${def.notice.random}_help{position:relative;margin:0;padding:4px 15px!important;border:1px solid transparent;background:#f07f6a;box-shadow:0 0 6px 0 #f5846f;color:#fff;cursor:help}#${def.notice.random}_help:hover{background:#ed6248;box-shadow:0 0 6px 0 #f34525;}#${def.notice.random}_clear{margin:0 0 0 10px;color:#666;font-weight:500;cursor:pointer}#${def.notice.random}_clear:hover{color:#ff0000}#${def.notice.random}_clear u{padding:0 2px;text-decoration:none}.${def.notice.linkerror},.${def.notice.linkerror}:hover,.${def.notice.linkerror} *,.${def.notice.linkerror} *:hover{color:#a9a9a9!important;text-decoration-line:line-through!important;text-decoration-color:#ff0000!important;text-decoration-style:wavy!important}@-moz-document url-prefix() {.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before,.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{scrollbar-color:#bbbb #eee1;scrollbar-width:thin}}.${def.notice.card}{margin:0;padding:0;--background:#fff;--background-chackbox:#0082ff;--background-image:#fff,rgba(0, 107, 175, 0.2);--text-color:#666;--text-headline:#000;--card-shadow:#0082ff;--card-height:48px;--card-witght:240px;--card-radius:12px;--header-height:47px;--blend-mode:overlay;--transition:0.15s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.${def.notice.card}__input{position:absolute;display:none;margin:0;padding:0;outline:none;border:none;background:none;-webkit-appearance:none}.${def.notice.card}__input:checked ~ .${def.notice.card}__body{--shadow:0 0 0 3px var(--card-shadow);}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox{--chack-bg:var(--background-chackbox);--chack-border:#fff;--chack-scale:1;--chack-opacity:1;}` +
               `.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox--svg{--stroke-color:#fff;--stroke-dashoffset:0;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover:after{--opacity-bg:0;}.${def.notice.random}_iconText{color:#333}.${def.notice.random}_iconText:hover{color:#dc143c}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body{cursor:not-allowed;opacity:0.5;}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body:active{--scale:1;}.${def.notice.card}__body{position:relative;display:grid;overflow:hidden;width:var(--card-witght);height:var(--card-height);border-radius:var(--card-radius);background:var(--background);box-shadow:var(--shadow,1px 1px 3px 1px #ccc);cursor:pointer;-webkit-transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:transform var(--transition),box-shadow var(--transition);transition:transform var(--transition),box-shadow var(--transition),-webkit-transform var(--transition);-webkit-transform:scale(var(--scale,1)) translateZ(0);transform:scale(var(--scale,1)) translateZ(0);grid-auto-rows:calc(var(--card-height) - var(--header-height)) auto}.${def.notice.card}__body:active{--scale:0.96;}.${def.notice.card}__body-cover-image{position:absolute;top:8px;left:10px;z-index:100;width:32px;height:32px}.${def.notice.card}__body-cover-image span.${def.notice.favicons}{display:block;width:32px;height:32px}.${def.notice.card}__body-cover-chackbox{position:absolute;top:10px;right:10px;z-index:1;width:28px;height:28px;border:2px solid var(--chack-border,#fff);border-radius:50%;background:var(--chack-bg,var(--background-chackbox));opacity:var(--chack-opacity,0);transition:transform var(--transition),opacity calc(var(--transition)*1.2) linear,-webkit-transform var(--transition) ease;-webkit-transform:scale(var(--chack-scale,0));transform:scale(var(--chack-scale,0))}.${def.notice.card}__body-cover-chackbox--svg{display:inline-block;visibility:visible!important;margin:8px 0 0 7px;width:13px;height:11px;vertical-align:top;-webkit-transition:stroke-dashoffset .4s ease var(--transition);transition:stroke-dashoffset .4s ease var(--transition);fill:none;stroke:var(--stroke-color,#fff);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16px;stroke-dashoffset:var(--stroke-dashoffset,16px)}` +
@@ -2241,7 +2212,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 let returnHtml = "";
                 for (let site in listSite) {
                   if (hasOwnProperty(listSite, site) && listSite[site].siteTypeID !== 0 && listSite[site].siteTypeID !== currentSite.siteTypeID) {
-                    const iconStyle = `background-position:0 ${(1 - listSite[site].siteTypeID) * 24}px;background-attachment:local;background-size:cover;`;
+                    const iconStyle = `background-position:0 ${(1 - listSite[site].siteTypeID) * 32}px;background-attachment:local;background-size:32px auto;transform:scale(0.75);`;
                     const buttonTitle = selectedEngine.includes(listSite[site].siteTypeID) ? `title="${IS_CHN ? "您常用的搜索引擎" : "Commonly used search engine"}"` : ``;
                     returnHtml += String(
                       `<li>
@@ -2250,8 +2221,8 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                           <span class="${def.notice.random}_iconText">
                             ${listSite[site].siteNickName}<sup>${selectedEngine.includes(listSite[site].siteTypeID) ? "\u2726" : "\u0020"}</sup>
                           </span>
-                      </button>
-                    </li>`
+                        </button>
+                      </li>`
                     );
                   }
                 }
@@ -2465,7 +2436,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 const filterString = qS(`.${def.notice.random}_filter_textarea .${def.notice.random}_filter_content`).value.trim();
                 const filterTrigger = qS(`#${def.notice.rf}`).checked;
                 const parsedFilterString = filterString ? JSON.parse(filterString) : [];
-                if (!Array.isArray(parsedFilterString) || parsedFilterString.some(item => typeof item !== "string")) throw new Error("Format Error");
+                if (!Array.isArray(parsedFilterString) || parsedFilterString.Some(item => typeof item !== "string")) throw new Error("Format Error");
                 const resultFilterData = { filter: uniq(parsedFilterString), trigger: filterTrigger };
                 GMsetValue(RESULTFILTER, encrypt(JSON.stringify(resultFilterData)));
                 const successTitle = IS_CHN ? "保存成功！" : "Success!";
@@ -2478,7 +2449,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               }
             }
 
-            function addInputEventOnTextarea(event) {
+            async function addInputEventOnTextarea(event) {
               const _this = this ?? event.target;
               try {
                 if (def.var.composing) return;
@@ -2490,10 +2461,9 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 const currentScrollTop = _this.scrollTop;
                 _this.value = formattedValue;
                 _this.setAttribute("style", "border: 1px solid #999");
-                sleep(0).then(() => {
-                  _this.scrollTop = currentScrollTop;
-                  _this.setSelectionRange(newCursorPosition, newCursorPosition);
-                });
+                await sleep(10, { instant: true });
+                _this.scrollTop = currentScrollTop;
+                _this.setSelectionRange(newCursorPosition, newCursorPosition);
               } catch (e) {
                 _this.setAttribute("style", "border: 2px solid #dc143c");
               }
@@ -2629,12 +2599,9 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 });
 
               function handleClickEvent(name, time, event) {
-                event.preventDefault();
-                event.stopImmediatePropagation();
-                if (Date.now() - def.count.clickTimer > time) {
-                  def.count.clickTimer = Date.now();
-                  addAction[name]();
-                }
+                stopEventPropagation(event);
+                const currentTime = performance.now();
+                currentTime - def.count.clickTimer > time && (def.count.clickTimer = currentTime) && addAction[name]();
               }
             }
 
@@ -2676,7 +2643,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                   "font-size:12px;font-weight:700;color:#4682b4",
                   IS_CHN ? "因安全策略被阻止：" : "SecurityPolicy:\u0020",
                   `color:${def.var.securityPolicy ? "#006400" : "#0000ff"};${fontStyle}`,
-                  def.var.securityPolicy
+                  Boolean(def.var.securityPolicy)
                 );
               }
             }
@@ -2865,7 +2832,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                     insertAfter(buttonSection, target);
                     if (currentSite.imageType.includes(def.var.searchType)) {
                       const sectionRect = qS("#sbx")?.getBoundingClientRect() ?? { width: 656, left: 2e2 };
-                      buttonSection.style.cssText = `position:absolute;left:${6 + sectionRect.width + sectionRect.left}px`;
+                      buttonSection.style.cssText = `position:absolute;left:${6 + sectionRect.width + sectionRect.left}px;top:14px;`;
                     } else {
                       const sectionWidth = buttonSection.getBoundingClientRect().width ?? 224;
                       buttonSection.style.cssText = `position:absolute;top:0;right:-${10 + sectionWidth}px`;
@@ -3045,7 +3012,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               elements.forEach(item => processNode(item, returnContent));
               if (returnContent.size === 0) return;
               returnContent.forEach((content, item) => matchFilters(item, content));
-              await sleep(1e2);
+              await sleep(1e2, { instant: true });
               if (usedFilterWords.size > 0 && qA(querystring.split(/,(?![^()]*\))/g)[0]).length >= 2) {
                 const remainingResults = qA(selectors.split(/,(?![^()]*\))/g)[0]).length;
                 handleRemainingResults(remainingResults);
@@ -3271,7 +3238,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
         }
       },
     };
-    return { defineMethod, arrayMethods };
+    return { defineMethod, arrayMethods, object: Object.create(null) };
   })(Array.prototype),
   (() => ({
     oT: any => Object.prototype.toString.call(any),
