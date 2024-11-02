@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            помощник поисковых систем
 // @name:ja            優雅な検索エンジン助手
-// @version            2024.11.02.1
+// @version            2024.11.02.2
 // @author             F9y4ng
 // @description        “Elegant Search Engine Assistant” facilite la navigation entre moteurs de recherche, personnalise les préférences, met en évidence les mots-clés, élimine les redirections et publicités, et filtre les résultats. Compatible avec divers moteurs tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, etc.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG and more.
@@ -262,10 +262,11 @@
 // @grant              GM_unregisterMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
+// @note               {"CN":"修正 TM GM_xhr 加载序列化修复时引发的错误。","EN":"Fixed error thrown by TM GM_xhr when loading serialization fixes."}
 // @note               {"CN":"修正站点图标在非整比缩放时的样式错误。","EN":"Fixed icons scaling non-integral style error."}
 // @note               {"CN":"修正 Google 中文'下一页'的样式错误。","EN":"Fixed Google Chinese 'next page' style error."}
 // @note               {"CN":"修正 search.Yahoo 跳转按钮的样式问题。","EN":"Fixed style issue of search.Yahoo jump button."}
-// @note               {"CN":"修正 VM uad.getHighEntropyValues 造成的加载延迟。","EN":"Fixed load-delay caused by Violentmonkey uad.getHighEntropyValues."}
+// @note               {"CN":"修正 VM getHighEntropyValues 造成的加载延迟。","EN":"Fixed load-delay caused by Violentmonkey uad.getHighEntropyValues."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         edge 兼容Tampermonkey, Violentmonkey
 // @compatible         Chrome 兼容Tampermonkey, Violentmonkey
@@ -1284,10 +1285,10 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               getRealUrl(url, node, siteName, {
                 onreadystatechangeFunc: (resolve, reject) => response => {
                   if (response.readyState !== 4) return;
-                  if (response.status === 200) {
+                  if (response.status === 200 || response.status === 301) {
                     let resUrl = response.finalUrl || response.responseURL || url;
                     if (resUrl === url) {
-                      const responseHeader = response.responseHeaders?.match(/Location:\s*([\S]+)/);
+                      const responseHeader = response.responseHeaders?.match(/Location:\s*([\S]+)/i);
                       if (responseHeader) resUrl = responseHeader[1];
                       else reject(new Error("URLNotExistError"));
                     }
