@@ -900,7 +900,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         renderCanvas: !IS_GREASEMONKEY,
         shadowColor: IS_REAL_GECKO ? "#7C7C7C70" : "#7C7C7CDD",
         fontCSS: `:not(i,head *):not([class*='glyph']):not([class*='symbols' i]):not([class*='icon' i]):not([class*='fa-']):not([class*='vjs-'])`,
-        fontEx: `kbd,i,.textLayer *,pre,pre *,code,code *`,
+        fontEx: `samp,kbd,.textLayer *,pre,pre *,code,code *`,
       };
 
       /* INITIALIZE_CONFIGURE_AND_OTHERS */
