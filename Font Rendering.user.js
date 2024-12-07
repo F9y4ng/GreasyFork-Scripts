@@ -5,7 +5,7 @@
 // @name:en            Font Rendering (Customized)
 // @name:ko            글꼴 렌더링(자체 스크립트)
 // @name:ja            フォントレンダリング
-// @version            2024.12.07.1
+// @version            2024.12.08.2
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -157,7 +157,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         flagName: "fr-found-conflict-callback",
       },
       var: {
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.12.07.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.12.08.0",
         scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
         scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("Rjl5NG5n"),
         getScreenCTM: SVGGraphicsElement.prototype.getScreenCTM,
@@ -828,12 +828,14 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
       const UPDATE_VERSION_NOTICE = IS_CHN
-        ? `<li class="${def.const.seed}_fix">改进混合设置中英文字体后全局字体热替换的规则。</li>
+        ? `<li class="${def.const.seed}_fix">修复未开启字体缩放时无法保存数据的错误。</li>
+            <li class="${def.const.seed}_fix">改进混合设置中英文字体后全局字体热替换的规则。</li>
             <li class="${def.const.seed}_fix">改进常规字体及等宽字体渲染样式的默认规则。</li>
             <li class="${def.const.seed}_fix">改进粗体修正回调函数冲突检测功能的性能。</li>
             <li class="${def.const.seed}_fix">修复在部分站点设置界面滚动条样式未生效的问题。</li>
             <li class="${def.const.seed}_fix">修复一些已知的问题，优化代码，优化样式。</li>`
-        : `<li class="${def.const.seed}_fix">Improved the rule for global font hotshift after setting mixed English and Chinese(or Non-Latin) fonts.</li>
+        : `<li class="${def.const.seed}_fix">Fixed unable to save data when font scaling is OFF.</li>
+            <li class="${def.const.seed}_fix">Improved the rule for global font hotshift after setting mixed English and Chinese(or Non-Latin) fonts.</li>
             <li class="${def.const.seed}_fix">Improved the default rules of font rendering style.</li>
             <li class="${def.const.seed}_fix">Improved the bold-fix conflict detection performance.</li>
             <li class="${def.const.seed}_fix">Fixed invalid scrollbar style of font settings interface.</li>
@@ -3507,7 +3509,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               const fontlists = fontSetFn?.fsearchList(def.id.fontName) ?? [];
               const fontselect = fontlists.length > 0 ? addSingleQuoteForItem(fontlists) : CONST_VALUES.fontSelect;
               const [fontface, smooth] = [ffaceT.checked, smoothT.checked];
-              const fscaleValue = /^[0-1](\.[0-9]{1,3})?$/.test(fontScaleT.value) ? Number(fontScaleT.value) : fontScaleT.value === "OFF" ? 1 : CONST_VALUES.fontSize;
+              const fscaleValue = isFontsize && /^[0-1](\.[0-9]{1,3})?$/.test(fontScaleT.value) ? Number(fontScaleT.value) : INITIAL_VALUES.fontSize;
               const fscale = getFontScaleValue(!isEditorBlock && isFontsize, parseFloat(fscaleValue));
               const fixfviewport = isFixViewport && fscale !== 1 && fixViewportT.checked;
               const fstroke = /^[0-1](\.[0-9]{1,3})?$/.test(strokeT.value) ? Number(strokeT.value) : strokeT.value === "OFF" ? 0 : INITIAL_VALUES.fontStroke;
