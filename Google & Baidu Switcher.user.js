@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            помощник поисковых систем
 // @name:ja            優雅な検索エンジン助手
-// @version            2024.12.07.1
+// @version            2025.01.01.1
 // @author             F9y4ng
 // @description        “Elegant Search Engine Assistant” facilite la navigation entre moteurs de recherche, personnalise les préférences, met en évidence les mots-clés, élimine les redirections et publicités, et filtre les résultats. Compatible avec divers moteurs tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, etc.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG and more.
@@ -262,8 +262,9 @@
 // @grant              GM_unregisterMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
+// @note               {"CN":"✨ 恭祝大家新年快乐，身体健康、平安如意。🎉","EN":"✨ Wishing you a happy New Year, good health, peace and all the best. 🎉 Blessings via F9y4ng."}
+// @note               {"CN":"年度更新脚本版权日期信息，已服务 10 年啦！","EN":"Updated script copyright date to the 10th year."}
 // @note               {"CN":"优化 cn.Bing 搜索结果广告的移除规则。","EN":"Optimized cn.Bing search results ads removal."}
-// @note               {"CN":"优化 startpage.com 的搜索框样式。","EN":"Optimized the search box style of startpage."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         edge 兼容Tampermonkey, Violentmonkey
 // @compatible         Chrome 兼容Tampermonkey, Violentmonkey
@@ -272,7 +273,7 @@
 // @compatible         Safari 兼容Tampermonkey, Userscripts
 // @license            GPL-3.0-only
 // @create             2015-10-07
-// @copyright          2015-2024, F9y4ng
+// @copyright          2015-2025, F9y4ng
 // @run-at             document-start
 // ==/UserScript==
 
@@ -375,7 +376,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       var: {
         disappear: `ͽ${generateRandomString(10, "date")}ͼ`,
         translucent: `ͼ${generateRandomString(10, "date")}ͽ`,
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2024.12.07.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.01.01.0",
         scriptName: getMetaValue(`name:${getLocalLanguages()}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       },
       url: {
@@ -1316,9 +1317,10 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
 
         const siteAdblockHandlers = {
           Bing: (siteName, clean) => {
-            if (!CUR_HOST_NAME.startsWith("cn") || qA("#b_results>li.b_algo>div.b_caption>p.b_lineclamp2>span.algoSlug_icon").length < 1) return;
-            qA("#b_results>li.b_algo").forEach(node => {
-              if (qS("div.b_caption>p.b_lineclamp2>span.algoSlug_icon", node)) {
+            if (!CUR_HOST_NAME.startsWith("cn") || !qA(`:is(#b_results,#b_topw)>li:not(.${def.var.disappear})>div.b_caption>p[class*='b_lineclamp']`).length) return;
+            qA(`:is(#b_results,#b_topw)>li:not(.${def.var.disappear})`).forEach(node => {
+              const adv = qS("div.b_caption>p[class*='b_lineclamp']", node);
+              if (adv && (adv.className.includes("b_lineclamp2") || gCS(adv).getPropertyValue("-webkit-line-clamp") === "2")) {
                 COUNT(`[${siteName}-Anti-Ads-Deep-exp]`);
                 node.classList.add(def.var.disappear);
                 clean === true && safeRemoveNode(node);
@@ -1537,7 +1539,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 })();
               },
               antiAdsFn: function () {
-                deBounce({ fn: parseAntiAdvertising, delay: 50, timer: "bing_ad", immed: true })({
+                deBounce({ fn: parseAntiAdvertising, delay: 10, timer: "bing_ad", immed: true })({
                   selectors: `li.b_ans>div.wpt_bc_container,li.b_ans>#relatedSearchesLGWContainer,li.b_ans>.b_rs,li.b_ad,#b_pole,#b_content .b_underSearchbox,#b_header>div[id^="bnp."][data-vertical],#b_context li.b_ans .b_spa_adblock,.ad_sc,.b_adBottom,.b_adLastChild,.b_adPATitleBlock,.b_spa_adblock,.mapsTextAds,.pa_sb,.productAd,[id$="adsMvCarousel"],a[href*="/aclick?ld="],div.pagereco_anim,#inline_rs,#ev_talkbox_wrapper,#b_content>main[aria-label]>#b_ims_bza_pole,.shop_page .br-poleoffcarousel,#b_content>div#pole>div[class="ra_car_block ra_pole"]>div.ra_car_container,#pole>.productAd[data-ad-carousel],.b_adPATitleBlock+div,a.sb_meta[href^="http://advertise.bingads.microsoft.com"],.promotion-panel-inner,.ins_exp.vsp,li[class="b_algo"]:has(.b_attribution[data-partnertag] + p[class]),.b_ans:has([class^="xm_"][class*="_ansCont"])`,
                   siteName: "Bing",
                 });
@@ -2681,28 +2683,30 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                     input.style.maxWidth = `${inputLength - sectionWidth + 50}px`;
                     input.style.overflowY = "auto";
                   });
-                  if (formNode && textarea) {
-                    const inputs = qA(`#${def.const.rndButtonID} input`);
-                    const changeTextarea = e => !/b_logoArea|b_phead_chat_link/.test(e.target?.className) && inputs.forEach(input => input.classList.add(def.const.searchbox));
-                    const recoverTextarea = () => textarea.getAttribute("rows") < 2 && inputs.forEach(input => input.classList.remove(def.const.searchbox));
-                    textarea.getAttribute("rows") >= 2 && inputs.forEach(input => input.classList.add(def.const.searchbox));
-                    formNode.addEventListener("focus", changeTextarea, true);
-                    formNode.addEventListener("blur", recoverTextarea, true);
-                  }
                   if (formBox && getUrlParam("view") === "detailV2") {
                     formBox.style.cssText += "width:max-content!important;z-index:1000;position:relative;";
                     qA(`#${def.const.rndButtonID} input`).forEach(input => {
                       input.style.cssText += "height:34px!important;border-radius:6px!important;padding:0 12px!important;margin:0 0 0 2px!important;";
                     });
                   }
-                  new MutationObserver(() => {
-                    qA(`#b_header .b_searchbox[name="q"]`).forEach(input => {
-                      input.style.maxWidth = "";
-                      const inputLength = parseFloat(gCS(input).width) || 500;
-                      input.style.maxWidth = `${inputLength - sectionWidth + 30}px`;
-                      input.style.overflowY = "auto";
-                    });
-                  }).observe(formNode, { attributeFilter: ["aria-owns"] });
+                  if (!CUR_HOST_NAME.startsWith("cn")) {
+                    if (formNode && textarea) {
+                      const inputs = qA(`#${def.const.rndButtonID} input`);
+                      const changeTextarea = e => !/b_logoArea|b_phead_chat_link/.test(e.target?.className) && inputs.forEach(input => input.classList.add(def.const.searchbox));
+                      const recoverTextarea = () => textarea.getAttribute("rows") < 2 && inputs.forEach(input => input.classList.remove(def.const.searchbox));
+                      textarea.getAttribute("rows") >= 2 && inputs.forEach(input => input.classList.add(def.const.searchbox));
+                      formNode.addEventListener("focus", changeTextarea, true);
+                      formNode.addEventListener("blur", recoverTextarea, true);
+                    }
+                    new MutationObserver(() => {
+                      qA(`#b_header .b_searchbox[name="q"]`).forEach(input => {
+                        input.style.maxWidth = "";
+                        const inputLength = parseFloat(gCS(input).width) || 500;
+                        input.style.maxWidth = `${inputLength - sectionWidth + 30}px`;
+                        input.style.overflowY = "auto";
+                      });
+                    }).observe(formNode, { attributeFilter: ["aria-owns"] });
+                  }
                 },
               },
               google: {
