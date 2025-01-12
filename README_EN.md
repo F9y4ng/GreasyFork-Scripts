@@ -26,7 +26,11 @@
 * Back up your local data promptly and don't use backup files from unknown sources!
 
 ### version 2025.01.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
-
+```
+Due to February update to optimize data storage, data will be reconstructed.
+For your data security, please back up your local data in time!
+Thank you for your cooperation and support.
+```
 ```log
 # ✨ Wishing you a happy New Year, good health, peace and all the best. 🎉
 + Updated script copyright date to the 5th year.
