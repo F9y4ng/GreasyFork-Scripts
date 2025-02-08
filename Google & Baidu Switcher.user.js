@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            помощник поисковых систем
 // @name:ja            優雅な検索エンジン助手
-// @version            2025.01.01.1
+// @version            2025.02.08.1
 // @author             F9y4ng
 // @description        “Elegant Search Engine Assistant” facilite la navigation entre moteurs de recherche, personnalise les préférences, met en évidence les mots-clés, élimine les redirections et publicités, et filtre les résultats. Compatible avec divers moteurs tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, etc.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG and more.
@@ -259,12 +259,9 @@
 // @grant              GM.openInTab
 // @grant              GM_registerMenuCommand
 // @grant              GM.registerMenuCommand
-// @grant              GM_unregisterMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
-// @note               {"CN":"✨ 恭祝大家新年快乐，身体健康、平安如意。🎉","EN":"✨ Wishing you a happy New Year, good health, peace and all the best. 🎉 Blessings via F9y4ng."}
-// @note               {"CN":"年度更新脚本版权日期信息，已服务 10 年啦！","EN":"Updated script copyright date to the 10th year."}
-// @note               {"CN":"优化 cn.Bing 搜索结果广告的移除规则。","EN":"Optimized cn.Bing search results ads removal."}
+// @note               {"CN":"修正 Google 搜索跳转按钮样式问题。","EN":"Fixed Google Search Jump Button style issue."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         edge 兼容Tampermonkey, Violentmonkey
 // @compatible         Chrome 兼容Tampermonkey, Violentmonkey
@@ -296,8 +293,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
    * PROBLEMS OR NEW FEATURES, PLEASE FEEDBACK IN GITHUB ISSUES, THANK YOU!    *
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-  const { defineMethod, arrayMethods, object } = arrayProxy;
-  const utils = {
+  const toolkit = {
     info: GM?.info ?? GM_info,
     debugging: IS_OPEN_DEBUG,
     atob: atob.bind(ctx),
@@ -305,22 +301,10 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
     alert: alert.bind(ctx),
     prompt: prompt.bind(ctx),
     confirm: confirm.bind(ctx),
-    console: Object.assign(object, ctx.console),
+    console: Object.assign({}, ctx.console),
   };
-  const enhanceHistory = type => {
-    const original = ctx.history[type];
-    const event = new Event(type);
-    return function () {
-      const fn = original.apply(this, arguments);
-      event.arguments = arguments;
-      ctx.dispatchEvent(event);
-      return fn;
-    };
-  };
-  ctx.history.pushState = enhanceHistory("pushState");
-  ctx.history.replaceState = enhanceHistory("replaceState");
-  Object.entries(arrayMethods).forEach(method => void defineMethod(...method));
-  SearchEngineAssistant(ctx, utils, customFns);
+  if (!ctx.navigation) ["pushState", "replaceState"].forEach(m => void (ctx.history[m] = customFns.eH(m)));
+  SearchEngineAssistant(ctx, toolkit, { ...arrayProxy, ...customFns });
 })(
   typeof window !== "undefined" ? window : this,
   function (global, secureVars, customFuntions) {
@@ -329,7 +313,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
     /* PERFECTLY COMPATIBLE FOR GREASEMONKEY, TAMPERMONKEY, VIOLENTMONKEY, USERSCRIPTS 2024-03-15 F9Y4NG */
 
     const { atob, btoa, alert, prompt, confirm, console, debugging, info: GMinfo } = secureVars;
-    const { oT: getObjectType, aF: asArray, hP: hasOwnProperty, gS: localStorages } = customFuntions;
+    const { aF: asArray, oS: getObjectType, hP: hasOwnProperty, lS: localStorages, oC: object } = customFuntions;
     const GMversion = GMinfo.version ?? GMinfo.scriptHandlerVersion ?? "unknown";
     const GMscriptHandler = GMinfo.scriptHandler;
     const GMsetValue = gmSelector("setValue");
@@ -338,7 +322,6 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
     const GMlistValues = gmSelector("listValues");
     const GMopenInTab = gmSelector("openInTab");
     const GMregisterMenuCommand = gmSelector("registerMenuCommand");
-    const GMunregisterMenuCommand = gmSelector("unregisterMenuCommand");
     const GMxmlhttpRequest = gmSelector("xmlhttpRequest");
     const GMunsafeWindow = gmSelector("unsafeWindow");
     const GMcontentMode = gmSelector("contentMode");
@@ -376,7 +359,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       var: {
         disappear: `ͽ${generateRandomString(10, "date")}ͼ`,
         translucent: `ͼ${generateRandomString(10, "date")}ͽ`,
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.01.01.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.02.08.0",
         scriptName: getMetaValue(`name:${getLocalLanguages()}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       },
       url: {
@@ -490,7 +473,6 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
         listValues: typeof GM_listValues !== "undefined" ? GM_listValues : GM?.listValues ?? (() => []),
         openInTab: typeof GM_openInTab !== "undefined" ? GM_openInTab : GM?.openInTab ?? open.bind(global),
         registerMenuCommand: typeof GM_registerMenuCommand !== "undefined" ? GM_registerMenuCommand : GM?.registerMenuCommand,
-        unregisterMenuCommand: typeof GM_unregisterMenuCommand !== "undefined" ? GM_unregisterMenuCommand : GM?.unregisterMenuCommand,
         xmlhttpRequest: typeof GM_xmlhttpRequest !== "undefined" ? GM_xmlhttpRequest : GM?.xmlHttpRequest,
         unsafeWindow: typeof unsafeWindow !== "undefined" ? unsafeWindow : global,
         contentMode: GMinfo.injectInto === "content" || GMinfo.script["inject-into"] === "content" || ["dom", "js"].includes(GMinfo.sandboxMode),
@@ -540,7 +522,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
 
     function cE(nodeName, attributes) {
       const el = document.createElement(nodeName);
-      if (getObjectType(attributes) !== "[object Object]") return el;
+      if (getObjectType.call(attributes) !== "[object Object]") return el;
       for (const [key, value] of Object.entries(attributes)) {
         if (key === "class") Array.isArray(value) ? el.classList.add(...value) : el.classList.add(value);
         else if (["innerHTML", "textContent"].includes(key)) el[key] = value;
@@ -554,7 +536,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
     }
 
     function gCS(node, opt = null) {
-      if (node?.nodeType !== Node.ELEMENT_NODE) return new Proxy(Object.create(null), { get: () => NaN });
+      if (node?.nodeType !== Node.ELEMENT_NODE) return new Proxy(object(), { get: () => NaN });
       return global.getComputedStyle(node, opt);
     }
 
@@ -589,16 +571,15 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
     }
 
     function generateRandomString(length, type) {
-      if (type === "date") return new Date().setHours(20, 30, 40, 50).toString(20);
+      if (type === "date") return new Date().setHours(20, 30, 40, 50).toString(18);
       const characters = {
         mix: "mYsTBgpkwNcGzFJdOMrt8n2jUC3fWRlKVA5y16oLxIXQE7Z9buvqie4PahH0SD",
         char: "zkDcUGopOvHJLfIZdPqEeRmyCSNYwrgbsFQuBXxnVWiltjMhaATK",
         hex: "a62f8bc07bd15c9ad3efe4",
         digit: "3927154680",
       };
-      const [prefix, chars] = ["UKZJHQTRCSBFAYDMEVPXNWG", characters[type]];
-      const randomString = asArray({ length }, () => chars[random(chars.length, "floor")]).join("");
-      return type === "mix" ? prefix[random(prefix.length, "floor")] + randomString.slice(1) : randomString;
+      const randomString = asArray({ length }, () => characters[type][random(characters[type].length, "floor")]).join("");
+      return type === "mix" ? randomString.replace(/^\d/, characters.char[random(characters.char.length)]) : randomString;
     }
 
     function refresh() {
@@ -770,8 +751,8 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
     }
 
     function getLocalLanguages(lang = navigator.language) {
-      const languages = { "zh-CN": true, "zh-TW": true, en: true, ja: true, ru: true };
-      return languages[lang] ? lang : lang.startsWith("zh") ? "zh-CN" : "en";
+      const languages = new Set(["zh-CN", "zh-TW", "en", "ja", "ko"]);
+      return languages.has(lang) ? lang : lang.startsWith("zh") ? "zh-CN" : "en";
     }
 
     function setDebuggerMode() {
@@ -829,10 +810,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
 
       const cache = {
         value: (data, eT = 6048e5) => ({ data, expired: Date.now() + eT }),
-        set: (key, ...options) => {
-          const cacheValue = cache.value(...options);
-          GMsetValue(key, encrypt(JSON.stringify(cacheValue)));
-        },
+        set: (key, ...options) => void GMsetValue(key, encrypt(JSON.stringify(cache.value(...options)))),
         get: async key => {
           try {
             const encryptedValue = await GMgetValue(key);
@@ -1007,7 +985,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
 
       function getUrlParam(parameter) {
         try {
-          switch (getObjectType(parameter)) {
+          switch (getObjectType.call(parameter)) {
             case "[object Object]": {
               const { split, index } = parameter;
               const keyArray = global.location.pathname.split(split);
@@ -1051,7 +1029,6 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       }
 
       void (async function (getConfigureData, getResultFilterData, requestRemoteIcon, GMnotification) {
-        let parameter_Set, engine_List, filter_Set;
         let [_config_date_, _filter_Data_] = await Promise.all([getConfigureData(), getResultFilterData()]);
         let { isAutoUpdate, keywordHighlight, isHotkey, selectedEngine, localWindow, googleJump, antiLinkRedirect, antiAds, customColor } = _config_date_;
         const { trigger: antiResultsFilter, filter: resultFilters } = _filter_Data_;
@@ -1490,7 +1467,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               imageType: ["isch", "2"],
               splitTypeName: ["tbm", "udm"],
               mainSelector: "form button[type='submit']",
-              buttonCssText: `#pnnext>span:nth-child(2){clear:left}#${def.const.rndButtonID}{position:relative;z-index:100;display:flex;margin:0 4px 0 -5px;justify-content:center;align-items:center}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{padding:0 2px 0 8px}.${def.const.scrollspan}{min-height:26px}.${def.const.scrollspan2}{min-height:26px;margin-top:0!important}.${def.const.scrollbars}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}.${def.const.scrollbars2}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px!important;height:38px;min-width:90px;border:0;border-bottom-left-radius:24px;border-top-left-radius:24px;background:#1a73e8;box-shadow:none;color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 18px 0 12px!important;height:38px;min-width:90px;border:0;border-top-right-radius:24px;border-bottom-right-radius:24px;background:#1a73e8;box-shadow:none;color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#1b66c9;}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{background:#8ab4f8;box-shadow:0 1px 3px 1px rgba(0, 0, 0, 0.15),0 1px 2px rgba(0, 0, 0, 0.3);color:#202124}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#93baf9}}`,
+              buttonCssText: `#pnnext>span:nth-child(2){clear:left}#${def.const.rndButtonID}{position:relative;z-index:100;display:flex;margin:0 4px 0 -5px;justify-content:center;align-items:center}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{padding:0 2px 0 8px}.${def.const.scrollspan}{min-height:26px;margin-right:3px!important}.${def.const.scrollbars}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px!important;height:38px;min-width:90px;border:0;border-bottom-left-radius:24px;border-top-left-radius:24px;background:#1a73e8;box-shadow:none;color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 18px 0 12px!important;height:38px;min-width:90px;border:0;border-top-right-radius:24px;border-bottom-right-radius:24px;background:#1a73e8;box-shadow:none;color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#1b66c9;}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{background:#8ab4f8;box-shadow:0 1px 3px 1px rgba(0, 0, 0, 0.15),0 1px 2px rgba(0, 0, 0, 0.3);color:#202124}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#93baf9}}`,
               resultListProp: { qs: `div.g[data-hveid^="C"][data-hveid$="AA"],div.cLjAic.K7khPe[data-hveid^="C"][data-hveid$="AA"],div.g div[data-hveid^="C"][data-hveid$="AA"]`, delay: 10 },
               keywords: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
               antiRedirectFn: function () {
@@ -1517,7 +1494,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: `.b_searchboxForm>input[type="hidden"][name="form"]`,
-              buttonCssText: `.${def.const.searchbox}{border-radius:8px!important}a,#b_results>li[class] a:not(.wiki_seemore),#b_results .b_no a,#b_context .mediumCardTitle{color:#001ba0}#${def.const.rndButtonID}{position:relative;z-index:0;display:inline-flex;margin:0;padding:0 6px 0 0;width:auto;height:38px;min-width:180px;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.leftButton},#${def.const.rightButton}{margin:0;padding:0;width:auto}#${def.const.rndButtonID} input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:600;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px;border-bottom-left-radius:24px;border-top-left-radius:24px}#${def.const.rightButton} input{margin:0 0 0 2px;padding:0 18px 0 12px;border-top-right-radius:24px;border-bottom-right-radius:24px}.${def.const.scrollspan}{/*margin:-14px -3px 0 0!important;max-height:28px*/}.${def.const.scrollbars}{/*max-height:28px;font-size:14px!important*/}.${def.const.scrollspan2}{margin:0!important;padding:4px 4px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars2}{margin-right:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#fff;background-color:#f0f3f6;box-shadow:0 0 4px #174ae4;color:#174ae4;transition:border .1s linear,box-shadow .3s linear}.${def.notice.random}_input{width:300px!important}@media (prefers-color-scheme: dark){.b_dark #b_results>li[class] a{color:#7aabeb}#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#a2b7f4;color:#333}}`,
+              buttonCssText: `html{overflow-x:hidden}.${def.const.searchbox}{border-radius:8px!important}a,#b_results>li[class] a:not(.wiki_seemore),#b_results .b_no a,#b_context .mediumCardTitle{color:#001ba0}#${def.const.rndButtonID}{position:relative;z-index:0;display:inline-flex;margin:0;padding:0 6px 0 0;width:auto;height:38px;min-width:180px;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.leftButton},#${def.const.rightButton}{margin:0;padding:0;width:auto}#${def.const.rndButtonID} input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:600;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px;border-bottom-left-radius:24px;border-top-left-radius:24px}#${def.const.rightButton} input{margin:0 0 0 2px;padding:0 18px 0 12px;border-top-right-radius:24px;border-bottom-right-radius:24px}.${def.const.scrollspan}{/*margin:-14px -3px 0 0!important;max-height:28px*/}.${def.const.scrollbars}{/*max-height:28px;font-size:14px!important*/}.${def.const.scrollspan2}{margin:0!important;padding:4px 4px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars2}{margin-right:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#fff;background-color:#f0f3f6;box-shadow:0 0 4px #174ae4;color:#174ae4;transition:border .1s linear,box-shadow .3s linear}.${def.notice.random}_input{width:300px!important}@media (prefers-color-scheme: dark){.b_dark #b_results>li[class] a{color:#7aabeb}#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#a2b7f4;color:#333}}`,
               resultListProp: { qs: `#b_results>li.b_algo:not(.b_algoBorder,.b_topborder),#b_results>li.b_vidAns .mmlist>div[id],#b_results>li.b_mop .b_slidebar>div.slide`, delay: 10 },
               keywords: String(
                 Number(getUrlParam("ensearch")) || Number(global.gbCookies.getItem("ENSEARCH")?.match(/[=](\d)/)?.[1])
@@ -2054,7 +2031,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
 
           function findCurrentSite() {
             for (const regex in engineMap) {
-              if (hasOwnProperty(engineMap, regex) && new RegExp(regex).test(CUR_HOST_NAME)) {
+              if (hasOwnProperty.call(engineMap, regex) && new RegExp(regex).test(CUR_HOST_NAME)) {
                 const { siteType, site } = engineMap[regex];
                 const currentSite = selectedEngine.includes(siteType) ? site : listSite.other;
                 return { currentSite, listCurrentSite: site };
@@ -2066,7 +2043,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
           function updateSiteInformation() {
             let [currentSiteName, allSiteURIs] = ["", ""];
             for (let site in listSite) {
-              if (hasOwnProperty(listSite, site)) {
+              if (hasOwnProperty.call(listSite, site)) {
                 if (listSite[site].siteTypeID !== newSiteType.OTHERS) allSiteURIs += listSite[site].siteHostName + ";";
                 if (listSite[site].siteTypeID === listCurrentSite.siteTypeID) currentSiteName = site;
                 if (listSite[site].siteTypeID !== currentSite.siteTypeID && selectedEngine.includes(Number(listSite[site].siteTypeID))) {
@@ -2091,8 +2068,8 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               const observer = new MutationObserver(deBounce({ fn: getGlobalParameter, delay: 2e2, timer: "globalParameter" }));
               observer.observe(document.body, { childList: true, subtree: true });
             } else {
-              global.addEventListener("pushState", getGlobalParameter);
-              global.addEventListener("replaceState", getGlobalParameter);
+              if (global.navigation) global.navigation.addEventListener("navigate", getGlobalParameter);
+              else ["pushState", "replaceState"].forEach(event => global.addEventListener(event, getGlobalParameter));
               global.addEventListener("popstate", getGlobalParameter);
             }
           }
@@ -2209,7 +2186,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               listSearchEngine: currentSite => {
                 let returnHtml = "";
                 for (let site in listSite) {
-                  if (hasOwnProperty(listSite, site) && listSite[site].siteTypeID !== 0 && listSite[site].siteTypeID !== currentSite.siteTypeID) {
+                  if (hasOwnProperty.call(listSite, site) && listSite[site].siteTypeID !== 0 && listSite[site].siteTypeID !== currentSite.siteTypeID) {
                     const iconStyle = `background-position:0 ${(1 - listSite[site].siteTypeID) * 32}px;background-attachment:local;background-size:32px auto;transform:scale(0.75);`;
                     const buttonTitle = selectedEngine.includes(listSite[site].siteTypeID) ? `title="${IS_CHN ? "您常用的搜索引擎" : "Commonly used search engine"}"` : ``;
                     returnHtml += String(
@@ -2229,7 +2206,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               listSelectSearchEngine: () => {
                 let returnHtml = "";
                 for (let site in listSite) {
-                  if (hasOwnProperty(listSite, site) && listSite[site].siteTypeID !== 0) {
+                  if (hasOwnProperty.call(listSite, site) && listSite[site].siteTypeID !== 0) {
                     const iconStyle = `background-position:0 ${(1 - listSite[site].siteTypeID) * 32}px;background-attachment:local;background-size:32px auto;`;
                     const inputStatus = selectedEngine.includes(listSite[site].siteTypeID) ? "checked" : "disabled";
                     returnHtml += String(
@@ -2568,14 +2545,11 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
 
             function insertMenus() {
               const parameter_Set_Menu = `\ufff0\u2699\ufe0f ${IS_CHN ? "搜索引擎助手高级设置" : "Advanced Feature Settings "}${isHotkey ? "(E)" : ""}`;
-              parameter_Set ? GMunregisterMenuCommand(parameter_Set) : DEBUG("%cInstalling Parameter_Set_Menu", "color:#808080");
-              parameter_Set = GMregisterMenuCommand(parameter_Set_Menu, addAction.setConfigure);
-              const filter_Set_Menu = `\ufff2\ud83d\udcdb ${IS_CHN ? "搜索结果拦截词设置" : "Search Filter Settings "}${isHotkey ? "(B)" : ""}`;
-              filter_Set ? GMunregisterMenuCommand(filter_Set) : DEBUG("%cInstalling Filter_Set_Menu", "color:#808080");
-              filter_Set = GMregisterMenuCommand(filter_Set_Menu, addAction.filterResult);
+              GMregisterMenuCommand(parameter_Set_Menu, addAction.setConfigure) && DEBUG("%cInstalling Parameter_Set_Menu", "color:#808080");
+              const filter_Set_Menu = `\ufff2\ud83d\udcdb ${IS_CHN ? "搜索结果拦截词设置" : "SearchResult Filter Settings "}${isHotkey ? "(B)" : ""}`;
+              GMregisterMenuCommand(filter_Set_Menu, addAction.filterResult) && DEBUG("%cInstalling Filter_Set_Menu", "color:#808080");
               const engine_List_Menu = `\ufff4\ud83d\udc4b ${IS_CHN ? "嗨，你想去哪里吖？" : "Hi, Where to visit? "} ${isHotkey ? "(V)" : ""}`;
-              engine_List ? GMunregisterMenuCommand(engine_List) : DEBUG("%cInstalling Engine_List_Menu", "color:#808080");
-              engine_List = GMregisterMenuCommand(engine_List_Menu, addAction.listEngine);
+              GMregisterMenuCommand(engine_List_Menu, addAction.listEngine) && DEBUG("%cInstalling Engine_List_Menu", "color:#808080");
             }
 
             function insertHotkey() {
@@ -2668,6 +2642,10 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                       });
                       document.body.style.overflowX = "clip";
                       break;
+                    case "news":
+                    case "vsearch":
+                      qS(`#${def.const.rightButton} input`).style.marginLeft = "3px";
+                      break;
                   }
                 },
               },
@@ -2711,17 +2689,9 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               },
               google: {
                 listTypes: { target: "div[eid][data-async-context]", listName: "div", className: "MjjYud" },
-                applyButton: ({ buttonSection, buttonID, target }) => {
+                applyButton: ({ buttonSection, target }) => {
                   getGlobalGoogle("www.google.com", googleJump);
                   insertAfter(buttonSection, target);
-                  if (!qS(buttonID)) return;
-                  buttonSection.parentNode.style.width = "fit-content";
-                  buttonSection.parentNode.style.minWidth = "100%";
-                  buttonSection.parentNode.parentNode.style.width = "100%";
-                  buttonSection.parentNode.parentNode.parentNode.style.width = "95%";
-                  if (currentSite.imageType.includes(def.var.searchType)) {
-                    buttonSection.parentNode.firstElementChild.style.width = "400px";
-                  }
                 },
               },
               duckduckgo: {
@@ -2934,10 +2904,10 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               let scrollspan, scrollbars, height, searchType;
               switch (currentSite.siteTypeID) {
                 case newSiteType.GOOGLE:
-                  searchType = /^isch$/.test(def.var.searchType);
-                  scrollspan = searchType ? def.const.scrollspan2 : def.const.scrollspan;
-                  scrollbars = searchType ? def.const.scrollbars2 : def.const.scrollbars;
-                  height = searchType ? 0 : 35;
+                  searchType = /^isch|2$/.test(def.var.searchType);
+                  scrollspan = def.const.scrollspan;
+                  scrollbars = def.const.scrollbars;
+                  height = searchType ? 100 : 80;
                   break;
                 case newSiteType.BING:
                   searchType = /^(images|videos)$/.test(def.var.searchType);
@@ -3229,40 +3199,40 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       );
     })(createTrustedTypePolicy());
   },
-  (array => {
-    const defineMethod = (property, methodFunction) => {
-      if (Reflect.getOwnPropertyDescriptor(array, property)) return;
-      Object.defineProperty(array, property, { value: methodFunction, writable: false, configurable: false, enumerable: false });
-    };
-    const arrayMethods = {
-      Some: function (callback, thisArg = this) {
-        for (let i = 0; i < this.length; i++) {
-          if (callback.call(thisArg, this[i], i, this)) return true;
-        }
+  (object => {
+    const privateMethods = Object.entries({
+      Some(callback, thisArg = this) {
+        for (let i = 0; i < this.length; i++) if (callback.call(thisArg, this[i], i, this)) return true;
       },
-      Find: function (callback, thisArg = this) {
-        for (let i = 0; i < this.length; i++) {
-          if (callback.call(thisArg, this[i], i, this)) return this[i];
-        }
+      Find(callback, thisArg = this) {
+        for (let i = 0; i < this.length; i++) if (callback.call(thisArg, this[i], i, this)) return this[i];
       },
-    };
-    return { defineMethod, arrayMethods, object: Object.create(null) };
+    });
+    const options = { writable: false, configurable: false, enumerable: false };
+    const defineMethod = (key, value) => !Reflect.getOwnPropertyDescriptor(object, key) && Reflect.defineProperty(object, key, { value, ...options });
+    privateMethods.forEach(method => void defineMethod(...method));
+    return { aF: Array.from.bind(Array) };
   })(Array.prototype),
-  (() => ({
-    oT: any => Object.prototype.toString.call(any),
-    hP: (...any) => Object.prototype.hasOwnProperty.call(...any),
-    aF: Array.from.bind(Array),
-    gS: (testKey => {
-      const testStorage = storageType => {
-        try {
-          storageType.setItem(testKey, testKey);
-          storageType.removeItem(testKey);
-          return storageType;
-        } catch (e) {
-          return null;
-        }
+  (ctx => {
+    const oS = Object.prototype.toString;
+    const hP = Object.prototype.hasOwnProperty;
+    const oC = ctx.Object.create.bind(null, null);
+    const eH = type => {
+      const original = ctx.history[type];
+      return function () {
+        ctx.dispatchEvent(new CustomEvent(type, { detail: [...arguments] }));
+        return original.apply(this, arguments);
       };
-      return testStorage(localStorage);
-    })("__fr_storage_test__"),
-  }))()
+    };
+    const tS = storageType => {
+      try {
+        storageType.setItem("__fr_storage_test__", !0);
+        storageType.removeItem("__fr_storage_test__");
+        return storageType;
+      } catch (e) {
+        return null;
+      }
+    };
+    return { oC, eH, oS, hP, lS: tS(ctx.localStorage), sS: tS(ctx.sessionStorage) };
+  })(typeof window !== "undefined" ? window : this)
 );
