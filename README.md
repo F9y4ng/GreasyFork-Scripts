@@ -25,17 +25,18 @@
 - 脚本错误、异常请反馈至{[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)}, 字体、渲染样式、乱码问题请反馈至{[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)}。
 - 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-### version 2025.01.01.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2025.02.08.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 ```
-由于二月份月更新中优化了数据存储算法，更新后会造成脚本自动重置数据。
-为了确保您的本地配置数据不会丢失，请您在二月份更新前及时备份您的本地数据!
-及时备份您的本地数据! 备份您的本地数据! 感谢您的合作和支持。🤝
+由于二月份月更新优化了数据存储算法，更新后会自动重置数据。
+为了您的本地配置数据安全，请在更新前及时备份本地数据!
+感谢您的合作和支持。🤝
 ```
 ```log
-# ✨ 恭祝新年快乐，身体健康、平安如意、事事顺心。🎉
-+ 年度更新脚本版权日期信息，已经服务 5 年啦！
-@ 增强脚本渲染样式 DOM 插入以实现 CSP 兼容性。
-@ 修复字体比例缩放功能样式插入的错误。
+# 浏览器兼容性：(最低支持版本: Chrome ≥ 90, Edge ≥ 90, Firefox ≥ 84, Opera ≥ 78, Safari ≥ 15.4)
+@ 优化数据储存算法，提升脚本运行效率。
+@ 优化字体阴影颜色拾色器的兼容性。
+@ 优化渲染效果预览功能，提升预览兼容性。
+@ 修复因 CSP 内联样式被禁用，滑块样式失效的问题。
 @ 修复一些已知的问题，优化代码，优化样式。
 ```
 
@@ -128,12 +129,10 @@
 - [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 - 自动更新检测默认开启，如无更新提示需求，可在“**搜索引擎助手高级设置**”中关闭它。
 
-### version 2025.01.01.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2025.02.08.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-# ✨ 恭祝大家新年快乐，身体健康、平安如意。🎉
-+ 年度更新脚本版权日期信息，已服务 10 年啦！
-@ 优化 cn.Bing 搜索结果广告的移除规则。
+@ 修正 Google 搜索跳转按钮样式问题。
 @ 修正一些已知问题，优化代码，优化样式。
 ```
 
