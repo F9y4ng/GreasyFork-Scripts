@@ -26,11 +26,6 @@
 * Back up your local data promptly and don't use backup files from unknown sources!
 
 ### version 2025.02.08.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
-```
-Due to February update to optimize data storage, data will be reconstructed.
-For your data security, please back up your local data in time!
-Thank you for your cooperation and support. 🤝
-```
 ```log
 # Browser compatibility: (Min.Version: Chrome ≥ 90, Edge ≥ 90, Firefox ≥ 84, Opera ≥ 78, Safari ≥ 15.4)
 @ Optimized storage algorithms to improve efficiency.
