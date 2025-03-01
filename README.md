@@ -25,13 +25,12 @@
 - 脚本错误、异常请反馈至{[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)}, 字体、渲染样式、乱码问题请反馈至{[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)}。
 - 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-### version 2025.02.08.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2025.03.01.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 ```log
-# 浏览器兼容性：(最低支持版本: Chrome ≥ 90, Edge ≥ 90, Firefox ≥ 84, Opera ≥ 78, Safari ≥ 15.4)
-@ 优化数据储存算法，提升脚本运行效率。
-@ 优化字体阴影颜色拾色器的兼容性。
-@ 优化渲染效果预览功能，提升预览兼容性。
-@ 修复因 CSP 内联样式被禁用，滑块样式失效的问题。
++ 更新 OPPOSans 至 3.04 版本，可到 Github.Discussions 下载安装新字体。
+@ 修复在超长页面上因高频操作造成页面加载延迟问题。
+@ 优化字体列表字体检测被浏览器指纹保护阻止的提示。
+@ 修复在 Firefox 中 content 注入模式下的权限错误。
 @ 修复一些已知的问题，优化代码，优化样式。
 ```
 
@@ -124,10 +123,12 @@
 - [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 - 自动更新检测默认开启，如无更新提示需求，可在“**搜索引擎助手高级设置**”中关闭它。
 
-### version 2025.02.08.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2025.03.01.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ 修正 Google 搜索跳转按钮样式问题。
+@ 优化提升代码兼容性，支持更多脚本管理器。
+@ 修复因 requier 资源下载不成功代码失效的问题。
+@ 修复搜索引擎图标异步下载失效的问题。
 @ 修正一些已知问题，优化代码，优化样式。
 ```
 
