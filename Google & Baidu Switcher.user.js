@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            помощник поисковых систем
 // @name:ja            優雅な検索エンジン助手
-// @version            2025.02.08.1
+// @version            2025.03.01.1
 // @author             F9y4ng
 // @description        “Elegant Search Engine Assistant” facilite la navigation entre moteurs de recherche, personnalise les préférences, met en évidence les mots-clés, élimine les redirections et publicités, et filtre les résultats. Compatible avec divers moteurs tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, etc.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG and more.
@@ -20,7 +20,6 @@
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.meta.js
 // @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js
-// @require            https://update.greasyfork.org/scripts/460897/1277476/gbCookies.js#sha256-Sv+EuBerch8z/6LvAU0m/ufvjmqB1Q/kbQrX7zAvOPk=
 // @match              *://www.baidu.com/*
 // @match              *://ipv6.baidu.com/*
 // @match              *://image.baidu.com/search*
@@ -261,7 +260,9 @@
 // @grant              GM.registerMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
-// @note               {"CN":"修正 Google 搜索跳转按钮样式问题。","EN":"Fixed Google Search Jump Button style issue."}
+// @note               {"CN":"优化提升代码兼容性，支持更多脚本管理器。","EN":"Optimize to improve code compatibility and support more script managers."}
+// @note               {"CN":"修复因 requier 资源下载不成功代码失效的问题。","EN":"Fixed code failure due to unsuccessful download of requier resources."}
+// @note               {"CN":"修复搜索引擎图标异步下载失效的问题。","EN":"Fixed searchengine icons async-download failure."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         edge 兼容Tampermonkey, Violentmonkey
 // @compatible         Chrome 兼容Tampermonkey, Violentmonkey
@@ -306,7 +307,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
   if (!ctx.navigation) ["pushState", "replaceState"].forEach(m => void (ctx.history[m] = customFns.eH(m)));
   SearchEngineAssistant(ctx, toolkit, { ...arrayProxy, ...customFns });
 })(
-  typeof window !== "undefined" ? window : this,
+  typeof window !== "undefined" ? window : this ?? globalThis,
   function (global, secureVars, customFuntions) {
     "use strict";
 
@@ -359,7 +360,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       var: {
         disappear: `ͽ${generateRandomString(10, "date")}ͼ`,
         translucent: `ͼ${generateRandomString(10, "date")}ͽ`,
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.02.08.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.03.01.0",
         scriptName: getMetaValue(`name:${getLocalLanguages()}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       },
       url: {
@@ -1021,18 +1022,29 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
         return false;
       }
 
-      function convertBlobToDataURL(blob, resolve, reject) {
-        let oFileReader = new FileReader();
-        oFileReader.onloadend = e => resolve(e.target.result);
-        oFileReader.onerror = reject;
-        oFileReader.readAsDataURL(blob);
+      function manageCookies() {
+        return {
+          getItem: sKey => decodeURIComponent(document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + sKey?.replace(/[-.+*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")) || null,
+          setItem: function ({ sKey, sValue, sEnd, sPath, sDomain, sSameSite, sSecure }) {
+            if (!sKey || /^(?:expires|max-age|path|domain|samesite|secure)$/i.test(sKey)) return false;
+            [sDomain, sPath, sSameSite, sSecure] = [sDomain ? `;domain=${sDomain}` : "", sPath ? `;path=${sPath}` : "", sSameSite ? `;SameSite=${sSameSite}` : "", sSecure ? ";secure" : ""];
+            const sExpires = typeof sEnd === "number" && sEnd !== Infinity ? `;expires=${new Date(Date.now() + sEnd).toUTCString()}` : `;expires=Fri, 31 Dec 3999 23:59:59 GMT`;
+            document.cookie = `${sKey}=${sValue}${sExpires}${sDomain}${sPath}${sSameSite}${sSecure}`;
+            return true;
+          },
+          removeItem: function ({ sKey, sPath, sDomain }) {
+            if (!sKey || !new RegExp("(?:^|;\\s*)" + sKey.replace(/[-.+*]/g, "\\$&") + "\\s*\\=").test(document.cookie)) return false;
+            document.cookie = `${sKey}=;expires=Thu, 01 Jan 1970 00:00:00 GMT${sDomain ? `;domain=${sDomain}` : ""}${sPath ? `;path=${sPath}` : ""}`;
+            return true;
+          },
+        };
       }
 
       void (async function (getConfigureData, getResultFilterData, requestRemoteIcon, GMnotification) {
         let [_config_date_, _filter_Data_] = await Promise.all([getConfigureData(), getResultFilterData()]);
-        let { isAutoUpdate, keywordHighlight, isHotkey, selectedEngine, localWindow, googleJump, antiLinkRedirect, antiAds, customColor } = _config_date_;
         const { trigger: antiResultsFilter, filter: resultFilters } = _filter_Data_;
-        const [cachedRequestLinks, usedFilterWords, selectedSite] = [antiLinkRedirect ? new Map() : null, antiResultsFilter ? new Set() : null, []];
+        const { isAutoUpdate, keywordHighlight, isHotkey, selectedEngine, localWindow, googleJump, antiLinkRedirect, antiAds, customColor } = _config_date_;
+        const [gbCookies, cachedRequestLinks, usedFilterWords, selectedSite] = [manageCookies(), antiLinkRedirect ? new Map() : null, antiResultsFilter ? new Set() : null, []];
 
         /* ANTIREDIRECT_FUNCTIONS */
 
@@ -1094,16 +1106,16 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
 
         function fetchData(url, resolve, reject, readystate, error, timeout) {
           const headers = { Accept: "*/*", Referer: global.location.origin.replace(/^http:/i, "https:") };
-          const [onreadystatechange, onerror, ontimeout] = [readystate(resolve, reject), error(reject, resolve), timeout(reject)];
-          GMxmlhttpRequest({ url, headers, method: "GET", timeout: 25e3, onreadystatechange, onerror, ontimeout });
+          const [onload, onerror, ontimeout] = [readystate(resolve, reject), error(reject, resolve), timeout(reject)];
+          GMxmlhttpRequest({ url, headers, method: "GET", timeout: 25e3, onload, onerror, ontimeout });
         }
 
-        async function getRealUrl(url, node, name, { onreadystatechangeFunc, onerrorFunc, ontimeoutFunc }) {
+        async function getRealUrl(url, node, name, { onloadFunc, onerrorFunc, ontimeoutFunc }) {
           try {
             const res = await new Promise((resolve, reject) => {
               if (!cachedRequestLinks.has(url)) {
                 cachedRequestLinks.set(url, null);
-                fetchData(url, resolve, reject, onreadystatechangeFunc, onerrorFunc, ontimeoutFunc);
+                fetchData(url, resolve, reject, onloadFunc, onerrorFunc, ontimeoutFunc);
               } else reject(new RangeError("DuplicateLinksError"));
             });
             return handleSuccess(res, url, node);
@@ -1235,7 +1247,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
 
         function getXHRDecodeURI(url, node, siteName) {
           return getRealUrl(url, node, siteName, {
-            onreadystatechangeFunc: (resolve, reject) => response => {
+            onloadFunc: (resolve, reject) => response => {
               if (response.readyState !== 4) return;
               if (response.status === 200) {
                 let resUrl = response.finalUrl || response.responseURL || url;
@@ -1259,7 +1271,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
           const tasks = {
             Baidu: () =>
               getRealUrl(url, node, siteName, {
-                onreadystatechangeFunc: (resolve, reject) => response => {
+                onloadFunc: (resolve, reject) => response => {
                   if (response.readyState !== 4) return;
                   if (response.status === 200 || response.status === 301) {
                     let resUrl = response.finalUrl || response.responseURL || url;
@@ -1392,16 +1404,14 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
           try {
             return await new Promise((resolve, reject) => {
               const headers = { Accept: "*/*", Referer: url };
-              const onreadystatechange = response => {
+              const onload = response => {
                 if (response.readyState !== 4) return;
-                if (response.status === 200) {
-                  const res = response.responseText || response.response;
-                  resolve({ res, url });
-                } else reject(new Error("NoAccessError"));
+                if (response.status === 200) resolve({ res: response.responseText || response.response, url });
+                else if (response.status !== 0) reject(new Error("NoAccessError"));
               };
               const onerror = () => reject(new Error("NetworkError"));
               const ontimeout = () => reject(new Error("TimeoutError"));
-              GMxmlhttpRequest({ url, headers, method: "GET", nocache: true, timeout, onreadystatechange, onerror, ontimeout });
+              GMxmlhttpRequest({ url, headers, method: "GET", nocache: true, timeout, onload, onerror, ontimeout });
             });
           } catch (e) {
             throw new Error(`fetchUpdateResponse: ${e.message}`);
@@ -1414,15 +1424,16 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
           try {
             const iconBase64Data = await cache.get(REMOTEICONS);
             if (!iconBase64Data || setDebuggerMode()) {
-              DEBUG("%cRequest remote icon data.", "color:#dc143c");
+              DEBUG("%cRequest remote icon data...", "color:#25f");
               iconDataURL = await requestRemoteIcon(remoteURL);
-              iconDataURL && cache.set(REMOTEICONS, iconDataURL, 2592e6);
+              if (iconDataURL) cache.set(REMOTEICONS, iconDataURL, 2592e6) ?? DEBUG("%cRemote icon data parsed successfully.", "color:#006400");
+              else DEBUG("%cRemote icon data parsing failed.", "color:#ff0000");
             } else {
-              DEBUG("%cGet localCache icon data.", "color:#006400");
+              DEBUG("%cGet local cached icon data.", "color:#006400");
               iconDataURL = iconBase64Data;
             }
           } catch (e) {
-            ERROR(`Error: Can't request the icon data.`);
+            ERROR(`fetchAndCacheRemoteIcons: Can't request the icon data.`, e?.message);
           }
           return iconDataURL;
         }
@@ -1497,7 +1508,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               buttonCssText: `html{overflow-x:hidden}.${def.const.searchbox}{border-radius:8px!important}a,#b_results>li[class] a:not(.wiki_seemore),#b_results .b_no a,#b_context .mediumCardTitle{color:#001ba0}#${def.const.rndButtonID}{position:relative;z-index:0;display:inline-flex;margin:0;padding:0 6px 0 0;width:auto;height:38px;min-width:180px;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.leftButton},#${def.const.rightButton}{margin:0;padding:0;width:auto}#${def.const.rndButtonID} input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:600;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px;border-bottom-left-radius:24px;border-top-left-radius:24px}#${def.const.rightButton} input{margin:0 0 0 2px;padding:0 18px 0 12px;border-top-right-radius:24px;border-bottom-right-radius:24px}.${def.const.scrollspan}{/*margin:-14px -3px 0 0!important;max-height:28px*/}.${def.const.scrollbars}{/*max-height:28px;font-size:14px!important*/}.${def.const.scrollspan2}{margin:0!important;padding:4px 4px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars2}{margin-right:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#fff;background-color:#f0f3f6;box-shadow:0 0 4px #174ae4;color:#174ae4;transition:border .1s linear,box-shadow .3s linear}.${def.notice.random}_input{width:300px!important}@media (prefers-color-scheme: dark){.b_dark #b_results>li[class] a{color:#7aabeb}#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#a2b7f4;color:#333}}`,
               resultListProp: { qs: `#b_results>li.b_algo:not(.b_algoBorder,.b_topborder),#b_results>li.b_vidAns .mmlist>div[id],#b_results>li.b_mop .b_slidebar>div.slide`, delay: 10 },
               keywords: String(
-                Number(getUrlParam("ensearch")) || Number(global.gbCookies.getItem("ENSEARCH")?.match(/[=](\d)/)?.[1])
+                Number(getUrlParam("ensearch")) || Number(gbCookies.getItem("ENSEARCH")?.match(/[=](\d)/)?.[1])
                   ? "strong,.b_no h4,.b_strong,.b_ad .b_adlabel strong,.cbl"
                   : "#sp_requery strong,#sp_recourse strong,.sb_adTA_title_link_cn strong,.b_ad .ad_esltitle~div strong,h2 strong,#b_results .b_algo p strong,.b_caption p strong,.b_snippetBigText strong,.recommendationsTableTitle+.b_slideexp strong,.recommendationsTableTitle+table strong,.recommendationsTableTitle+ul strong,.pageRecoContainer .b_module_expansion_control strong,.pageRecoContainer .b_title>strong,.b_rs strong,.b_rrsr strong,.richrswrapper strong,#dict_ans strong,.b_listnav>.b_ans_stamp>strong,#b_content #ans_nws .na_cnt strong,.b_vidAns strong,.adltwrnmsg strong"
               ),
@@ -1693,7 +1704,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               antiRedirectFn: function () {
                 ["adBlockNoticeDismissed", "personalCounterTooltipSearch"].forEach(item => localStorages?.setItem(item, 1));
                 deBounce({
-                  fn: option => !/:nt=1:/.test(global.gbCookies.getItem("ECFG")) && global.gbCookies.setItem(option) && refresh(),
+                  fn: option => !/:nt=1:/.test(gbCookies.getItem("ECFG")) && gbCookies.setItem(option) && refresh(),
                   timer: "ecosia_cookie",
                   immed: true,
                   once: true,
@@ -1783,7 +1794,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               keywords: `.result b`,
               antiRedirectFn: function () {
                 deBounce({
-                  fn: option => !/disable_open_in_new_windowEEE0|enable_post_methodEEE0/.test(global.gbCookies.getItem("preferences")) && global.gbCookies.setItem(option) && refresh(),
+                  fn: option => !/disable_open_in_new_windowEEE0|enable_post_methodEEE0/.test(gbCookies.getItem("preferences")) && gbCookies.setItem(option) && refresh(),
                   timer: "startpage_cookie",
                   immed: true,
                   once: true,
@@ -1819,7 +1830,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               antiRedirectFn: function () {
                 localStorages?.setItem("app.aiPromoDismissCount", 10);
                 deBounce({
-                  fn: option => global.gbCookies.getItem("olnt") !== "1" && global.gbCookies.setItem(option) && refresh(),
+                  fn: option => gbCookies.getItem("olnt") !== "1" && gbCookies.setItem(option) && refresh(),
                   timer: "brave_cookie",
                   immed: true,
                   once: true,
@@ -1978,7 +1989,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               `.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#fd5f4e}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#ba2c1d}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#efefef}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#ccc}@keyframes ${def.notice.noticeX}-progress{0%{width:100%}to{width:0}}@keyframes ${def.notice.noticeX}-fadeOut{0%{opacity:1}to{opacity:0}}.${def.notice.noticeX}-fadeOut{animation-name:${def.notice.noticeX}-fadeOut}.${def.notice.noticeX}{position:fixed;z-index:2147483645}.${def.notice.noticeX} ::-webkit-scrollbar{width:8px}.${def.notice.noticeX} ::-webkit-scrollbar-button{width:8px;height:8px}.${def.notice.noticeX} ::-webkit-scrollbar-track{border-radius:3px}.${def.notice.noticeX} ::-webkit-scrollbar-thumb{background:#e1e1e1;border-radius:3px}.${def.notice.noticeX} ::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.rName}{padding:2px!important}.${def.notice.noticeX} .${def.notice.rName} dl{margin:0!important;padding:1px!important}.${def.notice.noticeX} .${def.notice.rName} dl dt{margin:2px 0 6px!important;font-weight:900!important;font-size:16px!important}.${def.notice.noticeX} .${def.notice.rName} dl dd{margin:2px 2px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${def.notice.noticeX} .${def.notice.rName} .${def.notice.center}{width:100%;text-align:center!important}.${def.notice.noticeX} .${def.notice.rName} dl dd em{padding:0 5px;color:#fff;font-style:italic;font-size:24px!important;font-family:Candara,sans-serif!important}.${def.notice.noticeX} .${def.notice.rName} dl dd span{margin-right:8px;font-weight:700;font-size:15px!important}.${def.notice.noticeX} .${def.notice.rName} dl dd i{font-size:20px!important;font-family:Candara,sans-serif!important}.${def.notice.noticeX} .${def.notice.rName} dl dd .im{padding:0 3px;color:gold;font-weight:900;font-size:16px!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} ul{display:inline-block;margin:0 0 0 8px;padding:4px 4px 8px;width:95%;color:rgba(255, 255, 255, 0.8);counter-reset:xxx 0;vertical-align:top;text-align:left}` +
               `.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} li{position:relative;margin:0 0 0 2px;padding:0 0 2px 2px;list-style:none;font-style:italic!important;line-height:150%;-webkit-transition:.12s;transition:.12s}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} li::before{display:inline-block;margin-left:-1.5em;width:1.5em;content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-size:14px;font-family:Candara,sans-serif;-webkit-transition:.5s;transition:.5s}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} #${def.notice.stopUpdate}{float:right;margin:0 5px!important;font-size:12px!important;cursor:help}.${def.const.loading}{position:relative;}.${def.const.loading}::after{content:" \u21ba";animation:fade 1.25s infinite;}@keyframes fade{0%{opacity:0.1}50%{opacity:0.5}to{opacity:0}}.${def.notice.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important;color:#999}#${def.notice.stopUpdate} input[type='checkbox']{box-sizing:content-box;margin:2px 4px 0 0;width:14px;height:14px;border:2px solid #fff;border-radius:50%;background:#ffa077;vertical-align:top;cursor:help;-webkit-appearance:none}#${def.notice.stopUpdate}:hover input,#${def.notice.stopUpdate} input:hover{background:#ba2c1d;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}{display:none!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label{position:relative;display:inline-block;-webkit-box-sizing:content-box;box-sizing:content-box;margin:0 0 0 25px;padding:11px 9px;width:58px;height:10px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(245, 146, 146, 0.4);word-wrap:normal!important;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;-webkit-border-radius:7px;border-radius:7px;background:#fff;box-shadow:0 0 1px rgba(0, 0, 0, 0.6);color:#fff;content:" "}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label::after{position:absolute;top:2px;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;padding:5px;-webkit-border-radius:100px;border-radius:100px;color:#fff;content:"OFF";font-weight:700;font-size:14px}` +
               `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label{-webkit-box-sizing:content-box;box-sizing:content-box;margin:0 0 0 25px;background:#67a5df!important;box-shadow:inset 0 0 20px rgba(0,0,0,.1),0 0 10px rgba(146, 196, 245, 0.4);cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label::after{top:2px;left:10px;content:"ON"}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}.${def.notice.noticeX} .${def.notice.configuration} button.${def.notice.searchButton}{display:flex;margin:0 0 10px;padding:6px 0;width:162px;height:25px;border:2px solid #eee;border-radius:6px;background:#fff;box-shadow:1px 1px 0 1px #aaa;font-size:14px!important;cursor:pointer;align-content:center;justify-content:center;align-items:center}.${def.notice.noticeX} .${def.notice.configuration} button.${def.notice.searchButton}:hover{box-shadow:1px 1px 3px 0 #888;color:#ff0000}.${def.notice.noticeX} .${def.notice.configuration} span.${def.notice.favicon}{margin:0 6px 0 0;width:32px;height:32px}.${def.notice.noticeX} .${def.notice.configuration} ul.${def.notice.searchList}{margin:5px;padding:2px;list-style:none}.${def.notice.noticeX} .${def.notice.configuration} ul.${def.notice.searchList} li{margin:0;list-style:none;font-style:normal}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.fieldset}{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;border:2px dashed #dfdfdf;border-radius:10px;background:transparent!important;text-align:left}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.legend}{display:block;margin:0;padding:0 8px;width:auto;color:#8b0000!important;font-weight:900!important;font-size:14px!important;-webkit-user-select:all;user-select:all}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList}{margin:0;padding:0;background:transparent!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li{float:none;display:flex;margin:3px 0;padding:2px 8px 2px 12px;height:36px;border:none;background:transparent!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none;align-content:center;justify-content:space-between}` +
-              `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li div{font:normal 700 14px/150% Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button{box-sizing:border-box;margin:0 0 0 8px;padding:4px 8px;height:36px;min-width:65px;border:1px solid #ccc;border-radius:8px;background:#fafafa;box-shadow:1px 1px 1px 0 #ccc;color:#5e5e5e;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info{font-weight:400!important;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info em{color:#dc143c!important;font-style:normal;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_textarea{padding: 6px 0;margin:0}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter{display:block;margin:0;height:100%}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar{width:8px;height:8px}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb{border-radius:4px;background:#cfcfcf}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.random}_filter_textarea textarea::placeholder{color:#555;font:normal 500 16px/150% ui-monospace,monospace,system-ui,-apple-system,BlinkMacSystemFont!important;opacity:0.85;white-space:break-spaces}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{box-sizing:border-box;margin:0!important;padding:5px!important;max-height:423px;width:100%;min-height:280px;outline:0!important;border:1px solid #bbb;border-radius:6px;white-space:pre;font:normal 400 14px/150% ui-monospace,monospace,sans-serif!important;resize:vertical;overscroll-behavior:contain;word-break:keep-all!important;cursor:auto}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content::placeholder{font:normal 400 14px/150% ui-monospace,monospace!important}.${def.notice.noticeX} .${def.notice.configuration} #${def.notice.random}_customColor{margin:0;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button:hover{background:#fff;cursor:pointer}` +
+              `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li div{font:normal 700 14px/150% Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button{box-sizing:border-box;margin:0 0 0 8px;padding:4px 8px;height:36px;min-width:65px;border:1px solid #ccc;border-radius:8px;background:#fafafa;box-shadow:1px 1px 1px 0 #ccc;color:#5e5e5e;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info{font-weight:400!important;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info em{color:#dc143c!important;font-style:normal;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_textarea{padding: 6px 0;margin:0}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter{display:block;margin:0;height:100%}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar{width:8px;height:8px}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb{border-radius:4px;background:#cfcfcf}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.random}_filter_textarea textarea::placeholder{color:#555;font:normal 500 16px/150% ui-monospace,monospace,system-ui,-apple-system,BlinkMacSystemFont!important;opacity:0.85;white-space:break-spaces}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{box-sizing:border-box;margin:0;padding:5px;max-height:423px;width:100%;min-height:280px;outline:0!important;border:1px solid #bbb;border-radius:6px;background:#fff;color:#111;white-space:pre;font:normal 400 14px/150% ui-monospace,monospace,sans-serif!important;resize:vertical;overscroll-behavior:contain;word-break:keep-all!important;cursor:auto}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content::placeholder{font:normal 400 14px/150% ui-monospace,monospace!important}.${def.notice.noticeX} .${def.notice.configuration} #${def.notice.random}_customColor{margin:0;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button:hover{background:#fff;cursor:pointer}` +
               `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}__content{display:block;margin:0;height:268px}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{overflow-x:hidden;overflow-y:auto;box-sizing:border-box;margin:4px 0 3px;padding:8px;width:266px;max-height:237px;overscroll-behavior:contain}.${def.notice.card} h2{margin:0;padding:0;border:0;vertical-align:baseline;font:inherit;font-size:100%;line-height:135%;}#${def.notice.random}_help{position:relative;margin:0;padding:4px 15px!important;border:1px solid transparent;background:#f07f6a;box-shadow:0 0 6px 0 #f5846f;color:#fff;cursor:help}#${def.notice.random}_help:hover{background:#ed6248;box-shadow:0 0 6px 0 #f34525;}#${def.notice.random}_clear{margin:0;color:#666;font-weight:500;cursor:pointer}#${def.notice.random}_clear:hover{color:#ff0000}#${def.notice.random}_clear u{padding:0 2px;text-decoration:none}.${def.notice.linkerror},.${def.notice.linkerror}:hover,.${def.notice.linkerror} *,.${def.notice.linkerror} *:hover{color:#a9a9a9!important;text-decoration-line:line-through!important;text-decoration-color:#ff0000!important;text-decoration-style:wavy!important}@-moz-document url-prefix() {.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before,.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{scrollbar-color:#bbbb #eee1;scrollbar-width:thin}}.${def.notice.card}{margin:0;padding:0;--background:#fff;--background-chackbox:#0082ff;--background-image:#fff,rgba(0, 107, 175, 0.2);--text-color:#666;--text-headline:#000;--card-shadow:#0082ff;--card-height:48px;--card-witght:240px;--card-radius:12px;--header-height:47px;--blend-mode:overlay;--transition:0.15s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.${def.notice.card}__input{position:absolute;display:none;margin:0;padding:0;outline:none;border:none;background:none;-webkit-appearance:none}.${def.notice.card}__input:checked ~ .${def.notice.card}__body{--shadow:0 0 0 3px var(--card-shadow);}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox{--chack-bg:var(--background-chackbox);--chack-border:#fff;--chack-scale:1;--chack-opacity:1;}` +
               `.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox--svg{--stroke-color:#fff;--stroke-dashoffset:0;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover:after{--opacity-bg:0;}.${def.notice.random}_iconText{color:#333}.${def.notice.random}_iconText:hover{color:#dc143c}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body{cursor:not-allowed;opacity:0.5;}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body:active{--scale:1;}.${def.notice.card}__body{position:relative;display:grid;overflow:hidden;width:var(--card-witght);height:var(--card-height);border-radius:var(--card-radius);background:var(--background);box-shadow:var(--shadow,1px 1px 3px 1px #ccc);cursor:pointer;-webkit-transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:transform var(--transition),box-shadow var(--transition);transition:transform var(--transition),box-shadow var(--transition),-webkit-transform var(--transition);-webkit-transform:scale(var(--scale,1)) translateZ(0);transform:scale(var(--scale,1)) translateZ(0);grid-auto-rows:calc(var(--card-height) - var(--header-height)) auto}.${def.notice.card}__body:active{--scale:0.96;}.${def.notice.card}__body-cover-image{position:absolute;top:8px;left:10px;z-index:100;width:32px;height:32px}.${def.notice.card}__body-cover-image span.${def.notice.favicons}{display:block;width:32px;height:32px}.${def.notice.card}__body-cover-chackbox{position:absolute;top:10px;right:10px;z-index:1;width:28px;height:28px;border:2px solid var(--chack-border,#fff);border-radius:50%;background:var(--chack-bg,var(--background-chackbox));opacity:var(--chack-opacity,0);transition:transform var(--transition),opacity calc(var(--transition)*1.2) linear,-webkit-transform var(--transition) ease;-webkit-transform:scale(var(--chack-scale,0));transform:scale(var(--chack-scale,0))}.${def.notice.card}__body-cover-chackbox--svg{display:inline-block;visibility:visible!important;margin:8px 0 0 7px;width:13px;height:11px;vertical-align:top;-webkit-transition:stroke-dashoffset .4s ease var(--transition);transition:stroke-dashoffset .4s ease var(--transition);fill:none;stroke:var(--stroke-color,#fff);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16px;stroke-dashoffset:var(--stroke-dashoffset,16px)}` +
               `.${def.notice.card}__body-header{padding:4px 10px 6px 50px;height:var(--header-height);background:var(--background)}.${def.notice.card}__body-header-title{margin-bottom:0!important;color:var(--text-headline);font-weight:700!important;font-size:15px!important}.${def.notice.card}__body-header-subtitle{color:var(--text-color);font-weight:500;font-size:13px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{display:grid;grid-template-columns:repeat(1, 1fr);grid-gap:10px;}.${def.notice.gberror}{display:block;margin:0 0 4px -6px;padding:6px;width:max-content;border:1px dashed #ffb78c;border-radius:4px;color:#ffb78c}`
@@ -2077,9 +2088,10 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
           async function updateToRequestIcon(isReload = true) {
             try {
               const iconDataURL = await requestRemoteIcon(yandexIconsAPIUrl);
-              if (iconDataURL) cache.set(REMOTEICONS, iconDataURL, 2592e6);
+              if (iconDataURL) return cache.set(REMOTEICONS, iconDataURL, 2592e6), DEBUG("%cRemote icon data parsed successfully.", "color:#006400");
+              DEBUG("%cRemote icon data parsing failed.", "color:#ff0000");
             } catch (e) {
-              ERROR("updateToRequestIcon: Can't fetch the iconData.");
+              ERROR("updateToRequestIcon: Can't fetch the iconData.", e.message);
             } finally {
               isReload && refresh();
             }
@@ -2494,7 +2506,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               const fonfirmbgColorText = IS_CHN ? "\r\n背景色代码：" : "\r\n𝐁𝐚𝐜𝐤𝐠𝐫𝐨𝐮𝐧𝐝-𝐂𝐨𝐥𝐨𝐫: ";
               const saveData = async () => {
                 if (!inputFgColor || !inputBgColor) return;
-                customColor = { foregroundColor: inputFgColor.trim().toLowerCase(), backgroundColor: inputBgColor.trim().toLowerCase() };
+                const customColor = { foregroundColor: inputFgColor.trim().toLowerCase(), backgroundColor: inputBgColor.trim().toLowerCase() };
                 _config_date_ = { ..._config_date_, keywordHighlight: true, customColor };
                 GMsetValue(CONFIGURE, encrypt(JSON.stringify(_config_date_)));
               };
@@ -2782,7 +2794,8 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 listTypes: { target: "section.mainline>div:not([class])", listName: "div", className: "mainline__result-wrapper" },
                 applyButton: ({ buttonSection, buttonID, target }) => {
                   let isLoadEventAttached = false;
-                  const handleLoadEvent = () => {
+                  const handleLoadEvent = async () => {
+                    await sleep(0, { instant: true });
                     if (!qS(buttonID) && target) insertAfter(buttonSection, target);
                     addSearchButtonEvent(qA(`${buttonID} span[sn]:not([event-insert])`));
                     global.removeEventListener("load", handleLoadEvent);
@@ -3064,8 +3077,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
 
             function updateIconsForExtension(requestVer) {
               if (decrypt(requestVer) === def.var.curVersion) return;
-              DEBUG("updateIconsForExtension: %cupdateToRequestIcon", "color:#dc143c");
-              updateToRequestIcon(false);
+              DEBUG("%cRequest icon data for extension update...", "color:#25f") ?? updateToRequestIcon(false);
               cache.set(AUTOCHECK, def.var.curVersion);
               GMsetValue(VERSION, encrypt(def.var.curVersion));
             }
@@ -3100,7 +3112,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 showSystemInfo();
                 insertMenus();
                 insertHotkey();
-                updateIconsForExtension(versionFlag);
+                if (updateFlag) updateIconsForExtension(versionFlag);
               }
               setupGlobalParameterListener();
               searchButtonAndStylesObserve();
@@ -3179,15 +3191,19 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
           if (!CUR_WINDOW_TOP || !url) return;
           return new Promise((resolve, reject) => {
             const headers = { Accept: "*/*", Referer: url };
-            const onreadystatechange = response => {
+            const onload = response => {
               if (response.readyState !== 4) return;
-              if (response.status === 200) convertBlobToDataURL(response.response, resolve, reject);
-              else if (response.status !== 0) reject(new Error("NoAccessError"));
+              if (response.status === 200) {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error("Convert failed"));
+                reader.readAsDataURL(response.response);
+              } else if (response.status !== 0) reject(new Error("NoAccessError"));
             };
             const onerror = () => reject(new Error("NetworkError"));
             const ontimeout = () => reject(new Error("TimeoutError"));
-            GMxmlhttpRequest({ url, headers, method: "GET", timeout: 5e3, responseType: "blob", onreadystatechange, onerror, ontimeout });
-          }).catch(e => Promise.reject(ERROR("requestRemoteIcon:", e.message)));
+            GMxmlhttpRequest({ url, headers, method: "GET", timeout: 5e3, responseType: "blob", onload, onerror, ontimeout });
+          }).catch(e => Promise.reject(new Error("requestRemoteIcon: " + e.message)));
         },
         options => {
           try {
@@ -3234,5 +3250,5 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       }
     };
     return { oC, eH, oS, hP, lS: tS(ctx.localStorage), sS: tS(ctx.sessionStorage) };
-  })(typeof window !== "undefined" ? window : this)
+  })(typeof window !== "undefined" ? window : this ?? globalThis)
 );
