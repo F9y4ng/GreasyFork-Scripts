@@ -25,13 +25,12 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data promptly and don't use backup files from unknown sources!
 
-### version 2025.02.08.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2025.03.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 ```log
-# Browser compatibility: (Min.Version: Chrome ≥ 90, Edge ≥ 90, Firefox ≥ 84, Opera ≥ 78, Safari ≥ 15.4)
-@ Optimized storage algorithms to improve efficiency.
-@ Optimized compatibility of font-shadow colorpicker.
-@ Optimized preview feature to improve compatibility.
-@ Fixed slider issues when setting CSP (style-src-attr).
++ Update OPPOSans to v3.04，download OPPOSans from Github.Discussions.
+@ Fixed page load delay issue caused by high-frequency actions on ultra-long pages.
+@ Improved the prompt that font detection is blocked by browser fingerprinting protection.
+@ Fixed an issue with content injection mode in Firefox.
 @ Fixed some known issues, optimized code & style.
 ```
 
@@ -132,10 +131,12 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-### version 2025.02.08.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2025.03.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Fixed Google Search Jump Button style issue.
+@ Optimize to improve code compatibility and support more script managers.
+@ Fixed code failure due to unsuccessful download of requier resources.
+@ Fixed searchengine icons async-download failure.
 @ Fixed some known issues, optimized code & style.
 ```
 
