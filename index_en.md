@@ -30,6 +30,9 @@
 * Back up your local data in a timely manner. Do not use backup files from unknown sources!
 
 ## version 2025.03.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+
+> **Update Preview**📣: Due to the new version add adaptive support for cross-domain iframes, style compatibility for common math formulas, and other rendering parameter adjustments, the update auto-reset function will be enabled in the next month's update, so if you haven't done a backup recently, please back up your local data in a timely manner before the release of April's update. (**But we strongly recommend you** 💭: If the custom site data is low, it is better to re-render with the new filter parameters. If you encounter problems such as garbled codes, block letters, abnormal font styles, etc. when rendering with the old parameters after restoring the backup, please reconfigure the parameters in order to try again with the latest rendering rules) ♥️ Thank you for your cooperation and support.
+
 ```log
 + Update OPPOSans to v3.04，download OPPOSans from Github.Discussions.
 @ Fixed page load delay issue caused by high-frequency actions on ultra-long pages.
