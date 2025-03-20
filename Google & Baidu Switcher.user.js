@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            помощник поисковых систем
 // @name:ja            優雅な検索エンジン助手
-// @version            2025.03.01.1
+// @version            2025.03.20.1
 // @author             F9y4ng
 // @description        “Elegant Search Engine Assistant” facilite la navigation entre moteurs de recherche, personnalise les préférences, met en évidence les mots-clés, élimine les redirections et publicités, et filtre les résultats. Compatible avec divers moteurs tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, etc.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG and more.
@@ -260,9 +260,6 @@
 // @grant              GM.registerMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
-// @note               {"CN":"优化提升代码兼容性，支持更多脚本管理器。","EN":"Optimize to improve code compatibility and support more script managers."}
-// @note               {"CN":"修复因 requier 资源下载不成功代码失效的问题。","EN":"Fixed code failure due to unsuccessful download of requier resources."}
-// @note               {"CN":"修复搜索引擎图标异步下载失效的问题。","EN":"Fixed searchengine icons async-download failure."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         edge 兼容Tampermonkey, Violentmonkey
 // @compatible         Chrome 兼容Tampermonkey, Violentmonkey
@@ -304,7 +301,6 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
     confirm: confirm.bind(ctx),
     console: Object.assign({}, ctx.console),
   };
-  if (!ctx.navigation) ["pushState", "replaceState"].forEach(m => void (ctx.history[m] = customFns.eH(m)));
   SearchEngineAssistant(ctx, toolkit, { ...arrayProxy, ...customFns });
 })(
   typeof window !== "undefined" ? window : this ?? globalThis,
@@ -1976,7 +1972,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
           const { currentSite, listCurrentSite } = findCurrentSite();
           const { currentSiteName, allSiteURIs } = updateSiteInformation();
           const { backgroundColor: bgcolor, foregroundColor: fgcolor } = customColor;
-          const updateDetectionAddress = getGlobalParameter() && getUpdateAddress();
+          const updateDetectionAddress = getUpdateAddress();
           const yandexIconsAPIUrl = `${def.url.yandexIcon}/${allSiteURIs}?size=32&stub=1`;
           const iconBase64Data = await fetchAndCacheRemoteIcons(yandexIconsAPIUrl);
 
@@ -2027,16 +2023,16 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
           }
 
           function getSecurityPolicy() {
+            const currentSearchType = getUrlParam(currentSite.splitTypeName);
             return (
-              (currentSite.siteTypeID === newSiteType.GOOGLE && (/^(lcl|flm|fin)$/.test(def.var.searchType) || getUrlParam("csui") === "1")) ||
-              (currentSite.siteTypeID === newSiteType.BING && (/^maps$/.test(def.var.searchType) || getUrlParam("showconv") === "1")) ||
-              (currentSite.siteTypeID === newSiteType.BAIDU && /^(news|vsearch)$/.test(def.var.searchType)) ||
-              (currentSite.siteTypeID === newSiteType.SOGOU && /^(fanyi|hanyu|as)/.test(CUR_HOST_NAME)) ||
+              (currentSite.siteTypeID === newSiteType.GOOGLE && (/^(lcl|flm|fin)$/.test(currentSearchType) || getUrlParam("csui") === "1")) ||
+              (currentSite.siteTypeID === newSiteType.BING && (/^maps$/.test(currentSearchType) || getUrlParam("showconv") === "1")) ||
+              (currentSite.siteTypeID === newSiteType.SOGOU && /^(fanyi|hanyu|as)/.test(location.hostname)) ||
               (currentSite.siteTypeID === newSiteType.DUCKDUCKGO && /^maps$/.test(getUrlParam("iaxm"))) ||
               (currentSite.siteTypeID === newSiteType.YANDEX && location.pathname.includes("/direct")) ||
               (currentSite.siteTypeID === newSiteType.YAHOO && CUR_HOST_NAME.search(/news|video/) !== -1) ||
-              (currentSite.siteTypeID === newSiteType.YOU && /^youchat$/.test(def.var.searchType)) ||
-              (currentSite.siteTypeID === newSiteType.SEARXNG && /^map$/.test(def.var.searchType))
+              (currentSite.siteTypeID === newSiteType.YOU && /^youchat$/.test(currentSearchType)) ||
+              (currentSite.siteTypeID === newSiteType.SEARXNG && /^map$/.test(currentSearchType))
             );
           }
 
@@ -2063,26 +2059,6 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               }
             }
             return { currentSiteName, allSiteURIs };
-          }
-
-          function getGlobalParameter() {
-            return Object.assign(def.var, {
-              indexPage: checkIndexPage(),
-              queryString: getQueryString(),
-              searchType: getUrlParam(currentSite.splitTypeName),
-              securityPolicy: getSecurityPolicy(),
-            });
-          }
-
-          function setupGlobalParameterListener() {
-            if (GMcontentMode && document.body) {
-              const observer = new MutationObserver(deBounce({ fn: getGlobalParameter, delay: 2e2, timer: "globalParameter" }));
-              observer.observe(document.body, { childList: true, subtree: true });
-            } else {
-              if (global.navigation) global.navigation.addEventListener("navigate", getGlobalParameter);
-              else ["pushState", "replaceState"].forEach(event => global.addEventListener(event, getGlobalParameter));
-              global.addEventListener("popstate", getGlobalParameter);
-            }
           }
 
           async function updateToRequestIcon(isReload = true) {
@@ -2592,6 +2568,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
             function showSystemInfo() {
               if (CUR_WINDOW_TOP && listCurrentSite.siteTypeID !== newSiteType.OTHERS) {
                 const isFavEngine = currentSite.siteTypeID !== newSiteType.OTHERS;
+                const securityPolicy = getSecurityPolicy();
                 const fontStyle = `text-transform:capitalize;font:italic 16px/130% Candara,'Times New Roman'`;
                 __console(
                   "shown_system_info",
@@ -2626,8 +2603,8 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                   antiResultsFilter,
                   "font-size:12px;font-weight:700;color:#4682b4",
                   IS_CHN ? "因安全策略被阻止：" : "SecurityPolicy:\u0020",
-                  `color:${def.var.securityPolicy ? "#006400" : "#0000ff"};${fontStyle}`,
-                  Boolean(def.var.securityPolicy)
+                  `color:${securityPolicy ? "#006400" : "#0000ff"};${fontStyle}`,
+                  securityPolicy
                 );
               }
             }
@@ -2641,7 +2618,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 applyButton: ({ buttonSection, buttonID, target }) => {
                   insertAfter(buttonSection, target);
                   if (!qS(buttonID)) return;
-                  switch (def.var.searchType) {
+                  switch (getUrlParam(currentSite.splitTypeName)) {
                     case currentSite.imageType[0]:
                       buttonSection.style.marginLeft = "16px";
                       qS(`#${def.const.rightButton} input`).style.marginLeft = "3px";
@@ -2737,7 +2714,8 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 listTypes: { target: "div.results", listName: "div", className: "vrwrap" },
                 clear: () => safeRemoveNode("#right"),
                 applyButton: ({ buttonSection, buttonID, target }) => {
-                  if (currentSite.imageType.includes(def.var.searchType)) {
+                  const currentSearchType = getUrlParam(currentSite.splitTypeName);
+                  if (currentSite.imageType.includes(currentSearchType)) {
                     sleep(4e2).then(() => {
                       if (!qS(buttonID) && target) {
                         insertAfter(buttonSection, target);
@@ -2747,7 +2725,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                         addSearchButtonEvent(qA(`${buttonID} span[sn]:not([event-insert])`));
                       }
                     });
-                  } else if (def.var.searchType === "weixin") {
+                  } else if (currentSearchType === "weixin") {
                     insertAfter(buttonSection, target);
                     buttonSection.style = "position:relative";
                     qA(`${buttonID} input`).forEach(node => node.classList.add(`${def.notice.random}_weixin`));
@@ -2776,7 +2754,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 clear: () => safeRemoveNode("#side_wrap"),
                 applyButton: ({ buttonSection, buttonID, target }) => {
                   insertAfter(buttonSection, target);
-                  if (currentSite.imageType.includes(def.var.searchType)) {
+                  if (currentSite.imageType.includes(getUrlParam(currentSite.splitTypeName))) {
                     qA(`${buttonID} input`).forEach(node => (node.style = "margin:0 0 0 1px;"));
                     sleep(5e2).then(() => qS("#tools_close")?.click());
                   }
@@ -2813,7 +2791,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 applyButton: ({ buttonSection, target }) => {
                   try {
                     insertAfter(buttonSection, target);
-                    if (currentSite.imageType.includes(def.var.searchType)) {
+                    if (currentSite.imageType.includes(getUrlParam(currentSite.splitTypeName))) {
                       const sectionRect = qS("#sbx")?.getBoundingClientRect() ?? { width: 656, left: 2e2 };
                       buttonSection.style.cssText = `position:absolute;left:${6 + sectionRect.width + sectionRect.left}px;top:14px;`;
                     } else {
@@ -2881,7 +2859,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
             async function insertButtons() {
               try {
                 const target = qS(currentSite.mainSelector);
-                if (def.var.indexPage || !target || !def.var.queryString || qS(`#${def.const.rndButtonID}`)) return;
+                if (checkIndexPage() || !target || !getQueryString() || qS(`#${def.const.rndButtonID}`)) return;
                 const buttonSection = cE("gb-button", { id: def.const.rndButtonID, innerHTML: tTP.createHTML(def.var.button) });
                 const spans = await applyButtons(buttonSection, target);
                 if (!spans) return;
@@ -2913,17 +2891,18 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
             }
 
             function scrollDetect() {
-              if (def.var.indexPage) return;
+              if (checkIndexPage()) return;
               let scrollspan, scrollbars, height, searchType;
+              const currentSearchType = getUrlParam(currentSite.splitTypeName);
               switch (currentSite.siteTypeID) {
                 case newSiteType.GOOGLE:
-                  searchType = /^isch|2$/.test(def.var.searchType);
+                  searchType = /^isch|2$/.test(currentSearchType);
                   scrollspan = def.const.scrollspan;
                   scrollbars = def.const.scrollbars;
                   height = searchType ? 100 : 80;
                   break;
                 case newSiteType.BING:
-                  searchType = /^(images|videos)$/.test(def.var.searchType);
+                  searchType = /^(images|videos)$/.test(currentSearchType);
                   scrollspan = searchType ? def.const.scrollspan2 : def.const.scrollspan;
                   scrollbars = searchType ? def.const.scrollbars2 : def.const.scrollbars;
                   height = 50;
@@ -3084,7 +3063,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
 
             function processMainThreadTasks() {
               const { siteTypeID } = currentSite;
-              if (siteTypeID !== newSiteType.OTHERS && !def.var.securityPolicy) {
+              if (siteTypeID !== newSiteType.OTHERS && !getSecurityPolicy()) {
                 if (!qS(`#${def.const.rndclassName}`)) insertCSS();
                 if (!qS(`#${def.const.rndButtonID}`)) insertButtons();
               }
@@ -3093,7 +3072,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 if (!qS(`#${def.const.rndstyleName}`)) insertStyle();
                 if (antiAds) antiAdsFn?.();
                 if (antiResultsFilter) filterSearchResults(resultListProp);
-                if (antiLinkRedirect && !def.var.indexPage) antiRedirectFn?.();
+                if (antiLinkRedirect && !checkIndexPage()) antiRedirectFn?.();
               }
             }
 
@@ -3114,7 +3093,6 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 insertHotkey();
                 if (updateFlag) updateIconsForExtension(versionFlag);
               }
-              setupGlobalParameterListener();
               searchButtonAndStylesObserve();
             })(await cache.get(AUTOCHECK), await GMgetValue(VERSION));
           })(
@@ -3143,9 +3121,9 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
         })(function () {
           const rnd = Date.now().toString(16);
           const updateURLArray = [
-            `https://update.greasyfork.org/scripts/12909/Google_baidu_Switcher_(ALL_in_One).meta.js`,
-            `https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`,
-            `https://openuserjs.org/install/f9y4ng/Google_baidu_Switcher_(ALL_in_One).meta.js`,
+            // `https://update.greasyfork.org/scripts/12909/Google_baidu_Switcher_(ALL_in_One).meta.js`,
+            // `https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`,
+            // `https://openuserjs.org/install/f9y4ng/Google_baidu_Switcher_(ALL_in_One).meta.js`,
           ];
           return updateURLArray.map(url => `${url}?${rnd}`);
         });
@@ -3233,13 +3211,6 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
     const oS = Object.prototype.toString;
     const hP = Object.prototype.hasOwnProperty;
     const oC = ctx.Object.create.bind(null, null);
-    const eH = type => {
-      const original = ctx.history[type];
-      return function () {
-        ctx.dispatchEvent(new CustomEvent(type, { detail: [...arguments] }));
-        return original.apply(this, arguments);
-      };
-    };
     const tS = storageType => {
       try {
         storageType.setItem("__fr_storage_test__", !0);
@@ -3249,6 +3220,6 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
         return null;
       }
     };
-    return { oC, eH, oS, hP, lS: tS(ctx.localStorage), sS: tS(ctx.sessionStorage) };
+    return { oC, oS, hP, lS: tS(ctx.localStorage), sS: tS(ctx.sessionStorage) };
   })(typeof window !== "undefined" ? window : this ?? globalThis)
 );
