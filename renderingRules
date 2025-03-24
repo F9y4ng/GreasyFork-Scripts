@@ -1,0 +1,5 @@
+[
+  [["www.bilibili.com", "live.bilibili.com", "player.bilibili.com"], { "fontCSS": "+∯:not(.bili-danmaku-x-dm,.bili-danmaku-x-dm *)", "fixShadow": "@∯0" }],
+  [["www.douyu.com", "v.douyu.com"], { "fontCSS": "+∯:not([class*='danmuItem'],[class*='danmuItem'] *)", "fixShadow": "@∯0" }],
+  [["bbs.pcbeta.com"], { "fontCSS": "+∯:not(.nvhm,.bm_h .o em,[class^='ico_'])" }]
+]
