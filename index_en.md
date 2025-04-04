@@ -29,15 +29,18 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data in a timely manner. Do not use backup files from unknown sources!
 
-## version 2025.03.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
-
-> **Update Preview**📣: Due to the new version add adaptive support for cross-domain iframes, style compatibility for common math formulas, and other rendering parameter adjustments, the update auto-reset function will be enabled in the next month's update, so if you haven't done a backup recently, please back up your local data in a timely manner before the release of April's update. (**But we strongly recommend you** 💭: If the custom site data is low, it is better to re-render with the new render parameters. If you encounter problems such as garbled codes, block letters, abnormal font styles, etc, when rendering with the old parameters after restoring the backup, please reset the data and reconfigure the parameters in order to try again with the latest rendering rules) ♥️ Thank you for your cooperation and support.
+## version 2025.04.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-+ Update OPPOSans to v3.04，download OPPOSans from Github.Discussions.
-@ Fixed page load delay issue caused by high-frequency actions on ultra-long pages.
-@ Improved the prompt that font detection is blocked by browser fingerprinting protection.
-@ Fixed an issue with content injection mode in Firefox.
+# For major version updates, please read the introduction and notes from TG Groups.
++ Added predefined rendering data feature, see Discussions#446.
++ Added font rendering for iframe adaptive parent page.
+@ Improved rules & compatible with math formula style.
+@ Optimized compatibility of TrustedTypes.createPolicy.
+@ Optimized compatibility of Fix-bold on asyncload site.
+@ Optimized rendering preview for cross-domain iframe.
+@ Updated @namespace and @require resource domain.
+@ Fixed script conflicts that occurs in Firefox. (Issues#448)
 @ Fixed some known issues, optimized code & style.
 ```
 
@@ -113,9 +116,16 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-## version 2025.03.20.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2025.04.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
+# For major version updates, please read the introduction and notes from TG Groups.
+@ Fixed Baidu Search Button Load Exception.
+@ Fixed keyword filter feature fails in some sites.
+@ Improved loading logic of You.com jump button.
+@ Optimized TrustedTypes.createPolicy compatibility.
+@ Optimized search results ad blocking features.
+@ Updated @namespace source address.
 @ Fixed some known issues, optimized code & style.
 ```
 
