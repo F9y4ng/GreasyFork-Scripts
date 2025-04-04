@@ -25,15 +25,18 @@
 - 脚本错误、异常请反馈至{[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)}, 字体、渲染样式、乱码问题请反馈至{[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)}。
 - 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-### version 2025.03.01.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
-
-> **更新预告**📣：由于新版本中增加对跨域 iframe 的自适应支持、对常用数学公式的样式兼容、以及其他渲染参数的调整，在下个月更新中会启用更新自动重置功能，如您近期未做过备份，请在四月份更新发布前及时备份本地数据。（**但我们强烈建议您**💭：如果自定义站点数据较少，最好重新使用新的过滤参数进行渲染。如果您在还原备份后使用旧参数渲染时，遇到乱码、方块字、字体样式异常等问题，请重置数据后重新配置参数以使用最新渲染规则再次尝试）♥️ 感谢您的配合与支持。
+### version 2025.04.05.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-+ 更新 OPPOSans 至 3.04 版本，可到 Github.Discussions 下载安装新字体。
-@ 修复在超长页面上因高频操作造成页面加载延迟问题。
-@ 优化字体列表字体检测被浏览器指纹保护阻止的提示。
-@ 修复在 Firefox 中 content 注入模式下的权限错误。
+# 重大版本更新，请及时关注脚本功能介绍及 TG 群组的注意事项说明。
++ 新增预定义渲染数据功能，功能详情请访问 Discussions#446。
++ 新增对跨域 iframe 自适应父级页面的字体渲染设置。
+@ 优化调整默认渲染规则，兼容常见的数学公式渲染样式。
+@ 优化对 window.trustedTypes.createPolicy 的兼容性。
+@ 优化在异步加载网站粗体修正功能的兼容性。(Chromium)
+@ 优化对跨域 iframe（含嵌套框架）的渲染效果预览功能。
+@ 更新 @namespace 源地址以及 @require 资源域。
+@ 修复在 Firefox 中特定条件下出现的脚本冲突。(Issues#448)
 @ 修复一些已知的问题，优化代码，优化样式。
 ```
 
@@ -126,9 +129,16 @@
 - [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 - 自动更新检测默认开启，如无更新提示需求，可在“**搜索引擎助手高级设置**”中关闭它。
 
-### version 2025.03.20.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2025.04.05.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
+# 重大版本更新，请及时关注脚本功能介绍及 TG 群组的注意事项说明。
+@ 修复 Baidu 搜索跳转按钮的加载异常。
+@ 修复关键词过滤功能在部分站点失效的问题。
+@ 优化 You.com 跳转按钮的加载逻辑。
+@ 优化 TrustedTypes.createPolicy 的兼容性。
+@ 优化搜索结果广告拦截功能。
+@ 更新 @namespace 源地址。
 @ 修正一些已知问题，优化代码，优化样式。
 ```
 
