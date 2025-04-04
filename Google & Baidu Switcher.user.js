@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            помощник поисковых систем
 // @name:ja            優雅な検索エンジン助手
-// @version            2025.03.20.1
+// @version            2025.04.05.1
 // @author             F9y4ng
 // @description        “Elegant Search Engine Assistant” facilite la navigation entre moteurs de recherche, personnalise les préférences, met en évidence les mots-clés, élimine les redirections et publicités, et filtre les résultats. Compatible avec divers moteurs tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, etc.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG and more.
@@ -13,8 +13,8 @@
 // @description:zh-TW  「優雅的搜尋引擎助手」方便使用者在不同的搜尋引擎之間跳轉；支援自定義常用搜尋引擎、關鍵詞高亮渲染；還提供去除搜尋連結重定向、遮蔽搜尋結果廣告、使用關鍵詞過濾搜尋結果、和自動更新檢測等高階功能；相容如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、You、Startpage、Brave、Yahoo、Yep、Swisscows、searXNG等多個搜尋引擎。
 // @description:ru     “Элегантный помощник поисковых систем” обеспечивает удобное переключение между поисковыми системами, поддерживает настройку, выделение ключевых слов и продвинутые функции.  совместим с Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG и другими поисковыми системами.
 // @description:ja     「優雅な検索エンジン助手」は、検索エンジン間の切り替えを容易にし、カスタムエンジン、キーワードハイライト、リダイレクト削除、広告ブロック、キーワードフィルタリング、自動更新をサポートし、Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、You、Startpage、Brave、Yahoo、Yep、Swisscows、searXNGなどと互換性があります。
-// @namespace          https://openuserjs.org/scripts/f9y4ng/Google_baidu_Switcher_(ALL_in_One)
 // @icon               data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAFC0lEQVR4nO2WbUxTVxjHj8IMWZbt05Yt28y2D3yQRN0++MVsmXFbNjBixbFpkSGvXUt5GRpkgOCgIsgqOANUQCXYOQUKCMqrtDAmiorSwioIytsoIL3ce1olQ+W/3KsFlYov8yUmPsn/w725J//fec7zPPcQ8jJexoscABwsFosLpfRTq9W6CIDTMzFmWfYjSmkux3EWSilsYll2YnBwsNxsNi99auaUUn+O48ZZlkODrgW7lAVIjM9DWuohHD3yF8xmBhzHTXZ2du4B4PhEzVmWDeZ32nq+AxvESfDekIbwHbUIV51F+E4dAuTZEK2IQU3VKSEjBoNBQwiZ80TMx8bGPuY4buLsGSPc3WIQvKcVYVrMUPChAXh4JKC0uEGAKCsri/pfxgCcKKULKKXVfHo9RfGQ5Brtmk9BFJux0jUGl7r7MTAwMLR48eI3H9nYarW+c7vQrtqKTFOgxXrZ3lnNbfJNqEJq8kFhnVKplD+q+SKO40x8ofHn+dvOQuxIUsPPJwUbdttP/b2Sakbh6ZEgAJSUlPxOCJn7UOYMw7xBKb1sMo1AFrgTP/imI0ypw0+7GhG4+Q/Ij12dMgmpnoC02Axp0RUEl1sQVjc5DVE3iS8/3ygA9PT09HV3dwdbLJa3HghAKY3lF23eqIJ/bKn9HdZNIuhAH2S5fyNNewWqE2OIK+6Fb1Yb5Eett+BqJvDVsk3o7zdhdNRsmxPXurq6tswKwLKs0aC/iFWiBITV3bQLEJB3CcmVJuhHgA5mWkc7JhCkaoO8YhySQyYsWxqG1e5xcP0iEnJJOppPtgkger1+/wxjAPMopdH8ECk6rIXXpsP2K7zcgo3qi2g3321uU2HbOPxyO4VvQ6v/vZ2xm5Bnt0K0Mg5VFSeFQaVWq/3vNH+FUlrJ07WcNWJLVA7WRtgHCFL3ocAwbtec1wUzIM1pR2jtjRlrZQVDcHeNBl9fRqPRQAh5zXbuUbz5vpxyrFn9C8JTqhB8eNAugP++LtRcun5fAF7RBZeFY7C33jtcLbQzy7I35s+f/4kAwLfcuZYLELlvhbzi2qztFXigD0Xts2SAAWR8Bmqu213vta0e6cpCoRbEYvFavuff5h/2ZpfDO77igf0tO8Ih8mA3jKP2AUrPU/jsbkXocfsF/H1sJbIyjwgAy5cv/46f8R/wD9lZ5VgXV/1QQyZgfzeUx0fQdg9E7fkxRCY2Iij1DPyyO2bUQejxSazw2I7Tze0YGhoyOzo6fiZcKhiGYfifjJu7YrpyZ1PdTQTm9yBkvxGZjQz2NVMoyv6BX3oLQuL/RFiMDpLkU/DbY5w+irpJeEaWQiLPEnZfWVlZSghxFmqgv78/lX+5XVkC11VJ8EpqgM+ucw+Ut7IZXtsaIFbo4JVyAusSdfCM0EC2ueYWRMpprE9pgjhRCzfPX+ErycDw8ChMJtOos7OzFyFknq0NnXp7e/U8RK1Oj58TixAQkvNYEvumw+2bGIREVQsQPpIcfLtGgYrac3z/86lnRCJROCHkvbsGUX5+/utNTU0FDMOM33nNehztTiuEx8otiIg+BtmPGVBszRPe19fXV7u4uHgTQt6/3ySes2TJkgURERGBCoUi5nGk1+ubeDNVRilErtEI9EmZuhc4ODh8PZX2pxVardbJYDAcuzMjw8PDY1KpNJYQ8i55RjE3MzPTR6PRqFUqVebChQv5tH9InkPMIYS8+jyMyQsT/wHRI0Gp4kJwPQAAAABJRU5ErkJggg==
+// @namespace          https://github.com/F9y4ng/GreasyFork-Scripts/
 // @homepage           https://f9y4ng.github.io/GreasyFork-Scripts/
 // @homepageURL        https://f9y4ng.github.io/GreasyFork-Scripts/
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
@@ -33,10 +33,11 @@
 // @match              *://so.toutiao.com/search*
 // @match              *://yandex.com/*search*
 // @match              *://yandex.ru/*search*
+// @match              *://yandex.eu/*search*
 // @match              *://www.ecosia.org/*
 // @match              *://*.search.yahoo.com/search*
 // @match              *://*.images.search.yahoo.com/search*
-// @match              *://you.com/search*
+// @match              *://you.com/*
 // @match              *://www.startpage.com/*
 // @match              *://search.brave.com/*
 // @match              *://yep.com/*
@@ -256,10 +257,17 @@
 // @grant              GM.deleteValue
 // @grant              GM_openInTab
 // @grant              GM.openInTab
+// @grant              GM_addElement
 // @grant              GM_registerMenuCommand
 // @grant              GM.registerMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
+// @note               {"CN":"修复 Baidu 搜索跳转按钮的加载异常。","EN":"Fixed Baidu Search Button Load Exception."}
+// @note               {"CN":"修复关键词过滤功能在部分站点失效的问题。","EN":"Fixed keyword filter feature fails in some sites."}
+// @note               {"CN":"优化 You.com 跳转按钮的加载逻辑。","EN":"Improved loading logic of You.com jump button."}
+// @note               {"CN":"优化 TrustedTypes.createPolicy 的兼容性。","EN":"Optimized TrustedTypes.createPolicy compatibility."}
+// @note               {"CN":"优化搜索结果广告拦截功能。","EN":"Optimized search results ad blocking features."}
+// @note               {"CN":"更新 @namespace 源地址。","EN":"Updated @namespace source address."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         edge 兼容Tampermonkey, Violentmonkey
 // @compatible         Chrome 兼容Tampermonkey, Violentmonkey
@@ -274,7 +282,7 @@
 
 /* jshint esversion: 11 */
 
-void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
+void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
   "use strict";
 
   /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -291,20 +299,33 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
    * PROBLEMS OR NEW FEATURES, PLEASE FEEDBACK IN GITHUB ISSUES, THANK YOU!    *
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+  const wrappedFrom = ctx.wrappedJSObject ? Array.from : sctx.Array.from;
   const toolkit = {
-    info: GM?.info ?? GM_info,
     debugging: IS_OPEN_DEBUG,
-    atob: atob.bind(ctx),
-    btoa: btoa.bind(ctx),
-    alert: alert.bind(ctx),
-    prompt: prompt.bind(ctx),
-    confirm: confirm.bind(ctx),
-    console: Object.assign({}, ctx.console),
+    info: GM?.info ?? GM_info,
+    atob: sctx.atob.bind(sctx),
+    btoa: sctx.btoa.bind(sctx),
+    alert: ctx.alert.bind(ctx),
+    prompt: ctx.prompt.bind(ctx),
+    confirm: ctx.confirm.bind(ctx),
+    console: sctx.Object.assign({}, ctx.console),
+    orginalFns: { oS: sctx.Object.prototype.toString, hP: sctx.Object.prototype.hasOwnProperty, aF: (...args) => sctx.Object.setPrototypeOf(wrappedFrom(...args), arrayProxy) },
   };
-  SearchEngineAssistant(ctx, toolkit, { ...arrayProxy, ...customFns });
+  ["pushState", "replaceState"].forEach(m => void (ctx.history[m] = customFns.eH(m)));
+  SearchEngineAssistant(ctx, sctx, toolkit, { ...toolkit.orginalFns, ...customFns });
 })(
   typeof window !== "undefined" ? window : this ?? globalThis,
-  function (global, secureVars, customFuntions) {
+  ((originalWindow, iframe) => {
+    if (typeof GM_addElement === "undefined") return originalWindow;
+    try {
+      const { contentWindow } = (iframe = GM_addElement("iframe", { id: "𝚜𝚊𝚏e.w𝚒𝚗𝚍𝚘𝚠", style: "display:none" }));
+      if (!originalWindow.wrappedJSObject) iframe.remove();
+      return contentWindow;
+    } catch (e) {
+      return iframe?.remove(), originalWindow;
+    }
+  })(typeof window !== "undefined" ? window : this ?? globalThis, null),
+  function (global, safeWindow, secureVars, customFuntions) {
     "use strict";
 
     /* PERFECTLY COMPATIBLE FOR GREASEMONKEY, TAMPERMONKEY, VIOLENTMONKEY, USERSCRIPTS 2024-03-15 F9Y4NG */
@@ -342,9 +363,9 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
         loading: generateRandomString(6, "char"),
         cssAttrName: `gb-css-${generateRandomString(8, "hex")}`,
         rndButtonID: generateRandomString(12, "char"),
-        rndclassName: `SC${generateRandomString(8, "digit")}`,
-        rndstyleName: `SS${generateRandomString(8, "digit")}`,
-        rndadvName: `SA${generateRandomString(8, "digit")}`,
+        rndclassName: `SC${generateRandomString(8, "number")}`,
+        rndstyleName: `SS${generateRandomString(8, "number")}`,
+        rndadvName: `SA${generateRandomString(8, "number")}`,
         leftButton: generateRandomString(6, "mix"),
         rightButton: generateRandomString(6, "mix"),
         scrollspan: generateRandomString(8, "char"),
@@ -356,7 +377,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       var: {
         disappear: `ͽ${generateRandomString(10, "date")}ͼ`,
         translucent: `ͼ${generateRandomString(10, "date")}ͽ`,
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.03.01.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.04.05.0",
         scriptName: getMetaValue(`name:${getLocalLanguages()}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       },
       url: {
@@ -410,29 +431,27 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
     class RAF {
       constructor(context) {
         if (RAF.instance) return RAF.instance;
-        this.context = context;
-        this.timerMap = { timeout: {}, interval: {} };
+        safeWindow.Object.assign(this, { context, timerMap: { timeout: {}, interval: {} } });
         this._registerAnimationFrame(context);
         ["setTimeout", "setInterval", "clearTimeout", "clearInterval"].forEach(method => (this[method] = this[method].bind(this)));
         RAF.instance = this;
       }
       _registerAnimationFrame(scope) {
-        const vendor = ["ms", "moz", "webkit", "o"].Find(vendor => scope[`${vendor}RequestAnimationFrame`]);
+        const vendor = asArray(["ms", "moz", "webkit", "o"]).Find(vendor => scope[`${vendor}RequestAnimationFrame`]);
         const raf = scope.requestAnimationFrame ?? scope[`${vendor}RequestAnimationFrame`];
         const caf = scope.cancelAnimationFrame ?? (scope[`${vendor}CancelAnimationFrame`] || scope[`${vendor}CancelRequestAnimationFrame`]);
-        Object.assign(scope, { [def.const.raf]: raf, [def.const.caf]: caf });
+        safeWindow.Object.assign(scope, { [def.const.raf]: raf, [def.const.caf]: caf });
       }
-      _ticking(fn, type, interval = 0, ...args) {
+      _ticking(fn, type, interval, ...args) {
         let lastTime = performance.now();
         const timerSymbol = Symbol(type);
         const step = () => {
           const currentTime = performance.now();
           this._setTimerMap(timerSymbol, type, step);
-          if (interval < 16.67 || currentTime - lastTime >= interval) {
-            if (typeof fn === "function") fn(...args);
-            if (type === "interval") lastTime = currentTime;
-            else this.clearTimeout(timerSymbol);
-          }
+          if (currentTime - lastTime < (Number(interval) || 0)) return;
+          if (typeof fn === "function") fn(...args);
+          if (type === "interval") lastTime = currentTime;
+          else this.clearTimeout(timerSymbol);
         };
         this._setTimerMap(timerSymbol, type, step);
         return timerSymbol;
@@ -508,7 +527,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       try {
         return asArray(target.querySelectorAll(expr));
       } catch (e) {
-        return [];
+        return asArray([]);
       }
     }
 
@@ -528,8 +547,9 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       return el;
     }
 
-    function random(range, type = "round") {
-      return Math[type]((global.crypto.getRandomValues(new Uint32Array(1))[0] / (0xffffffff + 1)) * range);
+    function random({ range, count = 1, type = "round" }) {
+      const typedArray = global.crypto.getRandomValues(new Uint32Array(count));
+      return count === 1 ? Math[type]((typedArray[0] / 0xffffffff) * range) : typedArray.map(a => Math[type]((a / 0xffffffff) * range));
     }
 
     function gCS(node, opt = null) {
@@ -562,24 +582,19 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       }
     }
 
-    function uniq(array, filterType = Boolean) {
-      if (!Array.isArray(array)) return [];
-      return [...new Set(array.filter(filterType))];
-    }
-
     function generateRandomString(length, type) {
-      if (type === "date") return new Date().setHours(20, 30, 40, 50).toString(18);
-      const characters = {
-        mix: "mYsTBgpkwNcGzFJdOMrt8n2jUC3fWRlKVA5y16oLxIXQE7Z9buvqie4PahH0SD",
-        char: "zkDcUGopOvHJLfIZdPqEeRmyCSNYwrgbsFQuBXxnVWiltjMhaATK",
-        hex: "a62f8bc07bd15c9ad3efe4",
-        digit: "3927154680",
+      if (type === "date") return new Date().setHours(20, 30, 40, 50).toString(16);
+      const charset = {
+        mix: "w5imkK𝚌ofUeH𝚎tsEcSnJua𝚖hjpV𝚝zgIL8vZlNd𝚡C𝚊324𝚞qMWbr𝚣Y1X0𝚜9OPRA76QTFGy𝚘DBx",
+        char: "Uo𝚜ALDMRplYc𝚖fsCarEu𝚘ITZyqxwzh𝚊F𝚞iVBNO𝚣eKtJjnQWSH𝚡m𝚎PXGgb𝚌dv𝚝k",
+        hex: "fc8d6b1e7a9b2a5ec4f0d3",
+        number: "5039268147",
       };
-      const randomString = asArray({ length }, () => characters[type][random(characters[type].length, "floor")]).join("");
-      return type === "mix" ? randomString.replace(/^\d/, characters.char[random(characters.char.length)]) : randomString;
+      const generator = (v, i) => (type === "mix" && i === 0 ? [...charset.char][random({ range: 62 })] : [...charset[type]][v]);
+      return asArray(random({ range: [...charset[type]].length, count: length, type: "floor" }), generator).join("");
     }
 
-    function refresh() {
+    function reload() {
       return sleep(5e2, { useCachedSetTimeout: true }).then(() => global.location.reload(true));
     }
 
@@ -590,25 +605,25 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
     }
 
     function createTrustedTypePolicy() {
-      const defaultPolicy = { createHTML: string => string };
-      if (!global.trustedTypes?.createPolicy) return defaultPolicy;
-      const currentHostName = global.location.hostname;
+      const policyOptions = { createHTML: s => s, createScript: s => s, createScriptURL: u => u };
+      if (!global.trustedTypes?.createPolicy) return policyOptions;
+      const originalCreatePolicy = global.trustedTypes.createPolicy.bind(global.trustedTypes);
       const whitelist = [{ host: "bing.com", policy: "rwflyoutDefault" }];
-      const policyName = whitelist.Find(entry => currentHostName.endsWith(entry.host))?.policy ?? "default";
-      return global.trustedTypes.createPolicy(policyName, defaultPolicy);
+      const policyName = global.trustedTypes.defaultPolicy?.name ?? asArray(whitelist).Find(entry => location.hostname.endsWith(entry.host))?.policy ?? "default";
+      const defaultPolicy = global.trustedTypes.defaultPolicy ?? originalCreatePolicy(policyName, policyOptions);
+      global.trustedTypes.createPolicy = (name, options) => (name === policyName ? defaultPolicy : originalCreatePolicy(name, options));
+      return defaultPolicy;
     }
 
     function checkRedundantScript(global) {
-      const scriptRedundancyWarning = () => {
-        const scriptRedundanceText = `\ud83d\udea9 [Redundant Scripts]:\r\nFound redundant-installed scripts: ${def.var.scriptName}. please reload to troubleshoot the issue.`;
+      const redundancyWarning = () => {
+        const redundanceText = `\ud83d\udea9 [Redundant Scripts]:\r\nFound redundant-installed scripts: ${def.var.scriptName}. please reload to troubleshoot the issue.`;
         const troubleshoot = `\ufff8\ud83d\uded1 ${IS_CHN ? "发现冗余安装的脚本，点击排查！" : "Troubleshoot Redundant"}`;
-        CUR_WINDOW_TOP && GMregisterMenuCommand(troubleshoot, () => void (GMopenInTab(`${def.url.feedback}/117`, false) && refresh())) && __console("error", scriptRedundanceText);
-        return true;
+        return CUR_WINDOW_TOP && GMregisterMenuCommand(troubleshoot, () => void GMopenInTab(`${def.url.feedback}/117`, false)) && __console("error", redundanceText), true;
       };
-      if (global["gb-init-redundantcheck"] === true) return scriptRedundancyWarning();
-      global["gb-init-redundantcheck"] = true;
-      if (GMcontentMode && document.documentElement.getAttribute("gb-init-rc") === "true") return scriptRedundancyWarning();
-      Object.freeze(def.const) && document.documentElement.setAttribute("gb-init-rc", true);
+      if (global["gb-init-once"] === true) return redundancyWarning();
+      if (GMcontentMode && document.documentElement?.hasAttribute("gb-init-once")) return redundancyWarning();
+      (global["gb-init-once"] = true) && safeWindow.Object.freeze(def.const) && document.documentElement?.setAttribute("gb-init-once", "");
     }
 
     async function getNavigatorInfo() {
@@ -640,7 +655,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
         const getVMUserAgentData = ({ browserName, browserVersion, os, arch }) => {
           const [architecture, bitness] = arch?.split("-") ?? [];
           let brands = [{ brand: capitalize(browserName), version: browserVersion }];
-          if (parseFloat(browserVersion) < 57.0 && GMinfo.userAgent) {
+          if (parseFloat(browserVersion) < 78.0 && GMinfo.userAgent) {
             const [, brand, version] = GMinfo.userAgent.match(/\s(Chrom(?:e|ium)|Firefox)\/(\d+[.0-9]*)/i) ?? [];
             if (brand) brands = [{ brand: capitalize(brand), version }, ...brands];
           }
@@ -730,7 +745,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
 
       function getOSInfoFromUA(checkString) {
         const platforms = ["like Mac", "Mac", "Android", "Debian", "Ubuntu", "Linux", "Win", "CrOS", "X11"];
-        const platform = platforms.Find(p => checkString(p, "i")) || "Unknown";
+        const platform = asArray(platforms).Find(p => checkString(p, "i")) || "Unknown";
         return getFullPlatformName(platform);
       }
     }
@@ -794,16 +809,13 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       return pendingNodes.every(el => el.remove() || el.parentNode === null);
     }
 
-    function createNoticeHTML(html) {
-      return `<div class="${def.notice.rName}"><dl>${html}</dl></div>`;
-    }
-
     void (async function (tTP) {
       const [CONFIGURE, VERSION, AUTOCHECK, RESULTFILTER, REMOTEICONS] = ["_configures_", "_version_", "_autoupdate_", "_resultFilter_", "_remoteicons_"];
       const { engine, creditEngine, brand, voucher } = await getNavigatorInfo();
       const [IS_REAL_BLINK, IS_REAL_GECKO, IS_REAL_WEBKIT] = ["Blink", "Gecko", "WebKit"].map(cE => cE === creditEngine);
       const IS_CHEAT_UA = voucher === null && (engine !== creditEngine || checkBlinkCheatingUA(navigator.userAgentData));
       const IS_GREASEMONKEY = ["Greasemonkey", "Userscripts"].includes(GMscriptHandler);
+      const createNoticeHTML = html => `<div class="${def.notice.rName}"><dl>${html}</dl></div>`;
 
       const cache = {
         value: (data, eT = 6048e5) => ({ data, expired: Date.now() + eT }),
@@ -825,7 +837,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
 
       class NoticeX {
         constructor(options = {}) {
-          this.defaultOptions = {
+          const defaultOptions = {
             title: "",
             text: "",
             type: def.notice.success,
@@ -839,7 +851,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
             scroll: { maxHeight: 400, showOnHover: false },
             callbacks: { beforeShow: [], onShow: [], afterShow: [], beforeClose: [], onClose: [], afterClose: [], onClick: [], onHover: [] },
           };
-          this.options = { ...this.defaultOptions, ...options };
+          this.options = { ...defaultOptions, ...options };
           this._registerCallbacks();
         }
         static close(item) {
@@ -859,7 +871,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
           const position = `${def.notice.noticeX}-${this.options.position}`;
           if (qS(`gb-notice.${position}`)) return;
           const container = cE("gb-notice", { class: [def.notice.noticeX, position, def.notice.appear] });
-          document.documentElement.appendChild(container);
+          document.documentElement?.appendChild(container);
         }
         _createHeader() {
           if (!this.options.title && !this.options.closeWith.includes("button")) return null;
@@ -963,7 +975,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       function insertAfter(newEl, target) {
         if (!newEl || !target) return;
         const parent = target.parentNode || document.head;
-        parent.insertBefore(newEl, target.nextSibling);
+        parent.insertBefore(newEl, target.nextElementSibling);
       }
 
       function addStyle({ target, styleId, styleContent, media, isOverwrite }) {
@@ -973,8 +985,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
         else if (existingStyles.length > 0) return true;
         try {
           const styleElement = cE("style", { id: styleId, media, type: "text/css", textContent: styleContent ?? "", [def.const.cssAttrName]: isOverwrite ?? false });
-          target.appendChild(styleElement);
-          return true;
+          return target.appendChild(styleElement) && true;
         } catch (e) {
           ERROR("addStyle:", e.message);
         }
@@ -1012,9 +1023,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
       function versionCompare(current, compare) {
         const [currentVersion, compareVersion] = [current.split(".").map(Number), compare.split(".").map(Number)];
         if (compareVersion.length !== currentVersion.length) return true;
-        for (let i = 0; i < currentVersion.length; i++) {
-          if (compareVersion[i] !== currentVersion[i]) return compareVersion[i] > currentVersion[i];
-        }
+        for (let i = 0; i < currentVersion.length; i++) if (compareVersion[i] !== currentVersion[i]) return compareVersion[i] > currentVersion[i];
         return false;
       }
 
@@ -1226,13 +1235,12 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
           return decodeURIComponent(res ?? "");
         }
 
-        async function getNoneXHRDecodeURI(url, node, siteName, getDecodeURI) {
+        async function getNoneXHRDecodeURI(url, node, siteName, decodeUrl) {
           try {
             const d = await new Promise((resolve, reject) => {
               if (!cachedRequestLinks.has(url)) {
                 cachedRequestLinks.set(url, null);
-                const decodeURL = getDecodeURI || url;
-                resolve(decodeURL);
+                resolve(decodeUrl || url);
               } else reject(new RangeError("DuplicateLinksError"));
             });
             return handleSuccess(d, url, node);
@@ -1312,20 +1320,10 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               }
             });
           },
-          Google: (siteName, clean) => {
-            if (qA("div[class='Z26q7c UK95Uc']:not([data-content-feature])>div[id^='eob']").length < 1) return;
-            COUNT(`[${siteName}-Anti-Ads-Deep-exp]`);
-            qA("div[class='Z26q7c UK95Uc']:not([data-content-feature])").forEach(node => {
-              if (qS("div[id^='eob']", node)) {
-                node.classList.add(def.var.disappear);
-                clean === true && safeRemoveNode(node);
-              }
-            });
-          },
           Yandex: (siteName, clean) => {
             const querystring = `.AliceFabPromo-Close,.PopupDesktop-Buttons button.PopupDesktop-Button_type_close`;
             qA(querystring).forEach(item => item.click());
-            if (qA("li.serp-item.serp-item_card div.Organic-Subtitle span.organic__advLabel,li[data-cid][class*='_card'] .Organic-Subtitle>.Organic-Path~span").length < 1) return;
+            if (qA("li.serp-item.serp-item_card div.Organic-Subtitle span.organic__advLabel,li[data-cid][class*='_card'] .Organic-Subtitle>.Organic-Path~span").length === 0) return;
             COUNT(`[${siteName}-Anti-Ads-Deep-exp]`);
             qA("li.serp-item.serp-item_card,li[data-cid][class*='_card']").forEach(node => {
               const adsTxtNode = qS(".Organic-Subtitle span.organic__advLabel", node);
@@ -1337,21 +1335,11 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
             });
           },
           So360: (siteName, clean) => {
-            if (qA("ul.section>li span.txt>s, ul.result>li>div.res-recommend-tag").length < 1) return;
+            if (qA("ul.section>li span.txt>s, ul.result>li>div.res-recommend-tag").length === 0) return;
             COUNT(`[${siteName}-Anti-Ads-Deep-exp]`);
             qA("ul.section>li,ul.result>li").forEach(node => {
               const ads = qS("span[class='txt']>s", node);
               if (!ads?.textContent?.includes("\u5e7f\u544a") && !qS("div.res-recommend-tag", node)) return;
-              node.classList.add(def.var.disappear);
-              clean === true && safeRemoveNode(node);
-            });
-          },
-          You: (siteName, clean) => {
-            if (qA("ul[data-testid='web-results']>li div>div>span[class^='sc-']").length < 1) return;
-            COUNT(`[${siteName}-Anti-Ads-Deep-exp]`);
-            qA("ul[data-testid='web-results']>li").forEach(node => {
-              const ads = qS("div>div>span[class^='sc-']", node);
-              if (!ads?.textContent?.toLowerCase().includes("ad")) return;
               node.classList.add(def.var.disappear);
               clean === true && safeRemoveNode(node);
             });
@@ -1361,13 +1349,14 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
           Brave: () => qS(`.promo-tooltip>button.btn--icon[aria-label="Close"]`)?.click(),
           Duckduckgo: () => qS(`button[data-testid="serp-popover-promo-close"]`)?.click(),
           Yahoo: () => qS("button.refresh-soft-intro-dismiss-button")?.click(),
-          Swisscows: (siteName, clean) => {
-            if (qA(".web-results>article>.site>a.ad").length < 1) return;
-            COUNT(`[${siteName}-Anti-Ads-Deep-exp]`);
+          Swisscows: siteName => {
+            qS(`.dialog-content[id^="radix-"][role="dialog"][data-state="open"]>.buttons>button.button.button-link`)?.click();
+            if (qA(".web-results>article:not([data-ads]) .site>a:is(.policy,.ad)").length === 0) return;
             qA(".web-results>article").forEach(node => {
-              if (!qS(".site>a.ad", node)) return;
-              node.classList.add(def.var.disappear);
-              clean === true && safeRemoveNode(node);
+              if (qS(".site>a:is(.policy,.ad)", node)) {
+                node.style.cssText = "height:0;min-height:0;overflow:hidden;margin:0;padding:0";
+                node.dataset.ads = COUNT(`[${siteName}-Anti-Ads-Deep-exp]`) || "";
+              }
             });
           },
         };
@@ -1445,24 +1434,22 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               imageURL: "https://image.baidu.com/search/index?tn=baiduimage&ps=1&ie=utf-8&word=",
               imageType: ["baiduimage", "baiduimagedetail"],
               splitTypeName: "tn",
-              mainSelector: ".s_btn_wr,#sugOut",
-              buttonCssText: `a,a em{text-decoration:none!important}:not([class^="page-inner"])>a:not(.${def.notice.linkerror}):hover{text-decoration:underline!important}#form{white-space:nowrap}#u{z-index:1!important}#${def.const.rndButtonID}{position:relative;z-index:1999999995;display:inline-block;margin:0 0 0 4px;padding:0;height:40px;vertical-align:top;line-height:40px}#${def.const.rndButtonID} *{-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:40px}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px!important;height:40px;min-width:100px;border:0;border-bottom-left-radius:10px;border-top-left-radius:10px;background:#4e6ef2;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 18px 0 12px!important;height:40px;min-width:100px;border:0;border-top-right-radius:10px;border-bottom-right-radius:10px;background:#4e6ef2;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#4662d9;border:1px solid transparent;}`,
+              mainSelector: ".s_btn_wr,#sugOut,span[class^='submit-btn']",
+              buttonCssText: `a,a em{text-decoration:none!important}:not([class^="page-inner"])>a:not(.${def.notice.linkerror}):hover{text-decoration:underline!important}#form{white-space:nowrap}#u{z-index:1!important}#${def.const.rndButtonID}{position:absolute;z-index:1999999995;display:inline-block;margin:0;padding:0;height:40px;vertical-align:top;line-height:40px;right:-210px}#${def.const.rndButtonID} *{-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:40px}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px!important;height:40px;min-width:100px;border:0;border-bottom-left-radius:10px;border-top-left-radius:10px;background:#4e6ef2;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 18px 0 12px!important;height:40px;min-width:100px;border:0;border-top-right-radius:10px;border-bottom-right-radius:10px;background:#4e6ef2;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#4662d9;border:1px solid transparent;}`,
               resultListProp: { qs: `#content_left>div.c-container[tpl]:not([tpl='recommend_list'],[tpl^="rel-"])`, delay: 10 },
               keywords: "#wrapper_wrapper em,.c-gap-top-small b",
-              antiRedirectFn: function () {
+              antiRedirectFn: () =>
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "baidu_ar" })(".c-container a[href*='//www.baidu.com/link?url=']", "Baidu", {
                   useNewTab: true,
                   removeDataSet: true,
                   advancedAnti: true,
-                });
-              },
-              antiAdsFn: function () {
-                deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "baidu_ad", immed: true })({
+                }),
+              antiAdsFn: () =>
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "baidu_ad", immed: true })({
                   selectors: `#s-hotsearch-wrapper,.result-op[tpl='sp_hot_sale'],.result-op[tpl='b2b_prod'],#content_left>div:not([class]):not([style]),div[data-placeid],[id$='_canvas'],div.result.c-container:not([class~='xpath-log']),.imgpage .imglist>li.newfcImgli,.ec_wise_ad,div[class^='result-op'][tpl='right_tabs'][data-click],div[class^='result-op'][tpl='right_links'][data-click],#searchTag,#content_left>div.c-container[tpl="recommend_list"],#con-ar div[tpl="right_recommends_merge"]`,
                   siteName: "Baidu",
                   isRemoveNodes: true,
-                });
-              },
+                }),
             },
             google: {
               siteTypeID: 2,
@@ -1475,21 +1462,19 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               splitTypeName: ["tbm", "udm"],
               mainSelector: "form button[type='submit']",
               buttonCssText: `#pnnext>span:nth-child(2){clear:left}#${def.const.rndButtonID}{position:relative;z-index:100;display:flex;margin:0 4px 0 -5px;justify-content:center;align-items:center}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{padding:0 2px 0 8px}.${def.const.scrollspan}{min-height:26px;margin-right:3px!important}.${def.const.scrollbars}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px!important;height:38px;min-width:90px;border:0;border-bottom-left-radius:24px;border-top-left-radius:24px;background:#1a73e8;box-shadow:none;color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 18px 0 12px!important;height:38px;min-width:90px;border:0;border-top-right-radius:24px;border-bottom-right-radius:24px;background:#1a73e8;box-shadow:none;color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#1b66c9;}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{background:#8ab4f8;box-shadow:0 1px 3px 1px rgba(0, 0, 0, 0.15),0 1px 2px rgba(0, 0, 0, 0.3);color:#202124}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#93baf9}}`,
-              resultListProp: { qs: `div.g[data-hveid^="C"][data-hveid$="AA"],div.cLjAic.K7khPe[data-hveid^="C"][data-hveid$="AA"],div.g div[data-hveid^="C"][data-hveid$="AA"]`, delay: 10 },
+              resultListProp: { qs: `div.MjjYud div.Ww4FFb.vt6azd[data-hveid^="C"][data-hveid$="AA"]:not(:has(div[jscontroller="TvBckd"]))`, delay: 10 },
               keywords: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
-              antiRedirectFn: function () {
+              antiRedirectFn: () =>
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "google_ar" })(
                   "#rcnt div[data-hveid^='C'][data-hveid$='AA'] :not(h3.ob5Hkd,.d0fCJc)>a:not(.ngTNl,.oRJe3d,.k8XOCe,[jsname='ZWuC2'],.fl,#pnprev,#pnnext)",
                   "Google",
                   { useNewTab: true, cleanAttr: ["ping"], removeDataSet: true }
-                );
-              },
-              antiAdsFn: function () {
-                deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "google_ad", immed: true })({
+                ),
+              antiAdsFn: () =>
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "google_ad", immed: true })({
                   selectors: `div[aria-label='\u5e7f\u544a'],div[aria-label='Ads' i],#bottomads,#tvcap`,
                   siteName: "Google",
-                });
-              },
+                }),
             },
             bing: {
               siteTypeID: 3,
@@ -1501,33 +1486,30 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: `.b_searchboxForm>input[type="hidden"][name="form"]`,
-              buttonCssText: `html{overflow-x:hidden}.${def.const.searchbox}{border-radius:8px!important}a,#b_results>li[class] a:not(.wiki_seemore),#b_results .b_no a,#b_context .mediumCardTitle{color:#001ba0}#${def.const.rndButtonID}{position:relative;z-index:0;display:inline-flex;margin:0;padding:0 6px 0 0;width:auto;height:38px;min-width:180px;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.leftButton},#${def.const.rightButton}{margin:0;padding:0;width:auto}#${def.const.rndButtonID} input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:600;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px;border-bottom-left-radius:24px;border-top-left-radius:24px}#${def.const.rightButton} input{margin:0 0 0 2px;padding:0 18px 0 12px;border-top-right-radius:24px;border-bottom-right-radius:24px}.${def.const.scrollspan}{/*margin:-14px -3px 0 0!important;max-height:28px*/}.${def.const.scrollbars}{/*max-height:28px;font-size:14px!important*/}.${def.const.scrollspan2}{margin:0!important;padding:4px 4px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars2}{margin-right:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#fff;background-color:#f0f3f6;box-shadow:0 0 4px #174ae4;color:#174ae4;transition:border .1s linear,box-shadow .3s linear}.${def.notice.random}_input{width:300px!important}@media (prefers-color-scheme: dark){.b_dark #b_results>li[class] a{color:#7aabeb}#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#a2b7f4;color:#333}}`,
-              resultListProp: { qs: `#b_results>li.b_algo:not(.b_algoBorder,.b_topborder),#b_results>li.b_vidAns .mmlist>div[id],#b_results>li.b_mop .b_slidebar>div.slide`, delay: 10 },
-              keywords: String(
+              buttonCssText: `html{overflow-x:hidden}#sb_form .inline_sb{border-radius:24px}.${def.const.searchbox}{border-radius:8px!important}a,#b_results>li[class] a:not(.wiki_seemore),#b_results .b_no a,#b_context .mediumCardTitle{color:#001ba0}#${def.const.rndButtonID}{position:relative;z-index:0;display:inline-flex;margin:0;padding:0 6px 0 0;width:auto;height:38px;min-width:180px;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.leftButton},#${def.const.rightButton}{margin:0;padding:0;width:auto}#${def.const.rndButtonID} input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:600;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px;border-bottom-left-radius:24px;border-top-left-radius:24px}#${def.const.rightButton} input{margin:0 0 0 2px;padding:0 18px 0 12px;border-top-right-radius:24px;border-bottom-right-radius:24px}.${def.const.scrollspan}{/*margin:-14px -3px 0 0!important;max-height:28px*/}.${def.const.scrollbars}{/*max-height:28px;font-size:14px!important*/}.${def.const.scrollspan2}{margin:0!important;padding:4px 4px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars2}{margin-right:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#fff;background-color:#f0f3f6;box-shadow:0 0 4px #174ae4;color:#174ae4;transition:border .1s linear,box-shadow .3s linear}.${def.notice.random}_input{width:300px!important}@media (prefers-color-scheme: dark){.b_dark #b_results>li[class] a{color:#7aabeb}#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#a2b7f4;color:#333}}`,
+              resultListProp: {
+                qs: `#b_results>li.b_algo:not(.b_algoBorder,.b_topborder),#b_results>li.b_vidAns .mmlist>div[id],#b_results>li.b_mop .b_slidebar>div.slide,#b_topw>li.b_ans,aside>ol#b_context>li.b_algo`,
+                delay: 10,
+              },
+              keywords:
                 Number(getUrlParam("ensearch")) || Number(gbCookies.getItem("ENSEARCH")?.match(/[=](\d)/)?.[1])
                   ? "strong,.b_no h4,.b_strong,.b_ad .b_adlabel strong,.cbl"
-                  : "#sp_requery strong,#sp_recourse strong,.sb_adTA_title_link_cn strong,.b_ad .ad_esltitle~div strong,h2 strong,#b_results .b_algo p strong,.b_caption p strong,.b_snippetBigText strong,.recommendationsTableTitle+.b_slideexp strong,.recommendationsTableTitle+table strong,.recommendationsTableTitle+ul strong,.pageRecoContainer .b_module_expansion_control strong,.pageRecoContainer .b_title>strong,.b_rs strong,.b_rrsr strong,.richrswrapper strong,#dict_ans strong,.b_listnav>.b_ans_stamp>strong,#b_content #ans_nws .na_cnt strong,.b_vidAns strong,.adltwrnmsg strong"
-              ),
+                  : "#sp_requery strong,#sp_recourse strong,.sb_adTA_title_link_cn strong,.b_ad .ad_esltitle~div strong,h2 strong,#b_results .b_algo p strong,.b_caption p strong,.b_snippetBigText strong,.recommendationsTableTitle+.b_slideexp strong,.recommendationsTableTitle+table strong,.recommendationsTableTitle+ul strong,.pageRecoContainer .b_module_expansion_control strong,.pageRecoContainer .b_title>strong,.b_rs strong,.b_rrsr strong,.richrswrapper strong,#dict_ans strong,.b_listnav>.b_ans_stamp>strong,#b_content #ans_nws .na_cnt strong,.b_vidAns strong,.adltwrnmsg strong",
               antiRedirectFn: function () {
-                GMunsafeWindow.AwayTimeScrollTopPoleRS = false;
-                GMunsafeWindow.AwayTimeThreshold = 864e3;
-                deBounce({
-                  fn: () => {
-                    parsingAntiRedirect("#b_results>li:not(.b_pag,#mfa_root) a:not([role='button']):not([href*='.bing.com/ck/a?'])", "Bing", { useNewTab: true, cleanAttr: ["h"] });
-                    parsingAntiRedirect("#b_results a.b_widePag:not([href*='.bing.com/ck/a?'])", "Bing", { forceSelf: true, cleanAttr: ["h"] });
-                    parsingAntiRedirect("#b_content a[href*='.bing.com/ck/a?']:not([role='button'],.b_widePag)", "Bing", { useNewTab: true, cleanAttr: ["h"], advancedAnti: true });
-                    parsingAntiRedirect("#b_content a.b_widePag[href*='.bing.com/ck/a?']", "Bing", { forceSelf: true, cleanAttr: ["h"], advancedAnti: true });
-                  },
-                  delay: 20,
-                  timer: "bing_ar",
-                })();
+                safeWindow.Object.assign(GMunsafeWindow, { AwayTimeScrollTopPoleRS: false, AwayTimeThreshold: 864e3 });
+                const antiRedirect = () => {
+                  parsingAntiRedirect("#b_results>li:not(.b_pag,#mfa_root) a:not([role='button']):not([href*='.bing.com/ck/a?'])", "Bing", { useNewTab: true, cleanAttr: ["h"] });
+                  parsingAntiRedirect("#b_results a.b_widePag:not([href*='.bing.com/ck/a?'])", "Bing", { forceSelf: true, cleanAttr: ["h"] });
+                  parsingAntiRedirect("#b_content a[href*='.bing.com/ck/a?']:not([role='button'],.b_widePag)", "Bing", { useNewTab: true, cleanAttr: ["h"], advancedAnti: true });
+                  parsingAntiRedirect("#b_content a.b_widePag[href*='.bing.com/ck/a?']", "Bing", { forceSelf: true, cleanAttr: ["h"], advancedAnti: true });
+                };
+                deBounce({ fn: antiRedirect, delay: 20, timer: "bing_ar" })();
               },
-              antiAdsFn: function () {
-                deBounce({ fn: parseAntiAdvertising, delay: 10, timer: "bing_ad", immed: true })({
+              antiAdsFn: () =>
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "bing_ad", immed: true })({
                   selectors: `li.b_ans>div.wpt_bc_container,li.b_ans>#relatedSearchesLGWContainer,li.b_ans>.b_rs,li.b_ad,#b_pole,#b_content .b_underSearchbox,#b_header>div[id^="bnp."][data-vertical],#b_context li.b_ans .b_spa_adblock,.ad_sc,.b_adBottom,.b_adLastChild,.b_adPATitleBlock,.b_spa_adblock,.mapsTextAds,.pa_sb,.productAd,[id$="adsMvCarousel"],a[href*="/aclick?ld="],div.pagereco_anim,#inline_rs,#ev_talkbox_wrapper,#b_content>main[aria-label]>#b_ims_bza_pole,.shop_page .br-poleoffcarousel,#b_content>div#pole>div[class="ra_car_block ra_pole"]>div.ra_car_container,#pole>.productAd[data-ad-carousel],.b_adPATitleBlock+div,a.sb_meta[href^="http://advertise.bingads.microsoft.com"],.promotion-panel-inner,.ins_exp.vsp,li[class="b_algo"]:has(.b_attribution[data-partnertag] + p[class]),.b_ans:has([class^="xm_"][class*="_ansCont"])`,
                   siteName: "Bing",
-                });
-              },
+                }),
             },
             duckduckgo: {
               siteTypeID: 4,
@@ -1540,12 +1522,18 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               splitTypeName: "ia",
               mainSelector: "#search_form",
               buttonCssText: `#${def.const.rndButtonID}{position:absolute;top:0;right:-188px;z-index:1999999995;display:block;height:44px}#${def.const.leftButton}{display:inline-block;height:44px}#${def.const.rightButton}{display:inline-block;margin:0 0 0 -2px;height:44px}#${def.const.leftButton} input{margin:0;padding:1px 10px 1px 15px!important;height:44px;min-width:100px;border:1px solid var(--theme-col-bg-button-secondary-hover);border-bottom-left-radius:var(--default-border-radius);border-top-left-radius:var(--default-border-radius);background:transparent;box-shadow:0 2px 3px rgba(0, 0, 0, 0.06);color:var(--theme-col-txt-button-secondary);vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:1px 15px 1px 10px!important;height:44px;min-width:100px;border:1px solid var(--theme-col-bg-button-secondary-hover);border-top-right-radius:var(--default-border-radius);border-bottom-right-radius:var(--default-border-radius);background:transparent;box-shadow:0 2px 3px rgba(0, 0, 0, 0.06);color:var(--theme-col-txt-button-secondary);vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid transparent;background-color:#2950bf!important;color:#fff!important}`,
-              resultListProp: { qs: `ol.react-results--main>li[data-layout="organic"],ol.react-results--main>li[data-layout="videos"] div.module--carousel__item`, delay: 10 },
+              resultListProp: {
+                qs: `ol.react-results--main>li[data-layout="organic"],ol.react-results--main>li[data-layout="videos"] div.module--carousel__item,ol.react-results--main>li:has(div[data-react-module-id="about"])`,
+                delay: 10,
+              },
               keywords: "strong, b",
               antiRedirectFn: null,
-              antiAdsFn: function () {
-                deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "ddg_ad", immed: true })({ selectors: `.footer`, siteName: "Duckduckgo", isRemoveNodes: true });
-              },
+              antiAdsFn: () =>
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "ddg_ad", immed: true })({
+                  selectors: `.footer,.react-results--main>li[data-layout="related_searches"]>div[class]`,
+                  siteName: "Duckduckgo",
+                  isRemoveNodes: true,
+                }),
             },
             sogou: {
               siteTypeID: 5,
@@ -1560,16 +1548,14 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               buttonCssText: `#${def.const.rndButtonID}{position:absolute;top:0;right:0;z-index:1999999995;margin:-1px 0 0;padding:0;width:auto;height:39px;cursor:pointer;-webkit-appearance:none}#${def.const.rndButtonID} *{-webkit-text-stroke:0 transparent!important}#${def.const.leftButton}{display:inline;height:39px}#${def.const.rightButton}{display:inline;height:39px}#${def.const.leftButton} input{margin:0;padding:0 18px!important;height:39px;min-width:100px;border:2px solid #222;border-radius:12px;background:#f5f5f5;color:#000;vertical-align:top;font-weight:500;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 18px!important;height:39px;min-width:100px;border:2px solid #222;border-radius:12px;background:#f5f5f5;color:#000;vertical-align:top;font-weight:500;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:2px solid #205aef;background:#e9f2ff;color:#205aef}.${def.notice.random}_images{height:34px!important;border:1px solid #ababab!important;border-radius:3px!important;background:##fafafa!important}.${def.notice.random}_weixin{height:34px!important;border:1px solid #00a06a!important;border-radius:2px!important;background:#fff!important;color:#00a06a!important;font-size:15px!important}.${def.notice.random}_weixin:hover{background:#f7fffd!important}`,
               resultListProp: { qs: `div.results>div.vrwrap,div.results>div.rb`, delay: 10 },
               keywords: "#wrapper em",
-              antiRedirectFn: function () {
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "sogou_ar" })("#wrapper a[href^='/link?url=']:not([uigs])", "Sogou", { useNewTab: true, advancedAnti: true });
-              },
-              antiAdsFn: function () {
-                deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "sogou_ad", immed: true })({
-                  selectors: `#biz_tip_box_tuiguang_float,.pz_pc_new_container,.share-wrap,.sponsored,.tgad-box,[class~="ext_query"][id*="sq_ext_"],div.top-better-hintBox,#right>div.rvr-model:not([tpl])`,
+              antiRedirectFn: () =>
+                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "sogou_ar" })("#wrapper a[href^='/link?url=']:not([uigs])", "Sogou", { useNewTab: true, advancedAnti: true }),
+              antiAdsFn: () =>
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "sogou_ad", immed: true })({
+                  selectors: `#biz_tip_box_tuiguang_float,.pz_pc_new_container,.share-wrap,.sponsored,.tgad-box,[class~="ext_query"][id*="sq_ext_"],div.top-better-hintBox,#right>div.rvr-model:not([tpl]),.results>.reactResult`,
                   siteName: "Sogou",
                   isRemoveNodes: true,
-                });
-              },
+                }),
             },
             qwant: {
               siteTypeID: 6,
@@ -1582,40 +1568,36 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               splitTypeName: "t",
               mainSelector: "form[data-testid='mainSearchBar']",
               buttonCssText: `#${def.const.rndButtonID}{position:absolute;top:0;right:0;z-index:1999999995;display:block;height:48px}#${def.const.leftButton}{display:inline-block;height:48px}#${def.const.rightButton}{display:inline-block;margin:0;height:48px}#${def.const.leftButton} input{box-sizing:content-box;margin:1px 0;padding:0 6px 0 12px!important;height:48px;min-width:100px;box-shadow:var(--shadow-searchbar-elevation);transition:box-shadow var(--motion-duration-200) var(--motion-ease), color var(--motion-duration-300) var(--motion-ease), background-color var(--motion-duration-300) var(--motion-ease);border-bottom-left-radius:var(--border-radius-300);border-top-left-radius:var(--border-radius-300);background-color:var(--color-elevation-surface-elevation);color:var(--color-text-primary);vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{box-sizing:content-box;margin:1px 0;padding:0 12px 0 6px!important;height:48px;min-width:100px;box-shadow:var(--shadow-searchbar-elevation);transition:box-shadow var(--motion-duration-200) var(--motion-ease), color var(--motion-duration-300) var(--motion-ease), background-color var(--motion-duration-300) var(--motion-ease);border-top-right-radius:var(--border-radius-300);border-bottom-right-radius:var(--border-radius-300);background-color:var(--color-elevation-surface-elevation);color:var(--color-text-primary);vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:var(--color-elevation-surface-raised);box-shadow:var(--shadow-searchbar-raised);}`,
-              resultListProp: { qs: `div[data-testid="containerWeb"] div[data-testid="sectionWeb"]>div>div`, delay: 10 },
+              resultListProp: { qs: `div[data-testid="containerWeb"] div[data-testid="sectionWeb"]>div>div,.is-sidebar>div>div div[style="display: block;"]`, delay: 50 },
               keywords: "mark",
               antiRedirectFn: null,
-              antiAdsFn: function () {
-                deBounce({ fn: parseAntiAdvertising, delay: 30, timer: "qwant_ad", immed: true })({
-                  selectors: `div[data-testid="containerWeb"] section div[style="display: block;"]:has([data-testid="aserpok"]),.is-sidebar>div>div:has([data-testid="aserpok"])`,
+              antiAdsFn: () =>
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "qwant_ad", immed: true })({
+                  selectors: `div[data-testid="containerWeb"] section div[style="display: block;"]:has([data-testid="aserpok"]),.is-sidebar>div>div:has([data-testid="aserpok"]),[data-testid="containerWeb"] section>div>div:last-child`,
                   siteName: "Qwant",
                   removeDataSet: true,
-                });
-              },
+                }),
             },
             yandex: {
               siteTypeID: 7,
               siteButtonName: "𝐘𝐚𝐧𝐝𝐞𝐱",
               siteNickName: IS_CHN ? "𝐘𝐚𝐧𝐝𝐞𝐱 搜索" : "𝐘𝐚𝐧𝐝𝐞𝐱.𝐜𝐨𝐦",
               siteHostName: "yandex.com",
-              webURL: `https://yandex.${navigator.language === "ru" ? "ru" : "com"}/search/?text=`,
-              imageURL: `https://yandex.${navigator.language === "ru" ? "ru" : "com"}/images/search?from=tabbar&family=no&text=`,
+              webURL: `https://yandex.${navigator.language === "ru" ? "ru" : "eu"}/search/?text=`,
+              imageURL: `https://yandex.${navigator.language === "ru" ? "ru" : "eu"}/images/search?from=tabbar&family=no&text=`,
               imageType: ["images"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: "header form.HeaderForm",
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;top:0;left:-12px;z-index:1999999995;margin:0;padding:0;width:auto;height:44px;cursor:pointer;-webkit-appearance:none}#${def.const.leftButton}{display:inline-block;height:44px}#${def.const.rightButton}{display:inline-block;margin:0 0 0 -1px;height:44px}#${def.const.leftButton} input{padding:1px 12px 0 18px!important;height:44px;min-width:100px;border:1px solid transparent;border-bottom-left-radius:10px;border-top-left-radius:10px;background:#fc0;box-shadow:none;color:#000;vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{padding:1px 18px 0 12px!important;height:44px;min-width:100px;border:1px solid transparent;border-top-right-radius:10px;border-bottom-right-radius:10px;background:#fc0;box-shadow:none;color:#000;vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#ffd633}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{background-color:#fdde55}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#fdc93d}}`,
-              resultListProp: { qs: "#search-result>li[class*='_card'][data-cid]", delay: 10 },
+              buttonCssText: `#${def.const.rndButtonID}{position:relative;top:0;left:-12px;z-index:1999999995;margin:0;padding:0;width:max-content;height:52px;cursor:pointer;-webkit-appearance:none}#${def.const.leftButton}{display:inline-block;height:52px}#${def.const.rightButton}{display:inline-block;margin:0 0 0 -1px;height:52px}#${def.const.leftButton} input{padding:1px 12px 0 18px!important;height:52px;min-width:100px;border:none;box-shadow:0 0 0 2px inset rgba(0, 0, 0, 0.1);border-bottom-left-radius:28px;border-top-left-radius:28px;background:#fff;color:#00000073;vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{padding:1px 18px 0 12px!important;height:52px;min-width:100px;border:none;box-shadow:0 0 0 2px inset rgba(0, 0, 0, .1);border-top-right-radius:28px;border-bottom-right-radius:28px;background:#fff;color:#00000073;vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#fbfbfb}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{color:#eee;background:#18181a;box-shadow:0 0 0 2px inset #3a3a3c;}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#333}}`,
+              resultListProp: { qs: "#search-result>li[data-fast]", delay: 10 },
               keywords: ".OrganicTitleContentSpan b,.OrganicTextContentSpan b",
-              antiRedirectFn: function () {
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yandex_ar" })("#search-result>li.serp-item a", "Yandex", { useNewTab: true, removeDataSet: true });
-              },
-              antiAdsFn: function () {
-                deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "yandex_ad", immed: true })({
-                  selectors: `#distr-pcode-container>div,div.HeaderDesktopActions-Distribution.HeaderDesktopActions-Item,div[tabindex][class*='location_right-bottom'],a.HeaderDesktopActions-MarketCart,span.distr-nav,div.market-cart`,
+              antiRedirectFn: () => deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yandex_ar" })("#search-result>li.serp-item a", "Yandex", { useNewTab: true, removeDataSet: true }),
+              antiAdsFn: () =>
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "yandex_ad", immed: true })({
+                  selectors: `#distr-pcode-container>div,div.HeaderDesktopActions-Distribution.HeaderDesktopActions-Item,div[tabindex][class*='location_right-bottom'],span.distr-nav,div.market-cart`,
                   siteName: "Yandex",
                   isRemoveNodes: true,
-                });
-              },
+                }),
             },
             so360: {
               siteTypeID: 8,
@@ -1630,20 +1612,18 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               buttonCssText: `#${def.const.rndButtonID}{position:relative;top:0;left:0;z-index:199999995;margin:0 0 0 5px;padding:0;width:auto;height:40px;cursor:pointer;-webkit-appearance:none}#${def.const.leftButton}{display:inline-block;padding:0 1px 0 0;height:40px;vertical-align:top}#${def.const.rightButton}{display:inline-block;height:40px;vertical-align:top}#${def.const.leftButton} input{margin:0 -2px 0 0;padding:0 18px!important;height:40px;min-width:100px;border:1px solid #0fb264;border-bottom-left-radius:8px;border-top-left-radius:8px;background:#0fb264;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 18px!important;height:40px;min-width:100px;border:1px solid #0fb264;border-top-right-radius:8px;border-bottom-right-radius:8px;background:#0fb264;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{box-shadow: 0 1px 2px rgba(0,0,0,0.1);background:#2dc471}`,
               resultListProp: { qs: `ul.result>li.res-list`, delay: 10 },
               keywords: "em,#mohe-newdict_dict .mh-exsentence b",
-              antiRedirectFn: function () {
+              antiRedirectFn: () =>
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "so360_ar" })(".res-list a[href*='//www.so.com/link?m=']", "So360", {
                   useNewTab: true,
                   cleanAttr: ["e_href", "data-res"],
                   advancedAnti: true,
-                });
-              },
-              antiAdsFn: function () {
-                deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "so360_ad", immed: true })({
+                }),
+              antiAdsFn: () =>
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "so360_ad", immed: true })({
                   selectors: `#so_bd-ad,#e_idea_pp,#righttop_box,[id^='mohe-360pic_ext--'],.res-mediav,.map_business_con,.lianmeng-ad,.res-mediav-right,.atom-adv,.e-buss,.spread,ul[data-so-biz-monitor-so-display],.related_query li.cm,[class='inline-recommend'][data-url],div#so_top,div#so-activity-entry,div.mh-relate-text,.section li[data-id^="related_query_init_"],#mohe-know_side_nlp`,
                   siteName: "So360",
                   isRemoveNodes: true,
-                });
-              },
+                }),
             },
             toutiao: {
               siteTypeID: 9,
@@ -1656,11 +1636,10 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               splitTypeName: "pd",
               mainSelector: "div[class^='search'][data-log-click]",
               buttonCssText: `#${def.const.rndButtonID}{position:absolute;top:0;right:-160px;z-index:1999999995;margin:-1px;padding:0;width:auto;height:44px;cursor:pointer;-webkit-appearance:none}#${def.const.leftButton}{display:inline-block;height:44px}#${def.const.rightButton}{display:inline-block;margin:0 0 0 -2px;height:44px}#${def.const.leftButton} input{margin:0;padding:1px 10px 1px 15px!important;height:44px;min-width:100px;border:1px solid transparent;border-bottom-left-radius:8px;border-top-left-radius:8px;background:#f04142;color:#fff;vertical-align:top;font-weight:500;font-size:18px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:1px 15px 1px 10px!important;height:44px;min-width:100px;border:1px solid transparent;border-top-right-radius:8px;border-bottom-right-radius:8px;background:#f04142;color:#fff;vertical-align:top;font-weight:500;font-size:18px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:rgba(240, 65, 66, 0.7);color:#fff}`,
-              resultListProp: { qs: `div.s-result-list>div.result-content[data-i]`, delay: 10 },
+              resultListProp: { qs: `div.s-result-list:not(.pd-video)>div.result-content[data-i]`, delay: 10 },
               keywords: "em",
-              antiRedirectFn: function () {
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "toutiao_ar" })(".main a[href*='/search/jump?url=']", "Toutiao", { useNewTab: true, advancedAnti: true });
-              },
+              antiRedirectFn: () =>
+                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "toutiao_ar" })(".main a[href*='/search/jump?url=']", "Toutiao", { useNewTab: true, advancedAnti: true }),
               antiAdsFn: null,
             },
             kaifa: {
@@ -1677,9 +1656,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               resultListProp: { qs: `ul.ant-list-items>li.ant-list-item`, delay: 10 },
               keywords: "mark",
               antiRedirectFn: null,
-              antiAdsFn: function () {
-                deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "kaifa_ad", immed: true })({ selectors: `#reward-entry`, siteName: "Kaifa", isRemoveNodes: true });
-              },
+              antiAdsFn: () => deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "kaifa_ad", immed: true })({ selectors: `#reward-entry`, siteName: "Kaifa", isRemoveNodes: true }),
             },
             ecosia: {
               siteTypeID: 11,
@@ -1692,33 +1669,19 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               splitTypeName: { split: "/", index: 1 },
               mainSelector: "form[role='search'][class~='search-form'][data-test-id='main-header-search-form']",
               buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:1999999995;display:inline-block;margin-left:4px;height:40px}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:40px}#${def.const.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;height:40px;min-width:100px;border:1px solid var(--color-form-border-default);border-bottom-left-radius:20px;border-top-left-radius:20px;background:var(--color-background-primary);box-shadow:0 1px 2px rgba(26,26,26,.18),0 0 8px rgba(26,26,26,.06);color:var(--color-button-content-tertiary);vertical-align:top;font-weight:700;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;height:40px;min-width:100px;border:1px solid var(--color-form-border-default);border-top-right-radius:20px;border-bottom-right-radius:20px;background:var(--color-background-primary);box-shadow:0 1px 2px rgba(26,26,26,.18),0 0 8px rgba(26,26,26,.06);color:var(--color-button-content-tertiary);vertical-align:top;font-weight:700;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid var(--color-button-background-primary-hover);background:var(--color-button-background-primary-hover);color:var(--color-button-content-primary)}`,
-              resultListProp: {
-                qs: `section.mainline>div>div[data-test-id="mainline-result-web"],div.mainline__result[data-test-id="videos-snippet"] ul>li[data-test-id="videos-snippet-item"]`,
-                delay: Infinity,
-              },
+              resultListProp: { qs: `.mainline__content>div:not([class])>div[data-test-id="mainline-result-web"],aside>article[position="sidebar"]`, delay: 150 },
               keywords: "",
               antiRedirectFn: function () {
                 ["adBlockNoticeDismissed", "personalCounterTooltipSearch"].forEach(item => localStorages?.setItem(item, 1));
-                deBounce({
-                  fn: option => !/:nt=1:/.test(gbCookies.getItem("ECFG")) && gbCookies.setItem(option) && refresh(),
-                  timer: "ecosia_cookie",
-                  immed: true,
-                  once: true,
-                })({
-                  sKey: "ECFG",
-                  sValue: `a=0:as=1:cs=0:dt=pc:f=i:fr=0:fs=1:l=en:lt=${Date.now()}:mc=zh-cn:nf=1:nt=1:pz=0:t=1:tt=0:tu=auto:wu=auto:ma=1`,
-                  sEnd: Infinity,
-                  sDomain: ".ecosia.org",
-                  sPath: "/",
-                  sSomeSite: "Lax",
-                });
+                const fn = option => !/:nt=1:/.test(gbCookies.getItem("ECFG")) && gbCookies.setItem(option) && reload();
+                const sValue = `a=0:as=1:cs=0:dt=pc:f=i:fr=0:fs=1:l=en:lt=${Date.now()}:mc=zh-cn:nf=1:nt=1:pz=0:t=1:tt=0:tu=auto:wu=auto:ma=1`;
+                deBounce({ fn, timer: "ecosia_cookie", immed: true, once: true })({ sKey: "ECFG", sValue, sEnd: Infinity, sDomain: ".ecosia.org", sPath: "/", sSomeSite: "Lax" });
               },
-              antiAdsFn: function () {
+              antiAdsFn: () =>
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "ecosia_ad", immed: true })({
-                  selectors: `div[data-test-id="sidebar-onboarding"][href],div.main-header__install-cta,div.main-footer__card-container,div.personal-counter__tooltip,div.cookie-wrapper,div.mainline__footer>a[data-test-id='chat-entry']`,
+                  selectors: `div[data-test-id="sidebar-onboarding"][href],div.main-header__install-cta,div.main-footer-visual__cards,div.personal-counter__tooltip,div.cookie-wrapper,div.mainline__footer>a[data-test-id='chat-entry'],[data-test-id="mainline-result-ad"]`,
                   siteName: "Ecosia",
-                });
-              },
+                }),
             },
             yahoo: {
               siteTypeID: 12,
@@ -1729,23 +1692,21 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               imageURL: "https://images.search.yahoo.com/search/images?p=",
               imageType: ["images"],
               splitTypeName: () => CUR_HOST_NAME.split(".").slice(-4, -3)[0],
-              mainSelector: "#hd div.sbx form#sf,header.hd form#sf #sh section#sbx",
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;position:absolute;z-index:1999999995;display:inline-block;margin-left:4px;width:max-content;height:44px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:44px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:44px}#${def.const.leftButton} input{box-sizing:content-box;margin:0;padding:0 3px 0 6px!important;height:44px;min-width:100px;border:1px solid transparent;border-bottom-left-radius:100px;border-top-left-radius:100px;background:#7e1fff;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{box-sizing:content-box;margin:0;padding:0 6px 0 3px!important;height:44px;min-width:100px;border:1px solid transparent;border-top-right-radius:100px;border-bottom-right-radius:100px;background:#7e1fff;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid transparent;background:#6001d2;color:#fff}`,
+              mainSelector: "#hd div.sbx form#sf,header.hd section#sbx form#sf",
+              buttonCssText: `#${def.const.rndButtonID}{position:relative;position:absolute;z-index:1999999995;display:inline-block;margin-left:4px;width:max-content;height:44px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:44px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:44px}#${def.const.leftButton} input{box-sizing:content-box;margin:0;padding:0 12px 0 18px!important;height:44px;min-width:60px;border:1px solid transparent;border-bottom-left-radius:100px;border-top-left-radius:100px;background:#7e1fff;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{box-sizing:content-box;margin:0;padding:0 18px 0 12px!important;height:44px;min-width:60px;border:1px solid transparent;border-top-right-radius:100px;border-bottom-right-radius:100px;background:#7e1fff;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid transparent;background:#6001d2;color:#fff}`,
               resultListProp: { qs: `#web>ol>li`, delay: 10 },
               keywords: "strong",
-              antiRedirectFn: function () {
+              antiRedirectFn: () =>
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yahoo_ar" })(
                   "#main ol a[href^='https://r.search.yahoo.com/_ylt='],#main #results #sres>li>a[href^='https://r.search.yahoo.com/_ylt=']",
                   "Yahoo",
                   { useNewTab: true, advancedAnti: true }
-                );
-              },
-              antiAdsFn: function () {
-                deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "yahoo_ad", immed: true })({
+                ),
+              antiAdsFn: () =>
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "yahoo_ad", immed: true })({
                   selectors: `#main ol.searchCenterBottomAds,#main ol.searchCenterTopAds`,
                   siteName: "Yahoo",
-                });
-              },
+                }),
             },
             you: {
               siteTypeID: 13,
@@ -1757,23 +1718,19 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               imageType: ["isch"],
               splitTypeName: "tbm",
               mainSelector: "button[data-testid='qb_submit_button']",
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:-9px 0 0;height:34px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:44px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:44px}#${def.const.leftButton} input{margin:0;padding:0;height:44px;min-width:110px;border:1px solid #596ced;border-bottom-left-radius:12px;border-top-left-radius:12px;background-color:#596ced;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0;height:44px;min-width:110px;border:1px solid #596ced;border-top-right-radius:12px;border-bottom-right-radius:12px;background-color:#596ced;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #7a89f0;background-color:#7a89f0;color:#fff}@media (prefers-color-scheme: dark){#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #4d5cc3;background-color:#4d5cc3;}}`,
+              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:0;height:36px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:36px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:36px}#${def.const.leftButton} input{margin:0;padding:0 10px;height:36px;min-width:80px;border:1px solid #596ced;border-bottom-left-radius:12px;border-top-left-radius:12px;background-color:#596ced;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 10px;height:36px;min-width:80px;border:1px solid #596ced;border-top-right-radius:12px;border-bottom-right-radius:12px;background-color:#596ced;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #7a89f0;background-color:#7a89f0;color:#fff}@media (prefers-color-scheme: dark){#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #4d5cc3;background-color:#4d5cc3;}}`,
               resultListProp: {
-                qs: `div[data-testid="app-mainline"]>div[data-eventappname][data-testid]>ul[data-testid="web-results"],div[data-testid="Github Issues-app"]>ul>li`,
+                qs: `[data-floating-ui-portal]>[role='dialog'][data-open='true'] section>article,div[data-eventappname="web_results"] section>article,div[data-eventappname="web_results"] ul>li`,
                 delay: 10,
               },
               keywords: `div[data-testid="app-mainline"] p strong,div[data-testid="app-mainline"] p b`,
-              antiRedirectFn: function () {
-                deBounce({
-                  fn: parameters => parameters.forEach(item => localStorages?.setItem(item, true)),
-                  timer: "you_set",
-                  immed: true,
-                  once: true,
-                })(["openLinksInNewTabs", "hasSeenP13nAnnouncement", "hasUserClosedExtensionModal"]);
-              },
-              antiAdsFn: function () {
-                deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "you_ad", immed: true })({ siteName: "You" });
-              },
+              antiRedirectFn: () =>
+                deBounce({ fn: parameters => parameters.forEach(item => localStorages?.setItem(item, true)), timer: "you_set", immed: true, once: true })([
+                  "openLinksInNewTabs",
+                  "hasSeenP13nAnnouncement",
+                  "hasUserClosedExtensionModal",
+                ]),
+              antiAdsFn: null,
             },
             startpage: {
               siteTypeID: 14,
@@ -1786,29 +1743,19 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               splitTypeName: "cat",
               mainSelector: "#search[role='search'] button.search-btn",
               buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline-block;margin:-1px 5px 0 0;height:40px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:40px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:0;height:40px}#${def.const.leftButton} input{margin:0;padding:0 10px 0 20px!important;height:40px;min-width:95px;border:0 solid transparent;border-bottom-left-radius:2rem;border-top-left-radius:2rem;background:#f1f3ff;box-shadow:0 0 2px #a4a5bb;color:#2e39b3;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 20px 0 10px!important;height:40px;min-width:95px;border:0 solid transparent;border-top-right-radius:2rem;border-bottom-right-radius:2rem;background:#f1f3ff;box-shadow:0 0 2px #a4a5bb;color:#2e39b3;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#6573ff;color:#fff}@media (prefers-color-scheme: dark){#${def.const.leftButton} input{border:1px solid #252b3b;background:#252b3b;color:#fff}#${def.const.rightButton} input{border:1px solid #252b3b;background:#252b3b;color:#fff}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #6573ff;background:#6573ff}}`,
-              resultListProp: { qs: `#main>.w-gl>div.result`, delay: Infinity },
+              resultListProp: { qs: `#main>.w-gl>div.result,.wiki-container>div[role="region"]`, delay: 1e2 },
               keywords: `.result b`,
               antiRedirectFn: function () {
-                deBounce({
-                  fn: option => !/disable_open_in_new_windowEEE0|enable_post_methodEEE0/.test(gbCookies.getItem("preferences")) && gbCookies.setItem(option) && refresh(),
-                  timer: "startpage_cookie",
-                  immed: true,
-                  once: true,
-                })({
-                  sKey: "preferences",
-                  sValue: `date_timeEEEworldN1Ndisable_family_filterEEE0N1Ndisable_open_in_new_windowEEE0N1Nenable_post_methodEEE0N1Nenable_proxy_safety_suggestEEE1N1Nenable_stay_controlEEE0N1Ninstant_answersEEE1N1Nlang_homepageEEEs/device/enN1NlanguageEEEenglishN1Nlanguage_uiEEEenglishN1Nnum_of_resultsEEE20N1Nsearch_results_regionEEEallN1NsuggestionsEEE1N1Nwt_unitEEEcelsius`,
-                  sEnd: Infinity,
-                  sDomain: ".startpage.com",
-                  sPath: "/",
-                  sSecure: true,
-                });
+                const setGBCookie = option => !/disable_open_in_new_windowEEE0|enable_post_methodEEE0/.test(gbCookies.getItem("preferences")) && gbCookies.setItem(option) && reload();
+                const sValue = `date_timeEEEworldN1Ndisable_family_filterEEE0N1Ndisable_open_in_new_windowEEE0N1Nenable_post_methodEEE0N1Nenable_proxy_safety_suggestEEE1N1Nenable_stay_controlEEE0N1Ninstant_answersEEE1N1Nlang_homepageEEEs/device/enN1NlanguageEEEenglishN1Nlanguage_uiEEEenglishN1Nnum_of_resultsEEE20N1Nsearch_results_regionEEEallN1NsuggestionsEEE1N1Nwt_unitEEEcelsius`;
+                const option = { sKey: "preferences", sValue, sEnd: Infinity, sDomain: ".startpage.com", sPath: "/", sSecure: true };
+                deBounce({ fn: setGBCookie, timer: "startpage_cookie", delay: 20, immed: true, once: true })(option);
               },
-              antiAdsFn: function () {
-                deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "startpage_ad", immed: true })({
+              antiAdsFn: () =>
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "startpage_ad", immed: true })({
                   selectors: `section.a-gl-tp,div.widget-install-legacy,div.mainline-results>div.block-display,.Firefox-promo`,
                   siteName: "Startpage",
-                });
-              },
+                }),
             },
             brave: {
               siteTypeID: 15,
@@ -1821,21 +1768,15 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               splitTypeName: { split: "/", index: 1 },
               mainSelector: ".searchform-container[data-testid='searchform-container']",
               buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:0 0 0 10px;padding:0;width:max-content;height:var(--search-form-height)}.${def.const.scrollspan},.${def.const.scrollbars}{height:var(--search-form-height-compact)!important}.${def.const.scrollbars}{border-radius:var(--border-radius-l)!important;box-shadow:none!important}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.rightButton},#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:100%}#${def.const.leftButton} input{margin:0;padding:0 20px!important;height:var(--search-form-height);min-width:95px;border:0;outline:1px solid var(--color-serp-divider-subtle-container);box-shadow:var(--elevation-02);border-bottom-left-radius:var(--border-radius-xl);border-top-left-radius:var(--border-radius-xl);background:var(--color-serp-bar-bg);color:var(--color-text-primary);vertical-align:top;font-weight:600;font-size:16px!important;line-height:16px;box-sizing:border-box;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 20px!important;height:var(--search-form-height);min-width:95px;border:0;outline:1px solid var(--color-serp-divider-subtle-container);box-shadow:var(--elevation-02);border-top-right-radius:var(--border-radius-xl);border-bottom-right-radius:var(--border-radius-xl);background:var(--color-serp-bar-bg);color:var(--color-text-primary);vertical-align:top;font-weight:600;font-size:16px!important;line-height:16px;box-sizing:border-box;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{color:var(--color-primitive-white, #fff);background:linear-gradient(314deg,#fa7250 8.49%,#ff1893 43.72%,#a78aff 99.51%);}`,
-              resultListProp: { qs: `#results>div.snippet[data-type="web"]`, delay: 10 },
+              resultListProp: { qs: `#results>div.snippet[data-type],#results>.standalone>.video-item`, delay: 10 },
               keywords: `.snippet-content strong`,
               antiRedirectFn: function () {
                 localStorages?.setItem("app.aiPromoDismissCount", 10);
-                deBounce({
-                  fn: option => gbCookies.getItem("olnt") !== "1" && gbCookies.setItem(option) && refresh(),
-                  timer: "brave_cookie",
-                  immed: true,
-                  once: true,
-                })({ sKey: "olnt", sValue: "1", sEnd: Infinity, sDomain: "search.brave.com", sPath: "/", sSameSite: "Lax", sSecure: true });
+                const option = { sKey: "olnt", sValue: "1", sEnd: Infinity, sDomain: "search.brave.com", sPath: "/", sSameSite: "Lax", sSecure: true };
+                deBounce({ fn: opt => gbCookies.getItem("olnt") !== "1" && gbCookies.setItem(opt) && reload(), timer: "brave_cookie", immed: true, once: true })(option);
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "brave_ar" })("#results>div#search-elsewhere a", "Brave", { useNewTab: true, forceNewTab: true, removeDataSet: true });
               },
-              antiAdsFn: function () {
-                deBounce({ fn: parseAntiAdvertising, delay: 50, timer: "brave_ad" })({ siteName: "Brave" });
-              },
+              antiAdsFn: () => deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "brave_ad" })({ siteName: "Brave" }),
             },
             yep: {
               siteTypeID: 16,
@@ -1848,15 +1789,14 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               splitTypeName: { split: "/", index: 1 },
               mainSelector: `form div[class$="-addon"]`,
               buttonCssText: `#${def.const.rndButtonID}{position:absolute;top:.5em;z-index:112;display:block;margin:-6px 0 0;padding:0;height:50px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:50px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:50px}#${def.const.leftButton} input{margin:0;padding:4px 15px 4px 25px!important;height:50px;min-width:95px;border:1px solid #f1dc1b;border-bottom-left-radius:25px;border-top-left-radius:25px;background:var(--background--brand);color:#333;vertical-align:top;font-weight:600;font-size:16px!important;line-height:16px;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:4px 25px 4px 15px!important;height:50px;min-width:95px;border:1px solid #f1dc1b;border-top-right-radius:25px;border-bottom-right-radius:25px;background:var(--background--brand);color:#333;vertical-align:top;font-weight:600;font-size:16px!important;line-height:16px;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--background--brandHover)}`,
-              resultListProp: { qs: `div[class*='-results']>div>div>div[class*='-card']`, delay: 10 },
+              resultListProp: { qs: `div[class*='-results']>div>div>div[class*='-card'],div[class*='-sidebar']>div>div>div>div[class*='-stack']`, delay: 20 },
               keywords: ``,
-              antiRedirectFn: function () {
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yep_ar" })(
+              antiRedirectFn: () =>
+                deBounce({ fn: parsingAntiRedirect, delay: 30, timer: "yep_ar", immed: true })(
                   "div[class*='-results']>div>div>div[class*='-card'] a,div[class*='-results']>div>div>div[class*='-block'] a,div[class*='-results']>div>div>div[class*='-incut'] div[class*='-newsIncut'] a,div[class*='-results']>div>div>div[class*='-incut'] div[class*='-container'] a",
                   "Yep",
                   { useNewTab: true, forceNewTab: true, cleanAttr: ["referrerpolicy"] }
-                );
-              },
+                ),
               antiAdsFn: null,
             },
             swisscows: {
@@ -1870,21 +1810,18 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               splitTypeName: { split: "/", index: 2 },
               mainSelector: "form>.searchbar>button.erase",
               buttonCssText: `#header .form-search{max-width:35em}#${def.const.rndButtonID}{position:absolute;top:0;z-index:112;display:block;margin:0;padding:0;height:48px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:2.5em}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:48px}#${def.const.leftButton} input{box-sizing:content-box;margin:0;padding:0 2px 0 4px!important;height:48px;min-width:95px;border-width:0;border-bottom-left-radius:24px;border-top-left-radius:24px;background:var(--button-background);color:var(--button-text-color);vertical-align:top;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{box-sizing:content-box;margin:0;padding:0 4px 0 2px!important;height:48px;min-width:95px;border-width:0;border-top-right-radius:24px;border-bottom-right-radius:24px;background:var(--button-background);color:var(--button-text-color);vertical-align:top;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--button-focus-background);color:var(--button-text-color)}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #eee;background:none;color:#eee;height:46px}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--button-focus-background);color:var(--button-text-color)}}`,
-              resultListProp: { qs: `.web-results>article.item`, delay: 10 },
+              resultListProp: { qs: `.web-results>article.item,.web-results>article.widget`, delay: 10 },
               keywords: `.web-results b`,
-              antiRedirectFn: function () {
+              antiRedirectFn: () =>
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "swisscows_ar" })(".web-results>article.item a,.web-results>div.widget a:not(.widget-button)", "Swisscows", {
                   useNewTab: true,
                   forceNewTab: true,
-                });
-              },
-              antiAdsFn: function () {
-                deBounce({ fn: parseAntiAdvertising, delay: 1e2, timer: "swisscows_ad", immed: true })({
-                  selectors: `header :is(.badge-tg,.badge-vpn,.badge-email,.search-counter),.web-results>div[class*="-privacy"]`,
+                }),
+              antiAdsFn: () =>
+                deBounce({ fn: parseAntiAdvertising, delay: 50, timer: "swisscows_ad", immed: true })({
+                  selectors: `header :is(.badge-tg,.badge-vpn,.badge-email,.search-counter,.badge-edelcloud),.web-results>div[class*="-privacy"],.web-results>section.widget.widget-products`,
                   siteName: "Swisscows",
-                  isRemoveNodes: true,
-                });
-              },
+                }),
             },
             searxng: {
               siteTypeID: 18,
@@ -1899,9 +1836,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               buttonCssText: `#${def.const.rndButtonID}{position:relative;top:0;right:-10px;width:0;z-index:199995;display:block;height:45px}#${def.const.leftButton}{display:inline-block;height:45px}#${def.const.rightButton}{display:inline-block;margin:0;height:45px}#${def.const.leftButton} input{margin:0;padding:1px 10px 1px 15px!important;height:45px;min-width:100px;border:0 solid #ccc;border-bottom-left-radius:.8rem;border-top-left-radius:.8rem;background:var(--color-search-background);box-shadow:var(--color-search-shadow);color:var(--color-search-font);vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:1px 15px 1px 10px!important;height:45px;min-width:100px;border:0;border-top-right-radius:.8rem;border-bottom-right-radius:.8rem;background:var(--color-search-background);box-shadow:var(--color-search-shadow);color:var(--color-search-font);vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rndButtonID}:hover #${def.const.leftButton} input,#${def.const.rndButtonID}:hover #${def.const.rightButton} input{background-color:var(--color-search-background);color:var(--color-search-font);}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid transparent;background-color:var(--color-search-background-hover)!important;color:var(--color-search-background)!important}`,
               resultListProp: { qs: `div#urls article.result`, delay: 10 },
               keywords: ".highlight",
-              antiRedirectFn: function () {
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "searxng_ar" })("div#urls article.result a", "SearXNG", { useNewTab: true });
-              },
+              antiRedirectFn: () => deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "searxng_ar" })("div#urls article.result a", "SearXNG", { useNewTab: true }),
               antiAdsFn: null,
             },
             other: { siteTypeID: 0 },
@@ -1937,8 +1872,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
             "duckduckgo\\.com$": { siteType: newSiteType.DUCKDUCKGO, site: listSite.duckduckgo },
             "\\.sogou\\.com$": { siteType: newSiteType.SOGOU, site: listSite.sogou },
             "www\\.qwant\\.com$": { siteType: newSiteType.QWANT, site: listSite.qwant },
-            "yandex\\.com$": { siteType: newSiteType.YANDEX, site: listSite.yandex },
-            "yandex\\.ru$": { siteType: newSiteType.YANDEX, site: listSite.yandex },
+            "yandex\\.(com|ru|eu)$": { siteType: newSiteType.YANDEX, site: listSite.yandex },
             "\\.so\\.com$": { siteType: newSiteType.SO360, site: listSite.so360 },
             "so\\.toutiao\\.com$": { siteType: newSiteType.TOUTIAO, site: listSite.toutiao },
             "www\\.ecosia\\.org$": { siteType: newSiteType.ECOSIA, site: listSite.ecosia },
@@ -1969,7 +1903,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
             searchKeys: ["wd", "word", "query", "q", "text", "keyword", "p"],
           };
 
-          const { currentSite, listCurrentSite } = findCurrentSite();
+          const { currentSite = {}, listCurrentSite = {} } = findCurrentSite();
           const { currentSiteName, allSiteURIs } = updateSiteInformation();
           const { backgroundColor: bgcolor, foregroundColor: fgcolor } = customColor;
           const updateDetectionAddress = getUpdateAddress();
@@ -1979,7 +1913,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
           /* DEFINE_GLOBAL_STYLES */
 
           def.var.style = String(
-            `.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before {box-sizing:content-box;line-height:normal}.${def.notice.animated}{animation-duration:1s;animation-fill-mode:both}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.${def.notice.random}_fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.${def.notice.random}_fadeOut{animation-name:fadeOut}.${def.notice.appear}{display:block!important}.${def.notice.noticeX},.${def.notice.noticeX} *{text-shadow:none!important;font-family:Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:0 transparent!important}.${def.notice.noticeX}-top{top:0;width:100%}.${def.notice.noticeX}-top .${def.notice.item}{margin:0!important;border-radius:0!important}.${def.notice.noticeX}-topRight{top:10px;right:10px;z-index:2147483647!important}.${def.notice.noticeX}-topLeft{top:10px;left:10px}.${def.notice.noticeX}-topCenter{top:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX}-middleLeft,.${def.notice.noticeX}-middleRight{right:10px;top:50%;transform:translateY(-50%)}.${def.notice.noticeX}-middleLeft{left:10px}.${def.notice.noticeX}-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.${def.notice.noticeX}-bottom{bottom:0;width:100%}.${def.notice.noticeX}-bottom .${def.notice.item}{border-radius:0!important;margin:0!important}.${def.notice.noticeX}-bottomRight{bottom:10px;right:10px;z-index:2147483646!important}.${def.notice.noticeX}-bottomLeft{bottom:10px;left:10px}.${def.notice.noticeX}-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX} .${def.notice.item}{margin:0 0 10px;border-radius:6px;overflow:hidden}.${def.var.translucent} *{display:none!important}.${def.var.translucent} notice-label{display:block!important}.${def.var.disappear}{display:none!important}[gb-filter-notice]{display:block!important;margin:18px 0 28px 10px!important;padding:10px 2px!important;font:normal 400 14px/100% 'Times New Roman',system-ui,-apple-system,BlinkMacSystemFont,serif!important;-webkit-text-stroke:0 transparent!important;line-height:100%!important}gb-filters.code{display:block;margin:20px 0;word-break:break-word;font-size:12px!important}.${def.notice.noticeX} .${def.notice.item} .${def.notice.close}{float:right;margin-right:7px;color:#fff;text-shadow:0 1px 0 #fff;font-weight:700;font-size:18px!important;line-height:1;opacity:1}` +
+            `.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before {box-sizing:content-box;line-height:normal}.${def.notice.animated}{animation-duration:1s;animation-fill-mode:both}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.${def.notice.random}_fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.${def.notice.random}_fadeOut{animation-name:fadeOut}.${def.notice.appear}{display:block!important}.${def.notice.noticeX},.${def.notice.noticeX} *{text-shadow:none!important;font-family:Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:0 transparent!important}.${def.notice.noticeX}-top{top:0;width:100%}.${def.notice.noticeX}-top .${def.notice.item}{margin:0!important;border-radius:0!important}.${def.notice.noticeX}-topRight{top:10px;right:10px;z-index:2147483647!important}.${def.notice.noticeX}-topLeft{top:10px;left:10px}.${def.notice.noticeX}-topCenter{top:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX}-middleLeft,.${def.notice.noticeX}-middleRight{right:10px;top:50%;transform:translateY(-50%)}.${def.notice.noticeX}-middleLeft{left:10px}.${def.notice.noticeX}-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.${def.notice.noticeX}-bottom{bottom:0;width:100%}.${def.notice.noticeX}-bottom .${def.notice.item}{border-radius:0!important;margin:0!important}.${def.notice.noticeX}-bottomRight{bottom:10px;right:10px;z-index:2147483646!important}.${def.notice.noticeX}-bottomLeft{bottom:10px;left:10px}.${def.notice.noticeX}-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX} .${def.notice.item}{margin:0 0 10px;border-radius:6px;overflow:hidden}.${def.var.translucent} *{display:none!important}.${def.var.translucent} notice-label{display:block!important}.${def.var.disappear}{display:none!important}[gb-filter-notice]{display:block!important;min-width:430px;margin:18px 0 28px 10px!important;padding:10px 2px!important;font:normal 400 14px/100% 'WenQuanYi Micro Hei','PingFang SC','Microsoft YaHei',sans-serif!important;-webkit-text-stroke:0 transparent!important;color:grey!important;line-height:1!important}gb-filters.code{display:block;margin:20px 0;word-break:break-word;font-size:12px!important}.${def.notice.noticeX} .${def.notice.item} .${def.notice.close}{float:right;margin-right:7px;color:#fff;text-shadow:0 1px 0 #fff;font-weight:700;font-size:18px!important;line-height:1;opacity:1}` +
               `.${def.notice.noticeX} .${def.notice.item} .${def.notice.close}:hover{color:#000;opacity:.5;cursor:pointer}.${def.notice.noticeX} .${def.notice.item} a{border-bottom:1px dashed #fff;color:#fff}.${def.notice.noticeX} .${def.notice.item} a,.${def.notice.noticeX} .${def.notice.item} a:hover{text-decoration:none}.${def.notice.noticeX} .${def.notice.success}{background-color:#64ce83!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-heading{padding:10px;background-color:#3da95c;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-body{padding:10px!important;color:#fff;}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.info}{background-color:#3ea2ff!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-heading{padding:10px;background-color:#067cea;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-body{padding:10px!important;color:#fff}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.warning}{background-color:#ff7f48!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#f97038;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-body{color:#fff;padding:10px}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.error}{background-color:#e74c3c!important}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#e93724;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-body{padding:10px;color:#fff}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-body:hover{visibility:visible!important}` +
               `.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.configuration} input[disabled],.${def.notice.configuration} select[disabled]{color:#bbb;background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:20px 20px!important;background-color:#fff7f7!important}.${def.notice.noticeX} .${def.notice.configuration}{background:linear-gradient(to right,#fcfcfc,#f2f2f7);background:-webkit-gradient(linear,0 0,0 100%,from(#fcfcfc),to(#f2f2f7));box-shadow:0 0 5px #888}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.close}{float:right;margin-right:7px;color:#000000;text-shadow:0 1px 0 #aaa;font-weight:700;font-size:18px!important;line-height:1;opacity:1}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.close}:hover{color:#555;opacity:.5;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#e7e7e7;color:#333;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-body{padding:10px;color:#333333}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.noticeX}-heading-title{display:inline-block;vertical-align:middle;overflow:hidden;max-width:90%;text-overflow:ellipsis;white-space:nowrap}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#64ce83}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#3da95c}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#3ea2ff}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#067cea;}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#ff7f48}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#f44e06}` +
               `.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#fd5f4e}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#ba2c1d}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#efefef}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#ccc}@keyframes ${def.notice.noticeX}-progress{0%{width:100%}to{width:0}}@keyframes ${def.notice.noticeX}-fadeOut{0%{opacity:1}to{opacity:0}}.${def.notice.noticeX}-fadeOut{animation-name:${def.notice.noticeX}-fadeOut}.${def.notice.noticeX}{position:fixed;z-index:2147483645}.${def.notice.noticeX} ::-webkit-scrollbar{width:8px}.${def.notice.noticeX} ::-webkit-scrollbar-button{width:8px;height:8px}.${def.notice.noticeX} ::-webkit-scrollbar-track{border-radius:3px}.${def.notice.noticeX} ::-webkit-scrollbar-thumb{background:#e1e1e1;border-radius:3px}.${def.notice.noticeX} ::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.rName}{padding:2px!important}.${def.notice.noticeX} .${def.notice.rName} dl{margin:0!important;padding:1px!important}.${def.notice.noticeX} .${def.notice.rName} dl dt{margin:2px 0 6px!important;font-weight:900!important;font-size:16px!important}.${def.notice.noticeX} .${def.notice.rName} dl dd{margin:2px 2px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${def.notice.noticeX} .${def.notice.rName} .${def.notice.center}{width:100%;text-align:center!important}.${def.notice.noticeX} .${def.notice.rName} dl dd em{padding:0 5px;color:#fff;font-style:italic;font-size:24px!important;font-family:Candara,sans-serif!important}.${def.notice.noticeX} .${def.notice.rName} dl dd span{margin-right:8px;font-weight:700;font-size:15px!important}.${def.notice.noticeX} .${def.notice.rName} dl dd i{font-size:20px!important;font-family:Candara,sans-serif!important}.${def.notice.noticeX} .${def.notice.rName} dl dd .im{padding:0 3px;color:gold;font-weight:900;font-size:16px!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} ul{display:inline-block;margin:0 0 0 8px;padding:4px 4px 8px;width:95%;color:rgba(255, 255, 255, 0.8);counter-reset:xxx 0;vertical-align:top;text-align:left}` +
@@ -2002,6 +1936,12 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
           def.var.iconstyle = `.${def.notice.noticeX} .${def.notice.configuration} span.${def.notice.favicon},.${def.notice.card}__body-cover-image span.${def.notice.favicons}{background-color:transparent;background-image:${def.var.iconbg};background-repeat:no-repeat;}`;
 
           function getQueryString() {
+            if (currentSite.siteTypeID === newSiteType.YOU) {
+              const textWord = qS(`textarea#search-input-textarea[name='query']`)?.value.trim();
+              if (textWord) return encodeURIComponent(textWord);
+              const keyNodes = qA(`[data-testid^="youchat-question-turn"] span[class^='sc-']`);
+              if (keyNodes.length) return keyNodes[keyNodes.length - 1].textContent;
+            }
             const { inputArray, searchKeys } = searchProperties;
             const inputValue = qA(inputArray.join()).Find(item => item.value)?.value;
             if (inputValue) {
@@ -2025,37 +1965,34 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
           function getSecurityPolicy() {
             const currentSearchType = getUrlParam(currentSite.splitTypeName);
             return (
-              (currentSite.siteTypeID === newSiteType.GOOGLE && (/^(lcl|flm|fin)$/.test(currentSearchType) || getUrlParam("csui") === "1")) ||
-              (currentSite.siteTypeID === newSiteType.BING && (/^maps$/.test(currentSearchType) || getUrlParam("showconv") === "1")) ||
-              (currentSite.siteTypeID === newSiteType.SOGOU && /^(fanyi|hanyu|as)/.test(location.hostname)) ||
+              (currentSite.siteTypeID === newSiteType.GOOGLE && (/^fin|26|28$/.test(currentSearchType) || getUrlParam("csui") === "1")) ||
+              (currentSite.siteTypeID === newSiteType.BING && /^maps$/.test(currentSearchType)) ||
+              (currentSite.siteTypeID === newSiteType.SOGOU && /^(fanyi|hanyu|as)/.test(CUR_HOST_NAME)) ||
               (currentSite.siteTypeID === newSiteType.DUCKDUCKGO && /^maps$/.test(getUrlParam("iaxm"))) ||
               (currentSite.siteTypeID === newSiteType.YANDEX && location.pathname.includes("/direct")) ||
               (currentSite.siteTypeID === newSiteType.YAHOO && CUR_HOST_NAME.search(/news|video/) !== -1) ||
-              (currentSite.siteTypeID === newSiteType.YOU && /^youchat$/.test(currentSearchType)) ||
               (currentSite.siteTypeID === newSiteType.SEARXNG && /^map$/.test(currentSearchType))
             );
           }
 
           function findCurrentSite() {
             for (const regex in engineMap) {
-              if (hasOwnProperty.call(engineMap, regex) && new RegExp(regex).test(CUR_HOST_NAME)) {
-                const { siteType, site } = engineMap[regex];
-                const currentSite = selectedEngine.includes(siteType) ? site : listSite.other;
-                return { currentSite, listCurrentSite: site };
-              }
+              if (!hasOwnProperty.call(engineMap, regex) || !new RegExp(regex).test(CUR_HOST_NAME)) continue;
+              const { siteType, site } = engineMap[regex];
+              const currentSite = selectedEngine.includes(siteType) ? site : listSite.other;
+              return { currentSite, listCurrentSite: site };
             }
-            return { currentSite: null, listCurrentSite: null };
+            return {};
           }
 
           function updateSiteInformation() {
             let [currentSiteName, allSiteURIs] = ["", ""];
             for (let site in listSite) {
-              if (hasOwnProperty.call(listSite, site)) {
-                if (listSite[site].siteTypeID !== newSiteType.OTHERS) allSiteURIs += listSite[site].siteHostName + ";";
-                if (listSite[site].siteTypeID === listCurrentSite.siteTypeID) currentSiteName = site;
-                if (listSite[site].siteTypeID !== currentSite.siteTypeID && selectedEngine.includes(Number(listSite[site].siteTypeID))) {
-                  selectedSite.length < 2 && selectedSite.push(listSite[site]);
-                }
+              if (!hasOwnProperty.call(listSite, site)) continue;
+              if (listSite[site].siteTypeID !== newSiteType.OTHERS) allSiteURIs += listSite[site].siteHostName + ";";
+              if (listSite[site].siteTypeID === listCurrentSite.siteTypeID) currentSiteName = site;
+              if (listSite[site].siteTypeID !== currentSite.siteTypeID && selectedEngine.includes(Number(listSite[site].siteTypeID))) {
+                selectedSite.length < 2 && selectedSite.push(listSite[site]);
               }
             }
             return { currentSiteName, allSiteURIs };
@@ -2064,12 +2001,12 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
           async function updateToRequestIcon(isReload = true) {
             try {
               const iconDataURL = await requestRemoteIcon(yandexIconsAPIUrl);
-              if (iconDataURL) return cache.set(REMOTEICONS, iconDataURL, 2592e6), DEBUG("%cRemote icon data parsed successfully.", "color:#006400");
-              DEBUG("%cRemote icon data parsing failed.", "color:#ff0000");
+              if (iconDataURL) cache.set(REMOTEICONS, iconDataURL, 2592e6) ?? DEBUG("%cRemote icon data parsed successfully.", "color:#006400");
+              else DEBUG("%cRemote icon data parsing failed.", "color:#ff0000");
             } catch (e) {
               ERROR("updateToRequestIcon: Can't fetch the iconData.", e.message);
             } finally {
-              isReload && refresh();
+              isReload && reload();
             }
           }
 
@@ -2174,132 +2111,124 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               listSearchEngine: currentSite => {
                 let returnHtml = "";
                 for (let site in listSite) {
-                  if (hasOwnProperty.call(listSite, site) && listSite[site].siteTypeID !== 0 && listSite[site].siteTypeID !== currentSite.siteTypeID) {
-                    const iconStyle = `background-position:0 ${(1 - listSite[site].siteTypeID) * 32}px;background-attachment:local;background-size:32px auto;transform:scale(0.75);`;
-                    const buttonTitle = selectedEngine.includes(listSite[site].siteTypeID) ? `title="${IS_CHN ? "您常用的搜索引擎" : "Commonly used search engine"}"` : ``;
-                    returnHtml += String(
-                      `<li>
-                        <button class="${def.notice.searchButton}" id="${listSite[site].siteTypeID}" ${buttonTitle}>
-                          <span class="${def.notice.favicon} ${def.notice.random}_icon" style="${iconStyle}"></span>
-                          <span class="${def.notice.random}_iconText">
-                            ${listSite[site].siteNickName}<sup>${selectedEngine.includes(listSite[site].siteTypeID) ? "\u2726" : "\u0020"}</sup>
-                          </span>
-                        </button>
-                      </li>`
-                    );
-                  }
+                  if (!hasOwnProperty.call(listSite, site) || listSite[site].siteTypeID === 0 || listSite[site].siteTypeID === currentSite.siteTypeID) continue;
+                  const iconStyle = `background-position:0 ${(1 - listSite[site].siteTypeID) * 32}px;background-attachment:local;background-size:32px auto;transform:scale(0.75);`;
+                  const buttonTitle = selectedEngine.includes(listSite[site].siteTypeID) ? `title="${IS_CHN ? "您常用的搜索引擎" : "Commonly used search engine"}"` : ``;
+                  returnHtml += `<li>
+                    <button class="${def.notice.searchButton}" id="${listSite[site].siteTypeID}" ${buttonTitle}>
+                      <span class="${def.notice.favicon} ${def.notice.random}_icon" style="${iconStyle}"></span>
+                      <span class="${def.notice.random}_iconText">
+                        ${listSite[site].siteNickName}<sup>${selectedEngine.includes(listSite[site].siteTypeID) ? "\u2726" : "\u0020"}</sup>
+                      </span>
+                    </button>
+                  </li>`;
                 }
                 return String(`<ul class="${def.notice.searchList}">${returnHtml}</ul>`);
               },
               listSelectSearchEngine: () => {
                 let returnHtml = "";
                 for (let site in listSite) {
-                  if (hasOwnProperty.call(listSite, site) && listSite[site].siteTypeID !== 0) {
-                    const iconStyle = `background-position:0 ${(1 - listSite[site].siteTypeID) * 32}px;background-attachment:local;background-size:32px auto;`;
-                    const inputStatus = selectedEngine.includes(listSite[site].siteTypeID) ? "checked" : "disabled";
-                    returnHtml += String(
-                      `<label class="${def.notice.card}">
-                        <input class="${def.notice.card}__input" type="checkbox" name="${def.notice.card}_lists" data-sn="${listSite[site].siteTypeID}" ${inputStatus}/>
-                        <div class="${def.notice.card}__body">
-                          <header class="${def.notice.card}__body-header">
-                            <span class="${def.notice.card}__body-cover-chackbox">
-                              <svg class="${def.notice.card}__body-cover-chackbox--svg" viewBox="0 0 12 10"><polyline points="1.5 6 4.5 9 10.5 1"></polyline></svg>
-                            </span>
-                            <span class="${def.notice.card}__body-cover-image">
-                              <span class="${def.notice.favicons} ${def.notice.random}_icon" style="${iconStyle}"></span>
-                            </span>
-                            <h2 class="${def.notice.card}__body-header-title" fr-fix-stroke="true">${listSite[site].siteNickName}</h2>
-                            <p class="${def.notice.card}__body-header-subtitle" style="margin:0;padding:0">${listSite[site].siteHostName}</p>
-                          </header>
-                        </div>
-                      </label>`
-                    );
-                  }
+                  if (!hasOwnProperty.call(listSite, site) || listSite[site].siteTypeID === 0) continue;
+                  const iconStyle = `background-position:0 ${(1 - listSite[site].siteTypeID) * 32}px;background-attachment:local;background-size:32px auto;`;
+                  const inputStatus = selectedEngine.includes(listSite[site].siteTypeID) ? "checked" : "disabled";
+                  returnHtml += `<label class="${def.notice.card}">
+                    <input class="${def.notice.card}__input" type="checkbox" name="${def.notice.card}_lists" data-sn="${listSite[site].siteTypeID}" ${inputStatus}/>
+                    <div class="${def.notice.card}__body">
+                      <header class="${def.notice.card}__body-header">
+                        <span class="${def.notice.card}__body-cover-chackbox">
+                          <svg class="${def.notice.card}__body-cover-chackbox--svg" viewBox="0 0 12 10"><polyline points="1.5 6 4.5 9 10.5 1"></polyline></svg>
+                        </span>
+                        <span class="${def.notice.card}__body-cover-image">
+                          <span class="${def.notice.favicons} ${def.notice.random}_icon" style="${iconStyle}"></span>
+                        </span>
+                        <h2 class="${def.notice.card}__body-header-title" fr-fix-stroke="true">${listSite[site].siteNickName}</h2>
+                        <p class="${def.notice.card}__body-header-subtitle" style="margin:0;padding:0">${listSite[site].siteHostName}</p>
+                      </header>
+                    </div>
+                  </label>`;
                 }
                 return returnHtml;
               },
               setConfigure: () => {
                 sleep(5e2)(addAction.closeConfig()).then(isClosed => {
                   if (!isClosed) return;
-                  const configText = String(
-                    `<fieldset class="${def.notice.fieldset}">
-                      <legend class="${def.notice.legend}" title="Version ${def.var.curVersion}">
-                        ${IS_CHN ? "高级功能参数设置" : "Advanced Feature Settings"}
-                      </legend>
-                      <ur class="${def.notice.settingList}">
-                        <li class="${def.notice.random}__content">
-                          <div><span>${IS_CHN ? "请选择三个最常用的搜索引擎：" : "Choose three search engines:"}</span>
-                          <span id="${def.notice.random}_clear">[<u>${IS_CHN ? "清除" : "Clear"}</u>]</span></div>
-                          <div class="${def.notice.grid}">
-                          ${addAction.listSelectSearchEngine()}
-                          </div>
-                        </li>
-                        <li>
-                          <div>${IS_CHN ? "键盘快捷键功能开关" : "Keyboard Shortcut"}</div>
-                          <div style="margin:-2px 2px 0 10px">
-                            <input type="checkbox" id="${def.notice.hk}" class="${def.notice.checkbox}" ${isHotkey ? "checked" : ""} />
-                            <label for="${def.notice.hk}"></label>
-                          </div>
-                        </li>
-                        <li>
-                          <div>${IS_CHN ? "Google 国际站跳转" : "Open Google NCR"}</div>
-                          <div style="margin:-2px 2px 0 10px">
-                            <input type="checkbox" id="${def.notice.gj}" class="${def.notice.checkbox}" ${googleJump ? "checked" : ""} />
-                            <label for="${def.notice.gj}"></label>
-                          </div>
-                        </li>
-                        <li>
-                          <div>${IS_CHN ? "在当前浏览器窗口跳转" : "Open in Self-window"}</div>
-                          <div style="margin:-2px 2px 0 10px">
-                            <input type="checkbox" id="${def.notice.lw}" class="${def.notice.checkbox}" ${localWindow ? "checked" : ""} />
-                            <label for="${def.notice.lw}"></label>
-                          </div>
-                        </li>
-                        <li>
-                          <div style="display:flex">${IS_CHN ? "搜索关键词高亮增强" : "Keyword Enhance"}
-                            <span title="${IS_CHN ? "自定义关键词颜色" : "Custom Keyword Color"}" id="${def.notice.random}_customColor"\
-                              style="display:${keywordHighlight ? `inline-block` : `none`}">\ud83c\udfa8</span>
-                          </div>
-                          <div style="margin:-2px 2px 0 10px">
-                            <input type="checkbox" id="${def.notice.kh}" class="${def.notice.checkbox}" ${keywordHighlight ? "checked" : ""} />
-                            <label for="${def.notice.kh}"></label>
-                          </div>
-                        </li>
-                        <li>
-                          <div>${IS_CHN ? "去除链接重定向跳转" : "Remove Redirection"}</div>
-                          <div style="margin:-2px 2px 0 10px">
-                            <input type="checkbox" id="${def.notice.ar}" class="${def.notice.checkbox}" ${antiLinkRedirect ? "checked" : ""} />
-                            <label for="${def.notice.ar}"></label>
-                          </div>
-                        </li>
-                        <li>
-                          <div title="${IS_CHN ? "实验性功能" : "Beta Version"}"><span>${IS_CHN ? "去除搜索结果广告" : "Remove Ads"}</span>
-                          <sup style="padding:0;font-style:italic;color:#dc143c;font-size:10px">Beta!</sup></div>
-                          <div style="margin:-2px 2px 0 10px">
-                            <input type="checkbox" id="${def.notice.aa}" class="${def.notice.checkbox}" ${antiAds ? "checked" : ""} />
-                            <label for="${def.notice.aa}"></label>
-                          </div>
-                        </li>
-                        <li>
-                          <div title="${IS_CHN ? "关闭更新检测或由扩展自动更新时，您需要到脚本主页查看更新内容。" : "We recommend that you turn on update detection."}">
-                          ${IS_CHN ? "更新检测（默认：开）" : "Auto Update Detect"}</div>
-                          <div style="margin:-2px 2px 0 10px">
-                            <input type="checkbox" id="${def.notice.au}" class="${def.notice.checkbox}" ${isAutoUpdate ? "checked" : ""} />
-                            <label for="${def.notice.au}"></label>
-                          </div>
-                        </li>
-                        <li style="display:flex;justify-content:space-between;">
-                          <button id="${def.notice.random}_help" title="${IS_CHN ? "单击查看脚本主页" : "View Homepage"}">
-                          ${IS_CHN ? "脚本主页" : "Guide!"}
-                          </button>
-                          <div style="display:flex">
-                            <button id="${def.notice.random}_cancel">${IS_CHN ? "取消" : "Cancel"}</button>
-                            <button id="${def.notice.random}_submit">${IS_CHN ? "保存" : "Save"}</button>
-                          </div>
-                        </li>
-                      </ul>
-                    </fieldset>`
-                  );
+                  const configText = `<fieldset class="${def.notice.fieldset}">
+                    <legend class="${def.notice.legend}" title="Version ${def.var.curVersion}">
+                      ${IS_CHN ? "高级功能参数设置" : "Advanced Feature Settings"}
+                    </legend>
+                    <ur class="${def.notice.settingList}">
+                      <li class="${def.notice.random}__content">
+                        <div><span>${IS_CHN ? "请选择三个最常用的搜索引擎：" : "Choose three search engines:"}</span>
+                        <span id="${def.notice.random}_clear">[<u>${IS_CHN ? "清除" : "Clear"}</u>]</span></div>
+                        <div class="${def.notice.grid}">
+                        ${addAction.listSelectSearchEngine()}
+                        </div>
+                      </li>
+                      <li>
+                        <div>${IS_CHN ? "键盘快捷键功能开关" : "Keyboard Shortcut"}</div>
+                        <div style="margin:-2px 2px 0 10px">
+                          <input type="checkbox" id="${def.notice.hk}" class="${def.notice.checkbox}" ${isHotkey ? "checked" : ""} />
+                          <label for="${def.notice.hk}"></label>
+                        </div>
+                      </li>
+                      <li>
+                        <div>${IS_CHN ? "Google 国际站跳转" : "Open Google NCR"}</div>
+                        <div style="margin:-2px 2px 0 10px">
+                          <input type="checkbox" id="${def.notice.gj}" class="${def.notice.checkbox}" ${googleJump ? "checked" : ""} />
+                          <label for="${def.notice.gj}"></label>
+                        </div>
+                      </li>
+                      <li>
+                        <div>${IS_CHN ? "在当前浏览器窗口跳转" : "Open in Self-window"}</div>
+                        <div style="margin:-2px 2px 0 10px">
+                          <input type="checkbox" id="${def.notice.lw}" class="${def.notice.checkbox}" ${localWindow ? "checked" : ""} />
+                          <label for="${def.notice.lw}"></label>
+                        </div>
+                      </li>
+                      <li>
+                        <div style="display:flex">${IS_CHN ? "搜索关键词高亮增强" : "Keyword Enhance"}
+                          <span title="${IS_CHN ? "自定义关键词颜色" : "Custom Keyword Color"}" id="${def.notice.random}_customColor"\
+                            style="display:${keywordHighlight ? `inline-block` : `none`}">\ud83c\udfa8</span>
+                        </div>
+                        <div style="margin:-2px 2px 0 10px">
+                          <input type="checkbox" id="${def.notice.kh}" class="${def.notice.checkbox}" ${keywordHighlight ? "checked" : ""} />
+                          <label for="${def.notice.kh}"></label>
+                        </div>
+                      </li>
+                      <li>
+                        <div>${IS_CHN ? "去除链接重定向跳转" : "Remove Redirection"}</div>
+                        <div style="margin:-2px 2px 0 10px">
+                          <input type="checkbox" id="${def.notice.ar}" class="${def.notice.checkbox}" ${antiLinkRedirect ? "checked" : ""} />
+                          <label for="${def.notice.ar}"></label>
+                        </div>
+                      </li>
+                      <li>
+                        <div title="${IS_CHN ? "实验性功能" : "Beta Version"}"><span>${IS_CHN ? "去除搜索结果广告" : "Remove Ads"}</span>
+                        <sup style="padding:0;font-style:italic;color:#dc143c;font-size:10px">Beta!</sup></div>
+                        <div style="margin:-2px 2px 0 10px">
+                          <input type="checkbox" id="${def.notice.aa}" class="${def.notice.checkbox}" ${antiAds ? "checked" : ""} />
+                          <label for="${def.notice.aa}"></label>
+                        </div>
+                      </li>
+                      <li>
+                        <div title="${IS_CHN ? "关闭更新检测或由扩展自动更新时，您需要到脚本主页查看更新内容。" : "We recommend that you turn on update detection."}">
+                        ${IS_CHN ? "更新检测（默认：开）" : "Auto Update Detect"}</div>
+                        <div style="margin:-2px 2px 0 10px">
+                          <input type="checkbox" id="${def.notice.au}" class="${def.notice.checkbox}" ${isAutoUpdate ? "checked" : ""} />
+                          <label for="${def.notice.au}"></label>
+                        </div>
+                      </li>
+                      <li style="display:flex;justify-content:space-between;">
+                        <button id="${def.notice.random}_help" title="${IS_CHN ? "单击查看脚本主页" : "View Homepage"}">
+                        ${IS_CHN ? "脚本主页" : "Guide!"}
+                        </button>
+                        <div style="display:flex">
+                          <button id="${def.notice.random}_cancel">${IS_CHN ? "取消" : "Cancel"}</button>
+                          <button id="${def.notice.random}_submit">${IS_CHN ? "保存" : "Save"}</button>
+                        </div>
+                      </li>
+                    </ul>
+                  </fieldset>`;
                   const [title, text, type, scroll] = [`${def.var.scriptName} v${def.var.curVersion}`, configText, def.notice.configuration, { maxHeight: 680, showOnHover: true }];
                   const configInterface = GMnotification({ title, text, type, width: 326, closeWith: ["button"], scroll, progressBar: false, timeout: false, position: "topRight" });
                   qA(`input[name='${def.notice.card}_lists']`).forEach(node => void addCardClickEvent(node));
@@ -2333,42 +2262,40 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                     : `Set Array as follows: \n[\n   "Any keywords",\n   "Any URLs but must be escaped",\n   "v\\\\.test\\\\.com\\\\/test\\\\.html",\n   \\\\(\\\\?\\\\:Non-regex escaped\\\\)",`;
                   const placeholderText = placeholder + `\n   "www\\\\.example\\\\.[a-z]{2,3}",\n   "(a|b)\\\\.test\\\\.com",\n   "keyword1|keyword[2345]",\n   "^(?!.*B).*A.*$"\n]`;
                   const resultFiltersJSON = resultFilters.length ? JSON.stringify(resultFilters, null, "  ") : "";
-                  const filterHTML = String(
-                    `<fieldset class="${def.notice.fieldset}">
-                        <legend class="${def.notice.legend}" title="Version ${def.var.curVersion}">
-                          ${IS_CHN ? "搜索结果拦截关键词设置" : "Search Filter Settings"}
-                        </legend>
-                        <ur class="${def.notice.settingList}">
-                          <li>
-                            <div>${IS_CHN ? "关键词拦截开关" : "Filter Switches"}</div>
-                            <div style="margin:-2px 2px 0 10px">
-                              <input type="checkbox" id="${def.notice.rf}" class="${def.notice.checkbox}" ${antiResultsFilter ? "checked" : ""} />
-                              <label for="${def.notice.rf}"></label>
-                            </div>
-                          </li>
-                          <li class="${def.notice.random}_filter">
-                            <div class="${def.notice.random}_filter_info">
-                            ${infoText}
-                            </div>
-                            <div class="${def.notice.random}_filter_textarea">
-                              <textarea class="${def.notice.random}_filter_content" placeholder='${placeholderText}'>${resultFiltersJSON}</textarea>
-                            </div>
-                            <div style="text-align:center;padding:0 0 6px 0">
-                            ${IS_CHN ? "(程序仅检测搜索结果列表内的可见文字)" : "(ONLY DETECT VISIBLE TEXT IN RESULT)"}
-                            </div>
-                          </li>
-                          <li style="display:flex;justify-content:space-between;">
-                            <button id="${def.notice.random}_help" title="${IS_CHN ? "查看详细设置规则请单击设置指引！" : "See document for detailed setting rules! (Chinese)"}">
-                            ${IS_CHN ? "设置指引" : "Guide!"}
-                            </button>
-                            <div style="display:flex">
-                              <button id="${def.notice.random}_cancel">${IS_CHN ? "取消" : "Cancel"}</button>
-                              <button id="${def.notice.random}_submit">${IS_CHN ? "保存" : "Save"}</button>
-                            </div>
-                          </li>
-                        </ul>
-                      </fieldset>`
-                  );
+                  const filterHTML = `<fieldset class="${def.notice.fieldset}">
+                    <legend class="${def.notice.legend}" title="Version ${def.var.curVersion}">
+                      ${IS_CHN ? "搜索结果拦截关键词设置" : "Search Filter Settings"}
+                    </legend>
+                    <ur class="${def.notice.settingList}">
+                      <li>
+                        <div>${IS_CHN ? "关键词拦截开关" : "Filter Switches"}</div>
+                        <div style="margin:-2px 2px 0 10px">
+                          <input type="checkbox" id="${def.notice.rf}" class="${def.notice.checkbox}" ${antiResultsFilter ? "checked" : ""} />
+                          <label for="${def.notice.rf}"></label>
+                        </div>
+                      </li>
+                      <li class="${def.notice.random}_filter">
+                        <div class="${def.notice.random}_filter_info">
+                        ${infoText}
+                        </div>
+                        <div class="${def.notice.random}_filter_textarea">
+                          <textarea class="${def.notice.random}_filter_content" placeholder='${placeholderText}'>${resultFiltersJSON}</textarea>
+                        </div>
+                        <div style="text-align:center;padding:0 0 6px 0">
+                        ${IS_CHN ? "(程序仅检测搜索结果列表内的可见文字)" : "(ONLY DETECT VISIBLE TEXT IN RESULT)"}
+                        </div>
+                      </li>
+                      <li style="display:flex;justify-content:space-between;">
+                        <button id="${def.notice.random}_help" title="${IS_CHN ? "查看详细设置规则请单击设置指引！" : "See document for detailed setting rules! (Chinese)"}">
+                        ${IS_CHN ? "设置指引" : "Guide!"}
+                        </button>
+                        <div style="display:flex">
+                          <button id="${def.notice.random}_cancel">${IS_CHN ? "取消" : "Cancel"}</button>
+                          <button id="${def.notice.random}_submit">${IS_CHN ? "保存" : "Save"}</button>
+                        </div>
+                      </li>
+                    </ul>
+                  </fieldset>`;
                   const [title, text, type, scroll] = [`${def.var.scriptName} v${def.var.curVersion}`, filterHTML, def.notice.configuration, { maxHeight: 680, showOnHover: true }];
                   const filterInterface = GMnotification({ title, text, type, width: 380, closeWith: ["button"], scroll, progressBar: false, timeout: false, position: "topRight" });
                   const textarea = qS(`.${def.notice.random}_filter_textarea .${def.notice.random}_filter_content`);
@@ -2399,12 +2326,12 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 const filterString = qS(`.${def.notice.random}_filter_textarea .${def.notice.random}_filter_content`).value.trim();
                 const filterTrigger = qS(`#${def.notice.rf}`).checked;
                 const parsedFilterString = filterString ? JSON.parse(filterString) : [];
-                if (!Array.isArray(parsedFilterString) || parsedFilterString.Some(item => typeof item !== "string")) throw new Error("Format Error");
-                const resultFilterData = { filter: uniq(parsedFilterString), trigger: filterTrigger };
+                if (!Array.isArray(parsedFilterString) || asArray(parsedFilterString).Some(item => typeof item !== "string")) throw new Error("Format Error");
+                const resultFilterData = { filter: [...new Set(parsedFilterString.filter(Boolean))], trigger: filterTrigger };
                 GMsetValue(RESULTFILTER, encrypt(JSON.stringify(resultFilterData)));
                 const successTitle = IS_CHN ? "保存成功！" : "Success!";
                 const successText = IS_CHN ? "<dd>设置参数已成功保存，页面稍后自动刷新！</dd>" : "<dd>The data is saved successfully, Page will refresh!</dd>";
-                if (await addAction.closeConfig()) GMnotification({ title: successTitle, text: createNoticeHTML(successText), callbacks: { onClose: [refresh] } });
+                if (await addAction.closeConfig()) GMnotification({ title: successTitle, text: createNoticeHTML(successText), callbacks: { onClose: [reload] } });
               } catch (error) {
                 const errorMessage = IS_CHN ? "设置数据格式有误，请修正后重新提交。" : "The setting data format is incorrect!";
                 const errorText = `<dd><e style="font-size:24px;vertical-align:bottom">\ud83d\ude31\u0020</e>${errorMessage}</dd>`;
@@ -2497,7 +2424,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                   const confirmText = `${confirmColorsText}${confirmfgColorText}${confirmForegroundColor}${fonfirmbgColorText}${confirmbackgroundColor}`;
                   if (confirm(confirmText)) {
                     const text = createNoticeHTML(IS_CHN ? "<dd>搜索关键词自定义颜色已保存，当前页面即将刷新！</dd>" : "<dd>Search keywords custom color has been saved!</dd>");
-                    GMnotification({ title: IS_CHN ? "自定义颜色保存" : "Save Custom Color", text, callbacks: { onShow: [saveData], onClose: [refresh] } });
+                    GMnotification({ title: IS_CHN ? "自定义颜色保存" : "Save Custom Color", text, callbacks: { onShow: [saveData], onClose: [reload] } });
                   }
                 } else alert(IS_CHN ? "背景色 格式输入错误！" : "Background-color input-format error!");
               } else alert(IS_CHN ? "前景色（字体颜色） 格式输入错误！" : "Foreground-color (font-color) input-format error!");
@@ -2527,7 +2454,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               GMsetValue(CONFIGURE, encrypt(JSON.stringify(_config_date_)));
               if (await addAction.closeConfig()) {
                 const text = createNoticeHTML(IS_CHN ? "<dd>设置参数已成功保存，页面稍后自动刷新！</dd>" : "<dd>The data is saved successfully, Page will refresh!</dd>");
-                GMnotification({ title: IS_CHN ? "保存成功！" : "Success!", text, callbacks: { onClose: [refresh] } });
+                GMnotification({ title: IS_CHN ? "保存成功！" : "Success!", text, callbacks: { onClose: [reload] } });
               }
             }
 
@@ -2538,31 +2465,22 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               GMregisterMenuCommand(filter_Set_Menu, addAction.filterResult) && DEBUG("%cInstalling Filter_Set_Menu", "color:#808080");
               const engine_List_Menu = `\ufff4\ud83d\udc4b ${IS_CHN ? "嗨，你想去哪里吖？" : "Hi, Where to visit? "} ${isHotkey ? "(V)" : ""}`;
               GMregisterMenuCommand(engine_List_Menu, addAction.listEngine) && DEBUG("%cInstalling Engine_List_Menu", "color:#808080");
+              isHotkey ? insertHotkey() : DEBUG("%cNo Hotkey_Setting", "color:#a9a9a9");
             }
 
             function insertHotkey() {
-              sleep(1e2, { useCachedSetTimeout: true })
-                .then(() => {
-                  if (!isHotkey) return DEBUG("%cNo Hotkey_Setting", "color:#a9a9a9");
-                  document.addEventListener("keydown", event => void (event.code === "AltRight" && (def.var.AltGraph = true)));
-                  document.addEventListener("keyup", event => void (event.code === "AltRight" && delete def.var.AltGraph));
-                  return DEBUG("%cInstalling Hotkey_Setting", "color:#808080") || isHotkey;
-                })
-                .then(isDeplayed => {
-                  isDeplayed &&
-                    document.addEventListener("keydown", e => {
-                      const ekey = (e.altKey || def.var.AltGraph === true) && !e.ctrlKey && !e.shiftKey && !e.metaKey;
-                      if (e.code === "KeyE" && ekey) handleClickEvent("setConfigure", 1e3, e);
-                      else if (e.code === "KeyV" && ekey) handleClickEvent("listEngine", 1e3, e);
-                      else if (e.code === "KeyB" && ekey) handleClickEvent("filterResult", 1e3, e);
-                    });
-                });
+              document.addEventListener("keydown", e => {
+                const ekey = (e.altKey || e.code === "AltRight") && !e.ctrlKey && !e.shiftKey && !e.metaKey;
+                if (e.code === "KeyE" && ekey) handleClickEvent("setConfigure", 1e3, e);
+                else if (e.code === "KeyV" && ekey) handleClickEvent("listEngine", 1e3, e);
+                else if (e.code === "KeyB" && ekey) handleClickEvent("filterResult", 1e3, e);
+              }) || DEBUG("%cInstalling Hotkey_Setting", "color:#808080");
+            }
 
-              function handleClickEvent(name, time, event) {
-                stopEventPropagation(event);
-                const currentTime = performance.now();
-                currentTime - def.count.clickTimer > time && (def.count.clickTimer = currentTime) && addAction[name]();
-              }
+            function handleClickEvent(name, time, event) {
+              stopEventPropagation(event);
+              const currentTime = performance.now();
+              currentTime - def.count.clickTimer > time && (def.count.clickTimer = currentTime) && addAction[name]();
             }
 
             function showSystemInfo() {
@@ -2620,8 +2538,8 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                   if (!qS(buttonID)) return;
                   switch (getUrlParam(currentSite.splitTypeName)) {
                     case currentSite.imageType[0]:
-                      buttonSection.style.marginLeft = "16px";
-                      qS(`#${def.const.rightButton} input`).style.marginLeft = "3px";
+                      buttonSection.style.right = qS("span[class^='submit-btn']") ? "-210px" : "-220px";
+                      qS(`#${def.const.rightButton} input`).style.marginLeft = qS("span[class^='submit-btn']") ? "0" : "3px";
                       document.body.style.overflowX = "clip";
                       break;
                     case currentSite.imageType[1]:
@@ -2677,7 +2595,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 },
               },
               google: {
-                listTypes: { target: "div[eid][data-async-context]", listName: "div", className: "MjjYud" },
+                listTypes: { target: "div.MjjYud", listName: "div" },
                 applyButton: ({ buttonSection, target }) => {
                   getGlobalGoogle("www.google.com", googleJump);
                   insertAfter(buttonSection, target);
@@ -2701,7 +2619,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 },
               },
               qwant: {
-                listTypes: { target: "div[data-testid='containerWeb']>section div[data-testid]>div>div", listName: "div" },
+                listTypes: { target: "div[data-testid='containerWeb'] div[data-testid='sectionWeb']>div", listName: "div" },
                 applyButton: ({ buttonSection, target }) => {
                   target.parentNode.appendChild(buttonSection);
                   sleep(0)(buttonSection.getBoundingClientRect().width || 2e2).then(sectionWidth => {
@@ -2742,7 +2660,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 },
               },
               toutiao: {
-                listTypes: { target: "div.s-result-list", listName: "div" },
+                listTypes: { target: "div.s-result-list", listName: "div", className: "result-content" },
                 clear: () => safeRemoveNode(".main>.s-side-list>.result-content"),
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
@@ -2769,19 +2687,16 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 },
               },
               ecosia: {
-                listTypes: { target: "section.mainline>div:not([class])", listName: "div", className: "mainline__result-wrapper" },
+                listTypes: { target: ".mainline__content>div:not([class])", listName: "div" },
+                clear: () => safeRemoveNode("aside>div[data-test-id='sidebar-web-related-queries']"),
                 applyButton: ({ buttonSection, buttonID, target }) => {
-                  let isLoadEventAttached = false;
-                  const handleLoadEvent = async () => {
-                    await sleep(0, { instant: true });
-                    if (!qS(buttonID) && target) insertAfter(buttonSection, target);
-                    addSearchButtonEvent(qA(`${buttonID} span[sn]:not([event-insert])`));
-                    global.removeEventListener("load", handleLoadEvent);
-                    isLoadEventAttached = false;
-                  };
-                  if (!isLoadEventAttached) {
-                    global.addEventListener("load", handleLoadEvent);
-                    isLoadEventAttached = true;
+                  if (IS_GREASEMONKEY) insertAfter(buttonSection, target);
+                  else {
+                    sleep(5e2).then(() => {
+                      if (qS(buttonID) || !target) return;
+                      insertAfter(buttonSection, target);
+                      addSearchButtonEvent(qA(`${buttonID} span[sn]:not([event-insert])`));
+                    });
                   }
                 },
               },
@@ -2790,11 +2705,9 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 clear: () => safeRemoveNode("#right>ol"),
                 applyButton: ({ buttonSection, target }) => {
                   try {
-                    insertAfter(buttonSection, target);
-                    if (currentSite.imageType.includes(getUrlParam(currentSite.splitTypeName))) {
-                      const sectionRect = qS("#sbx")?.getBoundingClientRect() ?? { width: 656, left: 2e2 };
-                      buttonSection.style.cssText = `position:absolute;left:${6 + sectionRect.width + sectionRect.left}px;top:14px;`;
-                    } else {
+                    if (currentSite.imageType.includes(getUrlParam(currentSite.splitTypeName))) target.appendChild(buttonSection);
+                    else {
+                      insertAfter(buttonSection, target);
                       const sectionWidth = buttonSection.getBoundingClientRect().width ?? 224;
                       buttonSection.style.cssText = `position:absolute;top:0;right:-${10 + sectionWidth}px`;
                     }
@@ -2812,7 +2725,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                   formSection.style.cssText = `max-width:${parseFloat(gCS(formSection).getPropertyValue("max-width")) + sectionWidth}px`;
                 },
               },
-              you: { listTypes: { target: "div[data-testid='app-mainline']>div[data-eventappname][data-testid]", listName: "ul" } },
+              you: { listTypes: { target: "[data-floating-ui-portal]>[role='dialog'][data-open='true'] div>section", listName: "article" } },
               brave: { listTypes: { target: "#results", listName: "div", className: "snippet" }, clear: () => safeRemoveNode("aside>div") },
               yep: {
                 listTypes: { target: "div[class$='-results']>div>div", listName: "div" },
@@ -2859,7 +2772,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
             async function insertButtons() {
               try {
                 const target = qS(currentSite.mainSelector);
-                if (checkIndexPage() || !target || !getQueryString() || qS(`#${def.const.rndButtonID}`)) return;
+                if (checkIndexPage() || !getQueryString() || !target || qS(`#${def.const.rndButtonID}`)) return;
                 const buttonSection = cE("gb-button", { id: def.const.rndButtonID, innerHTML: tTP.createHTML(def.var.button) });
                 const spans = await applyButtons(buttonSection, target);
                 if (!spans) return;
@@ -2883,7 +2796,7 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               if (!element) return;
               const offsetTop = element.getBoundingClientRect().top;
               const toggleClass = () => {
-                const scrollTop = global.scrollY || document.documentElement.scrollTop;
+                const scrollTop = global.scrollY || document.documentElement?.scrollTop || 0;
                 element.classList.toggle(className, scrollTop > offsetTop + scrollOffset);
               };
               toggleClass();
@@ -2954,23 +2867,22 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
               const siteConfig = siteConfigMap[siteName];
               if (!siteConfig) return;
               const { target, listName, className } = siteConfig.listTypes;
-              const noticeNode = qS(`${target} ${listName}[gb-filter-notice]`);
+              const noticeNode = qS(`${target} [gb-filter-notice]`);
               if (noticeNode) return;
               const usedFilterWordsStr = escapeHTML([...usedFilterWords].join(", "));
               const noticeCode = createNotice(listName, className, usedFilterWordsStr);
-              qS(listCurrentSite.resultListProp.qs)?.insertAdjacentHTML("beforebegin", noticeCode);
+              const el = qS(target)?.firstElementChild;
+              if (el) {
+                const position = el.classList.contains(def.var.translucent) || el.classList.contains(def.var.disappear) ? "beforebegin" : "afterend";
+                el.insertAdjacentHTML(position, noticeCode);
+              }
               usedFilterWords.clear();
             }
 
             function filterSearchResults(filterObj) {
               if (resultFilters.length === 0) return;
-              const { qs, delay } = filterObj;
-              let timeout = Number.parseInt(delay);
-              if (isNaN(timeout) && !def.var.infinityFilterTimeInitiated) {
-                if (typeof def.var.infinityFilterTimeInitiated === "boolean") return;
-                global.addEventListener("load", () => (def.var.infinityFilterTimeInitiated = true) && filterSearchResultsProcess(qs));
-                def.var.infinityFilterTimeInitiated = false;
-              } else deBounce({ fn: filterSearchResultsProcess, timer: "filterSearchResults", delay: timeout || 50 })(qs);
+              const { qs, delay } = filterObj ?? {};
+              deBounce({ fn: filterSearchResultsProcess, timer: "filterSearchResults", delay: delay || 50 })(qs);
             }
 
             async function filterSearchResultsProcess(querystring) {
@@ -3035,11 +2947,12 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
             function handleRemainingResults(remainingResults) {
               if (remainingResults > 2) return;
               if (remainingResults === 0) showEmptyNotice(currentSiteName);
+              else qS(`[gb-filter-notice]`)?.remove();
               adjustUI(currentSiteName);
             }
 
             function getDecodeURI(href) {
-              if (typeof href !== "string" || href.startsWith("javascript:")) return ``;
+              if (typeof href !== "string" || href.startsWith("javascript:")) return "";
               return `\ue620${decodeURIComponent(href)}\ue620`;
             }
 
@@ -3077,9 +2990,9 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
             }
 
             function searchButtonAndStylesObserve() {
-              const observer = new MutationObserver(processMainThreadTasks);
-              const config = { childList: true, subtree: true };
-              observer.observe(document, config);
+              const observer = new MutationObserver(deBounce({ fn: processMainThreadTasks, delay: 10, timer: "main" }));
+              observer.observe(document, { childList: true, subtree: true });
+              ["pushState", "replaceState"].forEach(event => global.addEventListener(event, processMainThreadTasks));
             }
 
             /* SEARCH_ENGINE_ASSISTANT_MAIN_PROCESS */
@@ -3090,7 +3003,6 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
                 parseUpdateInformatio(updateInfo);
                 showSystemInfo();
                 insertMenus();
-                insertHotkey();
                 if (updateFlag) updateIconsForExtension(versionFlag);
               }
               searchButtonAndStylesObserve();
@@ -3119,13 +3031,12 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
             }
           );
         })(function () {
-          const rnd = Date.now().toString(16);
           const updateURLArray = [
-            // `https://update.greasyfork.org/scripts/12909/Google_baidu_Switcher_(ALL_in_One).meta.js`,
-            // `https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`,
-            // `https://openuserjs.org/install/f9y4ng/Google_baidu_Switcher_(ALL_in_One).meta.js`,
+            `https://update.greasyfork.org/scripts/12909/Google_baidu_Switcher_(ALL_in_One).meta.js`,
+            `https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`,
+            `https://openuserjs.org/install/f9y4ng/Google_baidu_Switcher_(ALL_in_One).meta.js`,
           ];
-          return updateURLArray.map(url => `${url}?${rnd}`);
+          return updateURLArray.map(url => `${url}?${generateRandomString(16, "hex")}`);
         });
       })(
         async () => {
@@ -3194,32 +3105,32 @@ void (function (ctx, SearchEngineAssistant, arrayProxy, customFns) {
     })(createTrustedTypePolicy());
   },
   (object => {
-    const privateMethods = Object.entries({
+    Object.entries({
       Some(callback, thisArg = this) {
         for (let i = 0; i < this.length; i++) if (callback.call(thisArg, this[i], i, this)) return true;
       },
       Find(callback, thisArg = this) {
         for (let i = 0; i < this.length; i++) if (callback.call(thisArg, this[i], i, this)) return this[i];
       },
-    });
-    const options = { writable: false, configurable: false, enumerable: false };
-    const defineMethod = (key, value) => !Reflect.getOwnPropertyDescriptor(object, key) && Reflect.defineProperty(object, key, { value, ...options });
-    privateMethods.forEach(method => void defineMethod(...method));
-    return { aF: Array.from.bind(Array) };
-  })(Array.prototype),
+    }).forEach(([key, value]) => Reflect.defineProperty(object, key, { value, writable: false, configurable: false, enumerable: false }));
+    return object;
+  })(Object.create(Array.prototype)),
   (ctx => {
-    const oS = Object.prototype.toString;
-    const hP = Object.prototype.hasOwnProperty;
     const oC = ctx.Object.create.bind(null, null);
+    const eH = type => {
+      const original = ctx.history[type];
+      return function () {
+        return ctx.dispatchEvent(new CustomEvent(type, { detail: [...arguments] })), original.apply(this, arguments);
+      };
+    };
     const tS = storageType => {
       try {
-        storageType.setItem("__fr_storage_test__", !0);
-        storageType.removeItem("__fr_storage_test__");
-        return storageType;
+        ctx.addEventListener("error", event => event.message.includes("SecurityError") && event.preventDefault(), { once: true });
+        return ctx[storageType].setItem("__gb_storage_test__", true), ctx[storageType].removeItem("__gb_storage_test__"), ctx[storageType];
       } catch (e) {
         return null;
       }
     };
-    return { oC, oS, hP, lS: tS(ctx.localStorage), sS: tS(ctx.sessionStorage) };
+    return { oC, eH, lS: tS("localStorage"), sS: tS("sessionStorage") };
   })(typeof window !== "undefined" ? window : this ?? globalThis)
 );
