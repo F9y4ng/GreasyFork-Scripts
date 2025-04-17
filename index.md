@@ -6,16 +6,19 @@
 [![LAST COMMIT](https://img.shields.io/github/last-commit/F9y4ng/GreasyFork-Scripts?color=blue&logo=github&style=for-the-badge "LAST COMMIT")](https://github.com/F9y4ng/GreasyFork-Scripts/commits/master)
 [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues)
 [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/F9y4ng/GreasyFork-Scripts/stargazers)
-> [!TIP]
-> - 请先安装**脚本管理器**扩展(如：Tampermonkey/Violentmonkey/Greasemonkey)后再**安装脚本**。
-> - **Chrome**, **Firefox** 推荐安装 **Tampermonkey/Violentmonkey**，**Safari** 推荐安装 **Tampermonkey**.
-> - 使用 **Adguard桌面版** 或 **Userscripts** 等脚本管理器，可通过 [键盘快捷键](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89#user-content-hotkey) 呼出脚本管理菜单。
 
-> [!IMPORTANT]
-> > > 如果您喜欢本项目，请在Github主页的右上角 ⭐Start 它，感谢您的支持。
-> * 欢迎您加入 Telegram 频道（频道名称：GreasyFork-Scripts）
-> * 频道地址：[https://t.me/+1e8Ebdy-mtdhY2Rl](https://t.me/+1e8Ebdy-mtdhY2Rl)
-> * 此频道用于讨论桌面浏览器的用户脚本的问题反馈和功能建议。
+- 请先安装**脚本管理器**扩展(如：Tampermonkey/Violentmonkey/Greasemonkey)后再**安装脚本**。
+- **Chrome**, **Firefox** 推荐安装 **Tampermonkey/Violentmonkey**，**Safari** 推荐安装 **Tampermonkey**.
+- 使用 **Adguard桌面版** 或 **Userscripts** 等脚本管理器，可通过 [键盘快捷键](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89#user-content-hotkey) 呼出脚本管理菜单。
+
+***
+
+### 加入 Telegram 频道（频道名称：GreasyFork-Scripts）
+* 频道地址：[https://t.me/+1e8Ebdy-mtdhY2Rl](https://t.me/+1e8Ebdy-mtdhY2Rl)
+* 如果您喜欢本项目，请在Github主页的右上角 ⭐Start 它，感谢您的支持。
+* 此频道用于讨论桌面浏览器的用户脚本的问题反馈和功能建议。
+
+***
 
 # 字体渲染（自用脚本） `Font Rendering.user.js`
  　[[查看源代码](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Font%20Rendering.user.js)] 　[[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)] 　[[访问 GreasyFork](https://greasyfork.org/scripts/416688)] _（GreasyFork不再处理Issues反馈）_
@@ -60,8 +63,8 @@
 * [分享：分别设置英文字体和中文字体的方法。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83)
 * [如何正确地对不同显示器、浏览器设定字体渲染参数？](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160)
 
-> [!WARNING]
-> ### 如何提供脚本错误日志？ `New`
+> ### 如何提供脚本错误日志？ _`New`_
+> 
 > 1. 先打开脚本调试开关：
 >    - v2023.04.08.1以上版本，向URL添加`?whoami=F9y4ng`或`&whoami=F9y4ng`，开启调试模式。
 >    - 使用旧版本需将代码大约第 54 行 `const IS_OPEN_DEBUG = false` 改为 `true`，并保存。
