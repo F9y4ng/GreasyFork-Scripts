@@ -6,19 +6,16 @@
 [![LAST COMMIT](https://img.shields.io/github/last-commit/F9y4ng/GreasyFork-Scripts?color=blue&logo=github&style=for-the-badge "LAST COMMIT")](https://github.com/F9y4ng/GreasyFork-Scripts/commits/master)
 [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues)
 [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/F9y4ng/GreasyFork-Scripts/stargazers)
+> [!TIP]
+> - Please install the **script-manager** extension first (e.g. Tampermonkey, Violentmonkey, Greasemonkey) before installing the script.
+> - **Tampermonkey/Violentmonkey** is recommended for **Chrome / Firefox**, and **Tampermonkey** is recommended for **Safari.**
+> - Using a script-manager such as **Adguard Desktop** or **Userscripts**, you can use **keyboard shortcuts** to call up the scripts menu.
 
-- Please install the **script-manager** extension first (e.g. Tampermonkey, Violentmonkey, Greasemonkey) before installing the script.
-- **Tampermonkey/Violentmonkey** is recommended for **Chrome / Firefox**, and **Tampermonkey** is recommended for **Safari.**
-- Using a script-manager such as **Adguard Desktop** or **Userscripts**, you can use **keyboard shortcuts** to call up the scripts menu.
-
-***
-
-### Join Telegram Channel (Channel Name: GreasyFork-Scripts)
-* Channel: [https://t.me/+1e8Ebdy-mtdhY2Rl](https://t.me/+1e8Ebdy-mtdhY2Rl)
-* If you like this project, please ⭐Start it on Github, Thanks for your support.
-* This channel for discussing userscripts for desktop browsers.
-  
-***
+> [!IMPORTANT]
+> > > If you like this project, please ⭐Start it on Github, Thanks for your support.
+> * Welcome to join Telegram Channel (Channel Name: GreasyFork-Scripts)
+> * Channel: [https://t.me/+1e8Ebdy-mtdhY2Rl](https://t.me/+1e8Ebdy-mtdhY2Rl)
+> * This channel for discussing userscripts for desktop browsers.
 
 # Font Rendering (Customized) `Font Rendering.user.js`
  　[[View source code](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Font%20Rendering.user.js)] 　[[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)] 　[[Visit GreasyFork](https://greasyfork.org/scripts/416688)] _(No issues handled on GreasyFork)_
@@ -67,9 +64,8 @@
 * [Occasional updates: How to fix websites font style errors?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42) (Chinese)
 * [How to set custom English and Chinese fonts for the website?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83) (Chinese)
 * [How to correctly set font rendering parameters for different browsers?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160) (Chinese)
-
+> [!WARNING]
 > ### How to provide script error log?
->
 > 1. Turn on the script debugging switch first:
 >    - v2023.04.08.1 or later, add `?whoami=F9y4ng` or `&whoami=F9y4ng` to the URL to enable debugging mode.
 >    - To use the old version, you need to change the code from `const IS_OPEN_DEBUG = false` to `true` at about line 54 and save.
