@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            помощник поисковых систем
 // @name:ja            優雅な検索エンジン助手
-// @version            2025.04.05.1
+// @version            2025.05.03.1
 // @author             F9y4ng
 // @description        “Elegant Search Engine Assistant” facilite la navigation entre moteurs de recherche, personnalise les préférences, met en évidence les mots-clés, élimine les redirections et publicités, et filtre les résultats. Compatible avec divers moteurs tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, etc.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG and more.
@@ -262,18 +262,15 @@
 // @grant              GM.registerMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
-// @note               {"CN":"修复 Baidu 搜索跳转按钮的加载异常。","EN":"Fixed Baidu Search Button Load Exception."}
-// @note               {"CN":"修复关键词过滤功能在部分站点失效的问题。","EN":"Fixed keyword filter feature fails in some sites."}
+// @note               {"CN":"优化 baidu.com 跳转按钮样式。","EN":"Optimized the style of baidu.com jump button."}
+// @note               {"CN":"优化 bing.com 搜索框的样式。","EN":"Optimized the style of bing.com search box."}
 // @note               {"CN":"优化 You.com 跳转按钮的加载逻辑。","EN":"Improved loading logic of You.com jump button."}
-// @note               {"CN":"优化 TrustedTypes.createPolicy 的兼容性。","EN":"Optimized TrustedTypes.createPolicy compatibility."}
-// @note               {"CN":"优化搜索结果广告拦截功能。","EN":"Optimized search results ad blocking features."}
-// @note               {"CN":"更新 @namespace 源地址。","EN":"Updated @namespace source address."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
-// @compatible         edge 兼容Tampermonkey, Violentmonkey
-// @compatible         Chrome 兼容Tampermonkey, Violentmonkey
-// @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
-// @compatible         Opera 兼容Tampermonkey, Violentmonkey
-// @compatible         Safari 兼容Tampermonkey, Userscripts
+// @compatible         edge version≥88 (Compatible Tampermonkey, Violentmonkey)
+// @compatible         Chrome version≥88 (Compatible Tampermonkey, Violentmonkey)
+// @compatible         Firefox version≥78 (Compatible Greasemonkey, Tampermonkey, Violentmonkey)
+// @compatible         Opera version≥75 (Compatible Tampermonkey, Violentmonkey)
+// @compatible         Safari version≥14 (Compatible Tampermonkey, Userscripts)
 // @license            GPL-3.0-only
 // @create             2015-10-07
 // @copyright          2015-2025, F9y4ng
@@ -299,7 +296,6 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
    * PROBLEMS OR NEW FEATURES, PLEASE FEEDBACK IN GITHUB ISSUES, THANK YOU!    *
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-  const wrappedFrom = ctx.wrappedJSObject ? Array.from : sctx.Array.from;
   const toolkit = {
     debugging: IS_OPEN_DEBUG,
     info: GM?.info ?? GM_info,
@@ -309,10 +305,11 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
     prompt: ctx.prompt.bind(ctx),
     confirm: ctx.confirm.bind(ctx),
     console: sctx.Object.assign({}, ctx.console),
-    orginalFns: { oS: sctx.Object.prototype.toString, hP: sctx.Object.prototype.hasOwnProperty, aF: (...args) => sctx.Object.setPrototypeOf(wrappedFrom(...args), arrayProxy) },
   };
-  ["pushState", "replaceState"].forEach(m => void (ctx.history[m] = customFns.eH(m)));
-  SearchEngineAssistant(ctx, sctx, toolkit, { ...toolkit.orginalFns, ...customFns });
+  const wrappedFrom = ctx.wrappedJSObject ? Array.from : sctx.Array.from;
+  const orginalFns = { oS: sctx.Object.prototype.toString, hP: sctx.Object.prototype.hasOwnProperty, aF: (...args) => arrayProxy(wrappedFrom(...args)) };
+  if (!ctx.navigation) ["pushState", "replaceState"].forEach(m => void (ctx.history[m] = customFns.eH(m)));
+  SearchEngineAssistant(ctx, sctx, toolkit, { ...orginalFns, ...customFns, cS: customFns.mS.filter(isNaN) });
 })(
   typeof window !== "undefined" ? window : this ?? globalThis,
   ((originalWindow, iframe) => {
@@ -331,7 +328,7 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
     /* PERFECTLY COMPATIBLE FOR GREASEMONKEY, TAMPERMONKEY, VIOLENTMONKEY, USERSCRIPTS 2024-03-15 F9Y4NG */
 
     const { atob, btoa, alert, prompt, confirm, console, debugging, info: GMinfo } = secureVars;
-    const { aF: asArray, oS: getObjectType, hP: hasOwnProperty, lS: localStorages, oC: object } = customFuntions;
+    const { mS, cS, aF: asArray, oS: getObjectType, hP: hasOwnProperty, lS: localStorages, oC: object } = customFuntions;
     const GMversion = GMinfo.version ?? GMinfo.scriptHandlerVersion ?? "unknown";
     const GMscriptHandler = GMinfo.scriptHandler;
     const GMsetValue = gmSelector("setValue");
@@ -377,7 +374,7 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
       var: {
         disappear: `ͽ${generateRandomString(10, "date")}ͼ`,
         translucent: `ͼ${generateRandomString(10, "date")}ͽ`,
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.04.05.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.05.03.0",
         scriptName: getMetaValue(`name:${getLocalLanguages()}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       },
       url: {
@@ -547,9 +544,9 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
       return el;
     }
 
-    function random({ range, count = 1, type = "round" }) {
-      const typedArray = global.crypto.getRandomValues(new Uint32Array(count));
-      return count === 1 ? Math[type]((typedArray[0] / 0xffffffff) * range) : typedArray.map(a => Math[type]((a / 0xffffffff) * range));
+    function random({ range, length = 1, type = "round" }) {
+      const typedArray = global.crypto.getRandomValues(new Uint32Array(Number(length) || 1));
+      return asArray(typedArray, a => (Math[type] ?? Math.round)((a / 0xffffffff) * (Number(range) || 10)));
     }
 
     function gCS(node, opt = null) {
@@ -582,16 +579,10 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
       }
     }
 
-    function generateRandomString(length, type) {
-      if (type === "date") return new Date().setHours(20, 30, 40, 50).toString(16);
-      const charset = {
-        mix: "w5imkK𝚌ofUeH𝚎tsEcSnJua𝚖hjpV𝚝zgIL8vZlNd𝚡C𝚊324𝚞qMWbr𝚣Y1X0𝚜9OPRA76QTFGy𝚘DBx",
-        char: "Uo𝚜ALDMRplYc𝚖fsCarEu𝚘ITZyqxwzh𝚊F𝚞iVBNO𝚣eKtJjnQWSH𝚡m𝚎PXGgb𝚌dv𝚝k",
-        hex: "fc8d6b1e7a9b2a5ec4f0d3",
-        number: "5039268147",
-      };
-      const generator = (v, i) => (type === "mix" && i === 0 ? [...charset.char][random({ range: 62 })] : [...charset[type]][v]);
-      return asArray(random({ range: [...charset[type]].length, count: length, type: "floor" }), generator).join("");
+    function generateRandomString(length, type, p, m = mS, c = cS) {
+      if (type === "date") return (p = new Date().setHours(20, 30, 40, 50).toString(16)), p.padEnd(length, p);
+      if (type === "hex" || type === "number") return (p = type === "hex" ? 16 : 10), asArray(random({ range: p, length, type: "floor" }), v => v.toString(p)).join("");
+      return (p = type === "mix" ? m : c), asArray(random({ range: p.length, length }), (v, i) => (p === m && !i ? c[random({ range: 70 })] : p[v])).join("");
     }
 
     function reload() {
@@ -1717,8 +1708,8 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
               imageURL: "https://you.com/search?fromSearchBar=true&tbm=isch&q=",
               imageType: ["isch"],
               splitTypeName: "tbm",
-              mainSelector: "button[data-testid='qb_submit_button']",
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:0;height:36px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:36px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:36px}#${def.const.leftButton} input{margin:0;padding:0 10px;height:36px;min-width:80px;border:1px solid #596ced;border-bottom-left-radius:12px;border-top-left-radius:12px;background-color:#596ced;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 10px;height:36px;min-width:80px;border:1px solid #596ced;border-top-right-radius:12px;border-bottom-right-radius:12px;background-color:#596ced;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #7a89f0;background-color:#7a89f0;color:#fff}@media (prefers-color-scheme: dark){#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #4d5cc3;background-color:#4d5cc3;}}`,
+              mainSelector: "button[data-testid='qb_submit_button'],#ChatQueryBar ._1l6na7p6 :is(.pemrxs0,[data-state='closed'])",
+              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:0;height:36px;width:190%;max-width:fit-content}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:36px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:36px}#${def.const.leftButton} input{margin:0;padding:0 10px;height:36px;min-width:80px;border:1px solid #596ced;border-bottom-left-radius:8px;border-top-left-radius:8px;background-color:#596ced;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 10px;height:36px;min-width:80px;border:1px solid #596ced;border-top-right-radius:8px;border-bottom-right-radius:8px;background-color:#596ced;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #7a89f0;background-color:#7a89f0;color:#fff}@media (prefers-color-scheme: dark){#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #4d5cc3;background-color:#4d5cc3;}}`,
               resultListProp: {
                 qs: `[data-floating-ui-portal]>[role='dialog'][data-open='true'] section>article,div[data-eventappname="web_results"] section>article,div[data-eventappname="web_results"] ul>li`,
                 delay: 10,
@@ -2535,23 +2526,24 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
                 clear: () => safeRemoveNode("#con-ar"),
                 applyButton: ({ buttonSection, buttonID, target }) => {
                   insertAfter(buttonSection, target);
-                  if (!qS(buttonID)) return;
+                  const width = buttonSection.getBoundingClientRect().width || 2e2;
                   switch (getUrlParam(currentSite.splitTypeName)) {
                     case currentSite.imageType[0]:
-                      buttonSection.style.right = qS("span[class^='submit-btn']") ? "-210px" : "-220px";
-                      qS(`#${def.const.rightButton} input`).style.marginLeft = qS("span[class^='submit-btn']") ? "0" : "3px";
-                      document.body.style.overflowX = "clip";
+                      buttonSection.style.right = `-${width + 8}px`;
                       break;
                     case currentSite.imageType[1]:
-                      buttonSection.style.height = "34px";
+                      buttonSection.style.cssText += "height:34px;position:relative;left:10px";
                       qA(`${buttonID} input`).forEach(node => {
                         node.style.cssText = "min-width:100px;height:34px;padding:0 5px!important;color:#fff;background:#3388ff;border-radius:0;border:1px solid #2d78f4";
                       });
-                      document.body.style.overflowX = "clip";
                       break;
                     case "news":
                     case "vsearch":
+                      buttonSection.style.right = `-${width + 8}px`;
                       qS(`#${def.const.rightButton} input`).style.marginLeft = "3px";
+                      break;
+                    default:
+                      buttonSection.style.right = `-${width + 8}px`;
                       break;
                   }
                 },
@@ -2561,36 +2553,12 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
                 clear: () => safeRemoveNode("aside>ol#b_context"),
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
-                  const sectionWidth = buttonSection.getBoundingClientRect().width || 2e2;
-                  const [textarea, formBox, formNode] = [qS(`textarea.b_searchbox[name="q"]`, target.parentNode), qS(".b_searchboxForm"), qS(`form#sb_form`)];
-                  qA(`#b_header .b_searchbox[name="q"]`).forEach(input => {
-                    const inputLength = parseFloat(gCS(input).width) || 500;
-                    input.style.maxWidth = `${inputLength - sectionWidth + 50}px`;
-                    input.style.overflowY = "auto";
-                  });
+                  const formBox = qS(".b_searchboxForm");
                   if (formBox && getUrlParam("view") === "detailV2") {
                     formBox.style.cssText += "width:max-content!important;z-index:1000;position:relative;";
                     qA(`#${def.const.rndButtonID} input`).forEach(input => {
                       input.style.cssText += "height:34px!important;border-radius:6px!important;padding:0 12px!important;margin:0 0 0 2px!important;";
                     });
-                  }
-                  if (!CUR_HOST_NAME.startsWith("cn")) {
-                    if (formNode && textarea) {
-                      const inputs = qA(`#${def.const.rndButtonID} input`);
-                      const changeTextarea = e => !/b_logoArea|b_phead_chat_link/.test(e.target?.className) && inputs.forEach(input => input.classList.add(def.const.searchbox));
-                      const recoverTextarea = () => textarea.getAttribute("rows") < 2 && inputs.forEach(input => input.classList.remove(def.const.searchbox));
-                      textarea.getAttribute("rows") >= 2 && inputs.forEach(input => input.classList.add(def.const.searchbox));
-                      formNode.addEventListener("focus", changeTextarea, true);
-                      formNode.addEventListener("blur", recoverTextarea, true);
-                    }
-                    new MutationObserver(() => {
-                      qA(`#b_header .b_searchbox[name="q"]`).forEach(input => {
-                        input.style.maxWidth = "";
-                        const inputLength = parseFloat(gCS(input).width) || 500;
-                        input.style.maxWidth = `${inputLength - sectionWidth + 30}px`;
-                        input.style.overflowY = "auto";
-                      });
-                    }).observe(formNode, { attributeFilter: ["aria-owns"] });
                   }
                 },
               },
@@ -2992,7 +2960,8 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
             function searchButtonAndStylesObserve() {
               const observer = new MutationObserver(deBounce({ fn: processMainThreadTasks, delay: 10, timer: "main" }));
               observer.observe(document, { childList: true, subtree: true });
-              ["pushState", "replaceState"].forEach(event => global.addEventListener(event, processMainThreadTasks));
+              if (global.navigation) global.navigation.addEventListener("navigate", processMainThreadTasks);
+              else ["pushState", "replaceState"].forEach(event => global.addEventListener(event, processMainThreadTasks));
             }
 
             /* SEARCH_ENGINE_ASSISTANT_MAIN_PROCESS */
@@ -3032,11 +3001,11 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
           );
         })(function () {
           const updateURLArray = [
-            `https://update.greasyfork.org/scripts/12909/Google_baidu_Switcher_(ALL_in_One).meta.js`,
-            `https://raw.githubusercontent.com/F9y4ng/GreasyFork-Scripts/master/Google%20%26%20Baidu%20Switcher.meta.js`,
-            `https://openuserjs.org/install/f9y4ng/Google_baidu_Switcher_(ALL_in_One).meta.js`,
+            "1cGRhdGUuZ3JlYXN5Zm9yay5vcmclMkZzY3JpcHRzJTJGMTI5MDklMkZHb29nbGVfYmFpZHVfU3dpdGNoZXJfKEFMTF9pbl9PbmUpLm1ldGEuanM=",
+            "yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tJTJGRjl5NG5nJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJGbWFzdGVyJTJGR29vZ2xlJTI1MjAlMjUyNiUyNTIwQmFpZHUlMjUyMFN3aXRjaGVyLm1ldGEuanM=",
+            "vcGVudXNlcmpzLm9yZyUyRmluc3RhbGwlMkZmOXk0bmclMkZHb29nbGVfYmFpZHVfU3dpdGNoZXJfKEFMTF9pbl9PbmUpLm1ldGEuanM=",
           ];
-          return updateURLArray.map(url => `${url}?${generateRandomString(16, "hex")}`);
+          return updateURLArray.map(url => `${decrypt(`aHR0cHMlM0ElMkYlMkZ${url}`)}?${generateRandomString(32, "hex")}`);
         });
       })(
         async () => {
@@ -3104,7 +3073,7 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
       );
     })(createTrustedTypePolicy());
   },
-  (object => {
+  o =>
     Object.entries({
       Some(callback, thisArg = this) {
         for (let i = 0; i < this.length; i++) if (callback.call(thisArg, this[i], i, this)) return true;
@@ -3112,10 +3081,8 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
       Find(callback, thisArg = this) {
         for (let i = 0; i < this.length; i++) if (callback.call(thisArg, this[i], i, this)) return this[i];
       },
-    }).forEach(([key, value]) => Reflect.defineProperty(object, key, { value, writable: false, configurable: false, enumerable: false }));
-    return object;
-  })(Object.create(Array.prototype)),
-  (ctx => {
+    }).forEach(([k, v]) => !Reflect.getOwnPropertyDescriptor(o, k) && Reflect.defineProperty(o, k, { value: v.bind(o), writable: false, configurable: false, enumerable: false })) ?? o,
+  ((ctx, mS = [..."w6B𝚖S2otLN𝚞PjdM𝙲QK0Ycbx9RXT𝚘𝙳Z𝚠1Uul𝚟m4h𝚡vV𝚜3nIFH𝚎𝚝g𝚆O8𝚌iea𝚊zy𝚗Dp𝚣ErAs𝚁5f7G𝙺kqWCJ"]) => {
     const oC = ctx.Object.create.bind(null, null);
     const eH = type => {
       const original = ctx.history[type];
@@ -3131,6 +3098,6 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
         return null;
       }
     };
-    return { oC, eH, lS: tS("localStorage"), sS: tS("sessionStorage") };
+    return { oC, mS, eH, lS: tS("localStorage"), sS: tS("sessionStorage") };
   })(typeof window !== "undefined" ? window : this ?? globalThis)
 );
