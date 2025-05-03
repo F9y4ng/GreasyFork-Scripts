@@ -5,7 +5,7 @@
 // @name:en            Font Rendering (Customized)
 // @name:ko            글꼴 렌더링(자체 스크립트)
 // @name:ja            フォントレンダリング
-// @version            2025.04.05.1
+// @version            2025.05.03.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -36,11 +36,11 @@
 // @grant              GM_registerMenuCommand
 // @grant              GM.registerMenuCommand
 // @grant              GM_unregisterMenuCommand
-// @compatible         edge 兼容Tampermonkey, Violentmonkey
-// @compatible         Chrome 兼容Tampermonkey, Violentmonkey
-// @compatible         Firefox 兼容Greasemonkey, Tampermonkey, Violentmonkey
-// @compatible         Opera 兼容Tampermonkey, Violentmonkey
-// @compatible         Safari 兼容Tampermonkey, Userscripts
+// @compatible         edge version≥90 (Compatible Tampermonkey, Violentmonkey)
+// @compatible         Chrome version≥90 (Compatible Tampermonkey, Violentmonkey)
+// @compatible         Firefox version≥84 (Compatible Greasemonkey, Tampermonkey, Violentmonkey)
+// @compatible         Opera version≥78 (Compatible Tampermonkey, Violentmonkey)
+// @compatible         Safari version≥15.4 (Compatible Tampermonkey, Userscripts)
 // @license            GPL-3.0-only
 // @create             2020-11-24
 // @copyright          2020-2025, F9y4ng
@@ -66,7 +66,6 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
    * PROBLEMS OR NEW FEATURES, PLEASE FEEDBACK IN GITHUB ISSUES, THANK YOU!    *
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-  const wrappedFrom = ctx.wrappedJSObject ? Array.from : sctx.Array.from;
   const toolkit = {
     debugging: IS_OPEN_DEBUG,
     info: GM?.info ?? GM_info,
@@ -77,10 +76,11 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     confirm: ctx.confirm.bind(ctx),
     console: sctx.Object.assign({}, ctx.console),
     RC2: { flag: "5295b9589c42a644ca9304163cd8", date: "2025.04.05" },
-    orginalFns: { oS: sctx.Object.prototype.toString, aF: (...args) => sctx.Object.setPrototypeOf(wrappedFrom(...args), arrayProxy) },
   };
+  const wrappedFrom = ctx.wrappedJSObject ? Array.from : sctx.Array.from;
+  const orginalFns = { oS: sctx.Object.prototype.toString, aF: (...args) => arrayProxy(wrappedFrom(...args)) };
   if (!ctx.navigation) ["pushState", "replaceState"].forEach(m => void (ctx.history[m] = customFns.eH(m)));
-  fontRendering(ctx, sctx, toolkit, { ...toolkit.orginalFns, ...customFns });
+  fontRendering(ctx, sctx, toolkit, { ...orginalFns, ...customFns, cS: customFns.mS.filter(isNaN) });
 })(
   typeof window !== "undefined" ? window : this ?? globalThis,
   ((originalWindow, iframe) => {
@@ -99,7 +99,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     /* PERFECTLY COMPATIBLE FOR GREASEMONKEY, TAMPERMONKEY, VIOLENTMONKEY, USERSCRIPTS 2024-03-15 F9Y4NG */
 
     const { atob, btoa, alert, prompt, confirm, console, debugging, info: GMinfo, RC2 } = secureVars;
-    const { aF: asArray, oS: getObjectType, lS: localStorage, sS: sessionStorage, oC: object } = customFuntions;
+    const { mS, cS, aF: asArray, oS: getObjectType, lS: localStorage, sS: sessionStorage, oC: object } = customFuntions;
     const GMversion = GMinfo.version ?? GMinfo.scriptHandlerVersion ?? "unknown";
     const GMscriptHandler = GMinfo.scriptHandler;
     const GMsetValue = gmSelector("setValue");
@@ -137,11 +137,12 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         cssAttrName: `fr-css-${generateRandomString(8, "hex")}`,
         boldAttrName: `fr-bold-${generateRandomString(8, "date")}`,
         iframeAttrName: `fr-iframe-${generateRandomString(8, "hex")}`,
+        regexp: /\b#[\u{1D68A}-\u{1D6A3}\w\u{1D670}-\u{1D689}]+(?=\s)/gu,
         queryString: `html,head,title,base,meta,style,link,script,noscript,iframe,img,picture,canvas,br,hr,svg,svg *,g,image,object,embed,audio,video,source,track,progress,fr-colorpicker,fr-colorpicker *,fr-configure,fr-configure *,fr-dialogbox,fr-dialogbox *,gb-notice,gb-notice *`,
         flagName: "fr-found-conflict-callback",
       },
       var: {
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.04.05.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.05.03.0",
         scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
         scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("Rjl5NG5n"),
         attachShadow: Element.prototype.attachShadow,
@@ -481,14 +482,14 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       return global.getComputedStyle(node, opt);
     }
 
-    function random({ range, count = 1, type = "round" }) {
-      const typedArray = global.crypto.getRandomValues(new Uint32Array(count));
-      return count === 1 ? Math[type]((typedArray[0] / 0xffffffff) * range) : typedArray.map(a => Math[type]((a / 0xffffffff) * range));
+    function random({ range, length = 1, type = "round" }) {
+      const typedArray = global.crypto.getRandomValues(new Uint32Array(Number(length) || 1));
+      return asArray(typedArray, a => (Math[type] ?? Math.round)((a / 0xffffffff) * (Number(range) || 10)));
     }
 
-    function uniq(array, predicate = Boolean) {
+    function uniq(array, filterFn = Boolean, mapFn = null) {
       if (!Array.isArray(array)) return [];
-      return asArray(new Set(array.filter(predicate)));
+      return asArray(new Set(typeof filterFn === "function" ? array.filter(filterFn) : array), typeof mapFn === "function" ? mapFn : void 0);
     }
 
     function toString(value) {
@@ -536,16 +537,10 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       return parent.appendChild(asset.fragment) && asset.value;
     }
 
-    function generateRandomString(length, type) {
-      if (type === "date") return new Date().setHours(20, 30, 40, 50).toString(16);
-      const charset = {
-        mix: "Bw5i𝚌ofUe𝚎tsREcSnJa𝚖hVpj𝚝zKgIL8vZlNd𝚡C𝚊3F2H4𝚞qMkWbr𝚣Y1X0𝚜9OPuA76QTmGy𝚘Dx",
-        char: "IopN𝚜DlYcP𝚖JfsCUarEu𝚘ZyWxwRzMhX𝚊F𝚞AiVjO𝚣eTtnQHqL𝚡mK𝚎Ggb𝚌dSvB𝚝k",
-        hex: "5fa7eb1c9b3f0d4e8c6a2d",
-        number: "8250631947",
-      };
-      const generator = (v, i) => (type === "mix" && i === 0 ? [...charset.char][random({ range: 62 })] : [...charset[type]][v]);
-      return asArray(random({ range: [...charset[type]].length, count: length, type: "floor" }), generator).join("");
+    function generateRandomString(length, type, p, m = mS, c = cS) {
+      if (type === "date") return (p = new Date().setHours(20, 30, 40, 50).toString(16)), p.padEnd(length, p);
+      if (type === "hex" || type === "number") return (p = type === "hex" ? 16 : 10), asArray(random({ range: p, length, type: "floor" }), v => v.toString(p)).join("");
+      return (p = type === "mix" ? m : c), asArray(random({ range: p.length, length }), (v, i) => (p === m && !i ? c[random({ range: 70 })] : p[v])).join("");
     }
 
     function createTrustedTypePolicy() {
@@ -553,7 +548,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       if (!global.trustedTypes?.createPolicy) return policyOptions;
       const originalCreatePolicy = global.trustedTypes.createPolicy.bind(global.trustedTypes);
       const whitelist = [{ host: "bing.com", policy: "rwflyoutDefault" }];
-      const policyName = global.trustedTypes.defaultPolicy?.name ?? asArray(whitelist).Find(entry => location.hostname.endsWith(entry.host))?.policy ?? "default";
+      const policyName = global.trustedTypes.defaultPolicy?.name ?? asArray(whitelist).Find(entry => CUR_HOST_NAME.endsWith(entry.host))?.policy ?? "default";
       const defaultPolicy = global.trustedTypes.defaultPolicy ?? originalCreatePolicy(policyName, policyOptions);
       global.trustedTypes.createPolicy = (name, options) => (name === policyName ? defaultPolicy : originalCreatePolicy(name, options));
       return defaultPolicy;
@@ -725,13 +720,12 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     function getLocationInfo(tH) {
       const { host: h, href: hR, hostname: hN, pathname: pN, protocol: pT } = global.location;
       const iT = global.self === global.top;
-      const fS = iT ? "" : "[FRAMES]";
       try {
         tH = iT ? h : global.top.location.host;
       } catch (e) {
         tH = new URL(document.referrer || global.location).host;
       }
-      return { h, hR, hN, pN, pT, tH, iT, fS };
+      return { h, hR, hN, pN, pT, tH, iT, fS: iT ? "" : "[FRAMES]" };
     }
 
     function getMetaValue(str) {
@@ -826,25 +820,13 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
       const UPDATE_VERSION_NOTICE = IS_CHN
-        ? `<li class="${def.const.seed}.info">重大版本更新，请关注新功能介绍及升级注意事项。</li>
-            <li class="${def.const.seed}.added">新增预定义渲染数据功能，功能详情请访问 <a href="${def.url.feedback}/446" target="_blank">这里</a>。</li>
-            <li class="${def.const.seed}.added">新增对跨域 iframe 自适应父级页面的字体渲染设置。</li>
-            <li class="${def.const.seed}.fixed">优化调整默认渲染规则，兼容常见的数学公式渲染样式。</li>
-            <li class="${def.const.seed}.fixed">优化对 window.trustedTypes.createPolicy 的兼容性。</li>
-            <li class="${def.const.seed}.fixed">优化在异步加载网站粗体修正功能的兼容性。(Chromium)</li>
-            <li class="${def.const.seed}.fixed">优化对跨域 iframe（含嵌套框架）的渲染效果预览功能。</li>
-            <li class="${def.const.seed}.fixed">更新 @namespace 源地址以及 @require 资源域。</li>
-            <li class="${def.const.seed}.fixed">修复在 Firefox 中特定条件下出现的脚本冲突。(<a href="${def.url.feedback}/448" target="_blank">#448</a>)</li>
+        ? `<li class="${def.const.seed}.fixed">修复视口单位修正功能中 @import 的引用问题。</li>
+            <li class="${def.const.seed}.fixed">优化粗体样式修正功能脚本冲突检测的兼容性。</li>
+            <li class="${def.const.seed}.fixed">优化对泛域名下预定义数据的解析支持。</li>
             <li class="${def.const.seed}.fixed">修复一些已知的问题，优化代码，优化样式。</li>`
-        : `<li class="${def.const.seed}.info">Major version update, please follow the intro & notes.</li>
-            <li class="${def.const.seed}.added">Added predefined rendering data feature, see <a href="${def.url.feedback}/446" target="_blank">details</a>.</li>
-            <li class="${def.const.seed}.added">Added font rendering for iframe adaptive parent page.</li>
-            <li class="${def.const.seed}.fixed">Improved rules & compatible with math formula style.</li>
-            <li class="${def.const.seed}.fixed">Optimized compatibility of TrustedTypes.createPolicy.</li>
-            <li class="${def.const.seed}.fixed">Optimized compatibility of Fix-bold on asyncload site.</li>
-            <li class="${def.const.seed}.fixed">Optimized rendering preview for cross-domain iframe.</li>
-            <li class="${def.const.seed}.fixed">Updated @namespace and @require resource domain.</li>
-            <li class="${def.const.seed}.fixed">Fixed script conflicts that occurs in Firefox. (<a href="${def.url.feedback}/448" target="_blank">#448</a>)</li>
+        : `<li class="${def.const.seed}.fixed">Fixed @import issues in viewport units correction.</li>
+            <li class="${def.const.seed}.fixed">Optimized Bold-Fix conflict detect compatibility.</li>
+            <li class="${def.const.seed}.fixed">Improved predefined data support for pan-domain.</li>
             <li class="${def.const.seed}.fixed">Fixed some known issues, optimized code & style.</li>`;
 
       /* INITIALIZE_FONT_LIBRARY */
@@ -951,7 +933,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       const hostStyle = s => `:host(${s}){display:block!important;visibility:visible!important;opacity:1!important}`;
       const fullStyle = (b, c) => `${def.var.style.main};background-color:${b};color:${c};border-radius:4px;padding:4px 8px`;
       const leftStyle = b => `${def.var.style.main};background-color:${b};color:#fffafa;border-radius:4px 0 0 4px;padding:4px 2px 4px 8px`;
-      const rightStyle = b => `${def.var.style.main};background-color:${b};color:#fffafa;font-style:italic;border-radius:0 4px 4px 0;padding:4px 8px 4px 4px;margin:0 0 0 -2px`;
+      const rightStyle = b => `${def.var.style.main};background-color:${b};color:#fffafa;border-radius:0 4px 4px 0;padding:4px 8px 4px 4px;margin:0 0 0 -2px`;
       const remarkStyle = c => `${def.var.style.main};color:${c};padding:4px 0;line-height:120%`;
       const frDialogBoxCssText = String(hostStyle("fr-dialogbox") + def.var.style.shared + def.var.style.frDialogBox);
 
@@ -1105,8 +1087,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       }
 
       function updateAdoptedStyleSheets(shadow, sheet, writable) {
-        const hostSheet = asArray(shadow.adoptedStyleSheets);
-        const existIndex = hostSheet.FindIndex(s => s.id === sheet.id);
+        const existIndex = asArray(shadow.adoptedStyleSheets).FindIndex(s => s.id === sheet.id);
         if (!~existIndex) shadow.adoptedStyleSheets.push(sheet);
         else if (writable && !compareStyleSheets(shadow.adoptedStyleSheets[existIndex], sheet)) shadow.adoptedStyleSheets[existIndex] = sheet;
       }
@@ -1151,7 +1132,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         }
         encrypt(e) {
           if (this.m < 2 || !e) return "";
-          let k = random({ range: 1e9 }) % 1e8;
+          let k = random({ range: 1e9 })[0] % 1e8;
           let [d, o] = [this.d + k, ""];
           while (d.length > 10) d = (parseInt(d.slice(0, 10)) + parseInt(d.slice(10))).toString();
           d = (this.m * d + this.c) % this.u;
@@ -1444,13 +1425,14 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       function applyPredefinedRenderRules(predefinedData, data) {
         if (!predefinedData) return data;
         try {
-          const rules = asArray(JSON.parse(JSON.parse(decrypt(predefinedData)))).Find(([hostname]) => hostname.includes(CUR_HOST_NAME) || String(hostname) === "ALL");
+          const findFn = ([host]) => host.includes(CUR_HOST_NAME) || String(host) === "ALL" || asArray(host).Some(h => h.startsWith("*") && CUR_HOST_NAME.endsWith(h.slice(1)));
+          const rules = asArray(JSON.parse(JSON.parse(decrypt(predefinedData)))).Find(findFn);
           if (!(def.var.apply = Boolean(rules))) return data;
           for (const [key, rule] of Object.entries(rules[1])) {
             if (!rule || !(key in data)) continue;
             const [action, param] = rule.split("∯", 2);
             if (action === "+") !data[key].includes(param) && (data[key] += `${param}`);
-            else if (action === "-") data[key] = data[key].replaceAll(param, "");
+            else if (action === "-") data[key] = data[key].replace(new RegExp(param.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g"), "");
             else if (action === "@") data[key] = Boolean(Number(param));
             else if (action === "#") data[key] = param;
           }
@@ -1760,7 +1742,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           const ownerDocumentID = target?.ownerDocument?.documentElement?.id;
           const filter = compareVersion({ BLINK: 130, more: null }) || IS_GREASEMONKEY || !ownerDocumentID ? `` : `#${ownerDocumentID}`;
           textContent = compareVersion({ BLINK: 128, more: null }) || compareVersion({ GECKO: 126 }) ? textContent : textContent.replace("var(--fr-font-fontscale)", "initial");
-          return { css: textContent.replace(/\b#[\w𝚊𝚌𝚎𝚖𝚘𝚜𝚝𝚞𝚡𝚣]+(?=\s)/gu, filter), id, style: node?.textContent };
+          return { css: textContent.replace(def.const.regexp, filter), id, style: node?.textContent };
         }
 
         function applyStyleToIframes({ condition, nodeArray, cssText }) {
@@ -1821,8 +1803,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         function loadPreview(hasPreviewPermission, styleText = tStyle, shouldReturn = true) {
           try {
             if (!hasPreviewPermission || !CUR_WINDOW_TOP) return;
-            const [currentID, matchedID] = [`#${document.documentElement.id}`, styleText.match(/\b#[\w𝚊𝚌𝚎𝚖𝚘𝚜𝚝𝚞𝚡𝚣]+(?=\s)/u)?.[0]];
-            if (matchedID && matchedID !== currentID) styleText = styleText.replace(/\b#[\w𝚊𝚌𝚎𝚖𝚘𝚜𝚝𝚞𝚡𝚣]+(?=\s)/gu, currentID);
+            const [currentID, matchedID] = [`#${document.documentElement.id}`, styleText.match(def.const.regexp)?.[0]];
+            if (matchedID && matchedID !== currentID) styleText = styleText.replace(def.const.regexp, currentID);
             if (insertStyle({ target: document.head, id: def.id.rndStyle, cssText: styleText, overwrite: true }) && isFontsize) {
               const { prev, cur } = getscaleValueMatrix(def.array.scaleMatrix);
               cur !== prev && adjustCoordinateOffset({ cur, prev, props: def.array.props });
@@ -1839,7 +1821,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           try {
             const section = cE("fr-configure", { id: def.id.configure });
             const shadow = (def.var.configIf = aS(section));
-            const cssText = hostStyle("fr-configure") + def.var.style.shared + def.var.style.frConfigure;
+            const cssText = String(hostStyle("fr-configure") + def.var.style.shared + def.var.style.frConfigure);
             shadow.innerHTML = tTP.createHTML(htmlText);
             applyStylesToShadowRoot(shadow, cssText, `${def.const.seed}-configure`, false);
             return createDialogModel(section, document.documentElement);
@@ -1859,17 +1841,15 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
         function checkInputValue(input, slider, regex, bits, isOne = false) {
           if (!input || !slider) return;
-          const sanitizeInput = () => (input.value = input.value.replace(/[^0-9.]/g, ""));
-          const formatValue = value => (value === Number(isOne) ? "OFF" : value.toFixed(bits));
           const updateValues = () => {
             const inputValue = input.value === "OFF" ? Number(isOne) : Number(input.value);
             const [sliderValue, minValue, maxValue] = ["value", "min", "max"].map(item => Number(slider.getAttribute(item)));
             const isValidInput = regex.test(inputValue) && inputValue >= minValue && inputValue <= maxValue;
             const finalValue = isValidInput ? inputValue : sliderValue;
             setSliderProperty(slider, finalValue, bits);
-            input.value = formatValue(finalValue);
+            input.value = finalValue === Number(isOne) ? "OFF" : finalValue.toFixed(bits);
           };
-          input.addEventListener("input", sanitizeInput);
+          input.addEventListener("input", () => (input.value = input.value.replace(/[^0-9.]/g, "")));
           input.addEventListener("change", updateValues);
         }
 
@@ -2216,7 +2196,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           const deBounceGetRenderData = createDeBounce({ fn: asyncGetRules, delay: 5e2, once: true });
           qS(`#${def.id.pdrr}`, def.var.dialogIf)?.addEventListener("click", async () => {
             const processingText = IS_CHN ? "正在努力拉取预定义渲染数据中，请稍后..." : "Pulling predefined render data, please wait...";
-            const messageText = `<p id="${def.const.seed}.pull.result" class="${def.const.seed}.clr:b8860b">${processingText}</p>`;
+            const messageText = `<p id="${def.const.seed}.pull.result" class="${def.const.seed}.clr:708090">${processingText}</p>`;
             const [trueButtonText, titleText] = IS_CHN ? ["确 定", "拉取预定义渲染数据"] : ["OK", "Pull Predefined Render Data"];
             let repullDialog = new FrDialogBox({ trueButtonText, messageText, titleText });
             repullDialog.trueButton.className = repullDialog.trueButton.setAttribute("disabled", "") ?? `${def.class.dbb} ${def.class.dbbn}`;
@@ -2313,7 +2293,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               const resDomain = dsNode.value.trim().toLowerCase();
               const regexp = `^(?=^.{3,255}$)(\\*\\.)?[a-z0-9][-a-z0-9]{0,62}(\\.[a-z0-9][-a-z0-9]{0,62})+(:[0-9]{1,5})?$|^(?![0-9])(?!-)(?!.*--)[A-Za-z0-9-]{2,62}[a-zA-Z0-9](:[0-9]{1,5})?$|^\\[(([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4}|:)|(([0-9a-fA-F]{1,4}:){0,5}([0-9a-fA-F]{1,4})?::([0-9a-fA-F]{1,4}:){0,5}([0-9a-fA-F]{1,4})?)|::([0-9a-fA-F]{1,4}:){0,6}([0-9a-fA-F]{1,4})?)\\](:[0-9]{1,5})?$`;
               const domainRegex = new RegExp(regexp);
-              const exDomain = resDomain.replace(/:(80|443)$/g, "");
+              const exDomain = resDomain.replace(/:(80|443)$/, "");
               if (!domainRegex.test(exDomain) || exSite.includes(exDomain)) return (dsNode.className = `${def.const.seed}.clr:ff0000`);
               safeRemoveNode(tpNode);
               length++;
@@ -2579,8 +2559,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           }
 
           function getFontSearchList(name) {
-            const nodeArray = qA(`#${def.id.selector} .${def.class.selector} input[name="${name}"]`, def.var.configIf).map(item => item.value);
-            return uniq(nodeArray);
+            const nodeArray = qA(`#${def.id.selector} .${def.class.selector} input[name="${name}"]`, def.var.configIf);
+            return uniq(nodeArray, null, item => item.value);
           }
 
           function fontSearch() {
@@ -2810,10 +2790,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           async function getAvailableFontData() {
             try {
               const cachedFontCheckList = await cache.get(FONTCHECKLIST);
-              if (Array.isArray(cachedFontCheckList) && cachedFontCheckList.length > 0) {
-                return DEBUG("%cLoad fontData from cache", "color:#008000;font-weight:700"), uniq(cachedFontCheckList);
-              }
-              DEBUG("%cStart real-time font detection", "color:#dc143c;font-weight:700");
+              if (Array.isArray(cachedFontCheckList) && cachedFontCheckList.length) return DEBUG("%cLoad font data cache", "color:#008000;font-weight:700"), uniq(cachedFontCheckList);
+              DEBUG("%cStart real-time font detect", "color:#dc143c;font-weight:700");
               const fontCheckList = await detectAvailableFonts();
               const uniqueFontCheckList = uniq(fontCheckList);
               cache.set(FONTCHECKLIST, uniqueFontCheckList, 2592e6);
@@ -2980,8 +2958,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                   let fontCheckList = await cache.get(FONTCHECKLIST);
                   fontCheckList = Array.isArray(fontCheckList) && fontCheckList.length > 0 ? fontCheckList : [];
                   const fontCheckArray = fontCheckList.filter(item => item.en !== "Microsoft YaHei").map(item => (item.en.startsWith("\\") ? `{${item.ch}}` : item.en));
-                  const baseFontArray = INITIAL_REMARKS.fontBase.replaceAll("'", "").split(",");
-                  const monoFontArray = (monoFontList || INITIAL_REMARKS.monospacedFont).replaceAll("'", "").split(",");
+                  const baseFontArray = INITIAL_REMARKS.fontBase.replace(/'/g, "").split(",");
+                  const monoFontArray = (monoFontList || INITIAL_REMARKS.monospacedFont).replace(/'/g, "").split(",");
                   const filterFonts = uniq(["Courier New", "Courier", "monospace", ...baseFontArray, ...fontCheckArray, ...monoFontArray]);
                   const fontOverrideData = parsedFontOverrideDef.filter(item => !filterFonts.includes(item)).sort();
                   if (fixInputNode) localStorage?.setItem(FIXINPUT, fixInputNode.checked);
@@ -3340,7 +3318,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                 fontCssT.dispatchEvent(new Event("input"));
                 fontExT.value = INITIAL_VALUES.fontEx;
                 fontExT.dispatchEvent(new Event("input"));
-                sleep(220)(getCurrentFontName(ffaceT.checked, INITIAL_VALUES.fontSelect.replaceAll("'", ""), defaultFont))
+                sleep(220)(getCurrentFontName(ffaceT.checked, INITIAL_VALUES.fontSelect.replace(/'/g, ""), defaultFont))
                   .then(() => qS(`#${def.id.submit} .${def.class.submit}[v-Preview="true"]`, def.var.configIf))
                   .then(submitPreview => void submitPreview?.click());
               } else {
@@ -3489,12 +3467,11 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                     fontEx: convertHtmlToText(fontex),
                   };
                   if (await frDialog.respond()) {
-                    saveData(FONTSET, receivedRenderData);
+                    (def.var.successed = true) && saveData(FONTSET, receivedRenderData);
                     if (globalDisable !== _curEmptyConfig) {
                       _config_data_.globalDisable = !globalDisable;
                       saveData(CONFIGURE, _config_data_);
                     }
-                    def.var.successed = true;
                   } else {
                     const domainValue = { domain: TOP_HOST, fontDate: Date.now(), ...receivedRenderData };
                     domains = await GMgetValue(DOMAINFONTSET);
@@ -3505,20 +3482,16 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                     }
                     const domainValueIndex = updateDomainsIndex(domainValues);
                     ~domainValueIndex ? domainValues.splice(domainValueIndex, 1, domainValue) : domainValues.push(domainValue);
-                    if (domainValues.length <= maxPersonalSites || ~domainValueIndex) {
-                      saveData(DOMAINFONTSET, domainValues);
-                      def.var.successed = true;
-                    } else {
+                    if (domainValues.length <= maxPersonalSites || ~domainValueIndex) (def.var.successed = true) && saveData(DOMAINFONTSET, domainValues);
+                    else {
                       const messageText = IS_CHN
                         ? `<p class="${def.const.seed}.clr:808080">您已经保存超过<span class="${def.const.seed}.clr:crimson ${def.const.seed}.fw:700 ${def.const.seed}.fst:ita ${def.const.seed}.fs:20p">${maxPersonalSites} </span>个网站的个性化数据了，过多的数据会使脚本运行速度过慢，进而会影响您浏览网页的响应速度，建议您及时删除一些平时访问较少的站点设置，然后再进行新网站设置的数据保存。</p><p class="${def.const.seed}.clr:crimson">您确认要继续保存吗？</p>`
                         : `<p class="${def.const.seed}.clr:808080">You have saved more than <span class="${def.const.seed}.clr:crimson ${def.const.seed}.fw:700 ${def.const.seed}.fst:nml ${def.const.seed}.fs:20p">${maxPersonalSites}</span > Personalized data. Too much data will make script load slowly. It is recommended that you promptly delete some website configure data that you rarely visit. </p><p class="${def.const.seed}.clr:crimson">Are you sure you want to continue saving? </p>`;
                       const [trueButtonText, falseButtonText] = IS_CHN ? ["依然保存", "管理列表"] : ["Still Save", "Manage"];
                       const [neutralButtonText, titleText] = IS_CHN ? ["我放弃", "数据过多的提示"] : ["Abort", "Too Much Data"];
                       let warnDialog = new FrDialogBox({ trueButtonText, falseButtonText, neutralButtonText, messageText, titleText });
-                      if (await warnDialog.respond()) {
-                        saveData(DOMAINFONTSET, domainValues);
-                        def.var.successed = true;
-                      } else delete def.var.successed && (await manageDomainsList());
+                      if (await warnDialog.respond()) (def.var.successed = true) && saveData(DOMAINFONTSET, domainValues);
+                      else delete def.var.successed && (await manageDomainsList());
                       warnDialog = null;
                     }
                   }
@@ -3549,8 +3522,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                 const [trueButtonText, falseButtonText] = IS_CHN ? ["备 份", "还 原"] : ["Backup", "Restore"];
                 const [neutralButtonText, titleText] = IS_CHN ? ["取 消", "备份与还原数据"] : ["Cancel", "Backup and Restore Data"];
                 let frDialog = new FrDialogBox({ trueButtonText, falseButtonText, neutralButtonText, messageText, titleText });
-                const messageNode = qS(`#${def.id.tfiles}`, def.var.dialogIf);
-                const inputNode = qS(`#${def.id.files}`, def.var.dialogIf);
+                const [messageNode, inputNode] = [def.id.tfiles, def.id.files].map(id => qS(`#${id}`, def.var.dialogIf));
                 if (messageNode && inputNode) {
                   messageNode.addEventListener("click", () => void inputNode.click());
                   inputNode.addEventListener("change", () => {
@@ -3579,9 +3551,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                     db_9: fontScaleDef || "",
                     db_10: fontOverrideDef || "",
                   };
-                  const browser = brand.toLowerCase();
-                  const timeStamp = setDateFormat("yyyy-MM-ddTHH-mm-ssZ", new Date());
-                  const fileName = `FontRendering-backup-${browser}-${timeStamp}.sqlitedb`;
+                  const fileName = `FontRendering-backup-${brand.toLowerCase()}-${setDateFormat("yyyy-MM-ddTHH-mm-ssZ", new Date())}.sqlitedb`;
                   dataDownload(fileName, cipherInstance.encrypt(JSON.stringify(db)));
                   const messageText = IS_CHN
                     ? `<p class="${def.const.seed}.clr:green">备份数据已归档，备份文件导出下载中……</p><p class="${def.const.seed}.clr:8b0000 ${def.const.seed}.fst:ita ${def.const.seed}.fs:12p ${def.const.seed}.wrap.break">${fileName}</p>`
@@ -3794,7 +3764,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
         function addSingleQuoteForItem(fontArray) {
           if (!Array.isArray(fontArray)) return INITIAL_VALUES.fontSelect;
-          const uniqueItems = uniq(fontArray).map(item => `'${item}'`);
+          const uniqueItems = uniq(fontArray, Boolean, item => `'${item}'`);
           return uniqueItems.length > 0 ? uniqueItems.join(",") : INITIAL_VALUES.fontSelect;
         }
 
@@ -3878,7 +3848,6 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           const [observeNodeSet, boldStatusCache, watermark, selector] = [new Set(), new WeakMap(), new RegExp("watermark", "i"), `:not(${def.const.queryString})`];
           const deBounceFixPassive = createDeBounce({ fn: correctBoldPassive, delay: 50 });
           const deBounceMouseEvent = createDeBounce({ fn: mouseEventsHandler, delay: 16 });
-          const deBounceClearNodes = createDeBounce({ fn: clearCheckedNodes, delay: checkConflict.interval });
           const hasCorrectPermission = IS_CAUSED_BOLDSTROKEERROR && Boolean(Scenes ?? (IS_CURRENTSITE_ALLOWED && CONST_VALUES.o.fixStroke));
 
           if (["iframe", "preview", "recover"].includes(Scenes)) {
@@ -3888,10 +3857,6 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           } else {
             def.var.obsCorrect = new MutationObserver(fixBoldProcess);
             return observeBoldElements;
-          }
-
-          function isShadowRoot(node) {
-            return node?.nodeType === Node.DOCUMENT_FRAGMENT_NODE && Boolean(node.host);
           }
 
           function querySelectorAllShadows(expr, root) {
@@ -3964,7 +3929,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           }
 
           function shadowRootNodeInsertCss(shadow, syncStyle) {
-            if (!isShadowRoot(shadow)) return;
+            if (!(shadow instanceof ShadowRoot)) return;
             const hostNodeName = getNodeName(shadow.host);
             applyStylesToShadowRoot(shadow, selectionCssText + shadowCode, `${hostNodeName}-fix-selection`, false);
             if (!hasCorrectPermission) return;
@@ -4102,15 +4067,14 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
           function checkConflictNode(node, event) {
             if (event instanceof MouseEvent || !checkNodesForFix(node, [Node.ELEMENT_NODE]) || !isNodeContainsBoldFix(node, true)) return;
-            const [key, currentTime] = [node.outerHTML, performance.now()];
-            deBounceClearNodes(checkConflict, currentTime);
-            updateNodeCounter(key, currentTime);
+            updateNodeCounter(node.outerHTML, performance.now());
           }
 
           function updateNodeCounter(key, currentTime) {
             const data = checkConflict.nodeCounter.get(key);
             if (!data) return checkConflict.nodeCounter.set(key, { count: 1, lastTime: currentTime });
-            if (currentTime - data.lastTime < checkConflict.interval && ++data.count > checkConflict.threshold) return handleConflict(key);
+            if (currentTime - data.lastTime >= checkConflict.interval) clearCheckedNodes(checkConflict, currentTime);
+            else if (++data.count > checkConflict.threshold) return handleConflict(key);
             data.lastTime = currentTime;
           }
 
@@ -4150,9 +4114,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
         /* FIX_VIEWPORT_ZOOM_STYLE_ERRORS. NEW UPDATE: 2024-08-10 F9Y4NG */
 
-        function correctViewportUnits(disabledInlineStyleCSP) {
+        function correctViewportUnits(allowedInlineStyle) {
           const vRegexp = /(\.?\d+(?:\.\d+)?)([dsl]?(?:v[wh]|vmin|vmax))\b(?![\\=/+_-])/g;
-          const uRegexp = /url\((?![`'"]?(?:https?:\/\/|data:|\/\/|\/\B))([^)]+)\)/g;
+          const uRegexp = /url\((?![`'"]?(?:([\w.-]+)?#\b|https?:\/\/|data:|\/\/|\/\B))([^)]+)\)/g;
           const withPermission = IS_CURRENTSITE_ALLOWED && isFixViewport && CONST_VALUES.o.fixViewport && def.var.curScale !== 1;
           const getAttributes = node => asArray(node.attributes).reduce((atr, { name, value }) => (!["href", "rel"].includes(name) && (atr[name] = value), atr), {});
           if (withPermission) addLoadEvents.addFinalFn(correctViewport) || DEBUG(`correctUnit.Viewport.Active${IN_FRAMES}:`, { eventType: "init" });
@@ -4163,50 +4127,69 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           }
 
           async function fixViewportLinks() {
-            const nodes = qA(`link[rel~="stylesheet" i]:not([data-fr-processed])`);
-            await Promise.all(
-              nodes.map(async node => {
-                const url = node.href || node.dataset.href;
-                node.dataset.frProcessed = "ignore";
-                if (url) await applyStyleToOriginLink(url.replace(/^http:/, "https:"), node);
-              })
-            );
+            const links = qA(`link[rel~="stylesheet" i]:not([data-fr-processed])`).map(async link => {
+              const url = link.href || link.dataset.href;
+              link.dataset.frProcessed = "ignore";
+              if (url) await applyStyleToOriginLink(url.replace(/^http:/, "https:"), link);
+            });
+            await Promise.all(links);
           }
 
           async function applyStyleToOriginLink(url, node) {
             try {
-              const response = await fetch(url);
-              if (!response.ok) throw new Error(`Network response was not ok. Status: ${response.status}`);
-              const cssText = await response.text();
-              if (!cssText || !vRegexp.test(cssText)) return;
-              const styleText = replaceBaseURL(replaceStyle(cssText, vRegexp, def.var.curScale), url);
-              if (!styleText) return;
-              const parent = node.parentNode ?? document.head;
-              const attributes = { ...getAttributes(node), type: "text/css", "data-href": url, "data-fr-processed": "link" };
-              const style = GMaddElement(parent, "style", { ...attributes, textContent: `/*# sourceURL=${url} */\r\n${styleText}` });
-              ((disabledInlineStyleCSP && style && parent.replaceChild(style, node)) || style) && DEBUG("Fixed.viewport.Link:", { linkNode: style });
+              const cssText = await fetchLinkContent(url, node);
+              const [parent, processedCssText] = [node.parentNode ?? document.head, await fetchImport(cssText, url)];
+              if (!/\/\*# sourceURL=/.test(cssText) && !/\/\*# importURL=/.test(processedCssText)) return;
+              const attributes = { id: generateRandomString(8), ...getAttributes(node), type: "text/css", "data-href": url, "data-fr-processed": "link" };
+              const style = GMaddElement(parent, "style", { ...attributes, textContent: processedCssText });
+              ((allowedInlineStyle && style && parent.replaceChild(style, node)) || (style && safeRemoveNode(node))) && DEBUG("Fixed.viewport.Link:", { linkNode: style });
             } catch (e) {
-              node.dataset.frProcessed = ERROR(`ApplyStyleToOriginLink${IN_FRAMES}:`, { url, msg: e.message }) ?? "error";
+              ERROR(`applyStyleToOriginLink${IN_FRAMES}:`, e.message);
             }
           }
 
           async function fixViewportStyles() {
-            const styles = qA(`style:not([data-fr-processed]):not(.darkreader)`);
-            await Promise.all(
-              styles.map(async style => {
-                if (asArray(style.attributes, attr => attr.name).Some(name => /^(?:fr|gb)-css-[0-9a-f]{8}$/.test(name))) return;
-                const cssText = style.textContent?.trim() ?? "";
-                if (!style.hasAttribute("nonce") || document.readyState === "complete") style.dataset.frProcessed = "ignore";
-                await applyStyleToOriginStyle(style, cssText);
-              })
-            );
+            const styles = qA(`style:not([data-fr-processed]):not(.darkreader)`).map(async style => {
+              if (asArray(style.attributes, attr => attr.name).Some(name => /^(?:fr|gb)-css-[0-9a-f]{8}$/.test(name))) return;
+              const cssText = style.textContent?.trim() ?? "";
+              if (!style.hasAttribute("nonce") || document.readyState === "complete") style.dataset.frProcessed = "ignore";
+              await applyStyleToOriginStyle(style, cssText);
+            });
+            await Promise.all(styles);
+          }
+
+          async function fetchLinkContent(url, node) {
+            try {
+              const response = await fetch(url);
+              if (!response.ok) throw new Error(`Network response was not ok. Status: ${response.status}`);
+              const cssText = await response.text();
+              if (!cssText || (node && !vRegexp.test(cssText))) return cssText ?? "";
+              return `/*# ${node ? "sourceURL" : "importURL"}=${url} */\r\n${replaceBaseURL(replaceStyle(cssText, vRegexp, def.var.curScale), url)}`;
+            } catch (e) {
+              return ERROR(`fetchLinkContent${IN_FRAMES}:`, { url, msg: e.message }) ?? (node && (node.dataset.frProcessed = "error")), "";
+            }
+          }
+
+          async function asyncReplace(str, regex, asyncReplaceFn) {
+            const matches = asArray(str.matchAll(regex));
+            if (matches.length === 0) return str;
+            const replacements = await Promise.all(matches.map(match => asyncReplaceFn(match[2] ?? match[1])));
+            matches.forEach((match, index) => (str = str.replace(match[0], replacements[index])));
+            return str;
+          }
+
+          function fetchImport(cssText, originUrl) {
+            if (!cssText) return Promise.resolve("");
+            return asyncReplace(cssText, /@import (url\(([^)]+)\)|"([^"]+)")[ \w(),:]*;/g, url => {
+              const fullPath = new URL(url.replace(/[`'"]/g, ""), originUrl).href;
+              return fullPath ? fetchLinkContent(fullPath, null) : "";
+            });
           }
 
           async function applyStyleToOriginStyle(node, cssText) {
             try {
               if (!cssText || !vRegexp.test(cssText)) return;
-              const updatedCssText = replaceStyle(cssText, vRegexp, def.var.curScale);
-              node.textContent = updatedCssText;
+              node.textContent = replaceStyle(cssText, vRegexp, def.var.curScale);
               node.dataset.frProcessed = DEBUG("Fixed.viewport.Style:", { styleNode: node }) ?? "style";
             } catch (e) {
               node.dataset.frProcessed = ERROR(`applyStyleToOriginStyle:`, e.message) ?? "error";
@@ -4248,7 +4231,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             if (withPermission && asArray(addedNodes).Some(node => checkStyleNode(node, getNodeName(node)))) deBounceViewport();
           };
           const updateStyleWithNewRootID = (mainStyle, id) => {
-            const cssText = (mainStyle?.textContent ?? tStyle).replace(/\b#[\w𝚊𝚌𝚎𝚖𝚘𝚜𝚝𝚞𝚡𝚣]+(?=\s)/gu, `#${id}`);
+            const cssText = (mainStyle?.textContent ?? tStyle).replace(def.const.regexp, `#${id}`);
             insertStyle({ target: document.head, id: def.id.rndStyle, cssText, overwrite: true }) &&
               INFO(`%c[MO]${IN_FRAMES}[HTML.ID]:%c#${id}`, leftStyle("#1e90ff"), rightStyle("#1e90ff"));
           };
@@ -4317,13 +4300,10 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           const callback = u => GMregisterMenuCommand(`\ufff0\ud83d\udd34 ${msg}`, () => void GMopenInTab(u)) && __console("error", `${msg} ${def.var.scriptName} ${u}`);
           return { callback, code: decrypt(source) };
         },
-        async () => {
-          let config, _config_data_;
+        async (config, _config_data_) => {
           const configure = await GMgetValue(CONFIGURE);
-          if (!configure) {
-            saveData(CONFIGURE, INITIAL_CONFIGURE);
-            _config_data_ = INITIAL_CONFIGURE;
-          } else {
+          if (!configure) saveData(CONFIGURE, (_config_data_ = INITIAL_CONFIGURE));
+          else {
             try {
               config = JSON.parse(decrypt(configure));
             } catch (e) {
@@ -4352,9 +4332,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           }
           return { monoSiteRules, monoFontList, monoFeature };
         },
-        async () => {
-          const defaultExSite = ["127.0.0.1", "workstation-xi"];
-          let exSite = defaultExSite;
+        async exSite => {
+          const defaultExSite = (exSite = ["127.0.0.1", "localhost"]);
           try {
             const exSiteSave = await GMgetValue(EXCLUDESITES);
             if (exSiteSave) exSite = JSON.parse(decrypt(exSiteSave));
@@ -4440,7 +4419,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       );
     })(createTrustedTypePolicy(), safeWindow.JSON.parse ? safeWindow.JSON : global.JSON.parse ? global.JSON : JSON, null);
   },
-  (object => {
+  o =>
     Object.entries({
       Remove(value) {
         for (let i = 0; i < this.length; i++) if (this[i] === value) return this.splice(i, 1);
@@ -4455,10 +4434,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         for (let i = 0; i < this.length; i++) if (callback.call(thisArg, this[i], i, this)) return i;
         return -1;
       },
-    }).forEach(([key, value]) => Reflect.defineProperty(object, key, { value, writable: false, configurable: false, enumerable: false }));
-    return object;
-  })(Object.create(Array.prototype)),
-  (ctx => {
+    }).forEach(([k, v]) => !Reflect.getOwnPropertyDescriptor(o, k) && Reflect.defineProperty(o, k, { value: v.bind(o), writable: false, configurable: false, enumerable: false })) ?? o,
+  ((ctx, mS = [..."Sw𝚄p2jn𝙺𝚓E𝚣R𝚎CxT𝚊JaU𝚒b𝚡𝚕ZG5𝚜v9I𝚠D1Fiqz𝚌ef0𝚋V𝚛B8W𝚟y𝚅𝚁dO𝚑K𝚘Lrk𝚐N𝙷3PAX𝚢Yc𝙶𝚂𝚙𝚖6𝚔H𝚗𝚆us𝚇m𝚏7g𝙴𝚍t𝙽l𝙲𝚚o𝚝4Q𝚞hM"]) => {
     const oC = ctx.Object.create.bind(null, null);
     const eH = type => {
       const original = ctx.history[type];
@@ -4474,6 +4451,6 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         return null;
       }
     };
-    return { oC, eH, lS: tS("localStorage"), sS: tS("sessionStorage") };
+    return { oC, mS, eH, lS: tS("localStorage"), sS: tS("sessionStorage") };
   })(typeof window !== "undefined" ? window : this ?? globalThis)
 );
