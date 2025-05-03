@@ -28,18 +28,12 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data in a timely manner. Do not use backup files from unknown sources!
 
-## version 2025.04.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2025.05.03.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-# For major version updates, please read the introduction and notes from TG Groups.
-+ Added predefined rendering data feature, see Discussions#446.
-+ Added font rendering for iframe adaptive parent page.
-@ Improved rules & compatible with math formula style.
-@ Optimized compatibility of TrustedTypes.createPolicy.
-@ Optimized compatibility of Fix-bold on asyncload site.
-@ Optimized rendering preview for cross-domain iframe.
-@ Updated @namespace and @require resource domain.
-@ Fixed script conflicts that occurs in Firefox. (Issues#448)
+@ Fixed @import issues in viewport units correction.
+@ Optimized Bold-Fix conflict detect compatibility.
+@ Improved predefined data support for pan-domain.
 @ Fixed some known issues, optimized code & style.
 ```
 
@@ -115,16 +109,12 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-## version 2025.04.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2025.05.03.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-# For major version updates, please read the introduction and notes from TG Groups.
-@ Fixed Baidu Search Button Load Exception.
-@ Fixed keyword filter feature fails in some sites.
+@ Optimized the style of baidu.com jump button.
+@ Optimized the style of bing.com search box.
 @ Improved loading logic of You.com jump button.
-@ Optimized TrustedTypes.createPolicy compatibility.
-@ Optimized search results ad blocking features.
-@ Updated @namespace source address.
 @ Fixed some known issues, optimized code & style.
 ```
 
