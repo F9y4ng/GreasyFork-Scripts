@@ -5,7 +5,7 @@
 // @name:en            Font Rendering (Customized)
 // @name:ko            글꼴 렌더링(자체 스크립트)
 // @name:ja            フォントレンダリング
-// @version            2025.05.03.1
+// @version            2025.06.07.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -82,7 +82,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
   if (!ctx.navigation) ["pushState", "replaceState"].forEach(m => void (ctx.history[m] = customFns.eH(m)));
   fontRendering(ctx, sctx, toolkit, { ...orginalFns, ...customFns, cS: customFns.mS.filter(isNaN) });
 })(
-  typeof window !== "undefined" ? window : this ?? globalThis,
+  typeof window !== "undefined" ? window : this,
   ((originalWindow, iframe) => {
     if (typeof GM_addElement === "undefined") return originalWindow;
     try {
@@ -92,7 +92,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     } catch (e) {
       return iframe?.remove(), originalWindow;
     }
-  })(typeof window !== "undefined" ? window : this ?? globalThis, null),
+  })(typeof window !== "undefined" ? window : this, null),
   function (global, safeWindow, secureVars, customFuntions) {
     "use strict";
 
@@ -142,7 +142,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         flagName: "fr-found-conflict-callback",
       },
       var: {
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.05.03.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.06.07.0",
         scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
         scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("Rjl5NG5n"),
         attachShadow: Element.prototype.attachShadow,
@@ -820,13 +820,11 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
       const UPDATE_VERSION_NOTICE = IS_CHN
-        ? `<li class="${def.const.seed}.fixed">修复视口单位修正功能中 @import 的引用问题。</li>
-            <li class="${def.const.seed}.fixed">优化粗体样式修正功能脚本冲突检测的兼容性。</li>
-            <li class="${def.const.seed}.fixed">优化对泛域名下预定义数据的解析支持。</li>
+        ? `<li class="${def.const.seed}.fixed">优化脚本样式插入函数为惰性函数，提升性能。</li>
+            <li class="${def.const.seed}.fixed">修复字体缩放视口单位修正函数的一个隐藏Bug。</li>
             <li class="${def.const.seed}.fixed">修复一些已知的问题，优化代码，优化样式。</li>`
-        : `<li class="${def.const.seed}.fixed">Fixed @import issues in viewport units correction.</li>
-            <li class="${def.const.seed}.fixed">Optimized Bold-Fix conflict detect compatibility.</li>
-            <li class="${def.const.seed}.fixed">Improved predefined data support for pan-domain.</li>
+        : `<li class="${def.const.seed}.fixed">Optimized style insertion function as a lazy function.</li>
+            <li class="${def.const.seed}.fixed">Fixed a hidden bug in viewport unit correction.</li>
             <li class="${def.const.seed}.fixed">Fixed some known issues, optimized code & style.</li>`;
 
       /* INITIALIZE_FONT_LIBRARY */
@@ -1063,14 +1061,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       }
 
       function applyStylesToShadowRoot(shadow, css, id, writable = true) {
-        try {
-          if (IS_COMPATIBLE_ADOPTEDSTYLE && shadow.adoptedStyleSheets) {
-            const sheet = createStyleSheet(id, css);
-            updateAdoptedStyleSheets(shadow, sheet, writable);
-          } else updateInlineStyle(shadow, css, id, writable);
-        } catch (e) {
-          ERROR("ApplyStylesToShadowRoot:", e.message);
-        }
+        const aSS = IS_COMPATIBLE_ADOPTEDSTYLE && shadow.adoptedStyleSheets;
+        const fn = aSS ? (s, c, i, w = true) => updateAdoptedStyleSheets(s, createStyleSheet(i, c), w) : (s, c, i, w = true) => updateInlineStyle(s, c, i, w);
+        return (applyStylesToShadowRoot = fn)(shadow, css, id, writable);
       }
 
       function compareVersion({ WEBKIT = NaN, BLINK = NaN, GECKO = NaN, ignore = true, more = true } = {}) {
@@ -1087,17 +1080,25 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       }
 
       function updateAdoptedStyleSheets(shadow, sheet, writable) {
-        const existIndex = asArray(shadow.adoptedStyleSheets).FindIndex(s => s.id === sheet.id);
-        if (!~existIndex) shadow.adoptedStyleSheets.push(sheet);
-        else if (writable && !compareStyleSheets(shadow.adoptedStyleSheets[existIndex], sheet)) shadow.adoptedStyleSheets[existIndex] = sheet;
+        try {
+          const existIndex = asArray(shadow.adoptedStyleSheets).FindIndex(s => s.id === sheet.id);
+          if (!~existIndex) shadow.adoptedStyleSheets.push(sheet);
+          else if (writable && !compareStyleSheets(shadow.adoptedStyleSheets[existIndex], sheet)) shadow.adoptedStyleSheets[existIndex] = sheet;
+        } catch (e) {
+          ERROR("updateAdoptedStyleSheets:", e.message);
+        }
       }
 
       function updateInlineStyle(shadow, css, id, writable) {
-        const existSheet = qS(`style#${id}`, shadow);
-        if (css) {
-          if (!existSheet) GMaddElement(shadow, "style", { id, media: "screen", type: "text/css", textContent: css });
-          else if (writable && existSheet.textContent !== css) existSheet.textContent = css;
-        } else safeRemoveNode(existSheet);
+        try {
+          const existSheet = qS(`style#${id}`, shadow);
+          if (css) {
+            if (!existSheet) GMaddElement(shadow, "style", { id, media: "screen", type: "text/css", textContent: css });
+            else if (writable && existSheet.textContent !== css) existSheet.textContent = css;
+          } else safeRemoveNode(existSheet);
+        } catch (e) {
+          ERROR("updateInlineStyle:", e.message);
+        }
       }
 
       function compareStyleSheets(sheetA, sheetB) {
@@ -1944,8 +1945,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               : `%cData Reset Warning\r\n%cData has been initialized due to detect data parsing anomaly, or illegally tamper with code/data, please restore your local backup manually! If this appears repeatedly, please reinstall the script!`;
             const dataReconstructText = def.var.structureError !== true ? ["warn", `${rebuildWarnText} (%s)`] : ["error", `${resetWarnText} (%s)`];
             __console(...dataReconstructText, "font-weight:700", "font-weight:400", setDebuggerMode() && cipherInstance.encrypt(odata.date));
-            safeWindow.Object.assign(_config_data_, { ...INITIAL_FEATURES, rebuild: odata.flag, curVersion: void 0, isCustomMono: false, globalDisable: false });
-            saveData(CONFIGURE, _config_data_);
+            saveData(CONFIGURE, safeWindow.Object.assign(_config_data_, { ...INITIAL_FEATURES, rebuild: odata.flag, curVersion: void 0, isCustomMono: false, globalDisable: false }));
             def.var.versionStatus = null;
             DEBUG(`%c Reconstruct configuration data: true `, `background-color:${def.var.structureError ? "#ff0000" : "#4b0082"};color:#fffafa;font-style:italic`);
           } else if (typeof rebuild === "undefined") {
@@ -1986,8 +1986,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           const [trueButtonText, falseButtonText] = IS_CHN ? ["好，去看看", "不，算了吧"] : ["Yes, Let's go", "No, Thanks"];
           const titleText = IS_CHN ? "脚本更新 - 温馨提示" : "Script Updates - Update Tips";
           const messageText = IS_CHN
-            ? `<p class="${def.const.seed}.wrap.break"><span class="${def.const.seed}.clr:ff6347 ${def.const.seed}.hi.cn">您好！</span>这是${CANDIDATE_FIELD}<span class="${def.const.seed}.pd:4p ${def.const.seed}.fw:700">${def.var.scriptName}</span>的新版本<span class="${def.const.seed}.clr:ff6347 ${def.const.seed}.v.cn">${def.var.curVersion}</span>，以下为更新详情：</p><p><ul id="${def.const.seed}.update">${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}${UPDATE_VERSION_NOTICE}</ul></p><p>建议您先去查阅 <strong class="${def.const.seed}.clr:ff6347 ${def.const.seed}.fw:700 ${def.const.seed}.fst:ita">新版使用文档</strong> ，要去看一下吗？</p>`
-            : `<p class="${def.const.seed}.wrap.break" class="${def.const.seed}.lh:180"><span class="${def.const.seed}.clr:ff6347 ${def.const.seed}.hi.en">Hi! </span>This is ${CANDIDATE_FIELD} "<span class="${def.const.seed}.pd:4p ${def.const.seed}.fw:700">${def.var.scriptName}</span>" in Version<span class="${def.const.seed}.clr:ff6347 ${def.const.seed}.v.en">${def.var.curVersion}</span>, and the update details are as follows:</p><p><ul id="${def.const.seed}.update">${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}${UPDATE_VERSION_NOTICE}</ul></p><p>Suggest you to view <strong class="${def.const.seed}.clr:ff6347 ${def.const.seed}.fw:700 ${def.const.seed}.fst:ita">Usage Document,</strong> okay?</p></p>`;
+            ? `<p class="${def.const.seed}.wrap.break"><span class="${def.const.seed}.clr:ff6347 ${def.const.seed}.hi.cn">您好！</span>这是${CANDIDATE_FIELD}<span class="${def.const.seed}.pd:4p ${def.const.seed}.fw:700">${def.var.scriptName}</span>的新版本<span class="${def.const.seed}.clr:ff6347 ${def.const.seed}.v.cn">v${def.var.curVersion}</span>，以下为更新详情：</p><p><ul id="${def.const.seed}.update">${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}${UPDATE_VERSION_NOTICE}</ul></p><p>建议您先去查阅 <strong class="${def.const.seed}.clr:ff6347 ${def.const.seed}.fw:700 ${def.const.seed}.fst:ita">新版使用文档</strong> ，要去看一下吗？</p>`
+            : `<p class="${def.const.seed}.wrap.break" class="${def.const.seed}.lh:180"><span class="${def.const.seed}.clr:ff6347 ${def.const.seed}.hi.en">Hi! </span>This is ${CANDIDATE_FIELD} "<span class="${def.const.seed}.pd:4p ${def.const.seed}.fw:700">${def.var.scriptName}</span>" in Version<span class="${def.const.seed}.clr:ff6347 ${def.const.seed}.v.en">v${def.var.curVersion}</span>, and the update details are as follows:</p><p><ul id="${def.const.seed}.update">${FIRST_INSTALL_NOTICE_WARNING}${STRUCTURE_ERROR_NOTICE_WARNING}${UPDATE_VERSION_NOTICE}</ul></p><p>Suggest you to view <strong class="${def.const.seed}.clr:ff6347 ${def.const.seed}.fw:700 ${def.const.seed}.fst:ita">Usage Document,</strong> okay?</p></p>`;
           let frDialog = new FrDialogBox({ trueButtonText, falseButtonText, messageText, titleText });
           if (await frDialog.respond()) GMopenInTab(url, false);
           sleep(5e2)((frDialog = null)).then(r => void (savedVersion === r && reload()));
@@ -4166,7 +4166,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               if (!cssText || (node && !vRegexp.test(cssText))) return cssText ?? "";
               return `/*# ${node ? "sourceURL" : "importURL"}=${url} */\r\n${replaceBaseURL(replaceStyle(cssText, vRegexp, def.var.curScale), url)}`;
             } catch (e) {
-              return ERROR(`fetchLinkContent${IN_FRAMES}:`, { url, msg: e.message }) ?? (node && (node.dataset.frProcessed = "error")), "";
+              return ERROR(`fetchLinkContent${IN_FRAMES}:`, { url, msg: e }), node && (node.dataset.frProcessed = "error"), "";
             }
           }
 
@@ -4203,7 +4203,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           }
 
           function replaceBaseURL(txt, baseURL) {
-            return txt.replace(uRegexp, (match, url) => {
+            return txt.replace(uRegexp, (match, _, url) => {
               const path = url.replace(/[`'"]/g, "");
               const fullPath = new URL(path, baseURL).href;
               return match.replace(path, fullPath);
@@ -4311,7 +4311,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             }
             _config_data_ = { ...INITIAL_CONFIGURE, ...config };
           }
-          return safeWindow.Object.assign(def.var, { versionStatus: _config_data_.curVersion }), _config_data_;
+          return (def.var.versionStatus = _config_data_.curVersion), _config_data_;
         },
         async () => {
           let [monoSiteRules, monoFontList, monoFeature] = await Promise.all([MONORULES, MONOFONTS, MONOFEATS].map(key => GMgetValue(key)));
@@ -4376,7 +4376,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             };
             return { o: await applyPredefinedRenderRules(predefinedData, safeWindow.Object.assign({}, data)), ...data };
           } catch (e) {
-            return safeWindow.Object.assign(def.var, { structureError: true }), ERROR("FontData.JSON.Parsing:", e.message), defaultFontValue;
+            return (def.var.structureError = true), ERROR("FontData.JSON.Parsing:", e.message), defaultFontValue;
           }
         },
         async () => {
@@ -4452,5 +4452,5 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       }
     };
     return { oC, mS, eH, lS: tS("localStorage"), sS: tS("sessionStorage") };
-  })(typeof window !== "undefined" ? window : this ?? globalThis)
+  })(typeof window !== "undefined" ? window : this)
 );
