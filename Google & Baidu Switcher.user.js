@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            помощник поисковых систем
 // @name:ja            優雅な検索エンジン助手
-// @version            2025.05.03.1
+// @version            2025.06.07.1
 // @author             F9y4ng
 // @description        “Elegant Search Engine Assistant” facilite la navigation entre moteurs de recherche, personnalise les préférences, met en évidence les mots-clés, élimine les redirections et publicités, et filtre les résultats. Compatible avec divers moteurs tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, etc.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG and more.
@@ -262,9 +262,9 @@
 // @grant              GM.registerMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
-// @note               {"CN":"优化 baidu.com 跳转按钮样式。","EN":"Optimized the style of baidu.com jump button."}
-// @note               {"CN":"优化 bing.com 搜索框的样式。","EN":"Optimized the style of bing.com search box."}
-// @note               {"CN":"优化 You.com 跳转按钮的加载逻辑。","EN":"Improved loading logic of You.com jump button."}
+// @note               {"CN":"修复 you.com 的跳转按钮显示问题。","EN":"Fixed the jump button display issue of you.com."}
+// @note               {"CN":"优化 yandex.com 的跳转按钮样式。","EN":"Optimized the jump button style of yandex.com."}
+// @note               {"CN":"优化 bing.com 的跳转链接地址。","EN":"Optimized the jump link address of bing.com."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         edge version≥88 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Chrome version≥88 (Compatible Tampermonkey, Violentmonkey)
@@ -311,7 +311,7 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
   if (!ctx.navigation) ["pushState", "replaceState"].forEach(m => void (ctx.history[m] = customFns.eH(m)));
   SearchEngineAssistant(ctx, sctx, toolkit, { ...orginalFns, ...customFns, cS: customFns.mS.filter(isNaN) });
 })(
-  typeof window !== "undefined" ? window : this ?? globalThis,
+  typeof window !== "undefined" ? window : this,
   ((originalWindow, iframe) => {
     if (typeof GM_addElement === "undefined") return originalWindow;
     try {
@@ -321,7 +321,7 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
     } catch (e) {
       return iframe?.remove(), originalWindow;
     }
-  })(typeof window !== "undefined" ? window : this ?? globalThis, null),
+  })(typeof window !== "undefined" ? window : this, null),
   function (global, safeWindow, secureVars, customFuntions) {
     "use strict";
 
@@ -374,7 +374,7 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
       var: {
         disappear: `ͽ${generateRandomString(10, "date")}ͼ`,
         translucent: `ͼ${generateRandomString(10, "date")}ͽ`,
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.05.03.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.06.07.0",
         scriptName: getMetaValue(`name:${getLocalLanguages()}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       },
       url: {
@@ -1472,8 +1472,8 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
               siteButtonName: "𝐁𝐢𝐧𝐠 ®",
               siteNickName: IS_CHN ? "𝐁𝐢𝐧𝐠 搜索" : "𝐁𝐢𝐧𝐠.𝐜𝐨𝐦",
               siteHostName: "www.bing.com",
-              webURL: "https://www.bing.com/search?go=Search&qs=ds&form=QBRE&rdr=1&hta=off&q=",
-              imageURL: "https://www.bing.com/images/search?qs=ds&form=QBIR&first=1&q=",
+              webURL: "https://www.bing.com/search?qs=n&form=QBRE&sp=-1&lq=0&pq=&sc=0-0&q=",
+              imageURL: "https://www.bing.com/images/search?qs=n&form=QBILPG&sp=-1&lq=0&sc=0-0&first=1&q=",
               imageType: ["images"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: `.b_searchboxForm>input[type="hidden"][name="form"]`,
@@ -1579,7 +1579,7 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: "header form.HeaderForm",
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;top:0;left:-12px;z-index:1999999995;margin:0;padding:0;width:max-content;height:52px;cursor:pointer;-webkit-appearance:none}#${def.const.leftButton}{display:inline-block;height:52px}#${def.const.rightButton}{display:inline-block;margin:0 0 0 -1px;height:52px}#${def.const.leftButton} input{padding:1px 12px 0 18px!important;height:52px;min-width:100px;border:none;box-shadow:0 0 0 2px inset rgba(0, 0, 0, 0.1);border-bottom-left-radius:28px;border-top-left-radius:28px;background:#fff;color:#00000073;vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{padding:1px 18px 0 12px!important;height:52px;min-width:100px;border:none;box-shadow:0 0 0 2px inset rgba(0, 0, 0, .1);border-top-right-radius:28px;border-bottom-right-radius:28px;background:#fff;color:#00000073;vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#fbfbfb}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{color:#eee;background:#18181a;box-shadow:0 0 0 2px inset #3a3a3c;}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#333}}`,
+              buttonCssText: `#${def.const.rndButtonID}{position:relative;top:0;left:-12px;z-index:1999999995;margin:0;padding:0;width:max-content;height:52px;cursor:pointer;-webkit-appearance:none}#${def.const.leftButton}{display:inline-block;height:52px}#${def.const.rightButton}{display:inline-block;margin:0 0 0 -1px;height:52px}#${def.const.leftButton} input{padding:1px 12px 0 18px!important;height:52px;min-width:100px;border:none;box-shadow:0 0 0 2px inset rgba(0, 0, 0, 0.3);border-bottom-left-radius:28px;border-top-left-radius:28px;background:#fff;color:#00000073;vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{padding:1px 18px 0 12px!important;height:52px;min-width:100px;border:none;box-shadow:0 0 0 2px inset rgba(0, 0, 0, 0.3);border-top-right-radius:28px;border-bottom-right-radius:28px;background:#fff;color:#00000073;vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#fbfbfb}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{color:#eee;background:#18181a;box-shadow:0 0 0 2px inset rgba(255, 255, 255, .3);}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#333}}`,
               resultListProp: { qs: "#search-result>li[data-fast]", delay: 10 },
               keywords: ".OrganicTitleContentSpan b,.OrganicTextContentSpan b",
               antiRedirectFn: () => deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yandex_ar" })("#search-result>li.serp-item a", "Yandex", { useNewTab: true, removeDataSet: true }),
@@ -1664,7 +1664,7 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
               keywords: "",
               antiRedirectFn: function () {
                 ["adBlockNoticeDismissed", "personalCounterTooltipSearch"].forEach(item => localStorages?.setItem(item, 1));
-                const fn = option => !/:nt=1:/.test(gbCookies.getItem("ECFG")) && gbCookies.setItem(option) && reload();
+                const fn = option => !/:nt=1:/.test(gbCookies.getItem("ECFG")) && gbCookies.setItem(option) && location.replace(location.href);
                 const sValue = `a=0:as=1:cs=0:dt=pc:f=i:fr=0:fs=1:l=en:lt=${Date.now()}:mc=zh-cn:nf=1:nt=1:pz=0:t=1:tt=0:tu=auto:wu=auto:ma=1`;
                 deBounce({ fn, timer: "ecosia_cookie", immed: true, once: true })({ sKey: "ECFG", sValue, sEnd: Infinity, sDomain: ".ecosia.org", sPath: "/", sSomeSite: "Lax" });
               },
@@ -1708,7 +1708,7 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
               imageURL: "https://you.com/search?fromSearchBar=true&tbm=isch&q=",
               imageType: ["isch"],
               splitTypeName: "tbm",
-              mainSelector: "button[data-testid='qb_submit_button'],#ChatQueryBar ._1l6na7p6 :is(.pemrxs0,[data-state='closed'])",
+              mainSelector: "#ChatQueryBar>form ._1975xbj6 :is(.pemrxs0,[data-state='closed'])",
               buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:0;height:36px;width:190%;max-width:fit-content}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:36px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:36px}#${def.const.leftButton} input{margin:0;padding:0 10px;height:36px;min-width:80px;border:1px solid #596ced;border-bottom-left-radius:8px;border-top-left-radius:8px;background-color:#596ced;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 10px;height:36px;min-width:80px;border:1px solid #596ced;border-top-right-radius:8px;border-bottom-right-radius:8px;background-color:#596ced;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #7a89f0;background-color:#7a89f0;color:#fff}@media (prefers-color-scheme: dark){#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #4d5cc3;background-color:#4d5cc3;}}`,
               resultListProp: {
                 qs: `[data-floating-ui-portal]>[role='dialog'][data-open='true'] section>article,div[data-eventappname="web_results"] section>article,div[data-eventappname="web_results"] ul>li`,
@@ -1737,7 +1737,8 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
               resultListProp: { qs: `#main>.w-gl>div.result,.wiki-container>div[role="region"]`, delay: 1e2 },
               keywords: `.result b`,
               antiRedirectFn: function () {
-                const setGBCookie = option => !/disable_open_in_new_windowEEE0|enable_post_methodEEE0/.test(gbCookies.getItem("preferences")) && gbCookies.setItem(option) && reload();
+                const setGBCookie = option =>
+                  !/disable_open_in_new_windowEEE0|enable_post_methodEEE0/.test(gbCookies.getItem("preferences")) && gbCookies.setItem(option) && location.replace(location.href);
                 const sValue = `date_timeEEEworldN1Ndisable_family_filterEEE0N1Ndisable_open_in_new_windowEEE0N1Nenable_post_methodEEE0N1Nenable_proxy_safety_suggestEEE1N1Nenable_stay_controlEEE0N1Ninstant_answersEEE1N1Nlang_homepageEEEs/device/enN1NlanguageEEEenglishN1Nlanguage_uiEEEenglishN1Nnum_of_resultsEEE20N1Nsearch_results_regionEEEallN1NsuggestionsEEE1N1Nwt_unitEEEcelsius`;
                 const option = { sKey: "preferences", sValue, sEnd: Infinity, sDomain: ".startpage.com", sPath: "/", sSecure: true };
                 deBounce({ fn: setGBCookie, timer: "startpage_cookie", delay: 20, immed: true, once: true })(option);
@@ -1764,7 +1765,8 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
               antiRedirectFn: function () {
                 localStorages?.setItem("app.aiPromoDismissCount", 10);
                 const option = { sKey: "olnt", sValue: "1", sEnd: Infinity, sDomain: "search.brave.com", sPath: "/", sSameSite: "Lax", sSecure: true };
-                deBounce({ fn: opt => gbCookies.getItem("olnt") !== "1" && gbCookies.setItem(opt) && reload(), timer: "brave_cookie", immed: true, once: true })(option);
+                const fn = opt => gbCookies.getItem("olnt") !== "1" && gbCookies.setItem(opt) && location.replace(location.href);
+                deBounce({ fn, timer: "brave_cookie", immed: true, once: true })(option);
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "brave_ar" })("#results>div#search-elsewhere a", "Brave", { useNewTab: true, forceNewTab: true, removeDataSet: true });
               },
               antiAdsFn: () => deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "brave_ad" })({ siteName: "Brave" }),
@@ -3099,5 +3101,5 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
       }
     };
     return { oC, mS, eH, lS: tS("localStorage"), sS: tS("sessionStorage") };
-  })(typeof window !== "undefined" ? window : this ?? globalThis)
+  })(typeof window !== "undefined" ? window : this)
 );
