@@ -28,11 +28,12 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data in a timely manner. Do not use backup files from unknown sources!
 
-## version 2025.06.07.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2025.07.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ Optimized style insertion function as a lazy function.
-@ Fixed a hidden bug in viewport unit correction.
+@ Improved session caching of browser UserAgent detection results to improve performance.
+@ Optimized font detect function as a lazy function.
+@ Fixed frames styling issue in Firefox when font scaling.
 @ Fixed some known issues, optimized code & style.
 ```
 
@@ -108,12 +109,12 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-## version 2025.06.07.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2025.07.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Fixed the jump button display issue of you.com.
-@ Optimized the jump button style of yandex.com.
-@ Optimized the jump link address of bing.com.
+@ Optimized the jump button style of Google.
+@ Optimized the jump button style of Swisscows.
+@ Optimized Bing.com advanced ad filtering rules.
 @ Fixed some known issues, optimized code & style.
 ```
 
