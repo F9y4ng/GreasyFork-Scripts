@@ -3,9 +3,9 @@
 // @name:zh-CN         字体渲染（自用脚本）
 // @name:zh-TW         字型渲染（自用程式碼）
 // @name:en            Font Rendering (Customized)
-// @name:ko            글꼴 렌더링(자체 스크립트)
+// @name:ko            글꼴 렌더링 (자체 스크립트)
 // @name:ja            フォントレンダリング
-// @version            2025.06.07.1
+// @version            2025.07.05.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -42,7 +42,6 @@
 // @compatible         Opera version≥78 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Safari version≥15.4 (Compatible Tampermonkey, Userscripts)
 // @license            GPL-3.0-only
-// @create             2020-11-24
 // @copyright          2020-2025, F9y4ng
 // @run-at             document-start
 // ==/UserScript==
@@ -86,8 +85,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
   ((originalWindow, iframe) => {
     if (typeof GM_addElement === "undefined") return originalWindow;
     try {
-      const { contentWindow } = (iframe = GM_addElement("iframe", { id: "𝚜𝚊𝚏𝚎.w𝚒𝚗𝚍𝚘𝚠", style: "display:none" }));
-      if (!originalWindow.wrappedJSObject) iframe.remove();
+      const { contentWindow } = (iframe = GM_addElement("iframe", { id: "𝐬𝐚𝐟𝐞.𝐰𝐢𝐧𝐝𝐨𝐰", style: "display:none" }));
+      if (!originalWindow.wrappedJSObject) iframe?.remove();
       return contentWindow;
     } catch (e) {
       return iframe?.remove(), originalWindow;
@@ -142,7 +141,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         flagName: "fr-found-conflict-callback",
       },
       var: {
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.06.07.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.07.05.0",
         scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
         scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("Rjl5NG5n"),
         attachShadow: Element.prototype.attachShadow,
@@ -499,7 +498,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
     function capitalize(string) {
       string = toString(string ?? "").toLowerCase();
-      return string.replace(/\b[a-z]|\s[a-z]/g, str => str.toUpperCase());
+      return string.replace(/^\b[a-z]|\s[a-z]/g, str => str.toUpperCase());
     }
 
     function getNodeName(node) {
@@ -543,7 +542,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       return (p = type === "mix" ? m : c), asArray(random({ range: p.length, length }), (v, i) => (p === m && !i ? c[random({ range: 70 })] : p[v])).join("");
     }
 
-    function createTrustedTypePolicy() {
+    function initTrustedTypesPolicy() {
       const policyOptions = { createHTML: s => s, createScript: s => s, createScriptURL: u => u };
       if (!global.trustedTypes?.createPolicy) return policyOptions;
       const originalCreatePolicy = global.trustedTypes.createPolicy.bind(global.trustedTypes);
@@ -565,6 +564,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     }
 
     function checkRedundantScript(context) {
+      if (!CUR_WINDOW_TOP && isAccessProhibited(CUR_HREF)) return true;
       const reportRedundanceError = () => {
         const errorText = IS_CHN
           ? `\ud83d\udea9 [脚本冗余警告]:\r\n发现冗余安装的脚本: "${def.var.scriptName}"，如刷新后问题依旧，请访问 ${def.url.feedback}/117 排查错误。`
@@ -572,7 +572,6 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         const troubleshoot = `\ufff8\ud83d\uded1 ${IS_CHN ? "发现冗余安装的脚本，点击排查！" : "Troubleshoot Redundant"}`;
         return CUR_WINDOW_TOP && GMregisterMenuCommand(troubleshoot, () => GMopenInTab(`${def.url.feedback}/117`, false)) && __console("error", errorText), true;
       };
-      if (!CUR_WINDOW_TOP && isAccessProhibited(CUR_HREF)) return true;
       if (context["fr-init-once"] === true) return reportRedundanceError();
       if (GMcontextMode) {
         if (document.documentElement?.hasAttribute("fr-init-once")) return reportRedundanceError();
@@ -810,7 +809,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       const [MONOFONTS, MONOFEATS, FONTOVERRIDE] = ["_MONOSPACED_FONTLIST_", "_MONOSPACED_FEATURE_", "_FONTOVERRIDE_DEF_"];
       const [FONTSCALE, FONTCHECKLIST, FIXINPUT] = ["_FONTSCALE_DEF_", "_FONTCHECKLIST_", "_FR_FIREOFX_FIXINPUT_"];
       const [getDocumentElement, getHeadElement, getBodyElement] = ["documentElement", "head", "body"].map(prop => new NodeObserver(() => document[prop]));
-      const { engine, engineVersion, creditEngine, brand, os, voucher } = (navigatorInfo = await getNavigatorInfo());
+      const { engine, engineVersion, creditEngine, brand, os, voucher } = (navigatorInfo =
+        JSON.parse(navigatorInfo || null) || (sessionStorage?.setItem("_NAVIGATORINFO_", JSON.stringify((navigatorInfo = await getNavigatorInfo()))), navigatorInfo));
       const [IS_REAL_BLINK, IS_REAL_GECKO, IS_REAL_WEBKIT] = ["Blink", "Gecko", "WebKit"].map(engine => engine === creditEngine);
       const IS_CHEAT_UA = voucher === null && (engine !== creditEngine || checkBlinkCheatingUA(navigator.userAgentData));
       const [IS_GREASEMONKEY, IS_MACOS] = [["Greasemonkey", "Userscripts", "FireMonkey", "stay"].includes(GMscriptHandler), os === "MacOS"];
@@ -820,11 +820,13 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
       const UPDATE_VERSION_NOTICE = IS_CHN
-        ? `<li class="${def.const.seed}.fixed">优化脚本样式插入函数为惰性函数，提升性能。</li>
-            <li class="${def.const.seed}.fixed">修复字体缩放视口单位修正函数的一个隐藏Bug。</li>
+        ? `<li class="${def.const.seed}.fixed">改进对浏览器 UserAgent 检测结果进行会话缓存。</li>
+            <li class="${def.const.seed}.fixed">优化字体检测函数为惰性函数，提升性能。</li>
+            <li class="${def.const.seed}.fixed">修复 Firefox 在字体缩放时框架页面的样式问题。</li>
             <li class="${def.const.seed}.fixed">修复一些已知的问题，优化代码，优化样式。</li>`
-        : `<li class="${def.const.seed}.fixed">Optimized style insertion function as a lazy function.</li>
-            <li class="${def.const.seed}.fixed">Fixed a hidden bug in viewport unit correction.</li>
+        : `<li class="${def.const.seed}.fixed">Improved session caching of browser UserAgent detection results to improve performance.</li>
+            <li class="${def.const.seed}.fixed">Optimized font detect function as a lazy function.</li>
+            <li class="${def.const.seed}.fixed">Fixed frames styling issue in Firefox when font scaling.</li>
             <li class="${def.const.seed}.fixed">Fixed some known issues, optimized code & style.</li>`;
 
       /* INITIALIZE_FONT_LIBRARY */
@@ -996,10 +998,15 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         static closure() {
           return safeRemoveNode(`#${def.id.dialogbox}`);
         }
+        static setShadowStyle(shadow, css, id, writable = true) {
+          const aSS = IS_COMPATIBLE_ADOPTEDSTYLE && shadow.adoptedStyleSheets;
+          const fn = aSS ? (s, c, i, w = true) => updateAdoptedStyleSheets(s, createStyleSheet(i, c), w) : (s, c, i, w = true) => updateInlineStyle(s, c, i, w);
+          return (FrDialogBox.setShadowStyle = fn)(shadow, css, id, writable);
+        }
         _create(context) {
           this.container = cE("fr-dialogbox", { id: def.id.dialogbox });
           const shadow = (def.var.dialogIf = aS(this.container));
-          applyStylesToShadowRoot(shadow, this.cssText, `${def.const.seed}-dialogbox`, false);
+          FrDialogBox.setShadowStyle(shadow, this.cssText, `${def.const.seed}-dialogbox`, false);
           this.frDialog = cE("fr-box", { class: def.class.db });
           appendNode(shadow, this.frDialog);
           const title = cE("fr-title", { class: def.class.dbt, innerHTML: tTP.createHTML(this.titleText) });
@@ -1058,12 +1065,6 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         dialog?.close?.();
         document.removeEventListener("blur", stopEventPropagation, true);
         return safeRemoveNode(dialog || `dialog#${def.const.dialog}`);
-      }
-
-      function applyStylesToShadowRoot(shadow, css, id, writable = true) {
-        const aSS = IS_COMPATIBLE_ADOPTEDSTYLE && shadow.adoptedStyleSheets;
-        const fn = aSS ? (s, c, i, w = true) => updateAdoptedStyleSheets(s, createStyleSheet(i, c), w) : (s, c, i, w = true) => updateInlineStyle(s, c, i, w);
-        return (applyStylesToShadowRoot = fn)(shadow, css, id, writable);
       }
 
       function compareVersion({ WEBKIT = NaN, BLINK = NaN, GECKO = NaN, ignore = true, more = true } = {}) {
@@ -1201,8 +1202,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               configurable: true,
               enumerable: true,
               get() {
-                const value = descriptor.get.call(this);
-                return /^(fd|ct)[a-zA-Z]{8}$/.test(this.type) ? value : value / scale; // Fit::Scriptcat bind clientX
+                return descriptor.get.call(this) / scale;
               },
               ...(isScrollProp && {
                 set(Value) {
@@ -1289,11 +1289,12 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           this.canvasContext = this._createCanvasContext();
           this.originFontData = this._checkFont(this.originFont);
         }
-        static chechCanvasFingerprintProtection() {
+        static checkCanvasFingerprintProtection() {
           const ctx = cE("canvas").getContext("2d");
           const { data } = (void (ctx.fillStyle = "#000"), ctx.fillRect(0, 0, 50, 50), ctx.getImageData(0, 0, 50, 50));
-          for (let i = 0; i < data.length; i += 4) if (data[i] !== 0 || data[i + 1] !== 0 || data[i + 2] !== 0 || data[i + 3] !== 255) return true;
-          return false;
+          const checkData = (data, i) => data[i] !== 0 || data[i + 1] !== 0 || data[i + 2] !== 0 || data[i + 3] !== 255;
+          for (let i = 0; i < data.length; i += 4) if (checkData(data, i)) return (FontFaceSetObserver.checkCanvasFingerprintProtection = () => true), true;
+          return (FontFaceSetObserver.checkCanvasFingerprintProtection = () => false), false;
         }
         _createCanvasContext() {
           const canvas = cE("canvas");
@@ -1742,7 +1743,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           const id = node?.id || def.id.rndStyle;
           const ownerDocumentID = target?.ownerDocument?.documentElement?.id;
           const filter = compareVersion({ BLINK: 130, more: null }) || IS_GREASEMONKEY || !ownerDocumentID ? `` : `#${ownerDocumentID}`;
-          textContent = compareVersion({ BLINK: 128, more: null }) || compareVersion({ GECKO: 126 }) ? textContent : textContent.replace("var(--fr-font-fontscale)", "initial");
+          textContent = compareVersion({ BLINK: 128, more: null }) || compareVersion({ GECKO: 138, more: null }) ? textContent : textContent.replace("var(--fr-font-fontscale)", "initial");
           return { css: textContent.replace(def.const.regexp, filter), id, style: node?.textContent };
         }
 
@@ -1824,7 +1825,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             const shadow = (def.var.configIf = aS(section));
             const cssText = String(hostStyle("fr-configure") + def.var.style.shared + def.var.style.frConfigure);
             shadow.innerHTML = tTP.createHTML(htmlText);
-            applyStylesToShadowRoot(shadow, cssText, `${def.const.seed}-configure`, false);
+            FrDialogBox.setShadowStyle(shadow, cssText, `${def.const.seed}-configure`, false);
             return createDialogModel(section, document.documentElement);
           } catch (e) {
             ERROR("InsertHTML:", e.message);
@@ -1835,7 +1836,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           if (!slider) return;
           const [host, curValue] = [`:host(div.${slider.parentNode.host.className})`, Number(thisValue).toFixed(bits)];
           const hostCss = `${host}{--step:${slider.step};--min:${slider.min};--max:${slider.max};--value:${curValue};--text-value:'${toString(curValue)}'}`;
-          applyStylesToShadowRoot(slider.parentNode, hostCss, `${def.const.seed}-${slider.name}`, true);
+          FrDialogBox.setShadowStyle(slider.parentNode, hostCss, `${def.const.seed}-${slider.name}`, true);
           slider.setAttribute("value", curValue);
           slider.value = curValue;
         }
@@ -1861,8 +1862,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           const hostCss = `${host}{--step:${step};--min:${min};--max:${max};--value:${curValue};--text-value:'${toString(curValue)}'}`;
           const sliderHTML = `<input id="${sid}" type="range" name="${name}" min="${min}" max="${max}" step="${step}" value="${curValue}" ${disabled} /><output></output><div class="${def.class.rangeProgress}"></div>`;
           sliderShadowRoot.innerHTML = tTP.createHTML(sliderHTML);
-          applyStylesToShadowRoot(sliderShadowRoot, hostCss, `${def.const.seed}-${name}`, false);
-          applyStylesToShadowRoot(sliderShadowRoot, def.var.style.frSlider, `${def.const.seed}-range`, false);
+          FrDialogBox.setShadowStyle(sliderShadowRoot, hostCss, `${def.const.seed}-${name}`, false);
+          FrDialogBox.setShadowStyle(sliderShadowRoot, def.var.style.frSlider, `${def.const.seed}-range`, false);
         }
 
         function insertSliders() {
@@ -2250,8 +2251,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               let panDomainDialog = new FrDialogBox({ trueButtonText, falseButtonText, neutralButtonText, messageText, titleText });
               if (await panDomainDialog.respond()) {
                 const { exSite } = await getExSitesData();
-                const exSiteData = uniq(exSite, site => site && typeof site === "string" && !site.endsWith(panDomain.slice(1))).sort();
-                saveData(EXCLUDESITES, exSiteData);
+                saveData(EXCLUDESITES, uniq(exSite, site => site && typeof site === "string" && !site.endsWith(panDomain.slice(1))).sort());
                 closeConfigurePage({ isReload: true });
               } else setCustomExsite();
               panDomainDialog = null;
@@ -2508,7 +2508,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
         function fontSet({ container, fontData }) {
           if (!container || typeof container !== "string" || !Array.isArray(fontData)) return;
-          const isCFPE = FontFaceSetObserver.chechCanvasFingerprintProtection();
+          const isCFPE = FontFaceSetObserver.checkCanvasFingerprintProtection();
           const setFontOpt = item => ({ title: item.ch, sort: item.sort, value: item.en, style: `font-family:'${item.en}'!important`, textContent: item.ch });
           return { fdeleteList: deleteFontSelectList, fresetList: resetFontSelectList, fsearchList: getFontSearchList, fsearch: fontSearch };
 
@@ -2701,7 +2701,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           const GeckoText = `${globalPrefix}body{transform:scale(var(--fr-font-fontscale));transform-origin:0 0;width:${100 / size}%;height:${100 / size}%}`;
           const WebKitText = `@supports(zoom:100%){${globalPrefix}body{zoom:var(--fr-font-fontscale)!important}}`;
           const cssText = compareVersion({ GECKO: 126, more: null }) ? GeckoText : WebKitText;
-          return CUR_WINDOW_TOP || compareVersion({ BLINK: 128, more: null }) || compareVersion({ GECKO: 126 }) ? cssText : "";
+          return CUR_WINDOW_TOP || compareVersion({ BLINK: 128, more: null }) || compareVersion({ GECKO: 138, more: null }) ? cssText : "";
         }
 
         function generateTextShadow(size, color) {
@@ -3756,7 +3756,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         }
 
         function changePreviewButtonStyle(button) {
-          button.textContent = IS_CHN ? `\u9884\u89c8` : `\ud835\udc77\ud835\udc93\ud835\udc97\ud835\udc98`;
+          button.textContent = IS_CHN ? "\u9884\u89c8" : "\ud835\udc77\ud835\udc93\ud835\udc97\ud835\udc98";
           button.title = IS_CHN ? "预览渲染效果" : "Preview Rendering";
           button.classList.add(`${def.const.seed}.prvw`);
           button.setAttribute("v-Preview", "true");
@@ -3931,10 +3931,10 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           function shadowRootNodeInsertCss(shadow, syncStyle) {
             if (!(shadow instanceof ShadowRoot)) return;
             const hostNodeName = getNodeName(shadow.host);
-            applyStylesToShadowRoot(shadow, selectionCssText + shadowCode, `${hostNodeName}-fix-selection`, false);
+            FrDialogBox.setShadowStyle(shadow, selectionCssText + shadowCode, `${hostNodeName}-fix-selection`, false);
             if (!hasCorrectPermission) return;
             const syncCssText = syncStyle ? `:host(${hostNodeName}){--fr-fix-stroke:0px transparent;--fr-fix-shadow:${textShadowFix}}${syncStyle}` : ``;
-            applyStylesToShadowRoot(shadow, syncCssText, `${hostNodeName}-fix-boldstroke`);
+            FrDialogBox.setShadowStyle(shadow, syncCssText, `${hostNodeName}-fix-boldstroke`);
           }
 
           function handleRootNodeObserve(context, observer) {
@@ -3946,7 +3946,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           function correctBoldPassive(event, target = document, recheck = false) {
             try {
               let { elementSet, shadowSet } = querySelectorAllShadows(selector, target);
-              if ((!hasCorrectPermission && !Scenes) || hasSessionFlag) return (elementSet = shadowSet = null);
+              if ((!hasCorrectPermission && !Scenes) || hasSessionFlag) return (elementSet = null), (shadowSet = null);
               if (Permit !== false) getAndProcessBoldStyles({ elementSet, recheck: recheck || Permit });
               shadowSet.forEach(shadow => processShadowRootNode(shadow, Scenes, Permit)) ?? shadowSet.clear();
               DEBUG(`CorrectBold.stroke.Passive${IN_FRAMES}:`, { eventType: Scenes ?? event ?? global.event?.type ?? "unknown" });
@@ -4285,7 +4285,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           addLoadEvents.addFinalFn(applyStyleToIframes, { condition: "DOMLoaded" });
         })(
           ((target, csp) => {
-            const style = appendNode(target, cE("style", { id: "𝚌𝚜𝚙.𝚝e𝚜𝚝", type: "text/css", textContent: "test { color: #000; }" }));
+            const style = appendNode(target, cE("style", { id: "𝐜𝐬𝐩.𝐭𝐞𝐬𝐭", type: "text/css", textContent: "test { color: #000; }" }));
             return (csp = style.sheet?.cssRules?.length > 0), safeRemoveNode(style) && csp;
           })(document.documentElement, null),
           (preload => {
@@ -4417,7 +4417,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           }
         }
       );
-    })(createTrustedTypePolicy(), safeWindow.JSON.parse ? safeWindow.JSON : global.JSON.parse ? global.JSON : JSON, null);
+    })(initTrustedTypesPolicy(), safeWindow.JSON.parse ? safeWindow.JSON : global.JSON.parse ? global.JSON : JSON, sessionStorage?.getItem("_NAVIGATORINFO_"));
   },
   o =>
     Object.entries({
