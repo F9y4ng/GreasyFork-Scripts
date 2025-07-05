@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            помощник поисковых систем
 // @name:ja            優雅な検索エンジン助手
-// @version            2025.06.07.1
+// @version            2025.07.05.1
 // @author             F9y4ng
 // @description        “Elegant Search Engine Assistant” facilite la navigation entre moteurs de recherche, personnalise les préférences, met en évidence les mots-clés, élimine les redirections et publicités, et filtre les résultats. Compatible avec divers moteurs tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, etc.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG and more.
@@ -262,9 +262,9 @@
 // @grant              GM.registerMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
-// @note               {"CN":"修复 you.com 的跳转按钮显示问题。","EN":"Fixed the jump button display issue of you.com."}
-// @note               {"CN":"优化 yandex.com 的跳转按钮样式。","EN":"Optimized the jump button style of yandex.com."}
-// @note               {"CN":"优化 bing.com 的跳转链接地址。","EN":"Optimized the jump link address of bing.com."}
+// @note               {"CN":"优化 Google 的跳转按钮样式。","EN":"Optimized the jump button style of Google."}
+// @note               {"CN":"优化 Swisscows 的跳转按钮样式。","EN":"Optimized the jump button style of Swisscows."}
+// @note               {"CN":"优化 Bing.com 高级广告过滤规则。","EN":"Optimized Bing.com advanced ad filtering rules."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         edge version≥88 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Chrome version≥88 (Compatible Tampermonkey, Violentmonkey)
@@ -272,7 +272,6 @@
 // @compatible         Opera version≥75 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Safari version≥14 (Compatible Tampermonkey, Userscripts)
 // @license            GPL-3.0-only
-// @create             2015-10-07
 // @copyright          2015-2025, F9y4ng
 // @run-at             document-start
 // ==/UserScript==
@@ -374,7 +373,7 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
       var: {
         disappear: `ͽ${generateRandomString(10, "date")}ͼ`,
         translucent: `ͼ${generateRandomString(10, "date")}ͽ`,
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.06.07.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.07.05.0",
         scriptName: getMetaValue(`name:${getLocalLanguages()}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       },
       url: {
@@ -1301,10 +1300,10 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
 
         const siteAdblockHandlers = {
           Bing: (siteName, clean) => {
-            if (!CUR_HOST_NAME.startsWith("cn") || !qA(`:is(#b_results,#b_topw)>li:not(.${def.var.disappear})>div.b_caption>p[class*='b_lineclamp']`).length) return;
-            qA(`:is(#b_results,#b_topw)>li:not(.${def.var.disappear})`).forEach(node => {
-              const adv = qS("div.b_caption>p[class*='b_lineclamp']", node);
-              if (adv && (adv.className.includes("b_lineclamp2") || gCS(adv).getPropertyValue("-webkit-line-clamp") === "2")) {
+            qA(`:is(#b_results,#b_context,#b_topw)>li:not(.${def.var.disappear})`).forEach(node => {
+              const adv = qS("div.b_caption>p[class]", node);
+              const adg = adv && gCS(adv, ":before");
+              if (adg && adg.display === "inline-block" && adg.verticalAlign !== "middle") {
                 COUNT(`[${siteName}-Anti-Ads-Deep-exp]`);
                 node.classList.add(def.var.disappear);
                 clean === true && safeRemoveNode(node);
@@ -1452,7 +1451,7 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
               imageType: ["isch", "2"],
               splitTypeName: ["tbm", "udm"],
               mainSelector: "form button[type='submit']",
-              buttonCssText: `#pnnext>span:nth-child(2){clear:left}#${def.const.rndButtonID}{position:relative;z-index:100;display:flex;margin:0 4px 0 -5px;justify-content:center;align-items:center}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{padding:0 2px 0 8px}.${def.const.scrollspan}{min-height:26px;margin-right:3px!important}.${def.const.scrollbars}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px!important;height:38px;min-width:90px;border:0;border-bottom-left-radius:24px;border-top-left-radius:24px;background:#1a73e8;box-shadow:none;color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 18px 0 12px!important;height:38px;min-width:90px;border:0;border-top-right-radius:24px;border-bottom-right-radius:24px;background:#1a73e8;box-shadow:none;color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#1b66c9;}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{background:#8ab4f8;box-shadow:0 1px 3px 1px rgba(0, 0, 0, 0.15),0 1px 2px rgba(0, 0, 0, 0.3);color:#202124}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#93baf9}}`,
+              buttonCssText: `#pnnext>span:nth-child(2){clear:left}#rcnt #res a{color:#2440b3}#rcnt #res a:visited{color:#681da8}#${def.const.rndButtonID}{position:relative;z-index:100;display:flex;margin:0 4px 0 2px;justify-content:center;align-items:center}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{padding:0 2px 0 8px}.${def.const.scrollspan}{min-height:26px;margin-right:3px!important}.${def.const.scrollbars}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px!important;height:39px;min-width:90px;border:0;border-bottom-left-radius:24px;border-top-left-radius:24px;background:#1a73e8;box-shadow:none;color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 18px 0 12px!important;height:39px;min-width:90px;border:0;border-top-right-radius:24px;border-bottom-right-radius:24px;background:#1a73e8;box-shadow:none;color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#1b66c9;}@media (prefers-color-scheme: dark){#rcnt #res a{color:#99c3ff}#rcnt #res a:visited{color:#c58af9}#${def.const.leftButton} input,#${def.const.rightButton} input{background:#8ab4f8;box-shadow:0 1px 3px 1px rgba(0, 0, 0, 0.15),0 1px 2px rgba(0, 0, 0, 0.3);color:#202124}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#93baf9}}`,
               resultListProp: { qs: `div.MjjYud div.Ww4FFb.vt6azd[data-hveid^="C"][data-hveid$="AA"]:not(:has(div[jscontroller="TvBckd"]))`, delay: 10 },
               keywords: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
               antiRedirectFn: () =>
@@ -1477,7 +1476,7 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: `.b_searchboxForm>input[type="hidden"][name="form"]`,
-              buttonCssText: `html{overflow-x:hidden}#sb_form .inline_sb{border-radius:24px}.${def.const.searchbox}{border-radius:8px!important}a,#b_results>li[class] a:not(.wiki_seemore),#b_results .b_no a,#b_context .mediumCardTitle{color:#001ba0}#${def.const.rndButtonID}{position:relative;z-index:0;display:inline-flex;margin:0;padding:0 6px 0 0;width:auto;height:38px;min-width:180px;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.leftButton},#${def.const.rightButton}{margin:0;padding:0;width:auto}#${def.const.rndButtonID} input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:600;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px;border-bottom-left-radius:24px;border-top-left-radius:24px}#${def.const.rightButton} input{margin:0 0 0 2px;padding:0 18px 0 12px;border-top-right-radius:24px;border-bottom-right-radius:24px}.${def.const.scrollspan}{/*margin:-14px -3px 0 0!important;max-height:28px*/}.${def.const.scrollbars}{/*max-height:28px;font-size:14px!important*/}.${def.const.scrollspan2}{margin:0!important;padding:4px 4px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars2}{margin-right:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#fff;background-color:#f0f3f6;box-shadow:0 0 4px #174ae4;color:#174ae4;transition:border .1s linear,box-shadow .3s linear}.${def.notice.random}_input{width:300px!important}@media (prefers-color-scheme: dark){.b_dark #b_results>li[class] a{color:#7aabeb}#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#a2b7f4;color:#333}}`,
+              buttonCssText: `html{overflow-x:hidden}#sb_form .inline_sb{border-radius:24px}.${def.const.searchbox}{border-radius:8px!important}a,#b_results>li[class] a:not(.wiki_seemore),#b_results .b_no a,#b_context .mediumCardTitle,#b_results .b_tranthis{color:#2440b3}#b_content #b_results>li a:visited{color:#4007a2}#${def.const.rndButtonID}{position:relative;z-index:0;display:inline-flex;margin:0;padding:0 6px 0 0;width:auto;height:38px;min-width:180px;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.leftButton},#${def.const.rightButton}{margin:0;padding:0;width:auto}#${def.const.rndButtonID} input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:600;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px;border-bottom-left-radius:24px;border-top-left-radius:24px}#${def.const.rightButton} input{margin:0 0 0 2px;padding:0 18px 0 12px;border-top-right-radius:24px;border-bottom-right-radius:24px}.${def.const.scrollspan}{/*margin:-14px -3px 0 0!important;max-height:28px*/}.${def.const.scrollbars}{/*max-height:28px;font-size:14px!important*/}.${def.const.scrollspan2}{margin:0!important;padding:4px 4px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars2}{margin-right:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#fff;background-color:#f0f3f6;box-shadow:0 0 4px #174ae4;color:#174ae4;transition:border .1s linear,box-shadow .3s linear}.${def.notice.random}_input{width:300px!important}@media (prefers-color-scheme: dark){.b_dark #b_results>li[class] a{color:#7aabeb}#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#a2b7f4;color:#333}}`,
               resultListProp: {
                 qs: `#b_results>li.b_algo:not(.b_algoBorder,.b_topborder),#b_results>li.b_vidAns .mmlist>div[id],#b_results>li.b_mop .b_slidebar>div.slide,#b_topw>li.b_ans,aside>ol#b_context>li.b_algo`,
                 delay: 10,
@@ -1498,7 +1497,7 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
               },
               antiAdsFn: () =>
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "bing_ad", immed: true })({
-                  selectors: `li.b_ans>div.wpt_bc_container,li.b_ans>#relatedSearchesLGWContainer,li.b_ans>.b_rs,li.b_ad,#b_pole,#b_content .b_underSearchbox,#b_header>div[id^="bnp."][data-vertical],#b_context li.b_ans .b_spa_adblock,.ad_sc,.b_adBottom,.b_adLastChild,.b_adPATitleBlock,.b_spa_adblock,.mapsTextAds,.pa_sb,.productAd,[id$="adsMvCarousel"],a[href*="/aclick?ld="],div.pagereco_anim,#inline_rs,#ev_talkbox_wrapper,#b_content>main[aria-label]>#b_ims_bza_pole,.shop_page .br-poleoffcarousel,#b_content>div#pole>div[class="ra_car_block ra_pole"]>div.ra_car_container,#pole>.productAd[data-ad-carousel],.b_adPATitleBlock+div,a.sb_meta[href^="http://advertise.bingads.microsoft.com"],.promotion-panel-inner,.ins_exp.vsp,li[class="b_algo"]:has(.b_attribution[data-partnertag] + p[class]),.b_ans:has([class^="xm_"][class*="_ansCont"])`,
+                  selectors: `li.b_ans>div.wpt_bc_container,li.b_ans>#relatedSearchesLGWContainer,#b_results>li.b_ans[h],li.b_ans>.b_rs,li.b_ad,#b_pole,#b_content .b_underSearchbox,#b_header>div[id^="bnp."][data-vertical],#b_context li.b_ans .b_spa_adblock,.ad_sc,.b_adBottom,.b_adLastChild,.b_adPATitleBlock,.b_spa_adblock,.mapsTextAds,.pa_sb,.productAd,[id$="adsMvCarousel"],a[href*="/aclick?ld="],div.pagereco_anim,#inline_rs,#ev_talkbox_wrapper,#b_content>main[aria-label]>#b_ims_bza_pole,.shop_page .br-poleoffcarousel,#b_content>div#pole>div[class="ra_car_block ra_pole"]>div.ra_car_container,#pole>.productAd[data-ad-carousel],.b_adPATitleBlock+div,a.sb_meta[href^="http://advertise.bingads.microsoft.com"],.promotion-panel-inner,.ins_exp.vsp,li[class="b_algo"]:has(.b_attribution[data-partnertag] + p[class]),.b_ans:has([class^="xm_"][class*="_ansCont"])`,
                   siteName: "Bing",
                 }),
             },
@@ -1802,7 +1801,7 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: { split: "/", index: 2 },
               mainSelector: "form>.searchbar>button.erase",
-              buttonCssText: `#header .form-search{max-width:35em}#${def.const.rndButtonID}{position:absolute;top:0;z-index:112;display:block;margin:0;padding:0;height:48px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:2.5em}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:48px}#${def.const.leftButton} input{box-sizing:content-box;margin:0;padding:0 2px 0 4px!important;height:48px;min-width:95px;border-width:0;border-bottom-left-radius:24px;border-top-left-radius:24px;background:var(--button-background);color:var(--button-text-color);vertical-align:top;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{box-sizing:content-box;margin:0;padding:0 4px 0 2px!important;height:48px;min-width:95px;border-width:0;border-top-right-radius:24px;border-bottom-right-radius:24px;background:var(--button-background);color:var(--button-text-color);vertical-align:top;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--button-focus-background);color:var(--button-text-color)}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #eee;background:none;color:#eee;height:46px}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--button-focus-background);color:var(--button-text-color)}}`,
+              buttonCssText: `#header .form-search{max-width:35em}#${def.const.rndButtonID}{position:absolute;top:0;z-index:112;display:block;margin:0;padding:0;height:48px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:2.5em}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:48px}#${def.const.leftButton} input{box-sizing:content-box;margin:0;padding:0 8px 0 18px!important;height:48px;min-width:70px;border-width:0;border-bottom-left-radius:24px;border-top-left-radius:24px;background:var(--button-background);color:var(--button-text-color);vertical-align:top;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{box-sizing:content-box;margin:0;padding:0 18px 0 8px!important;height:48px;min-width:70px;border-width:0;border-top-right-radius:24px;border-bottom-right-radius:24px;background:var(--button-background);color:var(--button-text-color);vertical-align:top;font-weight:600;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--button-focus-background);color:var(--button-text-color)}@media (prefers-color-scheme: dark){#${def.const.leftButton} input,#${def.const.rightButton} input{border:1px solid #eee;background:none;color:#eee;height:46px}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--button-focus-background);color:var(--button-text-color)}}`,
               resultListProp: { qs: `.web-results>article.item,.web-results>article.widget`, delay: 10 },
               keywords: `.web-results b`,
               antiRedirectFn: () =>
@@ -2711,7 +2710,7 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
                   insertAfter(buttonSection, target);
                   sleep(0)
                     .then(() => buttonSection.getBoundingClientRect().width || 2e2)
-                    .then(sectionWidth => (buttonSection.style.right = `-${10 + sectionWidth}px`));
+                    .then(sectionWidth => (buttonSection.style.right = `-${5 + sectionWidth}px`));
                 },
               },
               searxng: {
