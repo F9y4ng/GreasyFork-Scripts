@@ -29,13 +29,10 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2025.07.05.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2025.07.11.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 改进对浏览器 UserAgent 检测结果进行会话缓存。
-@ 优化字体检测函数为惰性函数，提升性能。
-@ 修复 Firefox 在字体缩放时框架页面的样式问题。
-@ 修复一些已知的问题，优化代码，优化样式。
+@ 修复 outlook 加载时出现 Duplicated Default Trusted Types policy 错误的问题。
 ```
 
 ## 字体渲染新版本，使用前请注意以下事项：
