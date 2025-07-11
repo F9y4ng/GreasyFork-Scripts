@@ -25,13 +25,10 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data promptly and don't use backup files from unknown sources!
 
-### version 2025.07.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2025.07.11.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ Improved session caching of browser UserAgent detection results to improve performance.
-@ Optimized font detect function as a lazy function.
-@ Fixed frames styling issue in Firefox when font scaling.
-@ Fixed some known issues, optimized code & style.
+@ Fixed an issue where Duplicated Default Trusted Types policy error occurred when outlook loads.
 ```
 
 ### Please note the following before using the new version:
