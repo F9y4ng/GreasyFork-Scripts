@@ -101,7 +101,7 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 # Search Engine Assistant `Google & Baidu Switcher.user.js`
  　[[View source code](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Google%20%26%20Baidu%20Switcher.user.js)] 　[[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)] 　[[Visit GreasyFork](https://greasyfork.org/scripts/12909)]  _(No issues handled on GreasyFork)_
 
-**Introduction:** "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Swisscows, searXNG and more.
+**Introduction:** "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG and more.
 
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
@@ -118,7 +118,7 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 ## The latest feature introduction
 - Added a new high-efficiency keyword filtering function for search results to eliminate content farms and spam. `New`
 - Added the function of removing search results and sidebar ads to optimize ad blocking efficiency of ad blocking.
-- Added custom search engine selection function (including: Baidu, Google, Bing, Duckduckgo, Sogou, Qwant, Yandex, 360 Search, Toutiao Search, Baidu Developer, Ecosia, Yahoo, You, Startpage, Brave, Yep, Swisscows, searXNG)
+- Added custom search engine selection function (including: Baidu, Google, Bing, Duckduckgo, Sogou, Qwant, Yandex, 360 Search, Toutiao Search, Baidu Developer, Ecosia, Yahoo, You, Startpage, Brave, Yep, Mojeek, searXNG)
 - Added the anti-redirection function of search result links and optimized the masking function of privacy parameters.
 - Smarter update detection feature.
 
