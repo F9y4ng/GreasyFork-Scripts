@@ -96,7 +96,7 @@
 # 优雅的搜索引擎助手 `Google & Baidu Switcher.user.js`
  　[[查看源代码](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Google%20%26%20Baidu%20Switcher.user.js)] 　[[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)] 　[[访问 GreasyFork](https://greasyfork.org/scripts/12909)] _（GreasyFork不再处理Issues反馈）_
 
-简介：“优雅的搜索引擎助手”方便用户在不同的搜索引擎之间跳转；支持自定义常用搜索引擎、关键词高亮渲染；还提供去除搜索链接重定向、屏蔽搜索结果广告、使用关键词过滤搜索结果、和自动更新检测等高级功能；兼容如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、You、Startpage、Brave、Yahoo、Yep、Swisscows、searXNG等多个搜索引擎。
+简介：“优雅的搜索引擎助手”方便用户在不同的搜索引擎之间跳转；支持自定义常用搜索引擎、关键词高亮渲染；还提供去除搜索链接重定向、屏蔽搜索结果广告、使用关键词过滤搜索结果、和自动更新检测等高级功能；兼容如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、You、Startpage、Brave、Yahoo、Yep、Mojeek、searXNG等多个搜索引擎。
 
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
@@ -113,7 +113,7 @@
 ## 最新功能介绍
 - 新增搜索结果关键词高效过滤功能，杜绝内容农场与垃圾信息。`New!`
 - 新增去除搜索结果及侧栏广告功能，优化广告屏蔽效率。
-- 新增自定义搜索引擎选取功能（包含：百度、Google、Bing、Duckduckgo、搜狗、Qwant、Yandex、360 搜索、头条搜索、百度开发者、Ecosia、Yahoo、You、Startpage、Brave、Yep、Swisscows、searXNG等搜索引擎）
+- 新增自定义搜索引擎选取功能（包含：百度、Google、Bing、Duckduckgo、搜狗、Qwant、Yandex、360 搜索、头条搜索、百度开发者、Ecosia、Yahoo、You、Startpage、Brave、Yep、Mojeek、searXNG等搜索引擎）
 - 新增搜索结果链接去重定向功能，优化隐私参数屏蔽功能。
 - 更智能的更新检测功能。
 
