@@ -29,10 +29,13 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2025.07.11.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2025.08.02.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 修复 outlook 加载时出现 Duplicated Default Trusted Types policy 错误的问题。
+@ 优化 Trusted Types policy 处理函数。
+@ 优化浏览器的远程字体加载状态与超时处理。
+@ 默认自动修复所有 Discuz! 论坛的字体图标错误。
+@ 修复一些已知的问题，优化代码，优化样式。
 ```
 
 ## 字体渲染新版本，使用前请注意以下事项：
@@ -101,12 +104,13 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2025.07.05.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2025.08.02.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ 优化 Google 的跳转按钮样式。
-@ 优化 Swisscows 的跳转按钮样式。
-@ 优化 Bing.com 高级广告过滤规则。
+@ 修正 Baidu 图片详情页面的按钮样式。
+@ 替换 Swisscows 为 Mojeek 搜索引擎。
+@ 优化 Yandex 的高阶去广告规则。
+@ 修正 Yandex.com 的跳转按钮样式。
 @ 修正一些已知问题，优化代码，优化样式。
 ```
 
