@@ -5,7 +5,7 @@
 // @name:en            Font Rendering (Customized)
 // @name:ko            글꼴 렌더링 (자체 스크립트)
 // @name:ja            フォントレンダリング
-// @version            2025.07.11.1
+// @version            2025.08.02.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -73,6 +73,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     alert: ctx.alert.bind(ctx),
     prompt: ctx.prompt.bind(ctx),
     confirm: ctx.confirm.bind(ctx),
+    setTimeout: ctx.setTimeout.bind(ctx),
     console: sctx.Object.assign({}, ctx.console),
     RC2: { flag: "5295b9589c42a644ca9304163cd8", date: "2025.04.05" },
   };
@@ -97,7 +98,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
     /* PERFECTLY COMPATIBLE FOR GREASEMONKEY, TAMPERMONKEY, VIOLENTMONKEY, USERSCRIPTS 2024-03-15 F9Y4NG */
 
-    const { atob, btoa, alert, prompt, confirm, console, debugging, info: GMinfo, RC2 } = secureVars;
+    const { atob, btoa, alert, prompt, confirm, console, setTimeout, debugging, info: GMinfo, RC2 } = secureVars;
     const { mS, cS, aF: asArray, oS: getObjectType, lS: localStorage, sS: sessionStorage, oC: object } = customFuntions;
     const GMversion = GMinfo.version ?? GMinfo.scriptHandlerVersion ?? "unknown";
     const GMscriptHandler = GMinfo.scriptHandler;
@@ -141,7 +142,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         flagName: "fr-found-conflict-callback",
       },
       var: {
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.07.11.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.08.02.0",
         scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
         scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("Rjl5NG5n"),
         attachShadow: Element.prototype.attachShadow,
@@ -546,13 +547,10 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       const policyOptions = { createHTML: s => s, createScript: s => s, createScriptURL: u => u };
       if (!global.trustedTypes?.createPolicy) return policyOptions;
       const originalCreatePolicy = global.trustedTypes.createPolicy.bind(global.trustedTypes);
-      const whitelist = [
-        { host: "bing.com", policy: "rwflyoutDefault" },
-        { host: "outlook.live.com", policy: "frDefault" },
-      ];
+      const whitelist = [{ host: "bing.com", policy: "rwflyoutDefault" }];
       const policyName = global.trustedTypes.defaultPolicy?.name ?? asArray(whitelist).Find(entry => CUR_HOST_NAME.endsWith(entry.host))?.policy ?? "default";
       const defaultPolicy = global.trustedTypes.defaultPolicy ?? originalCreatePolicy(policyName, policyOptions);
-      global.trustedTypes.createPolicy = (name, options) => (name === policyName ? defaultPolicy : originalCreatePolicy(name, options));
+      uniq([global, GMunsafeWindow]).forEach(w => (w.trustedTypes.createPolicy = (name, options) => (name === policyName ? defaultPolicy : originalCreatePolicy(name, options))));
       return defaultPolicy;
     }
 
@@ -638,7 +636,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           }
           return { ...uad, source: "ext", voucher };
         };
-        if (voucher.startsWith("Tampermonkey") && GMinfo.userAgentData) return getTMUserAgentData(GMinfo.userAgentData);
+        if ((voucher.startsWith("Tampermonkey") || voucher.startsWith("ScriptCat")) && GMinfo.userAgentData) return getTMUserAgentData(GMinfo.userAgentData);
         const getUADHighEntropyValues = async uad =>
           await uad.getHighEntropyValues(["bitness", "architecture", "fullVersionList"]).then(rst => {
             rst.brands = rst.fullVersionList;
@@ -810,7 +808,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       const [REMOTERENDERDATA, CONFIGURE, EXCLUDESITES, FONTSET] = ["_REMOTERENDERRULESDATA_", "_CONFIGURE_", "_EXCLUDE_SITES_", "_FONTS_SET_"];
       const [DOMAINFONTSET, CUSTOMFONTS, CUSTOMPROPERTY, MONORULES] = ["_DOMAINS_FONTS_SET_", "_CUSTOM_FONTLIST_", "_CUSTOM_PROPERTY_", "_MONOSPACED_SITERULES_"];
       const [MONOFONTS, MONOFEATS, FONTOVERRIDE] = ["_MONOSPACED_FONTLIST_", "_MONOSPACED_FEATURE_", "_FONTOVERRIDE_DEF_"];
-      const [FONTSCALE, FONTCHECKLIST, FIXINPUT] = ["_FONTSCALE_DEF_", "_FONTCHECKLIST_", "_FR_FIREOFX_FIXINPUT_"];
+      const [FONTSCALE, FONTCHECKLIST, IS_DISCUZ] = ["_FONTSCALE_DEF_", "_FONTCHECKLIST_", "_FR_IS_DISCUZ_"];
       const [getDocumentElement, getHeadElement, getBodyElement] = ["documentElement", "head", "body"].map(prop => new NodeObserver(() => document[prop]));
       const { engine, engineVersion, creditEngine, brand, os, voucher } = (navigatorInfo =
         JSON.parse(navigatorInfo || null) || (sessionStorage?.setItem("_NAVIGATORINFO_", JSON.stringify((navigatorInfo = await getNavigatorInfo()))), navigatorInfo));
@@ -823,8 +821,14 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
       const UPDATE_VERSION_NOTICE = IS_CHN
-        ? `<li class="${def.const.seed}.fixed">修复了 outlook 加载时出现 Duplicated Default Trusted Types policy 错误的问题。</li>`
-        : `<li class="${def.const.seed}.fixed">Fixed an issue where Duplicated Default Trusted Types policy error occurred when outlook loads.</li>`;
+        ? `<li class="${def.const.seed}.fixed">优化 Trusted Types policy 处理函数。</li>
+            <li class="${def.const.seed}.fixed">优化浏览器的远程字体加载状态与超时处理。</li>
+            <li class="${def.const.seed}.fixed">默认自动修复所有 Discuz! 论坛的字体图标错误。</li>
+            <li class="${def.const.seed}.fixed">修复一些已知的问题，优化代码，优化样式。</li>`
+        : `<li class="${def.const.seed}.fixed">Optimized "Trusted Types policy" handler function.</li>
+            <li class="${def.const.seed}.fixed">Optimized the browser's remote fonts loading status & timeout processing.</li>
+            <li class="${def.const.seed}.fixed">Fixed font icon issue in Discuz! forums by default.</li>
+            <li class="${def.const.seed}.fixed">Fixed some known issues, optimized code & style.</li>`;
 
       /* INITIALIZE_FONT_LIBRARY */
 
@@ -1262,7 +1266,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       /* FONT_LIBRARY_OPERATION_FUNCTIONS */
 
       const cache = {
-        value: (data, eT = 6048e5) => ({ data, expired: Date.now() + eT }),
+        value: (data, eT) => ({ data, expired: Date.now() + (typeof eT === "number" ? eT : 6048e5) }),
         set: (key, ...options) => void GMsetValue(key, encrypt(JSON.stringify(cache.value(...options)))),
         get: async key => {
           try {
@@ -1271,8 +1275,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             const current = Date.now();
             const { data, expired } = JSON.parse(decrypt(encryptedValue));
             DEBUG("cache Remaining: %c%s hrs", "color:#dc143c;font-weight:700", ((expired - current) / 36e5).toFixed(2));
-            if (data && expired > current) return data;
-            else return cache.remove(key);
+            return data && expired > current ? data : cache.remove(key);
           } catch (e) {
             return cache.remove(key);
           }
@@ -1382,8 +1385,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
       function convertHtmlToText(htmlString) {
         if (typeof htmlString !== "string") return "";
-        htmlString = htmlString.replace(/expression\([^)]*\)|url\(.*?\)|\\u[0-9a-fA-F]{4}|\\x[0-9a-fA-F]{2}|`|{|}/gi, "");
-        const temp = cE("fr-safeInner", { innerHTML: tTP.createHTML(htmlString) });
+        const temp = cE("fr-safeInner", { innerHTML: tTP.createHTML(htmlString.replace(/expression\([^)]*\)|url\(.*?\)|\\u[0-9a-fA-F]{4}|\\x[0-9a-fA-F]{2}|`|{|}/gi, "")) });
         return temp.textContent.trim().replace(/(\s*,\s*)+$/, "");
       }
 
@@ -1488,11 +1490,12 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         const getBoldFixCssText = shadow => `${boldFixSelector}{-webkit-text-stroke:var(--fr-fix-stroke)!important;${shadow ?? ""}}`;
         const boldFixCSSText = IS_CAUSED_BOLDSTROKEERROR && CONST_VALUES.o.fixStroke ? getBoldFixCssText(noTextShadowCss) : "";
         const curEmptyConfig = !fontface_i && !smooth_i && !textShadow && !textStroke && Number(fontsize_r) === 1;
+        const isFixInputEnabled = fi => fi === "true" || (!fi && /;?\s*\w+_last(?:visi|ac)t=\d{10}(?:;|%)/.test(document.cookie) && !localStorage?.setItem(IS_DISCUZ, true));
+        const discuzIcon = isFixInputEnabled(localStorage?.getItem(IS_DISCUZ)) ? ":not([class^='ico_'],[class^='comiis_'],[class^='notice_'],[class^='prompt_'])" : "";
+        const fontStyle = `${fontFaces}${bodyScalecssText}${globalPrefix}::placeholder,${globalPrefix}:is(${inText}${discuzIcon}){${fontFamily}}${globalPrefix}:is(${inText}){${textShadow}${textStroke}${smoothing}}${selectionCssText}${cssExclude}${codeFonts}${boldFixCSSText}`;
         const IS_CURRENTSITE_ALLOWED = !~exSitesIndex && !curEmptyConfig;
-        const fontStyle = `${fontFaces}${bodyScalecssText}${globalPrefix}::placeholder,${globalPrefix}:is(${inText}){${fontFamily}}${globalPrefix}:is(${inText}){${textShadow}${textStroke}${smoothing}}${selectionCssText}${cssExclude}${codeFonts}${boldFixCSSText}`;
         const textShadowFix = `0 0 ${shadow_r}px ${shadow_c.toLowerCase().slice(0, 7).concat("2b")}`;
-        const isFixInputEnabled = fi => fi === "true" || (!fi && /;?\s*\w+_last(?:visi|ac)t=\d{10}(?:;|%)/.test(document.cookie) && !localStorage?.setItem(FIXINPUT, true));
-        const firefoxInputFix = IS_REAL_GECKO & fontface_i && isFixInputEnabled(localStorage?.getItem(FIXINPUT)) ? def.var.style.firefox : "";
+        const firefoxInputFix = IS_REAL_GECKO & fontface_i && isFixInputEnabled(localStorage?.getItem(IS_DISCUZ)) ? def.var.style.firefox : "";
         const [monoAllowed, isEditorBlock, supportMix] = [Boolean(isCustomMono), Boolean(CONST_VALUES.o.isEditorBlock), CSS.supports("(color:color-mix(in srgb, tan, red))")];
         const monoShadowColor = monoAllowed && supportMix ? `--fr-mono-shadowcolor:color-mix(in srgb, rgba(69, 69, 70, 0.05) 75%, currentcolor 25%);` : ``;
         const monoFontText = monoAllowed ? `--fr-mono-font:${monoFontList || INITIAL_REMARKS.monospacedFont};` : ``;
@@ -1885,13 +1888,10 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         }
 
         function isFontReady(t = 1e3) {
-          if (typeof def.var.fontReady !== "undefined") return delete def.var.fontReady;
+          if (typeof def.var.fontReady !== "undefined") return (def.var.fontReady = null) ?? { status: "done", time: NaN };
           const startTime = performance.now();
           const timeReady = sleep(t, { useCachedSetTimeout: true }).then(() => ({ status: "timeout", time: t }));
-          const fontReady = document.fonts.ready.then(() => {
-            const time = performance.now() - startTime;
-            return { status: "fontReady", time };
-          });
+          const fontReady = document.fonts.ready.then(() => ({ status: "loaded", time: performance.now() - startTime }));
           return (def.var.fontReady = Promise.race([timeReady, fontReady]));
         }
 
@@ -2004,7 +2004,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         /* SCRIPT_MENU_INSERT_PACKAGE */
 
         function openSettings() {
-          if (qS(`#${def.id.configure}`)) return closeConfigurePage({ isReload: false });
+          if (qS(`#${def.id.configure}`)) return closeConfigurePage();
           try {
             if (!insertHTML(tHTML)) return;
             insertSliders();
@@ -2332,10 +2332,6 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           frDialog = null;
         }
 
-        function setFeedback() {
-          return GMopenInTab(def.url.feedback, false);
-        }
-
         async function asyncGetRules(msgNode, dialog) {
           const successText = IS_CHN ? "预定义渲染数据成功更新，页面将自动刷新。" : "The data update succeed, page will be refresh!";
           const failedText = IS_CHN ? "预定义渲染数据拉取失败，请在刷新后重新拉取。" : "The data pull failed, please try to pull again!";
@@ -2380,7 +2376,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           sleep(1e3, { useCachedSetTimeout: true })(2e3)
             .then(async timeout => {
               const { status, time } = await isFontReady(timeout);
-              DEBUG("isFontReady:", { status, delay: `${parseInt(time)}ms` }) || loading ? GMunregisterMenuCommand(loading) : DEBUG("%cNo Loading_Menu", "color:#a9a9a9");
+              DEBUG("isFontReady:", { status, delay: `${parseInt(time)}` }) || loading ? GMunregisterMenuCommand(loading) : DEBUG("%cNo Loading_Menu", "color:#a9a9a9");
             })
             .then(() => {
               if (!~exSitesIndex) {
@@ -2406,7 +2402,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             if (e.code === "KeyP" && ekey) handleClickEvent(!~exSitesIndex ? openSettings : setIncludeSites, 1e3, e);
             else if (e.code === "KeyX" && ekey) handleClickEvent(!~exSitesIndex ? setExcludeSites : setIncludeSites, 1e3, e);
             else if (e.code === "KeyG" && ekey) handleClickEvent(!~exSitesIndex ? setVipConfigure : setIncludeSites, 1e3, e);
-            else if (e.code === "KeyT" && ekey) handleClickEvent(setFeedback, 1e4, e);
+            else if (e.code === "KeyT" && ekey) handleClickEvent(() => void GMopenInTab(def.url.feedback, false), 1e4, e);
           }) || DEBUG("%cInstalling Hotkey_Setting", "color:#808080");
 
           function handleClickEvent(func, time, event) {
@@ -2779,7 +2775,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             controlResetButton(resetButton, fontSetFn, finalSettings, { drawScale, drawStrock, drawShadow });
             controlSubmitButton(submitButton, fontSetFn, finalSettings);
             controlBackupButton(backupButton, isBackupFunction);
-            controlCancelButton(cancelButton);
+            cancelButton?.addEventListener("click", closeConfigurePage);
           } catch (e) {
             ERROR("OperateConfigure:", e, def.array.exps.push(`[operateConfigure]: ${e}`));
           }
@@ -2939,7 +2935,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               const messageText = IS_REAL_GECKO
                 ? `<div id="${def.id.fi}">
                     <span class="${def.const.seed}.cusmono">${IS_CHN ? "修复当前站点 &lt;INPUT&gt; 的样式问题" : "Fix &lt;INPUT&gt; Issue For Current Site"}</span>
-                    <input type="checkbox" id="${def.const.seed}.fixinput" class="${def.class.checkbox}" ${localStorage?.getItem(FIXINPUT) === "true" ? "checked" : ""} />
+                    <input type="checkbox" id="${def.const.seed}.fixinput" class="${def.class.checkbox}" ${localStorage?.getItem(IS_DISCUZ) === "true" ? "checked" : ""} />
                     <label for="${def.const.seed}.fixinput"></label>
                   </div>${rewriteText}`
                 : rewriteText;
@@ -2959,7 +2955,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                   const monoFontArray = (monoFontList || INITIAL_REMARKS.monospacedFont).replace(/'/g, "").split(",");
                   const filterFonts = uniq(["Courier New", "Courier", "monospace", ...baseFontArray, ...fontCheckArray, ...monoFontArray]);
                   const fontOverrideData = parsedFontOverrideDef.filter(item => !filterFonts.includes(item)).sort();
-                  if (fixInputNode) localStorage?.setItem(FIXINPUT, fixInputNode.checked);
+                  if (fixInputNode) localStorage?.setItem(IS_DISCUZ, fixInputNode.checked);
                   saveData(FONTOVERRIDE, fontOverrideData);
                   const messageText = IS_CHN
                     ? `<p class="${def.const.seed}.clr:green">自定义字体重写数据已成功保存！</p><p>当前页面将在您确认后自动刷新。</p>`
@@ -3184,8 +3180,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             fontCssNode?.addEventListener("dblclick", function (e) {
               stopEventPropagation(e, { preventDefault: true });
               this.classList.add(def.class.notreadonly);
-              this.removeAttribute("readonly");
-              this.removeAttribute("title");
+              ["readonly", "title"].forEach(name => this.removeAttribute(name));
             });
           }
 
@@ -3375,8 +3370,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               const fixfshadow = IS_CAUSED_BOLDSHADOWERROR && fixfstroke && fshadow && fixShadowT.checked;
               const [rendercanvas, pickedcolor, fcss, fex] = [canvasT?.checked, colorshowT.value, fontCssT.value, fontExT.value];
               const fscolor = colorReg.test(pickedcolor) ? revertColor(pickedcolor) : INITIAL_VALUES.shadowColor;
-              const fontcss = fcss ? fcss.replace(/["`]/g, "'") : INITIAL_VALUES.fontCSS;
-              const fontex = fex ? fex.replace(/["`]/g, "'") : "";
+              const fontcss = fcss ? convertHtmlToText(fcss.replace(/["`]/g, "'")).replace(/[,]+/g, ",") : INITIAL_VALUES.fontCSS;
+              const fontex = fex ? convertHtmlToText(fex.replace(/["`]/g, "'")).replace(/[,]+/g, ",") : "";
               const _curEmptyConfig = !fontface && !smooth && !fshadow && !fstroke && Number(fscale) === 1;
               if (isPreview && this.hasAttribute("v-Preview")) {
                 try {
@@ -3390,13 +3385,12 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                   const _selectedFontArray = fontselect?.replace(/["']/g, "").split(",") ?? [];
                   const _selectedFont = _selectedFontArray[1] ?? _selectedFontArray[0] ?? "";
                   const _fontfaces = fontface && _selectedFont ? await generateFontFaceCSS(_selectedFontArray, _selectedFont, fontOverrideDefData) : "";
-                  const _includeSelectors = `${globalPrefix}:is(${convertHtmlToText(fontcss)})`;
                   const _excludeSplit = `${_shadow ? "text-shadow:none!important;" : ""}${_stroke ? "-webkit-text-stroke:var(--fr-no-stroke)!important;" : ""}`;
-                  const _excludeCssText = fontex && (_shadow || _stroke) ? `${globalPrefix}:is(${convertHtmlToText(fontex)}){${_excludeSplit}}` : "";
+                  const _excludeCssText = fontex && (_shadow || _stroke) ? `${globalPrefix}:is(${fontex}){${_excludeSplit}}` : "";
                   const _codefont = fontex ? funcCodefont(fontex, fontface, isCustomMono) : "";
                   const _noTextShadowCss = IS_CAUSED_BOLDSHADOWERROR && fixfshadow ? "text-shadow:var(--fr-fix-shadow)!important;" : "";
                   const _fixfontstroke = fixfstroke ? getBoldFixCssText(_noTextShadowCss) : "";
-                  const _tFontStyle = `${_fontfaces}${_bodyscale}${globalPrefix}::placeholder,${_includeSelectors}{${_fontfamily}}${_includeSelectors}{${_shadow}${_stroke}${_smoothing}}${_excludeCssText}${_codefont}${_fixfontstroke}`;
+                  const _tFontStyle = `${_fontfaces}${_bodyscale}${globalPrefix}::placeholder,${globalPrefix}:is(${fontcss}${discuzIcon}){${_fontfamily}}${globalPrefix}:is(${fontcss}){${_shadow}${_stroke}${_smoothing}}${_excludeCssText}${_codefont}${_fixfontstroke}`;
                   const _firefoxInputFix = IS_REAL_GECKO && fontface ? def.var.style.firefox : "";
                   const _textShadowFix = `0 0 ${fshadow}px ${fscolor.toLowerCase().slice(0, 7).concat("2b")}`;
                   const _sharpRender = rendercanvas ? `--fr-render-shape:geometricPrecision;` : ``;
@@ -3555,7 +3549,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                     : `<p class="${def.const.seed}.clr:green">The data archived and being downloaded…</p><p class="${def.const.seed}.clr:8b0000 ${def.const.seed}.fst:ita ${def.const.seed}.fs:12p ${def.const.seed}.wrap.break">${fileName}</p>`;
                   const [trueButtonText, titleText] = IS_CHN ? ["确 定", "数据备份"] : ["OK", "Data Backup"];
                   let downloadDialog = new FrDialogBox({ trueButtonText, messageText, titleText });
-                  if (await downloadDialog.respond()) DEBUG(`Backup succeeded: ${fileName}`) ?? closeConfigurePage({ isReload: false });
+                  if (await downloadDialog.respond()) DEBUG(`Backup succeeded: ${fileName}`) ?? closeConfigurePage();
                   downloadDialog = null;
                 } else {
                   try {
@@ -3636,14 +3630,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               }
             });
           }
-
-          function controlCancelButton(cancelT) {
-            cancelT?.addEventListener("click", () => void closeConfigurePage({ isReload: false }));
-          }
         }
 
         async function detectAvailableFonts() {
-          if (!(await isFontReady())) return [];
           const fontCheckList = await getMergedFontCheckList();
           const checkFont = new FontFaceSetObserver();
           const fontAvailable = [];
@@ -3675,7 +3664,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           inputFont?.addEventListener("mouseleave", () => void inputFont.setAttribute("placeholder", `${IS_CHN ? "当前字体：" : "Current: "}${curFont}`));
         }
 
-        function closeConfigurePage({ isReload }) {
+        function closeConfigurePage({ isReload } = {}) {
           FrDialogBox.closure() && qS(`#${def.id.container}`, def.var.configIf)?.classList.remove(`${def.const.seed}.opac:1`);
           sleep(5e2)(safeRemoveNode("fr-colorpicker"))
             .then(r => r && safeRemoveNode("fr-configure") && qS(`dialog#${def.const.dialog}`))
@@ -3747,8 +3736,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         function restoreSaveButton({ button, isRestore = true }) {
           button.textContent = IS_CHN ? "\u4fdd\u5b58" : isRestore ? "Save" : "\ud835\udc7a\ud835\udc82\ud835\udc97\ud835\udc86";
           button.classList.remove(`${def.const.seed}.prvw`);
-          button.removeAttribute("v-Preview");
-          button.removeAttribute("title");
+          ["v-Preview", "title"].forEach(attr => button.removeAttribute(attr));
           isRestore && restoreSavedPreview();
         }
 
@@ -3776,7 +3764,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
         function reportErrorToAuthor(exps) {
           if (!Array.isArray(exps) || exps.length === 0) return;
-          sleep(6e2)(closeConfigurePage({ isReload: false })).then(async () => {
+          sleep(6e2)(closeConfigurePage()).then(async () => {
             if (qS("fr-dialogbox[fr-error]")) return;
             const errorList = exps.map((exp, i) => `${i + 1}. ${exp}`).join("<br/>");
             const errorNoticeHTML = IS_CHN
