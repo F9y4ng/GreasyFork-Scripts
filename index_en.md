@@ -109,13 +109,10 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-## version 2025.08.02.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2025.08.10.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Fixed button style on Baidu image detail page.
-@ Replaced Swisscows with Mojeek search engine.
-@ Optimized advanced anti-adv rules for Yandex.
-@ Fixed jump button style of Yandex.com.
+@ Fixed jump button style of Baidu.com.
 @ Fixed some known issues, optimized code & style.
 ```
 
