@@ -9,6 +9,6 @@
 // @author       F9y4ng
 // @description  "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG and more.
 // @namespace    https://github.com/F9y4ng/GreasyFork-Scripts/
-// @note         {"CN":"修正 Baidu.com 的跳转按钮样式。","EN":"Fixed jump button style of Baidu.com."}}
+// @note         {"CN":"修正 Baidu.com 的跳转按钮样式。","EN":"Fixed jump button style of Baidu.com."}
 // @note         {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // ==/UserScript==
