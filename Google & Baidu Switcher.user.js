@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            помощник поисковых систем
 // @name:ja            優雅な検索エンジン助手
-// @version            2025.08.02.1
+// @version            2025.08.10.1
 // @author             F9y4ng
 // @description        “Elegant Search Engine Assistant” facilite la navigation entre moteurs de recherche, personnalise les préférences, met en évidence les mots-clés, élimine les redirections et publicités, et filtre les résultats. Compatible avec divers moteurs tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, etc.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG and more.
@@ -262,10 +262,7 @@
 // @grant              GM.registerMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
-// @note               {"CN":"修正 Baidu 图片详情页面的按钮样式。","EN":"Fixed button style on Baidu image detail page."}
-// @note               {"CN":"替换 Swisscows 为 Mojeek 搜索引擎。","EN":"Replaced Swisscows with Mojeek search engine."}
-// @note               {"CN":"优化 Yandex 的高阶去广告规则。","EN":"Optimized advanced anti-adv rules for Yandex."}
-// @note               {"CN":"修正 Yandex.com 的跳转按钮样式。","EN":"Fixed jump button style of Yandex.com."}
+// @note               {"CN":"修正 Baidu.com 的跳转按钮样式。","EN":"Fixed jump button style of Baidu.com."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         edge version≥88 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Chrome version≥88 (Compatible Tampermonkey, Violentmonkey)
@@ -1412,9 +1409,9 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
               webURL: "https://www.baidu.com/s?ie=utf-8&rqlang=cn&wd=",
               imageURL: "https://image.baidu.com/search/index?tn=baiduimage&ps=1&ie=utf-8&word=",
               imageType: ["baiduimage", "baiduimagedetail"],
-              splitTypeName: "tn",
-              mainSelector: ".s_btn_wr,#sugOut,span[class^='submit-btn']",
-              buttonCssText: `a,a em{text-decoration:none!important}:not([class^="page-inner"])>a:not(.${def.notice.linkerror}):hover{text-decoration:underline!important}#form{white-space:nowrap}#u{z-index:1!important}#${def.const.rndButtonID}{position:absolute;z-index:1999999995;display:inline-block;margin:0;padding:0;height:40px;vertical-align:top;line-height:40px;right:-210px}#${def.const.rndButtonID} *{-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:40px}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px!important;height:40px;min-width:100px;border:0;border-bottom-left-radius:10px;border-top-left-radius:10px;background:#4e6ef2;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 18px 0 12px!important;height:40px;min-width:100px;border:0;border-top-right-radius:10px;border-bottom-right-radius:10px;background:#4e6ef2;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#4662d9;border:1px solid transparent;}`,
+              splitTypeName: ["tn", "pd"],
+              mainSelector: "#chat-input-main,.s_btn_wr,#sugOut,span[class^='submit-btn']",
+              buttonCssText: `a,a em{text-decoration:none!important}:not([class^="page-inner"])>a:not(.${def.notice.linkerror}):hover{text-decoration:underline!important}#form{white-space:nowrap}#u{z-index:1!important}#${def.const.rndButtonID}{position:absolute;z-index:1999999995;display:inline-block;margin:0;padding:0;height:40px;vertical-align:top;line-height:40px;right:-210px}#${def.const.rndButtonID} *{-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:40px}#${def.const.leftButton} input{margin:4px 0;padding:0 12px 0 18px!important;height:40px;min-width:100px;border:0;border-bottom-left-radius:10px;border-top-left-radius:10px;background:linear-gradient(316deg,#286aff,#4e6ef2,#7274f9,#9f66ff);color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:4px 0;padding:0 18px 0 12px!important;height:40px;min-width:100px;border:0;border-top-right-radius:10px;border-bottom-right-radius:10px;background:linear-gradient(136deg,#286aff,#4e6ef2,#7274f9,#9f66ff);color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:linear-gradient(rgba(0, 0, 0, 0.09),rgba(0, 0, 0, 0.09)), linear-gradient(75deg,#286aff,#4e6ef2,#7274f9,#9f66ff)!important;border:1px solid transparent;}`,
               resultListProp: { qs: `#content_left>div.c-container[tpl]:not([tpl='recommend_list'],[tpl^="rel-"])`, delay: 10 },
               keywords: "#wrapper_wrapper em,.c-gap-top-small b",
               antiRedirectFn: () =>
@@ -2508,17 +2505,17 @@ void (function (ctx, sctx, SearchEngineAssistant, arrayProxy, customFns) {
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
                   const width = buttonSection.getBoundingClientRect().width || 2e2;
+                  buttonSection.style.right = `-${width + 8}px`;
                   switch (getUrlParam(currentSite.splitTypeName)) {
                     case currentSite.imageType[0]:
-                      buttonSection.style.right = `-${width + 8}px`;
+                    case currentSite.imageType[1]:
+                    case "note":
+                      qA(`#${def.const.rndButtonID} input`).forEach(node => (node.style.cssText = "margin:0;background:#4e6ef2"));
                       break;
                     case "news":
                     case "vsearch":
-                      buttonSection.style.right = `-${width + 8}px`;
+                      qA(`#${def.const.rndButtonID} input`).forEach(node => (node.style.cssText = "margin:0;background:#4e6ef2"));
                       qS(`#${def.const.rightButton} input`).style.marginLeft = "3px";
-                      break;
-                    default:
-                      buttonSection.style.right = `-${width + 8}px`;
                       break;
                   }
                 },
