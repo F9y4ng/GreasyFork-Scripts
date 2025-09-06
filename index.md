@@ -29,12 +29,15 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2025.08.02.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2025.09.06.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 优化 Trusted Types policy 处理函数。
-@ 优化浏览器的远程字体加载状态与超时处理。
-@ 默认自动修复所有 Discuz! 论坛的字体图标错误。
+@ 持续优化提升了脚本的兼容性。
+@ 改进浏览器通过 CSS 合成字体粗体的样式。
+@ 优化字体设置界面自动检测滚动条效果。
+@ 优化字体阴影拾色器的事件监听规则以提升性能。
+@ 优化字体缩放功能兼容 CodeMirror/Monaco. (实验性)
+@ 修复视口修正处理 @import 的匹配问题。
 @ 修复一些已知的问题，优化代码，优化样式。
 ```
 
@@ -104,10 +107,17 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2025.08.10.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2025.09.06.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ 修正 Baidu.com 的跳转按钮样式。
+@ 持续优化提升了脚本的兼容性。
+@ 更新 SearXNG 的外部引用源地址。
+@ 优化 Bing.com 的链接重定向规则。
+@ 修正 You.com 跳转按钮未正确加载的问题。
+@ 修正 search.Brave 跳转按钮显示异常的问题。
+@ 修正 Duckduckgo 跳转按钮显示异常的问题。
+@ 修正浏览器应用深色模式时搜索链接的颜色异常。
+@ 修正脚本更新后无法自动更新图标缓存的错误。
 @ 修正一些已知问题，优化代码，优化样式。
 ```
 
