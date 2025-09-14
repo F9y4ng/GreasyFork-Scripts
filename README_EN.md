@@ -171,11 +171,10 @@ The "**Automatic Update**" function is enabled by default. If you do not need it
 
 **Introduction:** "Autoclose Zhihu Login Prompt" is only used to close the automatically pop-up login prompt. It does nothing else and will not do anything else in the future.
 
-### version 2025.01.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
+### version 2025.09.14.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
 
 ```log
-+ Updated script copyright date.
-@ Optimized and updated feature code.
+@ Fixed the login dialogBox can't be closed automatically.
 ```
 
 ### Important
