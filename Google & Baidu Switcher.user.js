@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            Помощник поисковой системы
 // @name:ja            優雅な検索エンジン助手
-// @version            2025.09.06.1
+// @version            2025.10.05.1
 // @author             F9y4ng
 // @description        “Elegant Search Engine Assistant” facilite la navigation entre moteurs de recherche, personnalise les préférences, met en évidence les mots-clés, élimine les redirections et publicités, et filtre les résultats. Compatible avec divers moteurs tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, etc.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG and more.
@@ -263,14 +263,11 @@
 // @grant              GM.registerMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
-// @note               {"CN":"持续优化提升了脚本的兼容性。","EN":"Continuously improved script compatibility."}
-// @note               {"CN":"更新 SearXNG 的外部引用源地址。","EN":"Updated external reference sources for SearXNG."}
-// @note               {"CN":"优化 Bing.com 的链接重定向规则。","EN":"Optimized Bing.com's link redirection rules."}
-// @note               {"CN":"修正 You.com 跳转按钮未正确加载的问题。","EN":"Fixed You.com's button not loading properly."}
-// @note               {"CN":"修正 search.Brave 跳转按钮显示异常的问题。","EN":"Fixed search.Brave's button displays abnormal."}
-// @note               {"CN":"修正 Duckduckgo 跳转按钮显示异常的问题。","EN":"Fixed Duckduckgo's button displays abnormal."}
-// @note               {"CN":"修正浏览器应用深色模式时搜索链接的颜色异常。","EN":"Fixed links color anomaly in browser dark mode."}
-// @note               {"CN":"修正脚本更新后无法自动更新图标缓存的错误。","EN":"Fixed failure to update icon cache after upgrade."}
+// @note               {"CN":"优化部分搜索引擎广告屏蔽规则。","EN":"Optimized some search engine ad blocking rules."}
+// @note               {"CN":"优化搜索结果链接重定向检测机制。","EN":"Optimized search result link redirect detection."}
+// @note               {"CN":"优化对搜索链接重定向地址的关键词拦截。","EN":"Optimized keyword block for search redirect url."}
+// @note               {"CN":"修复 Bing.com 链接重定向被监测还原的问题。","EN":"Fixed Bing.com link redirection restore issue."}
+// @note               {"CN":"修复 Google.com 搜索链接的颜色问题。","EN":"Fixed color issue with Google.com search links."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         edge version≥88 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Chrome version≥88 (Compatible Tampermonkey, Violentmonkey)
@@ -309,11 +306,12 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     prompt: ctx.prompt.bind(ctx),
     confirm: ctx.confirm.bind(ctx),
     setTimeout: ctx.setTimeout.bind(ctx),
-    console: sctx.Object.assign({}, ctx.console),
+    console: sctx.Object.assign(customFns.oC(), ctx.console),
     info: typeof GM !== "undefined" && GM.info ? GM.info : typeof GM_info !== "undefined" ? GM_info : { script: {} },
   };
   const wrappedFrom = ctx.wrappedJSObject ? Array.from : sctx.Array.from;
-  const orginalFns = { oS: sctx.Object.prototype.toString, hP: sctx.Object.prototype.hasOwnProperty, aF: (...args) => arrayProxy(wrappedFrom(...args)) };
+  const asArray = o => (arrayProxy.method.every(([k, v]) => Reflect.defineProperty(o, k, { value: v.bind(o), ...arrayProxy.option })), o);
+  const orginalFns = { oS: sctx.Object.prototype.toString, hP: sctx.Object.prototype.hasOwnProperty, aF: (...args) => asArray(wrappedFrom(...args)) };
   if (!ctx.navigation) ["pushState", "replaceState"].forEach(m => void (ctx.history[m] = customFns.eH(m)));
   searchEngineAssistant(ctx, sctx, toolkit, { ...orginalFns, ...customFns, cS: customFns.mS.filter(isNaN) });
 })(
@@ -363,6 +361,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       const: {
         raf: Symbol(`פֿ${generateRandomString(8, "hex")}`),
         caf: Symbol(`פֿ${generateRandomString(8, "hex")}`),
+        bing: Symbol(`פֿ${generateRandomString(8, "hex")}`),
         loading: generateRandomString(6, "char"),
         cssAttrName: `gb-css-${generateRandomString(8, "hex")}`,
         rndButtonID: generateRandomString(12, "char"),
@@ -380,7 +379,8 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       var: {
         disappear: `ͽ${generateRandomString(10, "date")}ͼ`,
         translucent: `ͼ${generateRandomString(10, "date")}ͽ`,
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.09.06.0",
+        filtered: `ͼ${generateRandomString(6, "char")}ͼ`,
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.10.05.0",
         scriptName: getMetaValue(`name:${getLocalLanguages()}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       },
       url: {
@@ -440,7 +440,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         RAF.instance = this;
       }
       _registerAnimationFrame(scope) {
-        const vendor = asArray(["ms", "moz", "webkit", "o"]).Find(vendor => scope[`${vendor}RequestAnimationFrame`]);
+        const vendor = asArray(["ms", "moz", "webkit", "o"]).FindX(vendor => scope[`${vendor}RequestAnimationFrame`]);
         const raf = scope.requestAnimationFrame ?? scope[`${vendor}RequestAnimationFrame`];
         const caf = scope.cancelAnimationFrame ?? (scope[`${vendor}CancelAnimationFrame`] || scope[`${vendor}CancelRequestAnimationFrame`]);
         safeWindow.Object.assign(scope, { [def.const.raf]: raf, [def.const.caf]: caf });
@@ -450,10 +450,9 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         const timerSymbol = Symbol(type);
         const step = () => {
           const currentTime = performance.now();
-          this._setTimerMap(timerSymbol, type, step);
-          if (currentTime - lastTime < (Number(interval) || 0)) return;
-          typeof fn === "function" && fn.apply(null, args);
-          type === "interval" ? (lastTime = currentTime) : this.clearTimeout(timerSymbol);
+          if (currentTime - lastTime < (Number(interval) || 0)) return this._setTimerMap(timerSymbol, type, step);
+          type === "interval" ? (lastTime = this._setTimerMap(timerSymbol, type, step) ?? currentTime) : this.clearTimeout(timerSymbol);
+          typeof fn === "function" && fn.apply(this.context, args);
         };
         this._setTimerMap(timerSymbol, type, step);
         return timerSymbol;
@@ -616,7 +615,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       if (!global.trustedTypes?.createPolicy) return policyOptions;
       const originalCreatePolicy = global.trustedTypes.createPolicy.bind(global.trustedTypes);
       const whitelist = [{ host: "bing.com", policy: "rwflyoutDefault" }];
-      const policyName = global.trustedTypes.defaultPolicy?.name ?? asArray(whitelist).Find(entry => CUR_HOST_NAME.endsWith(entry.host))?.policy ?? "default";
+      const policyName = global.trustedTypes.defaultPolicy?.name ?? asArray(whitelist).FindX(entry => CUR_HOST_NAME.endsWith(entry.host))?.policy ?? "default";
       const defaultPolicy = global.trustedTypes.defaultPolicy ?? originalCreatePolicy(policyName, policyOptions);
       uniq([global, GMunsafeWindow]).forEach(w => (w.trustedTypes.createPolicy = (name, options) => (name === policyName ? defaultPolicy : originalCreatePolicy(name, options))));
       return defaultPolicy;
@@ -708,7 +707,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         };
         for (const [key, { brand, engine, verset, as }] of Object.entries(brandMap)) {
           if (!checkString(key)) continue;
-          const versionKey = asArray(verset ?? []).Find(k => checkString(k)) || key;
+          const versionKey = asArray(verset ?? []).FindX(k => checkString(k)) || key;
           let brandVersion = getVersion(versionKey, versionKey.length + 1);
           if (!brandVersion) continue;
           const enVersionKey = as || key;
@@ -733,7 +732,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       }
 
       function getRealBrowserEngine(w) {
-        return w.GestureEvent ? "WebKit" : w.scrollByLines || w.getDefaultComputedStyle ? "Gecko" : w.webkitRequestFileSystem || w.queryLocalFonts ? "Blink" : "Unknown";
+        return w.GestureEvent ? "WebKit" : w.scrollByLines || w.getDefaultComputedStyle ? "Gecko" : w.webkitRequestFileSystem || w.webkitSpeechGrammar ? "Blink" : "Unknown";
       }
 
       function getEngineFromUA(ua) {
@@ -752,7 +751,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
       function getOSInfoFromUA(checkString) {
         const platforms = ["like Mac", "Mac", "Android", "Debian", "Ubuntu", "Linux", "Win", "CrOS", "X11"];
-        const platform = asArray(platforms).Find(p => checkString(p, "i")) || "Unknown";
+        const platform = asArray(platforms).FindX(p => checkString(p, "i")) || "Unknown";
         return getFullPlatformName(platform);
       }
     }
@@ -943,7 +942,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               handleClick();
             });
           } else item.addEventListener("click", e => e.target.className !== def.notice.close && this._executeCallbacks("onClick"));
-          item.addEventListener("mouseover", () => this._executeCallbacks("onHover"));
+          item.addEventListener("mouseenter", () => this._executeCallbacks("onHover"));
         }
         _closeItem(item) {
           const closetNode = item.closest(`.${def.notice.noticeX}`);
@@ -1066,12 +1065,13 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           };
         }
 
-        function updateNodeAttributes(options, node) {
-          if (options.useNewTab) node.setAttribute("target", "_blank");
-          if (options.forceSelf) node.setAttribute("target", "_self");
-          if (Array.isArray(options.cleanAttr) && options.cleanAttr.length > 0) options.cleanAttr.forEach(item => node.removeAttribute(item));
-          if (options.removeDataSet) Object.keys(node.dataset).forEach(ds => delete node.dataset[ds]);
-          node.setAttribute("gd-depurate-status", true);
+        function updateNodeAttributes(options, node, result = 0) {
+          if (options.useNewTab && ++result) node.setAttribute("target", "_blank");
+          if (options.forceSelf && ++result) node.setAttribute("target", "_self");
+          if (Array.isArray(options.cleanAttr) && options.cleanAttr.length > 0 && ++result) options.cleanAttr.forEach(item => node.removeAttribute(item));
+          if (options.removeDataSet && ++result) Object.keys(node.dataset).forEach(ds => delete node.dataset[ds]);
+          if (options.forceNewTab && ++result) node.addEventListener("click", e => stopEventPropagation(e) ?? GMopenInTab(getRealHref(node), false));
+          if (result) node.setAttribute("gd-depurate-succeed", "");
         }
 
         function stopEventPropagation(event) {
@@ -1079,16 +1079,12 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           event.stopImmediatePropagation();
         }
 
-        function setForceNewTab(options, node) {
-          if (!options.forceNewTab) return;
-          node.addEventListener("click", e => {
-            stopEventPropagation(e);
-            GMopenInTab(node.href, false);
-          });
+        function getRealHref(node) {
+          const realHref = node?.getAttribute("gb-real-href");
+          return (realHref?.startsWith("a0") && new URL(decrypt(realHref.slice(2, -1)), location).href) || node?.href || "about:blank";
         }
 
-        function setAdvancedAntiRedirect(options, node, tasks, siteName) {
-          if (!options.advancedAnti) return;
+        function setAdvancedAntiRedirect(node, tasks, siteName) {
           node.setAttribute("gd-antiredirect-status", "pending");
           const task = advancedAntiRedirection(siteName, node, () => Promise.resolve(NaN));
           if (typeof task === "function") tasks.push(task);
@@ -1098,14 +1094,21 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           if (typeof selectors !== "string" || selectors.trim() === "") return;
           options = validateOptions(options);
           const selectorArray = selectors.split(/,(?![^()]*\))/g);
-          const queryString = selectorArray.map(item => `${item}:not([href^='javascript:' i]):not([href^='#']):not([gd-depurate-status],[gd-antiredirect-status])`).join(",");
-          const aNodes = qA(queryString);
+          const queryString = selectorArray.map(item => `${item}:not([href^='javascript:' i]):not([href^='#']):not([gd-antiredirect-status])`).join(",");
+          const aNodes = qA(queryString).filter(node => {
+            node.hasAttribute("gd-depurate-succeed") &&
+              ((options.useNewTab && node.target !== "_blank") ||
+                (options.forceSelf && node.target !== "_self") ||
+                (Array.isArray(options.cleanAttr) && asArray(options.cleanAttr).SomeX(attr => node.hasAttribute(attr))) ||
+                (options.removeDataSet && Object.keys(node.dataset).length > 0)) &&
+              node.removeAttribute("gd-depurate-succeed");
+            return !node.hasAttribute("gd-depurate-succeed");
+          });
           if (aNodes.length === 0) return;
           COUNT(`[${siteName}-Anti-Redirect]`);
           const taskList = aNodes.reduce((tasks, node) => {
             updateNodeAttributes(options, node);
-            setForceNewTab(options, node);
-            setAdvancedAntiRedirect(options, node, tasks, siteName);
+            options.advancedAnti && setAdvancedAntiRedirect(node, tasks, siteName);
             return tasks;
           }, []);
           parallelTasks(taskList, 10);
@@ -1132,6 +1135,9 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         }
 
         function handleSuccess(res, url, node) {
+          antiResultsFilter &&
+            asArray(resultFilters).SomeX(filter => new RegExp(filter, "i").test(res)) &&
+            node.insertAdjacentHTML("beforeend", tTP.createHTML(`<div class="${def.var.filtered}">${res}</div>`));
           cachedRequestLinks.set(url, res);
           setRealLink(node, res);
           toggleLoadClass(node)?.remove();
@@ -1161,15 +1167,25 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             def.count.duplicate--;
             toggleLoadClass(node)?.remove();
             raf.clearInterval(attemptToFindCacheLink);
-          }, 5e2);
+          }, 2e2);
         }
 
         function toggleLoadClass(node) {
           if (node && IS_DEBUG) return { remove: () => node.classList.remove(def.const.loading), add: () => node.classList.add(def.const.loading) };
         }
 
+        function handleBingLink(e) {
+          const node = e.target;
+          node?.getAttribute?.("gd-antiredirect-status") === "success" && (stopEventPropagation(e) ?? (node.href = getRealHref(node)));
+        }
+
         function setRealLink(node, url) {
           node.href = url;
+          if (CUR_HOST_NAME.endsWith(".bing.com")) {
+            const actions = ["mouseenter", "mouseleave", "mouseout", "mousedown", "mouseup", "blur", "keyup"];
+            !global[def.const.bing] && actions.forEach(act => void document.addEventListener(act, handleBingLink, (global[def.const.bing] = true)));
+            node.setAttribute("gb-real-href", `a0${encrypt(url)}=`);
+          }
           IS_REAL_WEBKIT && node.setAttribute("title", url);
           node.setAttribute("gd-antiredirect-status", "success");
         }
@@ -1214,17 +1230,23 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           } else if (response.status !== 0) resUrl === url ? reject(new Error("ResponseError")) : resolve(resUrl);
         }
 
-        function getBingDecodeURI(url) {
-          const uParam = new URL(url).searchParams.get("u");
-          return uParam ? decrypt(uParam.slice(2).replace(/[-_]/g, v => (v === "-" ? "+" : "/"))) : url;
-        }
-
-        function getToutiaoDecodeURI(url) {
-          return decodeURIComponent(new URL(url).searchParams.get("url") ?? "");
-        }
-
-        function getYahooDecodeURI(url) {
-          return decodeURIComponent(url.match(/\/RU=([^/]+)\//)?.[1] ?? "");
+        function getNodeDecodeURI(siteName, url, node) {
+          switch (siteName) {
+            case "Bing": {
+              const uParam = new URL(url).searchParams.get("u");
+              return uParam?.startsWith("a1") ? decrypt(uParam.slice(2).replace(/_/g, "/").replace(/-/g, "+")) : node.href;
+            }
+            case "Sogou": {
+              const target = qA(`.vrwrap`).FindX(el => el.contains(node));
+              return target && qS(`div.r-sech[style="display:none"]`, target)?.dataset.url;
+            }
+            case "Toutiao":
+              return decodeURIComponent(new URL(url).searchParams.get("url") ?? "") || node.href;
+            case "Yahoo":
+              return decodeURIComponent(url.match(/(\/RU|&rurl|&imgurl)=([^/&]+)(\/|&)/)?.[2] ?? "") || node.href;
+            default:
+              return;
+          }
         }
 
         async function getNoneXHRDecodeURI(url, node, siteName, decodeUrl) {
@@ -1249,53 +1271,42 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 let resUrl = response.finalUrl || response.responseURL || url;
                 if (resUrl === url) {
                   const resText = response.responseText || response.response || "";
-                  const res = resText.match(/URL\s*=\s*'([^']+)'/);
+                  const res = resText.match(/URL\s*=\s*'([^']+)'/) || response.responseHeaders?.match(/Location:\s*([\S]+)/i);
                   if (res) resUrl = res[1];
                   else reject(new Error("URLNotExistError"));
                 }
                 resolve(resUrl);
               } else rejectResponse(response, resolve, reject, url);
             },
-            onerrorFunc: reject => () => reject(new Error("URLBrokenError")),
+            onerrorFunc: (reject, resolve) => e => {
+              if (e.error?.includes("Request was redirected to a not whitelisted URL") || e.error?.includes("This domain is not a part of the @connect list")) {
+                const realUrl = e.error?.toString().match(/Refused to connect to "([^"]+)"/)?.[1];
+                if (!realUrl || realUrl.includes("/search/error") || realUrl.includes("/static/captcha")) reject(new Error("URLNotExistError"));
+                resolve(realUrl);
+              } else reject(new Error("URLBrokenError"));
+            },
             ontimeoutFunc: reject => () => reject(new Error("TimeoutError")),
           });
         }
 
         function advancedAntiRedirection(siteName, node, task) {
-          const url = node?.href?.replace(/^http:/i, "https:");
-          if (!url) return;
-          const tasks = {
-            Baidu: () =>
-              getRealUrl(url, node, siteName, {
-                onloadFunc: (resolve, reject) => response => {
-                  if (response.readyState !== 4) return;
-                  if (response.status === 200 || response.status === 301) {
-                    let resUrl = response.finalUrl || response.responseURL || url;
-                    if (resUrl === url) {
-                      const responseHeader = response.responseHeaders?.match(/Location:\s*([\S]+)/i);
-                      if (responseHeader) resUrl = responseHeader[1];
-                      else reject(new Error("URLNotExistError"));
-                    }
-                    resolve(resUrl);
-                  } else rejectResponse(response, resolve, reject, url);
-                },
-                onerrorFunc: (reject, resolve) => e => {
-                  if (e.error?.includes("Request was redirected to a not whitelisted URL") || e.error?.includes("This domain is not a part of the @connect list")) {
-                    const realUrl = e.error?.toString().match(/Refused to connect to "([^"]+)"/)?.[1];
-                    if (!realUrl || realUrl.includes("/search/error") || realUrl.includes("/static/captcha")) reject(new Error("URLNotExistError"));
-                    resolve(realUrl);
-                  } else reject(new Error("URLBrokenError"));
-                },
-                ontimeoutFunc: reject => () => reject(new Error("TimeoutError")),
-              }),
-            So360: () => getXHRDecodeURI(url, node, siteName),
-            Sogou: () => getXHRDecodeURI(url, node, siteName),
-            Bing: () => getNoneXHRDecodeURI(url, node, siteName, getBingDecodeURI(url)),
-            Toutiao: () => getNoneXHRDecodeURI(url, node, siteName, getToutiaoDecodeURI(url)),
-            Yahoo: () => getNoneXHRDecodeURI(url, node, siteName, getYahooDecodeURI(url)),
-          };
+          if (!node?.href) return;
+          const url = node.href.replace(/^http:/i, "https:");
           toggleLoadClass(node)?.add();
-          return tasks[siteName] ?? task;
+          switch (siteName) {
+            case "Baidu":
+              return () => getXHRDecodeURI(url, node, siteName);
+            case "So360":
+              return (data = node.dataset.mdurl) => (data ? getNoneXHRDecodeURI(url, node, siteName, data) : getXHRDecodeURI(url, node, siteName));
+            case "Sogou":
+              return (data = getNodeDecodeURI(siteName, url, node)) => (data ? getNoneXHRDecodeURI(url, node, siteName, data) : getXHRDecodeURI(url, node, siteName));
+            case "Bing":
+            case "Toutiao":
+            case "Yahoo":
+              return () => getNoneXHRDecodeURI(url, node, siteName, getNodeDecodeURI(siteName, url, node));
+            default:
+              return task;
+          }
         }
 
         /* ANTIADS_FUNCTIONS */
@@ -1414,7 +1425,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               mainSelector: "#chat-input-main,.s_btn_wr,#sugOut,span[class^='submit-btn']",
               overrideCss: `a,a em{text-decoration:none!important}:not([class^="page-inner"])>a:not(.${def.notice.linkerror}):hover{text-decoration:underline!important}#form{white-space:nowrap}#u{z-index:1!important}`,
               buttonCssText: `#${def.const.rndButtonID}{position:absolute;z-index:1999999995;display:inline-block;margin:0;padding:0;height:46px;vertical-align:top;line-height:46px}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:42px}#${def.const.leftButton} input{margin:3px 0;padding:0 12px 0 18px!important;height:40px;min-width:95px;border:none;border-bottom-left-radius:10px;border-top-left-radius:10px;background:linear-gradient(316deg,#286aff,#4e6ef2,#7274f9,#9f66ff);color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:3px 0;padding:0 18px 0 12px!important;height:40px;min-width:95px;border:none;border-top-right-radius:10px;border-bottom-right-radius:10px;background:linear-gradient(136deg,#286aff,#4e6ef2,#7274f9,#9f66ff);color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:linear-gradient(#00000017,#00000017), linear-gradient(75deg,#286aff,#4e6ef2,#7274f9,#9f66ff)!important;border:1px solid transparent;}`,
-              resultListProp: { qs: `#content_left>div.c-container[tpl]:not([tpl='recommend_list'],[tpl^="rel-"])`, delay: 10 },
+              resultListProp: { qs: `#content_left div.c-container:not([tpl="recommend_list"]):not([tpl^="rel-"])`, delay: 10 },
               keywords: "#wrapper_wrapper em,.c-gap-top-small b",
               antiRedirectFn: () =>
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "baidu_ar" })("Baidu", ".c-container a[href*='//www.baidu.com/link?url=']", {
@@ -1424,7 +1435,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 }),
               antiAdsFn: () =>
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "baidu_ad", immed: true })({
-                  selectors: `#s-hotsearch-wrapper,.result-op[tpl='sp_hot_sale'],.result-op[tpl='b2b_prod'],#content_left>div:not([class]):not([style]),div[data-placeid],[id$='_canvas'],div.result.c-container:not([class~='xpath-log']),.imgpage .imglist>li.newfcImgli,.ec_wise_ad,div[class^='result-op'][tpl='right_tabs'][data-click],div[class^='result-op'][tpl='right_links'][data-click],#searchTag,#content_left>div.c-container[tpl="recommend_list"],#con-ar div[tpl="right_recommends_merge"],#con-ar>div:has([id='ai-accompanies-container']),div.result-molecule[tpl="app/rs"]`,
+                  selectors: `#s-hotsearch-wrapper,.result-op[tpl='sp_hot_sale'],.result-op[tpl='b2b_prod'],.result-op.cr-content[tpl^='recommend_list_'],#content_left>div:not([class]):not([style]),div[data-placeid],[id$='_canvas'],div.result.c-container:not([class~='xpath-log']),.imgpage .imglist>li.newfcImgli,.ec_wise_ad,div[class^='result-op'][tpl='right_tabs'][data-click],div[class^='result-op'][tpl='right_links'][data-click],#searchTag,#content_left>div.c-container[tpl="recommend_list"],#con-ar div:is([tpl='interactive'],[tpl="right_recommends_merge"]),div.result-op.cr-content:has([id='ai-accompanies-container']),div.result-molecule[tpl="app/rs"],.hint_right_top:has([tpl='app/hint-chat-entry']),.hint_right_middle:has([tpl='app/hint-head-top'])`,
                   siteName: "Baidu",
                   isRemoveNodes: true,
                 }),
@@ -1439,9 +1450,9 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["2"],
               splitTypeName: "udm",
               mainSelector: "form button[type='submit']",
-              overrideCss: `#pnnext>span:nth-child(2){clear:left}#rcnt #res :is(a,.FR7ZSc){color:var(--JKqx2,#1a0dab)}#rcnt #res a:visited{color:#681da8}`,
+              overrideCss: `#pnnext>span:nth-child(2){clear:left}`,
               buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:100;display:flex;margin:0 5px 0 4px;top:0;left:0;justify-content:center;align-items:center}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{padding:0 2px 0 12px}.${def.const.scrollspan}{min-height:26px;margin-right:3px!important}.${def.const.scrollbars}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}#${def.const.leftButton} input,#${def.const.rightButton} input{margin:0;height:39px;min-width:90px;border:0;background:var(--gm3-sys-color-primary, #0b57d0);background:if(style(--JKqx2:#1a0dab):#0b57d0;style(--JKqx2:#99c3ff):#c2e7ff);color:var(--gm3-sys-color-on-primary, #fff);color:if(style(--JKqx2:#1a0dab):#fff;style(--JKqx2:#99c3ff):#001d35);box-shadow:0 0 2px #00000059;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;cursor:pointer;transition:opacity .5s ease-out;}#${def.const.leftButton} input{padding:0 12px 0 18px!important;border-bottom-left-radius:24px;border-top-left-radius:24px;}#${def.const.rightButton} input{padding:0 18px 0 12px!important;border-top-right-radius:24px;border-bottom-right-radius:24px;}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{opacity:.88}`,
-              darkModeCss: `#rcnt #res :is(a,.FR7ZSc){color:var(--JKqx2,#99c3ff)}#rcnt #res a:visited{color:#c58af9;color:if(style(--JKqx2:#1a0dab):#681da8;style(--JKqx2:#99c3ff):#c58af9);}#${def.const.leftButton} input,#${def.const.rightButton} input{background:var(--gm3-sys-color-secondary-fixed,#c2e7ff);background:if(style(--JKqx2:#1a0dab):#0b57d0;style(--JKqx2:#99c3ff):#c2e7ff);color:var(--gm3-sys-color-on-secondary-fixed,#001d35);color:if(style(--JKqx2:#1a0dab):#fff;style(--JKqx2:#99c3ff):#001d35);}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{opacity:.85}`,
+              darkModeCss: `#${def.const.leftButton} input,#${def.const.rightButton} input{background:var(--gm3-sys-color-secondary-fixed,#c2e7ff);background:if(style(--JKqx2:#1a0dab):#0b57d0;style(--JKqx2:#99c3ff):#c2e7ff);color:var(--gm3-sys-color-on-secondary-fixed,#001d35);color:if(style(--JKqx2:#1a0dab):#fff;style(--JKqx2:#99c3ff):#001d35);}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{opacity:.85}`,
               resultListProp: { qs: `div.MjjYud div.Ww4FFb.vt6azd[data-hveid^="C"][data-hveid$="AA"]:not(:has(div[jscontroller="TvBckd"]))`, delay: 10 },
               keywords: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
               antiRedirectFn: () =>
@@ -1466,9 +1477,9 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: `.b_searchboxForm>input[type="hidden"][name="form"]`,
-              overrideCss: `html{overflow-x:hidden}#sb_form .inline_sb{border-radius:24px}.${def.const.searchbox}{border-radius:8px!important}a,#b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.mmlist .mc_vtvc_title,.b_tt,.b_wsnm,#b_results :is(li[class] a:not(.wiki_seemore,.gs_mdlink),.b_no a,.na_t):not(#imc_pbtn)){color:#2440b3}#b_content #b_results>li a:not(.wiki_seemore,.gs_mdlink):visited{color:#4007a2}`,
+              overrideCss: `html{overflow-x:hidden}#sb_form .inline_sb{border-radius:24px}.${def.const.searchbox}{border-radius:8px!important}a,#b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.mmlist .mc_vtvc_title,.b_tt,.b_wsnm,.nslist_card_title,.nscardlite_title,.nscardcal_title,.product-card-info--title,#b_results :is(li[class] a:not(.wiki_seemore,.gs_mdlink,[role='button'],:has(.b_dynamicMrsSuggestionText),.acf_p_title),.b_no a,.na_t):not(#imc_pbtn)){color:#2440b3}#b_content .product-card-info--title{color:#2440b3!important}#b_content #b_results li[class] a:not(.wiki_seemore,.gs_mdlink):visited{color:#4007a2!important}`,
               buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:0;display:inline-flex;margin:0;padding:0 6px 0 0;width:auto;height:38px;min-width:180px;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.leftButton},#${def.const.rightButton}{margin:0;padding:0;width:auto}#${def.const.rndButtonID} input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:600;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px;border-bottom-left-radius:24px;border-top-left-radius:24px}#${def.const.rightButton} input{margin:0 0 0 2px;padding:0 18px 0 12px;border-top-right-radius:24px;border-bottom-right-radius:24px}.${def.const.scrollspan}{}.${def.const.scrollbars}{}.${def.const.scrollspan2}{margin:0!important;padding:4px 4px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars2}{margin-right:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#f0f3f6;box-shadow:0 0 4px #174ae4;transition:border .1s linear,box-shadow .3s linear}.${def.notice.random}_input{width:300px!important}`,
-              darkModeCss: `.b_dark a,.b_dark #b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.mmlist .mc_vtvc_title,.b_tt,.b_wsnm,.exsui,#b_results :is(li[class] a:not(.wiki_seemore,.gs_mdlink),.b_no a,.na_t):not(#imc_pbtn)){color:#a2b7f4}.b_dark a:visited,.b_dark #b_content #b_results>li a:not(.wiki_seemore,.gs_mdlink):visited{color:#7b7fec}.b_dark .b_pag_above_footer{background-color:#1b1a19;color:#d2d0ce}.b_dark #${def.const.leftButton} input,.b_dark #${def.const.rightButton} input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}.b_dark #${def.const.leftButton} input:hover,.b_dark #${def.const.rightButton} input:hover{background:#a2b7f4;color:#333}`,
+              darkModeCss: `.b_dark a,.b_dark #b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.mmlist .mc_vtvc_title,.b_tt,.b_wsnm,.nslist_card_title,.nscardlite_title,.nscardcal_title,.product-card-info--title,#b_results :is(li[class] a:not(.wiki_seemore,.gs_mdlink,[role='button'],:has(.b_dynamicMrsSuggestionText),.acf_p_title),.b_no a,.na_t):not(#imc_pbtn)){color:#a2b7f4}.b_dark a:visited,.b_dark #b_content #b_results>li a:not(.wiki_seemore,.gs_mdlink):visited{color:#7b7fec!important}.b_dark .b_pag_above_footer{background-color:#1b1a19;color:#d2d0ce}.b_dark #${def.const.leftButton} input,.b_dark #${def.const.rightButton} input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}.b_dark #${def.const.leftButton} input:hover,.b_dark #${def.const.rightButton} input:hover{background:#a2b7f4;color:#333}`,
               resultListProp: {
                 qs: `#b_results>li.b_algo:not(.b_algoBorder,.b_topborder),#b_results>li.b_vidAns .mmlist>div[id],#b_results>li.b_mop .b_slidebar>div.slide,#b_topw>li.b_ans,aside>ol#b_context>li.b_algo`,
                 delay: 10,
@@ -1478,30 +1489,17 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                   ? "strong,.b_no h4,.b_strong,.b_ad .b_adlabel strong,.cbl"
                   : "#sp_requery strong,#sp_recourse strong,.sb_adTA_title_link_cn strong,.b_ad .ad_esltitle~div strong,h2 strong,#b_results .b_algo p strong,.b_caption p strong,.b_snippetBigText strong,.recommendationsTableTitle+.b_slideexp strong,.recommendationsTableTitle+table strong,.recommendationsTableTitle+ul strong,.pageRecoContainer .b_module_expansion_control strong,.pageRecoContainer .b_title>strong,.b_rs strong,.b_rrsr strong,.richrswrapper strong,#dict_ans strong,.b_listnav>.b_ans_stamp>strong,#b_content #ans_nws .na_cnt strong,.b_vidAns strong,.adltwrnmsg strong",
               antiRedirectFn: function () {
-                safeWindow.Object.assign(GMunsafeWindow, { AwayTimeScrollTopPoleRS: false, AwayTimeThreshold: 864e3 });
-                const antiRedirect = () => {
-                  parsingAntiRedirect(
-                    "Bing",
-                    "#b_results>li:not(.b_pag) a:not([role='button']):not([href*='.bing.com/ck/a?']),nav.b_scopebar>ul>li:is(#b-scopeListItem-conv,#b-scopeListItem-local)>a:not([href*='.bing.com/ck/a?'])",
-                    { useNewTab: true }
-                  );
-                  parsingAntiRedirect(
-                    "Bing",
-                    "nav.b_scopebar>ul>li:not(#b-scopeListItem-local,#b-scopeListItem-conv)>a:not([href*='.bing.com/ck/a?']),#b_content li.b_pag>nav>ul>li>a.b_widePag",
-                    { forceSelf: true, cleanAttr: ["h"] }
-                  );
-                  parsingAntiRedirect(
-                    "Bing",
-                    "#b_content a[href*='.bing.com/ck/a?']:not([role='button']),nav.b_scopebar>ul>li:is(#b-scopeListItem-conv,#b-scopeListItem-local)>a[href*='.bing.com/ck/a?']",
-                    { useNewTab: true, advancedAnti: true }
-                  );
-                  parsingAntiRedirect("Bing", "nav.b_scopebar>ul>li:not(#b-scopeListItem-conv,#b-scopeListItem-local)>a[href*='.bing.com/ck/a?']", {
-                    forceSelf: true,
-                    cleanAttr: ["h"],
-                    advancedAnti: true,
-                  });
+                safeWindow.Object.assign(GMunsafeWindow, { AwayTimeScrollTopPoleRS: false, AwayTimeThresholdCustomControl: false, AwayTimeThreshold: 864e3 });
+                const checkAllRegionsRedirection = () => {
+                  parsingAntiRedirect("Bing", "#b_content li.b_pag a.b_widePag", { forceSelf: true, cleanAttr: ["h"] });
+                  parsingAntiRedirect("Bing", "#b_results>li:not(.b_pag) a:not([role='button']):not([href*='.bing.com/ck/a?'])", { useNewTab: true, cleanAttr: ["h"] });
+                  parsingAntiRedirect("Bing", ".b_scopebar li:is(#b-scopeListItem-conv,#b-scopeListItem-local)>a:not([href*='.bing.com/ck/a?'])", { useNewTab: true, cleanAttr: ["h"] });
+                  parsingAntiRedirect("Bing", ".b_scopebar li:not(#b-scopeListItem-local,#b-scopeListItem-conv)>a:not([href*='.bing.com/ck/a?'])", { forceSelf: true, cleanAttr: ["h"] });
+                  parsingAntiRedirect("Bing", "#b_content a[href*='.bing.com/ck/a?']:not([role='button'])", { useNewTab: true, forceNewTab: true, advancedAnti: true });
+                  parsingAntiRedirect("Bing", ".b_scopebar li:is(#b-scopeListItem-conv,#b-scopeListItem-local)>a[href*='.bing.com/ck/a?']", { useNewTab: true, advancedAnti: true });
+                  parsingAntiRedirect("Bing", ".b_scopebar li:not(#b-scopeListItem-conv,#b-scopeListItem-local)>a[href*='.bing.com/ck/a?']", { forceSelf: true, advancedAnti: true });
                 };
-                deBounce({ fn: antiRedirect, delay: 20, timer: "bing_ar" })();
+                deBounce({ fn: checkAllRegionsRedirection, delay: 20, timer: "bing_ar" })();
               },
               antiAdsFn: () =>
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "bing_ad", immed: true })({
@@ -1550,7 +1548,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "sogou_ar" })("Sogou", "#wrapper a[href^='/link?url=']:not([uigs])", { useNewTab: true, advancedAnti: true }),
               antiAdsFn: () =>
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "sogou_ad", immed: true })({
-                  selectors: `#biz_tip_box_tuiguang_float,.pz_pc_new_container,.share-wrap,.sponsored,.tgad-box,[class~="ext_query"][id*="sq_ext_"],div.top-better-hintBox,#right>div.rvr-model:not([tpl]),.results>.reactResult,.results>div.vrwrap.middle-better-hintBox`,
+                  selectors: `#biz_tip_box_tuiguang_float,.pz_pc_new_container,.share-wrap,.sponsored,.tgad-box,[class~="ext_query"][id*="sq_ext_"],div.top-better-hintBox,#right>div.rvr-model:not([tpl]),.results>.reactResult,.results>div.vrwrap.middle-better-hintBox,#right>.reactResult`,
                   siteName: "Sogou",
                   isRemoveNodes: true,
                 }),
@@ -1573,7 +1571,6 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "qwant_ad", immed: true })({
                   selectors: `div[data-testid="containerWeb"] section div[style="display: block;"]:has([data-testid="aserpok"]),.is-sidebar>div>div:has([data-testid="aserpok"]),[data-testid="containerWeb"] section>div>div:last-child`,
                   siteName: "Qwant",
-                  removeDataSet: true,
                 }),
             },
             yandex: {
@@ -1593,7 +1590,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               antiRedirectFn: () => deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yandex_ar" })("Yandex", "#search-result>li.serp-item a", { useNewTab: true, removeDataSet: true }),
               antiAdsFn: () =>
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "yandex_ad", immed: true })({
-                  selectors: `#distr-pcode-container>div,div.HeaderDesktopActions-Distribution.HeaderDesktopActions-Item,div[tabindex][class*='location_right-bottom'],span.distr-nav,div.market-cart`,
+                  selectors: `#distr-pcode-container>div,div.HeaderDesktopActions-Distribution.HeaderDesktopActions-Item,div[tabindex][class*='location_right-bottom'],span.distr-nav,div.market-cart,.SerpListFeature :is(.DirectInlineContainer,.Skeleton_type_ad_search),div[id*='-cross-page-']`,
                   siteName: "Yandex",
                   isRemoveNodes: true,
                 }),
@@ -1620,7 +1617,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 }),
               antiAdsFn: () =>
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "so360_ad", immed: true })({
-                  selectors: `#so_bd-ad,#e_idea_pp,#righttop_box,[id^='mohe-360pic_ext--'],.res-mediav,.map_business_con,.lianmeng-ad,.res-mediav-right,.atom-adv,.e-buss,.spread,ul[data-so-biz-monitor-so-display],.related_query li.cm,[class='inline-recommend'][data-url],div#so_top,div#so-activity-entry,div.mh-relate-text,.section li[data-id^="related_query_init_"],#mohe-know_side_nlp,#rs-top>dd.rs-top`,
+                  selectors: `#so_bd-ad,#e_idea_pp,#righttop_box,[id^='mohe-360pic_ext--'],.res-mediav,.map_business_con,.lianmeng-ad,.res-mediav-right,.atom-adv,.e-buss,.spread,ul[data-so-biz-monitor-so-display],.related_query li.cm,ul>div.inline-recommend,div#so_top,div#so-activity-entry,div.mh-relate-text,.section li[data-id^="related_query_init_"],#mohe-know_side_nlp,#rs-top>dd.rs-top`,
                   siteName: "So360",
                   isRemoveNodes: true,
                 }),
@@ -1675,7 +1672,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               antiRedirectFn: function () {
                 ["adBlockNoticeDismissed", "personalCounterTooltipSearch"].forEach(item => localStorage?.setItem(item, 1));
                 const fn = option => !/:nt=1:/.test(gbCookies.getItem("ECFG")) && gbCookies.setItem(option) && location.replace(location.href);
-                const sValue = `a=0:as=1:cs=0:dt=pc:f=i:fr=0:fs=1:l=en:lt=${Date.now()}:mc=zh-cn:nf=1:nt=1:pz=0:t=1:tt=0:tu=auto:wu=auto:ma=1`;
+                const sValue = `a=0:as=1:cs=0:dt=pc:f=i:fr=0:fs=1:l=en:lt=${Date.now()}:mc=en-ww:nf=1:nt=1:pz=0:t=1:tt=0:tu=auto:wu=auto:ma=1`;
                 deBounce({ fn, timer: "ecosia_cookie", immed: true, once: true })({ sKey: "ECFG", sValue, sEnd: Infinity, sDomain: ".ecosia.org", sPath: "/", sSomeSite: "Lax" });
               },
               antiAdsFn: () =>
@@ -1700,7 +1697,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               antiRedirectFn: () =>
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yahoo_ar" })(
                   "Yahoo",
-                  "#main ol a[href^='https://r.search.yahoo.com/_ylt='],#main #results #sres>li>a[href^='https://r.search.yahoo.com/_ylt=']",
+                  "#main a:is([href^='https://r.search.yahoo.com/_ylt='],[href^='https://images.search.yahoo.com/search/images;_ylt='],[href^='https://video.search.yahoo.com/search/video;_ylt='])",
                   { useNewTab: true, advancedAnti: true }
                 ),
               antiAdsFn: () =>
@@ -1811,7 +1808,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               siteNickName: IS_CHN ? "𝐌𝐨𝐣𝐞𝐞𝐤 搜索" : "𝐌𝐨𝐣𝐞𝐞𝐤.𝐜𝐨𝐦",
               siteHostName: "www.mojeek.com",
               webURL: "https://www.mojeek.com/search?q=",
-              imageURL: "https://www.mojeek.com/search?fmt=images&q=",
+              imageURL: "https://www.mojeek.com/search?fmt=images&imgpr=pixabay&q=",
               imageType: ["images"],
               splitTypeName: "fmt",
               mainSelector: "form[name='sf1']",
@@ -1911,15 +1908,15 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           /* DEFINE_GLOBAL_STYLES */
 
           def.var.style = String(
-            `.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before {box-sizing:content-box;line-height:normal}.${def.notice.animated}{animation-duration:1s;animation-fill-mode:both}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.${def.notice.random}_fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.${def.notice.random}_fadeOut{animation-name:fadeOut}.${def.notice.appear}{display:block!important}.${def.notice.noticeX},.${def.notice.noticeX} *{text-shadow:none!important;font-family:Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:0 transparent!important}.${def.notice.noticeX}-top{top:0;width:100%}.${def.notice.noticeX}-top .${def.notice.item}{margin:0!important;border-radius:0!important}.${def.notice.noticeX}-topRight{top:10px;right:10px;z-index:2147483647!important}.${def.notice.noticeX}-topLeft{top:10px;left:10px}.${def.notice.noticeX}-topCenter{top:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX}-middleLeft,.${def.notice.noticeX}-middleRight{right:10px;top:50%;transform:translateY(-50%)}.${def.notice.noticeX}-middleLeft{left:10px}.${def.notice.noticeX}-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.${def.notice.noticeX}-bottom{bottom:0;width:100%}.${def.notice.noticeX}-bottom .${def.notice.item}{border-radius:0!important;margin:0!important}.${def.notice.noticeX}-bottomRight{bottom:10px;right:10px;z-index:2147483646!important}.${def.notice.noticeX}-bottomLeft{bottom:10px;left:10px}.${def.notice.noticeX}-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX} .${def.notice.item}{margin:0 0 10px;border-radius:6px;overflow:hidden}.${def.var.translucent} *{display:none!important}.${def.var.translucent} notice-label{display:block!important}.${def.var.disappear}{display:none!important}[gb-filter-notice]{display:block!important;min-width:430px;margin:18px 0 28px 10px!important;padding:10px 2px!important;font:normal 400 14px/100% 'WenQuanYi Micro Hei','PingFang SC','Microsoft YaHei',sans-serif!important;-webkit-text-stroke:0 transparent!important;color:grey!important;line-height:1!important}gb-filters.code{display:block;margin:20px 0;word-break:break-word;font-size:12px!important}.${def.notice.noticeX} .${def.notice.item} .${def.notice.close}{float:right;margin-right:7px;color:#fff;text-shadow:0 1px 0 #fff;font-weight:700;font-size:18px!important;line-height:1;opacity:1}` +
-              `.${def.notice.noticeX} .${def.notice.item} .${def.notice.close}:hover{color:#000;opacity:.5;cursor:pointer}.${def.notice.noticeX} .${def.notice.item} a{border-bottom:1px dashed #fff;color:#fff}.${def.notice.noticeX} .${def.notice.item} a,.${def.notice.noticeX} .${def.notice.item} a:hover{text-decoration:none}.${def.notice.noticeX} .${def.notice.success}{background-color:#64ce83!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-heading{padding:10px;background-color:#3da95c;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-body{padding:10px!important;color:#fff;}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.info}{background-color:#3ea2ff!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-heading{padding:10px;background-color:#067cea;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-body{padding:10px!important;color:#fff}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.warning}{background-color:#ff7f48!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#f97038;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-body{color:#fff;padding:10px}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.error}{background-color:#e74c3c!important}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#e93724;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-body{padding:10px;color:#fff}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-body:hover{visibility:visible!important}` +
-              `.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.configuration} input[disabled],.${def.notice.configuration} select[disabled]{color:#bbb;background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:20px 20px!important;background-color:#fff7f7!important}.${def.notice.noticeX} .${def.notice.configuration}{background:linear-gradient(to right,#fcfcfc,#f2f2f7);background:-webkit-gradient(linear,0 0,0 100%,from(#fcfcfc),to(#f2f2f7));box-shadow:0 0 5px #888}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.close}{float:right;margin-right:7px;color:#000000;text-shadow:0 1px 0 #aaa;font-weight:700;font-size:18px!important;line-height:1;opacity:1}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.close}:hover{color:#555;opacity:.5;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#e7e7e7;color:#333;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-body{padding:10px;color:#333333}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.noticeX}-heading-title{display:inline-block;vertical-align:middle;overflow:hidden;max-width:90%;text-overflow:ellipsis;white-space:nowrap}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#64ce83}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#3da95c}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#3ea2ff}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#067cea;}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#ff7f48}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#f44e06}` +
-              `.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#fd5f4e}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#ba2c1d}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#efefef}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#ccc}@keyframes ${def.notice.noticeX}-progress{0%{width:100%}to{width:0}}@keyframes ${def.notice.noticeX}-fadeOut{0%{opacity:1}to{opacity:0}}.${def.notice.noticeX}-fadeOut{animation-name:${def.notice.noticeX}-fadeOut}.${def.notice.noticeX}{position:fixed;z-index:2147483645}.${def.notice.noticeX} ::-webkit-scrollbar{width:8px}.${def.notice.noticeX} ::-webkit-scrollbar-button{width:8px;height:8px}.${def.notice.noticeX} ::-webkit-scrollbar-track{border-radius:3px}.${def.notice.noticeX} ::-webkit-scrollbar-thumb{background:#e1e1e1;border-radius:3px}.${def.notice.noticeX} ::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.rName}{padding:2px!important}.${def.notice.noticeX} .${def.notice.rName} dl{margin:0!important;padding:1px!important}.${def.notice.noticeX} .${def.notice.rName} dl dt{margin:2px 0 6px!important;font-weight:900!important;font-size:16px!important}.${def.notice.noticeX} .${def.notice.rName} dl dd{margin:2px 2px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${def.notice.noticeX} .${def.notice.rName} .${def.notice.center}{width:100%;text-align:center!important}.${def.notice.noticeX} .${def.notice.rName} dl dd em{padding:0 5px;color:#fff;font-style:italic;font-size:24px!important;font-family:Candara,sans-serif!important}.${def.notice.noticeX} .${def.notice.rName} dl dd span{margin-right:8px;font-weight:700;font-size:15px!important}.${def.notice.noticeX} .${def.notice.rName} dl dd i{font-size:20px!important;font-family:Candara,sans-serif!important}.${def.notice.noticeX} .${def.notice.rName} dl dd .im{padding:0 3px;color:gold;font-weight:900;font-size:16px!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} ul{display:inline-block;margin:0 0 0 8px;padding:4px 4px 8px;width:95%;color:#ffffffcc;counter-reset:xxx 0;vertical-align:top;text-align:left}` +
-              `.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} li{position:relative;margin:0 0 0 2px;padding:0 0 2px 2px;list-style:none;font-style:italic!important;line-height:150%;-webkit-transition:.12s;transition:.12s}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} li::before{display:inline-block;margin-left:-1.5em;width:1.5em;content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-size:14px;font-family:Candara,sans-serif;-webkit-transition:.5s;transition:.5s}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} #${def.notice.stopUpdate}{float:right;margin:0 5px!important;font-size:12px!important;cursor:help}.${def.const.loading}{position:relative;}.${def.const.loading}::after{content:" \u21ba";animation:fade 1.25s infinite;}@keyframes fade{0%{opacity:0.1}50%{opacity:0.5}to{opacity:0}}.${def.notice.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important;color:#999}#${def.notice.stopUpdate} input[type='checkbox']{box-sizing:content-box;margin:2px 4px 0 0;width:14px;height:14px;border:2px solid #fff;border-radius:50%;background:#ffa077;vertical-align:top;cursor:help;-webkit-appearance:none}#${def.notice.stopUpdate}:hover input,#${def.notice.stopUpdate} input:hover{background:#ba2c1d;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}{display:none!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label{position:relative;display:inline-block;-webkit-box-sizing:content-box;box-sizing:content-box;margin:0 0 0 25px;padding:11px 9px;width:58px;height:10px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px #0000001a,0 0 10px #f5929266;word-wrap:normal!important;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;-webkit-border-radius:7px;border-radius:7px;background:#fff;box-shadow:0 0 1px #00000099;color:#fff;content:" "}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label::after{position:absolute;top:2px;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;padding:5px;-webkit-border-radius:100px;border-radius:100px;color:#fff;content:"OFF";font-weight:700;font-size:14px}` +
-              `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label{-webkit-box-sizing:content-box;box-sizing:content-box;margin:0 0 0 25px;background:#67a5df!important;box-shadow:inset 0 0 20px #0000001a,0 0 10px #92c4f566;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label::after{top:2px;left:10px;content:"ON"}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}.${def.notice.noticeX} .${def.notice.configuration} button.${def.notice.searchButton}{display:flex;position:relative;margin:0 0 10px;padding:6px 0;width:162px;height:25px;border:2px solid #eee;border-radius:6px;background:#fff;box-shadow:1px 1px 0 1px #aaa;font-size:14px!important;cursor:pointer;align-content:center;justify-content:center;align-items:center}.${def.notice.noticeX} .${def.notice.configuration} button.${def.notice.searchButton}:hover{box-shadow:1px 1px 3px 0 #888;color:#ff0000}.${def.notice.noticeX} .${def.notice.configuration} span.${def.notice.favicon}{margin:0 6px 0 0;width:32px;height:32px}.${def.notice.noticeX} .${def.notice.configuration} ul.${def.notice.searchList}{margin:5px;padding:2px;list-style:none}.${def.notice.noticeX} .${def.notice.configuration} ul.${def.notice.searchList} li{margin:0;list-style:none;font-style:normal}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.fieldset}{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;border:2px dashed #dfdfdf;border-radius:10px;background:transparent!important;text-align:left}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.legend}{display:block;margin:0;padding:0 8px;width:auto;color:#8b0000!important;font-weight:900!important;font-size:14px!important;-webkit-user-select:all;user-select:all}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList}{margin:0;padding:0;background:transparent!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li{float:none;display:flex;margin:3px 0;padding:2px 8px 2px 12px;height:36px;border:none;background:transparent!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none;align-content:center;justify-content:space-between}` +
-              `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li div{font:normal 700 14px/150% Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button{box-sizing:border-box;margin:0 0 0 8px;padding:4px 8px;height:36px;min-width:65px;border:1px solid #ccc;border-radius:8px;background:#fafafa;box-shadow:1px 1px 1px 0 #ccc;color:#5e5e5e;font-weight:700;font-size:14px!important;letter-spacing:normal;text-transform:none;text-decoration:none}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info{font-weight:400!important;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info em{color:#dc143c!important;font-style:normal;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_textarea{padding: 6px 0;margin:0}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter{display:block;margin:0;height:100%}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar{width:8px;height:8px}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb{border-radius:4px;background:#cfcfcf}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.random}_filter_textarea textarea::placeholder{color:#555;font:normal 500 16px/150% ui-monospace,monospace,system-ui,-apple-system,BlinkMacSystemFont!important;opacity:0.85;white-space:break-spaces}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{box-sizing:border-box;margin:0;padding:5px;max-height:423px;width:100%;min-height:280px;outline:0!important;border:1px solid #bbb;border-radius:6px;background:#fff;color:#111;white-space:pre;font:normal 400 14px/150% ui-monospace,monospace,sans-serif!important;resize:vertical;overscroll-behavior:contain;word-break:keep-all!important;cursor:auto}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content::placeholder{font:normal 400 14px/150% ui-monospace,monospace!important}.${def.notice.noticeX} .${def.notice.configuration} #${def.notice.random}_customColor{margin:0;cursor:pointer}` +
-              `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button:hover{background:#fff;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}__content{display:block;margin:0;height:268px}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{overflow-x:hidden;overflow-y:auto;box-sizing:border-box;margin:4px 0 3px;padding:8px;width:266px;max-height:237px;overscroll-behavior:contain}.${def.notice.card} h2{margin:0;padding:0;border:0;vertical-align:baseline;font:inherit;font-size:100%;line-height:135%;}#${def.notice.random}_help{position:relative;margin:0;padding:4px 15px!important;border:1px solid transparent;background:#f07f6a;box-shadow:0 0 6px 0 #f5846f;color:#fff;cursor:help}#${def.notice.random}_help:hover{background:#ed6248;box-shadow:0 0 6px 0 #f34525;}#${def.notice.random}_clear{margin:0;color:#666;font-weight:500;cursor:pointer}#${def.notice.random}_clear:hover{color:#ff0000}#${def.notice.random}_clear u{padding:0 2px;text-decoration:none}.${def.notice.linkerror},.${def.notice.linkerror}:hover,.${def.notice.linkerror} *,.${def.notice.linkerror} *:hover{color:#a9a9a9!important;text-decoration-line:line-through!important;text-decoration-color:#ff0000!important;text-decoration-style:wavy!important}@-moz-document url-prefix() {.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before,.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{scrollbar-color:#bbbb #eee1;scrollbar-width:thin}}.${def.notice.card}{margin:0;padding:0;--background:#fff;--background-chackbox:#0082ff;--background-image:#fff,#006baf33;--text-color:#666;--text-headline:#000;--card-shadow:#0082ff;--card-height:48px;--card-witght:240px;--card-radius:12px;--header-height:47px;--blend-mode:overlay;--transition:0.15s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.${def.notice.card}__input{position:absolute;display:none;margin:0;padding:0;outline:none;border:none;background:none;-webkit-appearance:none}.${def.notice.card}__input:checked ~ .${def.notice.card}__body{--shadow:0 0 0 3px var(--card-shadow);}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox{--chack-bg:var(--background-chackbox);--chack-border:#fff;--chack-scale:1;--chack-opacity:1;}` +
-              `.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox--svg{--stroke-color:#fff;--stroke-dashoffset:0;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover:after{--opacity-bg:0;}.${def.notice.random}_iconText{color:#333;font-weight:400;letter-spacing:normal;text-transform:none;text-decoration:none}.${def.notice.random}_iconText:hover{color:#dc143c}.${def.notice.random}_iconText>sup{position:absolute;font-size:25px;top:-10px;right:-2px}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body{cursor:not-allowed;opacity:0.5;}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body:active{--scale:1;}.${def.notice.card}__body{position:relative;display:grid;overflow:hidden;width:var(--card-witght);height:var(--card-height);border-radius:var(--card-radius);background:var(--background);box-shadow:var(--shadow,1px 1px 3px 1px #ccc);cursor:pointer;-webkit-transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:transform var(--transition),box-shadow var(--transition);transition:transform var(--transition),box-shadow var(--transition),-webkit-transform var(--transition);-webkit-transform:scale(var(--scale,1)) translateZ(0);transform:scale(var(--scale,1)) translateZ(0);grid-auto-rows:calc(var(--card-height) - var(--header-height)) auto}.${def.notice.card}__body:active{--scale:0.96;}.${def.notice.card}__body-cover-image{position:absolute;top:8px;left:10px;z-index:100;width:32px;height:32px}.${def.notice.card}__body-cover-image span.${def.notice.favicons}{display:block;width:32px;height:32px}.${def.notice.card}__body-cover-chackbox{position:absolute;top:10px;right:10px;z-index:1;width:28px;height:28px;border:2px solid var(--chack-border,#fff);border-radius:50%;background:var(--chack-bg,var(--background-chackbox));opacity:var(--chack-opacity,0);transition:transform var(--transition),opacity calc(var(--transition)*1.2) linear,-webkit-transform var(--transition) ease;-webkit-transform:scale(var(--chack-scale,0));transform:scale(var(--chack-scale,0))}` +
+            `.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before {box-sizing:content-box;line-height:normal}.${def.notice.animated}{animation-duration:1s;animation-fill-mode:both}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.${def.notice.random}_fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.${def.notice.random}_fadeOut{animation-name:fadeOut}.${def.notice.appear}{display:block!important}.${def.notice.noticeX},.${def.notice.noticeX} *{text-shadow:none!important;font-family:Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:0 transparent!important}.${def.notice.noticeX}-top{top:0;width:100%}.${def.notice.noticeX}-top .${def.notice.item}{margin:0!important;border-radius:0!important}.${def.notice.noticeX}-topRight{top:10px;right:20px;z-index:2147483646!important}.${def.notice.noticeX}-topLeft{top:10px;left:10px}.${def.notice.noticeX}-topCenter{top:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX}-middleLeft,.${def.notice.noticeX}-middleRight{right:20px;top:50%;transform:translateY(-50%)}.${def.notice.noticeX}-middleLeft{left:10px}.${def.notice.noticeX}-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.${def.notice.noticeX}-bottom{bottom:0;width:100%}.${def.notice.noticeX}-bottom .${def.notice.item}{border-radius:0!important;margin:0!important}.${def.notice.noticeX}-bottomRight{bottom:10px;right:20px;z-index:2147483647!important}.${def.notice.noticeX}-bottomLeft{bottom:10px;left:10px}.${def.notice.noticeX}-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX} .${def.notice.item}{margin:0 0 10px;border-radius:6px;overflow:hidden}.${def.var.translucent} *{display:none!important}.${def.var.translucent} notice-label{display:block!important}.${def.var.filtered},.${def.var.disappear}{display:none!important}[gb-filter-notice]{display:block!important;min-width:430px;margin:18px 0 28px 10px!important;padding:10px 2px!important;font:normal 400 14px/100% 'WenQuanYi Micro Hei','PingFang SC','Microsoft YaHei',sans-serif!important;-webkit-text-stroke:0 transparent!important;color:grey!important;line-height:1!important}gb-filters.code{display:block;margin:20px 0;word-break:break-word;font-size:12px!important}` +
+              `.${def.notice.noticeX} .${def.notice.item} .${def.notice.close}{float:right;margin-right:7px;color:#fff;text-shadow:0 1px 0 #fff;font-weight:700;font-size:18px!important;line-height:1;opacity:1}.${def.notice.noticeX} .${def.notice.item} .${def.notice.close}:hover{color:#000;opacity:.5;cursor:pointer}.${def.notice.noticeX} .${def.notice.item} a{border-bottom:1px dashed #fff;color:#fff}.${def.notice.noticeX} .${def.notice.item} a,.${def.notice.noticeX} .${def.notice.item} a:hover{text-decoration:none}.${def.notice.noticeX} .${def.notice.success}{background-color:#64ce83!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-heading{padding:10px;background-color:#3da95c;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-body{padding:10px!important;color:#fff;}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.info}{background-color:#3ea2ff!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-heading{padding:10px;background-color:#067cea;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-body{padding:10px!important;color:#fff}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.warning}{background-color:#ff7f48!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#f97038;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-body{color:#fff;padding:10px}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.error}{background-color:#e74c3c!important}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#e93724;color:#fff;font-weight:700;font-size:14px!important}` +
+              `.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-body{padding:10px;color:#fff}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.configuration} input[disabled],.${def.notice.configuration} select[disabled]{color:#bbb;background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:20px 20px!important;background-color:#fff7f7!important}.${def.notice.noticeX} .${def.notice.configuration}{background:linear-gradient(to right,#fcfcfc,#f2f2f7);background:-webkit-gradient(linear,0 0,0 100%,from(#fcfcfc),to(#f2f2f7));box-shadow:0 0 5px #888}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.close}{float:right;margin-right:7px;color:#000000;text-shadow:0 1px 0 #aaa;font-weight:700;font-size:18px!important;line-height:1;opacity:1}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.close}:hover{color:#555;opacity:.5;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#e7e7e7;color:#333;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-body{padding:10px;color:#333333}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.noticeX}-heading-title{display:inline-block;vertical-align:middle;overflow:hidden;max-width:90%;text-overflow:ellipsis;white-space:nowrap}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#64ce83}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#3da95c}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#3ea2ff}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#067cea;}` +
+              `.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#ff7f48}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#f44e06}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#fd5f4e}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#ba2c1d}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#efefef}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#ccc}@keyframes ${def.notice.noticeX}-progress{0%{width:100%}to{width:0}}@keyframes ${def.notice.noticeX}-fadeOut{0%{opacity:1}to{opacity:0}}.${def.notice.noticeX}-fadeOut{animation-name:${def.notice.noticeX}-fadeOut}.${def.notice.noticeX}{position:fixed;z-index:2147483645}.${def.notice.noticeX} ::-webkit-scrollbar{width:8px}.${def.notice.noticeX} ::-webkit-scrollbar-button{width:8px;height:8px}.${def.notice.noticeX} ::-webkit-scrollbar-track{border-radius:3px}.${def.notice.noticeX} ::-webkit-scrollbar-thumb{background:#e1e1e1;border-radius:3px}.${def.notice.noticeX} ::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.rName}{padding:2px!important}.${def.notice.noticeX} .${def.notice.rName} dl{margin:0!important;padding:1px!important}.${def.notice.noticeX} .${def.notice.rName} dl dt{margin:2px 0 6px!important;font-weight:900!important;font-size:16px!important}.${def.notice.noticeX} .${def.notice.rName} dl dd{margin:2px 2px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${def.notice.noticeX} .${def.notice.rName} .${def.notice.center}{width:100%;text-align:center!important}.${def.notice.noticeX} .${def.notice.rName} dl dd em{padding:0 5px;color:#fff;font-style:italic;font-size:24px!important;font-family:Candara,sans-serif!important}.${def.notice.noticeX} .${def.notice.rName} dl dd span{margin-right:8px;font-weight:700;font-size:15px!important}.${def.notice.noticeX} .${def.notice.rName} dl dd i{font-size:20px!important;font-family:Candara,sans-serif!important}` +
+              `.${def.notice.noticeX} .${def.notice.rName} dl dd .im{padding:0 3px;color:gold;font-weight:900;font-size:16px!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} ul{display:inline-block;margin:0 0 0 8px;padding:4px 4px 8px;width:95%;color:#ffffffcc;counter-reset:xxx 0;vertical-align:top;text-align:left}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} li{position:relative;margin:0 0 0 2px;padding:0 0 2px 2px;list-style:none;font-style:italic!important;line-height:150%;-webkit-transition:.12s;transition:.12s}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} li::before{display:inline-block;margin-left:-1.5em;width:1.5em;content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-size:14px;font-family:Candara,sans-serif;-webkit-transition:.5s;transition:.5s}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} #${def.notice.stopUpdate}{float:right;margin:0 5px!important;font-size:12px!important;cursor:help}.${def.const.loading}{position:relative;}.${def.const.loading}::after{content:" \u21ba";animation:fade 1.25s infinite;}@keyframes fade{0%{opacity:0.1}50%{opacity:0.5}to{opacity:0}}.${def.notice.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important;color:#999}#${def.notice.stopUpdate} input[type='checkbox']{box-sizing:content-box;margin:2px 4px 0 0;width:14px;height:14px;border:2px solid #fff;border-radius:50%;background:#ffa077;vertical-align:top;cursor:help;-webkit-appearance:none}#${def.notice.stopUpdate}:hover input,#${def.notice.stopUpdate} input:hover{background:#ba2c1d;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}{display:none!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label{position:relative;display:inline-block;-webkit-box-sizing:content-box;box-sizing:content-box;margin:0 0 0 25px;padding:11px 9px;width:58px;height:10px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px #0000001a,0 0 10px #f5929266;word-wrap:normal!important;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;-webkit-border-radius:7px;border-radius:7px;background:#fff;box-shadow:0 0 1px #00000099;color:#fff;content:" "}` +
+              `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label::after{position:absolute;top:2px;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;padding:5px;-webkit-border-radius:100px;border-radius:100px;color:#fff;content:"OFF";font-weight:700;font-size:14px}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label{-webkit-box-sizing:content-box;box-sizing:content-box;margin:0 0 0 25px;background:#67a5df!important;box-shadow:inset 0 0 20px #0000001a,0 0 10px #92c4f566;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label::after{top:2px;left:10px;content:"ON"}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}.${def.notice.noticeX} .${def.notice.configuration} button.${def.notice.searchButton}{display:flex;position:relative;margin:0 0 10px;padding:6px 0;width:162px;height:25px;border:2px solid #eee;border-radius:6px;background:#fff;box-shadow:1px 1px 0 1px #aaa;font-size:14px!important;cursor:pointer;align-content:center;justify-content:center;align-items:center}.${def.notice.noticeX} .${def.notice.configuration} button.${def.notice.searchButton}:hover{box-shadow:1px 1px 3px 0 #888;color:#ff0000}.${def.notice.noticeX} .${def.notice.configuration} span.${def.notice.favicon}{margin:0 6px 0 0;width:32px;height:32px}.${def.notice.noticeX} .${def.notice.configuration} ul.${def.notice.searchList}{margin:5px;padding:2px;list-style:none}.${def.notice.noticeX} .${def.notice.configuration} ul.${def.notice.searchList} li{margin:0;list-style:none;font-style:normal}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.fieldset}{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;border:2px dashed #dfdfdf;border-radius:10px;background:transparent!important;text-align:left}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.legend}{display:block;margin:0;padding:0 8px;width:auto;color:#8b0000!important;font-weight:900!important;font-size:14px!important;-webkit-user-select:all;user-select:all}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList}{margin:0;padding:0;background:transparent!important}` +
+              `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li{float:none;display:flex;margin:3px 0;padding:2px 8px 2px 12px;height:36px;border:none;background:transparent!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none;align-content:center;justify-content:space-between}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li div{font:normal 700 14px/150% Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button{box-sizing:border-box;margin:0 0 0 8px;padding:4px 8px;height:36px;min-width:65px;border:1px solid #ccc;border-radius:8px;background:#fafafa;box-shadow:1px 1px 1px 0 #ccc;color:#5e5e5e;font-weight:700;font-size:14px!important;letter-spacing:normal;text-transform:none;text-decoration:none}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info{font-weight:400!important;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info em{color:#dc143c!important;font-style:normal;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_textarea{padding: 6px 0;margin:0}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter{display:block;margin:0;height:100%}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar{width:8px;height:8px}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb{border-radius:4px;background:#cfcfcf}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.random}_filter_textarea textarea::placeholder{color:#555;font:normal 500 16px/150% ui-monospace,monospace,system-ui,-apple-system,BlinkMacSystemFont!important;opacity:0.85;white-space:break-spaces}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{box-sizing:border-box;margin:0;padding:5px;max-height:423px;width:100%;min-height:280px;outline:0!important;border:1px solid #bbb;border-radius:6px;background:#fff;color:#111;white-space:pre;font:normal 400 14px/150% ui-monospace,monospace,sans-serif!important;resize:vertical;overscroll-behavior:contain;word-break:keep-all!important;cursor:auto}` +
+              `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content::placeholder{font:normal 400 14px/150% ui-monospace,monospace!important}.${def.notice.noticeX} .${def.notice.configuration} #${def.notice.random}_customColor{margin:0;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button:hover{background:#fff;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}__content{display:block;margin:0;height:268px}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{overflow-x:hidden;overflow-y:auto;box-sizing:border-box;margin:4px 0 3px;padding:8px;width:266px;max-height:237px;overscroll-behavior:contain}.${def.notice.card} h2{margin:0;padding:0;border:0;vertical-align:baseline;font:inherit;font-size:100%;line-height:135%;}#${def.notice.random}_help{position:relative;margin:0;padding:4px 15px!important;border:1px solid transparent;background:#f07f6a;box-shadow:0 0 6px 0 #f5846f;color:#fff;cursor:help}#${def.notice.random}_help:hover{background:#ed6248;box-shadow:0 0 6px 0 #f34525;}#${def.notice.random}_clear{margin:0;color:#666;font-weight:500;cursor:pointer}#${def.notice.random}_clear:hover{color:#ff0000}#${def.notice.random}_clear u{padding:0 2px;text-decoration:none}.${def.notice.linkerror},.${def.notice.linkerror}:hover,.${def.notice.linkerror} *,.${def.notice.linkerror} *:hover{color:#a9a9a9!important;text-decoration-line:line-through!important;text-decoration-color:#ff0000!important;text-decoration-style:wavy!important}@-moz-document url-prefix() {.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before,.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{scrollbar-color:#bbbb #eee1;scrollbar-width:thin}}.${def.notice.card}{margin:0;padding:0;--background:#fff;--background-chackbox:#0082ff;--background-image:#fff,#006baf33;--text-color:#666;--text-headline:#000;--card-shadow:#0082ff;--card-height:48px;--card-witght:240px;--card-radius:12px;--header-height:47px;--blend-mode:overlay;--transition:0.15s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.${def.notice.card}__input{position:absolute;display:none;margin:0;padding:0;outline:none;border:none;background:none;-webkit-appearance:none}` +
+              `.${def.notice.card}__input:checked ~ .${def.notice.card}__body{--shadow:0 0 0 3px var(--card-shadow);}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox{--chack-bg:var(--background-chackbox);--chack-border:#fff;--chack-scale:1;--chack-opacity:1;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox--svg{--stroke-color:#fff;--stroke-dashoffset:0;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover:after{--opacity-bg:0;}.${def.notice.random}_iconText{color:#333;font-weight:400;letter-spacing:normal;text-transform:none;text-decoration:none}.${def.notice.random}_iconText:hover{color:#dc143c}.${def.notice.random}_iconText>sup{position:absolute;font-size:25px;top:-10px;right:-2px}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body{cursor:not-allowed;opacity:0.5;}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body:active{--scale:1;}.${def.notice.card}__body{position:relative;display:grid;overflow:hidden;width:var(--card-witght);height:var(--card-height);border-radius:var(--card-radius);background:var(--background);box-shadow:var(--shadow,1px 1px 3px 1px #ccc);cursor:pointer;-webkit-transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:transform var(--transition),box-shadow var(--transition);transition:transform var(--transition),box-shadow var(--transition),-webkit-transform var(--transition);-webkit-transform:scale(var(--scale,1)) translateZ(0);transform:scale(var(--scale,1)) translateZ(0);grid-auto-rows:calc(var(--card-height) - var(--header-height)) auto}.${def.notice.card}__body:active{--scale:0.96;}.${def.notice.card}__body-cover-image{position:absolute;top:8px;left:10px;z-index:100;width:32px;height:32px}.${def.notice.card}__body-cover-image span.${def.notice.favicons}{display:block;width:32px;height:32px}.${def.notice.card}__body-cover-chackbox{position:absolute;top:10px;right:10px;z-index:1;width:28px;height:28px;border:2px solid var(--chack-border,#fff);border-radius:50%;background:var(--chack-bg,var(--background-chackbox));opacity:var(--chack-opacity,0);transition:transform var(--transition),opacity calc(var(--transition)*1.2) linear,-webkit-transform var(--transition) ease;-webkit-transform:scale(var(--chack-scale,0));transform:scale(var(--chack-scale,0))}` +
               `.${def.notice.card}__body-cover-chackbox--svg{display:inline-block;visibility:visible!important;margin:8px 0 0 7px;width:13px;height:11px;vertical-align:top;-webkit-transition:stroke-dashoffset .4s ease var(--transition);transition:stroke-dashoffset .4s ease var(--transition);fill:none;stroke:var(--stroke-color,#fff);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16px;stroke-dashoffset:var(--stroke-dashoffset,16px)}.${def.notice.card}__body-header{padding:4px 10px 6px 50px;height:var(--header-height);background:var(--background)}.${def.notice.card}__body-header-title{margin-bottom:0!important;color:var(--text-headline);font-weight:700!important;font-size:15px!important}.${def.notice.card}__body-header-subtitle{color:var(--text-color);font-weight:500;font-size:13px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{display:grid;grid-template-columns:repeat(1, 1fr);grid-gap:10px;}.${def.notice.gberror}{display:block;margin:0 0 4px -6px;padding:6px;width:max-content;border:1px dashed #ffb78c;border-radius:4px;color:#ffb78c}`
           );
           def.var.iconbg = iconBase64Data ? `url('${iconBase64Data}')` : `url('${def.url.backupIcon}'),url('${yandexIconsAPIUrl}')`;
@@ -1941,7 +1938,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               if (keyNodes.length) return keyNodes[keyNodes.length - 1].textContent;
             }
             const { inputArray, searchKeys } = searchProperties;
-            const inputValue = qA(inputArray.join()).Find(item => item.value)?.value;
+            const inputValue = qA(inputArray.join()).FindX(item => item.value)?.value;
             if (inputValue) return DEBUG("QueryString[INPUT]:", { value: inputValue }) ?? encodeURIComponent(inputValue);
             for (const key of searchKeys) {
               const queryString = getUrlParam(key);
@@ -1961,7 +1958,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             const currentSearchType = getUrlParam(currentSite.splitTypeName);
             return (
               (currentSite.siteTypeID === newSiteType.GOOGLE && /^(26|28|50)$/.test(currentSearchType)) ||
-              (currentSite.siteTypeID === newSiteType.BING && /^maps$/.test(currentSearchType)) ||
+              (currentSite.siteTypeID === newSiteType.BING && (/^maps$/.test(currentSearchType) || CUR_PATH_NAME.includes("/relatedvideo"))) ||
               (currentSite.siteTypeID === newSiteType.SOGOU && /^(fanyi|hanyu|as)/.test(CUR_HOST_NAME)) ||
               (currentSite.siteTypeID === newSiteType.DUCKDUCKGO && /^maps$/.test(getUrlParam("iaxm"))) ||
               (currentSite.siteTypeID === newSiteType.YANDEX && location.pathname.includes("/direct")) ||
@@ -2051,7 +2048,8 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             return notes.reduce((updateInfoList, note) => {
               try {
                 const parsedNote = JSON.parse(note);
-                updateInfoList += `<li>${IS_CHN ? parsedNote.CN : parsedNote.EN}</li>`;
+                const updateinfo = IS_CHN ? parsedNote.CN : parsedNote.EN;
+                updateInfoList += updateinfo ? `<li>${updateinfo}</li>` : ``;
               } catch (e) {
                 updateInfoList += `<li>${note}</li>`;
               }
@@ -2318,16 +2316,16 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 const filterString = qS(`.${def.notice.random}_filter_textarea .${def.notice.random}_filter_content`).value.trim();
                 const filterTrigger = qS(`#${def.notice.rf}`).checked;
                 const parsedFilterString = filterString ? JSON.parse(filterString) : [];
-                if (!Array.isArray(parsedFilterString) || asArray(parsedFilterString).Some(item => typeof item !== "string")) throw new Error("Format Error");
+                if (!Array.isArray(parsedFilterString) || asArray(parsedFilterString).SomeX(item => typeof item !== "string")) throw new Error("Format Error");
                 const resultFilterData = { filter: uniq(parsedFilterString.filter(Boolean)), trigger: filterTrigger };
                 GMsetValue(RESULTFILTER, encrypt(JSON.stringify(resultFilterData)));
                 const successTitle = IS_CHN ? "保存成功！" : "Success!";
                 const successText = IS_CHN ? "<dd>设置参数已成功保存，页面稍后自动刷新！</dd>" : "<dd>The data is saved successfully, Page will refresh!</dd>";
                 if (await addAction.closeConfig()) GMnotification({ title: successTitle, text: createNoticeHTML(successText), callbacks: { onClose: [reload] } });
-              } catch (error) {
+              } catch (e) {
                 const errorMessage = IS_CHN ? "设置数据格式有误，请修正后重新提交。" : "The setting data format is incorrect!";
                 const errorText = `<dd><e style="font-size:24px;vertical-align:bottom">\ud83d\ude31\u0020</e>${errorMessage}</dd>`;
-                GMnotification({ text: createNoticeHTML(errorText), type: def.notice.error, closeWith: ["click"] });
+                GMnotification({ text: createNoticeHTML(errorText), type: def.notice.error, newestOnTop: true, closeWith: ["click"] });
               }
             }
 
@@ -2435,7 +2433,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                   ? `\u0020您需要选择「三个」搜索引擎，还少<em>${3 - selectEngineList.length}</em>个呢！`
                   : `\u0020Please select <b>three</b> search engines, still less<em>${3 - selectEngineList.length}</em>`;
                 const text = createNoticeHTML(`<dd><e style="font-size:24px;vertical-align:bottom">\ud83d\ude31</e>${noticeText}</dd>`);
-                return GMnotification({ text, type: def.notice.error, closeWith: ["click"] });
+                return GMnotification({ text, type: def.notice.error, newestOnTop: true, closeWith: ["click"] });
               }
               const configKeys = ["hk", "gj", "lw", "kh", "ar", "aa", "au"];
               const configValues = configKeys.map(key => qS(`#${def.notice[key]}`).checked);
@@ -2545,6 +2543,13 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                   }
                 },
               },
+              google: {
+                listTypes: { target: "div.MjjYud", listName: "div" },
+                applyButton: ({ buttonSection, target }) => {
+                  getGlobalGoogle("www.google.com", googleJump);
+                  insertAfter(buttonSection, target);
+                },
+              },
               bing: {
                 listTypes: { target: "#b_results", listName: "li", className: "b_algo" },
                 clear: () => safeRemoveNode("aside>ol#b_context"),
@@ -2557,13 +2562,6 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                       input.style.cssText += "height:34px!important;border-radius:6px!important;padding:0 12px!important;margin:0 0 0 2px!important;";
                     });
                   }
-                },
-              },
-              google: {
-                listTypes: { target: "div.MjjYud", listName: "div" },
-                applyButton: ({ buttonSection, target }) => {
-                  getGlobalGoogle("www.google.com", googleJump);
-                  insertAfter(buttonSection, target);
                 },
               },
               duckduckgo: {
@@ -2841,10 +2839,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               const usedFilterWordsStr = escapeHTML([...usedFilterWords].join(", "));
               const noticeCode = createNotice(listName, className, usedFilterWordsStr);
               const el = qS(target)?.firstElementChild;
-              if (el) {
-                const position = el.classList.contains(def.var.translucent) || el.classList.contains(def.var.disappear) ? "beforebegin" : "afterend";
-                el.insertAdjacentHTML(position, noticeCode);
-              }
+              if (el) el.insertAdjacentHTML(el.classList.contains(def.var.translucent) || el.classList.contains(def.var.disappear) ? "beforebegin" : "afterend", noticeCode);
               usedFilterWords.clear();
             }
 
@@ -2860,19 +2855,19 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               const elements = qA(selectors);
               if (elements.length === 0) return;
               const returnContent = new Map();
-              elements.forEach(item => processNode(item, returnContent));
+              elements.forEach(item => processANodeURL(item, returnContent));
               if (returnContent.size === 0) return;
               returnContent.forEach((content, item) => matchFilters(item, content));
               await sleep(1e2, { instant: true });
               if (usedFilterWords.size > 0 && qA(querystring.split(/,(?![^()]*\))/g)[0]).length >= 2) handleRemainingResults(qA(selectors.split(/,(?![^()]*\))/g)[0]).length);
+              returnContent.clear();
             }
 
             function processMatchedItem(item, content, filter) {
               if (IS_DEBUG) addDebugNotice(item, filter);
               usedFilterWords.add(filter);
               item.classList.add(IS_DEBUG ? def.var.translucent : def.var.disappear);
-              DEBUG("Filter.match:", { filter, item, content });
-              qA("a", item).forEach(node => node.setAttribute("gd-antiredirect-status", "blocked"));
+              DEBUG("Filter.match:", { filter, item, content }) ?? qA("a", item).forEach(node => node.setAttribute("gd-antiredirect-status", "blocked"));
             }
 
             function addDebugNotice(item, filter) {
@@ -2890,11 +2885,11 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               return array.map(item => `${item}:not(.${def.var.disappear},.${def.var.translucent},[gb-filter-notice])`).join(",");
             }
 
-            function processNode(item, returnContent) {
+            function processANodeURL(item, returnContent) {
               if (item.nodeType !== Node.ELEMENT_NODE) return;
               const href = qS("a:not([data-testid='result-extras-site-search-link']):not([aria-label^='Anonymous']):not([href*='.bing.com/ck/a?'])", item)?.href ?? "";
-              const url = [1, 5, 8].includes(listCurrentSite.siteTypeID) ? "" : getDecodeURI(href);
-              const content = item.innerText?.replace(/[\t\r\n\ue62b]/g, "").trim() + url;
+              const url = [1, 5, 8, 12].includes(listCurrentSite.siteTypeID) ? qS(`.${def.var.filtered}`, item)?.textContent.trim() || "" : href;
+              const content = item.innerText?.replace(/[\t\r\n\ue62b]/g, "").trim() + getDecodeURI(url);
               if (content) returnContent.set(item, content);
             }
 
@@ -2914,7 +2909,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             }
 
             function getDecodeURI(href) {
-              if (typeof href !== "string" || href.startsWith("javascript:")) return "";
+              if (!href || typeof href !== "string" || href.startsWith("javascript:")) return "";
               return `\ue620${decodeURIComponent(href)}\ue620`;
             }
 
@@ -3067,15 +3062,17 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       );
     })(createTrustedTypePolicy());
   },
-  o =>
-    Object.entries({
-      Some(callback, thisArg = this) {
+  {
+    method: Object.entries({
+      SomeX(callback, thisArg = this) {
         for (let i = 0; i < this.length; i++) if (callback.call(thisArg, this[i], i, this)) return true;
       },
-      Find(callback, thisArg = this) {
+      FindX(callback, thisArg = this) {
         for (let i = 0; i < this.length; i++) if (callback.call(thisArg, this[i], i, this)) return this[i];
       },
-    }).forEach(([k, v]) => !Reflect.getOwnPropertyDescriptor(o, k) && Reflect.defineProperty(o, k, { value: v.bind(o), writable: false, configurable: false, enumerable: false })) ?? o,
+    }),
+    option: { writable: false, configurable: false, enumerable: false },
+  },
   ((ctx, mS = [..."t𝚁TjLWO𝙳ZR𝚖𝚜i𝚗gE𝚎𝚠2H𝚘8YkxC𝙲N0GcBrF5Qda4𝙺XoK𝚆𝚣hIn7uw1e𝚌bpM𝚞PUJlS9szD𝚝Avm3𝚟6qfV𝚡y𝚊"]) => {
     const oC = ctx.Object.create.bind(null, null);
     const eH = type => {
