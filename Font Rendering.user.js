@@ -5,7 +5,7 @@
 // @name:en            Font Rendering (Customized)
 // @name:ko            글꼴 렌더링 (자체 사용 스크립트)
 // @name:ja            フォントのレンダリング
-// @version            2025.09.06.1
+// @version            2025.10.05.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -73,12 +73,13 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     prompt: ctx.prompt.bind(ctx),
     confirm: ctx.confirm.bind(ctx),
     setTimeout: ctx.setTimeout.bind(ctx),
-    console: sctx.Object.assign({}, ctx.console),
+    console: sctx.Object.assign(customFns.oC(), ctx.console),
     RC2: { flag: "5295b9589c42a644ca9304163cd8", date: "2025.04.05" },
     info: typeof GM !== "undefined" && GM.info ? GM.info : typeof GM_info !== "undefined" ? GM_info : { script: {} },
   };
   const wrappedFrom = ctx.wrappedJSObject ? Array.from : sctx.Array.from;
-  const orginalFns = { oS: sctx.Object.prototype.toString, aF: (...args) => arrayProxy(wrappedFrom(...args)) };
+  const asArray = o => (arrayProxy.method.every(([k, v]) => Reflect.defineProperty(o, k, { value: v.bind(o), ...arrayProxy.option })), o);
+  const orginalFns = { oS: sctx.Object.prototype.toString, aF: (...args) => asArray(wrappedFrom(...args)) };
   if (!ctx.navigation) ["pushState", "replaceState"].forEach(m => void (ctx.history[m] = customFns.eH(m)));
   fontRendering(ctx, sctx, toolkit, { ...orginalFns, ...customFns, cS: customFns.mS.filter(isNaN) });
 })(
@@ -138,11 +139,10 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         boldAttrName: `fr-bold-${generateRandomString(8, "date")}`,
         iframeAttrName: `fr-iframe-${generateRandomString(8, "hex")}`,
         regexp: /\b#[\u{1D68A}-\u{1D6A3}\w\u{1D670}-\u{1D689}]+(?=\s)/gu,
-        queryString: `html,head,title,base,meta,style,link,script,noscript,iframe,img,picture,canvas,br,hr,svg,svg *,g,image,object,embed,audio,video,source,track,progress,fr-colorpicker,fr-colorpicker *,fr-configure,fr-configure *,fr-dialogbox,fr-dialogbox *,gb-notice,gb-notice *`,
-        flagName: "fr-found-conflict-callback",
+        isConflict: "fr-found-callback-conflict",
       },
       var: {
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.09.06.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.10.05.0",
         scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
         scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("Rjl5NG5n"),
         attachShadow: Element.prototype.attachShadow,
@@ -293,7 +293,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         RAF.instance = this;
       }
       _registerAnimationFrame(scope) {
-        const vendor = asArray(["ms", "moz", "webkit", "o"]).Find(vendor => scope[`${vendor}RequestAnimationFrame`]);
+        const vendor = asArray(["ms", "moz", "webkit", "o"]).FindX(vendor => scope[`${vendor}RequestAnimationFrame`]);
         const raf = scope.requestAnimationFrame ?? scope[`${vendor}RequestAnimationFrame`];
         const caf = scope.cancelAnimationFrame ?? (scope[`${vendor}CancelAnimationFrame`] || scope[`${vendor}CancelRequestAnimationFrame`]);
         safeWindow.Object.assign(scope, { [def.const.raf]: raf, [def.const.caf]: caf });
@@ -303,10 +303,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         const timerSymbol = Symbol(type);
         const step = () => {
           const currentTime = performance.now();
-          this._setTimerMap(timerSymbol, type, step);
-          if (currentTime - lastTime < (Number(interval) || 0)) return;
-          typeof fn === "function" && fn.apply(null, args);
-          type === "interval" ? (lastTime = currentTime) : this.clearTimeout(timerSymbol);
+          if (currentTime - lastTime < (Number(interval) || 0)) return this._setTimerMap(timerSymbol, type, step);
+          type === "interval" ? (lastTime = currentTime) && this._setTimerMap(timerSymbol, type, step) : this.clearTimeout(timerSymbol);
+          typeof fn === "function" && fn.apply(this.context, args);
         };
         this._setTimerMap(timerSymbol, type, step);
         return timerSymbol;
@@ -468,6 +467,17 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       }
     }
 
+    function qAS(expr, root, filterFn, target = null) {
+      const [stack, eSet, sSet] = [[root], new Set(), new Set()];
+      const deepProcessElements = el => (!eSet.has(el) && eSet.add(el), el.shadowRoot && !sSet.has(el.shadowRoot) && sSet.add(el.shadowRoot) && stack.push(el.shadowRoot));
+      while (stack.length) {
+        if (!(target = stack.pop())) continue;
+        target.nodeType === Node.ELEMENT_NODE ? !eSet.has(target) && eSet.add(target) : target.nodeType === Node.DOCUMENT_FRAGMENT_NODE ? !sSet.has(target) && sSet.add(target) : void 0;
+        (typeof filterFn === "function" ? qA(expr, target).filter(filterFn) : qA(expr, target)).forEach(deepProcessElements);
+      }
+      return { elementSet: eSet, shadowSet: sSet };
+    }
+
     function cE(nodeName, attributes) {
       const el = document.createElement(nodeName);
       if (getObjectType.call(attributes) !== "[object Object]") return el;
@@ -509,7 +519,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     }
 
     function getNodeName(node) {
-      return node?.nodeName?.toLowerCase() ?? "";
+      return node?.localName ?? "";
     }
 
     function encrypt(string, encode = true) {
@@ -554,7 +564,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       if (!global.trustedTypes?.createPolicy) return policyOptions;
       const originalCreatePolicy = global.trustedTypes.createPolicy.bind(global.trustedTypes);
       const whitelist = [{ host: "bing.com", policy: "rwflyoutDefault" }];
-      const policyName = global.trustedTypes.defaultPolicy?.name ?? asArray(whitelist).Find(entry => CUR_HOST_NAME.endsWith(entry.host))?.policy ?? "default";
+      const policyName = global.trustedTypes.defaultPolicy?.name ?? asArray(whitelist).FindX(entry => CUR_HOST_NAME.endsWith(entry.host))?.policy ?? "default";
       const defaultPolicy = global.trustedTypes.defaultPolicy ?? originalCreatePolicy(policyName, policyOptions);
       uniq([global, GMunsafeWindow]).forEach(w => (w.trustedTypes.createPolicy = (name, options) => (name === policyName ? defaultPolicy : originalCreatePolicy(name, options))));
       return defaultPolicy;
@@ -562,12 +572,12 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
     function isAccessProhibited(href) {
       const URI = new URL(href?.replace(/^blob:/, "") || "about:blank");
-      return asArray(def.url.prohibit.split("|")).Some(item => URI.hostname === item || URI.pathname.startsWith(item));
+      return asArray(def.url.prohibit.split("|")).SomeX(item => URI.hostname === item || URI.pathname.startsWith(item));
     }
 
     function getMainStyleElements({ primary = false, target = document }) {
       if (primary) return qS(`style#${def.id.rndStyle}`, document.head);
-      return qA("style[id]", target).filter(s => asArray(s.attributes).Some(a => /^fr-css-[0-9a-f]{8}$/.test(a.name)));
+      return qA("style[id]", target).filter(s => asArray(s.attributes).SomeX(a => /^fr-css-[0-9a-f]{8}$/.test(a.name)));
     }
 
     function checkRedundantScript(context) {
@@ -674,7 +684,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         };
         for (const [key, { brand, engine, verset, as }] of Object.entries(brandMap)) {
           if (!checkString(key)) continue;
-          const versionKey = asArray(verset ?? []).Find(k => checkString(k)) || key;
+          const versionKey = asArray(verset ?? []).FindX(k => checkString(k)) || key;
           let brandVersion = getVersion(versionKey, versionKey.length + 1);
           if (!brandVersion) continue;
           const enVersionKey = as || key;
@@ -699,7 +709,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       }
 
       function getRealBrowserEngine(w) {
-        return w.GestureEvent ? "WebKit" : w.scrollByLines || w.getDefaultComputedStyle ? "Gecko" : w.webkitRequestFileSystem || w.queryLocalFonts ? "Blink" : "Unknown";
+        return w.GestureEvent ? "WebKit" : w.scrollByLines || w.getDefaultComputedStyle ? "Gecko" : w.webkitRequestFileSystem || w.webkitSpeechGrammar ? "Blink" : "Unknown";
       }
 
       function getEngineFromUA(ua) {
@@ -718,7 +728,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
       function getOSInfoFromUA(checkString) {
         const platforms = ["like Mac", "Mac", "Android", "Debian", "Ubuntu", "Linux", "Win", "CrOS", "X11"];
-        const platform = asArray(platforms).Find(p => checkString(p, "i")) || "Unknown";
+        const platform = asArray(platforms).FindX(p => checkString(p, "i")) || "Unknown";
         return getFullPlatformName(platform);
       }
     }
@@ -827,19 +837,16 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
       const UPDATE_VERSION_NOTICE = IS_CHN
-        ? `<li class="${def.const.seed}.fixed">持续优化提升了脚本的兼容性。</li>
-            <li class="${def.const.seed}.fixed">改进浏览器通过 CSS 合成字体粗体的样式。</li>
-            <li class="${def.const.seed}.fixed">优化字体设置界面自动检测滚动条效果。</li>
-            <li class="${def.const.seed}.fixed">优化字体阴影拾色器的事件监听规则以提升性能。</li>
-            <li class="${def.const.seed}.fixed">优化字体缩放功能兼容 CodeMirror/Monaco. (实验性)</li>
-            <li class="${def.const.seed}.fixed">修复视口修正处理 @import 的匹配问题。</li>
+        ? `<li class="${def.const.seed}.info">🎊 恭祝各位用户中秋、国庆双节节日快乐 🎉</li>
+            <li class="${def.const.seed}.fixed">优化字体粗体描边样式修正函数的执行性能。</li>
+            <li class="${def.const.seed}.fixed">优化脚本对浏览器真实内核信息的识别方法。</li>
+            <li class="${def.const.seed}.fixed">优化字体缩放功能兼容 CodeMirror/Monaco 编辑器。</li>
+            <li class="${def.const.seed}.fixed">修复 CSS 视口单位修正函数的逻辑问题。</li>
             <li class="${def.const.seed}.fixed">修复一些已知的问题，优化代码，优化样式。</li>`
-        : `<li class="${def.const.seed}.fixed">Continuously improved script compatibility.</li>
-            <li class="${def.const.seed}.fixed">Improved browser synthesized font bold style via CSS.</li>
-            <li class="${def.const.seed}.fixed">Optimized auto-detecting scrollbar in setting interface.</li>
-            <li class="${def.const.seed}.fixed">Optimized event listener rules for shadow colorpicker.</li>
-            <li class="${def.const.seed}.fixed">Optimized the font scaling feature for compatibility with CodeMirror/Monaco. (Experimental)</li>
-            <li class="${def.const.seed}.fixed">Fixed viewport fixes to handle @import match issues.</li>
+        : `<li class="${def.const.seed}.fixed">Optimized performance of font bold stroke correction.</li>
+            <li class="${def.const.seed}.fixed">Optimized to identify browser kernel information.</li>
+            <li class="${def.const.seed}.fixed">Optimized font scaling compatible with CodeMirror/Monaco editors.</li>
+            <li class="${def.const.seed}.fixed">Fixed logical issue of CSS viewport unit correction.</li>
             <li class="${def.const.seed}.fixed">Fixed some known issues, optimized code & style.</li>`;
 
       /* INITIALIZE_FONT_LIBRARY */
@@ -894,7 +901,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         fixShadow: false,
         renderCanvas: false,
         shadowColor: IS_REAL_GECKO ? "#70707070" : "#7C7C7CDD",
-        fontCSS: `:not(i,head *):not(mjx-container *,.katex *):not([class*='glyph']):not([class*='symbols' i]):not([class*='icon' i]):not([class*='fa-']):not([class*='vjs-'])`,
+        fontCSS: `:not(i[class],head *):not(mjx-container *,.katex *):not([class*='glyph']):not([class*='symbols' i]):not([class*='icon' i]):not([class*='fa-']):not([class*='vjs-'])`,
         fontEx: `[class*='watermark' i],.textLayer *,pre,pre *,code,code *`,
       };
 
@@ -1096,7 +1103,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
       function updateAdoptedStyleSheets(shadow, sheet, writable) {
         try {
-          const existIndex = asArray(shadow.adoptedStyleSheets).FindIndex(s => s.id === sheet.id);
+          const existIndex = asArray(shadow.adoptedStyleSheets).FindIndeX(s => s.id === sheet.id);
           if (!~existIndex) shadow.adoptedStyleSheets.push(sheet);
           else if (writable && !compareStyleSheets(shadow.adoptedStyleSheets[existIndex], sheet)) shadow.adoptedStyleSheets[existIndex] = sheet;
         } catch (e) {
@@ -1376,7 +1383,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       }
 
       function updateDomainsIndex(domains, curHost = CUR_HOST) {
-        return asArray(domains).FindIndex(domain => domain.domain === curHost);
+        return asArray(domains).FindIndeX(domain => domain.domain === curHost);
       }
 
       function updateExsitesIndex(sites) {
@@ -1384,12 +1391,12 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           if (typeof domain !== "string") return [];
           return domain.startsWith("*") ? new RegExp(`^[a-z0-9][-a-z0-9]{0,62}${domain.slice(1).replace(/\./g, "\\.")}(\\:\\d{2,5})?$`) : domain;
         };
-        return asArray(sites.flatMap(wildcardFn)).FindIndex(site => (site instanceof RegExp && site.test(CUR_HOST)) || site === CUR_HOST);
+        return asArray(sites.flatMap(wildcardFn)).FindIndeX(site => (site instanceof RegExp && site.test(CUR_HOST)) || site === CUR_HOST);
       }
 
       function saveData(key, data) {
         try {
-          sessionStorage?.removeItem(def.const.flagName);
+          sessionStorage?.removeItem(def.const.isConflict);
           GMsetValue(key, encrypt(JSON.stringify(data)));
         } catch (e) {
           ERROR("SaveData:", e.message);
@@ -1403,7 +1410,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       }
 
       function matchEditorialSites(hostlist) {
-        return asArray(hostlist.split("|")).Some(hostname => CUR_HOST_NAME.endsWith(hostname));
+        return asArray(hostlist.split("|")).SomeX(hostname => CUR_HOST_NAME.endsWith(hostname));
       }
 
       function getFontScaleValue(isAllowFontScale, scaleValue) {
@@ -1439,8 +1446,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       function applyPredefinedRenderRules(predefinedData, data) {
         if (!predefinedData) return data;
         try {
-          const findFn = ([host]) => host.includes(CUR_HOST_NAME) || String(host) === "ALL" || asArray(host).Some(h => h.startsWith("*") && CUR_HOST_NAME.endsWith(h.slice(1)));
-          const rules = asArray(JSON.parse(JSON.parse(decrypt(predefinedData)))).Find(findFn);
+          const findFn = ([host]) => host.includes(CUR_HOST_NAME) || String(host) === "ALL" || asArray(host).SomeX(h => h.startsWith("*") && CUR_HOST_NAME.endsWith(h.slice(1)));
+          const rules = asArray(JSON.parse(JSON.parse(decrypt(predefinedData)))).FindX(findFn);
           if (!(def.var.apply = Boolean(rules))) return data;
           for (const [key, rule] of Object.entries(rules[1])) {
             if (!rule || !(key in data)) continue;
@@ -1500,7 +1507,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         const [codeFonts, shadowCode] = [false, true].map(i => funcCodefont(exText, fontface_i, isCustomMono, i));
         const noTextShadowCss = IS_CAUSED_BOLDSHADOWERROR && CONST_VALUES.o.fixShadow ? "text-shadow:var(--fr-fix-shadow)!important;" : "";
         const boldFixSelector = `[${def.const.boldAttrName}],.${def.const.boldAttrName}`;
-        const getBoldFixCssText = shadow => `${boldFixSelector}{font-synthesis:weight!important;-webkit-text-stroke:var(--fr-fix-stroke)!important;${shadow ?? ""}}`;
+        const getBoldFixCssText = shadow => `${boldFixSelector}{font-synthesis:weight style!important;-webkit-text-stroke:var(--fr-fix-stroke)!important;${shadow ?? ""}}`;
         const boldFixCSSText = IS_CAUSED_BOLDSTROKEERROR && CONST_VALUES.o.fixStroke ? getBoldFixCssText(noTextShadowCss) : "";
         const curEmptyConfig = !fontface_i && !smooth_i && !textShadow && !textStroke && Number(fontsize_r) === 1;
         const isFixInputEnabled = fi => fi === "true" || (!fi && /;?\s*\w+_last(?:visi|ac)t=\d{10}(?:;|%)/.test(document.cookie) && !localStorage?.setItem(IS_DISCUZ, true));
@@ -1510,7 +1517,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         const textShadowFix = `0 0 ${shadow_r}px ${shadow_c.toLowerCase().slice(0, 7).concat("2b")}`;
         const firefoxInputFix = IS_REAL_GECKO & fontface_i && isFixInputEnabled(localStorage?.getItem(IS_DISCUZ)) ? def.var.style.firefox : "";
         const [monoAllowed, isEditorBlock, supportMix] = [Boolean(isCustomMono), Boolean(CONST_VALUES.o.isEditorBlock), CSS.supports("(color:color-mix(in srgb, tan, red))")];
-        const monoShadowColor = monoAllowed && supportMix ? `--fr-mono-shadowcolor:color-mix(in srgb, #4545460d 75%, currentcolor 25%);` : ``;
+        const monoShadowColor = monoAllowed && supportMix ? `--fr-mono-shadowcolor:color-mix(in display-p3, #4545461b 70%, currentcolor 20%);` : ``;
         const monoFontText = monoAllowed ? `--fr-mono-font:${monoFontList || INITIAL_REMARKS.monospacedFont};` : ``;
         const monoShadow = monoAllowed ? `--fr-mono-shadow:0 0 0 var(--fr-mono-shadowcolor, currentcolor);` : ``;
         const monoFeatureText = monoAllowed ? `--fr-mono-feature:${monoFeature || INITIAL_REMARKS.monospacedFeature};` : ``;
@@ -1788,7 +1795,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             const { css, id, style } = getExactFrameStyle(data, ctx.document.head);
             if (style === css || !insertStyle({ target: ctx.document.head, id, cssText: css, overwrite: condition !== "DOMLoaded" })) return;
             node.setAttribute(def.const.iframeAttrName, condition) ?? COUNT(`[ASYNCFRAMES][ACT:${condition}]`);
-            correctBoldStrokeProcess({ Scenes: "iframe", Permit: CONST_VALUES.o.fixStroke })(null, ctx.document);
+            correctBoldPassive("iframe", boldFixCSSText, ctx.document, true);
           } catch (e) {
             if ((IS_GREASEMONKEY && GMscriptHandler !== "Userscripts") || !ctx || condition === "DOMLoaded") return ERROR("InsertFrameStyle:", { node, condition, error: e.name });
             ctx.postMessage({ fontRenderX: { command: "𝐬𝐞𝐧𝐝", data, condition } }, "*");
@@ -2251,7 +2258,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           if (await frDialog.respond()) {
             const { exSite, exSitesIndex } = await getExSitesData();
             const wildcard = site => typeof site === "string" && site.startsWith("*") && new RegExp(`^[a-z0-9][-a-z0-9]{0,62}${site.slice(1).replace(/\./g, "\\.")}(\\:\\d{2,5})?$`);
-            const panDomain = exSite.Find(site => (site = wildcard(site)) && site.test(CUR_HOST));
+            const panDomain = exSite.FindX(site => (site = wildcard(site)) && site.test(CUR_HOST));
             if (!panDomain) {
               ~exSitesIndex && exSite.splice(exSitesIndex, 1) && saveData(EXCLUDESITES, uniq(exSite, site => site && typeof site === "string").sort());
               closeConfigurePage({ isReload: true });
@@ -2330,7 +2337,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             const classList = target.parentNode.previousElementSibling.classList;
             const isDeleted = typeof target.dataset.del !== "undefined";
             if (isDeleted) delete target.dataset.del && !_temp_.includes(nodeDomain) && _temp_.push(nodeDomain);
-            else _temp_.Remove(nodeDomain) && (target.dataset.del = listID);
+            else _temp_.RemoveX(nodeDomain) && (target.dataset.del = listID);
             target.textContent = isDeleted ? delText : resetText;
             target.className = isDeleted ? `${def.const.seed}.clr:8b0000` : `${def.const.seed}.clr:green`;
             classList.toggle(`${def.const.seed}.list.reset`, !isDeleted);
@@ -2478,7 +2485,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               const { classList: dateClassList } = target.parentNode.nextElementSibling.nextElementSibling;
               const listID = Number(target.id.match(/\d+$/)?.[0] ?? -1);
               const isDeleted = typeof target.dataset.del !== "undefined";
-              if (isDeleted) _temp_.Remove(target.dataset.del) && delete target.dataset.del;
+              if (isDeleted) _temp_.RemoveX(target.dataset.del) && delete target.dataset.del;
               else _temp_.push((target.dataset.del = domainValues[listID].domain));
               target.textContent = isDeleted ? delText : resetText;
               target.className = isDeleted ? `${def.const.seed}.clr:8b0000` : `${def.const.seed}.clr:green`;
@@ -2730,7 +2737,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           if (!isFontsize || def.var.curScale === 1) return;
           try {
             const predefinedSitesProps = await getFontScaleDef();
-            const currentDomainProps = asArray(Object.entries(predefinedSitesProps)).Find(([domain]) => CUR_HOST_NAME.endsWith(domain))?.[1];
+            const currentDomainProps = asArray(Object.entries(predefinedSitesProps)).FindX(([domain]) => CUR_HOST_NAME.endsWith(domain))?.[1];
             if (!currentDomainProps) throw new Error("No extra correction properties");
             const { Window: W, Element: E, HTMLElement: H } = currentDomainProps;
             def.array.props = { window: uniq(W), element: uniq(E), html: uniq(H) };
@@ -2760,7 +2767,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         function insertMainStyleElement({ overwrite = false, shouldNotify = true } = {}) {
           const { id, textContent } = getMainStyleElements({ primary: true }) ?? object();
           if (!overwrite && id) return true;
-          const style = insertStyle({ target: document.head, id: id ?? def.id.rndStyle, cssText: textContent ?? tStyle, overwrite: Boolean(overwrite) });
+          const cssText = (textContent ?? tStyle).replace(def.const.regexp, `#${document.documentElement.id}`);
+          const style = insertStyle({ target: document.head, id: id ?? def.id.rndStyle, cssText, overwrite: Boolean(overwrite) });
           return style && shouldNotify && COUNT(`[INSERTSTYLE]${IN_FRAMES}[i:${def.id.rndStyle}]`), style;
         }
 
@@ -3335,6 +3343,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                 fontCssT.dispatchEvent(new Event("input"));
                 fontExT.value = INITIAL_VALUES.fontEx;
                 fontExT.dispatchEvent(new Event("input"));
+                def.var.fixStroke = INITIAL_VALUES.fixStroke;
                 sleep(220)(getCurrentFontName(ffaceT.checked, INITIAL_VALUES.fontSelect.replace(/'/g, ""), defaultFont))
                   .then(() => qS(`#${def.id.submit} .${def.class.submit}[v-Preview="true"]`, def.var.configIf))
                   .then(submitPreview => void submitPreview?.click());
@@ -3372,7 +3381,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                 fontCssT.dispatchEvent(new Event("input"));
                 fontExT.value = CONST_VALUES.fontEx;
                 fontExT.dispatchEvent(new Event("input"));
-                getCurrentFontName(ffaceT.checked, selectedFont, defaultFont).then(correctBoldStrokeProcess({ Scenes: "recover", Permit: CONST_VALUES.o.fixStroke }));
+                def.var.fixStroke = CONST_VALUES.o.fixStroke;
+                getCurrentFontName(ffaceT.checked, selectedFont, defaultFont).then(() => correctBoldPassive("recover", boldFixCSSText, document, true));
                 loadPreview(def.var.preview, (def.var.topStyle = tStyle)) || delete def.var.preview;
               }
               frDialog = null;
@@ -3389,7 +3399,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               const fscale = getFontScaleValue(!isEditorBlock && isFontsize, fscaleValue);
               const fixfviewport = isFixViewport && Number(fscale) !== 1 && fixViewportT.checked;
               const fstroke = /^[0-1](\.[0-9]{1,3})?$/.test(strokeT.value) ? Number(strokeT.value) : strokeT.value === "OFF" ? 0 : INITIAL_VALUES.fontStroke;
-              const fixfstroke = IS_CAUSED_BOLDSTROKEERROR && fstroke && fixStrokeT.checked;
+              const fixfstroke = (def.var.fixStroke = IS_CAUSED_BOLDSTROKEERROR && fstroke && fixStrokeT.checked);
               const lazyload = fixfstroke && lazyloadT.checked;
               const fshadow = /^[0-8](\.[0-9]{1,2})?$/.test(shadowsT.value) ? Number(shadowsT.value) : shadowsT.value === "OFF" ? 0 : INITIAL_VALUES.fontShadow;
               const fixfshadow = IS_CAUSED_BOLDSHADOWERROR && fixfstroke && fshadow && fixShadowT.checked;
@@ -3423,7 +3433,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                   const __tFontStyle = `@charset "UTF-8";${def.var.style.frDialog}${_curEmptyConfig ? `` : `${_rootpseudoclass}${_firefoxInputFix}${_tFontStyle}`}`;
                   restoreSaveButton({ button: this, isRestore: false });
                   getCurrentFontName(fontface, _selectedFont, defaultFont)
-                    .then(correctBoldStrokeProcess({ CorrectStyle: _fixfontstroke, Scenes: "preview", Permit: fixfstroke }))
+                    .then(() => correctBoldPassive("preview", _fixfontstroke, document, true))
                     .then(() => DEBUG(`frColorPicker<Preview>: %c${fscolor}`, fullStyle(fscolor, getBrightness(fscolor.slice(1)) > 182 ? "#333" : "#eee")));
                   loadPreview(isPreview, (def.var.topStyle = __tFontStyle), false);
                 } catch (e) {
@@ -3753,8 +3763,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         }
 
         function restoreSavedPreview() {
+          def.var.fixStroke = CONST_VALUES.o.fixStroke;
           def.array.scaleMatrix.push((def.var.curScale = CONST_VALUES.fontSize));
-          if (def.var.preview) correctBoldStrokeProcess({ Scenes: "recover", Permit: CONST_VALUES.o.fixStroke })();
+          if (def.var.preview) correctBoldPassive("recover", boldFixCSSText, document, true);
           loadPreview(def.var.preview, (def.var.topStyle = tStyle)) || delete def.var.preview;
         }
 
@@ -3848,162 +3859,151 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
         /* FIX_FONT_BOLD_STROKE_STYLE_ERRORS. NEW UPDATE: 2024-10-26 F9Y4NG */
 
-        function correctBoldStrokeProcess({ CorrectStyle = boldFixCSSText, Scenes, Permit } = {}) {
-          const hasLocalFlag = Boolean(localStorage?.getItem(def.const.flagName));
-          const hasSessionFlag = Boolean(sessionStorage?.getItem(def.const.flagName));
-          const observeConfig = { attributeOldValue: true, childList: true, subtree: true };
-          const checkConflict = { flag: hasLocalFlag, nodeCounter: new Map(), threshold: 250, interval: 50 };
-          const excludeNodeSet = new Set(def.const.queryString.split(",").filter(qs => !qs.includes("*")));
-          const [changeAttribute, threshold] = [createChangeAttribute(def.const.boldAttrName, !hasLocalFlag), Math.min(navigator.hardwareConcurrency || 4, 20)];
-          const [observeNodeSet, boldStatusCache, watermark, selector] = [new Set(), new WeakMap(), new RegExp("watermark", "i"), `:not(${def.const.queryString})`];
-          const deBounceFixPassive = createDeBounce({ fn: correctBoldPassive, delay: 50 });
-          const deBounceMouseEvent = createDeBounce({ fn: mouseEventsHandler, delay: 16 });
-          const hasCorrectPermission = IS_CAUSED_BOLDSTROKEERROR && Boolean(Scenes ?? (IS_CURRENTSITE_ALLOWED && CONST_VALUES.o.fixStroke));
+        const queryString = "audio,base,br,canvas,embed,g,head,hr,html,iframe,img,link,math,meta,noscript,object,path,picture,script,style,svg,title,video";
+        const [localFlag, sessionFlag] = [Boolean(localStorage?.getItem(def.const.isConflict)), Boolean(sessionStorage?.getItem(def.const.isConflict))];
+        const [observeNodeSet, boldStatusCache, watermark, threads] = [new Set(), new WeakMap(), /watermark/i, Math.min(navigator.hardwareConcurrency || 4, 20)];
+        const [checkConflict, excludeSet] = [{ flag: localFlag, counter: new Map(), threshold: Math.min(threads * 20, 2e2), interval: 1e2 }, new Set(queryString.split(","))];
+        const [changeAttribute, deBounceFixPassive] = [createChangeAttribute(def.const.boldAttrName, !localFlag), createDeBounce({ fn: correctBoldPassive, delay: 50 })];
+        const hasCorrectPermission = () => IS_CAUSED_BOLDSTROKEERROR && IS_CURRENTSITE_ALLOWED && def.var.fixStroke && !sessionStorage?.getItem(def.const.isConflict);
+        const applyLazyLoad = (fn, ...parameter) => void (CONST_VALUES.o.lazyload ? global[def.const.raf](fn.bind(null, ...parameter)) : fn(...parameter));
 
-          if (["iframe", "preview", "recover"].includes(Scenes)) {
-            if (Permit === false) def.var.obsCorrect?.disconnect() || (Scenes === "recover" && (CorrectStyle = ""));
-            else if (Scenes !== "iframe") def.var.obsCorrect = delete def.var.obsCorrect && new MutationObserver(fixBoldProcess);
-            return hasCorrectPermission ? correctBoldPassive : () => (def.var.obsCorrect = null);
-          } else {
-            def.var.obsCorrect = new MutationObserver(fixBoldProcess);
-            return observeBoldElements;
+        function correctBoldPassive(event, cssText, target = document, recheck = false) {
+          try {
+            let { elementSet, shadowSet } = qAS(`:not(${queryString})`, target, node => !watermark.test(toString(node.className)));
+            if (hasCorrectPermission()) getAndProcessBoldStyles({ elementSet, recheck });
+            shadowSet.forEach(shadow => processShadowRootNode(shadow, cssText, def.var.obsCorrect)) ?? shadowSet.clear();
+            DEBUG(`CorrectBold.stroke.Passive${IN_FRAMES}:`, { eventType: event ?? global.event?.type ?? "unknown" });
+          } catch (e) {
+            ERROR("CorrectBoldPassive:", e);
           }
+        }
 
-          function querySelectorAllShadows(expr, root) {
-            const [stack, elementSet, shadowSet] = [[root], new Set(), new Set()];
-            while (stack.length) {
-              const target = stack.pop();
-              const elements = qA(expr, target).filter(node => !watermark.test(toString(node.className)));
-              target.nodeType === Node.ELEMENT_NODE && elementSet.add(target);
-              elements.forEach(el => elementSet.add(el) && el.shadowRoot && stack.push(el.shadowRoot) && shadowSet.add(el.shadowRoot));
-            }
-            return { elementSet, shadowSet };
+        function getAndProcessBoldStyles({ elementSet, recheck }) {
+          const processedNode = new Set();
+          const checkingBold = value => processedNode.add({ node: value, isbold: isBold(value, recheck) });
+          const fixingBold = () => processedNode.forEach(checkedNode => boldFixedHandler({ checkedNode })) ?? processedNode.clear();
+          const batchSize = Math.max(threads * 1e3, elementSet.size / 2);
+          processBatch(elementSet.values(), batchSize, checkingBold, fixingBold);
+        }
+
+        function processShadowRootNode(shadow, cssText, observer) {
+          shadowRootNodeInsertCss(shadow, cssText);
+          if (hasCorrectPermission()) handleRootNodeObserve(shadow, observer);
+        }
+
+        function isBold(element, recheck) {
+          let boldStatus = boldStatusCache.get(element);
+          if (!boldStatus || (boldStatus < 600 && recheck)) {
+            boldStatus = gCS(element).fontWeight;
+            boldStatusCache.set(element, boldStatus);
           }
+          return boldStatus >= 600;
+        }
 
-          function createChangeAttribute(value, term) {
-            const compoundFns = el => void (term && el.removeAttribute(value), el.classList.add(value));
-            return {
-              add: el => void (checkConflict.flag ? compoundFns(el) : el.setAttribute(value, "")),
-              del: el => void (checkConflict.flag ? el.classList.remove(value) : el.removeAttribute(value)),
-            };
+        function boldFixedHandler({ checkedNode, uncheckedNode }) {
+          const item = checkedNode?.node ?? uncheckedNode;
+          const bold = checkedNode?.isbold ?? isBold(uncheckedNode);
+          const hasFixedAttr = isNodeContainsBoldFix(item, false);
+          if (hasFixedAttr !== bold) applyLazyLoad(hasFixedAttr ? changeAttribute.del : changeAttribute.add, item);
+        }
+
+        function processBatch(iterator, batchSize, preparator, finalizer, count = 0) {
+          while (count++ <= batchSize) {
+            const { done, value } = iterator.next();
+            if (done) return void finalizer();
+            preparator(value);
           }
+          raf.setTimeout(processBatch, 0, iterator, batchSize, preparator, finalizer);
+        }
 
-          function checkNodesForFix(node, checkList = [Node.ELEMENT_NODE, Node.DOCUMENT_FRAGMENT_NODE]) {
-            return node && checkList.includes(node.nodeType) && !excludeNodeSet.has(getNodeName(node)) && !watermark.test(toString(node.className));
-          }
+        function isNodeContainsBoldFix(node, shouldCheckChildren) {
+          return node && (node.matches(boldFixSelector) || (shouldCheckChildren && qS(boldFixSelector, node)));
+        }
 
-          function isBold(element, recheck) {
-            let boldStatus = boldStatusCache.get(element);
-            if (!boldStatus || (boldStatus < 600 && recheck)) {
-              boldStatus = gCS(element).fontWeight;
-              boldStatusCache.set(element, boldStatus);
-            }
-            return boldStatus >= 600;
-          }
+        function shadowRootNodeInsertCss(shadow, syncStyle) {
+          const hostNodeName = getNodeName(shadow.host);
+          FrDialogBox.setShadowStyle(shadow, selectionCssText + shadowCode, `${hostNodeName}-fix-selection`, false);
+          if (!IS_CAUSED_BOLDSTROKEERROR || !IS_CURRENTSITE_ALLOWED || sessionStorage?.getItem(def.const.isConflict)) return;
+          const syncCssText = syncStyle ? `:host(${hostNodeName}){--fr-fix-stroke:0px transparent;--fr-fix-shadow:${textShadowFix}}${syncStyle}` : ``;
+          FrDialogBox.setShadowStyle(shadow, syncCssText, `${hostNodeName}-fix-boldstroke`);
+        }
 
-          function boldFixedHandler({ checkedNode, uncheckedNode }) {
-            const item = checkedNode?.node ?? uncheckedNode;
-            const bold = checkedNode?.isbold ?? isBold(uncheckedNode);
-            const hasFixedAttr = isNodeContainsBoldFix(item, false);
-            if (hasFixedAttr === bold) return;
-            const changeHandler = hasFixedAttr ? changeAttribute.del : changeAttribute.add;
-            CONST_VALUES.o.lazyload ? global[def.const.raf](changeHandler.bind(null, item)) : changeHandler(item);
-          }
+        function handleRootNodeObserve(context, observer) {
+          hasCorrectPermission() && ["mouseenter", "mouseleave"].forEach(event => context.addEventListener(event, mouseEventsHandler, true));
+          !observeNodeSet.has(context) && observeNodeSet.add(context) && observer && observer.observe(context, { attributeOldValue: true, childList: true, subtree: true });
+        }
 
-          function processBatch(iterator, batchSize, preparator, finalizer, count = 0) {
-            while (count++ <= batchSize) {
-              const { done, value } = iterator.next();
-              if (done) return void finalizer();
-              preparator(value);
-            }
-            raf.setTimeout(processBatch, 0, iterator, batchSize, preparator, finalizer);
-          }
+        function createChangeAttribute(value, term) {
+          const compoundFns = el => void (term && el.removeAttribute(value), el.classList.add(value));
+          return {
+            add: el => void (checkConflict.flag ? compoundFns(el) : el.setAttribute(value, "")),
+            del: el => void (checkConflict.flag ? el.classList.remove(value) : el.removeAttribute(value)),
+          };
+        }
 
-          function getAndProcessBoldStyles({ elementSet, recheck }) {
-            const processedNode = new Set();
-            const checkingBold = value => processedNode.add({ node: value, isbold: isBold(value, recheck) });
-            const fixingBold = () => processedNode.forEach(checkedNode => boldFixedHandler({ checkedNode })) ?? processedNode.clear();
-            const batchSize = Math.max(threshold * 1e3, elementSet.size / 2);
-            processBatch(elementSet.values(), batchSize, checkingBold, fixingBold);
-          }
+        function mouseEventsHandler(event) {
+          const target = event.composedPath()[0] ?? event.target;
+          if (!checkNodesForFix(target, [Node.ELEMENT_NODE])) return;
+          const { transition, transitionDelay: delay, transitionDuration: duration } = gCS(target);
+          const recheckNode = (time, el) => sleep(time)(el).then(t => [t, ...t.children].forEach(N => removeBoldCache(N, false) && boldFixedHandler({ uncheckedNode: N })));
+          ["all", "none"].includes(transition) ? recheckNode(0, target) : recheckNode((parseFloat(delay) || 0 + parseFloat(duration) || 0) * 5e2, target);
+        }
 
-          function filterArrayDiffToStr(arrA, arrB) {
-            const [setA, setB] = [new Set(arrA), new Set(arrB)];
-            return [...arrA.filter(x => !setB.has(x)), ...arrB.filter(y => !setA.has(y))].join();
-          }
+        function checkNodesForFix(node, checkList = [Node.ELEMENT_NODE, Node.DOCUMENT_FRAGMENT_NODE]) {
+          return node && checkList.includes(node.nodeType) && !excludeSet.has(getNodeName(node)) && !watermark.test(toString(node.className));
+        }
 
-          function hasFontStyleChange(newValue, oldValue) {
-            const [oldArray, newArray] = [uniq(oldValue.split(";")), uniq(newValue.split(";"))];
-            const diff = filterArrayDiffToStr(oldArray, newArray);
-            return !/font:|font-weight:/i.test(diff);
-          }
+        function removeBoldCache(target, checkChildren = true) {
+          if (checkChildren) qA(`:not(${queryString})`, target).forEach(item => void boldStatusCache.delete(item));
+          return boldStatusCache.delete(target) || !boldStatusCache.has(target);
+        }
 
-          function shadowRootNodeInsertCss(shadow, syncStyle) {
-            if (!(shadow instanceof ShadowRoot)) return;
-            const hostNodeName = getNodeName(shadow.host);
-            FrDialogBox.setShadowStyle(shadow, selectionCssText + shadowCode, `${hostNodeName}-fix-selection`, false);
-            if (!hasCorrectPermission) return;
-            const syncCssText = syncStyle ? `:host(${hostNodeName}){--fr-fix-stroke:0px transparent;--fr-fix-shadow:${textShadowFix}}${syncStyle}` : ``;
-            FrDialogBox.setShadowStyle(shadow, syncCssText, `${hostNodeName}-fix-boldstroke`);
-          }
+        function correctBoldStrokeProcess() {
+          def.var.fixStroke = CONST_VALUES.o.fixStroke;
+          def.var.obsCorrect = new MutationObserver(fixBoldProcess);
+          handleRootNodeObserve(document, def.var.obsCorrect);
 
-          function handleRootNodeObserve(context, observer) {
-            if (observeNodeSet.has(context) || !observer) return;
-            observeNodeSet.add(context) && observer.observe(context, observeConfig);
-            hasCorrectPermission && ["mouseover", "mouseout"].forEach(event => context.addEventListener(event, handleMouseEvents));
-          }
-
-          function correctBoldPassive(event, target = document, recheck = false) {
-            try {
-              let { elementSet, shadowSet } = querySelectorAllShadows(selector, target);
-              if ((!hasCorrectPermission && !Scenes) || hasSessionFlag) return (elementSet = null), (shadowSet = null);
-              if (Permit !== false) getAndProcessBoldStyles({ elementSet, recheck: recheck || Permit });
-              shadowSet.forEach(shadow => processShadowRootNode(shadow, Scenes, Permit)) ?? shadowSet.clear();
-              DEBUG(`CorrectBold.stroke.Passive${IN_FRAMES}:`, { eventType: Scenes ?? event ?? global.event?.type ?? "unknown" });
-            } catch (e) {
-              ERROR("CorrectBoldPassive:", e);
-            }
+          if (hasCorrectPermission()) {
+            addLoadEvents.addFinalFn(correctBoldPassive, null, boldFixCSSText, document, true);
+            if (global.navigation) global.navigation.addEventListener("navigate", handleNavigateEvents);
+            else ["pushState", "replaceState"].forEach(event => global.addEventListener(event, handleNavigateEvents));
+            DEBUG(`CorrectBold.stroke.Active${IN_FRAMES}:`, { eventType: "init" });
           }
 
           function fixBoldProcess(mutationsList, observer) {
             try {
-              if (hasSessionFlag) return conflictReport();
+              if (sessionFlag) return conflictReport();
               const mutationNodeSet = new Set();
               observer.disconnect();
               mutationsList.forEach(mutation => {
                 if (mutation.type === "childList") return processChildListMutations(mutation, mutationNodeSet);
-                if (hasCorrectPermission && mutation.type === "attributes") processAttributesMutations(mutation, mutationNodeSet, observer);
+                if (hasCorrectPermission() && mutation.type === "attributes") processAttributesMutations(mutation, mutationNodeSet, observer);
               });
               mutationListMonitor(mutationNodeSet, observer);
-              observeNodeSet.forEach(node => void observer.observe(node, observeConfig));
+              observeNodeSet.forEach(node => void observer.observe(node, { attributeOldValue: true, childList: true, subtree: true }));
             } catch (e) {
               if (e.message.includes("callback conflict")) handleCallbackLimit(observer);
               ERROR("FixBoldProcess:", e.message);
             }
           }
 
-          function processShadowRootNode(shadow, scenes, permit) {
-            if (scenes) shadowRootNodeInsertCss(shadow, CorrectStyle);
-            if (typeof scenes === "undefined" || permit) handleRootNodeObserve(shadow, def.var.obsCorrect);
-          }
-
           function processNodes(target, pendingNodes, pendingShadows) {
-            const { elementSet, shadowSet } = querySelectorAllShadows(selector, target);
+            const { elementSet, shadowSet } = qAS(`:not(${queryString})`, target, node => !watermark.test(toString(node.className)));
             elementSet.forEach(el => pendingNodes.add(el));
             shadowSet.forEach(shadow => pendingShadows.add(shadow));
           }
 
           function mutationListMonitor(mutationNodeSet, observer) {
             const pendingSet = { pendingNodeSet: new Set(), pendingShadowSet: new Set(), size: mutationNodeSet.size };
-            const batchSize = Math.min(threshold * 2e2, pendingSet.size);
+            const batchSize = Math.min(threads * 2e2, pendingSet.size);
             pendingSet.size && chunkIteratorProcess(mutationNodeSet, batchSize, observer, pendingSet);
           }
 
           function chunkIteratorProcess(mutationNodeSet, batchSize, observer, { pendingNodeSet, pendingShadowSet }) {
-            const getNodesAndShadowRoots = value => processNodes(value, pendingNodeSet, pendingShadowSet);
+            const getNodesAndShadowRoots = value => void processNodes(value, pendingNodeSet, pendingShadowSet);
             const fixingBoldAndInsertShadowCSS = () => {
-              hasCorrectPermission && Permit !== false && pendingNodeSet.size && getAndProcessBoldStyles({ elementSet: pendingNodeSet, recheck: document.readyState === "complete" });
-              pendingShadowSet.forEach(shadow => (shadowRootNodeInsertCss(shadow, CorrectStyle), handleRootNodeObserve(shadow, observer))) ?? pendingShadowSet.clear();
+              hasCorrectPermission() && pendingNodeSet.size && getAndProcessBoldStyles({ elementSet: pendingNodeSet, recheck: document.readyState === "complete" });
+              pendingShadowSet.forEach(shadow => processShadowRootNode(shadow, boldFixCSSText, observer)) ?? pendingShadowSet.clear();
             };
             processBatch(mutationNodeSet.values(), batchSize, getNodesAndShadowRoots, fixingBoldAndInsertShadowCSS);
           }
@@ -4019,19 +4019,25 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             ChangedValue && ChangedValue.newValue !== ChangedValue.oldValue && removeBoldCache(target) && mutationNodeSet.add(target);
           }
 
-          function removeBoldCache(target, checkChildren = true) {
-            if (checkChildren) qA(selector, target).forEach(item => void boldStatusCache.delete(item));
-            return boldStatusCache.delete(target) || !boldStatusCache.has(target);
-          }
-
           function handleRemovedNode(node, shadow) {
             if (!checkNodesForFix(node)) return;
             if ((shadow = node.shadowRoot)) observeNodeSet.delete(shadow);
-            hasCorrectPermission && removeBoldCache(node) && shadow && ["mouseover", "mouseout"].forEach(event => void shadow.removeEventListener(event, handleMouseEvents));
+            removeBoldCache(node) && shadow && ["mouseenter", "mouseleave"].forEach(event => void shadow.removeEventListener(event, mouseEventsHandler, true));
           }
 
           function hasFixedBoldFlagChange(newValue, oldValue, className) {
             return toString(oldValue).includes(className) !== toString(newValue).includes(className);
+          }
+
+          function filterArrayDiffToStr(arrA, arrB) {
+            const [setA, setB] = [new Set(arrA), new Set(arrB)];
+            return [...arrA.filter(x => !setB.has(x)), ...arrB.filter(y => !setA.has(y))].join();
+          }
+
+          function hasFontStyleChange(newValue, oldValue) {
+            const [oldArray, newArray] = [uniq(oldValue.split(";")), uniq(newValue.split(";"))];
+            const diff = filterArrayDiffToStr(oldArray, newArray);
+            return !/font:|font-weight:/i.test(diff);
           }
 
           function checkAttributeChange({ target, attributeName, oldValue, newValue = "" }) {
@@ -4047,42 +4053,24 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             return { oldValue, newValue };
           }
 
-          function mouseEventsHandler(event) {
-            const target = event.composedPath()[0] ?? event.target;
-            if (!checkNodesForFix(target, [Node.ELEMENT_NODE])) return;
-            const { transition, transitionDelay, transitionDuration } = gCS(target);
-            if (["all 0s ease 0s", "none"].includes(transition)) return removeBoldCache(target, false) && boldFixedHandler({ uncheckedNode: target });
-            const delayTime = (parseFloat(transitionDelay) || 0 + parseFloat(transitionDuration) || 0) * 1e3;
-            raf.setTimeout(() => removeBoldCache(target, false) && boldFixedHandler({ uncheckedNode: target }), delayTime);
-          }
-
-          function handleMouseEvents(event) {
-            deBounceMouseEvent.setImmediate(event.type === "mouseout");
-            deBounceMouseEvent(event);
-          }
-
           function handleNavigateEvents(event) {
-            const { isTrusted, navigationType, type } = event ?? global.event ?? object();
-            if (isTrusted || type) deBounceFixPassive(navigationType ?? type);
-          }
-
-          function isNodeContainsBoldFix(node, shouldCheckChildren) {
-            return node?.nodeType === Node.ELEMENT_NODE && (node.matches(boldFixSelector) || (shouldCheckChildren && qS(boldFixSelector, node)));
+            const { navigationType, type } = event ?? global.event ?? object();
+            deBounceFixPassive(navigationType ?? type, boldFixCSSText, document, true);
           }
 
           function clearCheckedNodes(checkObject, currentTime) {
-            const { nodeCounter, interval } = checkObject;
-            nodeCounter.forEach((data, key) => currentTime - data.lastTime >= interval && nodeCounter.delete(key));
+            const { counter, interval } = checkObject;
+            counter.forEach((data, key) => currentTime - data.lastTime >= interval && counter.delete(key));
           }
 
           function checkConflictNode(node, event) {
-            if (event instanceof MouseEvent || !checkNodesForFix(node, [Node.ELEMENT_NODE]) || !isNodeContainsBoldFix(node, true)) return;
+            if (event instanceof MouseEvent || event instanceof MessageEvent || !checkNodesForFix(node, [Node.ELEMENT_NODE]) || !isNodeContainsBoldFix(node, true)) return;
             updateNodeCounter(node.outerHTML, performance.now());
           }
 
           function updateNodeCounter(key, currentTime) {
-            const data = checkConflict.nodeCounter.get(key);
-            if (!data) return checkConflict.nodeCounter.set(key, { count: 1, lastTime: currentTime });
+            const data = checkConflict.counter.get(key);
+            if (!data) return checkConflict.counter.set(key, { count: 1, lastTime: currentTime });
             if (currentTime - data.lastTime >= checkConflict.interval) clearCheckedNodes(checkConflict, currentTime);
             else if (++data.count > checkConflict.threshold) return handleConflict(key);
             data.lastTime = currentTime;
@@ -4090,12 +4078,12 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
           function handleConflict(key) {
             if (checkConflict.flag) {
-              checkConflict.nodeCounter.clear();
-              sessionStorage?.setItem(def.const.flagName, 12388);
+              checkConflict.counter.clear();
+              sessionStorage?.setItem(def.const.isConflict, 12388);
               return conflictReport(key);
             }
             __console("warn", "[Warning]", "Potential infinite loop detected, switching to <classList> mode.");
-            localStorage?.setItem(def.const.flagName, 12339);
+            localStorage?.setItem(def.const.isConflict, 12339);
             checkConflict.flag = true;
           }
 
@@ -4104,20 +4092,11 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             throw new Error(`Found callback conflict! Try the workaround to enable the 'Lazyload' option.`);
           }
 
-          function observeBoldElements(observer) {
-            handleRootNodeObserve(document, observer);
-            if (!hasCorrectPermission) return;
-            addLoadEvents.addFinalFn(correctBoldPassive, null, document, true);
-            if (global.navigation) global.navigation.addEventListener("navigate", handleNavigateEvents);
-            else ["pushState", "replaceState"].forEach(event => global.addEventListener(event, handleNavigateEvents));
-            DEBUG(`CorrectBold.stroke.Active${IN_FRAMES}:`, { eventType: "init" });
-          }
-
           function handleCallbackLimit(observer) {
             observer.disconnect();
             if (global.navigation) global.navigation.removeEventListener("navigate", handleNavigateEvents);
             else ["pushState", "replaceState"].forEach(event => global.removeEventListener(event, handleNavigateEvents));
-            observeNodeSet.forEach(shadow => ["mouseover", "mouseout"].forEach(event => shadow.removeEventListener(event, handleMouseEvents)));
+            observeNodeSet.forEach(shadow => ["mouseenter", "mouseleave"].forEach(event => shadow.removeEventListener(event, mouseEventsHandler, true)));
             delete def.var.obsCorrect && observeNodeSet.clear();
           }
         }
@@ -4138,9 +4117,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
           async function fixViewportLinks() {
             const links = qA(`link[rel~="stylesheet" i]:not([data-fr-processed])`).map(async link => {
-              const url = link.href || link.dataset.href;
-              link.dataset.frProcessed = "ignore";
-              if (url) await applyStyleToOriginLink(url.replace(/^http:/, "https:"), link);
+              const url = link.href || link.dataset.href || "about:blank";
+              link.dataset.frProcessed = "";
+              await applyStyleToOriginLink(url.replace(/^http:/, "https:"), link);
             });
             await Promise.all(links);
           }
@@ -4148,11 +4127,13 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           async function applyStyleToOriginLink(url, node) {
             try {
               const cssText = await fetchLinkContent(url, node);
-              const [parent, processedCssText] = [node.parentNode ?? document.head, await fetchImport(cssText, url)];
-              if (!/\/\*# sourceURL=/.test(cssText) && (!/\/\*# importURL=/.test(processedCssText) || !vRegexp.test(processedCssText))) return;
-              const attributes = { id: generateRandomString(8), ...getAttributes(node), type: "text/css", "data-href": url, "data-fr-processed": "link" };
+              const processedCssText = cssText ? await fetchImport(cssText, url) : "";
+              if (!/\/\*# (source|import)URL=/.test(processedCssText)) return (node.dataset.frProcessed = "ignore");
+              const attributes = { id: node.id || generateRandomString(6), ...getAttributes(node), type: "text/css", "data-href": url, "data-fr-processed": "link" };
+              const parent = node.parentNode ?? document.head;
               const style = GMaddElement(parent, "style", { ...attributes, textContent: processedCssText });
-              ((allowedInlineStyle && style && parent.replaceChild(style, node)) || (style && safeRemoveNode(node))) && DEBUG("Fixed.viewport.Link:", { linkNode: style });
+              ((allowedInlineStyle && style && parent.contains(node) && parent.replaceChild(style, node)) || (style && safeRemoveNode(node))) &&
+                DEBUG("Fixed.viewport.Link:", { linkNode: style });
             } catch (e) {
               ERROR(`applyStyleToOriginLink${IN_FRAMES}:`, e.message);
             }
@@ -4160,12 +4141,23 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
           async function fixViewportStyles() {
             const styles = qA(`style:not([data-fr-processed]):not(.darkreader)`).map(async style => {
-              if (asArray(style.attributes, attr => attr.name).Some(name => /^(?:fr|gb)-css-[0-9a-f]{8}$/.test(name))) return;
-              const cssText = style.textContent?.trim() ?? "";
-              if (!style.hasAttribute("nonce") || document.readyState === "complete") style.dataset.frProcessed = "ignore";
+              if (asArray(style.attributes, attr => attr.name).SomeX(name => /^(?:fr|gb)-css-[0-9a-f]{8}$/.test(name))) return;
+              const cssText = style.textContent?.trim();
+              style.dataset.frProcessed = "";
               await applyStyleToOriginStyle(style, cssText);
             });
             await Promise.all(styles);
+          }
+
+          async function applyStyleToOriginStyle(node, cssText) {
+            try {
+              if (!cssText || !vRegexp.test(cssText)) return (node.dataset.frProcessed = "ignore");
+              node.textContent = `/*# sourceURL= ${CUR_HREF}#internal */\r\n` + replaceStyle(cssText, vRegexp, def.var.curScale);
+              node.id = node.id || generateRandomString(6);
+              node.dataset.frProcessed = DEBUG("Fixed.viewport.Style:", { styleNode: node }) ?? "style";
+            } catch (e) {
+              node.dataset.frProcessed = ERROR(`applyStyleToOriginStyle:`, e.message) ?? "failed";
+            }
           }
 
           async function fetchLinkContent(url, node) {
@@ -4173,10 +4165,10 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               const response = await fetch(url);
               if (!response.ok) throw new Error(`Network response was not ok. Status: ${response.status}`);
               const cssText = await response.text();
-              if (!cssText || (node && !vRegexp.test(cssText))) return cssText ?? "";
+              if (!cssText || (node && !vRegexp.test(cssText))) return cssText || "";
               return `/*# ${node ? "sourceURL" : "importURL"}=${url} */\r\n${replaceBaseURL(replaceStyle(cssText, vRegexp, def.var.curScale), url)}`;
             } catch (e) {
-              return ERROR(`fetchLinkContent${IN_FRAMES}:`, { url, msg: e }), node && (node.dataset.frProcessed = "error"), "";
+              return ERROR(`fetchLinkContent${IN_FRAMES}:`, { url, msg: e }), node && (node.dataset.frProcessed = "failed"), "";
             }
           }
 
@@ -4194,16 +4186,6 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               const fullPath = new URL(url.replace(/[`'"]/g, ""), originUrl).href;
               return fullPath ? fetchLinkContent(fullPath, null) : "";
             });
-          }
-
-          async function applyStyleToOriginStyle(node, cssText) {
-            try {
-              if (!cssText || !vRegexp.test(cssText)) return;
-              node.textContent = replaceStyle(cssText, vRegexp, def.var.curScale);
-              node.dataset.frProcessed = DEBUG("Fixed.viewport.Style:", { styleNode: node }) ?? "style";
-            } catch (e) {
-              node.dataset.frProcessed = ERROR(`applyStyleToOriginStyle:`, e.message) ?? "error";
-            }
           }
 
           function replaceStyle(txt, reg, scale) {
@@ -4231,14 +4213,14 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             if (nodeName === "style") return node.id !== def.id.rndStyle && !node.classList?.contains("darkreader");
           };
           const handleRemovedNodesMutation = removedNodes => {
-            asArray(removedNodes).Some(node => getNodeName(node) === "style" && node.id === def.id.rndStyle && !node.dataset.frRemoved) &&
+            asArray(removedNodes).SomeX(node => getNodeName(node) === "style" && node.id === def.id.rndStyle && !node.dataset.frRemoved) &&
               insertMainStyleElement({ overwrite: false, shouldNotify: false }) &&
               INFO(`%c[MO]${IN_FRAMES}[REINSERT]:%c<style> success!`, leftStyle("#a52a2a"), rightStyle("#a52a2a"));
           };
           const handleChildListMutation = (target, addedNodes, removedNodes) => {
             if (target === document.documentElement) return updateFlagAtRootElement(target);
             if (target === document.head) handleRemovedNodesMutation(removedNodes);
-            if (withPermission && asArray(addedNodes).Some(node => checkStyleNode(node, getNodeName(node)))) deBounceViewport();
+            if (withPermission && asArray(addedNodes).SomeX(node => checkStyleNode(node, getNodeName(node)))) deBounceViewport();
           };
           const updateStyleWithNewRootID = (mainStyle, id) => {
             const cssText = (mainStyle?.textContent ?? tStyle).replace(def.const.regexp, `#${id}`);
@@ -4254,16 +4236,18 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             if (type === "childList") handleChildListMutation(target, addedNodes, removedNodes);
             else if (type === "attributes") handleAttributesMutation(target, oldValue, mainStyle);
           };
-          const resetFontScaleForModernEditors = fontScale => {
-            if (fontScale === 1 || typeof def.var.editor !== "undefined" || !qS(`.CodeMirror,.cm-editor,.monaco-editor`)) return;
+          const resetFontScaleForModernEditors = (fontScale, editorSel) => {
+            if (fontScale === 1 || typeof def.var.editor !== "undefined") return;
+            if (!asArray(qAS(`:not(${queryString})`, document.body).elementSet).SomeX(el => el.matches(editorSel))) return;
             (def.var.editor = true) && adjustCoordinateOffset({ cur: 1, prev: fontScale, props: def.array.props });
             document.documentElement.style.setProperty("--fr-font-fontscale", "1.0");
           };
+          const resetFontScale = createDeBounce({ fn: resetFontScaleForModernEditors, delay: 50 });
           const mainStyleProcess = mutations => {
             def.var.mainStyle = def.var.mainStyle ?? getMainStyleElements({ primary: true });
             mutations.forEach(mutation => void handleStyleProcess(mutation, def.var.mainStyle));
             if (!def.var.mainStyle) insertMainStyleElement();
-            resetFontScaleForModernEditors(def.var.curScale);
+            resetFontScale(def.var.curScale, `.CodeMirror,.cm-editor,.monaco-editor`);
           };
           const styleObserve = new MutationObserver(mainStyleProcess);
           getHeadElement.getNodeAndObserve().then(r => r.get() && insertMainStyleElement()); // Fit::IS_GREASEMONKEY
@@ -4278,9 +4262,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             (aNodes.length || (attributeName && getNodeName(target) === "iframe" && (target.src || target.srcdoc))) &&
               applyStyleToIframes({ condition: type, nodeArray: aNodes.length ? aNodes : [target] });
           };
-          const praseIframes = ({ mutations }) => document.readyState === "complete" && mutations.forEach(handleIframeProcess);
-          const config = { childList: true, subtree: true, attributeFilter: ["src", "srcdoc", "style"] };
-          CUR_WINDOW_TOP && getBodyElement.getNodeAndObserve({ callback: praseIframes, config });
+          const callback = ({ mutations }) => document.readyState === "complete" && mutations.forEach(handleIframeProcess);
+          CUR_WINDOW_TOP && getBodyElement.getNodeAndObserve({ callback, config: { childList: true, subtree: true, attributeFilter: ["src", "srcdoc", "style"] } });
         }
 
         /* FONT_RENDERING_MAIN_PROCESS */
@@ -4294,7 +4277,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             insertMenus(initMenus);
           }
           monitorMainStyleProcess(correctViewportUnits(CSP));
-          correctBoldStrokeProcess()(def.var.obsCorrect);
+          correctBoldStrokeProcess();
           correctFontScaleOffset();
           overrideCanvasFont(selectedFont);
           IS_CURRENTSITE_ALLOWED && addLoadEvents.addFn(monitorBodyIframeProcess);
@@ -4431,22 +4414,24 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       );
     })(initTrustedTypesPolicy(), safeWindow.JSON.parse ? safeWindow.JSON : global.JSON.parse ? global.JSON : JSON, sessionStorage?.getItem("_NAVIGATORINFO_"));
   },
-  o =>
-    Object.entries({
-      Remove(value) {
+  {
+    method: Object.entries({
+      RemoveX(value) {
         for (let i = 0; i < this.length; i++) if (this[i] === value) return this.splice(i, 1);
       },
-      Some(callback, thisArg = this) {
+      SomeX(callback, thisArg = this) {
         for (let i = 0; i < this.length; i++) if (callback.call(thisArg, this[i], i, this)) return true;
       },
-      Find(callback, thisArg = this) {
+      FindX(callback, thisArg = this) {
         for (let i = 0; i < this.length; i++) if (callback.call(thisArg, this[i], i, this)) return this[i];
       },
-      FindIndex(callback, thisArg = this) {
+      FindIndeX(callback, thisArg = this) {
         for (let i = 0; i < this.length; i++) if (callback.call(thisArg, this[i], i, this)) return i;
         return -1;
       },
-    }).forEach(([k, v]) => !Reflect.getOwnPropertyDescriptor(o, k) && Reflect.defineProperty(o, k, { value: v.bind(o), writable: false, configurable: false, enumerable: false })) ?? o,
+    }),
+    option: { writable: false, configurable: false, enumerable: false },
+  },
   ((ctx, mS = [..."Nc5𝙶Jo𝚊bR7𝙽𝚖4P𝚟CpvgY𝚄𝚏G𝚙𝚔Ue0𝚞V𝚍2𝙴𝚇DE3𝚠X𝚁QL𝚑𝚜kd𝚢𝚛F8s𝚎𝚓9𝚝𝙺hr𝚂zm𝚡yTul𝚘𝚌Z6a𝚗𝚐fAn𝚕𝙷𝚚jStMi𝚆𝚣𝚒𝙲1OWKB𝚅𝚋HwqxI"]) => {
     const oC = ctx.Object.create.bind(null, null);
     const eH = type => {
