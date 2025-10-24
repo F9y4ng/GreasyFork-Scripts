@@ -71,7 +71,7 @@ body:
 - type: input
   id: system-info
   attributes:
-    label: 操作系统及版本号
+    label: 操作系统及版本
     description: 输入您所使用的操作系统和版本信息
     placeholder: 例如 Windows 11, Window 10, MacOS 26.0.1, Ubuntu 20.04
   validations:
@@ -79,7 +79,7 @@ body:
 - type: input
   id: browser-info
   attributes:
-    label: 浏览器及版本号
+    label: 浏览器及版本
     description: 输入您所使用的浏览器和版本信息
     placeholder: 例如 Chrome 141.0.7390.123, Brave 1.83.120, Firefox 144.0
   validations:
@@ -87,7 +87,7 @@ body:
 - type: input
   id: scriptmanager-info
   attributes:
-    label: 脚本管理器及版本号
+    label: 脚本管理器及版本
     description: 输入您所使用的脚本管理器和版本信息
     placeholder: 例如 Tampermonkey 5.4.0, Violentmonkey 2.31.0, Userscripts 4.8.2
   validations:
