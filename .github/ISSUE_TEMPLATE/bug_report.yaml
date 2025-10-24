@@ -7,7 +7,7 @@ assignees: F9y4ng
 body:
 - type: markdown
   attributes:
-    value: "## 感谢您花费几分钟宝贵的时间来反馈问题和建议。"
+    value: "### 感谢您花费几分钟宝贵的时间来反馈问题和建议。"
 - type: markdown
   attributes:
     value: |
