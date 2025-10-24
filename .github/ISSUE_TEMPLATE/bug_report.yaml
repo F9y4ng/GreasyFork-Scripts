@@ -16,16 +16,6 @@ body:
 - type: markdown
   attributes:
     value: "## 准备工作"
-- type: checkboxes
-  id: preparation
-  attributes:
-    label: "请务必在反馈问题前确认您已经完成以下操作，以便您的问题得到解答。"
-    options:
-      - label: 我确认正在使用的是当前脚本的最新版本。
-        required: true
-      - label: 我已在Issues或Discussions中搜索过此问题，但没有找到相关答案。
-        required: true
-      - label: 我已在关闭浏览器其他扩展、仅开启此脚本的情况下测试，但依然出错。
 - type: dropdown
   id: select-script
   attributes:
@@ -36,6 +26,16 @@ body:
       - 自动关闭知乎登录提示
   validations:
     required: true
+- type: checkboxes
+  id: preparation
+  attributes:
+    label: "请务必在反馈问题前确认您已经完成下面的预先准备工作。"
+    options:
+      - label: 我确认正在使用的是当前脚本的最新版本。
+        required: true
+      - label: 我已在Issues或Discussions中搜索过此问题，但没有找到相关答案。
+        required: true
+      - label: 我已在关闭浏览器其他扩展、仅开启此脚本的情况下测试，但依然出错。
 
 - type: markdown
   attributes:
