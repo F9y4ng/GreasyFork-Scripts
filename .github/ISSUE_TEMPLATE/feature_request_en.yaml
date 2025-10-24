@@ -7,7 +7,7 @@ assignees: F9y4ng
 body:
 - type: markdown
   attributes:
-    value: "## Thank you for taking a few minutes of your valuable time to provide feedback on questions and suggestions."
+    value: "### Thank you for taking a few minutes of your valuable time to provide new feature requests."
 - type: markdown
   attributes:
     value: |
