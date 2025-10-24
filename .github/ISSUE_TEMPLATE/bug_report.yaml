@@ -19,7 +19,7 @@ body:
 - type: dropdown
   id: select-script
   attributes:
-    label: 请选择您需要反馈问题的所属脚本。
+    label: 请选择您需要反馈问题的所属脚本
     options:
       - 字体渲染（自用脚本）
       - 优雅的搜索引擎助手
@@ -29,7 +29,7 @@ body:
 - type: checkboxes
   id: preparation
   attributes:
-    label: 预先准备工作。
+    label: 预先准备工作
     description: 这有助于您在填写更多内容前找到问题的答案或解决方案。
     options:
       - label: 我确认正在使用的是当前脚本的最新版本。
@@ -45,7 +45,7 @@ body:
   id: problem-description
   attributes:
     label: "问题描述"
-    description: "清楚且简洁地描述您遇到的问题。"
+    description: "清楚且简洁地描述您遇到的问题"
     placeholder: "例：在exmaple.com站点出现脚本无法正常运行，并且控制台有报错信息。"
   validations:
     required: true
@@ -53,7 +53,7 @@ body:
   id: reproduction-steps
   attributes:
     label: "重现步骤"
-    description: "请按顺序列出可稳定重现问题的操作步骤"
+    description: "请按顺序列出可稳定重现问题的操作步骤。"
     placeholder: |
       1. _去XX网址 "..."_
       2. _单击YY链接/按钮 "..."_
@@ -64,7 +64,7 @@ body:
   id: expected-result
   attributes:
     label: "预期结果"
-    description: "清晰明了地描述您所期待想要什么样的结果"
+    description: "清晰明了地描述您所期待想要什么样的结果。"
 
 - type: markdown
   attributes:
@@ -73,7 +73,7 @@ body:
   id: system-info
   attributes:
     label: 操作系统及版本
-    description: 输入您所使用的操作系统和版本信息
+    description: 输入您所使用的操作系统和版本信息。
     placeholder: 例如 Windows 11, Window 10, MacOS 26.0.1, Ubuntu 20.04
   validations:
     required: true
@@ -81,7 +81,7 @@ body:
   id: browser-info
   attributes:
     label: 浏览器及版本
-    description: 输入您所使用的浏览器和版本信息
+    description: 输入您所使用的浏览器和版本信息。
     placeholder: 例如 Chrome 141.0.7390.123, Brave 1.83.120, Firefox 144.0
   validations:
     required: true
@@ -89,7 +89,7 @@ body:
   id: scriptmanager-info
   attributes:
     label: 脚本管理器及版本
-    description: 输入您所使用的脚本管理器和版本信息
+    description: 输入您所使用的脚本管理器和版本信息。
     placeholder: 例如 Tampermonkey 5.4.0, Violentmonkey 2.31.0, Userscripts 4.8.2
   validations:
     required: true
