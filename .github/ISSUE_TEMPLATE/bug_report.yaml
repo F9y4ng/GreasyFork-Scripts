@@ -31,11 +31,11 @@ body:
 - type: textarea
   id: reproduction-steps
   attributes:
-    label: "重现步骤"
+    label: "3. 重现步骤"
     description: "请按顺序列出可稳定重现问题的操作步骤"
     placeholder: |
       1. _去XX网址 "..."_
-      2. _单击YY链接/按钮 "..."_ 或 _向下滚动到ZZ位置 "..."_
+      2. _单击YY链接/按钮 "..."_
       3. _遇到错误或问题 "..."_
       4. -提供错误信息或问题页面的截图 "..."-
   validations:
