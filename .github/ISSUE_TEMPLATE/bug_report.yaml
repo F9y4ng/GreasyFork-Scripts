@@ -21,10 +21,22 @@ body:
       - label: 我已在Issues或Discussions中搜索过此问题，但没有找到相关答案。
       - label: 我已在关闭浏览器其他扩展、仅开启此脚本的情况下测试，但依然出错。
 - type: textarea
-    id: problem-description
-    attributes:
-      label: "描述错误信息"
-      description: "请清楚而简洁地描述错误。"
-      placeholder: "例：在exmaple.com站点出现脚本无法正常运行，并且控制台有报错信息。"
-    validations:
-      required: true
+  id: problem-description
+  attributes:
+    label: "2. 问题描述"
+    description: "清楚且简洁地描述您遇到的问题。"
+    placeholder: "例：在exmaple.com站点出现脚本无法正常运行，并且控制台有报错信息。"
+  validations:
+    required: true
+- type: textarea
+  id: reproduction-steps
+  attributes:
+    label: "重现步骤"
+    description: "请按顺序列出可稳定重现问题的操作步骤"
+    placeholder: |
+      1. _去XX网址 "..."_
+      2. _单击YY链接/按钮 "..."_ 或 _向下滚动到ZZ位置 "..."_
+      3. _遇到错误或问题 "..."_
+      4. -提供错误信息或问题页面的截图 "..."-
+  validations:
+    required: true
