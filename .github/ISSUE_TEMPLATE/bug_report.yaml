@@ -11,11 +11,13 @@ body:
 - type: markdown
   attributes:
     value: |
-      Thanks for taking the time to fill out this bug! If you need real-time help, join us on Discord.
-- type: checkboxes
-  id: cat-preferences
+      **请您在反馈问题前，确认完成以下准备工作，这能极大帮助我们快速定位问题。**
+- type: markdown
   attributes:
-    label: What kinds of cats do you like?
-    description: You may select more than one.
+    value: "### 1. 准备工作（确认预先完成的操作）"
+- type: checkboxes
+  attributes:
+    label: 确认脚本版本。
+    description: 确认正在使用的是当前脚本的最新版本。
     options:
-      - label: Orange cat (required. Everyone likes orange cats.)
+      - label: 我确认正在使用的是当前脚本的最新版本。
