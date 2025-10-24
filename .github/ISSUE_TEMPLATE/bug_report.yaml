@@ -98,13 +98,13 @@ body:
   attributes:
     label: "脚本运行环境排查：其他扩展"
     description: "清晰明了地描述是否同时运行了其他浏览器扩展？"
-    placeholder: 例如 Dark Reader、uBlock Origin…… 等等
+    placeholder: 例如 Dark Reader、uBlock Origin、Adguard…… 等等
 - type: textarea
   id: troubleshooting-scripts
   attributes:
     label: "脚本运行环境排查：其他脚本"
     description: "清晰明了地描述是否同时运行了其他第三方用户脚本？"
-    placeholder: 例如 AC-baidu、Github Acceleration…… 等等
+    placeholder: 例如 AC-baidu、东方永页机、网页限制解除…… 等等
 
 - type: markdown
   attributes:
