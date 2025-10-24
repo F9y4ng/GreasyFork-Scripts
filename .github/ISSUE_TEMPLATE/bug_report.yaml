@@ -17,7 +17,5 @@ body:
     value: "### 1. 准备工作（确认预先完成的操作）"
 - type: checkboxes
   attributes:
-    label: 确认脚本版本。
-    description: 确认正在使用的是当前脚本的最新版本。
     options:
       - label: 我确认正在使用的是当前脚本的最新版本。
