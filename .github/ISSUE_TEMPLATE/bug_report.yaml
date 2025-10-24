@@ -13,14 +13,27 @@ body:
     value: |
       请您在反馈问题前，确认完成以下准备工作，这能极大帮助我们快速定位问题。
 
+- type: markdown
+  attributes:
+    value: "## 准备工作"
 - type: checkboxes
   id: preparation
   attributes:
-    label: "## 准备工作（确认预先完成的操作）"
+    label: "请务必在反馈问题前确认您已经完成以下操作，以便您的问题得到解答。"
     options:
       - label: 我确认正在使用的是当前脚本的最新版本。
       - label: 我已在Issues或Discussions中搜索过此问题，但没有找到相关答案。
       - label: 我已在关闭浏览器其他扩展、仅开启此脚本的情况下测试，但依然出错。
+- type: dropdown
+  id: select-script
+  attributes:
+    label: 请选择您需要反馈问题的所属脚本。
+    options:
+      - 字体渲染（自用脚本）
+      - 优雅的搜索引擎助手
+      - 自动关闭知乎登录提示
+  validations:
+    required: true
       
 - type: markdown
   attributes:
