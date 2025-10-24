@@ -1,0 +1,54 @@
+name: "新功能要求"
+description: "给这个项目的新想法或是提出新功能建议"
+title: "[新增功能] "
+labels: []
+assignees: F9y4ng
+
+body:
+- type: markdown
+  attributes:
+    value: "## 感谢您花费几分钟宝贵的时间来反馈问题和建议。"
+- type: markdown
+  attributes:
+    value: |
+      请您在反馈问题前，确认完成以下准备工作，这能极大帮助我们快速定位问题。
+
+- type: markdown
+  attributes:
+    value: "## 一、准备工作"
+- type: dropdown
+  id: "select-script"
+  attributes:
+    label: "请选择您需要反馈问题的所属脚本"
+    options:
+      - "字体渲染（自用脚本）"
+      - "优雅的搜索引擎助手"
+      - "自动关闭知乎登录提示"
+  validations:
+    required: true
+- type: checkboxes
+  id: "preparation"
+  attributes:
+    label: "预先准备工作"
+    description: "这有助于您在填写更多内容前找到问题的答案或解决方案。"
+    options:
+      - label: "我确认正在使用的脚本是最新版本，并已经阅读过脚本的使用说明 Wiki。"
+        required: true
+      - label: "我已在 Issues 或 Discussions 中搜索过此需求，但没有找到类似的提案。"
+        required: true
+
+- type: markdown
+  attributes:
+    value: "## 二、功能需求"
+- type: textarea
+  id: "functional-requirements"
+  attributes:
+    label: "需求描述"
+    description: "清晰简明地描述您的新需求或新功能。"
+  validations:
+    required: true
+- type: textarea
+  id: "additional-information"
+  attributes:
+    label: "附加信息或屏幕截图"
+    description: "此处添加可帮助表明您意图的附加信息或截图"
