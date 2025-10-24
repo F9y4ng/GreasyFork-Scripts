@@ -1,0 +1,54 @@
+name: "New Feature Requests"
+description: "Give new ideas or suggest new features for this project!"
+title: "[New Feature] "
+labels: []
+assignees: F9y4ng
+
+body:
+- type: markdown
+  attributes:
+    value: "## Thank you for taking a few minutes of your valuable time to provide feedback on questions and suggestions."
+- type: markdown
+  attributes:
+    value: |
+      Please make sure that you have completed the following preparations before giving us your feedback, as this will greatly help us to locate the problem quickly.
+
+- type: markdown
+  attributes:
+    value: "## I. Preparatory work"
+- type: dropdown
+  id: "select-script"
+  attributes:
+    label: "Please select the script that you want to give your feedback on."
+    options:
+      - "Font Rendering (Customized)"
+      - "Search Engine Assistant"
+      - "Autoclose Zhihu Login Prompt"
+  validations:
+    required: true
+- type: checkboxes
+  id: "preparation"
+  attributes:
+    label: "Preparatory work"
+    description: "This helps you find answers or solutions to your questions before you fill out more content."
+    options:
+      - label: "I confirm that I am using the latest version and have read the instructions Wiki."
+        required: true
+      - label: "I've searched for this requirement in Issues or Discussions but found no similar proposals."
+        required: true
+
+- type: markdown
+  attributes:
+    value: "## II. Functional requirements"
+- type: textarea
+  id: "functional-requirements"
+  attributes:
+    label: "Requirement description"
+    description: "Clearly and concisely describe your new requirements or features."
+  validations:
+    required: true
+- type: textarea
+  id: "additional-information"
+  attributes:
+    label: "Additional Information"
+    description: "Add additional information or screenshots here to help show your intent."

@@ -1,0 +1,119 @@
+name: "Bug Report"
+description: "Create bug reports to help us improve our scripts"
+title: "[Bug] "
+labels: []
+assignees: F9y4ng
+
+body:
+- type: markdown
+  attributes:
+    value: "## Thank you for taking a few minutes of your valuable time to provide feedback on questions and suggestions."
+- type: markdown
+  attributes:
+    value: |
+      Please make sure that you have completed the following preparations before giving us your feedback, as this will greatly help us to locate the problem quickly.
+
+- type: markdown
+  attributes:
+    value: "## I. Preparatory work"
+- type: dropdown
+  id: "select-script"
+  attributes:
+    label: "Please select the script that you want to give your feedback on."
+    options:
+      - "Font Rendering (Customized)"
+      - "Search Engine Assistant"
+      - "Autoclose Zhihu Login Prompt"
+  validations:
+    required: true
+- type: checkboxes
+  id: "preparation"
+  attributes:
+    label: "Preparatory work"
+    description: "This helps you find answers or solutions to your questions before you fill out more content."
+    options:
+      - label: "I confirm that I am using the latest version and have read the instructions Wiki."
+        required: true
+      - label: "I've searched for this question in Issues or Discussions but haven't found an answer."
+        required: true
+      - label: "I've tried testing the script with other browser extensions turned off and only this script turned on, but the error still occurred."
+
+- type: markdown
+  attributes:
+    value: "## II. Feedback issues"
+- type: textarea
+  id: "problem-description"
+  attributes:
+    label: "Problem description"
+    description: "Clearly and concisely describe the problem you are experiencing"
+    placeholder: "Example: On the exmaple.com site, the script does not run properly and there are error messages in the console."
+  validations:
+    required: true
+- type: textarea
+  id: "reproduction-steps"
+  attributes:
+    label: "Reproduce steps"
+    description: "Please list the steps in order that can reliably reproduce the problem."
+    placeholder: |
+      1. _Go to XX website "..."_
+      2. _Click the YY link/button "..."_
+      3. _Encountering an error or problem "..."_
+  validations:
+    required: true
+- type: textarea
+  id: "expected-result"
+  attributes:
+    label: "Expected results"
+    description: "Describe clearly and succinctly what you expect to achieve."
+
+- type: markdown
+  attributes:
+    value: "## III. Client information"
+- type: input
+  id: "system-info"
+  attributes:
+    label: "Operating system and version"
+    description: "Enter your operating system and version information."
+    placeholder: "Example: Windows 11, Window 10, MacOS 26.0.1, Ubuntu 20.04"
+  validations:
+    required: true
+- type: input
+  id: "browser-info"
+  attributes:
+    label: "Browser and version"
+    description: "Enter your browser and version information."
+    placeholder: "Example: Chrome 141.0.7390.123, Brave 1.83.120, Firefox 144.0"
+  validations:
+    required: true
+- type: input
+  id: "scriptmanager-info"
+  attributes:
+    label: "Script manager and Versions"
+    description: "Enter your script manager and version information."
+    placeholder: "Example: Tampermonkey 5.4.0, Violentmonkey 2.31.0, Userscripts 4.8.2"
+  validations:
+    required: true
+- type: textarea
+  id: "troubleshooting-extensions"
+  attributes:
+    label: "Troubleshooting script running environment: other extensions"
+    description: "Clearly describe whether other browser extensions are running at the same time?"
+    placeholder: "Example: Dark Reader、uBlock Origin、Adguard... etc."
+- type: textarea
+  id: "troubleshooting-scripts"
+  attributes:
+    label: "Troubleshooting script running environment: other scripts"
+    description: "Clearly describe whether other third-party userscripts are running at the same time?"
+    placeholder: "Example: AC-baidu、Pagetual、Remove web limits... etc."
+
+- type: markdown
+  attributes:
+    value: "## IV. Other Additional information"
+- type: textarea
+  id: "additional-info"
+  attributes:
+    label: "Additional Information (optional)"
+    description: "Error logs/screenshots/script code snippets/related configurations..."
+    placeholder: |
+      The script error log can be viewed in the developer tools (shortcut key F12)-console on the script running page.
+      Right-click the log blank to save as log file and upload it here.
