@@ -16,15 +16,19 @@ body:
 - type: checkboxes
   id: preparation
   attributes:
-    label: "1. 准备工作（确认预先完成的操作）"
+    label: "## 准备工作（确认预先完成的操作）"
     options:
       - label: 我确认正在使用的是当前脚本的最新版本。
       - label: 我已在Issues或Discussions中搜索过此问题，但没有找到相关答案。
       - label: 我已在关闭浏览器其他扩展、仅开启此脚本的情况下测试，但依然出错。
+      
+- type: markdown
+  attributes:
+    value: "## 反馈问题"
 - type: textarea
   id: problem-description
   attributes:
-    label: "2. 问题描述"
+    label: "问题描述"
     description: "清楚且简洁地描述您遇到的问题。"
     placeholder: "例：在exmaple.com站点出现脚本无法正常运行，并且控制台有报错信息。"
   validations:
@@ -32,7 +36,7 @@ body:
 - type: textarea
   id: reproduction-steps
   attributes:
-    label: "3. 重现步骤"
+    label: "重现步骤"
     description: "请按顺序列出可稳定重现问题的操作步骤"
     placeholder: |
       1. _去XX网址 "..."_
@@ -44,11 +48,12 @@ body:
 - type: textarea
   id: expected-result
   attributes:
-    label: "4. 预期结果"
+    label: "预期结果"
     description: "清晰明了地描述您所期待想要什么样的结果"
+
 - type: markdown
   attributes:
-    value: "5. 客户端信息"
+    value: "## 客户端信息"
 - type: input
   id: system-info
   attributes:
