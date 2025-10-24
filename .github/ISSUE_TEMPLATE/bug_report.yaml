@@ -32,9 +32,9 @@ body:
     label: 预先准备工作
     description: 这有助于您在填写更多内容前找到问题的答案或解决方案。
     options:
-      - label: 我确认正在使用的是当前脚本的最新版本。
+      - label: 我确认正在使用的脚本是最新版本，并已经阅读过脚本的使用说明 [Wiki](https://github.com/F9y4ng/GreasyFork-Scripts/wiki)。
         required: true
-      - label: 我已在Issues或Discussions中搜索过此问题，但没有找到相关答案。
+      - label: 我已在 Issues 或 Discussions 中搜索过此问题，但没有找到相关答案。
         required: true
       - label: 我已在关闭浏览器其他扩展、仅开启此脚本的情况下测试，但依然出错。
 
