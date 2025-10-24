@@ -29,7 +29,7 @@ body:
 - type: checkboxes
   id: preparation
   attributes:
-    label: 请务必在反馈问题前确认您已经完成下面的预先准备工作。
+    label: 预先准备工作。
     description: 这有助于您在填写更多内容前找到问题的答案或解决方案。
     options:
       - label: 我确认正在使用的是当前脚本的最新版本。
