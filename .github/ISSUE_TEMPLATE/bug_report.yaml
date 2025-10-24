@@ -7,11 +7,11 @@ assignees: F9y4ng
 body:
 - type: markdown
   attributes:
-    value: "# 感谢您花费宝贵的时间来反馈问题和建议。"
+    value: "## 感谢您花费宝贵的时间来反馈问题和建议。"
 - type: markdown
   attributes:
     value: |
-      **请您在反馈问题前，确认完成以下准备工作，这能极大帮助我们快速定位问题。**
+      ### 请您在反馈问题前，确认完成以下准备工作，这能极大帮助我们快速定位问题。
 - type: checkboxes
   attributes:
     label: "1. 准备工作（确认预先完成的操作）"
