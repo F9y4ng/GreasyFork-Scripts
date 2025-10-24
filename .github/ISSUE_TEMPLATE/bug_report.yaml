@@ -12,6 +12,7 @@ body:
   attributes:
     value: |
       请您在反馈问题前，确认完成以下准备工作，这能极大帮助我们快速定位问题。
+
 - type: checkboxes
   id: preparation
   attributes:
@@ -38,5 +39,37 @@ body:
       2. _单击YY链接/按钮 "..."_
       3. _遇到错误或问题 "..."_
       4. -提供错误信息或问题页面的截图 "..."-
+  validations:
+    required: true
+- type: textarea
+  id: expected-result
+  attributes:
+    label: "4. 预期结果"
+    description: "清晰明了地描述您所期待想要什么样的结果"
+- type: markdown
+  attributes:
+    value: "5. 客户端信息"
+- type: input
+  id: system-info
+  attributes:
+    label: 操作系统及版本号
+    description: 输入您所使用的操作系统和版本信息
+    placeholder: 例如 Windows 11, Window 10, MacOS 26.0.1, Ubuntu 20.04
+  validations:
+    required: true
+- type: input
+  id: browser-info
+  attributes:
+    label: 浏览器及版本号
+    description: 输入您所使用的浏览器和版本信息
+    placeholder: 例如 Chrome 141.0.7390.123, Brave 1.83.120, Firefox 144.0
+  validations:
+    required: true
+- type: input
+  id: scriptmanager-info
+  attributes:
+    label: 脚本管理器及版本号
+    description: 输入您所使用的脚本管理器和版本信息
+    placeholder: 例如 Tampermonkey 5.4.0, Violentmonkey 2.31.0, Userscripts 4.8.2
   validations:
     required: true
