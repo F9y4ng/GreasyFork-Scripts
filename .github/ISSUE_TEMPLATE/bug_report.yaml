@@ -15,7 +15,7 @@ body:
 
 - type: markdown
   attributes:
-    value: "## 准备工作"
+    value: "## 一、准备工作"
 - type: dropdown
   id: select-script
   attributes:
@@ -39,7 +39,7 @@ body:
 
 - type: markdown
   attributes:
-    value: "## 反馈问题"
+    value: "## 二、反馈问题"
 - type: textarea
   id: problem-description
   attributes:
@@ -67,7 +67,7 @@ body:
 
 - type: markdown
   attributes:
-    value: "## 客户端信息"
+    value: "## 三、客户端信息"
 - type: input
   id: system-info
   attributes:
@@ -107,7 +107,7 @@ body:
 
 - type: markdown
   attributes:
-    value: "## 其他补充信息"
+    value: "## 四、其他补充信息"
 - type: textarea
   id: additional-info
   attributes:
