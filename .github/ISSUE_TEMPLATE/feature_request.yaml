@@ -24,6 +24,7 @@ body:
       - "字体渲染（自用脚本）"
       - "优雅的搜索引擎助手"
       - "自动关闭知乎登录提示"
+      - "请求创建一个我期望的脚本"
   validations:
     required: true
 - type: checkboxes
@@ -33,7 +34,6 @@ body:
     description: "这有助于您在填写更多内容前找到问题的答案或解决方案。"
     options:
       - label: "我确认正在使用的脚本是最新版本，并已经阅读过脚本的使用说明 Wiki。"
-        required: true
       - label: "我已在 Issues 或 Discussions 中搜索过此需求，但没有找到类似的提案。"
         required: true
 

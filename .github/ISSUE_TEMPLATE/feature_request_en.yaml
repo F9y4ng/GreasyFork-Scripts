@@ -24,6 +24,7 @@ body:
       - "Font Rendering (Customized)"
       - "Search Engine Assistant"
       - "Autoclose Zhihu Login Prompt"
+      - "Request to create a script that I expect"
   validations:
     required: true
 - type: checkboxes
@@ -33,7 +34,6 @@ body:
     description: "This helps you find answers or solutions to your questions before you fill out more content."
     options:
       - label: "I confirm that I am using the latest version and have read the instructions Wiki."
-        required: true
       - label: "I've searched for this requirement in Issues or Discussions but found no similar proposals."
         required: true
 
