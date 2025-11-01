@@ -28,13 +28,12 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data in a timely manner. Do not use backup files from unknown sources!
 
-## version 2025.10.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2025.11.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ Optimized the performance of fontstroke correction.
-@ Optimized to identify browser kernel information.
-@ Optimized font scaling compatible with CodeMirror/Monaco editors.
-@ Fixed logical issue of CSS viewport unit correction.
+@ Refactored core functions to improve compatibility.
+@ Optimized Bold-Fix script conflict detection threshold.
+@ Fixed various hidden issues in the shadow colorpicker.
 @ Fixed some known issues, optimized code & style.
 ```
 
@@ -110,14 +109,13 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-## version 2025.10.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2025.11.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Optimized some search engine ad blocking rules.
-@ Optimized search result link redirect detection.
-@ Optimized keyword block for search redirect url.
-@ Fixed Bing.com link redirection restore issue.
-@ Fixed color issue with Google.com search links.
+@ Refactored core functions to improve compatibility.
+@ Refactored the loading mode of jump buttons.
+@ Optimize the real-time styles of all jump buttons.
+@ Perfect solution for button issues in darkmode.
 @ Fixed some known issues, optimized code & style.
 ```
 
