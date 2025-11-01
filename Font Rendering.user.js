@@ -5,7 +5,7 @@
 // @name:en            Font Rendering (Customized)
 // @name:ko            글꼴 렌더링 (자체 사용 스크립트)
 // @name:ja            フォントのレンダリング
-// @version            2025.10.05.1
+// @version            2025.11.01.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -20,7 +20,7 @@
 // @supportURL         https://github.com/F9y4ng/GreasyFork-Scripts/issues
 // @updateURL          https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.meta.js
 // @downloadURL        https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js
-// @require            https://f9y4ng.github.io/GreasyFork-Scripts/lib/frColorPicker.js#sha256-kPydNbMx7sXzPgOTb2jVqsrjsIApbofKzaOYTSGt8Kg=
+// @require            https://f9y4ng.github.io/GreasyFork-Scripts/lib/frColorPicker.js#sha256-NOTvR0GLDjoSMU4CzhSSj158s2Xc9mMTdyzVj1WF0bM=
 // @match              *://*/*
 // @grant              GM_getValue
 // @grant              GM.getValue
@@ -75,11 +75,11 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     setTimeout: ctx.setTimeout.bind(ctx),
     console: sctx.Object.assign(customFns.oC(), ctx.console),
     RC2: { flag: "5295b9589c42a644ca9304163cd8", date: "2025.04.05" },
-    info: typeof GM !== "undefined" && GM.info ? GM.info : typeof GM_info !== "undefined" ? GM_info : { script: {} },
+    info: typeof GM_info !== "undefined" ? GM_info : typeof GM !== "undefined" && GM.info ? GM.info : { script: {} },
   };
   const wrappedFrom = ctx.wrappedJSObject ? Array.from : sctx.Array.from;
   const asArray = o => (arrayProxy.method.every(([k, v]) => Reflect.defineProperty(o, k, { value: v.bind(o), ...arrayProxy.option })), o);
-  const orginalFns = { oS: sctx.Object.prototype.toString, aF: (...args) => asArray(wrappedFrom(...args)) };
+  const orginalFns = { oS: sctx.Object.prototype.toString, aF: (...af) => wrappedFrom(...af), aS: (...as) => asArray(wrappedFrom(...as)) };
   if (!ctx.navigation) ["pushState", "replaceState"].forEach(m => void (ctx.history[m] = customFns.eH(m)));
   fontRendering(ctx, sctx, toolkit, { ...orginalFns, ...customFns, cS: customFns.mS.filter(isNaN) });
 })(
@@ -89,9 +89,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     try {
       const { contentWindow } = (iframe = GM_addElement("iframe", { id: "𝐬𝐚𝐟𝐞.𝐰𝐢𝐧𝐝𝐨𝐰", style: "display:none" }));
       if (!originalWindow.wrappedJSObject) iframe?.remove();
-      return contentWindow;
+      return contentWindow ?? originalWindow;
     } catch (e) {
-      return iframe?.remove(), originalWindow;
+      return e && iframe?.remove(), originalWindow;
     }
   })(typeof window !== "undefined" ? window : this, null),
   function (global, safeWindow, secureVars, customFuntions) {
@@ -100,7 +100,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     /* PERFECTLY COMPATIBLE FOR GREASEMONKEY, TAMPERMONKEY, VIOLENTMONKEY, USERSCRIPTS 2024-03-15 F9Y4NG */
 
     const { atob, btoa, alert, prompt, confirm, console, setTimeout, debugging, info: GMinfo, RC2 } = secureVars;
-    const { mS, cS, aF: asArray, oS: getObjectType, lS: localStorage, sS: sessionStorage, oC: object } = customFuntions;
+    const { mS, cS, aF: arrayFrom, aS: asArray, oS: getObjectType, lS: localStorage, sS: sessionStorage, oC: object } = customFuntions;
     const GMversion = GMinfo.version ?? GMinfo.scriptHandlerVersion ?? "unknown";
     const GMscriptHandler = GMinfo.scriptHandler;
     const GMsetValue = gmSelector("setValue");
@@ -138,12 +138,12 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         cssAttrName: `fr-css-${generateRandomString(8, "hex")}`,
         boldAttrName: `fr-bold-${generateRandomString(8, "date")}`,
         iframeAttrName: `fr-iframe-${generateRandomString(8, "hex")}`,
-        regexp: /\b#[\u{1D68A}-\u{1D6A3}\w\u{1D670}-\u{1D689}]+(?=\s)/gu,
-        isConflict: "fr-found-callback-conflict",
+        regexp: new RegExp("\\b#[\\u{1D68A}-\\u{1D6A3}\\w\\u{1D670}-\\u{1D689}]+(?=\\s)", "gu"),
+        const: { once: "fr-init-once", conflict: "fr-callback-conflict", vpu: "data-fr-processed", navinfo: "__Navigation#INFO__" },
       },
       var: {
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.10.05.0",
-        scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.11.01.0",
+        scriptName: getMetaValue(`name:${getLanguages()}`) ?? GMinfo.script.locales?.[getLanguages()]?.name ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
         scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("Rjl5NG5n"),
         attachShadow: Element.prototype.attachShadow,
         getClientRects: Element.prototype.getClientRects,
@@ -156,6 +156,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       },
       url: {
         introURL: decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRkZvbnQtUmVuZGVyaW5n"),
+        redundant: decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRnJlZHVuZGFudC1pc3N1ZQ=="),
         fontlistImg: decrypt("aHR0cHMlM0ElMkYlMkZvb28uMHgwLm9vbyUyRjIwMjUlMkYwMyUyRjI1JTJGT1NkVVVZLmdpZg=="),
         loadingImg: decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcuZ2l0aHViLmlvJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJGaW1hZ2VzJTJGbG9hZGluZy5naWY="),
         Anton: decrypt("aHR0cHMlM0ElMkYlMkZmb250cy5nc3RhdGljLmNvbSUyRnMlMkZhbnRvbiUyRnYyNSUyRjFQdGdnODdMUk95QW0zS3otQzgud29mZjI="),
@@ -286,17 +287,15 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
     class RAF {
       constructor(context) {
-        if (RAF.instance) return RAF.instance;
         safeWindow.Object.assign(this, { context, timerMap: { timeout: {}, interval: {} } });
         this._registerAnimationFrame(context);
-        ["setTimeout", "setInterval", "clearTimeout", "clearInterval"].forEach(method => (this[method] = this[method].bind(this)));
-        RAF.instance = this;
+        ["setTimeout", "setInterval", "clearTimeout", "clearInterval"].forEach(m => (this[m] = this[m].bind(this)));
       }
       _registerAnimationFrame(scope) {
         const vendor = asArray(["ms", "moz", "webkit", "o"]).FindX(vendor => scope[`${vendor}RequestAnimationFrame`]);
-        const raf = scope.requestAnimationFrame ?? scope[`${vendor}RequestAnimationFrame`];
-        const caf = scope.cancelAnimationFrame ?? (scope[`${vendor}CancelAnimationFrame`] || scope[`${vendor}CancelRequestAnimationFrame`]);
-        safeWindow.Object.assign(scope, { [def.const.raf]: raf, [def.const.caf]: caf });
+        const raf = scope.requestAnimationFrame || scope[`${vendor}RequestAnimationFrame`];
+        const caf = scope.cancelAnimationFrame || scope[`${vendor}CancelAnimationFrame`] || scope[`${vendor}CancelRequestAnimationFrame`];
+        safeWindow.Object.assign(scope, { [def.const.raf]: raf.bind(GMunsafeWindow), [def.const.caf]: caf.bind(GMunsafeWindow) });
       }
       _ticking(fn, type, interval, ...args) {
         let lastTime = performance.now();
@@ -311,18 +310,11 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         return timerSymbol;
       }
       _setTimerMap(timerSymbol, type, step) {
-        try {
-          this.timerMap[type][timerSymbol] = this.context[def.const.raf](step);
-        } catch (e) {
-          delete this.timerMap[type][timerSymbol];
-        }
+        this.timerMap[type][timerSymbol] = this.context[def.const.raf](step);
       }
       _clearTimerMap(timerSymbol, type) {
-        try {
-          this.context[def.const.caf](this.timerMap[type][timerSymbol]) ?? delete this.timerMap[type][timerSymbol];
-        } catch (e) {
-          delete this.timerMap[type][timerSymbol];
-        }
+        this.context[def.const.caf](this.timerMap[type][timerSymbol]);
+        delete this.timerMap[type][timerSymbol];
       }
       setTimeout(fn, interval, ...args) {
         return this._ticking(fn, "timeout", interval, ...args);
@@ -338,59 +330,59 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       }
     }
 
-    const raf = new RAF(global);
+    const rAF = new RAF(global);
 
     /* NODE_OBSERVER */
 
     class NodeObserver {
-      constructor(targetNode = () => document.documentElement) {
-        safeWindow.Object.assign(this, { targetNode, result: new Map(), callbacks: new Map(), isCancelled: false, observer: null });
+      constructor(T = document) {
+        const checkTarget = T && typeof T === "string" ? () => qS(T) : T && T.getRootNode() === T ? () => T : () => Promise.reject(new Error("Target locator must be String or RootNode."));
+        safeWindow.Object.assign(this, { checkTarget, callbacks: new Map(), targetNode: null, initialObserver: null, nodeObserver: null });
       }
-      async getNodeAndObserve({ name, callback, config, timeout = 1e4 } = {}) {
-        if (typeof callback === "function") this.callbacks.set(name, callback);
-        this.config = config ?? { childList: true, subtree: true, attributes: true };
-        this.target = this.targetNode();
-        if (this.target) return this._observeElement(this.target);
-        try {
-          const raceResult = await Promise.race([this._waitingForTarget(), sleep(timeout, { instant: true })]);
-          if (raceResult) return this._observeElement(raceResult);
-          throw new Error(`Target cannot be found in the current page.`);
-        } catch (e) {
-          this.isCancelled = ERROR(`GetNodeAndObserve${IN_FRAMES}:`, e.message) ?? true;
-          if (this.observer) this.observer.disconnect() ?? (this.observer = null);
-          return this.result;
-        }
-      }
-      _waitingForTarget() {
-        return new Promise(resolve => {
-          if (this.observer) this.observer.disconnect();
-          this.observer = new MutationObserver(() => {
-            const target = this.targetNode();
-            if (!target && !this.isCancelled) return;
-            this.observer.disconnect();
-            resolve(target);
+      _waitForTarget(timeout) {
+        if ((this.targetNode = this.checkTarget())) return Promise.resolve(this.targetNode);
+        return new Promise((resolve, reject) => {
+          const timer = rAF.setTimeout(() => {
+            if (this.initialObserver) this.initialObserver = this.initialObserver.disconnect() ?? null;
+            reject(new ReferenceError(`Target node not found within ${timeout / 1e3} seconds.`));
+          }, timeout);
+          this.initialObserver = new MutationObserver(() => {
+            if ((this.targetNode = this.checkTarget())) {
+              rAF.clearTimeout(timer);
+              this.initialObserver = this.initialObserver.disconnect() ?? null;
+              resolve(this.targetNode);
+            }
           });
-          this.observer.observe(document, { childList: true, subtree: true });
+          this.initialObserver.observe(document, { childList: true, subtree: true });
         });
       }
-      _handleCallbacks(node, mutations, observer) {
-        for (const [name, callback] of this.callbacks) {
-          try {
-            this.result.set(name, callback({ node, mutations, observer }) ?? node);
-          } catch (e) {
-            ERROR(`Error in callback '${name}':`, e.message);
+      _observeElement(node, config) {
+        if (this.nodeObserver) this.nodeObserver.disconnect();
+        this.nodeObserver = new MutationObserver((mutations, observer) => {
+          for (const [name, callback] of this.callbacks) {
+            try {
+              callback({ node, mutations, observer });
+            } catch (e) {
+              ERROR(`${e.name} in NodeObserver callback '${name}':`, e.message);
+            }
           }
-        }
-      }
-      _observeElement(node) {
-        if (this.result.set(void 0, node) && this.callbacks.size === 0) return Promise.resolve(this.result);
-        return new Promise(resolve => {
-          const elementObserver = new MutationObserver((mutations, observer) => {
-            this._handleCallbacks(node, mutations, observer);
-            resolve(this.result);
-          });
-          elementObserver.observe(node, this.config);
         });
+        this.nodeObserver.observe(node, config);
+      }
+      onUpdate(name, callback) {
+        if (name && this.callbacks.has(name) && !callback) return this.callbacks.delete(name);
+        if (typeof callback === "function" && name && this.callbacks.get(name) !== callback) this.callbacks.set(name, callback);
+      }
+      async startObserver({ name, callback, config, timeout = 1e4 } = {}) {
+        if (name) this.onUpdate(name, callback);
+        this.config = config ?? { childList: true, subtree: true, attributes: true };
+        try {
+          const target = await this._waitForTarget(timeout);
+          if (this.callbacks.size) this._observeElement(target, this.config);
+          return { target, observer: this.nodeObserver };
+        } catch (e) {
+          ERROR(`${e.name} in NodeObserver:`, e.message);
+        }
       }
     }
 
@@ -414,10 +406,10 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
     function __console(action, message, ...args) {
       const consoleMethods = {
-        log: ["log", "%c\u27A4 %c", "display:inline-block", "font-family:ui-monospace,monospace"],
-        info: ["log", "%c\u27A4 ", "display:inline-block;padding:4px 0"],
-        error: ["error", "%c\ud83d\udea9 ", "display:inline-block;font-family:ui-monospace,monospace"],
-        warn: ["warn", "%c\ud83d\udea9 ", "display:inline-block;font-family:ui-monospace,monospace"],
+        log: ["log", "%c\u27A4%c ", "display:inline-block", ""],
+        info: ["log", "%c\u27A4%c ", "display:inline-block;padding:4px 0", ""],
+        error: ["error", "%c\ud83d\udea9%c ", "display:inline-block", ""],
+        warn: ["warn", "%c\ud83d\udea9%c ", "display:inline-block;", ""],
         count: ["count", "\u27A4 "],
       };
       const [_, msg, consoleMethod] = [this ?? console, message ?? "", consoleMethods[action]];
@@ -428,20 +420,20 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
     function safeAddElement(...args) {
       try {
-        // Fixed `TypeError: Illegal invocation` error when inserting element to the same-origin frames in Tampermonkey all version.
+        // Fixed `TypeError: Illegal invocation` error when inserting element to the same-origin frames with Tampermonkey all version.
         if (GMscriptHandler === "Tampermonkey" && typeof args[0] !== "string" && args[0].ownerDocument !== document) return generalAddElement(...args);
         return GM_addElement(...args);
       } catch (e) {
-        return ERROR("SafeAddElement:", { ...args, e: e.message }), generalAddElement(...args);
+        return ERROR(`${e.name} in SafeAddElement:`, { ...args, e: e.message }), generalAddElement(...args);
       }
     }
 
     function generalAddElement(p, t, o) {
       try {
-        typeof p === "string" && (o = t || {}) && (t = p) && (p = (/^(script|style|link|meta)$/i.test(t) ? document.head : document.body) || document.documentElement);
+        typeof p === "string" && (o = t || {}) && (t = p) && (p = (/^(?:script|style|link|meta)$/i.test(t) ? document.head : document.body) || document.documentElement);
         return appendNode(p, cE(t, o));
       } catch (e) {
-        ERROR("GeneralAddElement:", { ...arguments, e });
+        ERROR(`${e.name} in GeneralAddElement:`, { ...arguments, e });
       }
     }
 
@@ -452,10 +444,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
     function qS(expr, target = document) {
       try {
-        if (/^#[\w:.-]+$/.test(expr)) return target.getElementById(expr.slice(1));
         return target.querySelector(expr);
       } catch (e) {
-        return null;
+        return e && null;
       }
     }
 
@@ -463,17 +454,17 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       try {
         return asArray(target.querySelectorAll(expr));
       } catch (e) {
-        return asArray([]);
+        return e && asArray([]);
       }
     }
 
-    function qAS(expr, root, filterFn, target = null) {
+    function qAS(expr, root, filterFn, temp = null) {
       const [stack, eSet, sSet] = [[root], new Set(), new Set()];
-      const deepProcessElements = el => (!eSet.has(el) && eSet.add(el), el.shadowRoot && !sSet.has(el.shadowRoot) && sSet.add(el.shadowRoot) && stack.push(el.shadowRoot));
+      const deepProcessElements = el => (!eSet.has(el) && eSet.add(el), (temp = el.shadowRoot) && !sSet.has(temp) && sSet.add(temp) && stack.push(temp));
       while (stack.length) {
-        if (!(target = stack.pop())) continue;
-        target.nodeType === Node.ELEMENT_NODE ? !eSet.has(target) && eSet.add(target) : target.nodeType === Node.DOCUMENT_FRAGMENT_NODE ? !sSet.has(target) && sSet.add(target) : void 0;
-        (typeof filterFn === "function" ? qA(expr, target).filter(filterFn) : qA(expr, target)).forEach(deepProcessElements);
+        if (!(temp = stack.pop())) continue;
+        temp.nodeType === Node.ELEMENT_NODE ? !eSet.has(temp) && eSet.add(temp) : temp instanceof ShadowRoot ? !sSet.has(temp) && sSet.add(temp) : void 0;
+        (typeof filterFn === "function" ? qA(expr, temp).filter(filterFn) : qA(expr, temp)).forEach(deepProcessElements);
       }
       return { elementSet: eSet, shadowSet: sSet };
     }
@@ -500,12 +491,12 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
     function random({ range, length = 1, type = "round" }) {
       const typedArray = global.crypto.getRandomValues(new Uint32Array(Number(length) || 1));
-      return asArray(typedArray, a => (Math[type] ?? Math.round)((a / 0xffffffff) * (Number(range) || 10)));
+      return arrayFrom(typedArray, a => (Math[type] ?? Math.round)((a / 0xffffffff) * (Number(range) || 10)));
     }
 
     function uniq(array, filterFn = Boolean, mapFn = null) {
       if (!Array.isArray(array)) return [];
-      return asArray(new Set(typeof filterFn === "function" ? array.filter(filterFn) : array), typeof mapFn === "function" ? mapFn : void 0);
+      return arrayFrom(new Set(typeof filterFn === "function" ? array.filter(filterFn) : array), typeof mapFn === "function" ? mapFn : void 0);
     }
 
     function toString(value) {
@@ -528,7 +519,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         const req = encode ? encodeURIComponent(string) : string;
         return btoa(req);
       } catch (e) {
-        return "";
+        return e && "";
       }
     }
 
@@ -538,7 +529,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         const rst = atob(string.replace(/[^A-Za-z0-9+/=]/g, ""));
         return decode ? decodeURIComponent(rst) : rst;
       } catch (e) {
-        return "";
+        return e && "";
       }
     }
 
@@ -555,8 +546,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
     function generateRandomString(length, type, p, m = mS, c = cS) {
       if (type === "date") return (p = new Date().setHours(20, 30, 40, 50).toString(16)), p.padEnd(length, p);
-      if (type === "hex" || type === "number") return (p = type === "hex" ? 16 : 10), asArray(random({ range: p, length, type: "floor" }), v => v.toString(p)).join("");
-      return (p = type === "mix" ? m : c), asArray(random({ range: p.length, length }), (v, i) => (p === m && !i ? c[random({ range: 70 })] : p[v])).join("");
+      if (type === "hex" || type === "number") return (p = type === "hex" ? 16 : 10), arrayFrom(random({ range: p, length, type: "floor" }), v => v.toString(p)).join("");
+      return (p = type === "mix" ? m : c), arrayFrom(random({ range: p.length, length }), (v, i) => (p === m && !i ? c[random({ range: 70 })] : p[v])).join("");
     }
 
     function initTrustedTypesPolicy() {
@@ -584,20 +575,17 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       if (!CUR_WINDOW_TOP && isAccessProhibited(CUR_HREF)) return true;
       const reportRedundanceError = () => {
         const errorText = IS_CHN
-          ? `\ud83d\udea9 [脚本冗余警告]:\r\n发现冗余安装的脚本: "${def.var.scriptName}"，如刷新后问题依旧，请访问 ${def.url.feedback}/117 排查错误。`
-          : `\ud83d\udea9 [Redundant Warning]:\r\nFound Redundant Script: '${def.var.scriptName}', if persists after reloading, please visit ${def.url.feedback}/117 to troubleshoot.`;
-        const troubleshoot = `\ufff8\ud83d\uded1 ${IS_CHN ? "发现冗余安装的脚本，点击排查！" : "Troubleshoot Redundant"}`;
-        return CUR_WINDOW_TOP && GMregisterMenuCommand(troubleshoot, () => GMopenInTab(`${def.url.feedback}/117`, false)) && __console("error", errorText), true;
+          ? `\ud83d\udea9【脚本冗余警告】发现冗余安装的脚本: "${def.var.scriptName}"，如刷新后问题依旧，请访问 ${def.url.redundant} 排查错误。`
+          : `\ud83d\udea9 [Redundance Warning] Found Redundant Scripts: '${def.var.scriptName}', if persists after reloading, please visit ${def.url.redundant} to troubleshoot.`;
+        const troubleshoot = `\ufff8\ud83d\uded1 ${IS_CHN ? "发现冗余安装的脚本，点击排查！" : "Troubleshoot Redundant Issue"}`;
+        return CUR_WINDOW_TOP && (__console("error", errorText), GMregisterMenuCommand(troubleshoot, () => GMopenInTab(`${def.url.feedback}/117`, false))), true;
       };
-      if (context["fr-init-once"] === true) return reportRedundanceError();
-      if (GMcontextMode) {
-        if (document.documentElement?.hasAttribute("fr-init-once")) return reportRedundanceError();
-        const contextText = IS_CHN
-          ? `${def.var.scriptName}警告\r\n脚本的注入模式已设置为"content"，部分脚本功能将受限制，如框架页面内部分功能失效、字体缩放后无法全局修正坐标等。`
-          : `${def.var.scriptName} Warning\r\nThe injection mode of the script has been set to "content", and some script features will be limited.`;
-        CUR_WINDOW_TOP && __console("warn", contextText);
-      }
-      (context["fr-init-once"] = true) && safeWindow.Object.freeze(def.const) && updateFlagAtRootElement(document.documentElement);
+      const contentText = IS_CHN
+        ? `${def.var.scriptName}警告：脚本的注入模式已设置为"content"，部分脚本功能可能受到限制，如框架页面内部分功能失效、字体缩放后无法全局修正坐标等。`
+        : `${def.var.scriptName} Warning: The injection mode is set to "content" and some functions may be limited, such as some functions within the frame page are invalid, coordinates cannot be globally corrected after font scaling, etc.`;
+      if (GMcontextMode && CUR_WINDOW_TOP) __console("warn", contentText);
+      if (context[def.const.const.once] === true || document.documentElement?.hasAttribute(def.const.const.once)) return reportRedundanceError();
+      (context[def.const.const.once] = true) && safeWindow.Object.freeze(def.const) && updateFlagAtRootElement(document.documentElement);
     }
 
     function reload() {
@@ -607,7 +595,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     function updateFlagAtRootElement(target) {
       if (!target) return;
       if (!target.id) target.id = def.const.root;
-      if (!target.hasAttribute("fr-init-once")) target.setAttribute("fr-init-once", "");
+      if (!target.hasAttribute(def.const.const.once)) target.setAttribute(def.const.const.once, "");
     }
 
     async function getNavigatorInfo() {
@@ -617,10 +605,10 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
       function getGlobalInfoFromUAD(uad) {
         const os = getFullPlatformName(uad.platform);
-        const mapBrandPath = ({ brand: b, version: v }) => `${/Not[^a-z]*A[^a-z]*Brand/i.test(b) ? 9 : /^Chrom(?:e|ium)|Firefox|Safari$/i.test(b) ? 5 : 1}${b}\r${v}`;
+        const mapBrandPath = ({ brand: b, version: v }) => `${/Not[^a-z]*A[^a-z]*Brand/i.test(b) ? 9 : /^(?:Chrom(?:e|ium)|Firefox|Safari)$/i.test(b) ? 5 : 1}${b}\r${v}`;
         const [brand, brandVersion] = uad.brands?.map(mapBrandPath).sort()[0]?.slice(1).split("\r") ?? [];
         const engineMap = { Chrome: "Blink", Chromium: "Blink", Firefox: "Gecko", Safari: "WebKit" };
-        const mapEnginePath = ({ brand, version }) => /^(Chrom(?:e|ium)|Firefox|Safari)$/i.test(brand) && `${brand}\r${version}`;
+        const mapEnginePath = ({ brand, version }) => /^(?:Chrom(?:e|ium)|Firefox|Safari)$/i.test(brand) && `${brand}\r${version}`;
         const [engine, engineVersion] = uad.brands?.map(mapEnginePath).filter(Boolean)[0]?.split("\r") ?? [brand, brandVersion];
         const engineInfo = { engine: engineMap[capitalize(engine)] ?? getEngineFromUA(navigator.userAgent), engineVersion: parseFloat(engineVersion) || 99, creditEngine };
         const browserInfo = { brand: (brand?.split(/\s/) ?? []).slice(-1)[0] ?? "Unknown", brandVersion: formatVersion(brandVersion), os };
@@ -705,7 +693,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       function getFullPlatformName(platform) {
         if (!platform) return "Unknown";
         const os = capitalize(platform);
-        return /^(Like Mac|Ios)$/.test(os) ? "iOS" : os === "Cros" ? "Chrome OS" : os.startsWith("Win") ? "Windows" : os.startsWith("Mac") ? "MacOS" : os === "X11" ? "Linux" : os;
+        return /^(?:Like Mac|Ios)$/.test(os) ? "iOS" : os === "Cros" ? "Chrome OS" : os.startsWith("Win") ? "Windows" : os.startsWith("Mac") ? "MacOS" : os === "X11" ? "Linux" : os;
       }
 
       function getRealBrowserEngine(w) {
@@ -713,7 +701,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       }
 
       function getEngineFromUA(ua) {
-        return /Gecko\/|Firefox\/|FxiOS/.test(ua) ? "Gecko" : /Chrom(?:e|ium)\/|CriOS/.test(ua) ? "Blink" : /AppleWebKit\/|Version\//.test(ua) ? "WebKit" : "Unknown";
+        return /(?:Gecko\/|Firefox\/|FxiOS)/.test(ua) ? "Gecko" : /(?:Chrom(?:e|ium)\/|CriOS)/.test(ua) ? "Blink" : /(?:AppleWebKit\/|Version\/)/.test(ua) ? "WebKit" : "Unknown";
       }
 
       function getUnregisteredBrandAndVersionFromUA(ua) {
@@ -722,7 +710,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         const brand = ua.slice(nameOffset, verOffset).trim();
         const brandVersion = formatVersion(ua.slice(verOffset + 1).match(/\d*\.?\d+/)?.[0]);
         const engineVersion = parseFloat(ua.match(/(?:Chrom(?:e|ium)|Firefox|Version)\/(\d+[.0-9]*)/i)?.[1] || brandVersion || 99);
-        const validVersion = (!/version|\/|\(|\)|;/i.test(brand) && brandVersion) || "0.0.0.0";
+        const validVersion = (!/(?:version|\/|\(|\)|;)/i.test(brand) && brandVersion) || "0.0.0.0";
         return { b: brand, bv: validVersion, ev: engineVersion };
       }
 
@@ -739,7 +727,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       try {
         tH = iT ? h : global.top.location.host;
       } catch (e) {
-        tH = new URL(document.referrer || global.location).host;
+        tH = e && new URL(document.referrer || global.location).host;
       }
       return { h, hR, hN, pN, pT, tH, iT, fS: iT ? "" : "[FRAMES]" };
     }
@@ -761,15 +749,15 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       return Object.is(key, value);
     }
 
-    function sleep(delay, { useCachedSetTimeout, instant } = {}) {
-      const timeoutFunction = useCachedSetTimeout ? setTimeout : raf.setTimeout;
+    function sleep(delay, { useCachedSetTimeout, instance } = {}) {
+      const timeoutFunction = useCachedSetTimeout ? setTimeout : rAF.setTimeout;
       const sleepPromise = new Promise(resolve => {
         timeoutFunction(resolve, delay);
       });
       const promiseFunction = value => sleepPromise.then(() => value);
       promiseFunction.then = sleepPromise.then.bind(sleepPromise);
       promiseFunction.catch = sleepPromise.catch.bind(sleepPromise);
-      return instant ? sleepPromise : promiseFunction;
+      return instance ? sleepPromise : promiseFunction;
     }
 
     function createDeBounce({ fn, delay, once = false, immed = false }) {
@@ -779,17 +767,17 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         const context = this;
         const executeFunction = () => (fn.apply(context, args), (timeoutId = once || null));
         if (timeoutId === true) return;
-        if (timeoutId) raf.clearTimeout(timeoutId);
+        if (timeoutId) rAF.clearTimeout(timeoutId);
         else if (immed && executeFunction()) return;
-        timeoutId = raf.setTimeout(executeFunction, delay);
+        timeoutId = rAF.setTimeout(executeFunction, delay);
       }
       debounced.setImmediate = immedValue => (immed = Boolean(immedValue));
       return debounced;
     }
 
-    function safeRemoveNode(expression, scope) {
-      if (!expression) return false;
-      const pendingNodes = Array.isArray(expression) ? expression : typeof expression === "string" ? qA(expression, scope) : expression?.nodeType ? [expression] : [];
+    function safeRemoveNode(expr, scope) {
+      if (!expr) return false;
+      const pendingNodes = Array.isArray(expr) ? expr : typeof expr === "string" ? qA(expr, scope) : expr?.nodeType ? [expr] : [];
       return pendingNodes.every(el => el.remove() || el.parentNode === null);
     }
 
@@ -800,7 +788,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
     function convertToUnicode(str) {
       if (typeof str !== "string") return "";
-      const result = asArray(str, char => `\\${("00" + char.charCodeAt(0).toString(16)).slice(-4)}`).join("");
+      const result = arrayFrom(str, char => `\\${("00" + char.charCodeAt(0).toString(16)).slice(-4)}`).join("");
       return result.toUpperCase();
     }
 
@@ -809,7 +797,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         navigator.clipboard.writeText(text);
       } catch (e) {
         const handler = event => {
-          event.preventDefault();
+          event.preventDefault(e);
           event.clipboardData.setData(type, text);
           document.removeEventListener("copy", handler, true);
         };
@@ -825,28 +813,25 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       const [DOMAINFONTSET, CUSTOMFONTS, CUSTOMPROPERTY, MONORULES] = ["_DOMAINS_FONTS_SET_", "_CUSTOM_FONTLIST_", "_CUSTOM_PROPERTY_", "_MONOSPACED_SITERULES_"];
       const [MONOFONTS, MONOFEATS, FONTOVERRIDE] = ["_MONOSPACED_FONTLIST_", "_MONOSPACED_FEATURE_", "_FONTOVERRIDE_DEF_"];
       const [FONTSCALE, FONTCHECKLIST, IS_DISCUZ] = ["_FONTSCALE_DEF_", "_FONTCHECKLIST_", "_FR_IS_DISCUZ_"];
-      const [getDocumentElement, getHeadElement, getBodyElement] = ["documentElement", "head", "body"].map(prop => new NodeObserver(() => document[prop]));
       const { engine, engineVersion, creditEngine, brand, os, voucher } = (navigatorInfo =
-        JSON.parse(navigatorInfo || null) || (sessionStorage?.setItem("_NAVIGATORINFO_", JSON.stringify((navigatorInfo = await getNavigatorInfo()))), navigatorInfo));
+        JSON.parse(navigatorInfo || null) || (sessionStorage?.setItem(def.const.const.navinfo, JSON.stringify((navigatorInfo = await getNavigatorInfo()))), navigatorInfo));
+      const [requestHTML, requestHEAD, requestBODY] = ["html", "head", "body"].map(prop => new NodeObserver(prop));
       const [IS_REAL_BLINK, IS_REAL_GECKO, IS_REAL_WEBKIT] = ["Blink", "Gecko", "WebKit"].map(engine => engine === creditEngine);
       const IS_CHEAT_UA = voucher === null && (engine !== creditEngine || checkBlinkCheatingUA(navigator.userAgentData));
-      const [IS_GREASEMONKEY, IS_MACOS] = [["Greasemonkey", "Userscripts", "FireMonkey", "stay"].includes(GMscriptHandler), os === "MacOS"];
+      const [IS_GREASEMONKEY, IS_MACOS] = [["Greasemonkey", "Userscripts", "FireMonkey", "tamp", "OrangeMonkey"].includes(GMscriptHandler), os === "MacOS"];
       const [IS_CAUSED_BOLDSTROKEERROR, IS_CAUSED_BOLDSHADOWERROR] = [96, 123].map(version => compareVersion({ BLINK: version }));
-      const IS_COMPATIBLE_ADOPTEDSTYLE = compareVersion({ WEBKIT: 16.4, BLINK: 73, GECKO: 101, ignore: null });
+      const IS_ADOPTEDSTYLESHEET_MUTABLE = compareVersion({ WEBKIT: 16.4, BLINK: 99, GECKO: 101 }) && typeof document.adoptedStyleSheets?.push === "function";
 
       /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
       const UPDATE_VERSION_NOTICE = IS_CHN
-        ? `<li class="${def.const.seed}.info">🎊 恭祝各位用户中秋、国庆双节节日快乐 🎉</li>
-            <li class="${def.const.seed}.fixed">优化字体粗体描边样式修正函数的执行性能。</li>
-            <li class="${def.const.seed}.fixed">优化脚本对浏览器真实内核信息的识别方法。</li>
-            <li class="${def.const.seed}.fixed">优化字体缩放功能兼容 CodeMirror/Monaco 编辑器。</li>
-            <li class="${def.const.seed}.fixed">修复 CSS 视口单位修正函数的逻辑问题。</li>
+        ? `<li class="${def.const.seed}.fixed">优化重构脚本核心函数，提升脚本兼容性。</li>
+            <li class="${def.const.seed}.fixed">优化粗体描边样式修正脚本冲突检测阈值。</li>
+            <li class="${def.const.seed}.fixed">修复字体阴影拾色器中的各种隐藏问题。</li>
             <li class="${def.const.seed}.fixed">修复一些已知的问题，优化代码，优化样式。</li>`
-        : `<li class="${def.const.seed}.fixed">Optimized performance of font bold stroke correction.</li>
-            <li class="${def.const.seed}.fixed">Optimized to identify browser kernel information.</li>
-            <li class="${def.const.seed}.fixed">Optimized font scaling compatible with CodeMirror/Monaco editors.</li>
-            <li class="${def.const.seed}.fixed">Fixed logical issue of CSS viewport unit correction.</li>
+        : `<li class="${def.const.seed}.fixed">Refactored core functions to improve compatibility.</li>
+            <li class="${def.const.seed}.fixed">Optimized Bold-Fix script conflict detection threshold.</li>
+            <li class="${def.const.seed}.fixed">Fixed various hidden issues in the shadow colorpicker.</li>
             <li class="${def.const.seed}.fixed">Fixed some known issues, optimized code & style.</li>`;
 
       /* INITIALIZE_FONT_LIBRARY */
@@ -922,28 +907,27 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       /* INITIALIZE_SHADOWROOT_STYLE */
 
       def.var.style = safeWindow.Object.freeze({
-        main: `display:inline-block;font-family:ui-monospace,monospace`,
         firefox: `input:is([type='text'],[type='password'],[type='search'],[type='email'],[type='tel'],[type='url'],[type='number']),input:not([type]){font-family:serif!important}`,
-        frDialog: `:root>#${def.const.dialog}{display:block!important;width:auto!important;height:auto!important;background:none!important;opacity:1!important;border:none!important;outline:none!important;z-index:2147483647!important}:root>#${def.const.dialog}::backdrop{background:transparent!important}#${def.const.dialog}>fr-colorpicker div{all:revert}@font-face{font-family:Anton;font-style:normal;font-weight:400;font-display:swap;src:local("Impact"),url(${def.url.Anton}) format("woff2");unicode-range:U+00??,U+0131,U+0152-0153,U+02bb-02bc,U+02c6,U+02da,U+02dc,U+0304,U+0308,U+0329,U+2000-206f,U+2074,U+20ac,U+2122,U+2191,U+2193,U+2212,U+2215,U+feff,U+fffd}`,
+        frDialog: `:root>dialog#${def.const.dialog}{display:block!important;visibility:visible!important;width:auto!important;height:auto!important;background:none!important;opacity:1!important;border:none!important;outline:none!important;z-index:2147483647!important}:root>dialog#${def.const.dialog}::backdrop{background:transparent!important}@font-face{font-family:Anton;font-style:normal;font-weight:400;font-display:swap;src:local("Impact"),url(${def.url.Anton}) format("woff2");unicode-range:U+00??,U+0131,U+0152-0153,U+02bb-02bc,U+02c6,U+02da,U+02dc,U+0304,U+0308,U+0329,U+2000-206f,U+2074,U+20ac,U+2122,U+2191,U+2193,U+2212,U+2215,U+feff,U+fffd}`,
         shared: `:host(fr-dialogbox),:host(fr-configure){position:fixed!important;top:0!important;left:0!important;width:100%!important;height:100%!important;background:0 0!important;pointer-events:none!important;--fr-shared-fontfamily:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif;--fr-shared-monospace:ui-monospace,'Operator Mono Lig','JetBrains Mono',monospace,${INITIAL_VALUES.fontSelect},sans-serif;--fr-shared-emoji:system-ui,-apple-system,BlinkMacSystemFont,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji,Android Emoji,mojiSymbol,EmojiOne Mozilla,Twemoji Mozilla,bwi-font;}.${def.const.seed}\\.disp\\:inline\\.block{display:inline-block!important}.${def.const.seed}\\.disp\\:block{display:block!important}.${def.const.seed}\\.disp\\:none{display:none!important}.${def.const.seed}\\.vis\\:visible{visibility:visible!important}.${def.const.seed}\\.vis\\:hidden{visibility:hidden!important}.${def.const.seed}\\.clr\\:8b0000{color:#8b0000!important}.${def.const.seed}\\.clr\\:cecece{color:#cecece!important}.${def.const.seed}\\.clr\\:crimson{color:#dc143c!important}.${def.const.seed}\\.fw\\:700{font-weight:700!important}.${def.const.seed}\\.opac\\:1{opacity:1!important}:is(#${def.id.container},.${def.class.db}) .${def.class.emoji}{text-shadow:1px 1px 2px #4b5b6b!important;vertical-align:2px;font:normal 400 16px/150% var(--fr-shared-emoji)!important}.${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}`,
         frDialogBox:
-          `:host(#${def.id.dialogbox}){z-index:2147483647}.${def.class.db}{position:absolute;top:calc(12% + 10px);right:20px;z-index:99999;display:block;overflow:hidden;box-sizing:content-box;width:100%;max-width:420px;border:2px solid #efefef;border-radius:6px;background:#fff;box-shadow:0 0 10px 0 #0000004d;color:#444;transition:opacity .5s;pointer-events:auto;opacity:0}.${def.class.db} *{text-shadow:0 0 1px #777!important;font-family:var(--fr-shared-fontfamily),var(--fr-shared-emoji)!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}.${def.class.db} textarea,.${def.class.db} input{background-color:#fefefe;color:#333}.${def.class.dbt}{display:flex;margin-top:0;padding:10px 15px;width:auto;background:#efefef;text-align:left;font-weight:700;font-size:18px!important;flex-wrap:nowrap;justify-content:space-between;align-items:center;align-content:center}#${def.const.seed}\\.dialog\\.close{cursor:pointer;color:gray}#${def.const.seed}\\.dialog\\.close:hover{transform:scale(1.8);color:grey}.${def.class.dbt},.${def.class.dbt} *{font-weight:700;font-size:20px!important;font-family:Candara,Times,var(--fr-shared-fontfamily)!important}.${def.class.dbm}{display:block;margin:5px;padding:10px;color:#444;text-align:left;font-weight:500;font-size:16px!important}.${def.class.dbb}{display:inline-block;box-sizing:content-box;margin:2px 1%;padding:8px 12px;min-width:12%;border-radius:4px;text-align:center;text-decoration:none!important;letter-spacing:0;font-weight:400;cursor:pointer}.${def.const.seed}\\.gradient\\.bg{background:#e7ffd9;animation:gradient 2s ease-in-out forwards}@keyframes gradient{0%{background:#e7ffd9}to{background:transparent}}.${def.class.db} .${def.class.dbt},.${def.class.db} .${def.class.dbb}{text-shadow:none!important;-webkit-text-stroke:0 transparent!important;-webkit-user-select:none;user-select:none}.${def.class.db} .${def.class.dbb}:hover{box-sizing:content-box;color:#fff;text-decoration:none!important;font-weight:700;opacity:.8}.${def.class.db} .${def.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${def.class.db} .${def.class.dbbf}{border:1px solid #d93223!important;border-radius:6px;background:#d93223!important;color:#fff!important;font-size:14px!important}.${def.class.db} .${def.class.dbbt}{border:1px solid #038c5a!important;border-radius:6px;background:#038c5a!important;color:#fff!important;font-size:14px!important}.${def.class.db} .${def.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}` +
-          `.${def.class.db} .${def.class.dbbn}{border:1px solid #777!important;border-radius:6px;background:#777!important;color:#fff!important;font-size:14px!important}.${def.class.db} .${def.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${def.class.dbbc}{display:block;padding:2.5%;background:#efefef;color:#fff;text-align:right;font-size:initial}.${def.class.dbm} textarea{cursor:auto;overscroll-behavior:contain;scrollbar-color:auto}.${def.class.dbm} textarea::-webkit-scrollbar{width:8px;height:8px}.${def.class.dbm} textarea::-webkit-scrollbar-corner{border-radius:2px;background:#efefef;box-shadow:inset 0 0 3px #aaa}.${def.class.dbm} textarea::-webkit-scrollbar-thumb{border-radius:2px;background:#cfcfcf;box-shadow:inset 0 0 5px #999}.${def.class.dbm} textarea::-webkit-scrollbar-track{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}.${def.class.dbm} button:hover{background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important;cursor:pointer}.${def.class.dbm} p{margin:5px 0!important;text-align:left;text-indent:0;font-weight:400;font-size:16px;line-height:1.5!important;-webkit-user-select:none;user-select:none}.${def.class.dbm} ul{margin:0 0 0 10px!important;padding:2px;color:#808080;list-style:none;font:italic 400 14px/150% var(--fr-shared-fontfamily)!important;-webkit-user-select:none;user-select:none}.${def.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${def.class.dbm} ul::-webkit-scrollbar-thumb{border-radius:10px;background:#cfcfcf;box-shadow:inset 0 0 5px #999;}.${def.class.dbm} ul::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #aaa}.${def.class.dbm} ul li{display:list-item;list-style-type:none;word-break:break-all}.${def.class.dbm} li:before{display:none}.${def.class.dbm} ul#${def.const.seed}\\.vlist li:hover{background-color:#fdf6eccc!important}#${def.const.seed}\\.temp{padding:18px 8px;text-align:center;color:#555;font-size:14px!important}#${def.id.bk},#${def.id.pv},#${def.id.fs},#${def.id.fvp},#${def.id.hk},#${def.id.ct},#${def.id.mps},#${def.id.pdr},#${def.id.flc},#${def.id.gc},#${def.id.cm},#${def.id.fi}{display:flex;box-sizing:content-box;margin:0;padding:2px 4px!important;width:calc(98% - 10px);height:max-content;min-width:auto;min-height:40px;list-style:none;font-style:normal;justify-content:space-between;align-items:flex-start;word-break:break-word}` +
-          `.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 10px #0000001a,0 0 5px #f5929266;white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#fff;box-shadow:0 0 1px #00000099;color:#fff;content:' '}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#fff;content:'OFF';font-weight:700;font-style:normal;font-size:16px}.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 10px #0000001a,0 0 5px #92c4f566;cursor:pointer}.${def.class.checkbox}:checked+label::after{left:10px;content:'ON'}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:' '}#${def.const.seed}\\.monospaced\\.siterules::placeholder,#${def.const.seed}\\.monospaced\\.font::placeholder,#${def.const.seed}\\.monospaced\\.feature::placeholder,#${def.const.seed}\\.custom\\.feature::placeholder,#${def.const.seed}\\.custom\\.variant::placeholder{color:#aaa!important;white-space:pre-line!important;font:normal 400 14px/150% var(--fr-shared-fontfamily)!important}.${def.const.seed}\\.VIP{margin:2px 0 0 0;color:#b8860b!important;font:normal 400 16px/150% var(--fr-shared-fontfamily)}.${def.const.seed}\\.VIP>u{all:initial;margin:0 4px 0 0;font:normal 500 16px/150% Arial!important;color:#b8860b!important}:is(#${def.id.pdr},#${def.id.flc},#${def.id.gc}) button{box-sizing:border-box!important;margin:0 5px 0 0!important;padding:5px!important;border:1px solid #999!important;border-radius:4px!important;background-color:#eee;color:#444!important;letter-spacing:normal!important;font-weight:400!important;font-size:14px!important}.${def.class.dbm} a{color:#0969da;text-decoration:none!important;font-style:inherit}.${def.class.dbm} a:hover{color:#dc143c;text-decoration:underline}#${def.id.feedback}{box-sizing:content-box;margin:0;padding:2px 10px;width:max-content;height:22px;min-width:auto;font-style:normal;font-size:16px;cursor:pointer}.${def.class.dbm} #${def.id.files}{display:none}#${def.id.feedback}:hover{color:#dc143c!important}` +
-          `#${def.id.feedback}:after{width:0;height:0;background:url('${def.url.loadingImg}') no-repeat -400px -300px;content:""}#${def.id.pdrr},#${def.id.flcid}{width:max-content;height:max-content;min-width:70px;min-height:32px}#${def.id.maxps}{box-sizing:border-box;padding:4px 5px;width:70px;min-width:70px;border:2px solid #b8860b;border-radius:4px;background:#efefef;color:#333;text-align:center;font:normal 400 16px/150% 'Anton',Times,serif!important}.${def.class.dbm} ul.${def.class.main}{overflow-x:hidden;box-sizing:content-box;margin:0;padding:5px 0;max-height:255px;overscroll-behavior:contain;scrollbar-color:auto}#${def.id.globaldisable}{width:max-content;height:max-content;min-width:70px;min-height:32px}#${def.const.seed}\\.del\\.sitedata{box-sizing:border-box;margin-left:15px;padding:3px 5px;width:max-content;height:max-content;max-width:120px;min-height:30px;border:1px solid #777;border-radius:4px;background-color:#eee;color:#333!important;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}\\.sitedatalist>span{margin:0;padding:0 2px;color:#3e3e3e;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}\\.save\\.sitedata{color:#4b0082;cursor:help;word-break:break-all}p.${def.const.seed}\\.exclusion{font:italic 700 24px/150% Candara,Times!important;word-break:break-all}#${def.const.seed}\\.sdata{box-sizing:content-box;margin:4px 6px;padding:2px 6px;width:57%;height:22px;outline:none!important;border:2px solid #777;border-radius:4px;font:normal 400 16px/150% var(--fr-shared-monospace)!important}#${def.const.seed}\\.sdata\\:search{box-sizing:border-box;margin:0;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#333!important;outline:none!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}\\.sdata\\:clear{box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#333!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}\\.vlist{overflow-x:hidden;margin:0!important;padding:0!important;max-height:190px;list-style:none!important;overscroll-behavior:contain;scrollbar-color:auto}` +
+          `:host(#${def.id.dialogbox}){z-index:2147483647}.${def.class.db}{position:absolute;top:calc(12% + 10px);right:20px;z-index:99999;display:block;overflow:hidden;box-sizing:content-box;width:100%;max-width:420px;border:2px solid #efefef;border-radius:6px;background:#fff;box-shadow:0 0 10px 0 #0000004d;color:#444;transition:opacity .5s;pointer-events:auto;opacity:0}.${def.class.db} *{text-shadow:0 0 1.25px #3d3d3d5f!important;font-family:var(--fr-shared-fontfamily),var(--fr-shared-emoji)!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}.${def.class.db} textarea,.${def.class.db} input{background:#fefefe;color:#333}.${def.class.dbt}{display:flex;margin-top:0;padding:10px 15px;width:auto;background:#efefef;text-align:left;font-weight:700;font-size:18px!important;flex-wrap:nowrap;justify-content:space-between;align-items:center;align-content:center}#${def.const.seed}\\.dialog\\.close{cursor:pointer;color:gray}#${def.const.seed}\\.dialog\\.close:hover{transform:scale(1.8);color:grey}.${def.class.dbt},.${def.class.dbt} *{font-weight:700;font-size:20px!important;font-family:Candara,Times,var(--fr-shared-fontfamily)!important}.${def.class.dbm}{display:block;margin:5px;padding:10px;color:#444;text-align:left;font-weight:500;font-size:16px!important}.${def.class.dbb}{display:inline-block;box-sizing:content-box;margin:2px 1%;padding:8px 12px;min-width:12%;border-radius:4px;text-align:center;text-decoration:none!important;letter-spacing:0;font-weight:400;cursor:pointer}.${def.const.seed}\\.gradient\\.bg{background:#e7ffd9;animation:gradient 2s ease-in-out forwards}@keyframes gradient{0%{background:#e7ffd9}to{background:transparent}}.${def.class.db} .${def.class.dbt},.${def.class.db} .${def.class.dbb}{text-shadow:none!important;-webkit-text-stroke:0 transparent!important;-webkit-user-select:none;user-select:none}.${def.class.db} .${def.class.dbb}:hover{box-sizing:content-box;color:#fff;text-decoration:none!important;font-weight:700;opacity:.8}.${def.class.db} .${def.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${def.class.db} .${def.class.dbbf}{border:1px solid #d93223!important;border-radius:6px;background:#d93223!important;color:#fff!important;font-size:14px!important}.${def.class.db} .${def.class.dbbt}{border:1px solid #038c5a!important;border-radius:6px;background:#038c5a!important;color:#fff!important;font-size:14px!important}.${def.class.db} .${def.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}` +
+          `.${def.class.db} .${def.class.dbbn}{border:1px solid #777!important;border-radius:6px;background:#777!important;color:#fff!important;font-size:14px!important}.${def.class.db} .${def.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${def.class.dbbc}{display:block;padding:2.5%;background:#efefef;color:#fff;text-align:right;font-size:initial}.${def.class.dbm} textarea{cursor:auto;overscroll-behavior:contain;scrollbar-color:auto}.${def.class.dbm} textarea::-webkit-scrollbar{width:8px;height:8px}.${def.class.dbm} textarea::-webkit-scrollbar-corner{border-radius:2px;background:#efefef;box-shadow:inset 0 0 3px #aaa}.${def.class.dbm} textarea::-webkit-scrollbar-thumb{border-radius:2px;background:#cfcfcf;box-shadow:inset 0 0 5px #999}.${def.class.dbm} textarea::-webkit-scrollbar-track{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}.${def.class.dbm} button:hover{background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important;cursor:pointer}.${def.class.dbm} p{margin:5px 0!important;text-align:left;text-indent:0;font-weight:400;font-size:16px;line-height:1.5!important;-webkit-user-select:none;user-select:none}.${def.class.dbm} ul{margin:0 0 0 10px!important;padding:2px;color:#808080;list-style:none;font:italic 400 14px/150% var(--fr-shared-fontfamily)!important;-webkit-user-select:none;user-select:none}.${def.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${def.class.dbm} ul::-webkit-scrollbar-thumb{border-radius:10px;background:#cfcfcf;box-shadow:inset 0 0 5px #999;}.${def.class.dbm} ul::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #aaa}.${def.class.dbm} ul li{display:list-item;list-style-type:none;word-break:break-all}.${def.class.dbm} li:before{display:none}.${def.class.dbm} ul#${def.const.seed}\\.vlist li:hover{background:#fdf6eccc!important}#${def.const.seed}\\.temp{padding:18px 8px;text-align:center;color:#555;font-size:14px!important}#${def.id.bk},#${def.id.pv},#${def.id.fs},#${def.id.fvp},#${def.id.hk},#${def.id.ct},#${def.id.mps},#${def.id.pdr},#${def.id.flc},#${def.id.gc},#${def.id.cm},#${def.id.fi}{display:flex;box-sizing:content-box;margin:0;padding:2px 4px!important;width:calc(98% - 10px);height:max-content;min-width:auto;min-height:40px;list-style:none;font-style:normal;justify-content:space-between;align-items:flex-start;word-break:break-word}` +
+          `.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 10px #0000001a,0 0 5px #f5929266;white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#fff;box-shadow:0 0 1px #00000099;color:#fff;content:' '}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#fff;content:'OFF';font-weight:700;font-style:normal;font-size:16px}.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 10px #0000001a,0 0 5px #92c4f566;cursor:pointer}.${def.class.checkbox}:checked+label::after{left:10px;content:'ON'}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:' '}#${def.const.seed}\\.monospaced\\.siterules::placeholder,#${def.const.seed}\\.monospaced\\.font::placeholder,#${def.const.seed}\\.monospaced\\.feature::placeholder,#${def.const.seed}\\.custom\\.feature::placeholder,#${def.const.seed}\\.custom\\.variant::placeholder{color:#aaa!important;white-space:pre-line!important;font:normal 400 14px/150% var(--fr-shared-fontfamily)!important}.${def.const.seed}\\.VIP{margin:2px 0 0 0;color:#b8860b!important;font:normal 400 16px/150% var(--fr-shared-fontfamily)}.${def.const.seed}\\.VIP>u{all:initial;margin:0 4px 0 0;font:normal 500 16px/150% Arial!important;color:#b8860b!important}:is(#${def.id.pdr},#${def.id.flc},#${def.id.gc}) button{box-sizing:border-box!important;margin:0 5px 0 0!important;padding:5px!important;border:1px solid #999!important;border-radius:4px!important;background:#eee;color:#444!important;letter-spacing:normal!important;font-weight:400!important;font-size:14px!important}.${def.class.dbm} a{color:#0969da;text-decoration:none!important;font-style:inherit}.${def.class.dbm} a:hover{color:#dc143c;text-decoration:underline}#${def.id.feedback}{box-sizing:content-box;margin:0;padding:2px 10px;width:max-content;height:22px;min-width:auto;font-style:normal;font-size:16px;cursor:pointer}.${def.class.dbm} #${def.id.files}{display:none}#${def.id.feedback}:hover{color:#dc143c!important}` +
+          `#${def.id.feedback}:after{width:0;height:0;background:url('${def.url.loadingImg}') no-repeat -400px -300px;content:""}#${def.id.pdrr},#${def.id.flcid}{width:max-content;height:max-content;min-width:70px;min-height:32px}#${def.id.maxps}{box-sizing:border-box;padding:4px 5px;width:70px;min-width:70px;border:2px solid #b8860b;border-radius:4px;background:#efefef;color:#333;text-align:center;font:normal 400 16px/150% 'Anton',Times,serif!important}.${def.class.dbm} ul.${def.class.main}{overflow-x:hidden;box-sizing:content-box;margin:0;padding:5px 0;max-height:255px;overscroll-behavior:contain;scrollbar-color:auto}#${def.id.globaldisable}{width:max-content;height:max-content;min-width:70px;min-height:32px}#${def.const.seed}\\.del\\.sitedata{box-sizing:border-box;margin-left:15px;padding:3px 5px;width:max-content;height:max-content;max-width:120px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#333!important;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}\\.sitedatalist>span{margin:0;padding:0 2px;color:#3e3e3e;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}\\.save\\.sitedata{color:#4b0082;cursor:help;word-break:break-all}p.${def.const.seed}\\.exclusion{font:italic 700 24px/150% Candara,Times!important;word-break:break-all}#${def.const.seed}\\.sdata{box-sizing:content-box;margin:4px 6px;padding:2px 6px;width:57%;height:22px;outline:none!important;border:2px solid #777;border-radius:4px;font:normal 400 16px/150% var(--fr-shared-monospace)!important}#${def.const.seed}\\.sdata\\:search{box-sizing:border-box;margin:0;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#333!important;outline:none!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}\\.sdata\\:clear{box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#333!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}\\.vlist{overflow-x:hidden;margin:0!important;padding:0!important;max-height:190px;list-style:none!important;overscroll-behavior:contain;scrollbar-color:auto}` +
           `#${def.const.seed}\\.sdata\\:add{box-sizing:border-box;margin:0 0 0 4px;padding:3px 10px;width:max-content;height:max-content;min-width:60px;min-height:30px;border:1px solid #777;border-radius:4px;background:#eee;color:#8b0000!important;vertical-align:initial;text-align:center;letter-spacing:normal;font-weight:400;font-size:12px!important;cursor:pointer}#${def.const.seed}\\.vlist li[id^='${def.const.seed}.vlist.item:']{display:flex;overflow:hidden;margin:0;padding:5px;max-width:364px;color:#555;list-style:none;white-space:nowrap;font:normal 400 14px/150% var(--fr-shared-fontfamily)!important;justify-content:space-between}#${def.const.seed}\\.vlist span.${def.const.seed}\\.domainlist{overflow:hidden;margin-right:auto;padding-left:5px;width:85%;text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all}#${def.const.seed}\\.vlist span.${def.const.seed}\\.customdomain{overflow:hidden;margin-left:5px;width:57%;text-overflow:ellipsis;font-weight:700;-webkit-user-select:all;user-select:all}#${def.const.seed}\\.vlist a[id^='${def.const.seed}.vlist.item.link:']{padding:2px;background:0 0;color:#8b0000;font-size:14px!important;cursor:pointer}#${def.const.seed}\\.exSite\\.add{font:italic 700 24px/150% Candara,Times!important;word-break:break-all}#${def.const.seed}\\.custom\\.fontlist,#${def.const.seed}\\.fontoverride\\.defarray,#${def.const.seed}\\.fontscale\\.defjson{box-sizing:content-box;margin:0 0 4px 0;padding:5px;max-width:372px;min-width:372px;min-height:160px;max-height:457px;outline:0;border:1px solid #999;border-radius:6px;white-space:pre;font:normal 400 14px/150% var(--fr-shared-monospace)!important;resize:vertical;overscroll-behavior:contain;scrollbar-color:auto}#${def.const.seed}\\.warning\\.chn{display:block;margin:-7px 0 0 -7px!important;height:max-content;color:#dc143c;font-size:14px!important}#${def.const.seed}\\.warning\\.en{display:block;margin:-5px 0 0 0!important;height:max-content;color:#dc143c;font-size:14px!important}#${def.const.seed}\\.monospaced\\.siterules{box-sizing:border-box;margin:0!important;padding:5px!important;max-width:388px!important;min-width:388px!important;min-height:140px!important;max-height:256px;outline:0!important;border:1px solid #999;border-radius:6px;white-space:pre;font:normal 400 14px/150% var(--fr-shared-monospace)!important;resize:vertical;overscroll-behavior:contain;scrollbar-color:auto;word-break:keep-all!important}` +
-          `#${def.const.seed}\\.monospaced\\.font,#${def.const.seed}\\.monospaced\\.feature,#${def.const.seed}\\.custom\\.feature,#${def.const.seed}\\.custom\\.variant{box-sizing:border-box;padding:5px;width:380px;outline:0!important;border:1px solid #999;border-radius:6px;font:normal 400 14px/150% var(--fr-shared-monospace)!important}.${def.class.dbm} p:is(.${def.const.seed}\\.mono\\.notify,.${def.const.seed}\\.fontfeature,.${def.const.seed}\\.fontvariant){display:block;margin-top:10px!important;color:#555;font-size:14px!important}#${def.id.cm},#${def.id.fi}{margin:0 0 8px;width:97%!important;border-bottom:1px groove #ccc}.${def.class.dbm} span.${def.const.seed}\\.cusmono{margin:2px 0 0 0;color:#555!important;font-weight:700!important;user-select:none;-webkit-user-select:none}#${def.const.seed}\\.kbd{display:inline-block;box-sizing:content-box;margin:4px 0 0;padding:3px 10px;width:94%;border:1px solid #afb8c166;border-radius:6px;background-color:#f6f8fa;color:#666;vertical-align:middle;text-align:center;font-size:14px!important}.${def.const.seed}\\.clr\\:808080{color:#808080!important}.${def.const.seed}\\.fst\\:nml{font-style:normal!important}.${def.const.seed}\\.fst\\:ita{font-style:italic!important}.${def.const.seed}\\.fs\\:20p{font-size:20px!important}.${def.const.seed}\\.save\\:p{display:flex;height:30px;align-items:center}.${def.const.seed}\\.mh\\:22p{min-height:22px}.${def.const.seed}\\.indent\\:6p{text-indent:6px!important}.${def.const.seed}\\.mgr\\:5p{margin:0 5px 0 0}.${def.const.seed}\\.pd\\:0{padding:0}.${def.const.seed}\\.fs\\:14p{font-size:14px!important}.${def.const.seed}\\.fs\\:11p{font-size:11px!important}.${def.const.seed}\\.cs\\:pointer{cursor:pointer}.${def.const.seed}\\.wrap\\.break{word-wrap:break-word;word-break:break-all!important}.${def.const.seed}\\.clr\\:indigo{color:#4b0082!important}.${def.const.seed}\\.clr\\:green{color:#006400!important}.${def.const.seed}\\.clr\\:555{color:#555!important}.${def.const.seed}\\.fs\\:12p{font-size:12px!important}.${def.const.seed}\\.clr\\:tan{color:#d2b48c!important}.${def.const.seed}\\.clr\\:708090{color:#708090!important}.${def.const.seed}\\.clr\\:ff7f50{color:#ff7f50!important}.${def.const.seed}\\.list\\:p{display:flex;justify-content:left;align-items:center}.${def.const.seed}\\.mg\\:05p{margin:0 5px}.${def.const.seed}\\.clr\\:ff6347{color:#ff6347!important}.${def.const.seed}\\.v\\.en{padding:0px 4px;font:italic 700 20px/130% Candara,Times New Roman!important}` +
+          `#${def.const.seed}\\.monospaced\\.font,#${def.const.seed}\\.monospaced\\.feature,#${def.const.seed}\\.custom\\.feature,#${def.const.seed}\\.custom\\.variant{box-sizing:border-box;padding:5px;width:380px;outline:0!important;border:1px solid #999;border-radius:6px;font:normal 400 14px/150% var(--fr-shared-monospace)!important}.${def.class.dbm} p:is(.${def.const.seed}\\.mono\\.notify,.${def.const.seed}\\.fontfeature,.${def.const.seed}\\.fontvariant){display:block;margin-top:10px!important;color:#555;font-size:14px!important}#${def.id.cm},#${def.id.fi}{margin:0 0 8px;width:97%!important;border-bottom:1px groove #ccc}.${def.class.dbm} span.${def.const.seed}\\.cusmono{margin:2px 0 0 0;color:#555!important;font-weight:700!important;user-select:none;-webkit-user-select:none}#${def.const.seed}\\.kbd{display:inline-block;box-sizing:content-box;margin:4px 0 0;padding:3px 10px;width:94%;border:1px solid #afb8c166;border-radius:6px;background:#f6f8fa;color:#666;vertical-align:middle;text-align:center;font-size:14px!important}.${def.const.seed}\\.clr\\:808080{color:#808080!important}.${def.const.seed}\\.fst\\:nml{font-style:normal!important}.${def.const.seed}\\.fst\\:ita{font-style:italic!important}.${def.const.seed}\\.fs\\:20p{font-size:20px!important}.${def.const.seed}\\.save\\:p{display:flex;height:30px;align-items:center}.${def.const.seed}\\.mh\\:22p{min-height:22px}.${def.const.seed}\\.indent\\:6p{text-indent:6px!important}.${def.const.seed}\\.mgr\\:5p{margin:0 5px 0 0}.${def.const.seed}\\.pd\\:0{padding:0}.${def.const.seed}\\.fs\\:14p{font-size:14px!important}.${def.const.seed}\\.fs\\:11p{font-size:11px!important}.${def.const.seed}\\.cs\\:pointer{cursor:pointer}.${def.const.seed}\\.wrap\\.break{word-wrap:break-word;word-break:break-all!important}.${def.const.seed}\\.clr\\:indigo{color:#4b0082!important}.${def.const.seed}\\.clr\\:green{color:#006400!important}.${def.const.seed}\\.clr\\:555{color:#555!important}.${def.const.seed}\\.fs\\:12p{font-size:12px!important}.${def.const.seed}\\.clr\\:tan{color:#d2b48c!important}.${def.const.seed}\\.clr\\:708090{color:#708090!important}.${def.const.seed}\\.clr\\:ff7f50{color:#ff7f50!important}.${def.const.seed}\\.list\\:p{display:flex;justify-content:left;align-items:center}.${def.const.seed}\\.mg\\:05p{margin:0 5px}.${def.const.seed}\\.clr\\:ff6347{color:#ff6347!important}.${def.const.seed}\\.v\\.en{padding:0px 4px;font:italic 700 20px/130% Candara,Times New Roman!important}` +
           `.${def.const.seed}\\.v\\.cn{padding:4px;font:italic 700 22px/150% Candara,Times!important}.${def.const.seed}\\.hi\\.cn{font:italic 700 22px/150% var(--fr-shared-fontfamily)!important}.${def.const.seed}\\.hi\\.en{font:normal 700 20px/150% var(--fr-shared-fontfamily)!important}.${def.const.seed}\\.pd\\:4p{padding:4px}.${def.const.seed}\\.lh\\:180{line-height:180%!important}.${def.const.seed}\\.clr\\:b8860b{color:#b8860b!important}.${def.const.seed}\\.tal\\:center{text-align:center!important}.${def.const.seed}\\.cps{padding-bottom:6px;font-size:18px!important}.${def.const.seed}\\.cpsa{display:inline-block;overflow:hidden;width:302px;height:237px;border:2px solid #b8860b;border-radius:8px;background:url('${def.url.loadingImg}') 50% 50% no-repeat}.${def.const.seed}\\.clr\\:ff0000{border-color:#ff0000!important}.${def.const.seed}\\.clr\\:ff8c00{border-color:#ff8c00!important}.${def.const.seed}\\.input\\.pdb\\:5px{padding-bottom:5px;width:98%;}.${def.const.seed}\\.bd\\:crimson{border:2px solid #dc143c!important}.${def.const.seed}\\.list\\.reset{text-decoration:line-through;font-style:italic}#${def.const.seed}\\.report\\:author{overflow-y:auto;margin:0!important;padding:0!important;max-height:300px;list-style-position:outside}#${def.const.seed}\\.report\\:author li{padding:2px}#${def.const.seed}\\.custom\\.fontlist::placeholder{color:#aaa!important;white-space:pre-line!important;font:normal 400 14px/150% var(--fr-shared-fontfamily)!important;word-break:break-all!important}` +
           `#${def.const.seed}\\.update li{margin:0;padding:1px 4px;color:#808080;font:normal 400 14px/150% var(--fr-shared-fontfamily)!important}#${def.const.seed}\\.update .${def.const.seed}\\.added{list-style-type:'\uff0b'}#${def.const.seed}\\.update .${def.const.seed}\\.removed{list-style-type:'\uff0d'}#${def.const.seed}\\.update .${def.const.seed}\\.fixed{list-style-type:'\uff20'}#${def.const.seed}\\.update .${def.const.seed}\\.info{color:#daa520;word-break:break-word;list-style-type:'\u266f'}#${def.const.seed}\\.update .${def.const.seed}\\.warn{color:#e90000;word-break:break-word;list-style-type:'\u2718'}#${def.const.seed}\\.update .${def.const.seed}\\.init{color:#65a16a;word-break:break-word;list-style-type:'\u2691'}.${def.class.dbm} input:focus,.${def.class.dbm} textarea:focus{box-shadow:inset 0 1px 3px #0000001a,0 0 4px #6e6f7099!important}@-moz-document url-prefix() {.${def.class.dbm} textarea,.${def.class.dbm} ul,#${def.const.seed}\\.custom\\.fontlist,#${def.const.seed}\\.monospaced\\.siterules,#${def.const.seed}\\.fontoverride\\.defarray,#${def.const.seed}\\.fontscale\\.defjson{scrollbar-color:#bbbbbbba #eeeeee12;scrollbar-width:thin}}`,
         frConfigure:
           `:host(#${def.id.configure}){z-index:2147483645}#${def.id.container}{position:absolute;top:10px;right:24px;z-index:99999;display:block;box-sizing:content-box;padding:4px;border-radius:12px;background:#f0f6ff!important;box-shadow:0 0 4px 0 #0000004d;color:#333;text-align:left;font-weight:700;font-size:16px!important;opacity:0;transition:opacity .5s;width:auto;overflow:hidden;pointer-events:auto}#${def.id.container} .${def.const.seed}\\.dialog\\.scrollbar{display:block;visibility:hidden;overflow-x:hidden;overflow-y:auto;max-height:max(calc(98vh - 10px),100px);min-height:10%;scrollbar-color:auto;overscroll-behavior:contain}#${def.id.container} .${def.const.seed}\\.dialog\\.scrollbar:hover{visibility:visible}#${def.id.container} .${def.const.seed}\\.dialog\\.scrollbar::-webkit-scrollbar{width:6px;height:1px}#${def.id.container} .${def.const.seed}\\.dialog\\.scrollbar::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df}#${def.id.container} .${def.const.seed}\\.dialog\\.scrollbar::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df}#${def.id.container} *{text-shadow:none!important;font-weight:700;font-size:16px;font-family:var(--fr-shared-fontfamily),var(--fr-shared-emoji)!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}#${def.id.container} fieldset{display:block;visibility:visible;margin:2px;padding:4px 6px;width:auto;height:auto;min-height:475px;border:2px groove #67a5df!important;border-radius:10px;background:#f0f6ff}#${def.id.container} legend{position:relative;float:none;display:block;visibility:visible;box-sizing:content-box;margin:0;padding:0 32px 0 8px;width:auto!important;height:auto!important;border:none!important;border-radius:6px;background:#f0f6ff!important;font:normal 700 16px/150% var(--fr-shared-fontfamily)!important}#${def.id.container} fieldset ul{margin:0;padding:0;background:#f0f6ff!important}#${def.id.container} ul li{float:none;display:block;box-sizing:content-box;margin:3px 0;min-width:-webkit-fill-available;min-width:-moz-available;border:none;background:#f0f6ff!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none}#${def.id.container} ul li:before{display:none}#${def.id.container} .${def.class.rotation} svg{visibility:visible!important;overflow:hidden;width:24px;height:24px;vertical-align:initial!important;fill:#67a5df}` +
-          `#${def.id.container} .${def.class.rotation} svg:hover{cursor:help}#${def.const.seed}\\.scriptname{display:inline-block;margin:0 4px 0 0;vertical-align:bottom;overflow:hidden;min-width:130px;max-width:225px;text-overflow:ellipsis;white-space:nowrap;font-weight:700!important;-webkit-user-select:all;user-select:all}#${def.const.seed}\\.scriptname:hover{cursor:help}#${def.id.container} .${def.class.title} .${def.class.guide}{position:absolute;display:inline-block;cursor:pointer}@keyframes rotation{0%{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(1turn)}}.${def.class.title} .${def.class.rotation}{position:relative;display:inline-block;top:auto;right:auto;bottom:auto;left:auto;margin:0;padding:0;width:24px;height:24px;-webkit-transform:rotate(1turn);transform-origin:center 50% 0;animation:rotation 6s linear infinite}#${def.id.container} input:not([type='range'],[type='checkbox']):focus,#${def.id.container} textarea:focus{box-shadow:inset 0 1px 3px #0000001a,0 0 6px #52a8ec99!important}#${def.id.fontList}{padding:2px 10px 0;min-height:73px}#${def.id.fontFace},#${def.id.fontSmooth}{display:flex!important;padding:2px 10px;width:calc(100% - 18px);height:40px;min-width:auto;align-items:center;justify-content:space-between}#${def.id.fontSize}{padding:2px 10px;height:60px}#${def.id.fontStroke}{padding:2px 10px;height:60px}#${def.id.fontShadow}{padding:2px 10px;height:60px}#${def.id.container} #${def.id.shadowColor}{display:flex;padding:2px 10px;width:auto;min-height:45px;align-items:center;justify-content:space-around;flex-wrap:nowrap;flex-direction:row}#${def.id.fontCss},#${def.id.fontEx}{padding:2px 10px;height:110px;min-height:110px;min-width:254px!important}#${def.id.submit}{padding:2px 10px;height:40px;display:flex!important}#${def.id.fontList} .${def.class.selector} a{text-decoration:none;font-weight:400}#${def.id.fontList} .${def.class.label}{display:inline-block;margin:-1px 4px 5px 0;padding:0;height:34px;line-height:100%!important}#${def.id.fontList} .${def.class.label} span{display:inline-block;overflow:hidden;box-sizing:border-box;padding:5px;width:max-content;height:max-content;max-width:200px;min-width:12px;background:#67a5df;color:#fff;text-overflow:ellipsis;white-space:nowrap;font-weight:400;font-size:16px!important}#${def.id.fontList} .${def.class.close}:hover{border-radius:2px;background-color:#2d7dca;color:#ff6347}#${def.id.fontList} .${def.class.close}{width:12px}` +
-          `#${def.id.fontList} .${def.class.selector}{overflow-x:hidden;box-sizing:border-box;margin:0 0 6px 0;padding:6px 0 0 6px;width:100%;max-width:254px;max-height:90px;min-width:100%;min-height:45px;border:2px solid #67a5df!important;border-radius:6px;overscroll-behavior:contain;scrollbar-color:auto}#${def.id.selector}{width:100%;max-width:100%;display:none}#${def.id.selector} label{display:block;margin:0 0 4px;color:#333;cursor:auto}#${def.id.cleaner}{margin-left:5px;cursor:pointer}#${def.id.cleaner}:hover{color:#dc143c}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontList} .${def.class.selectFontID} span.${def.class.spanlabel},#${def.id.selector} span.${def.class.spanlabel}{display:block!important;margin:0!important;padding:0 0 4px;width:auto;border:0;background-color:transparent!important;color:#333;text-align:left!important}#${def.id.fontList} .${def.class.selectFontID}{width:auto}#${def.id.fontList} .${def.class.selectFontID} input{overflow:hidden;box-sizing:border-box;margin:0;padding:1px 4px 1px 0px;width:230px;height:42px;max-width:100%;min-width:100%;outline:none;border:2px solid #67a5df;border-radius:6px;background:#fafafa;text-indent:8px;text-overflow:ellipsis;color:#333;font:normal 700 16px/150% var(--fr-shared-fontfamily)!important}#${def.id.fontList} .${def.class.selectFontID} input[disabled]{pointer-events:none!important}#${def.id.fontList} input[disabled]::placeholder{color:#444a!important}#${def.id.fontList} .${def.class.selectFontID} input:focus:not(:placeholder-shown)~span{display:none}#${def.id.fontList} .${def.class.selectFontID} input::-webkit-search-cancel-button{margin:auto 4px;cursor:pointer}#${def.id.fontList} .${def.class.selectFontID} dl{display:none;position:absolute;z-index:1000;overflow-x:hidden;box-sizing:content-box;margin:4px 0 0;padding:4px 8px;width:auto;max-width:calc(100% - 68px);max-height:298px;min-width:60%;border:2px solid #67a5df!important;border-radius:6px;background-color:#fff;white-space:nowrap;font-size:18px!important;overscroll-behavior:contain;scrollbar-color:auto}#${def.const.seed}\\.fontoverride\\.def:hover,#${def.const.seed}\\.fontscale\\.def:hover{cursor:help;color:#8b0000}` +
-          `#${def.const.seed}\\.search::placeholder{color:#3699!important;font:normal 700 16px/150% var(--fr-shared-fontfamily)!important}#${def.id.fontList} .${def.class.selectFontID} dl::-webkit-scrollbar{width:10px;height:1px}#${def.id.fontList} .${def.class.selectFontID} dl::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df}#${def.id.fontList} .${def.class.selectFontID} dl::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df}#${def.id.fontList} .${def.class.selectFontID} dl dd{display:block;overflow-x:hidden;box-sizing:content-box;margin:1px 8px;padding:5px 0;width:-moz-available;width:-webkit-fill-available;max-width:100%;min-width:100%;text-overflow:ellipsis;font-weight:400;font-size:21px!important}#${def.id.fontList} .${def.class.selectFontID} dl dd:hover{overflow-x:hidden;box-sizing:content-box;min-width:-moz-available;min-width:-webkit-fill-available;background-color:#67a5df;color:#fff;text-overflow:ellipsis}.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 10px #0000001a,0 0 5px #f5929266;white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#fff;box-shadow:0 0 1px #00000099;color:#fff;content:" "}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#fff;content:"OFF";font-weight:700;font-style:normal;font-size:16px}.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 10px #0000001a,0 0 5px #92c4f566;cursor:pointer}.${def.class.checkbox}:checked+label::after{left:10px;content:"ON"}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}#${def.id.fface} label,#${def.id.fface}+label::after,#${def.id.fface}+label::before,#${def.id.smooth} label,#${def.id.smooth}+label::after,#${def.id.smooth}+label::before{-webkit-transition:all .3s ease-in;transition:all .3s ease-in}` +
-          `#${def.id.fontShadow} div.${def.class.flex}:before,#${def.id.fontShadow} div.${def.class.flex}:after,#${def.id.fontStroke} div.${def.class.flex}:before,#${def.id.fontStroke} div.${def.class.flex}:after,#${def.id.fontSize} div.${def.class.flex}:before,#${def.id.fontSize} div.${def.class.flex}:after{display:none}#${def.id.shadowSize},#${def.id.strokeSize},#${def.id.fontScale}{box-sizing:content-box;margin:0 10px 0 0!important;padding:0;width:56px!important;height:32px!important;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:#fafafa!important;color:#111!important;text-align:center;text-indent:0;font-weight:400!important;font-size:17px!important;font-family:'Anton',Times,serif!important}#${def.id.fontScale}[disabled]{background-color:#e4e7edd1!important;color:#555!important;filter:grayscale(.9)}#${def.id.fviewport},#${def.id.fstroke},#${def.id.rdCanvas}{visibility:visible;width:auto;color:#666;font-size:12px!important}#${def.id.fviewport}>label,#${def.id.fstroke}>label,#${def.id.rdCanvas}>label{float:none!important;display:inline!important;margin:0!important;padding:0 4px 0 2px!important;color:#666!important;font-size:12px!important;cursor:help!important}#${def.id.fixViewport},#${def.id.fixStroke},#${def.id.renderCanvas}{display:inline-block;margin:0 2px 0 0!important;width:14px!important;height:14px!important;vertical-align:text-bottom;cursor:pointer;-webkit-appearance:none!important}#${def.id.fixViewport}:checked::after,#${def.id.fixStroke}:checked::after,#${def.id.renderCanvas}:checked::after{border:0!important;background-color:#65a0db;color:#fff;content:"\u2713";font-weight:700;font-size:12px;line-height:14px}.${def.class.flex}{display:flex;width:auto;min-width:100%;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}.${def.class.slider} input{visibility:hidden}#${def.id.fixViewport}::after,#${def.id.fixStroke}::after,#${def.id.renderCanvas}::after{position:relative;top:0;display:inline-block;margin:0;padding:0;width:14px;height:14px;border-radius:3px;background-color:#aaa;color:#fff;content:"\u2717";vertical-align:top;text-align:center;font-weight:700;font-size:10px;line-height:14px}` +
-          `#${def.id.shadowColor} .${def.class.frColorPicker} #${def.id.color}{box-sizing:border-box;margin:0;padding:0 8px 0 0;min-width:160px;max-width:160px;height:35px!important;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:#fdfdffb0;color:#333!important;text-align:center;text-indent:0;font-weight:400!important;font-size:18px!important;font-family:'Anton',Times,serif!important;cursor:pointer}#${def.id.fontCss} textarea,#${def.id.fontEx} textarea{display:block;box-sizing:border-box;margin:0;padding:5px;width:calc(100% - 2px)!important;height:78px;max-width:calc(100% - 2px);max-height:78px;min-width:calc(100% - 2px);min-height:78px;outline:none!important;border:2px solid #67a5df!important;border-radius:6px;scrollbar-color:auto;color:#0b5b9c!important;font:normal 600 14px/150% var(--fr-shared-monospace)!important;resize:none;cursor:auto;word-break:break-all;overscroll-behavior:contain;scrollbar-color:auto}#${def.id.fontCss} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontCss} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontCss} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #00000033}#${def.id.fontEx} textarea{background:#fafafa!important}#${def.id.fontEx} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontEx} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df}.${def.class.switcher}{float:right;box-sizing:border-box;margin:-2px 4px 0 0;padding:0 6px;border:2px double #67a5df;border-radius:4px;color:#0a68c1;}#${def.id.fontCss} textarea::placeholder,#${def.id.fontEx} textarea::placeholder{color:#555;font:italic 500 14px/150% var(--fr-shared-fontfamily)!important;opacity:.85}#${def.id.cSwitch}:hover,#${def.id.eSwitch}:hover{cursor:pointer;-webkit-user-select:none;user-select:none}.${def.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9,#e9ffe9 25%,transparent 0,transparent 50%,#e9ffe9 0,#e9ffe9 75%,transparent 0,transparent)!important;background-color:#f7fff7!important;background-size:50px 50px}#${def.id.submit} .${def.class.submit}{margin-left:auto}#${def.id.backup}{display:none}` +
-          `#${def.id.submit} button{box-sizing:border-box;margin:0;padding:5px 10px;width:auto;height:35px;min-width:min-content;min-height:35px;border:2px solid #6ba7e0;border-radius:6px;background-color:#67a5df;background-image:none;color:#fff!important;font:normal 600 14px/150% var(--fr-shared-fontfamily)!important;cursor:pointer}#${def.id.submit} button:hover{box-shadow:0 0 5px #042f6459!important}#${def.id.submit} .${def.class.cancel},#${def.id.submit} .${def.class.reset}{margin-right:6px}.${def.class.anim}{border:2px solid #dc143c!important;background:#dc143c!important;animation:jiggle 1.8s ease-in infinite}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}.${def.class.tooltip}{position:relative;padding:0;cursor:help;-webkit-user-select:none;user-select:none}.${def.class.tooltip}:active .${def.class.tooltip}{display:block}.${def.const.seed}\\.mgl\\:-5p{margin:0 0 0 -5px}#${def.id.container} .${def.class.tooltip} .${def.class.tooltip} *{font-size:14px}.${def.class.tooltip} .${def.class.tooltip}{position:absolute;z-index:999999;display:none;box-sizing:content-box;padding:10px 10px 0 10px;width:234px;max-width:234px;border:2px solid #b8c4ce;border-radius:6px;background-color:#54a2ec;color:#fff;font-weight:400;opacity:.92;word-break:break-all}#${def.id.container} .${def.class.tooltip} .${def.class.tooltip} em{font-style:normal}#${def.id.container} .${def.class.tooltip} .${def.class.tooltip} strong{color:#ff8c00;font-size:18px}#${def.id.container} .${def.class.tooltip} .${def.class.tooltip} p{display:block;margin:0 0 10px;color:#fff;text-indent:0;line-height:150%}.${def.class.ps1}{position:relative;top:-33px;right:3px;float:right;margin:0;padding:0;width:24px;height:0}.${def.class.ps2}{top:35px;right:-7px}.${def.class.ps3},.${def.class.ps4},.${def.class.ps5}{bottom:30px;left:auto}#${def.id.fshadow}{visibility:hidden;margin-top:5px;position:absolute;z-index:999;box-sizing:content-box;padding:10px;width:234px;max-width:234px;border:2px solid #67a5df;border-radius:6px;background-color:#f0f6ff;color:#333;opacity:.92;left:21px}#${def.id.fshadow} .${def.const.seed}\\.fix\\.label{display:flex;align-items:center;justify-content:space-around}#${def.id.fshadow} .${def.const.seed}\\.fix\\.text{padding:5px;font-size:12px;font-weight:400;line-height:170%!important;color:#808287;word-break:break-all}` +
-          `.${def.const.seed}\\.mg\\:0\\.pd\\:0{margin:0;padding:0}.${def.const.seed}\\.checkbox{height:32px;align-self:center}.${def.const.seed}\\.ft\\:gs1{filter:grayscale(1)!important}.${def.const.seed}\\.mg\\:0-3p\\.pd\\:0{margin:0 -3px;padding:0}.${def.const.seed}\\.mgb\\:6p{margin:0 0 6px 0}.${def.const.seed}\\.bdlr\\:4px{border-top-left-radius:4px;border-bottom-left-radius:4px}.${def.const.seed}\\.bdrr\\:4px{border-top-right-radius:4px;border-bottom-right-radius:4px}.${def.const.seed}\\.usel\\:none{user-select:none!important}.${def.const.seed}\\.h\\:35p\\.mh\\:35p{height:35px!important;min-height:35px!important}.${def.const.seed}\\.prvw{background-color:#ff7f50!important;border-color:#ff7f50!important}.${def.const.seed}\\.input\\.color{background-position:left top,left top!important;background-size:var(--fr-input-gb-size,"auto,35px 16px")!important;background-repeat:repeat-y,repeat-y!important;background-origin:padding-box,padding-box!important;background-image:linear-gradient(90deg,var(--fr-input-color) 0,var(--fr-input-color) var(--fr-input-color-edge,35px),transparent var(--fr-input-color-edge2,36px),transparent),url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACMAAAAQCAYAAACcN8ZaAAAAAXNSR0IArs4c6QAAAFNJREFUSEtjnDlz5n8GPODs2bP4pBmMjY3xypOin3HUMUhhiRyyoyGDnMhGQwZXlhu8IZOWloa3nKFmOYItdJDLIcZRxyAF0WjI4MpNoyEz5EIGAMmNh+nDrPy/AAAAAElFTkSuQmCC")!important;padding-left:var(--fr-input-padding-left,43px)!important}#${def.id.fontList} .${def.class.selectFontID} dl>dt{all:initial;display:none;padding:8px;border-radius:4px;border:1px solid #e51111;background:#e51111;word-break:break-all;color:#efea11;font-size:15px;cursor:progress}@-moz-document url-prefix() {#${def.id.fontList} .${def.class.label}{margin:-1px 0 4px 0}#${def.id.fontList} .${def.class.selectFontID} input{padding:1px 24px 1px 0px!important}#${def.id.fontList} .${def.class.selectFontID} input:focus:not(:placeholder-shown){padding:1px 8px 1px 0px!important}#${def.id.container} .${def.const.seed}\\.dialog\\.scrollbar{padding:0 4px 0 2px}#${def.id.container} .${def.const.seed}\\.dialog\\.scrollbar,#${def.id.fontList} .${def.class.selector},#${def.id.fontList} .${def.class.selectFontID} dl,#${def.id.fontCss} textarea,#${def.id.fontEx} textarea{scrollbar-color: #c3cdddff #f1f0f012;scrollbar-width:thin}}`,
+          `#${def.id.container} .${def.class.rotation} svg:hover{cursor:help}#${def.const.seed}\\.scriptname{display:inline-block;margin:0 4px 0 0;vertical-align:bottom;overflow:hidden;min-width:130px;max-width:225px;text-overflow:ellipsis;white-space:nowrap;font-weight:700!important;-webkit-user-select:all;user-select:all}#${def.const.seed}\\.scriptname:hover{cursor:help}#${def.id.container} .${def.class.title} .${def.class.guide}{position:absolute;display:inline-block;cursor:pointer}@keyframes rotation{0%{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(1turn)}}.${def.class.title} .${def.class.rotation}{position:relative;display:inline-block;top:auto;right:auto;bottom:auto;left:auto;margin:0;padding:0;width:24px;height:24px;-webkit-transform:rotate(1turn);transform-origin:center 50% 0;animation:rotation 6s linear infinite}#${def.id.container} input:not([type='range'],[type='checkbox']):focus,#${def.id.container} textarea:focus{box-shadow:inset 0 1px 3px #0000001a,0 0 6px #52a8ec99!important}#${def.id.fontList}{padding:2px 10px 0;min-height:73px}#${def.id.fontFace},#${def.id.fontSmooth}{display:flex!important;padding:2px 10px;width:calc(100% - 18px);height:40px;min-width:auto;align-items:center;justify-content:space-between}#${def.id.fontSize}{padding:2px 10px;height:60px}#${def.id.fontStroke}{padding:2px 10px;height:60px}#${def.id.fontShadow}{padding:2px 10px;height:60px}#${def.id.container} #${def.id.shadowColor}{display:flex;padding:2px 10px;width:auto;min-height:45px;align-items:center;justify-content:space-around;flex-wrap:nowrap;flex-direction:row}#${def.id.fontCss},#${def.id.fontEx}{padding:2px 10px;height:110px;min-height:110px;min-width:254px!important}#${def.id.submit}{padding:2px 10px;height:40px;display:flex!important}#${def.id.fontList} .${def.class.selector} a{text-decoration:none;font-weight:400}#${def.id.fontList} .${def.class.label}{display:inline-block;margin:-1px 4px 5px 0;padding:0;height:34px;line-height:100%!important}#${def.id.fontList} .${def.class.label} span{display:inline-block;overflow:hidden;box-sizing:border-box;padding:5px;width:max-content;height:max-content;max-width:200px;min-width:12px;background:#67a5df;color:#fff;text-overflow:ellipsis;white-space:nowrap;font-weight:400;font-size:16px!important}#${def.id.fontList} .${def.class.close}:hover{border-radius:2px;background:#2d7dca;color:#ff6347}#${def.id.fontList} .${def.class.close}{width:12px}` +
+          `#${def.id.fontList} .${def.class.selector}{overflow-x:hidden;box-sizing:border-box;margin:0 0 6px 0;padding:6px 0 0 6px;width:100%;max-width:254px;max-height:90px;min-width:100%;min-height:45px;border:2px solid #67a5df!important;border-radius:6px;overscroll-behavior:contain;scrollbar-color:auto}#${def.id.selector}{width:100%;max-width:100%;display:none}#${def.id.selector} label{display:block;margin:0 0 4px;color:#333;cursor:auto}#${def.id.cleaner}{margin-left:5px;cursor:pointer}#${def.id.cleaner}:hover{color:#dc143c}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontList} .${def.class.selectFontID} span.${def.class.spanlabel},#${def.id.selector} span.${def.class.spanlabel}{display:block!important;margin:0!important;padding:0 0 4px;width:auto;border:0;background:transparent!important;color:#333;text-align:left!important}#${def.id.fontList} .${def.class.selectFontID}{width:auto}#${def.id.fontList} .${def.class.selectFontID} input{overflow:hidden;box-sizing:border-box;margin:0;padding:1px 4px 1px 0px;width:230px;height:42px;max-width:100%;min-width:100%;outline:none;border:2px solid #67a5df;border-radius:6px;background:#fafafa;text-indent:8px;text-overflow:ellipsis;color:#333;font:normal 700 16px/150% var(--fr-shared-fontfamily)!important}#${def.id.fontList} .${def.class.selectFontID} input[disabled]{pointer-events:none!important}#${def.id.fontList} input[disabled]::placeholder{color:#444a!important}#${def.id.fontList} .${def.class.selectFontID} input:focus:not(:placeholder-shown)~span{display:none}#${def.id.fontList} .${def.class.selectFontID} input::-webkit-search-cancel-button{margin:auto 4px;cursor:pointer}#${def.id.fontList} .${def.class.selectFontID} dl{display:none;position:absolute;z-index:1000;overflow-x:hidden;box-sizing:content-box;margin:4px 0 0;padding:4px 8px;width:auto;max-width:calc(100% - 68px);max-height:298px;min-width:60%;border:2px solid #67a5df!important;border-radius:6px;background:#fff;white-space:nowrap;font-size:18px!important;overscroll-behavior:contain;scrollbar-color:auto}#${def.const.seed}\\.fontoverride\\.def:hover,#${def.const.seed}\\.fontscale\\.def:hover{cursor:help;color:#8b0000}` +
+          `#${def.const.seed}\\.search::placeholder{color:#3699!important;font:normal 700 16px/150% var(--fr-shared-fontfamily)!important}#${def.id.fontList} .${def.class.selectFontID} dl::-webkit-scrollbar{width:10px;height:1px}#${def.id.fontList} .${def.class.selectFontID} dl::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df}#${def.id.fontList} .${def.class.selectFontID} dl::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df}#${def.id.fontList} .${def.class.selectFontID} dl dd{display:block;overflow-x:hidden;box-sizing:content-box;margin:1px 8px;padding:5px 0;width:-moz-available;width:-webkit-fill-available;max-width:100%;min-width:100%;text-overflow:ellipsis;font-weight:400;font-size:21px!important}#${def.id.fontList} .${def.class.selectFontID} dl dd:hover{overflow-x:hidden;box-sizing:content-box;min-width:-moz-available;min-width:-webkit-fill-available;background:#67a5df;color:#fff;text-overflow:ellipsis}.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 10px #0000001a,0 0 5px #f5929266;white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#fff;box-shadow:0 0 1px #00000099;color:#fff;content:" "}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#fff;content:"OFF";font-weight:700;font-style:normal;font-size:16px}.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 10px #0000001a,0 0 5px #92c4f566;cursor:pointer}.${def.class.checkbox}:checked+label::after{left:10px;content:"ON"}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}#${def.id.fface} label,#${def.id.fface}+label::after,#${def.id.fface}+label::before,#${def.id.smooth} label,#${def.id.smooth}+label::after,#${def.id.smooth}+label::before{-webkit-transition:all .3s ease-in;transition:all .3s ease-in}` +
+          `#${def.id.fontShadow} div.${def.class.flex}:before,#${def.id.fontShadow} div.${def.class.flex}:after,#${def.id.fontStroke} div.${def.class.flex}:before,#${def.id.fontStroke} div.${def.class.flex}:after,#${def.id.fontSize} div.${def.class.flex}:before,#${def.id.fontSize} div.${def.class.flex}:after{display:none}#${def.id.shadowSize},#${def.id.strokeSize},#${def.id.fontScale}{box-sizing:content-box;margin:0 10px 0 0!important;padding:0;width:56px!important;height:32px!important;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:#fafafa!important;color:#111!important;text-align:center;text-indent:0;font-weight:400!important;font-size:17px!important;font-family:'Anton',Times,serif!important}#${def.id.fontScale}[disabled]{background:#e4e7edd1!important;color:#555!important;filter:grayscale(.9)}#${def.id.fviewport},#${def.id.fstroke},#${def.id.rdCanvas}{visibility:visible;width:auto;color:#666;font-size:12px!important}#${def.id.fviewport}>label,#${def.id.fstroke}>label,#${def.id.rdCanvas}>label{float:none!important;display:inline!important;margin:0!important;padding:0 4px 0 2px!important;color:#666!important;font-size:12px!important;cursor:help!important}#${def.id.fixViewport},#${def.id.fixStroke},#${def.id.renderCanvas}{display:inline-block;margin:0 2px 0 0!important;width:14px!important;height:14px!important;vertical-align:text-bottom;cursor:pointer;-webkit-appearance:none!important}#${def.id.fixViewport}:checked::after,#${def.id.fixStroke}:checked::after,#${def.id.renderCanvas}:checked::after{border:0!important;background:#65a0db;color:#fff;content:"\u2713";font-weight:700;font-size:12px;line-height:14px}.${def.class.flex}{display:flex;width:auto;min-width:100%;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}.${def.class.slider} input{visibility:hidden}#${def.id.fixViewport}::after,#${def.id.fixStroke}::after,#${def.id.renderCanvas}::after{position:relative;top:0;display:inline-block;margin:0;padding:0;width:14px;height:14px;border-radius:3px;background:#aaa;color:#fff;content:"\u2717";vertical-align:top;text-align:center;font-weight:700;font-size:10px;line-height:14px}` +
+          `#${def.id.shadowColor} .${def.class.frColorPicker} #${def.id.color}{box-sizing:border-box;margin:0;padding:0 8px 0 0;min-width:160px;max-width:160px;height:35px!important;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:#fdfdffb0;color:#333!important;text-align:center;text-indent:0;font-weight:400!important;font-size:18px!important;font-family:'Anton',Times,serif!important;cursor:pointer}#${def.id.fontCss} textarea,#${def.id.fontEx} textarea{display:block;box-sizing:border-box;margin:0;padding:5px;width:calc(100% - 2px)!important;height:78px;max-width:calc(100% - 2px);max-height:78px;min-width:calc(100% - 2px);min-height:78px;outline:none!important;border:2px solid #67a5df!important;border-radius:6px;scrollbar-color:auto;color:#0b5b9c!important;font:normal 600 14px/150% var(--fr-shared-monospace)!important;resize:none;cursor:auto;word-break:break-all;overscroll-behavior:contain;scrollbar-color:auto}#${def.id.fontCss} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontCss} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontCss} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #00000033}#${def.id.fontEx} textarea{background:#fafafa!important}#${def.id.fontEx} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontEx} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df}.${def.class.switcher}{float:right;box-sizing:border-box;margin:-2px 4px 0 0;padding:0 6px;border:2px double #67a5df;border-radius:4px;color:#0a68c1;}#${def.id.fontCss} textarea::placeholder,#${def.id.fontEx} textarea::placeholder{color:#555;font:italic 500 14px/150% var(--fr-shared-fontfamily)!important;opacity:.85}#${def.id.cSwitch}:hover,#${def.id.eSwitch}:hover{cursor:pointer;-webkit-user-select:none;user-select:none}.${def.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9,#e9ffe9 25%,transparent 0,transparent 50%,#e9ffe9 0,#e9ffe9 75%,transparent 0,transparent)!important;background-color:#f7fff7!important;background-size:50px 50px!important}#${def.id.submit} .${def.class.submit}{margin-left:auto}#${def.id.backup}{display:none}` +
+          `#${def.id.submit} button{box-sizing:border-box;margin:0;padding:5px 10px;width:auto;height:35px;min-width:min-content;min-height:35px;border:2px solid #6ba7e0;border-radius:6px;background:#67a5df;background-image:none;color:#fff!important;font:normal 600 14px/150% var(--fr-shared-fontfamily)!important;cursor:pointer}#${def.id.submit} button:hover{box-shadow:0 0 5px #042f6459!important}#${def.id.submit} .${def.class.cancel},#${def.id.submit} .${def.class.reset}{margin-right:6px}.${def.class.anim}{border:2px solid #dc143c!important;background:#dc143c!important;animation:jiggle 1.8s ease-in infinite}@keyframes jiggle{48%,62%{transform:scale(1,1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translate(0,-5px)}59%{transform:scale(1,1) translate(0,-3px)}}.${def.class.tooltip}{position:relative;padding:0;cursor:help;-webkit-user-select:none;user-select:none}.${def.class.tooltip}:active .${def.class.tooltip}{display:block}.${def.const.seed}\\.mgl\\:-5p{margin:0 0 0 -5px}#${def.id.container} .${def.class.tooltip} .${def.class.tooltip} *{font-size:14px}.${def.class.tooltip} .${def.class.tooltip}{position:absolute;z-index:999999;display:none;box-sizing:content-box;padding:10px 10px 0 10px;width:234px;max-width:234px;border:2px solid #b8c4ce;border-radius:6px;background:#54a2ec;color:#fff;font-weight:400;opacity:.92;word-break:break-all}#${def.id.container} .${def.class.tooltip} .${def.class.tooltip} em{font-style:normal}#${def.id.container} .${def.class.tooltip} .${def.class.tooltip} strong{color:#ff8c00;font-size:18px}#${def.id.container} .${def.class.tooltip} .${def.class.tooltip} p{display:block;margin:0 0 10px;color:#fff;text-indent:0;line-height:150%}.${def.class.ps1}{position:relative;top:-33px;right:3px;float:right;margin:0;padding:0;width:24px;height:0}.${def.class.ps2}{top:35px;right:-7px}.${def.class.ps3},.${def.class.ps4},.${def.class.ps5}{bottom:30px;left:auto}#${def.id.fshadow}{visibility:hidden;margin-top:5px;position:absolute;z-index:999;box-sizing:content-box;padding:10px;width:234px;max-width:234px;border:2px solid #67a5df;border-radius:6px;background:#f0f6ff;color:#333;opacity:.92;left:21px}#${def.id.fshadow} .${def.const.seed}\\.fix\\.label{display:flex;align-items:center;justify-content:space-around}#${def.id.fshadow} .${def.const.seed}\\.fix\\.text{padding:5px;font-size:12px;font-weight:400;line-height:170%!important;color:#808287;word-break:break-all}` +
+          `.${def.const.seed}\\.mg\\:0\\.pd\\:0{margin:0;padding:0}.${def.const.seed}\\.checkbox{height:32px;align-self:center}.${def.const.seed}\\.ft\\:gs1{filter:grayscale(1)!important}.${def.const.seed}\\.mg\\:0-3p\\.pd\\:0{margin:0 -3px;padding:0}.${def.const.seed}\\.mgb\\:6p{margin:0 0 6px 0}.${def.const.seed}\\.bdlr\\:4px{border-top-left-radius:4px;border-bottom-left-radius:4px}.${def.const.seed}\\.bdrr\\:4px{border-top-right-radius:4px;border-bottom-right-radius:4px}.${def.const.seed}\\.usel\\:none{user-select:none!important}.${def.const.seed}\\.h\\:35p\\.mh\\:35p{height:35px!important;min-height:35px!important}.${def.const.seed}\\.prvw{background:#ff7f50!important;border-color:#ff7f50!important}.${def.const.seed}\\.input\\.color{background-position:left top,left top!important;background-size:var(--fr-input-gb-size,"auto,35px 16px")!important;background-repeat:repeat-y,repeat-y!important;background-origin:padding-box,padding-box!important;background-image:linear-gradient(90deg,var(--fr-input-color) 0,var(--fr-input-color) var(--fr-input-color-edge,35px),transparent var(--fr-input-color-edge2,36px),transparent),url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACMAAAAQCAYAAACcN8ZaAAAAAXNSR0IArs4c6QAAAFNJREFUSEtjnDlz5n8GPODs2bP4pBmMjY3xypOin3HUMUhhiRyyoyGDnMhGQwZXlhu8IZOWloa3nKFmOYItdJDLIcZRxyAF0WjI4MpNoyEz5EIGAMmNh+nDrPy/AAAAAElFTkSuQmCC")!important;padding-left:var(--fr-input-padding-left,43px)!important}#${def.id.fontList} .${def.class.selectFontID} dl>dt{all:initial;display:none;padding:8px;border-radius:4px;border:1px solid #e51111;background:#e51111;word-break:break-all;color:#efea11;font-size:15px;cursor:progress}@-moz-document url-prefix() {#${def.id.fontList} .${def.class.label}{margin:-1px 0 4px 0}#${def.id.fontList} .${def.class.selectFontID} input{padding:1px 24px 1px 0px!important}#${def.id.fontList} .${def.class.selectFontID} input:focus:not(:placeholder-shown){padding:1px 8px 1px 0px!important}#${def.id.container} .${def.const.seed}\\.dialog\\.scrollbar{padding:0 4px 0 2px}#${def.id.container} .${def.const.seed}\\.dialog\\.scrollbar,#${def.id.fontList} .${def.class.selector},#${def.id.fontList} .${def.class.selectFontID} dl,#${def.id.fontCss} textarea,#${def.id.fontEx} textarea{scrollbar-color: #c3cdddff #f1f0f012;scrollbar-width:thin}}`,
         frSlider:
           `:host(.${def.class.range}){--primary-color:#67a5df;--value-offset-y:var(--ticks-gap);--value-active-color:#fff;--value-background:transparent;--value-background-hover:var(--primary-color);--value-font:italic 700 14px/14px ui-monospace,Consolas,monospace;--fill-color:var(--primary-color);--progress-background:#dfdfdf;--progress-radius:20px;--show-min-max:none;--track-height:calc(var(--thumb-size) / 2);--min-max-font:12px serif;--min-max-opacity:0.5;--min-max-x-offset:10%;--thumb-size:22px;--thumb-color:#fff;--thumb-shadow:0 0 3px #00000066,0 0 1px #00000080 inset,0 0 0 99px var(--thumb-color) inset;--thumb-shadow-active:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px var(--primary-color) inset,0 0 3px #00000066;--thumb-shadow-hover:0 0 0 calc(var(--thumb-size) / 4) inset var(--thumb-color),0 0 0 99px #ff8c00 inset,0 0 3px #00000066;--ticks-thickness:1px;--ticks-height:5px;--ticks-gap:var(--ticks-height, 0);--ticks-color:transparent;--ticks-count:(var(--max) - var(--min))/var(--step);--maxTicksAllowed:1000;--too-many-ticks:Min(1, Max(var(--ticks-count) - var(--maxTicksAllowed), 0));--x-step:Max(var(--step), var(--too-many-ticks) * (var(--max) - var(--min)));--tickIntervalPerc_1:Calc((var(--max) - var(--min)) / var(--x-step));--tickIntervalPerc:calc((100% - var(--thumb-size)) / var(--tickIntervalPerc_1) * var(--tickEvery, 1));--value-a:Clamp(var(--min), var(--value, 0), var(--max));--value-b:var(--value, 0);--text-value-a:var(--text-value, "");--completed-a:calc((var(--value-a) - var(--min)) / (var(--max) - var(--min)) * 100);--completed-b:calc((var(--value-b) - var(--min)) / (var(--max) - var(--min)) * 100);width:auto;min-width:105%!important;margin:-3px 0 0 -7px;box-sizing:content-box;display:inline-block;height:Max(var(--track-height),var(--thumb-size));background:linear-gradient(to right,var(--ticks-color) var(--ticks-thickness),transparent 1px) repeat-x;background-color:transparent;background-size:var(--tickIntervalPerc) var(--ticks-height);background-position-x:calc(var(--thumb-size)/ 2 - var(--ticks-thickness)/ 2);background-position-y:var(--flip-y,bottom);padding-bottom:var(--flip-y,var(--ticks-gap));padding-top:calc(var(--flip-y) * var(--ticks-gap));position:relative;z-index:1;--ca:Min(var(--completed-a), var(--completed-b));--cb:Max(var(--completed-a), var(--completed-b));--thumbs-too-close:Clamp(-1, 1000 * (Min(1, Max(var(--cb) - var(--ca) - 5, -1)) + 0.001), 1);` +
           `--thumb-close-to-min:Min(1, Max(var(--ca) - 5, 0));--thumb-close-to-max:Min(1, Max(95 - var(--cb), 0))}:host(.${def.class.range}[disabled]){filter:grayscale(0.9);}:host(.${def.class.range}[data-ticks-position=top]){--flip-y:1}:host(.${def.class.range}::after),:host(.${def.class.range}::before){--offset:calc(var(--thumb-size) / 2);content:counter(x);display:var(--show-min-max,block);font:var(--min-max-font);position:absolute;bottom:var(--flip-y,-2.5ch);top:calc(-2.5ch * var(--flip-y));opacity:Clamp(0,var(--at-edge),var(--min-max-opacity));transform:translateX(calc(var(--min-max-x-offset) * var(--before,-1) * -1)) scale(var(--at-edge));pointer-events:none}:host(.${def.class.range}::before){--before:1;--at-edge:var(--thumb-close-to-min);counter-reset:x var(--min);left:var(--offset)}:host(.${def.class.range}::after){--at-edge:var(--thumb-close-to-max);counter-reset:x var(--max);right:var(--offset)}.${def.class.rangeProgress}{--start-end:calc(var(--thumb-size) / 2);--clip-end:calc(100% - (var(--cb)) * 1%);--clip-start:calc(var(--ca) * 1%);--clip:inset(-20px var(--clip-end) -20px var(--clip-start));position:absolute;left:var(--start-end);right:var(--start-end);top:calc(var(--ticks-gap) * var(--flip-y,0) + var(--thumb-size)/ 2 - var(--track-height)/ 2);height:calc(var(--track-height));background:var(--progress-background,#eee);pointer-events:none;z-index:-1;border-radius:var(--progress-radius)}.${def.class.rangeProgress}::before{content:"";position:absolute;left:0;right:0;clip-path:var(--clip);top:0;bottom:0;background:var(--fill-color,#000);box-shadow:var(--progress-flll-shadow);z-index:1;border-radius:inherit}.${def.class.rangeProgress}::after{content:"";position:absolute;top:0;right:0;bottom:0;left:0;box-shadow:var(--progress-shadow);pointer-events:none;border-radius:inherit}:host(.${def.class.range})>input:only-of-type~.${def.class.rangeProgress}{--clip-start:0}:host(.${def.class.range})>input::-webkit-slider-runnable-track{background:transparent!important;box-shadow:none!important;border:none!important}:host(.${def.class.range})>input{-webkit-appearance:none;box-shadow:none!important;width:100%;height:var(--thumb-size)!important;margin:0!important;padding:0!important;position:absolute!important;left:0;top:calc(50% - Max(var(--track-height),var(--thumb-size))/ 2 + calc(var(--ticks-gap)/ 2 * var(--flip-y,-1)))!important;border:0!important;cursor:grab;outline:0!important;background:0 0!important;--thumb-shadow:var(--thumb-shadow-active)}` +
@@ -951,11 +935,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           `:host(.${def.class.range})>input+output{--flip:-1;--x-offset:calc(var(--completed-b) * -1%);--pos:calc(((var(--value) - var(--min)) / (var(--max) - var(--min))) * 100%);pointer-events:none;width:auto;min-width:40px;height:24px;min-height:24px;text-align:center;position:absolute;z-index:5;background:var(--value-background);border-radius:4px;padding:0 6px;left:var(--pos);transform:translate(var(--x-offset),calc(150% * var(--flip) - (var(--y-offset,0) + var(--value-offset-y)) * var(--flip)));transition:all .12s ease-out,left 0s;opacity:0;box-sizing:content-box}`,
       });
       const hostStyle = s => `:host(${s}){display:block!important;visibility:visible!important;opacity:1!important}`;
-      const fullStyle = (b, c) => `${def.var.style.main};background-color:${b};color:${c};border-radius:4px;padding:4px 8px`;
-      const leftStyle = b => `${def.var.style.main};background-color:${b};color:#fffafa;border-radius:4px 0 0 4px;padding:4px 2px 4px 8px`;
-      const rightStyle = b => `${def.var.style.main};background-color:${b};color:#fffafa;border-radius:0 4px 4px 0;padding:4px 8px 4px 4px;margin:0 0 0 -2px`;
-      const remarkStyle = c => `${def.var.style.main};color:${c};padding:4px 0;line-height:120%`;
-      const frDialogBoxCssText = String(hostStyle("fr-dialogbox") + def.var.style.shared + def.var.style.frDialogBox);
+      const fullStyle = (b, c = "#fffafa") => `display:inline-block;background:${b};color:${c};border-radius:4px;padding:4px 8px`;
+      const remarkStyle = c => `display:inline-block;color:${c};padding:4px 0;line-height:120%`;
 
       /* REGISTER_LOAD_EVENT_CLASS */
 
@@ -974,6 +955,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               fn.apply(null, args);
               runCount++;
             } catch (e) {
+              ERROR(`${e.name} in ${capitalize(fn.name) || "(anonymous)"}:`, e.message);
               errorCount++;
             }
           }
@@ -995,8 +977,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           this._runFunctions(IS_GREASEMONKEY ? this.functionsToRun : this.finalFunctionsToRun, "#008000");
         }
         _logReadyState(background, description, ...logs) {
-          const args = [leftStyle(background), rightStyle(background), "display:block;height:0", remarkStyle("0"), remarkStyle("#a9a9a9")];
-          INFO(`%c${description}:%c${logs}!%c\r\n%c \u3000\u27A6${IN_FRAMES} ${CUR_HOST_NAME} %c${CUR_HOST_PATH}`, ...args);
+          const args = [fullStyle(background), "display:block;height:0", remarkStyle("0"), remarkStyle("#a9a9a9")];
+          INFO(`%c${description}:${logs}!%c\r\n%c \u3000\u27A6${IN_FRAMES} ${CUR_HOST_NAME} %c${CUR_HOST_PATH}`, ...args);
         }
         addFn(fn, ...args) {
           if (typeof fn === "function") this.functionsToRun.push({ fn, args });
@@ -1008,6 +990,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
       /* FR_DIALOGBOX_CLASS */
 
+      let setAdoptedStyleSheets = (...args) => (setAdoptedStyleSheets = IS_ADOPTEDSTYLESHEET_MUTABLE ? updateAdoptedStyleSheets : updateInlineStyle)(...args);
+      const frDialogBoxCssText = String(hostStyle("fr-dialogbox") + def.var.style.shared + def.var.style.frDialogBox);
       class FrDialogBox {
         constructor({ titleText = "Test", messageText = "Test message.", trueButtonText = "OK", falseButtonText = null, neutralButtonText = null } = {}) {
           safeWindow.Object.assign(this, { cssText: frDialogBoxCssText, titleText, messageText, trueButtonText, falseButtonText, neutralButtonText });
@@ -1018,15 +1002,10 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         static closure() {
           return safeRemoveNode(`#${def.id.dialogbox}`);
         }
-        static setShadowStyle(shadow, css, id, writable = true) {
-          const aSS = IS_COMPATIBLE_ADOPTEDSTYLE && shadow.adoptedStyleSheets;
-          const fn = aSS ? (s, c, i, w = true) => updateAdoptedStyleSheets(s, createStyleSheet(i, c), w) : (s, c, i, w = true) => updateInlineStyle(s, c, i, w);
-          return (FrDialogBox.setShadowStyle = fn)(shadow, css, id, writable);
-        }
         _create(context) {
           this.container = cE("fr-dialogbox", { id: def.id.dialogbox });
           const shadow = (def.var.dialogIf = aS(this.container));
-          FrDialogBox.setShadowStyle(shadow, this.cssText, `${def.const.seed}-dialogbox`, false);
+          setAdoptedStyleSheets(shadow, this.cssText, `${def.const.seed}-dialogbox`, false);
           this.frDialog = cE("fr-box", { class: def.class.db });
           appendNode(shadow, this.frDialog);
           const titleHtml = `${this.titleText}<span id="${def.const.seed}.dialog.close" title="${IS_CHN ? "关闭" : "Close"}">&times;</span>`;
@@ -1061,16 +1040,16 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         }
         async respond() {
           return new Promise((resolve, reject) => {
-            if (!this.frDialog || !this.trueButton) reject(new Error("FrDialogBox Error!"));
+            if (!this.frDialog || !this.trueButton) reject(new Error("FrDialogBox not exist!"));
             this.trueButton.addEventListener("click", () => void resolve(true));
             if (this.hasFalse) this.falseButton.addEventListener("click", () => void resolve(false));
-          }).catch(e => void ERROR("FrDialogBox:", e.message));
+          }).catch(e => void ERROR(`${e.name} in FrDialogBox:`, e.message));
         }
       }
 
       function createDialogModel(container, parent) {
-        const preparedStyle = getMainStyleElements({ primary: true }) ? {} : { style: "width:100%;height:100%;background:none;outline:none;border:none" };
-        const dialog = qS(`dialog#${def.const.dialog}`) ?? GMaddElement(parent, "dialog", { ...preparedStyle, id: def.const.dialog });
+        setAdoptedStyleSheets(document, def.var.style.frDialog, `${def.const.seed}-dialog-style`, false);
+        const dialog = qS(`dialog#${def.const.dialog}`) ?? GMaddElement(parent, "dialog", { id: def.const.dialog });
         if (dialog instanceof Node) {
           appendNode(dialog, container);
           dialog.hasAttribute("open") && dialog.close?.();
@@ -1088,44 +1067,41 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         return safeRemoveNode(dialog || `dialog#${def.const.dialog}`);
       }
 
-      function compareVersion({ WEBKIT = NaN, BLINK = NaN, GECKO = NaN, ignore = true, more = true } = {}) {
+      function compareVersion({ WEBKIT = NaN, BLINK = NaN, GECKO = NaN, more = true } = {}) {
         if (IS_CHEAT_UA) return false;
         const compare = version => (more ? engineVersion >= version : engineVersion < version);
-        return (IS_REAL_WEBKIT && compare(WEBKIT)) || (IS_REAL_BLINK && compare(BLINK)) || (IS_REAL_GECKO && compare(GECKO) && (ignore || (!IS_GREASEMONKEY && !GMcontextMode)));
+        return (IS_REAL_WEBKIT && compare(WEBKIT)) || (IS_REAL_BLINK && compare(BLINK)) || (IS_REAL_GECKO && compare(GECKO));
       }
 
-      function createStyleSheet(id, css) {
-        const sheet = new CSSStyleSheet();
-        sheet.id = id;
-        sheet.replaceSync(css);
-        return sheet;
+      function createStyleSheet(id, css, sheet) {
+        return (sheet = new CSSStyleSheet()), (sheet.id = id), sheet.replaceSync(css), sheet;
       }
 
-      function updateAdoptedStyleSheets(shadow, sheet, writable) {
+      function updateAdoptedStyleSheets(target, css, id, writable = true) {
         try {
-          const existIndex = asArray(shadow.adoptedStyleSheets).FindIndeX(s => s.id === sheet.id);
-          if (!~existIndex) shadow.adoptedStyleSheets.push(sheet);
-          else if (writable && !compareStyleSheets(shadow.adoptedStyleSheets[existIndex], sheet)) shadow.adoptedStyleSheets[existIndex] = sheet;
+          const sheet = createStyleSheet(id, css, null);
+          const index = asArray(target.adoptedStyleSheets).FindIndeX(s => s.id === id);
+          if (!~index) return target.adoptedStyleSheets.push(sheet);
+          if (writable && !compareStyleSheets(target.adoptedStyleSheets[index], sheet)) target.adoptedStyleSheets[index] = sheet;
         } catch (e) {
-          ERROR("updateAdoptedStyleSheets:", e.message);
+          ERROR(`${e.name} in UpdateAdoptedStyleSheets:`, e.message);
         }
       }
 
-      function updateInlineStyle(shadow, css, id, writable) {
+      function updateInlineStyle(target, css, id, writable = true) {
         try {
-          const existSheet = qS(`style#${id}`, shadow);
-          if (css) {
-            if (!existSheet) GMaddElement(shadow, "style", { id, media: "screen", type: "text/css", textContent: css });
-            else if (writable && existSheet.textContent !== css) existSheet.textContent = css;
-          } else safeRemoveNode(existSheet);
+          target = target instanceof ShadowRoot ? target : target.head;
+          const existSheet = qS(`style#${id}`, target);
+          if (!existSheet) return GMaddElement(target, "style", { id, media: "screen", type: "text/css", textContent: css });
+          if (writable && existSheet.textContent !== css) existSheet.textContent = css;
         } catch (e) {
-          ERROR("updateInlineStyle:", e.message);
+          ERROR(`${e.name} in UpdateInlineStyle:`, e.message);
         }
       }
 
       function compareStyleSheets(sheetA, sheetB) {
         if (!sheetA || !sheetB) return false;
-        const [ruleA, ruleB] = [asArray(sheetA.cssRules), asArray(sheetB.cssRules)];
+        const [ruleA, ruleB] = [arrayFrom(sheetA.cssRules), arrayFrom(sheetB.cssRules)];
         return ruleA.length === ruleB.length && ruleA.every((rule, index) => rule.cssText === ruleB[index].cssText);
       }
 
@@ -1149,7 +1125,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
       class SecureCipherSuite {
         constructor(p) {
-          this.d = asArray(p).reduce((acc, char) => acc + char.charCodeAt(0), "");
+          this.d = arrayFrom(p).reduce((acc, char) => acc + char.charCodeAt(0), "");
           [this.s, this.c, this.u] = [Math.floor(this.d.length / 5), Math.ceil(p.length / 2), Math.pow(2, 31) - 1];
           this.m = parseInt(this.d[this.s] + this.d[this.s * 2] + this.d[this.s * 3] + this.d[this.s * 4] + this.d[this.s * 5]);
         }
@@ -1210,7 +1186,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           if (global.frDOMRects.toggle) overrideGetDOMRects(Element.prototype);
           DEBUG(`[FONTSCALE]${IN_FRAMES} %O Done (%s)`, results || "Adjust", zoomScale.toFixed(3));
         } catch (e) {
-          ERROR("AdjustCoordinateOffset:", e);
+          ERROR(`${e.name} in AdjustCoordinateOffset:`, e.message);
         }
 
         function definePropertyProcess(obj, prop, descriptor) {
@@ -1236,7 +1212,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             Reflect.defineProperty(target, prop, value);
             debugging && results.add({ obj: getObjectType.call(target), prop });
           } catch (e) {
-            ERROR(`Error defining property "${prop}":`, e.message);
+            ERROR(`${e.name} in definePropertyProcess '${prop}':`, e.message);
           }
         }
 
@@ -1269,7 +1245,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
         function overrideGetClientRects() {
           const originalRects = def.var.getClientRects.call(this);
-          const rects = asArray(originalRects, rect => DOMRect.fromRect(createProxy(rect)));
+          const rects = arrayFrom(originalRects, rect => DOMRect.fromRect(createProxy(rect)));
           rects.item = index => rects[index] ?? null;
           rects[Symbol.iterator] = function* iterator() {
             for (let i = 0; i < this.length; i++) yield this[i];
@@ -1297,7 +1273,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             DEBUG("cache Remaining: %c%s hrs", "color:#dc143c;font-weight:700", ((expired - current) / 36e5).toFixed(2));
             return data && expired > current ? data : cache.remove(key);
           } catch (e) {
-            return cache.remove(key);
+            return e && cache.remove(key);
           }
         },
         remove: key => void GMdeleteValue(key),
@@ -1311,7 +1287,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         }
         static checkCanvasFingerprintProtection() {
           const ctx = cE("canvas").getContext("2d");
-          const { data } = (void (ctx.fillStyle = "#000"), ctx.fillRect(0, 0, 50, 50), ctx.getImageData(0, 0, 50, 50));
+          const { data } = ((ctx.fillStyle = "#000"), ctx.fillRect(0, 0, 50, 50), ctx.getImageData(0, 0, 50, 50));
           const checkData = (data, i) => data[i] !== 0 || data[i + 1] !== 0 || data[i + 2] !== 0 || data[i + 3] !== 255;
           for (let i = 0; i < data.length; i += 4) if (checkData(data, i)) return (FontFaceSetObserver.checkCanvasFingerprintProtection = () => true), true;
           return (FontFaceSetObserver.checkCanvasFingerprintProtection = () => false), false;
@@ -1331,9 +1307,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             this.canvasContext.fillText(this.fontText, this.canvasWidth / 2, this.canvasHeight / 2);
             const { data: fontData } = this.canvasContext.getImageData(0, 0, this.canvasWidth, this.canvasHeight);
             const { actualBoundingBoxLeft: l, actualBoundingBoxRight: r } = this.canvasContext.measureText(this.fontText);
-            return { fontData: asArray(fontData).filter(Boolean).join(), fontWidth: l + r };
+            return { fontData: arrayFrom(fontData).filter(Boolean).join(), fontWidth: l + r };
           } catch (e) {
-            ERROR("FontFaceSetObserver.checkFont:", e.message);
+            ERROR(`${e.name} in FontFaceSetObserver.checkFont:`, e.message);
           }
         }
         _unescape(input) {
@@ -1372,14 +1348,14 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           const cusFontCheck = cusFontList ? JSON.parse(decrypt(cusFontList)) : [];
           return getUniqueFontlist([...defFontCheck, ...cusFontCheck]);
         } catch (e) {
-          return ERROR("GetMergedFontCheckList:", e.message) ?? [...defFontCheck];
+          return ERROR(`${e.name} in GetMergedFontCheckList:`, e.message) ?? [...defFontCheck];
         }
       }
 
       function getNonDuplicateFontArray(arra, arrb) {
         const arrbSet = new Set();
-        asArray(arrb).forEach(item => (arrbSet.add(item.en), arrbSet.add(item.ch)));
-        return asArray(arra).filter(x => !arrbSet.has(x.en) && !arrbSet.has(x.ch));
+        arrayFrom(arrb).forEach(item => (arrbSet.add(item.en), arrbSet.add(item.ch)));
+        return arrayFrom(arra).filter(x => !arrbSet.has(x.en) && !arrbSet.has(x.ch));
       }
 
       function updateDomainsIndex(domains, curHost = CUR_HOST) {
@@ -1396,10 +1372,10 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
       function saveData(key, data) {
         try {
-          sessionStorage?.removeItem(def.const.isConflict);
+          sessionStorage?.removeItem(def.const.const.conflict);
           GMsetValue(key, encrypt(JSON.stringify(data)));
         } catch (e) {
-          ERROR("SaveData:", e.message);
+          ERROR(`${e.name} in SaveData:`, e.message);
         }
       }
 
@@ -1428,8 +1404,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
       }
 
       async function setRootSelector() {
-        const rootID = await getDocumentElement.getNodeAndObserve().then(res => res.get().id); // Fit::IS_GREASEMONKEY & Blink < 130::IFRAME_STYLE_PARSING
-        return (!CUR_WINDOW_TOP && (compareVersion({ BLINK: 130, more: null }) || IS_GREASEMONKEY)) || !rootID ? `:root ` : `:root#${rootID} `;
+        const rootID = await requestHTML.startObserver().then(res => res.target.id); // Fit::IS_GREASEMONKEY & Blink < 130::IFRAME_STYLE_PARSING
+        return !rootID || (!CUR_WINDOW_TOP && (compareVersion({ BLINK: 130, more: null }) || IS_GREASEMONKEY)) ? `:root ` : `:root#${rootID} `;
       }
 
       async function getRenderRules() {
@@ -1439,7 +1415,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           const text = await response.text();
           return DEBUG(`Pull predefined data: %c${text ? "Succeeded" : "Failed"} (${text?.length ?? 0})`, `color:${text ? "#008000" : "#dc143c"}`), text;
         } catch (e) {
-          ERROR("Pull predefined data: %c%s", "color:#dc143c", e.message);
+          ERROR(`${e.name} in getRenderRules:`, e.message);
         }
       }
 
@@ -1458,7 +1434,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             else if (action === "#") data[key] = param;
           }
         } catch (e) {
-          ERROR("ApplyPredefinedRenderConfig:", e.message);
+          ERROR(`${e.name} in ApplyPredefinedRenderConfig:`, e.message);
         }
         return data;
       }
@@ -1494,7 +1470,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         const textStroke = stroke_r > 0 && stroke_r <= 1.0 ? "-webkit-text-stroke:var(--fr-font-stroke);" : "";
         const strokeCssText = `${textStroke ? stroke_r : 0}px currentcolor`;
         const shadow_c = String(CONST_VALUES.o.shadowColor) || INITIAL_VALUES.shadowColor;
-        const parseColor = color => (/^#F{8}|currentcolor$/i.test(color) ? "currentcolor" : color.toUpperCase());
+        const parseColor = color => (/^(?:#F{8}|currentcolor)$/i.test(color) ? "currentcolor" : color.toUpperCase());
         const revertColor = value => (/^currentcolor$/i.test(value) ? "#FFFFFFFF" : value);
         const textShadow = shadow_r > 0 && shadow_r <= 4 ? "text-shadow:var(--fr-font-shadow);" : "";
         const shadowCssText = generateTextShadow(shadow_r, shadow_c);
@@ -1512,8 +1488,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         const curEmptyConfig = !fontface_i && !smooth_i && !textShadow && !textStroke && Number(fontsize_r) === 1;
         const isFixInputEnabled = fi => fi === "true" || (!fi && /;?\s*\w+_last(?:visi|ac)t=\d{10}(?:;|%)/.test(document.cookie) && !localStorage?.setItem(IS_DISCUZ, true));
         const discuzIcon = isFixInputEnabled(localStorage?.getItem(IS_DISCUZ)) ? ":not(.nvhm,[class^='ico_'],[class^='comiis_'],[class^='notice_'],[class^='prompt_'])" : "";
-        const fontStyle = `${fontFaces}${bodyScalecssText}${globalPrefix}::placeholder,${globalPrefix}:is(${inText}${discuzIcon}){${fontFamily}}${globalPrefix}:is(${inText}){${textShadow}${textStroke}${smoothing}}${selectionCssText}${cssExclude}${codeFonts}${boldFixCSSText}`;
-        const IS_CURRENTSITE_ALLOWED = !~exSitesIndex && !curEmptyConfig;
+        const fontFamilyStyle = fontFamily ? `${globalPrefix}::placeholder,${globalPrefix}:is(${inText}${discuzIcon}){${fontFamily}}` : ``;
+        const fontAdvenceedStyle = `${globalPrefix}:is(${inText}){${textShadow}${textStroke}${smoothing}}`;
+        const fontStyle = `${fontFaces}${bodyScalecssText}${fontFamilyStyle}${fontAdvenceedStyle}${selectionCssText}${cssExclude}${codeFonts}${boldFixCSSText}`;
         const textShadowFix = `0 0 ${shadow_r}px ${shadow_c.toLowerCase().slice(0, 7).concat("2b")}`;
         const firefoxInputFix = IS_REAL_GECKO & fontface_i && isFixInputEnabled(localStorage?.getItem(IS_DISCUZ)) ? def.var.style.firefox : "";
         const [monoAllowed, isEditorBlock, supportMix] = [Boolean(isCustomMono), Boolean(CONST_VALUES.o.isEditorBlock), CSS.supports("(color:color-mix(in srgb, tan, red))")];
@@ -1524,7 +1501,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         const monoFallback = monoAllowed ? `--fr-mono-fallback:ui-monospace,'Courier New','Liberation Mono',Courier;` : ``;
         const sharpRender = CONST_VALUES.o.renderCanvas ? `--fr-render-shape:geometricPrecision;` : ``;
         const rootPseudoClass = `:root{--fr-font-basefont:${INITIAL_REMARKS.fontBase};--fr-font-emoji:${INITIAL_REMARKS.fontEmoji};${customFontFeature}--fr-font-fontscale:${fontsize_r};--fr-font-family:${CONST_VALUES.o.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-no-stroke:0px transparent;--fr-fix-stroke:var(--fr-no-stroke);--fr-fix-shadow:${textShadowFix};--fr-render-text:optimizeLegibility;${sharpRender}--fr-render-image:auto;${monoFontText}${monoFallback}${monoShadowColor}${monoShadow}${monoFeatureText}}`;
-        const tStyle = `@charset "UTF-8";${CUR_WINDOW_TOP ? def.var.style.frDialog : ""}${IS_CURRENTSITE_ALLOWED ? `${rootPseudoClass}${firefoxInputFix}${fontStyle}` : ``}`;
+        const IS_CURRENTSITE_ALLOWED = !~exSitesIndex && !curEmptyConfig;
+        const tStyle = `@charset "UTF-8";${IS_CURRENTSITE_ALLOWED ? `${rootPseudoClass}${firefoxInputFix}${fontStyle}` : ``}`;
 
         /* FR_CONFIGURE_SHADOWROOT_CONTENT */
 
@@ -1565,7 +1543,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           </div>
           <div id="${def.id.fshadow}.shadow.text" class="${def.const.seed}.fix.text">${fixShadowLabel}</div>`;
         const tLazyloadHTML = `<div class="${def.const.seed}.fix.label">
-            <span>${IS_CHN ? "启用修正延迟加载：" : "Use lazy loading: "}</span>
+            <span>${IS_CHN ? "使用延迟加载修正：" : "Use Lazyload Fix:"}</span>
             <input type="checkbox" class="${def.class.checkbox}" id="${def.id.lazyload}" ${CONST_VALUES.lazyload ? "checked" : ""} ${CONST_VALUES.fixStroke ? "" : "disabled"} />
             <label for="${def.id.lazyload}" ${CONST_VALUES.fixStroke ? `` : `class="${def.const.seed}.ft:gs1"`}></label>
           </div>
@@ -1736,14 +1714,14 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             else logMessage("shown-system-disabled", `${TOP_HOST.toUpperCase()} ${rerenderText} ${shortcut}`, "#aa56e7");
           },
           compat: isCheatUA => {
-            const isCompatible = compareVersion({ BLINK: 90 }) || compareVersion({ GECKO: 84 }) || compareVersion({ WEBKIT: 15.4 });
+            const isCompatible = compareVersion({ BLINK: 90, GECKO: 84, WEBKIT: 15.4 });
             const compatibleMessage = `%c${brand} Browser Compatible: ${isCompatible}%c\r\nOnly desktop browsers support full functionality for this script. (Version: Chrome>=90, Edge>=90, Firefox>=84, Opera>=78, Safari>=15.4)`;
             const compatibleWarning = IS_CHN ? "您的浏览器版本过低，脚本可能无法正常运行！" : "Your browser version is too low, the script may not work properly!";
-            const compatibleStyles = [`${fullStyle("#dc143c", "#fffafa")};text-transform:uppercase`, "color:0;font-family:ui-monospace,monospace;line-height:150%"];
+            const compatibleStyles = [`${fullStyle("#dc143c")};text-transform:uppercase`, "color:0;line-height:150%"];
             const cheatUAWarning = IS_CHN
               ? `%c浏览器 UA 异常警告%c\r\n伪造 UserAgent 信息会造成部分脚本功能失效。如需使用全功能脚本，请恢复浏览器默认的 UserAgent 信息。`
               : `%cBrowser UA Exception%c\r\nModifying UserAgent information will cause some script functions to become invalid. To use the full-featured script, please restore the browser's default UserAgent information.`;
-            const cheatUAStyles = [`${fullStyle("#715100", "#fffafa")};text-transform:uppercase`, "color:0;font-family:ui-monospace,monospace;line-height:150%"];
+            const cheatUAStyles = [`${fullStyle("#715100")};text-transform:uppercase`, "color:0;line-height:150%"];
             if ((navigatorInfo["cheat-ua"] = isCheatUA)) __console("warn", cheatUAWarning, ...cheatUAStyles);
             if (!isCompatible && !isCheatUA) __console("error", `%c${compatibleWarning}`, "color:#be0d1c;font:italic 700 18px ui-monospace,monospace");
             INFO(`${compatibleMessage}%c\r\n${JSON.stringify(navigatorInfo)}`, ...compatibleStyles, "color:#a9a9a9;font:italic 400 12px/150% ui-monospace,monospace");
@@ -1765,16 +1743,15 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           const id = node?.id || def.id.rndStyle;
           const ownerDocumentID = target?.ownerDocument?.documentElement?.id;
           const filter = compareVersion({ BLINK: 130, more: null }) || IS_GREASEMONKEY || !ownerDocumentID ? `` : `#${ownerDocumentID}`;
-          textContent = compareVersion({ BLINK: 128, more: null }) || compareVersion({ GECKO: 138, more: null }) ? textContent : textContent.replace("var(--fr-font-fontscale)", "initial");
+          textContent = compareVersion({ BLINK: 128, GECKO: 138, more: null }) ? textContent : textContent.replace("var(--fr-font-fontscale)", "initial");
           return { css: textContent.replace(def.const.regexp, filter), id, style: node?.textContent };
         }
 
         function applyStyleToIframes({ condition, nodeArray, cssText }) {
           if (!CUR_WINDOW_TOP || !IS_CURRENTSITE_ALLOWED) return;
-          const data = (cssText ?? tStyle).replace(def.var.style.frDialog, "");
-          if (condition === "Preview" && def.array.iframe.size) updateFramesWithConditionalStyle(def.array.iframe, condition, data);
+          if (condition === "Preview" && def.array.iframe.size) updateFramesWithConditionalStyle(def.array.iframe, condition, cssText ?? tStyle);
           if (!Array.isArray(nodeArray)) nodeArray = qA("html>:not(head) *").flatMap(el => (el.shadowRoot ? qA("iframe", el.shadowRoot) : getNodeName(el) === "iframe" ? [el] : []));
-          updateFramesWithConditionalStyle(nodeArray, condition, data);
+          updateFramesWithConditionalStyle(nodeArray, condition, cssText ?? tStyle);
         }
 
         function updateFramesWithConditionalStyle(resources, condition, data) {
@@ -1797,7 +1774,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             node.setAttribute(def.const.iframeAttrName, condition) ?? COUNT(`[ASYNCFRAMES][ACT:${condition}]`);
             correctBoldPassive("iframe", boldFixCSSText, ctx.document, true);
           } catch (e) {
-            if ((IS_GREASEMONKEY && GMscriptHandler !== "Userscripts") || !ctx || condition === "DOMLoaded") return ERROR("InsertFrameStyle:", { node, condition, error: e.name });
+            if ((IS_GREASEMONKEY && GMscriptHandler !== "Userscripts") || !ctx || condition === "DOMLoaded") return ERROR(`${e.name} in InsertFrameStyle:`, { node, condition });
             ctx.postMessage({ fontRenderX: { command: "𝐬𝐞𝐧𝐝", data, condition } }, "*");
           }
         }
@@ -1806,7 +1783,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           if (CUR_WINDOW_TOP) {
             return global.top.addEventListener("message", event => {
               if (event.data?.fontRenderX?.command !== "𝐫𝐞𝐪𝐮𝐞𝐬𝐭") return;
-              const { condition, data = (def.var.topStyle ?? tStyle).replace(def.var.style.frDialog, "") } = event.data.fontRenderX;
+              const { condition, data = def.var.topStyle ?? tStyle } = event.data.fontRenderX;
               condition === "Loaded" && def.array.iframe.add(event.source);
               event.source.postMessage({ fontRenderX: { command: "𝐬𝐞𝐧𝐝", data, condition } }, "*");
             });
@@ -1837,28 +1814,24 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             applyStyleToIframes({ condition: "Preview", cssText: styleText });
             def.var.preview = !shouldReturn;
           } catch (e) {
-            ERROR("LoadPreview:", e.message);
+            ERROR(`${e.name} in LoadPreview:`, e.message);
           }
         }
 
         function insertHTML(htmlText) {
-          try {
-            const section = cE("fr-configure", { id: def.id.configure });
-            const shadow = (def.var.configIf = aS(section));
-            const cssText = String(hostStyle("fr-configure") + def.var.style.shared + def.var.style.frConfigure);
-            shadow.innerHTML = tTP.createHTML(htmlText);
-            FrDialogBox.setShadowStyle(shadow, cssText, `${def.const.seed}-configure`, false);
-            return createDialogModel(section, document.documentElement);
-          } catch (e) {
-            ERROR("InsertHTML:", e.message);
-          }
+          const section = cE("fr-configure", { id: def.id.configure });
+          const shadow = (def.var.configIf = aS(section));
+          const cssText = String(hostStyle("fr-configure") + def.var.style.shared + def.var.style.frConfigure);
+          shadow.innerHTML = tTP.createHTML(htmlText);
+          setAdoptedStyleSheets(shadow, cssText, `${def.const.seed}-configure`, false);
+          return createDialogModel(section, document.documentElement);
         }
 
         function setSliderProperty(slider, thisValue, bits) {
           if (!slider) return;
           const [host, curValue] = [`:host(div.${slider.parentNode.host.className})`, Number(thisValue).toFixed(bits)];
           const hostCss = `${host}{--step:${slider.step};--min:${slider.min};--max:${slider.max};--value:${curValue};--text-value:'${toString(curValue)}'}`;
-          FrDialogBox.setShadowStyle(slider.parentNode, hostCss, `${def.const.seed}-${slider.name}`, true);
+          setAdoptedStyleSheets(slider.parentNode, hostCss, `${def.const.seed}-${slider.name}`);
           slider.setAttribute("value", curValue);
           slider.value = curValue;
         }
@@ -1884,29 +1857,26 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           const hostCss = `${host}{--step:${step};--min:${min};--max:${max};--value:${curValue};--text-value:'${toString(curValue)}'}`;
           const sliderHTML = `<input id="${sid}" type="range" name="${name}" min="${min}" max="${max}" step="${step}" value="${curValue}" ${disabled} /><output></output><div class="${def.class.rangeProgress}"></div>`;
           sliderShadowRoot.innerHTML = tTP.createHTML(sliderHTML);
-          FrDialogBox.setShadowStyle(sliderShadowRoot, hostCss, `${def.const.seed}-${name}`, false);
-          FrDialogBox.setShadowStyle(sliderShadowRoot, def.var.style.frSlider, `${def.const.seed}-range`, false);
+          setAdoptedStyleSheets(sliderShadowRoot, hostCss, `${def.const.seed}-${name}`, false);
+          setAdoptedStyleSheets(sliderShadowRoot, def.var.style.frSlider, `${def.const.seed}-range`, false);
         }
 
         function insertSliders() {
-          try {
-            drawSliderElement({ name: "fr-scale", pid: def.id.fontSize, sid: def.id.scale, min: 0.8, max: 2.5, step: 0.001, value: CONST_VALUES.fontSize, bits: 3 });
-            drawSliderElement({ name: "fr-stroke", pid: def.id.fontStroke, sid: def.id.stroke, min: 0, max: 1, step: 0.001, value: CONST_VALUES.fontStroke, bits: 3 });
-            drawSliderElement({ name: "fr-shadow", pid: def.id.fontShadow, sid: def.id.shadow, min: 0, max: 4, step: 0.01, value: CONST_VALUES.fontShadow, bits: 2 });
-          } catch (e) {
-            ERROR("InsertSliders:", e.message, def.array.exps.push(`[insertSliders]: ${e}`));
-          }
+          drawSliderElement({ name: "fr-scale", pid: def.id.fontSize, sid: def.id.scale, min: 0.8, max: 2.5, step: 0.001, value: CONST_VALUES.fontSize, bits: 3 });
+          drawSliderElement({ name: "fr-stroke", pid: def.id.fontStroke, sid: def.id.stroke, min: 0, max: 1, step: 0.001, value: CONST_VALUES.fontStroke, bits: 3 });
+          drawSliderElement({ name: "fr-shadow", pid: def.id.fontShadow, sid: def.id.shadow, min: 0, max: 4, step: 0.01, value: CONST_VALUES.fontShadow, bits: 2 });
         }
 
         function removeKeyboardEvent(...targets) {
           !def.var.runOnce && document.addEventListener("blur", stopEventPropagation, (def.var.runOnce = true));
-          asArray(targets).forEach(target => ["keydown", "keyup", "keypress", "paste"].forEach(eventType => target?.addEventListener(eventType, stopEventPropagation)));
+          arrayFrom(targets).forEach(target => ["keydown", "keyup", "keypress", "paste"].forEach(eventType => target?.addEventListener(eventType, stopEventPropagation)));
         }
 
         function getBrightness(hexa) {
+          const dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
           const [r, g, b, a] = hexa?.match(/[0-9a-f]{2}/gi)?.map(x => parseInt(x, 16)) ?? [0, 0, 0, 0];
-          const rgb = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-          return a && rgb ? rgb / (a / 255) : 255 - a;
+          const bright = (r, g, b) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
+          return bright(r, g, b) * (a / 255) + (dark ? bright(40, 40, 40) : bright(255, 255, 255)) * (1 - a / 255);
         }
 
         function isFontReady(t = 1e3) {
@@ -1949,7 +1919,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             const subkey = new RegExp(def.var.scriptAuthor).exec(decrypt(result))?.[0];
             return { keycode: () => result, inspect: (key = decrypt(result)) => key.includes(subkey) };
           } catch (e) {
-            ERROR(e.message);
+            ERROR(`${e.name} in InspectLicense:`, e.message);
           }
         }
 
@@ -1967,16 +1937,16 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             __console(...dataReconstructText, "font-weight:700", "font-weight:400", setDebuggerMode() && cipherInstance.encrypt(odata.date));
             saveData(CONFIGURE, safeWindow.Object.assign(_config_data_, { ...INITIAL_FEATURES, rebuild: odata.flag, curVersion: void 0, isCustomMono: false, globalDisable: false }));
             def.var.versionStatus = null;
-            DEBUG(`%c Reconstruct configuration data: true `, `background-color:${def.var.structureError ? "#ff0000" : "#4b0082"};color:#fffafa;font-style:italic`);
+            DEBUG(`%c Reconstruct configuration data: true `, `background:${def.var.structureError ? "#ff0000" : "#4b0082"};color:#fffafa;font-style:italic`);
           } else if (typeof rebuild === "undefined") {
             _config_data_.rebuild = odata.flag;
             saveData(CONFIGURE, _config_data_);
             const message = !curVersion ? `configuration data is null, building now!` : `configuration data has been restored!`;
-            DEBUG(`%c${message}`, `color:${!curVersion ? "#d8aa01" : "#1e90ff"};font-style:italic;font-family:ui-monospace,monospace`);
+            DEBUG(`%c${message}`, `color:${!curVersion ? "#d8aa01" : "#1e90ff"};font-style:italic`);
           } else {
             const dataStatus = curVersion === def.var.curVersion;
             const message = dataStatus ? "OK" : "Updated";
-            DEBUG(`%cConfigure Data Status: ${message}`, `color:${dataStatus ? "#008080" : "#dc143c"};font-style:italic;font-family:ui-monospace,monospace`);
+            DEBUG(`%cConfigure Data Status: ${message}`, `color:${dataStatus ? "#008080" : "#dc143c"};font-style:italic`);
           }
           return keys.length;
         }
@@ -2038,12 +2008,13 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                 return DEBUG("configure<errorCount>:", rst.error.length) ?? reportErrorToAuthor(rst.error);
               });
           } catch (e) {
-            ERROR("OpenSettings:", e);
+            ERROR(`${e.name} in OpenSettings:`, e.message);
           }
         }
 
         function setConfigureListener() {
-          global.innerHeight <= qS(`#${def.id.container}`, def.var.configIf).getBoundingClientRect().height * def.var.curScale + 18 &&
+          const configHeight = qS(`#${def.id.container}`, def.var.configIf).getBoundingClientRect().height;
+          global.innerHeight <= configHeight * (IS_REAL_WEBKIT || compareVersion({ BLINK: 128, GECKO: 126, more: null }) ? 1 : def.var.curScale) + 18 &&
             qA(`#${def.id.cSwitch},#${def.id.eSwitch}`, def.var.configIf).forEach(item => void item.click());
           qS(`.${def.class.title} span.${def.class.guide}`, def.var.configIf)?.addEventListener("click", () => void GMopenInTab(def.url.guideURI, false));
           qS(`#${def.id.render}`, def.var.configIf)?.addEventListener("dblclick", e => stopEventPropagation(e, { preventDefault: true }) || GMopenInTab(`${def.url.feedback}/42`, false));
@@ -2188,8 +2159,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           fsNode?.addEventListener("click", function () {
             const baseMessage = IS_CHN ? "字体比例缩放（实验性功能）\r\n\r\n注意：" : "𝐅𝐨𝐧𝐭 𝐒𝐜𝐚𝐥𝐢𝐧𝐠 (𝐞𝐱𝐩𝐞𝐫𝐢𝐦𝐞𝐧𝐭𝐚𝐥)\r\n𝐍𝐨𝐭𝐞: ";
             const geckoWarning = IS_CHN
-              ? `由于 Firefox (Gecko内核版本 < 126) 或 Greasemonkey/Userscripts/FireMonkey 扩展的兼容性原因，会对部分网站造成不可修复的样式错误、页面动作缺失等问题。\r\n\r\n强烈建议您：使用“浏览器缩放”替代 (快捷键：ctrl+-/ctrl++)`
-              : `Due to the compatible of Firefox (Gecko Engine < 126) or Greasemonkey/Userscripts/FireMonkey extensions, may cause irreparable styling errors or missing animations on some websites. \r\n𝐑𝐞𝐜𝐨𝐦𝐦𝐞𝐧𝐝𝐞𝐝: use 'Browser Zoom' instead. \r\n𝐁𝐫𝐨𝐰𝐬𝐞𝐫 𝐒𝐡𝐨𝐫𝐭𝐜𝐮𝐭: ( Ctrl+- / Ctrl++ )`;
+              ? `由于 Firefox (版本 < 126) 或 Greasemonkey, Userscripts, Firemonkey, Orangemonkey, Stay 等小众浏览器扩展的兼容性问题，可能会对一些网站造成不可修复的样式错误、页面动作缺失等问题。\r\n\r\n强烈建议您：使用“浏览器缩放”替代 (快捷键：ctrl+-/ctrl++)`
+              : `Due to the compatibility of Firefox (version < 126) or niche browser extensions such as Greasemonkey, Userscripts, Firemonkey, Orangemonkey, Stay, etc., it can cause irreparable style errors, missing page actions and other issues on some websites. \r\n𝐑𝐞𝐜𝐨𝐦𝐦𝐞𝐧𝐝𝐞𝐝: use 'Browser Zoom' instead. \r\n𝐁𝐫𝐨𝐰𝐬𝐞𝐫 𝐒𝐡𝐨𝐫𝐭𝐜𝐮𝐭: ( Ctrl+- / Ctrl++ )`;
             const nonGeckoWarning = IS_CHN
               ? `字体缩放功能将在您确认后开启，字体缩放后造成的视口单位偏移可通过“视口单位修正”功能解决，如介意禁用 CSP 权限，该功能可在此全局关闭，也可在字体渲染设置中单独关闭。`
               : `'𝐅𝐨𝐧𝐭 𝐒𝐜𝐚𝐥𝐢𝐧𝐠' feature will be turned on after you confirm, viewport unit offset caused by font scaling could be solved by the '𝐅𝐢𝐱 𝐕𝐢𝐞𝐰𝐩𝐨𝐫𝐭' feature, which can be turned off globally here or individually in font rendering settings, If you mind disabling CSP.`;
@@ -2298,7 +2269,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           const messageText = `${customExsiteHTML}<p class="${def.const.seed}.list:p"><input id="${def.const.seed}.sdata" type="search"><button id="${def.const.seed}.sdata:search">${searchBtn}</button><button id="${def.const.seed}.sdata:add">${addBtn}</button></p><ul id="${def.const.seed}.vlist">${listContents}</ul>`;
           const [trueButtonText, neutralButtonText, titleText] = IS_CHN ? ["保存数据", "取 消", "自定义排除站点管理"] : ["Save", "Cancel", "Manage Customized Exclusions"];
           let frDialog = new FrDialogBox({ trueButtonText, neutralButtonText, messageText, titleText });
-          const [dsNode, dssNode, dsaNode, ddNode, tpNode] = ["sdata", "sdata\\:search", "sdata\\:add", "vlist", "temp"].map(l => qS(`#${def.const.seed}\\.${l}`, def.var.dialogIf));
+          const [dsNode, dssNode, dsaNode, ddNode] = ["sdata", "sdata\\:search", "sdata\\:add", "vlist"].map(l => qS(`#${def.const.seed}\\.${l}`, def.var.dialogIf));
           if (ddNode && dsNode && dssNode && dsaNode) {
             dsNode.addEventListener("keydown", e => {
               if (e.key !== "Enter") return;
@@ -2315,7 +2286,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               const domainRegex = new RegExp(regexp);
               const exDomain = resDomain.replace(/:(80|443)$/, "");
               if (!domainRegex.test(exDomain) || exSite.includes(exDomain)) return (dsNode.className = `${def.const.seed}.clr:ff0000`);
-              safeRemoveNode(tpNode);
+              safeRemoveNode(`#${def.const.seed}\\.temp`, def.var.dialogIf);
               length++;
               const newNode = cE("li", { id: `${def.const.seed}.vlist.item:${length}`, class: `${def.const.seed}.gradient.bg` });
               const domainName = convertHtmlToText(exDomain);
@@ -2421,7 +2392,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
         function insertHotkey() {
           document.addEventListener("keydown", e => {
-            const ekey = (e.altKey || e.code === "AltRight") && !e.ctrlKey && !e.shiftKey && !e.metaKey;
+            const ekey = (e.altKey || e.key === "Alt" || e.code === "AltRight" || e.code === "AltLeft") && !e.ctrlKey && !e.shiftKey && !e.metaKey;
             if (e.code === "KeyP" && ekey) handleClickEvent(!~exSitesIndex ? openSettings : setIncludeSites, 1e3, e);
             else if (e.code === "KeyX" && ekey) handleClickEvent(!~exSitesIndex ? setExcludeSites : setIncludeSites, 1e3, e);
             else if (e.code === "KeyG" && ekey) handleClickEvent(!~exSitesIndex ? setVipConfigure : setIncludeSites, 1e3, e);
@@ -2442,7 +2413,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             try {
               domainValues = domains ? [...JSON.parse(decrypt(domains))] : [];
             } catch (e) {
-              domainValues = [];
+              e && (domainValues = []);
             }
             const [searchText, clearText, delText, resetText] = IS_CHN ? ["查 询", "清 除", "删除", "恢复"] : ["Search", "Clear", "Del", "Reset"];
             const searchBtnLabel = `<p class="${def.const.seed}.list:p"><input id="${def.const.seed}.sdata" type="search"><button id="${def.const.seed}.sdata:search">${searchText}</button><button id="${def.const.seed}.sdata:clear">${clearText}</button></p>`;
@@ -2497,7 +2468,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               try {
                 domainValues = domains ? [...JSON.parse(decrypt(domains))] : [];
               } catch (e) {
-                domainValues = [];
+                e && (domainValues = []);
               }
               for (let l = _temp_.length - 1; l >= 0; l--) {
                 domainValueIndex = updateDomainsIndex(domainValues, _temp_[l]);
@@ -2516,7 +2487,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             }
             frDialog = null;
           } catch (e) {
-            ERROR("ManageDomainsList:", e.message);
+            ERROR(`${e.name} in ManageDomainsList:`, e.message);
           }
         }
 
@@ -2725,7 +2696,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           const GeckoText = `${globalPrefix}body{transform:scale(var(--fr-font-fontscale));transform-origin:0 0;width:${100 / size}%;height:${100 / size}%}`;
           const WebKitText = `@supports(zoom:100%){${globalPrefix}body{zoom:var(--fr-font-fontscale)!important}}`;
           const cssText = compareVersion({ GECKO: 126, more: null }) ? GeckoText : WebKitText;
-          return CUR_WINDOW_TOP || compareVersion({ BLINK: 128, more: null }) || compareVersion({ GECKO: 138, more: null }) ? cssText : "";
+          return CUR_WINDOW_TOP || compareVersion({ BLINK: 128, GECKO: 138, more: null }) ? cssText : "";
         }
 
         function generateTextShadow(size, color) {
@@ -2794,7 +2765,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             const drawStrock = getFontsStroke(strokeT, submitButton, def.var["fr-stroke"]);
             const { fixStrokeT, fixShadowT, lazyloadT } = getFixStrokeBool(strokeT, submitButton);
             const drawShadow = getFontShadow(shadowsT, shadowColorNode, submitButton, def.var["fr-shadow"]);
-            const colorReg = /^(#[0-9A-F]{8}|currentcolor)$/i;
+            const colorReg = /^(?:#[0-9A-F]{8}|currentcolor)$/i;
             const colorPickerT = getColorAndColorPicker(colorshowT, submitButton, CONST_VALUES.shadowColor, colorReg);
             const initialSettings = { ffaceT, smoothT, fontScaleT, fixViewportT, strokeT, fixStrokeT, lazyloadT, fixShadowT };
             const finalSettings = { ...initialSettings, shadowsT, canvasT, colorshowT, colorReg, fontCssT, fontExT, colorPickerT };
@@ -2809,7 +2780,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             controlBackupButton(backupButton, isBackupFunction);
             cancelButton?.addEventListener("click", closeConfigurePage);
           } catch (e) {
-            ERROR("OperateConfigure:", e, def.array.exps.push(`[operateConfigure]: ${e}`));
+            ERROR(`${e.name} in OperateConfigure:`, e.message, def.array.exps.push(`[operateConfigure]: ${e}`));
           }
 
           async function getAvailableFontData() {
@@ -2822,7 +2793,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               cache.set(FONTCHECKLIST, uniqueFontCheckList, 2592e6);
               return uniqueFontCheckList;
             } catch (e) {
-              return cache.remove(FONTCHECKLIST), ERROR("GetAvailableFontData:", e.message, def.array.exps.push(`[getAvailableFontData]: ${e}`)), [];
+              return cache.remove(FONTCHECKLIST), ERROR(`${e.name} in GetAvailableFontData:`, e.message, def.array.exps.push(`[getAvailableFontData]: ${e}`)), [];
             }
           }
 
@@ -2846,7 +2817,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                   const cusFontCheck = cusFontList ? [...JSON.parse(decrypt(cusFontList))] : [];
                   cusFontCheck.forEach(item => delete item.sort && (savedFontListString += JSON.stringify(item) + "\r\n"));
                 } catch (e) {
-                  ERROR("FontSelectionAndCustomFonts:", e.message);
+                  ERROR(`${e.name} in FontSelectionAndCustomFonts:`, e.message);
                 }
                 const messageText = IS_CHN
                   ? `<p class="${def.const.seed}.clr:555 ${def.const.seed}.fs:14p">\u2474 以下文本域可按预定格式增加自定义字体。请用小贴士或按示例填写，输入有误将被自动过滤。与『<a href="${def.url.guideURI}#既定的字体表" title="查看内置字体表" target="_blank">内置字体表</a>』重复的字体将被自动剔除。【功能小贴士：<span id="${def.const.seed}.addTools" title="点击开启工具" class="${def.const.seed}.clr:crimson ${def.const.seed}.cs:pointer">字体添加辅助工具</span>】</p><p><textarea id="${def.const.seed}.custom.fontlist" placeholder='字体表自定义格式样例，每行一组字体名称数据，如下：\r\n{ "ch":"中文字体名一","en":"EN Fontname 1" }\u21b2\r\n{ "ch":"中文字体名二","en":"EN Fontname 2","ps":"Post-Script Name" }\u21b2\r\n\r\n(注一：如无中文字体名，可用英文或其他语言名称替代)\r\n(注二：“ps:” 该项为字体的PostScript名称，可选填写)'>${savedFontListString}</textarea></p><p id="${def.const.seed}.warning.chn">（请勿添加过多自定义字体，避免造成页面加载缓慢）</p><p class="${def.const.seed}.fontfeature">\u2475 以下设置字体的 font-variant 变体样式属性。<br/><span class="${def.const.seed}.clr:crimson">如果您不了解该属性，请保持留空，以免造成渲染异常。</span></p><p class="${def.const.seed}.input.pdb:5px"><input id="${def.const.seed}.custom.variant" placeholder='例如：common-ligatures small-caps' value='${fontVariant}'></p><p class="${def.const.seed}.fontvariant">\u2476 以下设置 OpenType 字体 <a href="https://learn.microsoft.com/en-us/typography/opentype/spec/featurelist" target="_blank">font-feature-settings</a> 属性。<br/><span class="${def.const.seed}.clr:crimson">如果您设置的常规字体非 OpenType 字体，请保持留空。</span></p><p class="${def.const.seed}.input.pdb:5px"><input id="${def.const.seed}.custom.feature" placeholder='例如："liga" 0,"tnum","zero"' value='${fontFeature}'></p>`
@@ -2930,7 +2901,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                 frDialog = null;
               });
             } catch (e) {
-              ERROR("FontSelectionAndCustomFonts:", e.message, def.array.exps.push(`[fontSelectionAndCustomFonts]: ${e}`));
+              ERROR(`${e.name} in FontSelectionAndCustomFonts:`, e.message, def.array.exps.push(`[fontSelectionAndCustomFonts]: ${e}`));
             }
           }
 
@@ -2946,11 +2917,11 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                 const currentScrollTop = _this_.scrollTop;
                 _this_.value = formattedValue;
                 _this_.classList.remove(`${def.const.seed}.bd:crimson`);
-                await sleep(16.7, { instant: true });
+                await sleep(16.7, { instance: true });
                 _this_.scrollTop = currentScrollTop;
                 _this_.setSelectionRange(newCursorPosition, newCursorPosition);
               } catch (e) {
-                _this_.classList.add(`${def.const.seed}.bd:crimson`);
+                e && _this_.classList.add(`${def.const.seed}.bd:crimson`);
               }
             };
             target?.addEventListener("change", event => standardizeString(event.target, true, false) && handleInput(event));
@@ -3002,7 +2973,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                     : `<p class="${def.const.seed}.clr:8b0000">Font-rewrite data format error, please re-enter!</p>`;
                   const [trueButtonText, titleText] = IS_CHN ? ["确 定", "重写数据格式错误"] : ["OK", "Customized Font-Rewrite Data Error"];
                   let errorDialog = new FrDialogBox({ trueButtonText, messageText, titleText });
-                  if (await errorDialog.respond()) {
+                  if (await errorDialog.respond(e)) {
                     const clickEvent = new Event("dblclick", { bubbles: true, cancelable: false });
                     qS(`#${def.const.seed}\\.fontoverride\\.def`, def.var.configIf)?.dispatchEvent(clickEvent);
                   }
@@ -3023,7 +2994,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               if (fontFaceNode.checked && !CONST_VALUES.fontFace) {
                 const placeholderText = IS_CHN ? "正在恢复之前设置的字体…" : "Restore previous font…";
                 inputNode.setAttribute("placeholder", placeholderText);
-                await sleep(220, { instant: true });
+                await sleep(220, { instance: true });
                 qS(`#${def.id.submit} .${def.class.submit}[v-Preview="true"]`, def.var.configIf)?.click();
               }
             };
@@ -3041,7 +3012,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               checkInputValue(fontScaleNode, drawScale, /^[0-2](\.[0-9]{1,3})?$/, 3, true);
               return drawScale;
             } catch (e) {
-              ERROR("GetFontSizeScale:", e.message, def.array.exps.push(`[getFontSizeScale]: ${e}`));
+              ERROR(`${e.name} in GetFontSizeScale:`, e.message, def.array.exps.push(`[getFontSizeScale]: ${e}`));
             } finally {
               saveChangeStatus(fontScaleNode, CONST_VALUES.fontSize, submitButton, true);
             }
@@ -3079,7 +3050,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                     : `<p class="${def.const.seed}.clr:8b0000">Fix-scaling Data format error, please re-enter!</p>`;
                   const [trueButtonText, titleText] = IS_CHN ? ["确 定", "设置数据格式错误"] : ["OK", "Sites Fix-scaling Data Error"];
                   let errorDialog = new FrDialogBox({ trueButtonText, messageText, titleText });
-                  if (await errorDialog.respond()) {
+                  if (await errorDialog.respond(e)) {
                     const clickEvent = new Event("dblclick", { bubbles: true, cancelable: false });
                     qS(`#${def.const.seed}\\.fontscale\\.def`, def.var.configIf)?.dispatchEvent(clickEvent);
                   }
@@ -3100,7 +3071,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               toggleVisibility();
               return fixViewportT;
             } catch (e) {
-              ERROR("GetFixViewportBool:", e.message, def.array.exps.push(`[getFixViewportBool]: ${e}`));
+              ERROR(`${e.name} in GetFixViewportBool:`, e.message, def.array.exps.push(`[getFixViewportBool]: ${e}`));
             } finally {
               saveChangeStatus(fixViewportT, CONST_VALUES.fixViewport, submitButton);
             }
@@ -3115,7 +3086,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               checkInputValue(strokeNode, drawStrock, /^[0-1](\.[0-9]{1,3})?$/, 3);
               return drawStrock;
             } catch (e) {
-              ERROR("GetFontsStroke:", e.message, def.array.exps.push(`[getFontsStroke]: ${e}`));
+              ERROR(`${e.name} in GetFontsStroke:`, e.message, def.array.exps.push(`[getFontsStroke]: ${e}`));
             } finally {
               saveChangeStatus(strokeNode, CONST_VALUES.fontStroke, submitButton);
             }
@@ -3148,7 +3119,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               fixStrokeT.addEventListener("click", handleClick);
               return { fixStrokeT, fixShadowT, lazyloadT };
             } catch (e) {
-              ERROR("GetFixStrokeBool:", e.message, def.array.exps.push(`[getFixStrokeBool]: ${e}`));
+              ERROR(`${e.name} in GetFixStrokeBool:`, e.message, def.array.exps.push(`[getFixStrokeBool]: ${e}`));
             } finally {
               saveChangeStatus(fixStrokeT, CONST_VALUES.fixStroke, submitButton);
               saveChangeStatus(lazyloadT, CONST_VALUES.lazyload, submitButton);
@@ -3176,7 +3147,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               shadowNode.addEventListener("change", () => shadowColorNode.classList.toggle(`${def.const.seed}.disp:none`, isShadowOFF));
               return drawShadow;
             } catch (e) {
-              ERROR("GetFontShadow:", e.message, def.array.exps.push(`[getFontShadow]: ${e}`));
+              ERROR(`${e.name} in GetFontShadow:`, e.message, def.array.exps.push(`[getFontShadow]: ${e}`));
             } finally {
               saveChangeStatus(shadowNode, CONST_VALUES.fontShadow, submitButton);
               saveChangeStatus(renderCanvasT, CONST_VALUES.renderCanvas, submitButton);
@@ -3186,13 +3157,13 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           function getColorAndColorPicker(cpNode, button, defaultColor, colorReg) {
             if (!cpNode || !button) return object();
             try {
-              if (!global.FRColorPicker) return revokeColorPicker(cpNode, defaultColor, colorReg);
-              const colorPicker = new global.FRColorPicker(`#${def.id.color}`, def.var.configIf, { alpha: 1.0, format: "hexa" });
+              if (!global.FRColorPicker) return __console("warn", "FRColorPicker failed to load, inserted <INPUT> instead."), revokeColorPicker(cpNode, defaultColor, colorReg);
+              const colorPicker = new global.FRColorPicker(`#${def.id.color}`, def.var.configIf, { alpha: true, format: "hexa" });
               const color = colorPicker.fromString(defaultColor) && colorPicker.toHEXAString();
-              colorPicker.onChange = () => (cpNode.value = parseColor(colorPicker.toHEXAString()));
-              return DEBUG(`frColorPicker: %c${color}`, `${fullStyle(color, getBrightness(color.slice(1)) > 182 ? "#333" : "#eee")};border:1px solid #eee`) ?? colorPicker;
+              colorPicker.onChange = () => (colorPicker.value = parseColor(colorPicker.toHEXAString()));
+              return DEBUG(`frColorPicker: %c${color}`, fullStyle(color, getBrightness(color.slice(1)) >= 165 ? "#121212" : "#fcfcfc")) ?? colorPicker;
             } catch (e) {
-              return ERROR("GetColorAndColorPicker:", e.message, def.array.exps.push(`[getColorAndColorPicker]: ${e}`)) ?? object();
+              return ERROR(`${e.name} in GetColorAndColorPicker:`, e.message) ?? { fromString: value => (cpNode.style.cssText = `--fr-input-color:${(cpNode.value = value)}`) };
             } finally {
               saveChangeStatus(cpNode, defaultColor, button);
             }
@@ -3295,7 +3266,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                 }
                 frDialog = null;
               } catch (e) {
-                ERROR("Monospaced Set:", e.message);
+                ERROR(`${e.name} in CustomMonospceFont:`, e.message);
               }
             });
           }
@@ -3430,14 +3401,14 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                   const _textShadowFix = `0 0 ${fshadow}px ${fscolor.toLowerCase().slice(0, 7).concat("2b")}`;
                   const _sharpRender = rendercanvas ? `--fr-render-shape:geometricPrecision;` : ``;
                   const _rootpseudoclass = `:root{--fr-font-basefont:${INITIAL_REMARKS.fontBase};--fr-font-emoji:${INITIAL_REMARKS.fontEmoji};${customFontFeature}--fr-font-fontscale:${fscale};--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-no-stroke:0px transparent;--fr-fix-stroke:var(--fr-no-stroke);--fr-fix-shadow:${_textShadowFix};--fr-render-text:optimizeLegibility;${_sharpRender}--fr-render-image:auto;${monoFontText}${monoFallback}${monoShadowColor}${monoShadow}${monoFeatureText}}`;
-                  const __tFontStyle = `@charset "UTF-8";${def.var.style.frDialog}${_curEmptyConfig ? `` : `${_rootpseudoclass}${_firefoxInputFix}${_tFontStyle}`}`;
+                  const __tFontStyle = `@charset "UTF-8";${_curEmptyConfig ? `` : `${_rootpseudoclass}${_firefoxInputFix}${_tFontStyle}`}`;
                   restoreSaveButton({ button: this, isRestore: false });
                   getCurrentFontName(fontface, _selectedFont, defaultFont)
                     .then(() => correctBoldPassive("preview", _fixfontstroke, document, true))
-                    .then(() => DEBUG(`frColorPicker<Preview>: %c${fscolor}`, fullStyle(fscolor, getBrightness(fscolor.slice(1)) > 182 ? "#333" : "#eee")));
+                    .then(() => DEBUG(`frColorPicker<Preview>: %c${fscolor}`, fullStyle(fscolor, getBrightness(fscolor.slice(1)) >= 165 ? "#121212" : "#fcfcfc")));
                   loadPreview(isPreview, (def.var.topStyle = __tFontStyle), false);
                 } catch (e) {
-                  ERROR("ControlSubmitButton:", e.message);
+                  ERROR(`${e.name} in ControlSubmitButton.Preview:`, e.message);
                 }
               } else {
                 try {
@@ -3451,7 +3422,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                   try {
                     domainValues = domains ? [...JSON.parse(decrypt(domains))] : [];
                   } catch (e) {
-                    domainValues = [];
+                    e && (domainValues = []);
                   }
                   const awdlNode = qS(`#${def.const.seed}\\.sitedatalist`, def.var.dialogIf);
                   awdlNode?.classList.add(domainValues.length > 0 ? `${def.const.seed}.disp:inline.block` : `${def.const.seed}.disp:none`);
@@ -3504,7 +3475,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                     try {
                       domainValues = domains ? [...JSON.parse(decrypt(domains))] : [];
                     } catch (e) {
-                      domainValues = [];
+                      e && (domainValues = []);
                     }
                     const domainValueIndex = updateDomainsIndex(domainValues);
                     ~domainValueIndex ? domainValues.splice(domainValueIndex, 1, domainValue) : domainValues.push(domainValue);
@@ -3523,7 +3494,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                   }
                   frDialog = null;
                 } catch (e) {
-                  delete def.var.successed && ERROR("ControlSubmitButton:", e.message);
+                  delete def.var.successed && ERROR(`${e.name} in ControlSubmitButton.Save:`, e.message);
                 }
                 if (!def.var.successed) return;
                 const messageText = IS_CHN
@@ -3634,7 +3605,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                             backupDialog = null;
                           } else throw new Error("Invalid Data Error");
                         } catch (e) {
-                          ERROR("FileReader.load:", e.message);
+                          ERROR(`${e.name} in FileReader.load:`, e.message);
                           const messageText = IS_CHN
                             ? `<p class="${def.const.seed}.clr:8b0000">数据校验错误，请选择正确的本地备份文件！</p>`
                             : `<p class="${def.const.seed}.clr:8b0000">Data validation error, please recheck the file!</p>`;
@@ -3649,7 +3620,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                     reader.readAsText(thatFile);
                     reader = null;
                   } catch (e) {
-                    ERROR("<Load file not exist>", e.name);
+                    ERROR(`${e.name} in FileReader.load: Backup file does not exist!`);
                     const messageText = IS_CHN
                       ? `<p class="${def.const.seed}.clr:indigo">载入文件不存在，请选择要还原的备份文件！</p>`
                       : `<p class="${def.const.seed}.clr:indigo">Load file not exist, please select one to restore!</p>`;
@@ -3661,7 +3632,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
                 }
                 frDialog = null;
               } catch (e) {
-                ERROR("LoadBackupData:", e.message);
+                ERROR(`${e.name} in ControlBackupButton:`, e.message);
               }
             });
           }
@@ -3756,9 +3727,9 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             value !== initVal ? def.array.values.add(input.id) : def.array.values.delete(input.id);
             const hasValues = def.array.values.size > 0;
             button.classList.toggle(def.class.anim, hasValues);
-            if (isPrev) DEBUG("changed Element IDs:\r\n", def.array.values) || hasValues ? changePreviewButtonStyle(button) : restoreSaveButton({ button });
-          } catch (exp) {
-            ERROR("SetEffectIntoSubmit:", exp);
+            if (isPrev) DEBUG("changed Element IDs:", def.array.values) || hasValues ? changePreviewButtonStyle(button) : restoreSaveButton({ button });
+          } catch (e) {
+            ERROR(`${e.name} in SetEffectIntoSubmit:`, e.message);
           }
         }
 
@@ -3790,7 +3761,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         }
 
         function convertFullToHalf(str) {
-          return asArray(str).reduce((result, char) => {
+          return arrayFrom(str).reduce((result, char) => {
             const charCode = char.charCodeAt(0);
             if (charCode === 12288) return result + String.fromCharCode(charCode - 12256);
             else if (charCode >= 65281 && charCode <= 65374) return result + String.fromCharCode(charCode - 65248);
@@ -3828,7 +3799,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               } else reload();
               frDialog = null;
             } catch (e) {
-              ERROR("ReportErrorToAuthor:", e.message);
+              ERROR(`${e.name} in ReportErrorToAuthor:`, e.message);
             }
           });
         }
@@ -3859,22 +3830,22 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
         /* FIX_FONT_BOLD_STROKE_STYLE_ERRORS. NEW UPDATE: 2024-10-26 F9Y4NG */
 
-        const queryString = "audio,base,br,canvas,embed,g,head,hr,html,iframe,img,link,math,meta,noscript,object,path,picture,script,style,svg,title,video";
-        const [localFlag, sessionFlag] = [Boolean(localStorage?.getItem(def.const.isConflict)), Boolean(sessionStorage?.getItem(def.const.isConflict))];
-        const [observeNodeSet, boldStatusCache, watermark, threads] = [new Set(), new WeakMap(), /watermark/i, Math.min(navigator.hardwareConcurrency || 4, 20)];
-        const [checkConflict, excludeSet] = [{ flag: localFlag, counter: new Map(), threshold: Math.min(threads * 20, 2e2), interval: 1e2 }, new Set(queryString.split(","))];
+        const selectors = "audio,base,br,canvas,embed,g,head,hr,html,iframe,img,link,math,meta,noscript,object,path,picture,script,style,svg,title,video";
+        const [_Config, _ExcludeSet] = [{ attributeOldValue: true, childList: true, subtree: true }, new Set(selectors.split(","))];
+        const [observeNodeSet, boldStatusCache, threads] = [new Set(), new WeakMap(), Math.min(navigator.hardwareConcurrency || 4, 20)];
+        const [localFlag, sessionFlag] = [localStorage, sessionStorage].map(storage => Boolean(storage?.getItem(def.const.const.conflict)));
+        const [checkConflict, watermark] = [{ flag: localFlag, counter: new Map(), threshold: Math.min(threads * 20, 2e2), interval: 1e2 }, /watermark/i];
         const [changeAttribute, deBounceFixPassive] = [createChangeAttribute(def.const.boldAttrName, !localFlag), createDeBounce({ fn: correctBoldPassive, delay: 50 })];
-        const hasCorrectPermission = () => IS_CAUSED_BOLDSTROKEERROR && IS_CURRENTSITE_ALLOWED && def.var.fixStroke && !sessionStorage?.getItem(def.const.isConflict);
+        const hasCorrectPermission = () => IS_CAUSED_BOLDSTROKEERROR && IS_CURRENTSITE_ALLOWED && def.var.fixStroke && !sessionStorage?.getItem(def.const.const.conflict);
         const applyLazyLoad = (fn, ...parameter) => void (CONST_VALUES.o.lazyload ? global[def.const.raf](fn.bind(null, ...parameter)) : fn(...parameter));
 
         function correctBoldPassive(event, cssText, target = document, recheck = false) {
           try {
-            let { elementSet, shadowSet } = qAS(`:not(${queryString})`, target, node => !watermark.test(toString(node.className)));
-            if (hasCorrectPermission()) getAndProcessBoldStyles({ elementSet, recheck });
-            shadowSet.forEach(shadow => processShadowRootNode(shadow, cssText, def.var.obsCorrect)) ?? shadowSet.clear();
-            DEBUG(`CorrectBold.stroke.Passive${IN_FRAMES}:`, { eventType: event ?? global.event?.type ?? "unknown" });
+            let { elementSet, shadowSet } = qAS(`:not(${selectors})`, target, node => !watermark.test(toString(node.className)));
+            shadowSet.forEach(shadow => processShadowRootNode(shadow, cssText, def.var.obsFontBold)) ?? shadowSet.clear();
+            if (hasCorrectPermission()) getAndProcessBoldStyles({ elementSet, recheck }) ?? DEBUG(`CorrectBold.Passive${IN_FRAMES}:`, { eventType: event ?? global.event?.type });
           } catch (e) {
-            ERROR("CorrectBoldPassive:", e);
+            ERROR(`${e.name} in CorrectBoldPassive:`, e);
           }
         }
 
@@ -3913,7 +3884,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             if (done) return void finalizer();
             preparator(value);
           }
-          raf.setTimeout(processBatch, 0, iterator, batchSize, preparator, finalizer);
+          rAF.setTimeout(processBatch, 0, iterator, batchSize, preparator, finalizer);
         }
 
         function isNodeContainsBoldFix(node, shouldCheckChildren) {
@@ -3922,15 +3893,15 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
         function shadowRootNodeInsertCss(shadow, syncStyle) {
           const hostNodeName = getNodeName(shadow.host);
-          FrDialogBox.setShadowStyle(shadow, selectionCssText + shadowCode, `${hostNodeName}-fix-selection`, false);
-          if (!IS_CAUSED_BOLDSTROKEERROR || !IS_CURRENTSITE_ALLOWED || sessionStorage?.getItem(def.const.isConflict)) return;
+          setAdoptedStyleSheets(shadow, selectionCssText + shadowCode, `${hostNodeName}-fix-selection`, false);
+          if (!IS_CAUSED_BOLDSTROKEERROR || !IS_CURRENTSITE_ALLOWED || sessionStorage?.getItem(def.const.const.conflict)) return;
           const syncCssText = syncStyle ? `:host(${hostNodeName}){--fr-fix-stroke:0px transparent;--fr-fix-shadow:${textShadowFix}}${syncStyle}` : ``;
-          FrDialogBox.setShadowStyle(shadow, syncCssText, `${hostNodeName}-fix-boldstroke`);
+          setAdoptedStyleSheets(shadow, syncCssText, `${hostNodeName}-fix-boldstroke`);
         }
 
         function handleRootNodeObserve(context, observer) {
           hasCorrectPermission() && ["mouseenter", "mouseleave"].forEach(event => context.addEventListener(event, mouseEventsHandler, true));
-          !observeNodeSet.has(context) && observeNodeSet.add(context) && observer && observer.observe(context, { attributeOldValue: true, childList: true, subtree: true });
+          !observeNodeSet.has(context) && observeNodeSet.add(context) && observer && observer.observe(context, _Config);
         }
 
         function createChangeAttribute(value, term) {
@@ -3950,32 +3921,32 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
         }
 
         function checkNodesForFix(node, checkList = [Node.ELEMENT_NODE, Node.DOCUMENT_FRAGMENT_NODE]) {
-          return node && checkList.includes(node.nodeType) && !excludeSet.has(getNodeName(node)) && !watermark.test(toString(node.className));
+          return node && checkList.includes(node.nodeType) && !_ExcludeSet.has(getNodeName(node)) && !watermark.test(toString(node.className));
         }
 
         function removeBoldCache(target, checkChildren = true) {
-          if (checkChildren) qA(`:not(${queryString})`, target).forEach(item => void boldStatusCache.delete(item));
+          if (checkChildren) qA(`:not(${selectors})`, target).forEach(item => void boldStatusCache.delete(item));
           return boldStatusCache.delete(target) || !boldStatusCache.has(target);
         }
 
-        function correctBoldStrokeProcess() {
+        async function correctBoldStrokeProcess() {
           def.var.fixStroke = CONST_VALUES.o.fixStroke;
-          def.var.obsCorrect = new MutationObserver(fixBoldProcess);
-          handleRootNodeObserve(document, def.var.obsCorrect);
+          def.var.obsFontBold = await new NodeObserver().startObserver({ name: "Correct-bold", callback: fixBoldProcess, config: _Config }).then(r => r.observer);
+          handleRootNodeObserve(document, def.var.obsFontBold);
 
           if (hasCorrectPermission()) {
             addLoadEvents.addFinalFn(correctBoldPassive, null, boldFixCSSText, document, true);
             if (global.navigation) global.navigation.addEventListener("navigate", handleNavigateEvents);
             else ["pushState", "replaceState"].forEach(event => global.addEventListener(event, handleNavigateEvents));
-            DEBUG(`CorrectBold.stroke.Active${IN_FRAMES}:`, { eventType: "init" });
+            DEBUG(`CorrectBold.Active${IN_FRAMES}:`, { eventType: "init" });
           }
 
-          function fixBoldProcess(mutationsList, observer) {
+          function fixBoldProcess({ mutations, observer }) {
             try {
               if (sessionFlag) return conflictReport();
               const mutationNodeSet = new Set();
               observer.disconnect();
-              mutationsList.forEach(mutation => {
+              mutations.forEach(mutation => {
                 if (mutation.type === "childList") return processChildListMutations(mutation, mutationNodeSet);
                 if (hasCorrectPermission() && mutation.type === "attributes") processAttributesMutations(mutation, mutationNodeSet, observer);
               });
@@ -3983,12 +3954,12 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               observeNodeSet.forEach(node => void observer.observe(node, { attributeOldValue: true, childList: true, subtree: true }));
             } catch (e) {
               if (e.message.includes("callback conflict")) handleCallbackLimit(observer);
-              ERROR("FixBoldProcess:", e.message);
+              ERROR(`${e.name} in FixBoldProcess:`, e.message);
             }
           }
 
           function processNodes(target, pendingNodes, pendingShadows) {
-            const { elementSet, shadowSet } = qAS(`:not(${queryString})`, target, node => !watermark.test(toString(node.className)));
+            const { elementSet, shadowSet } = qAS(`:not(${selectors})`, target, node => !watermark.test(toString(node.className)));
             elementSet.forEach(el => pendingNodes.add(el));
             shadowSet.forEach(shadow => pendingShadows.add(shadow));
           }
@@ -4037,7 +4008,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           function hasFontStyleChange(newValue, oldValue) {
             const [oldArray, newArray] = [uniq(oldValue.split(";")), uniq(newValue.split(";"))];
             const diff = filterArrayDiffToStr(oldArray, newArray);
-            return !/font:|font-weight:/i.test(diff);
+            return !/(?:font:|font-weight:)/i.test(diff);
           }
 
           function checkAttributeChange({ target, attributeName, oldValue, newValue = "" }) {
@@ -4064,7 +4035,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           }
 
           function checkConflictNode(node, event) {
-            if (event instanceof MouseEvent || event instanceof MessageEvent || !checkNodesForFix(node, [Node.ELEMENT_NODE]) || !isNodeContainsBoldFix(node, true)) return;
+            if ((event instanceof MouseEvent && event.type === "mousemove") || event instanceof MessageEvent) return;
+            if (!checkNodesForFix(node, [Node.ELEMENT_NODE]) || !isNodeContainsBoldFix(node, true)) return;
             updateNodeCounter(node.outerHTML, performance.now());
           }
 
@@ -4079,17 +4051,17 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           function handleConflict(key) {
             if (checkConflict.flag) {
               checkConflict.counter.clear();
-              sessionStorage?.setItem(def.const.isConflict, 12388);
+              sessionStorage?.setItem(def.const.const.conflict, 12388);
               return conflictReport(key);
             }
-            __console("warn", "[Warning]", "Potential infinite loop detected, switching to <classList> mode.");
-            localStorage?.setItem(def.const.isConflict, 12339);
+            __console("warn", "[Warning]", "Potential infinite loop detected, switching to <class attribute> mode.");
+            localStorage?.setItem(def.const.const.conflict, 12339);
             checkConflict.flag = true;
           }
 
           function conflictReport(key) {
             __console("warn", "[Warning]", "Callback infinite loop occurred, suspending observer.", { "conflict.content": key ?? "SessionFlag" });
-            throw new Error(`Found callback conflict! Try the workaround to enable the 'Lazyload' option.`);
+            throw new Error(`Found callback conflict! ${CONST_VALUES.lazyload ? "Fix bold is disabled." : "Try a workaround to enable 'Use Lazyload Fix'."}`);
           }
 
           function handleCallbackLimit(observer) {
@@ -4097,7 +4069,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             if (global.navigation) global.navigation.removeEventListener("navigate", handleNavigateEvents);
             else ["pushState", "replaceState"].forEach(event => global.removeEventListener(event, handleNavigateEvents));
             observeNodeSet.forEach(shadow => ["mouseenter", "mouseleave"].forEach(event => shadow.removeEventListener(event, mouseEventsHandler, true)));
-            delete def.var.obsCorrect && observeNodeSet.clear();
+            delete def.var.obsFontBold && observeNodeSet.clear();
           }
         }
 
@@ -4107,8 +4079,8 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           const vRegexp = /(\.?\d+(?:\.\d+)?)([dsl]?(?:v[wh]|vmin|vmax))\b(?![\\=/+_-])/g;
           const uRegexp = /url\((?![`'"]?(?:([\w.-]+)?#\b|https?:\/\/|data:|\/\/|\/\B))([^)]+)\)/g;
           const withPermission = IS_CURRENTSITE_ALLOWED && isFixViewport && CONST_VALUES.o.fixViewport && def.var.curScale !== 1;
-          const getAttributes = node => asArray(node.attributes).reduce((atr, { name, value }) => (!["href", "rel"].includes(name) && (atr[name] = value), atr), {});
-          if (withPermission) addLoadEvents.addFinalFn(correctViewport) || DEBUG(`correctUnit.Viewport.Active${IN_FRAMES}:`, { eventType: "init" });
+          const getAttributes = node => arrayFrom(node.attributes).reduce((atr, { name, value }) => (!["href", "rel"].includes(name) && (atr[name] = value), atr), {});
+          if (withPermission) addLoadEvents.addFinalFn(correctViewport) ?? DEBUG(`correct.ViewportUnit${IN_FRAMES}:`, { eventType: "init" });
           return { withPermission, correctViewport };
 
           function correctViewport() {
@@ -4116,7 +4088,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           }
 
           async function fixViewportLinks() {
-            const links = qA(`link[rel~="stylesheet" i]:not([data-fr-processed])`).map(async link => {
+            const links = qA(`link[rel~="stylesheet" i]:not([${def.const.const.vpu}])`).map(async link => {
               const url = link.href || link.dataset.href || "about:blank";
               link.dataset.frProcessed = "";
               await applyStyleToOriginLink(url.replace(/^http:/, "https:"), link);
@@ -4128,19 +4100,19 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             try {
               const cssText = await fetchLinkContent(url, node);
               const processedCssText = cssText ? await fetchImport(cssText, url) : "";
-              if (!/\/\*# (source|import)URL=/.test(processedCssText)) return (node.dataset.frProcessed = "ignore");
-              const attributes = { id: node.id || generateRandomString(6), ...getAttributes(node), type: "text/css", "data-href": url, "data-fr-processed": "link" };
+              if (!/\/\*# (source|import)URL=/.test(processedCssText)) return !node.dataset.frProcessed && (node.dataset.frProcessed = "ignore");
+              const attributes = { id: node.id || generateRandomString(6), ...getAttributes(node), type: "text/css", "data-href": url, [def.const.const.vpu]: "link" };
               const parent = node.parentNode ?? document.head;
               const style = GMaddElement(parent, "style", { ...attributes, textContent: processedCssText });
               ((allowedInlineStyle && style && parent.contains(node) && parent.replaceChild(style, node)) || (style && safeRemoveNode(node))) &&
                 DEBUG("Fixed.viewport.Link:", { linkNode: style });
             } catch (e) {
-              ERROR(`applyStyleToOriginLink${IN_FRAMES}:`, e.message);
+              ERROR(`${e.name} in ApplyStyleToOriginLink${IN_FRAMES}:`, e.message);
             }
           }
 
           async function fixViewportStyles() {
-            const styles = qA(`style:not([data-fr-processed]):not(.darkreader)`).map(async style => {
+            const styles = qA(`style:not([${def.const.const.vpu}]):not(.darkreader)`).map(async style => {
               if (asArray(style.attributes, attr => attr.name).SomeX(name => /^(?:fr|gb)-css-[0-9a-f]{8}$/.test(name))) return;
               const cssText = style.textContent?.trim();
               style.dataset.frProcessed = "";
@@ -4151,12 +4123,12 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
 
           async function applyStyleToOriginStyle(node, cssText) {
             try {
-              if (!cssText || !vRegexp.test(cssText)) return (node.dataset.frProcessed = "ignore");
+              if (!cssText || !vRegexp.test(cssText)) return !node.dataset.frProcessed && (node.dataset.frProcessed = "ignore");
               node.textContent = `/*# sourceURL= ${CUR_HREF}#internal */\r\n` + replaceStyle(cssText, vRegexp, def.var.curScale);
               node.id = node.id || generateRandomString(6);
-              node.dataset.frProcessed = DEBUG("Fixed.viewport.Style:", { styleNode: node }) ?? "style";
+              DEBUG("Fixed.viewport.Style:", { styleNode: node }) ?? (node.dataset.frProcessed = "style");
             } catch (e) {
-              node.dataset.frProcessed = ERROR(`applyStyleToOriginStyle:`, e.message) ?? "failed";
+              ERROR(`${e.name} in ApplyStyleToOriginStyle:`, e.message) ?? (node.dataset.frProcessed = "failed");
             }
           }
 
@@ -4168,12 +4140,12 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
               if (!cssText || (node && !vRegexp.test(cssText))) return cssText || "";
               return `/*# ${node ? "sourceURL" : "importURL"}=${url} */\r\n${replaceBaseURL(replaceStyle(cssText, vRegexp, def.var.curScale), url)}`;
             } catch (e) {
-              return ERROR(`fetchLinkContent${IN_FRAMES}:`, { url, msg: e }), node && (node.dataset.frProcessed = "failed"), "";
+              return ERROR(`${e.name} in FetchLinkContent${IN_FRAMES}:`, { url, node, msg: e.message }), node?.setAttribute(def.const.const.vpu, "failed"), "";
             }
           }
 
           async function asyncReplace(str, regex, asyncReplaceFn) {
-            const matches = asArray(str.matchAll(regex));
+            const matches = arrayFrom(str.matchAll(regex));
             if (matches.length === 0) return str;
             const replacements = await Promise.all(matches.map(match => asyncReplaceFn(match[2] ?? match[1])));
             matches.forEach((match, index) => (str = str.replace(match[0], replacements[index])));
@@ -4212,63 +4184,69 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             if (nodeName === "link") return node.getAttribute("rel")?.includes("stylesheet") && node.getAttribute("href");
             if (nodeName === "style") return node.id !== def.id.rndStyle && !node.classList?.contains("darkreader");
           };
-          const handleRemovedNodesMutation = removedNodes => {
-            asArray(removedNodes).SomeX(node => getNodeName(node) === "style" && node.id === def.id.rndStyle && !node.dataset.frRemoved) &&
-              insertMainStyleElement({ overwrite: false, shouldNotify: false }) &&
-              INFO(`%c[MO]${IN_FRAMES}[REINSERT]:%c<style> success!`, leftStyle("#a52a2a"), rightStyle("#a52a2a"));
-          };
-          const handleChildListMutation = (target, addedNodes, removedNodes) => {
+          const handleChildListMutation = (target, addedNodes) => {
             if (target === document.documentElement) return updateFlagAtRootElement(target);
-            if (target === document.head) handleRemovedNodesMutation(removedNodes);
-            if (withPermission && asArray(addedNodes).SomeX(node => checkStyleNode(node, getNodeName(node)))) deBounceViewport();
+            if (withPermission) for (const node of addedNodes) if (checkStyleNode(node, getNodeName(node))) return deBounceViewport();
           };
-          const updateStyleWithNewRootID = (mainStyle, id) => {
-            const cssText = (mainStyle?.textContent ?? tStyle).replace(def.const.regexp, `#${id}`);
-            insertStyle({ target: document.head, id: def.id.rndStyle, cssText, overwrite: true }) &&
-              INFO(`%c[MO]${IN_FRAMES}[HTML.ID]:%c#${id}`, leftStyle("#1e90ff"), rightStyle("#1e90ff"));
+          const updateStyleWithNewRootID = id => {
+            const cssText = (getMainStyleElements({ primary: true })?.textContent ?? tStyle).replace(def.const.regexp, `#${id}`);
+            insertStyle({ target: document.head, id: def.id.rndStyle, cssText, overwrite: true }) && INFO(`%c[MO]${IN_FRAMES}[HTML.ID]: #${id}`, fullStyle("#1e90ff"));
           };
-          const handleAttributesMutation = (target, oldValue, mainStyle) => {
-            if (target !== document.documentElement) return;
-            const newID = target.id || (target.id = def.const.root);
-            if (oldValue !== newID) updateStyleWithNewRootID(mainStyle, newID);
+          const handleAttributesMutation = (target, oldValue) => {
+            const newValue = target.id || (target.id = def.const.root);
+            if (oldValue !== newValue) updateStyleWithNewRootID(newValue);
           };
-          const handleStyleProcess = ({ type, target, addedNodes, removedNodes, oldValue }, mainStyle) => {
-            if (type === "childList") handleChildListMutation(target, addedNodes, removedNodes);
-            else if (type === "attributes") handleAttributesMutation(target, oldValue, mainStyle);
+          const handleHTMLProcess = ({ type, target, addedNodes, oldValue }) => {
+            if (type === "childList" && addedNodes.length) return handleChildListMutation(target, addedNodes);
+            if (type === "attributes" && target === document.documentElement) handleAttributesMutation(target, oldValue);
           };
+          const handleRemovedNodesMutation = removedNodes => {
+            for (const node of removedNodes) {
+              if (getNodeName(node) !== "style" || (node.id !== def.id.rndStyle && !node.hasAttribute(def.const.cssAttrName)) || node.dataset.frRemoved) continue;
+              return insertMainStyleElement({ shouldNotify: false }) && INFO(`%c[MO]${IN_FRAMES}[REINSERT]: style#${node.id}`, fullStyle("#a52a2a"));
+            }
+          };
+          const check_start_time = performance.now();
           const resetFontScaleForModernEditors = (fontScale, editorSel) => {
-            if (fontScale === 1 || typeof def.var.editor !== "undefined") return;
-            if (!asArray(qAS(`:not(${queryString})`, document.body).elementSet).SomeX(el => el.matches(editorSel))) return;
-            (def.var.editor = true) && adjustCoordinateOffset({ cur: 1, prev: fontScale, props: def.array.props });
-            document.documentElement.style.setProperty("--fr-font-fontscale", "1.0");
+            if (fontScale === 1 || typeof def.var.editor !== "undefined" || performance.now() - check_start_time > 5e3) return;
+            const { elementSet } = qAS(`:not(${selectors})`, document.body);
+            for (const el of elementSet) {
+              if (!el.matches(editorSel)) continue;
+              (def.var.editor = true) && adjustCoordinateOffset({ cur: 1, prev: fontScale, props: def.array.props });
+              return document.documentElement.style.setProperty("--fr-font-fontscale", "1.0");
+            }
           };
           const resetFontScale = createDeBounce({ fn: resetFontScaleForModernEditors, delay: 50 });
-          const mainStyleProcess = mutations => {
-            def.var.mainStyle = def.var.mainStyle ?? getMainStyleElements({ primary: true });
-            mutations.forEach(mutation => void handleStyleProcess(mutation, def.var.mainStyle));
-            if (!def.var.mainStyle) insertMainStyleElement();
+          const mainHTMLProcess = ({ mutations }) => {
+            mutations.forEach(mutation => void handleHTMLProcess(mutation));
             resetFontScale(def.var.curScale, `.CodeMirror,.cm-editor,.monaco-editor`);
           };
-          const styleObserve = new MutationObserver(mainStyleProcess);
-          getHeadElement.getNodeAndObserve().then(r => r.get() && insertMainStyleElement()); // Fit::IS_GREASEMONKEY
-          styleObserve.observe(document, { childList: true, subtree: true, attributeOldValue: true, attributeFilter: ["id"] });
+          const config = { childList: true, subtree: true, attributeOldValue: true, attributeFilter: ["id"] };
+          new NodeObserver().startObserver({ name: "Observe-element:html-style-link", callback: mainHTMLProcess, config });
+          const mainStyleProcess = ({ mutations }) => mutations.forEach(mutation => void handleRemovedNodesMutation(mutation.removedNodes));
+          requestHEAD.startObserver({ name: "Insert-fr-style", callback: mainStyleProcess, config: { childList: true } }).then(insertMainStyleElement);
         }
+
+        /* IFRAME_STYLE_PROCESSING_IN_BODY */
 
         function monitorBodyIframeProcess() {
           if (!IS_GREASEMONKEY || GMscriptHandler === "Userscripts") processFrameworkEvent();
           const handleIframeProcess = ({ type, target, addedNodes, attributeName }) => {
             if (type !== "childList" && type !== "attributes") return;
-            const aNodes = asArray(addedNodes).filter(node => getNodeName(node) === "iframe");
+            const aNodes = arrayFrom(addedNodes).filter(node => getNodeName(node) === "iframe");
             (aNodes.length || (attributeName && getNodeName(target) === "iframe" && (target.src || target.srcdoc))) &&
               applyStyleToIframes({ condition: type, nodeArray: aNodes.length ? aNodes : [target] });
           };
           const callback = ({ mutations }) => document.readyState === "complete" && mutations.forEach(handleIframeProcess);
-          CUR_WINDOW_TOP && getBodyElement.getNodeAndObserve({ callback, config: { childList: true, subtree: true, attributeFilter: ["src", "srcdoc", "style"] } });
+          const config = { childList: true, subtree: true, attributeFilter: ["src", "srcdoc", "style"] };
+          if (CUR_WINDOW_TOP) requestBODY.startObserver({ name: "Observe-iframes-in-body", callback, config });
         }
 
         /* FONT_RENDERING_MAIN_PROCESS */
 
         void (async function (CSP, initMenus) {
+          monitorMainStyleProcess(correctViewportUnits(CSP));
+          await correctBoldStrokeProcess();
           if (CUR_WINDOW_TOP) {
             if (await initializeConfigData(RC2)) showUpdateInfo(def.var.versionStatus);
             await getCurrentFontName(CONST_VALUES.fontFace, selectedFont, defaultFont);
@@ -4276,16 +4254,14 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             showSystemInfo.compat(IS_CHEAT_UA);
             insertMenus(initMenus);
           }
-          monitorMainStyleProcess(correctViewportUnits(CSP));
-          correctBoldStrokeProcess();
           correctFontScaleOffset();
           overrideCanvasFont(selectedFont);
           IS_CURRENTSITE_ALLOWED && addLoadEvents.addFn(monitorBodyIframeProcess);
           addLoadEvents.addFinalFn(applyStyleToIframes, { condition: "DOMLoaded" });
         })(
           ((target, csp) => {
-            const style = appendNode(target, cE("style", { id: "𝐜𝐬𝐩.𝐭𝐞𝐬𝐭", type: "text/css", textContent: "test { color: #000; }" }));
-            return (csp = style.sheet?.cssRules?.length > 0), safeRemoveNode(style) && csp;
+            const style = generalAddElement(target, "style", { id: "𝐜𝐬𝐩.𝐭𝐞𝐬𝐭", type: "text/css", textContent: "test { color: black }" });
+            return (csp = style?.sheet?.cssRules.length > 0), safeRemoveNode(style) && csp;
           })(document.documentElement, null),
           (preload => {
             if (!CUR_WINDOW_TOP || toString(GMunregisterMenuCommand) === "() => {}") return;
@@ -4306,7 +4282,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             try {
               config = JSON.parse(decrypt(configure));
             } catch (e) {
-              config = (def.var.structureError = ERROR("Config.JSON.parse:", e.message) ?? true) && object();
+              (def.var.structureError = true) && (config = object()) && ERROR(`${e.name} in Config.JSON.parse:`, e.message);
             }
             _config_data_ = { ...INITIAL_CONFIGURE, ...config };
           }
@@ -4317,17 +4293,17 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
           try {
             monoSiteRules = monoSiteRules ? [...JSON.parse(decrypt(monoSiteRules))] : [];
           } catch (e) {
-            monoSiteRules = ERROR("Monospaced_siteRules.Array.parse:", e.message) ?? [];
+            ERROR(`${e.name} in Monospaced_siteRules.Array.parse:`, e.message) ?? (monoSiteRules = []);
           }
           try {
             monoFontList = monoFontList ? convertHtmlToText(JSON.parse(decrypt(monoFontList))) : "";
           } catch (e) {
-            monoFontList = ERROR("Monospaced_Fontlist.String.parse:", e.message) ?? "";
+            ERROR(`${e.name} in Monospaced_Fontlist.String.parse:`, e.message) ?? (monoFontList = "");
           }
           try {
             monoFeature = monoFeature ? convertHtmlToText(JSON.parse(decrypt(monoFeature))) : "";
           } catch (e) {
-            monoFeature = ERROR("Monospaced_Feature.String.parse:", e.message) ?? "";
+            ERROR(`${e.name} in Monospaced_Feature.String.parse:`, e.message) ?? (monoFeature = "");
           }
           return { monoSiteRules, monoFontList, monoFeature };
         },
@@ -4338,7 +4314,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             if (exSiteSave) exSite = JSON.parse(decrypt(exSiteSave));
             else saveData(EXCLUDESITES, defaultExSite);
           } catch (e) {
-            def.var.structureError = ERROR("ExSite.JSON.parse:", e.message) ?? true;
+            ERROR(`${e.name} in ExSite.JSON.parse:`, e.message) ?? (def.var.structureError = true);
           }
           return { exSite: asArray(exSite), exSitesIndex: updateExsitesIndex(exSite) };
         },
@@ -4375,18 +4351,18 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             };
             return { o: await applyPredefinedRenderRules(predefinedData, safeWindow.Object.assign({}, data)), ...data };
           } catch (e) {
-            return (def.var.structureError = true), ERROR("FontData.JSON.Parsing:", e.message), defaultFontValue;
+            return (def.var.structureError = true), ERROR(`${e.name} in FontData.JSON.Parsing:`, e.message), defaultFontValue;
           }
         },
         async () => {
-          const defaultScaleRule = { ".smzdm.com": { Element: ["clientWidth"] }, "live.bilibili.com": { HTMLElement: ["offsetHeight"] }, "www.ithome.com": { Element: ["scrollHeight"] } };
+          const defaultScaleRule = { "www.ithome.com": { Element: ["scrollHeight"] }, "live.bilibili.com": { HTMLElement: ["offsetHeight"] }, ".smzdm.com": { Element: ["clientWidth"] } };
           try {
             const storedFontScaleDef = await GMgetValue(FONTSCALE);
             if (!storedFontScaleDef) return defaultScaleRule;
             const fontScaleDefRule = JSON.parse(decrypt(storedFontScaleDef));
             if (getObjectType.call(fontScaleDefRule) === "[object Object]" && Object.keys(fontScaleDefRule).length > 0) return fontScaleDefRule;
           } catch (e) {
-            ERROR("FontScaleDef.JSON.parse:", e.message);
+            ERROR(`${e.name} in FontScaleDef.JSON.parse:`, e.message);
           }
           return saveData(FONTSCALE, defaultScaleRule), defaultScaleRule;
         },
@@ -4398,7 +4374,7 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             const fontOverride = fontOverrideDef ? JSON.parse(decrypt(fontOverrideDef)) : defaultFontRule;
             if (Array.isArray(fontOverride) && fontOverride.length > 0) return fontOverride;
           } catch (e) {
-            ERROR("FontOverrideDef.JSON.parse:", e.message);
+            ERROR(`${e.name} in FontOverrideDef.JSON.parse:`, e.message);
           }
           return saveData(FONTOVERRIDE, defaultFontRule), defaultFontRule;
         },
@@ -4408,11 +4384,11 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
             const property = customProperty ? JSON.parse(decrypt(customProperty)) : object();
             return { fontFeature: convertHtmlToText(property.feature), fontVariant: convertHtmlToText(property.variant) };
           } catch (e) {
-            return { fontFeature: null, fontVariant: null };
+            return e && { fontFeature: null, fontVariant: null };
           }
         }
       );
-    })(initTrustedTypesPolicy(), safeWindow.JSON.parse ? safeWindow.JSON : global.JSON.parse ? global.JSON : JSON, sessionStorage?.getItem("_NAVIGATORINFO_"));
+    })(initTrustedTypesPolicy(), safeWindow.JSON.parse ? safeWindow.JSON : global.JSON.parse ? global.JSON : JSON, sessionStorage?.getItem(def.const.const.navinfo));
   },
   {
     method: Object.entries({
@@ -4442,10 +4418,10 @@ void (function (ctx, sctx, fontRendering, arrayProxy, customFns) {
     };
     const tS = storageType => {
       try {
-        ctx.addEventListener("error", event => event.message.includes("SecurityError") && event.preventDefault(), { once: true });
+        ctx.addEventListener("error", event => (event.error?.name === "SecurityError" || event.message?.includes("SecurityError")) && event.preventDefault(), { once: true });
         return ctx[storageType].setItem("__fr_storage_test__", true), ctx[storageType].removeItem("__fr_storage_test__"), ctx[storageType];
       } catch (e) {
-        return null;
+        return e && null;
       }
     };
     return { oC, mS, eH, lS: tS("localStorage"), sS: tS("sessionStorage") };

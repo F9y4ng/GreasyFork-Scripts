@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            Помощник поисковой системы
 // @name:ja            優雅な検索エンジン助手
-// @version            2025.10.05.1
+// @version            2025.11.01.1
 // @author             F9y4ng
 // @description        “Elegant Search Engine Assistant” facilite la navigation entre moteurs de recherche, personnalise les préférences, met en évidence les mots-clés, élimine les redirections et publicités, et filtre les résultats. Compatible avec divers moteurs tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, etc.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG and more.
@@ -25,7 +25,8 @@
 // @match              *://ipv6.baidu.com/*
 // @match              *://image.baidu.com/search*
 // @match              *://kaifa.baidu.com/searchPage*
-// @match              *://*.bing.com/*search*
+// @match              *://*.bing.com/*search?*
+// @match              *://*.bing.com/videos/riverview/relatedvideo?*
 // @match              *://duckduckgo.com/*
 // @match              *://*.sogou.com/*
 // @match              *://www.qwant.com/?*
@@ -34,16 +35,14 @@
 // @match              *://so.toutiao.com/search*
 // @match              *://yandex.com/*search*
 // @match              *://yandex.ru/*search*
-// @match              *://yandex.eu/*search*
 // @match              *://www.ecosia.org/*
 // @match              *://*.search.yahoo.com/search*
-// @match              *://*.images.search.yahoo.com/search*
 // @match              *://you.com/*
 // @match              *://www.startpage.com/*
 // @match              *://search.brave.com/*
 // @match              *://yep.com/*
 // @match              *://www.mojeek.com/search*
-// @match              *://priv.au/search*
+// @match              *://au.priv.au/search*
 // @match              *://*.google.com/search*
 // @match              *://*.google.ad/search*
 // @match              *://*.google.ae/search*
@@ -239,9 +238,9 @@
 // @exclude            *://www.google.com/sorry*
 // @exclude            *://www.baidu.com/link*
 // @exclude            *://www.sogou.com/link*
-// @exclude            *://www.so.com/link*
 // @exclude            *://so.toutiao.com/search/jump*
 // @connect            baidu.com
+// @connect            bing.com
 // @connect            sogou.com
 // @connect            so.com
 // @connect            greasyfork.org
@@ -263,11 +262,10 @@
 // @grant              GM.registerMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
-// @note               {"CN":"优化部分搜索引擎广告屏蔽规则。","EN":"Optimized some search engine ad blocking rules."}
-// @note               {"CN":"优化搜索结果链接重定向检测机制。","EN":"Optimized search result link redirect detection."}
-// @note               {"CN":"优化对搜索链接重定向地址的关键词拦截。","EN":"Optimized keyword block for search redirect url."}
-// @note               {"CN":"修复 Bing.com 链接重定向被监测还原的问题。","EN":"Fixed Bing.com link redirection restore issue."}
-// @note               {"CN":"修复 Google.com 搜索链接的颜色问题。","EN":"Fixed color issue with Google.com search links."}
+// @note               {"CN":"优化重构脚本核心函数，提升脚本兼容性。","EN":"Refactored core functions to improve compatibility."}
+// @note               {"CN":"重构搜索引擎跳转按钮的载入模式。","EN":"Refactored the loading mode of jump buttons."}
+// @note               {"CN":"优化所有搜索引擎跳转按钮的实时样式。","EN":"Optimize the real-time styles of all jump buttons."}
+// @note               {"CN":"完美解决暗黑模式按钮及链接的颜色问题。","EN":"Perfect solution for button issues in darkmode."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         edge version≥88 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Chrome version≥88 (Compatible Tampermonkey, Violentmonkey)
@@ -307,11 +305,11 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     confirm: ctx.confirm.bind(ctx),
     setTimeout: ctx.setTimeout.bind(ctx),
     console: sctx.Object.assign(customFns.oC(), ctx.console),
-    info: typeof GM !== "undefined" && GM.info ? GM.info : typeof GM_info !== "undefined" ? GM_info : { script: {} },
+    info: typeof GM_info !== "undefined" ? GM_info : typeof GM !== "undefined" && GM.info ? GM.info : { script: {} },
   };
   const wrappedFrom = ctx.wrappedJSObject ? Array.from : sctx.Array.from;
   const asArray = o => (arrayProxy.method.every(([k, v]) => Reflect.defineProperty(o, k, { value: v.bind(o), ...arrayProxy.option })), o);
-  const orginalFns = { oS: sctx.Object.prototype.toString, hP: sctx.Object.prototype.hasOwnProperty, aF: (...args) => asArray(wrappedFrom(...args)) };
+  const orginalFns = { oS: sctx.Object.prototype.toString, hP: sctx.Object.prototype.hasOwnProperty, aF: (...af) => wrappedFrom(...af), aS: (...as) => asArray(wrappedFrom(...as)) };
   if (!ctx.navigation) ["pushState", "replaceState"].forEach(m => void (ctx.history[m] = customFns.eH(m)));
   searchEngineAssistant(ctx, sctx, toolkit, { ...orginalFns, ...customFns, cS: customFns.mS.filter(isNaN) });
 })(
@@ -321,9 +319,9 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     try {
       const { contentWindow } = (iframe = GM_addElement("iframe", { id: "𝐬𝐚𝐟𝐞.𝐰𝐢𝐧𝐝𝐨𝐰", style: "display:none" }));
       if (!originalWindow.wrappedJSObject) iframe?.remove();
-      return contentWindow;
+      return contentWindow ?? originalWindow;
     } catch (e) {
-      return iframe?.remove(), originalWindow;
+      return e && iframe?.remove(), originalWindow;
     }
   })(typeof window !== "undefined" ? window : this, null),
   function (global, safeWindow, secureVars, customFuntions) {
@@ -332,7 +330,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     /* PERFECTLY COMPATIBLE FOR GREASEMONKEY, TAMPERMONKEY, VIOLENTMONKEY, USERSCRIPTS 2024-03-15 F9Y4NG */
 
     const { atob, btoa, alert, prompt, confirm, console, setTimeout, debugging, info: GMinfo } = secureVars;
-    const { mS, cS, aF: asArray, oS: getObjectType, hP: hasOwnProperty, lS: localStorage, oC: object } = customFuntions;
+    const { mS, cS, aF: arrayFrom, aS: asArray, oS: getObjectType, hP: hasOwnProperty, lS: localStorage, oC: object } = customFuntions;
     const GMversion = GMinfo.version ?? GMinfo.scriptHandlerVersion ?? "unknown";
     const GMscriptHandler = GMinfo.scriptHandler;
     const GMsetValue = gmSelector("setValue");
@@ -343,7 +341,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     const GMregisterMenuCommand = gmSelector("registerMenuCommand");
     const GMxmlhttpRequest = gmSelector("xmlhttpRequest");
     const GMunsafeWindow = gmSelector("unsafeWindow");
-    const GMcontentMode = gmSelector("contentMode");
+    const GMcontextMode = gmSelector("contextMode");
 
     /* INITIALIZE_DEBUG_FUNCTIONS */
 
@@ -362,28 +360,34 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         raf: Symbol(`פֿ${generateRandomString(8, "hex")}`),
         caf: Symbol(`פֿ${generateRandomString(8, "hex")}`),
         bing: Symbol(`פֿ${generateRandomString(8, "hex")}`),
-        loading: generateRandomString(6, "char"),
         cssAttrName: `gb-css-${generateRandomString(8, "hex")}`,
-        rndButtonID: generateRandomString(12, "char"),
         rndclassName: `SC${generateRandomString(8, "number")}`,
         rndstyleName: `SS${generateRandomString(8, "number")}`,
         rndadvName: `SA${generateRandomString(8, "number")}`,
+        filtered: `ͼ${generateRandomString(6, "char")}ͼ`,
+        disappear: `ͽ${generateRandomString(10, "date")}ͼ`,
+        translucent: `ͼ${generateRandomString(10, "date")}ͽ`,
+        rndButtonID: generateRandomString(12, "char"),
+        visited: generateRandomString(6, "mix"),
+        buttons: generateRandomString(6, "mix"),
+        loading: generateRandomString(6, "char"),
+        darkmode: generateRandomString(8, "mix"),
         leftButton: generateRandomString(6, "mix"),
         rightButton: generateRandomString(6, "mix"),
         scrollspan: generateRandomString(8, "char"),
-        scrollspan2: generateRandomString(8, "char"),
         scrollbars: generateRandomString(8, "char"),
-        scrollbars2: generateRandomString(8, "char"),
-        searchbox: generateRandomString(7, "mix"),
+        scrollbarsV2: generateRandomString(8, "mix"),
+        const: { once: "gb-init-once", purge: "gd-purge-success", anti: "gd-anti-redirect", warn: "data-filter-warn", navinfo: "__Navigation#INFO__" },
       },
       var: {
-        disappear: `ͽ${generateRandomString(10, "date")}ͼ`,
-        translucent: `ͼ${generateRandomString(10, "date")}ͽ`,
-        filtered: `ͼ${generateRandomString(6, "char")}ͼ`,
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.10.05.0",
-        scriptName: getMetaValue(`name:${getLocalLanguages()}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.11.01.0",
+        scriptName: getMetaValue(`name:${getLanguages()}`) ?? GMinfo.script.locales?.[getLanguages()]?.name ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
+        requestIdleCallback: global.requestIdleCallback?.bind(GMunsafeWindow) ?? ((callback, { timeout }) => sleep(timeout).then(callback)),
+        stopImmediatePropagation: Event.prototype.stopImmediatePropagation,
+        attachShadow: Element.prototype.attachShadow,
       },
       url: {
+        redundant: decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRnJlZHVuZGFudC1pc3N1ZQ=="),
         yandexIcon: decrypt("aHR0cHMlM0ElMkYlMkZmYXZpY29uLnlhbmRleC5uZXQlMkZmYXZpY29uJTJGdjI="),
         backupIcon: decrypt("aHR0cHMlM0ElMkYlMkZzMjEuYXgxeC5jb20lMkYyMDI1JTJGMDclMkYyMCUyRnBWOGVMaTYucG5n"),
         feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? decrypt("aHR0cHMlM0ElMkYlMkZnaXRodWIuY29tJTJGRjl5NG5nJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJGaXNzdWVz"),
@@ -433,17 +437,15 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
     class RAF {
       constructor(context) {
-        if (RAF.instance) return RAF.instance;
         safeWindow.Object.assign(this, { context, timerMap: { timeout: {}, interval: {} } });
         this._registerAnimationFrame(context);
-        ["setTimeout", "setInterval", "clearTimeout", "clearInterval"].forEach(method => (this[method] = this[method].bind(this)));
-        RAF.instance = this;
+        ["setTimeout", "setInterval", "clearTimeout", "clearInterval"].forEach(m => (this[m] = this[m].bind(this)));
       }
       _registerAnimationFrame(scope) {
         const vendor = asArray(["ms", "moz", "webkit", "o"]).FindX(vendor => scope[`${vendor}RequestAnimationFrame`]);
-        const raf = scope.requestAnimationFrame ?? scope[`${vendor}RequestAnimationFrame`];
-        const caf = scope.cancelAnimationFrame ?? (scope[`${vendor}CancelAnimationFrame`] || scope[`${vendor}CancelRequestAnimationFrame`]);
-        safeWindow.Object.assign(scope, { [def.const.raf]: raf, [def.const.caf]: caf });
+        const raf = scope.requestAnimationFrame || scope[`${vendor}RequestAnimationFrame`];
+        const caf = scope.cancelAnimationFrame || scope[`${vendor}CancelAnimationFrame`] || scope[`${vendor}CancelRequestAnimationFrame`];
+        safeWindow.Object.assign(scope, { [def.const.raf]: raf.bind(GMunsafeWindow), [def.const.caf]: caf.bind(GMunsafeWindow) });
       }
       _ticking(fn, type, interval, ...args) {
         let lastTime = performance.now();
@@ -451,25 +453,18 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         const step = () => {
           const currentTime = performance.now();
           if (currentTime - lastTime < (Number(interval) || 0)) return this._setTimerMap(timerSymbol, type, step);
-          type === "interval" ? (lastTime = this._setTimerMap(timerSymbol, type, step) ?? currentTime) : this.clearTimeout(timerSymbol);
+          type === "interval" ? (lastTime = currentTime) && this._setTimerMap(timerSymbol, type, step) : this.clearTimeout(timerSymbol);
           typeof fn === "function" && fn.apply(this.context, args);
         };
         this._setTimerMap(timerSymbol, type, step);
         return timerSymbol;
       }
       _setTimerMap(timerSymbol, type, step) {
-        try {
-          this.timerMap[type][timerSymbol] = this.context[def.const.raf](step);
-        } catch (e) {
-          delete this.timerMap[type][timerSymbol];
-        }
+        this.timerMap[type][timerSymbol] = this.context[def.const.raf](step);
       }
       _clearTimerMap(timerSymbol, type) {
-        try {
-          this.context[def.const.caf](this.timerMap[type][timerSymbol]) ?? delete this.timerMap[type][timerSymbol];
-        } catch (e) {
-          delete this.timerMap[type][timerSymbol];
-        }
+        this.context[def.const.caf](this.timerMap[type][timerSymbol]);
+        delete this.timerMap[type][timerSymbol];
       }
       setTimeout(fn, interval, ...args) {
         return this._ticking(fn, "timeout", interval, ...args);
@@ -485,7 +480,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       }
     }
 
-    const raf = new RAF(global);
+    const rAF = new RAF(global);
 
     /* GLOBAL_GENERAL_FUNCTIONS */
 
@@ -499,16 +494,16 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         registerMenuCommand: typeof GM_registerMenuCommand !== "undefined" ? GM_registerMenuCommand : typeof GM !== "undefined" ? GM.registerMenuCommand : void 0,
         xmlhttpRequest: typeof GM_xmlhttpRequest !== "undefined" ? GM_xmlhttpRequest : typeof GM !== "undefined" ? GM.xmlHttpRequest : void 0,
         unsafeWindow: typeof unsafeWindow !== "undefined" ? unsafeWindow : global,
-        contentMode: GMinfo.injectInto === "content" || GMinfo.script["inject-into"] === "content" || ["dom", "js"].includes(GMinfo.sandboxMode),
+        contextMode: GMinfo.injectInto === "content" || GMinfo.script["inject-into"] === "content" || ["dom", "js"].includes(GMinfo.sandboxMode),
       };
       return gmFunctions[rec] ?? __console("warn", `Grant 'GM.${rec}' is not available.`) ?? (() => {});
     }
 
     function __console(action, message, ...args) {
       const consoleMethods = {
-        log: ["log", "%c\ud83d\udd33 %c", "display:inline-block", "font-family:ui-monospace,monospace"],
-        error: ["error", "%c\ud83d\udea9 ", "display:inline-block;font-family:ui-monospace,monospace"],
-        warn: ["warn", "%c\ud83d\udea9 ", "display:inline-block;font-family:ui-monospace,monospace"],
+        log: ["log", "%c\ud83d\udd33 %c", "display:inline-block", ""],
+        error: ["error", "%c\ud83d\udea9 %c", "display:inline-block", ""],
+        warn: ["warn", "%c\ud83d\udea9 %c", "display:inline-block", ""],
         count: ["count", "\ud83d\udd33 "],
       };
       const [_, msg, consoleMethod] = [this ?? console, message ?? "", consoleMethods[action]];
@@ -524,10 +519,9 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
     function qS(expr, target = document) {
       try {
-        if (/^#[\w:.-]+$/.test(expr)) return target.getElementById(expr.slice(1));
         return target.querySelector(expr);
       } catch (e) {
-        return null;
+        return e && null;
       }
     }
 
@@ -535,12 +529,12 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       try {
         return asArray(target.querySelectorAll(expr));
       } catch (e) {
-        return asArray([]);
+        return e && asArray([]);
       }
     }
 
     function uniq(array) {
-      return Array.isArray(array) ? asArray(new Set(array)) : [];
+      return Array.isArray(array) ? arrayFrom(new Set(array)) : [];
     }
 
     function toString(value) {
@@ -561,7 +555,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
     function random({ range, length = 1, type = "round" }) {
       const typedArray = global.crypto.getRandomValues(new Uint32Array(Number(length) || 1));
-      return asArray(typedArray, a => (Math[type] ?? Math.round)((a / 0xffffffff) * (Number(range) || 10)));
+      return arrayFrom(typedArray, a => (Math[type] ?? Math.round)((a / 0xffffffff) * (Number(range) || 10)));
     }
 
     function gCS(node, opt = null) {
@@ -580,7 +574,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         const req = encode ? encodeURIComponent(string) : string;
         return btoa(req);
       } catch (e) {
-        return "";
+        return e && "";
       }
     }
 
@@ -590,14 +584,14 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         const rst = atob(string.replace(/[^A-Za-z0-9+/=]/g, ""));
         return decode ? decodeURIComponent(rst) : rst;
       } catch (e) {
-        return "";
+        return e && "";
       }
     }
 
     function generateRandomString(length, type, p, m = mS, c = cS) {
       if (type === "date") return (p = new Date().setHours(20, 30, 40, 50).toString(16)), p.padEnd(length, p);
-      if (type === "hex" || type === "number") return (p = type === "hex" ? 16 : 10), asArray(random({ range: p, length, type: "floor" }), v => v.toString(p)).join("");
-      return (p = type === "mix" ? m : c), asArray(random({ range: p.length, length }), (v, i) => (p === m && !i ? c[random({ range: 70 })] : p[v])).join("");
+      if (type === "hex" || type === "number") return (p = type === "hex" ? 16 : 10), arrayFrom(random({ range: p, length, type: "floor" }), v => v.toString(p)).join("");
+      return (p = type === "mix" ? m : c), arrayFrom(random({ range: p.length, length }), (v, i) => (p === m && !i ? c[random({ range: 70 })] : p[v])).join("");
     }
 
     function reload() {
@@ -622,14 +616,19 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     }
 
     function checkRedundantScript(global) {
-      const redundancyWarning = () => {
-        const redundanceText = `\ud83d\udea9 [Redundant Scripts]:\r\nFound redundant-installed scripts: ${def.var.scriptName}. please reload to troubleshoot the issue.`;
-        const troubleshoot = `\ufff8\ud83d\uded1 ${IS_CHN ? "发现冗余安装的脚本，点击排查！" : "Troubleshoot Redundant"}`;
-        return CUR_WINDOW_TOP && GMregisterMenuCommand(troubleshoot, () => void GMopenInTab(`${def.url.feedback}/117`, false)) && __console("error", redundanceText), true;
+      const reportRedundanceError = () => {
+        const errorText = IS_CHN
+          ? `\ud83d\udea9【脚本冗余警告】发现冗余安装的脚本: "${def.var.scriptName}"，如刷新后问题依旧，请访问 ${def.url.redundant} 排查错误。`
+          : `\ud83d\udea9 [Redundance Warning] Found Redundant Scripts: '${def.var.scriptName}', if persists after reloading, please visit ${def.url.redundant} to troubleshoot.`;
+        const troubleshoot = `\ufff8\ud83d\uded1 ${IS_CHN ? "发现冗余安装的脚本，点击排查！" : "Troubleshoot Redundant Issue"}`;
+        return CUR_WINDOW_TOP && (__console("error", errorText), GMregisterMenuCommand(troubleshoot, () => GMopenInTab(`${def.url.feedback}/117`, false))), true;
       };
-      if (global["gb-init-once"] === true) return redundancyWarning();
-      if (GMcontentMode && document.documentElement?.hasAttribute("gb-init-once")) return redundancyWarning();
-      (global["gb-init-once"] = true) && safeWindow.Object.freeze(def.const) && document.documentElement?.setAttribute("gb-init-once", "");
+      const contentText = IS_CHN
+        ? `${def.var.scriptName}警告：脚本的注入模式已设置为"content"，部分脚本功能可能受到限制。`
+        : `${def.var.scriptName} Warning: The injection mode is set to "content" and some functions may be limited.`;
+      if (GMcontextMode && CUR_WINDOW_TOP) __console("warn", contentText);
+      if (global[def.const.const.once] === true || document.documentElement?.hasAttribute(def.const.const.once)) return reportRedundanceError();
+      (global[def.const.const.once] = true) && safeWindow.Object.freeze(def.const) && document.documentElement?.setAttribute(def.const.const.once, "");
     }
 
     async function getNavigatorInfo() {
@@ -639,10 +638,10 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
       function getGlobalInfoFromUAD(uad) {
         const platform = getFullPlatformName(uad.platform);
-        const mapBrandPath = ({ brand: b, version: v }) => `${/Not[^a-z]*A[^a-z]*Brand/i.test(b) ? 9 : /^Chrom(?:e|ium)|Firefox|Safari$/i.test(b) ? 5 : 1}${b}\r${v}`;
+        const mapBrandPath = ({ brand: b, version: v }) => `${/Not[^a-z]*A[^a-z]*Brand/i.test(b) ? 9 : /^(?:Chrom(?:e|ium)|Firefox|Safari)$/i.test(b) ? 5 : 1}${b}\r${v}`;
         const [brand, brandVersion] = uad.brands?.map(mapBrandPath).sort()[0]?.slice(1).split("\r") ?? [];
         const engineMap = { Chrome: "Blink", Chromium: "Blink", Firefox: "Gecko", Safari: "WebKit" };
-        const mapEnginePath = ({ brand, version }) => /^(Chrom(?:e|ium)|Firefox|Safari)$/i.test(brand) && `${brand}\r${version}`;
+        const mapEnginePath = ({ brand, version }) => /^(?:Chrom(?:e|ium)|Firefox|Safari)$/i.test(brand) && `${brand}\r${version}`;
         const [engine, engineVersion] = uad.brands?.map(mapEnginePath).filter(Boolean)[0]?.split("\r") ?? [brand, brandVersion];
         const engineInfo = { engine: engineMap[capitalize(engine)] ?? getEngineFromUA(navigator.userAgent), engineVersion: parseFloat(engineVersion) || 99, creditEngine };
         const browserInfo = { brand: (brand?.split(/\s/) ?? []).slice(-1)[0] ?? "Unknown", brandVersion: formatVersion(brandVersion), platform };
@@ -728,7 +727,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       function getFullPlatformName(platform) {
         if (!platform) return "Unknown";
         const os = capitalize(platform);
-        return /^(Like Mac|Ios)$/.test(os) ? "iOS" : os === "Cros" ? "Chrome OS" : os.startsWith("Win") ? "Windows" : os.startsWith("Mac") ? "MacOS" : os === "X11" ? "Linux" : os;
+        return /^(?:Like Mac|Ios)$/.test(os) ? "iOS" : os === "Cros" ? "Chrome OS" : os.startsWith("Win") ? "Windows" : os.startsWith("Mac") ? "MacOS" : os === "X11" ? "Linux" : os;
       }
 
       function getRealBrowserEngine(w) {
@@ -736,7 +735,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       }
 
       function getEngineFromUA(ua) {
-        return /Gecko\/|Firefox\/|FxiOS/.test(ua) ? "Gecko" : /Chrom(?:e|ium)\/|CriOS/.test(ua) ? "Blink" : /AppleWebKit\/|Version\//.test(ua) ? "WebKit" : "Unknown";
+        return /(?:Gecko\/|Firefox\/|FxiOS)/.test(ua) ? "Gecko" : /(?:Chrom(?:e|ium)\/|CriOS)/.test(ua) ? "Blink" : /(?:AppleWebKit\/|Version\/)/.test(ua) ? "WebKit" : "Unknown";
       }
 
       function getUnregisteredBrandAndVersionFromUA(ua) {
@@ -745,7 +744,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         const brand = ua.slice(nameOffset, verOffset).trim();
         const brandVersion = formatVersion(ua.slice(verOffset + 1).match(/\d*\.?\d+/)?.[0]);
         const engineVersion = parseFloat(ua.match(/(?:Chrom(?:e|ium)|Firefox|Version)\/(\d+[.0-9]*)/i)?.[1] || brandVersion || 99);
-        const validVersion = (!/version|\/|\(|\)|;/i.test(brand) && brandVersion) || "0.0.0.0";
+        const validVersion = (!/(?:version|\/|\(|\)|;)/i.test(brand) && brandVersion) || "0.0.0.0";
         return { b: brand, bv: validVersion, ev: engineVersion };
       }
 
@@ -768,7 +767,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       return metaValue?.[1];
     }
 
-    function getLocalLanguages(lang = navigator.language) {
+    function getLanguages(lang = navigator.language) {
       const languages = new Set(["zh-CN", "zh-TW", "en", "ja", "ko"]);
       return languages.has(lang) ? lang : lang.startsWith("zh") ? "zh-CN" : "en";
     }
@@ -779,15 +778,15 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       return Object.is(key, value);
     }
 
-    function sleep(delay, { useCachedSetTimeout, instant } = {}) {
-      const timeoutFunction = useCachedSetTimeout ? setTimeout : raf.setTimeout;
+    function sleep(delay, { useCachedSetTimeout, instance } = {}) {
+      const timeoutFunction = useCachedSetTimeout ? setTimeout : rAF.setTimeout;
       const sleepPromise = new Promise(resolve => {
         timeoutFunction(resolve, delay);
       });
       const promiseFunction = value => sleepPromise.then(() => value);
       promiseFunction.then = sleepPromise.then.bind(sleepPromise);
       promiseFunction.catch = sleepPromise.catch.bind(sleepPromise);
-      return instant ? sleepPromise : promiseFunction;
+      return instance ? sleepPromise : promiseFunction;
     }
 
     function deBounce({ fn, timer, delay, immed = false, once = false } = {}) {
@@ -799,9 +798,9 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           if (once === true) return (def.count[name] = true);
         } else if (def.count[name]) {
           if (def.count[name] === true) return true;
-          raf.clearTimeout(def.count[name]);
+          rAF.clearTimeout(def.count[name]);
         }
-        def.count[name] = raf.setTimeout(() => {
+        def.count[name] = rAF.setTimeout(() => {
           fn.apply(context, args);
           if (once === true) return (def.count[name] = true);
           delete def.count[name];
@@ -809,18 +808,19 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       };
     }
 
-    function safeRemoveNode(expression, scope) {
-      if (!expression) return false;
-      const pendingNodes = Array.isArray(expression) ? expression : typeof expression === "string" ? qA(expression, scope) : expression?.nodeType ? [expression] : [];
+    function safeRemoveNode(expr, scope) {
+      if (!expr) return false;
+      const pendingNodes = Array.isArray(expr) ? expr : typeof expr === "string" ? qA(expr, scope) : expr?.nodeType ? [expr] : [];
       return pendingNodes.every(el => el.remove() || el.parentNode === null);
     }
 
-    void (async function (tTP) {
+    void (async function (tTP, navigatorInfo) {
       const [CONFIGURE, VERSION, AUTOCHECK, RESULTFILTER, REMOTEICONS] = ["_configures_", "_version_", "_autoupdate_", "_resultFilter_", "_remoteicons_"];
-      const { engine, creditEngine, brand, voucher } = await getNavigatorInfo();
+      const { engine, creditEngine, brand, voucher } = (navigatorInfo =
+        JSON.parse(navigatorInfo || null) || (sessionStorage?.setItem(def.const.const.navinfo, JSON.stringify((navigatorInfo = await getNavigatorInfo()))), navigatorInfo));
       const [IS_REAL_BLINK, IS_REAL_GECKO, IS_REAL_WEBKIT] = ["Blink", "Gecko", "WebKit"].map(cE => cE === creditEngine);
       const IS_CHEAT_UA = voucher === null && (engine !== creditEngine || checkBlinkCheatingUA(navigator.userAgentData));
-      const IS_GREASEMONKEY = ["Greasemonkey", "Userscripts", "FireMonkey", "stay"].includes(GMscriptHandler);
+      const IS_GREASEMONKEY = ["Greasemonkey", "Userscripts", "FireMonkey", "tamp", "OrangeMonkey"].includes(GMscriptHandler);
       const createNoticeHTML = html => `<div class="${def.notice.rName}"><dl>${html}</dl></div>`;
 
       const cache = {
@@ -834,7 +834,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             const { data, expired } = JSON.parse(decrypt(encryptedValue));
             return data && expired > current ? data : cache.remove(key);
           } catch (e) {
-            return cache.remove(key);
+            return e && cache.remove(key);
           }
         },
         remove: key => void GMdeleteValue(key),
@@ -974,21 +974,20 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         return (global.isSecureContext && !uad) || (uad && toString(uad) !== "[object NavigatorUAData]");
       }
 
-      function insertAfter(newEl, target) {
-        if (!newEl || !target) return;
-        (target.parentNode || document.head).insertBefore(newEl, target.nextElementSibling);
+      function insertAfter(newNode, target) {
+        if (newNode && target) target.parentNode.insertBefore(newNode, target.nextElementSibling);
       }
 
-      function addStyle({ target, styleId, styleContent, media, isOverwrite }) {
-        if (!target || !styleId || !styleContent || !media) return;
-        let existingStyles = qA(`#${styleId}`, target);
-        if (isOverwrite) existingStyles.forEach(style => (style.dataset.frRemoved = true) && safeRemoveNode(style));
-        else if (existingStyles.length > 0) return true;
+      function addStyle({ target, id, cssText, media, overwrite = false }) {
+        if (!target || !id || !cssText || !media) return;
         try {
-          const styleElement = cE("style", { id: styleId, media, type: "text/css", textContent: styleContent ?? "", [def.const.cssAttrName]: isOverwrite ?? false });
-          return target.appendChild(styleElement) && true;
+          let existingStyles = qA(`#${id}`, target);
+          if (overwrite) existingStyles.forEach(style => (style.dataset.frRemoved = true) && safeRemoveNode(style));
+          else if (existingStyles.length > 0) return true;
+          if (typeof GM_addElement !== "undefined") return GM_addElement(target, "style", { id, media, type: "text/css", textContent: cssText, [def.const.cssAttrName]: overwrite }) && true;
+          return target.appendChild(cE("style", { id, media, type: "text/css", textContent: cssText ?? "", [def.const.cssAttrName]: overwrite })) && true;
         } catch (e) {
-          ERROR("addStyle:", e.message);
+          ERROR(`${e.name} in AddStyle:`, e.message);
         }
       }
 
@@ -1016,8 +1015,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               return "";
           }
         } catch (e) {
-          ERROR("getUrlParam:", e.message);
-          return "";
+          return ERROR(`${e.name} in GetUrlParam:`, e.message) ?? "";
         }
       }
 
@@ -1034,7 +1032,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           setItem: function ({ sKey, sValue, sEnd, sPath, sDomain, sSameSite, sSecure }) {
             if (!sKey || /^(?:expires|max-age|path|domain|samesite|secure)$/i.test(sKey)) return false;
             [sDomain, sPath, sSameSite, sSecure] = [sDomain ? `;domain=${sDomain}` : "", sPath ? `;path=${sPath}` : "", sSameSite ? `;SameSite=${sSameSite}` : "", sSecure ? ";secure" : ""];
-            const sExpires = typeof sEnd === "number" && sEnd !== Infinity ? `;expires=${new Date(Date.now() + sEnd).toUTCString()}` : `;expires=Fri, 31 Dec 3999 23:59:59 GMT`;
+            const sExpires = typeof sEnd === "number" ? `;expires=${new Date(Date.now() + sEnd * 24 * 60 * 60 * 1000).toUTCString()}` : `;expires=Sat, 23 Oct 2099 13:31:44 GMT`;
             document.cookie = `${sKey}=${sValue}${sExpires}${sDomain}${sPath}${sSameSite}${sSecure}`;
             return true;
           },
@@ -1070,22 +1068,27 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           if (options.forceSelf && ++result) node.setAttribute("target", "_self");
           if (Array.isArray(options.cleanAttr) && options.cleanAttr.length > 0 && ++result) options.cleanAttr.forEach(item => node.removeAttribute(item));
           if (options.removeDataSet && ++result) Object.keys(node.dataset).forEach(ds => delete node.dataset[ds]);
-          if (options.forceNewTab && ++result) node.addEventListener("click", e => stopEventPropagation(e) ?? GMopenInTab(getRealHref(node), false));
-          if (result) node.setAttribute("gd-depurate-succeed", "");
+          if (options.forceNewTab && ++result) node.addEventListener("click", e => forceNewTabAction(e, node));
+          if (result) node.setAttribute(def.const.const.purge, "");
         }
 
-        function stopEventPropagation(event) {
-          event.preventDefault();
-          event.stopImmediatePropagation();
+        function forceNewTabAction(event, node) {
+          stopEventPropagation(event) ?? GMopenInTab(getRealHref(node), false);
+          event.currentTarget.getAttribute(def.const.const.anti) === "success" && event.currentTarget.classList.add(def.const.visited);
+        }
+
+        function stopEventPropagation(event, { preventDefault = true } = {}) {
+          if (preventDefault) event.preventDefault();
+          def.var.stopImmediatePropagation.call(event);
         }
 
         function getRealHref(node) {
           const realHref = node?.getAttribute("gb-real-href");
-          return (realHref?.startsWith("a0") && new URL(decrypt(realHref.slice(2, -1)), location).href) || node?.href || "about:blank";
+          return (realHref?.startsWith("\u0061\u0030") && new URL(decrypt(realHref.slice(2, -1)), location).href) || node?.href || "about:blank";
         }
 
         function setAdvancedAntiRedirect(node, tasks, siteName) {
-          node.setAttribute("gd-antiredirect-status", "pending");
+          node.setAttribute(def.const.const.anti, "pending");
           const task = advancedAntiRedirection(siteName, node, () => Promise.resolve(NaN));
           if (typeof task === "function") tasks.push(task);
         }
@@ -1094,15 +1097,15 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           if (typeof selectors !== "string" || selectors.trim() === "") return;
           options = validateOptions(options);
           const selectorArray = selectors.split(/,(?![^()]*\))/g);
-          const queryString = selectorArray.map(item => `${item}:not([href^='javascript:' i]):not([href^='#']):not([gd-antiredirect-status])`).join(",");
+          const queryString = selectorArray.map(item => `${item}:not([href^='javascript:' i]):not([href^='#']):not([${def.const.const.anti}])`).join(",");
           const aNodes = qA(queryString).filter(node => {
-            node.hasAttribute("gd-depurate-succeed") &&
+            node.hasAttribute(def.const.const.purge) &&
               ((options.useNewTab && node.target !== "_blank") ||
                 (options.forceSelf && node.target !== "_self") ||
                 (Array.isArray(options.cleanAttr) && asArray(options.cleanAttr).SomeX(attr => node.hasAttribute(attr))) ||
                 (options.removeDataSet && Object.keys(node.dataset).length > 0)) &&
-              node.removeAttribute("gd-depurate-succeed");
-            return !node.hasAttribute("gd-depurate-succeed");
+              node.removeAttribute(def.const.const.purge);
+            return !node.hasAttribute(def.const.const.purge);
           });
           if (aNodes.length === 0) return;
           COUNT(`[${siteName}-Anti-Redirect]`);
@@ -1137,7 +1140,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         function handleSuccess(res, url, node) {
           antiResultsFilter &&
             asArray(resultFilters).SomeX(filter => new RegExp(filter, "i").test(res)) &&
-            node.insertAdjacentHTML("beforeend", tTP.createHTML(`<div class="${def.var.filtered}">${res}</div>`));
+            node.insertAdjacentHTML("beforeend", tTP.createHTML(`<div class="${def.const.filtered}">${res}</div>`));
           cachedRequestLinks.set(url, res);
           setRealLink(node, res);
           toggleLoadClass(node)?.remove();
@@ -1150,13 +1153,13 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           else {
             setErrorLink(node);
             toggleLoadClass(node)?.remove();
-            ERROR("antiRedirect_%s: %s %O", name, e?.message, { Node: node, Text: node.textContent, URL: node.href });
+            ERROR(`${e.name} in AntiRedirect_%s: %s %O`, name, e?.message, { Node: node, Text: node.textContent, URL: node.href });
           }
         }
 
         function handleDuplicateLinksError(url, node) {
           def.count.duplicate++;
-          const attemptToFindCacheLink = raf.setInterval(() => {
+          const attemptToFindCacheLink = rAF.setInterval(() => {
             const cachedRealLinks = cachedRequestLinks.get(url);
             if (!cachedRealLinks) return;
             if (cachedRealLinks === url) setErrorLink(node);
@@ -1166,7 +1169,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             }
             def.count.duplicate--;
             toggleLoadClass(node)?.remove();
-            raf.clearInterval(attemptToFindCacheLink);
+            rAF.clearInterval(attemptToFindCacheLink);
           }, 2e2);
         }
 
@@ -1176,7 +1179,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
         function handleBingLink(e) {
           const node = e.target;
-          node?.getAttribute?.("gd-antiredirect-status") === "success" && (stopEventPropagation(e) ?? (node.href = getRealHref(node)));
+          node?.nodeName === "A" && node.getAttribute(def.const.const.anti) === "success" && (stopEventPropagation(e) ?? node.setAttribute("href", getRealHref(node)));
         }
 
         function setRealLink(node, url) {
@@ -1184,16 +1187,16 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           if (CUR_HOST_NAME.endsWith(".bing.com")) {
             const actions = ["mouseenter", "mouseleave", "mouseout", "mousedown", "mouseup", "blur", "keyup"];
             !global[def.const.bing] && actions.forEach(act => void document.addEventListener(act, handleBingLink, (global[def.const.bing] = true)));
-            node.setAttribute("gb-real-href", `a0${encrypt(url)}=`);
+            node.setAttribute("gb-real-href", `\x61\x30${encrypt(url)}\x3d`);
           }
           IS_REAL_WEBKIT && node.setAttribute("title", url);
-          node.setAttribute("gd-antiredirect-status", "success");
+          node.setAttribute(def.const.const.anti, "success");
         }
 
         function setErrorLink(node) {
           node.classList.add(def.notice.linkerror);
-          node.setAttribute("gd-antiredirect-status", "failed");
-          node.setAttribute("title", `${IS_CHN ? "该链接目前无法正常访问。" : "This link is currently not accessible."}`);
+          node.setAttribute(def.const.const.anti, "failed");
+          node.setAttribute("title", `${IS_CHN ? "此链接可能不再可用，您仍可尝试访问它。" : "This link may no longer be available, you can still try to access it."}`);
         }
 
         function handlePageCheck(count) {
@@ -1223,8 +1226,8 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         }
 
         function rejectResponse(response, resolve, reject, url) {
-          const resUrl = response.finalUrl || response.responseURL || url;
-          if (/^2\d\d$/.test(response.status)) {
+          const resUrl = response.responseHeaders?.match(/Location:\s*([\S]+)/i)?.[1] || response.finalUrl || response.responseURL || url;
+          if (/^2\d{2}$/.test(response.status)) {
             if (response.statusText === "Intercepted by the IDM Advanced Integration") reportIDMHijacking();
             resolve(resUrl);
           } else if (response.status !== 0) resUrl === url ? reject(new Error("ResponseError")) : resolve(resUrl);
@@ -1234,7 +1237,8 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           switch (siteName) {
             case "Bing": {
               const uParam = new URL(url).searchParams.get("u");
-              return uParam?.startsWith("a1") ? decrypt(uParam.slice(2).replace(/_/g, "/").replace(/-/g, "+")) : node.href;
+              const u = uParam?.startsWith("a1") ? decrypt(uParam.slice(2).replace(/_/g, "/").replace(/-/g, "+")) : null;
+              return !/[\u0080-\u00FF]/g.test(u) && u;
             }
             case "Sogou": {
               const target = qA(`.vrwrap`).FindX(el => el.contains(node));
@@ -1271,7 +1275,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 let resUrl = response.finalUrl || response.responseURL || url;
                 if (resUrl === url) {
                   const resText = response.responseText || response.response || "";
-                  const res = resText.match(/URL\s*=\s*'([^']+)'/) || response.responseHeaders?.match(/Location:\s*([\S]+)/i);
+                  const res = resText.match(/URL\s*=\s*'([^']+)'/) || resText.match(/var\s+u\s*=\s*"([^"]+)"\s*;\s*\r\n/i) || response.responseHeaders?.match(/Location:\s*([\S]+)/i);
                   if (res) resUrl = res[1];
                   else reject(new Error("URLNotExistError"));
                 }
@@ -1299,8 +1303,8 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             case "So360":
               return (data = node.dataset.mdurl) => (data ? getNoneXHRDecodeURI(url, node, siteName, data) : getXHRDecodeURI(url, node, siteName));
             case "Sogou":
-              return (data = getNodeDecodeURI(siteName, url, node)) => (data ? getNoneXHRDecodeURI(url, node, siteName, data) : getXHRDecodeURI(url, node, siteName));
             case "Bing":
+              return (data = getNodeDecodeURI(siteName, url, node)) => (data ? getNoneXHRDecodeURI(url, node, siteName, data) : getXHRDecodeURI(url, node, siteName));
             case "Toutiao":
             case "Yahoo":
               return () => getNoneXHRDecodeURI(url, node, siteName, getNodeDecodeURI(siteName, url, node));
@@ -1313,13 +1317,12 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
         const siteAdblockHandlers = {
           Bing: (siteName, clean) => {
-            qA(".b_inline_ajax_rs a.b_clickback_close,.b_vfly_ctac>.b_vfly_dsm.b_vfly_btn[aria-label]").forEach(a => a.click());
-            qA(`:is(#b_results,#b_context,#b_topw)>li:not(.${def.var.disappear})`).forEach(node => {
+            qA(`:is(#b_results,#b_context,#b_topw)>li:not(.${def.const.disappear})`).forEach(node => {
               const adv = qS("div.b_caption>p[class]", node);
               const adg = adv && gCS(adv, ":before");
               if (adg && adg.display === "inline-block" && adg.verticalAlign !== "middle") {
                 COUNT(`[${siteName}-Anti-Ads-Deep-exp]`);
-                node.classList.add(def.var.disappear);
+                node.classList.add(def.const.disappear);
                 clean === true && safeRemoveNode(node);
               }
             });
@@ -1329,8 +1332,8 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             COUNT(`[${siteName}-Anti-Ads-Deep-exp]`);
             qA("li[data-fast][class]").forEach(node => {
               const adsTxtNode = qS(".OrganicHost-Content .OrganicHost-Description>div>span[class$='-Text'],[class*='Organic_with']>[class*='Organic']>span[class$='-Text']", node);
-              if (/^(ad|[РекламPeknam]{7})$/i.test(adsTxtNode?.textContent)) {
-                node.classList.add(def.var.disappear);
+              if (/^(?:ad|[РекламPeknam]{7})$/i.test(adsTxtNode?.textContent)) {
+                node.classList.add(def.const.disappear);
                 clean === true && safeRemoveNode(node);
               }
             });
@@ -1341,24 +1344,18 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             qA("ul.section>li,ul.result>li").forEach(node => {
               const ads = qS("span[class='txt']>s", node);
               if (!ads?.textContent?.includes("\u5e7f\u544a") && !qS("div.res-recommend-tag", node)) return;
-              node.classList.add(def.var.disappear);
+              node.classList.add(def.const.disappear);
               clean === true && safeRemoveNode(node);
             });
           },
-          Ecosia: () => qS(`button.banner__close[data-test-id="banner-close"][aria-label="Close"]`)?.click(),
+          Duckduckgo: () => qS(`button[data-testid="serp-popover-promo-close"]:has(svg)`)?.click(),
           Qwant: () => qS(`button[class][aria-label="close"]:has(svg)`)?.click(),
-          Brave: () => qS(`.promo-tooltip>button.btn--icon[aria-label="Close"]`)?.click(),
-          Duckduckgo: () => qS(`button[data-testid="serp-popover-promo-close"]`)?.click(),
-          Yahoo: () => qS("button.refresh-soft-intro-dismiss-button")?.click(),
         };
 
         function parseAntiAdvertising({ selectors, siteName, isRemoveNodes }) {
-          if (selectors && typeof selectors === "string") {
-            if (!qS(`#${def.const.rndadvName}`)) {
-              COUNT(`[${siteName}-Anti-Ads]`);
-              const cssText = `:root :is(${selectors}){display:none!important}`;
-              addStyle({ target: document.head, styleId: def.const.rndadvName, media: "all", styleContent: cssText });
-            }
+          if (selectors && typeof selectors === "string" && !qS(`#${def.const.rndadvName}`)) {
+            const cssText = `:root :is(${selectors}){display:none!important;opacity:0!important}`;
+            addStyle({ target: document.head, id: def.const.rndadvName, media: "all", cssText }) && COUNT(`[${siteName}-Anti-Ads]`);
             isRemoveNodes === true && safeRemoveNode(selectors);
           }
           AdvancedAntiAdvertising(siteName, isRemoveNodes);
@@ -1370,7 +1367,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           try {
             AdblockHandler.length > 0 ? AdblockHandler(siteName, clean) : AdblockHandler();
           } catch (e) {
-            ERROR("AdvancedAntiAdvertising:", e.message);
+            ERROR(`${e.name} in AdvancedAntiAdvertising:`, e.message);
           }
         }
 
@@ -1406,7 +1403,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 : DEBUG("%cRemote icon data parsing failed.", "color:#ff0000");
             } else iconDataURL = DEBUG("%cGet local cached icon data.", "color:#006400") ?? iconBase64Data;
           } catch (e) {
-            ERROR(`fetchAndCacheRemoteIcons: Can't request the icon data.`, e?.message);
+            ERROR(`FetchAndCacheRemoteIcons: Can't request the icon data.`, e?.message);
           }
           return iconDataURL;
         }
@@ -1424,21 +1421,17 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               splitTypeName: ["tn", "pd"],
               mainSelector: "#chat-input-main,.s_btn_wr,#sugOut,span[class^='submit-btn']",
               overrideCss: `a,a em{text-decoration:none!important}:not([class^="page-inner"])>a:not(.${def.notice.linkerror}):hover{text-decoration:underline!important}#form{white-space:nowrap}#u{z-index:1!important}`,
-              buttonCssText: `#${def.const.rndButtonID}{position:absolute;z-index:1999999995;display:inline-block;margin:0;padding:0;height:46px;vertical-align:top;line-height:46px}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:42px}#${def.const.leftButton} input{margin:3px 0;padding:0 12px 0 18px!important;height:40px;min-width:95px;border:none;border-bottom-left-radius:10px;border-top-left-radius:10px;background:linear-gradient(316deg,#286aff,#4e6ef2,#7274f9,#9f66ff);color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:3px 0;padding:0 18px 0 12px!important;height:40px;min-width:95px;border:none;border-top-right-radius:10px;border-bottom-right-radius:10px;background:linear-gradient(136deg,#286aff,#4e6ef2,#7274f9,#9f66ff);color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:linear-gradient(#00000017,#00000017), linear-gradient(75deg,#286aff,#4e6ef2,#7274f9,#9f66ff)!important;border:1px solid transparent;}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;z-index:99999;right:var(--right,unset);margin:var(--margin,3px 0);padding:0;display:inline-flex;justify-content:center;align-items:flex-start;flex-wrap:nowrap;height:40px}#${def.const.leftButton},#${def.const.rightButton}{margin:0 2px 0 0;height:42px}input{margin:0;height:40px;min-width:95px;border:none;outline:none;color:#fff;font-weight:500;font-size:17px;box-shadow:none;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px!important;border-radius:10px 0 0 10px;background:var(--background,linear-gradient(315deg,#286aff,#4e6ef2,#7274f9,#9f66ff))}#${def.const.rightButton} input{padding:0 18px 1px 12px!important;border-radius:0 10px 10px 0;background:var(--background,linear-gradient(135deg,#286aff,#4e6ef2,#7274f9,#9f66ff))}#${def.const.leftButton} input:hover{background:linear-gradient(#00000017,#00000017), linear-gradient(90deg,#286aff,#4e6ef2,#7274f9,#9f66ff)}#${def.const.rightButton} input:hover{background:linear-gradient(#00000017,#00000017), linear-gradient(270deg,#286aff,#4e6ef2,#7274f9,#9f66ff)}`,
               resultListProp: { qs: `#content_left div.c-container:not([tpl="recommend_list"]):not([tpl^="rel-"])`, delay: 10 },
               keywords: "#wrapper_wrapper em,.c-gap-top-small b",
-              antiRedirectFn: () =>
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "baidu_ar" })("Baidu", ".c-container a[href*='//www.baidu.com/link?url=']", {
-                  useNewTab: true,
-                  removeDataSet: true,
-                  advancedAnti: true,
-                }),
-              antiAdsFn: () =>
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "baidu_ad", immed: true })({
-                  selectors: `#s-hotsearch-wrapper,.result-op[tpl='sp_hot_sale'],.result-op[tpl='b2b_prod'],.result-op.cr-content[tpl^='recommend_list_'],#content_left>div:not([class]):not([style]),div[data-placeid],[id$='_canvas'],div.result.c-container:not([class~='xpath-log']),.imgpage .imglist>li.newfcImgli,.ec_wise_ad,div[class^='result-op'][tpl='right_tabs'][data-click],div[class^='result-op'][tpl='right_links'][data-click],#searchTag,#content_left>div.c-container[tpl="recommend_list"],#con-ar div:is([tpl='interactive'],[tpl="right_recommends_merge"]),div.result-op.cr-content:has([id='ai-accompanies-container']),div.result-molecule[tpl="app/rs"],.hint_right_top:has([tpl='app/hint-chat-entry']),.hint_right_middle:has([tpl='app/hint-head-top'])`,
-                  siteName: "Baidu",
-                  isRemoveNodes: true,
-                }),
+              antiRedirectFn: () => {
+                const selector = `.c-container a[href*='//www.baidu.com/link?url=']`;
+                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "baidu_ar" })("Baidu", selector, { useNewTab: true, removeDataSet: true, advancedAnti: true });
+              },
+              antiAdsFn: () => {
+                const selectors = `#s-hotsearch-wrapper,.result-op[tpl='sp_hot_sale'],.result-op[tpl='b2b_prod'],.result-op.cr-content[tpl^='recommend_list_'],#content_left>div:not([class]):not([style]),div[data-placeid],[id$='_canvas'],div.result.c-container:not([class~='xpath-log']),.imgpage .imglist>li.newfcImgli,.ec_wise_ad,div[class^='result-op'][tpl='right_tabs'][data-click],div[class^='result-op'][tpl='right_links'][data-click],#searchTag,#content_left>div.c-container[tpl="recommend_list"],#con-ar div:is([tpl='interactive'],[tpl="right_recommends_merge"]),div.result-op.cr-content:has([id='ai-accompanies-container']),div.result-molecule[tpl="app/rs"],.hint_right_top:has([tpl='app/hint-chat-entry']),.hint_right_middle:has([tpl='app/hint-head-top'])`;
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "baidu_ad", immed: true })({ selectors, siteName: "Baidu", isRemoveNodes: true });
+              },
             },
             google: {
               siteTypeID: 2,
@@ -1451,21 +1444,18 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               splitTypeName: "udm",
               mainSelector: "form button[type='submit']",
               overrideCss: `#pnnext>span:nth-child(2){clear:left}`,
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:100;display:flex;margin:0 5px 0 4px;top:0;left:0;justify-content:center;align-items:center}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{padding:0 2px 0 12px}.${def.const.scrollspan}{min-height:26px;margin-right:3px!important}.${def.const.scrollbars}{display:inline-block;margin:0;height:26px!important;font-weight:400!important;font-size:13px!important}#${def.const.leftButton} input,#${def.const.rightButton} input{margin:0;height:39px;min-width:90px;border:0;background:var(--gm3-sys-color-primary, #0b57d0);background:if(style(--JKqx2:#1a0dab):#0b57d0;style(--JKqx2:#99c3ff):#c2e7ff);color:var(--gm3-sys-color-on-primary, #fff);color:if(style(--JKqx2:#1a0dab):#fff;style(--JKqx2:#99c3ff):#001d35);box-shadow:0 0 2px #00000059;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;cursor:pointer;transition:opacity .5s ease-out;}#${def.const.leftButton} input{padding:0 12px 0 18px!important;border-bottom-left-radius:24px;border-top-left-radius:24px;}#${def.const.rightButton} input{padding:0 18px 0 12px!important;border-top-right-radius:24px;border-bottom-right-radius:24px;}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{opacity:.88}`,
-              darkModeCss: `#${def.const.leftButton} input,#${def.const.rightButton} input{background:var(--gm3-sys-color-secondary-fixed,#c2e7ff);background:if(style(--JKqx2:#1a0dab):#0b57d0;style(--JKqx2:#99c3ff):#c2e7ff);color:var(--gm3-sys-color-on-secondary-fixed,#001d35);color:if(style(--JKqx2:#1a0dab):#fff;style(--JKqx2:#99c3ff):#001d35);}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{opacity:.85}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:0 5px 0 -3px;justify-content:center;align-items:center;flex-wrap:nowrap}.ACRAdd{border-left:1px solid #dadce0;height:65%;padding:0 10px 0 0}#${def.const.leftButton},#${def.const.leftButton}{display:inline-block;margin:0 2px 0 0}input{margin:0;height:39px;min-width:90px;border:0;background:#0b57d0;color:#fff;box-shadow:0 0 2px rgba(0,0,0,.35);font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:24px 0 0 24px}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 24px 24px 0}input:hover{opacity:.88}:host(.${def.const.scrollspan}){margin-top:-1px!important;min-height:24px!important}.${def.const.scrollbars}{display:inline-block;margin:0;padding-bottom:0!important;height:24px!important;font-size:12px!important}`,
+              darkModeCss: `:host(.${def.const.darkmode}) input{background:#c2e7ff;color:#001d35}:host(.${def.const.darkmode}) .ACRAdd{border-left:1px solid rgba(248, 249, 250, 0.25)}:host(.${def.const.darkmode}) input:hover{opacity:.85}}`,
               resultListProp: { qs: `div.MjjYud div.Ww4FFb.vt6azd[data-hveid^="C"][data-hveid$="AA"]:not(:has(div[jscontroller="TvBckd"]))`, delay: 10 },
               keywords: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
-              antiRedirectFn: () =>
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "google_ar" })(
-                  "Google",
-                  "#rcnt div[data-hveid^='C'][data-hveid$='AA'] :not(h3.ob5Hkd,.d0fCJc)>a:not(.ngTNl,.oRJe3d,.k8XOCe,[jsname='ZWuC2'],.fl,#pnprev,#pnnext)",
-                  { useNewTab: true, cleanAttr: ["ping"], removeDataSet: true }
-                ),
-              antiAdsFn: () =>
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "google_ad", immed: true })({
-                  selectors: `div[aria-label='\u5e7f\u544a'],div[aria-label='Ads' i],#bottomads,#tvcap`,
-                  siteName: "Google",
-                }),
+              antiRedirectFn: () => {
+                const selector = `#rcnt div[data-hveid^='C'][data-hveid$='AA'] :not(h3.ob5Hkd,.d0fCJc)>a:not(.ngTNl,.oRJe3d,.k8XOCe,[jsname='ZWuC2'],.fl,#pnprev,#pnnext)`;
+                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "google_ar" })("Google", selector, { useNewTab: true, cleanAttr: ["ping"], removeDataSet: true });
+              },
+              antiAdsFn: () => {
+                const selectors = `div[aria-label='\u5e7f\u544a'],div[aria-label='Ads' i],#bottomads,#tvcap`;
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "google_ad", immed: true })({ selectors, siteName: "Google" });
+              },
             },
             bing: {
               siteTypeID: 3,
@@ -1477,9 +1467,12 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: `.b_searchboxForm>input[type="hidden"][name="form"]`,
-              overrideCss: `html{overflow-x:hidden}#sb_form .inline_sb{border-radius:24px}.${def.const.searchbox}{border-radius:8px!important}a,#b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.mmlist .mc_vtvc_title,.b_tt,.b_wsnm,.nslist_card_title,.nscardlite_title,.nscardcal_title,.product-card-info--title,#b_results :is(li[class] a:not(.wiki_seemore,.gs_mdlink,[role='button'],:has(.b_dynamicMrsSuggestionText),.acf_p_title),.b_no a,.na_t):not(#imc_pbtn)){color:#2440b3}#b_content .product-card-info--title{color:#2440b3!important}#b_content #b_results li[class] a:not(.wiki_seemore,.gs_mdlink):visited{color:#4007a2!important}`,
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:0;display:inline-flex;margin:0;padding:0 6px 0 0;width:auto;height:38px;min-width:180px;vertical-align:middle;justify-content:center;flex-wrap:nowrap}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.leftButton},#${def.const.rightButton}{margin:0;padding:0;width:auto}#${def.const.rndButtonID} input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:600;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px;border-bottom-left-radius:24px;border-top-left-radius:24px}#${def.const.rightButton} input{margin:0 0 0 2px;padding:0 18px 0 12px;border-top-right-radius:24px;border-bottom-right-radius:24px}.${def.const.scrollspan}{}.${def.const.scrollbars}{}.${def.const.scrollspan2}{margin:0!important;padding:4px 4px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars2}{margin-right:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#f0f3f6;box-shadow:0 0 4px #174ae4;transition:border .1s linear,box-shadow .3s linear}.${def.notice.random}_input{width:300px!important}`,
-              darkModeCss: `.b_dark a,.b_dark #b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.mmlist .mc_vtvc_title,.b_tt,.b_wsnm,.nslist_card_title,.nscardlite_title,.nscardcal_title,.product-card-info--title,#b_results :is(li[class] a:not(.wiki_seemore,.gs_mdlink,[role='button'],:has(.b_dynamicMrsSuggestionText),.acf_p_title),.b_no a,.na_t):not(#imc_pbtn)){color:#a2b7f4}.b_dark a:visited,.b_dark #b_content #b_results>li a:not(.wiki_seemore,.gs_mdlink):visited{color:#7b7fec!important}.b_dark .b_pag_above_footer{background-color:#1b1a19;color:#d2d0ce}.b_dark #${def.const.leftButton} input,.b_dark #${def.const.rightButton} input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}.b_dark #${def.const.leftButton} input:hover,.b_dark #${def.const.rightButton} input:hover{background:#a2b7f4;color:#333}`,
+              overrideCss:
+                `.${def.const.scrollbarsV2}\\.width{width:max-content!important;z-index:999!important}` +
+                `#b_content{--smtc-ctrl-link-foreground-brand-rest:#3c3c3c}a,#b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.nslist_card_title,.nscardlite_title,.nscardcal_title,.product-card-info--title,#b_results :is(li a.feedback-binded,li.b_vtl_deeplinks>a,li:not(:has(.b_loccardans)) :not(.b_rc_gb_sub_title,.mmtitle,#mt_tleWrp h2,#ns_mag_ht h2,.b_rcGbMod,.b_paractl)>a:not(.iacf_head,.vsb_tr_t,.b_wikiGbModHero,.wiki_seemore,.gs_mdlink,[role='button'],:has(.b_dynamicMrsSuggestionText),.acf_p_title,#imc_pbtn),.b_no a,.na_t,.l_ecrd_txt_gl>h2,.b_RichCardAnswerV2 .b_paractl>a)){color:#2440b3}#b_content #b_results .product-card-info--title{color:#2440b3!important}a:visited,#b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.nslist_card_title,.nscardlite_title,.nscardcal_title,.product-card-info--title,#b_results :is(li a.feedback-binded,li.b_vtl_deeplinks>a,li:not(:has(.b_loccardans)) :not(.b_rc_gb_sub_title,.mmtitle,#mt_tleWrp h2,#ns_mag_ht h2,.b_rcGbMod,.b_paractl)>a:not(.iacf_head,.vsb_tr_t,.b_wikiGbModHero,.wiki_seemore,.gs_mdlink,[role='button'],:has(.b_dynamicMrsSuggestionText),.acf_p_title,#imc_pbtn),.b_no a,.na_t,.l_ecrd_txt_gl>h2,.b_RichCardAnswerV2 .b_paractl>a)):visited{color:#4007a2}#b_content #b_results li :is(h2>a,h3>a).${def.const.visited}{color:#4007a2!important}` +
+                `.b_dark #b_content{--smtc-ctrl-link-foreground-brand-rest:#d2d0ce}.b_dark a,.b_dark #b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.nslist_card_title,.nscardlite_title,.nscardcal_title,.product-card-info--title,#b_results :is(li a.feedback-binded,li.b_vtl_deeplinks>a,li:not(:has(.b_loccardans)) :not(.b_rc_gb_sub_title,.mmtitle,#mt_tleWrp h2,#ns_mag_ht h2,.b_rcGbMod,.b_paractl)>a:not(.iacf_head,.vsb_tr_t,.b_wikiGbModHero,.wiki_seemore,.gs_mdlink,[role='button'],:has(.b_dynamicMrsSuggestionText),.acf_p_title,#imc_pbtn),.b_no a,.na_t,.l_ecrd_txt_gl>h2,.b_RichCardAnswerV2 .b_paractl>a)){color:#82c7ff}.b_dark #b_content #b_results .product-card-info--title{color:#82c7ff!important}.b_dark a:visited,.b_dark #b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.nslist_card_title,.nscardlite_title,.nscardcal_title,.product-card-info--title,#b_results :is(li a.feedback-binded,li.b_vtl_deeplinks>a,li:not(:has(.b_loccardans)) :not(.b_rc_gb_sub_title,.mmtitle,#mt_tleWrp h2,#ns_mag_ht h2,.b_rcGbMod,.b_paractl)>a:not(.iacf_head,.vsb_tr_t,.b_wikiGbModHero,.wiki_seemore,.gs_mdlink,[role='button'],:has(.b_dynamicMrsSuggestionText),.acf_p_title,#imc_pbtn),.b_no a,.na_t,.l_ecrd_txt_gl>h2,.b_RichCardAnswerV2 .b_paractl>a)):visited{color:#7b7fec}.b_dark #b_content #b_results li :is(h2>a,h3>a).${def.const.visited}{color:#7b7fec!important}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:6;display:inline-flex;margin:var(--margin,4px 0 0 0);padding:0 4px 0 0;width:auto;height:38px;min-width:180px;vertical-align:top;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0}input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 1px 18px;border-radius:24px 0 0 24px}#${def.const.rightButton} input{margin:0;padding:0 18px 1px 12px;border-radius:0 24px 24px 0}:host(.${def.const.scrollspan}){margin:0!important;padding:4px 2px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars}{margin-right:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}.${def.const.scrollbarsV2}{height:34px!important;border-radius:6px!important;padding:0 12px!important}input:hover{background:#f0f3f6;box-shadow:0 0 4px #174ae4;transition:background .1s linear,box-shadow .2s linear}`,
+              darkModeCss: `:host(.${def.const.darkmode}) input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}:host(.${def.const.darkmode}) input:hover{background:#a2b7f4;color:#333}`,
               resultListProp: {
                 qs: `#b_results>li.b_algo:not(.b_algoBorder,.b_topborder),#b_results>li.b_vidAns .mmlist>div[id],#b_results>li.b_mop .b_slidebar>div.slide,#b_topw>li.b_ans,aside>ol#b_context>li.b_algo`,
                 delay: 10,
@@ -1488,24 +1481,23 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 Number(getUrlParam("ensearch")) || Number(gbCookies.getItem("ENSEARCH")?.match(/[=](\d)/)?.[1])
                   ? "strong,.b_no h4,.b_strong,.b_ad .b_adlabel strong,.cbl"
                   : "#sp_requery strong,#sp_recourse strong,.sb_adTA_title_link_cn strong,.b_ad .ad_esltitle~div strong,h2 strong,#b_results .b_algo p strong,.b_caption p strong,.b_snippetBigText strong,.recommendationsTableTitle+.b_slideexp strong,.recommendationsTableTitle+table strong,.recommendationsTableTitle+ul strong,.pageRecoContainer .b_module_expansion_control strong,.pageRecoContainer .b_title>strong,.b_rs strong,.b_rrsr strong,.richrswrapper strong,#dict_ans strong,.b_listnav>.b_ans_stamp>strong,#b_content #ans_nws .na_cnt strong,.b_vidAns strong,.adltwrnmsg strong",
-              antiRedirectFn: function () {
-                safeWindow.Object.assign(GMunsafeWindow, { AwayTimeScrollTopPoleRS: false, AwayTimeThresholdCustomControl: false, AwayTimeThreshold: 864e3 });
+              antiRedirectFn: () => {
                 const checkAllRegionsRedirection = () => {
                   parsingAntiRedirect("Bing", "#b_content li.b_pag a.b_widePag", { forceSelf: true, cleanAttr: ["h"] });
-                  parsingAntiRedirect("Bing", "#b_results>li:not(.b_pag) a:not([role='button']):not([href*='.bing.com/ck/a?'])", { useNewTab: true, cleanAttr: ["h"] });
-                  parsingAntiRedirect("Bing", ".b_scopebar li:is(#b-scopeListItem-conv,#b-scopeListItem-local)>a:not([href*='.bing.com/ck/a?'])", { useNewTab: true, cleanAttr: ["h"] });
-                  parsingAntiRedirect("Bing", ".b_scopebar li:not(#b-scopeListItem-local,#b-scopeListItem-conv)>a:not([href*='.bing.com/ck/a?'])", { forceSelf: true, cleanAttr: ["h"] });
+                  parsingAntiRedirect("Bing", "#b_results>li:not(.b_pag) a:not([role='button']):not([href*='.bing.com/ck/a?'])", { useNewTab: true });
+                  parsingAntiRedirect("Bing", ".b_scopebar li:is(#b-scopeListItem-conv,#b-scopeListItem-local)>a:not([href*='.bing.com/ck/a?'])", { useNewTab: true });
+                  parsingAntiRedirect("Bing", ".b_scopebar li:not(#b-scopeListItem-local,#b-scopeListItem-conv)>a:not([href*='.bing.com/ck/a?'])", { forceSelf: true });
+                  parsingAntiRedirect("Bing", "#b_content a[href*='.bing.com/ck/a?'][role='button']", { advancedAnti: true, cleanAttr: ["h"] });
                   parsingAntiRedirect("Bing", "#b_content a[href*='.bing.com/ck/a?']:not([role='button'])", { useNewTab: true, forceNewTab: true, advancedAnti: true });
                   parsingAntiRedirect("Bing", ".b_scopebar li:is(#b-scopeListItem-conv,#b-scopeListItem-local)>a[href*='.bing.com/ck/a?']", { useNewTab: true, advancedAnti: true });
                   parsingAntiRedirect("Bing", ".b_scopebar li:not(#b-scopeListItem-conv,#b-scopeListItem-local)>a[href*='.bing.com/ck/a?']", { forceSelf: true, advancedAnti: true });
                 };
                 deBounce({ fn: checkAllRegionsRedirection, delay: 20, timer: "bing_ar" })();
               },
-              antiAdsFn: () =>
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "bing_ad", immed: true })({
-                  selectors: `li.b_ans>div.wpt_bc_container,li.b_ans>#relatedSearchesLGWContainer,li.b_ans>.b_rs,li.b_ad,#b_pole,#b_content .b_underSearchbox,#b_header>div[id^="bnp."][data-vertical],#b_context li.b_ans .b_spa_adblock,.ad_sc,.b_adBottom,.b_adLastChild,.b_adPATitleBlock,.b_spa_adblock,.mapsTextAds,.pa_sb,.productAd,[id$="adsMvCarousel"],a[href*="/aclick?ld="],div.pagereco_anim,#inline_rs,#ev_talkbox_wrapper,#b_content>main[aria-label]>#b_ims_bza_pole,.shop_page .br-poleoffcarousel,#b_content>div#pole>div[class="ra_car_block ra_pole"]>div.ra_car_container,#pole>.productAd[data-ad-carousel],.b_adPATitleBlock+div,a.sb_meta[href^="http://advertise.bingads.microsoft.com"],.promotion-panel-inner,.ins_exp.vsp,li[class="b_algo"]:has(.b_attribution[data-partnertag] + p[class]),.b_ans:has([class^="xm_"][class*="_ansCont"])`,
-                  siteName: "Bing",
-                }),
+              antiAdsFn: () => {
+                const selectors = `li.b_ans>div.wpt_bc_container,li.b_ans>#relatedSearchesLGWContainer,li.b_ans>.b_rs,li.b_ad,#b_pole,#b_content .b_underSearchbox,#b_header>div[id^="bnp."][data-vertical],#b_context li.b_ans .b_spa_adblock,.ad_sc,.b_adBottom,.b_adLastChild,.b_adPATitleBlock,.b_spa_adblock,.mapsTextAds,.pa_sb,.productAd,[id$="adsMvCarousel"],a[href*="/aclick?ld="],div.pagereco_anim,#inline_rs,#ev_talkbox_wrapper,#b_content>main[aria-label]>#b_ims_bza_pole,.shop_page .br-poleoffcarousel,#b_content>div#pole>div[class="ra_car_block ra_pole"]>div.ra_car_container,#pole>.productAd[data-ad-carousel],.b_adPATitleBlock+div,a.sb_meta[href^="http://advertise.bingads.microsoft.com"],.promotion-panel-inner,.ins_exp.vsp,li[class="b_algo"]:has(.b_attribution[data-partnertag] + p[class]),.b_ans:has([class^="xm_"][class*="_ansCont"]),.b_inline_ajax_rs,div[id^="bnp.nid"][data-viewname="VerticalHeaderFlyout"]`;
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "bing_ad", immed: true })({ selectors, siteName: "Bing" });
+              },
             },
             duckduckgo: {
               siteTypeID: 4,
@@ -1517,19 +1509,17 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: "ia",
               mainSelector: "#search_form",
-              buttonCssText: `#${def.const.rndButtonID}{position:absolute;top:3px;right:-188px;z-index:1999999995;display:block;height:44px}#${def.const.leftButton}{display:inline-block;height:44px}#${def.const.rightButton}{display:inline-block;margin:0 0 0 -2px;height:44px}#${def.const.leftButton} input{margin:0;padding:1px 10px 1px 15px!important;height:44px;min-width:100px;border:1px solid var(--theme-col-bg-button-secondary-hover);border-bottom-left-radius:13px;border-top-left-radius:13px;background:var(--sds-color-background-01);box-shadow:0 2px 3px #0000000f;color:var(--theme-col-txt-button-secondary);vertical-align:top;font-weight:400;font-size:17px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:1px 15px 1px 10px!important;height:44px;min-width:100px;border:1px solid var(--theme-col-bg-button-secondary-hover);border-top-right-radius:13px;border-bottom-right-radius:13px;background:var(--sds-color-background-01);box-shadow:0 2px 3px #0000000f;color:var(--theme-col-txt-button-secondary);vertical-align:top;font-weight:400;font-size:17px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid transparent;background-color:var(--sds-color-background-accent-01-state-01);color:var(--sds-color-text-on-color)}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){box-sizing:border-box;position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;height:50px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{box-sizing:border-box;margin:0 3px 0 0;padding:2px 0;height:100%}input{box-sizing:border-box;margin:0;height:99%;min-width:100px;border:none;background:var(--sds-color-background-01);box-shadow:0 0 0 1px rgba(0,0,0,.08),0 2px 3px 0 rgba(0,0,0,.06);color:var(--theme-col-txt-button-secondary);vertical-align:top;font-weight:500;font-size:18px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 10px 1px 15px;border-radius:13px 0 0 13px}#${def.const.rightButton} input{padding:0 15px 1px 10px;border-radius:0 13px 13px 0}input:hover{background-color:var(--sds-color-background-accent-01-state-01);color:var(--sds-color-text-on-color)}`,
               resultListProp: {
                 qs: `ol.react-results--main>li[data-layout="organic"],ol.react-results--main>li[data-layout="videos"] div.module--carousel__item,ol.react-results--main>li:has(div[data-react-module-id="about"])`,
                 delay: 10,
               },
               keywords: "strong, b",
               antiRedirectFn: null,
-              antiAdsFn: () =>
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "ddg_ad", immed: true })({
-                  selectors: `.footer,.react-results--main>li[data-layout="related_searches"]>div[class]`,
-                  siteName: "Duckduckgo",
-                  isRemoveNodes: true,
-                }),
+              antiAdsFn: () => {
+                const selectors = `.footer,.react-results--main>li[data-layout="related_searches"]>div[class]`;
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "ddg_ad", immed: true })({ selectors, siteName: "Duckduckgo", isRemoveNodes: true });
+              },
             },
             sogou: {
               siteTypeID: 5,
@@ -1540,18 +1530,16 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageURL: "https://pic.sogou.com/pics?query=",
               imageType: ["pics", "d", "v"],
               splitTypeName: { split: "/", index: 1 },
-              mainSelector: "input#searchBtn,input[type='button'][uigs='search_article'],input[type='submit']:is(.search-btn,.sbtn1)",
-              buttonCssText: `#${def.const.rndButtonID}{position:absolute;top:0;right:0;z-index:1999999995;margin:-1px 0 0;padding:0;width:auto;height:39px;cursor:pointer;-webkit-appearance:none}#${def.const.rndButtonID} *{-webkit-text-stroke:0 transparent!important}#${def.const.leftButton}{display:inline;height:39px}#${def.const.rightButton}{display:inline;height:39px}#${def.const.leftButton} input{margin:0;padding:0 18px!important;height:39px;min-width:100px;border:2px solid #222;border-radius:12px;background:#f5f5f5;color:#000;vertical-align:top;font-weight:500;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 18px!important;height:39px;min-width:100px;border:2px solid #222;border-radius:12px;background:#f5f5f5;color:#000;vertical-align:top;font-weight:500;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:2px solid #205aef;background:#e9f2ff;color:#205aef}.${def.notice.random}_images{height:34px!important;border:1px solid #ababab!important;border-radius:3px!important;background:##fafafa!important}.${def.notice.random}_weixin{height:34px!important;border:1px solid #00a06a!important;border-radius:2px!important;background:#fff!important;color:#00a06a!important;font-size:15px!important}.${def.notice.random}_weixin:hover{background:#f7fffd!important}`,
+              mainSelector: `input#searchBtn,input[type='button'][uigs='search_article'],input[type='submit']:is(.search-btn,.sbtn1)`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:var(--position,absolute);top:-2px;right:var(--right,unset);z-index:99999;display:inline-flex;margin:0;padding:0;width:auto;height:40px;cursor:pointer;-webkit-appearance:none;opacity:var(--opacity,0);justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:40px}input{margin:0;padding:0 18px 1px 18px;height:40px;min-width:100px;border:2px solid #222;border-radius:12px;background:#f5f5f5;color:#000;font-weight:500;font-size:15px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}input:hover{border:2px solid #205aef;background:#e9f2ff;color:#205aef}.${def.notice.random}_images{margin-top:1px;height:34px!important;border:1px solid #ababab!important;border-radius:3px!important;background:##fafafa!important}.${def.notice.random}_weixin{margin-top:2px;height:34px!important;border:1px solid #00a06a!important;border-radius:2px!important;background:#fff!important;color:#00a06a!important;font-size:15px!important}.${def.notice.random}_weixin:hover{background:#f7fffd!important}`,
               resultListProp: { qs: `div.results>div.vrwrap,div.results>div.rb`, delay: 10 },
               keywords: "#wrapper em",
               antiRedirectFn: () =>
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "sogou_ar" })("Sogou", "#wrapper a[href^='/link?url=']:not([uigs])", { useNewTab: true, advancedAnti: true }),
-              antiAdsFn: () =>
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "sogou_ad", immed: true })({
-                  selectors: `#biz_tip_box_tuiguang_float,.pz_pc_new_container,.share-wrap,.sponsored,.tgad-box,[class~="ext_query"][id*="sq_ext_"],div.top-better-hintBox,#right>div.rvr-model:not([tpl]),.results>.reactResult,.results>div.vrwrap.middle-better-hintBox,#right>.reactResult`,
-                  siteName: "Sogou",
-                  isRemoveNodes: true,
-                }),
+              antiAdsFn: () => {
+                const selectors = `#biz_tip_box_tuiguang_float,.pz_pc_new_container,.share-wrap,.sponsored,.tgad-box,[class~="ext_query"][id*="sq_ext_"],div.top-better-hintBox,#right>div.rvr-model:not([tpl]),.results>.reactResult,.results>div.vrwrap.middle-better-hintBox,#right>.reactResult,#searchBtn2[value="\u5168\u7f51\u641c\u7d22"]`;
+                deBounce({ fn: parseAntiAdvertising, delay: 10, timer: "sogou_ad", immed: true })({ selectors, siteName: "Sogou", isRemoveNodes: true });
+              },
             },
             qwant: {
               siteTypeID: 6,
@@ -1563,15 +1551,14 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: "t",
               mainSelector: "form[data-testid='mainSearchBar']",
-              buttonCssText: `#${def.const.rndButtonID}{position:absolute;top:0;right:0;z-index:1999999995;display:block;height:48px}#${def.const.leftButton}{display:inline-block;height:48px}#${def.const.rightButton}{display:inline-block;margin:0;height:48px}#${def.const.leftButton} input{box-sizing:content-box;margin:1px 0;padding:0 12px 0 18px!important;height:48px;min-width:70px;box-shadow:var(--shadow-searchbar-elevation);transition:box-shadow var(--motion-duration-200) var(--motion-ease), color var(--motion-duration-300) var(--motion-ease), background-color var(--motion-duration-300) var(--motion-ease);border-bottom-left-radius:var(--border-radius-300);border-top-left-radius:var(--border-radius-300);background-color:var(--color-elevation-surface-elevation);color:var(--color-text-primary);vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{box-sizing:content-box;margin:1px 0;padding:0 18px 0 12px!important;height:48px;min-width:70px;box-shadow:var(--shadow-searchbar-elevation);transition:box-shadow var(--motion-duration-200) var(--motion-ease), color var(--motion-duration-300) var(--motion-ease), background-color var(--motion-duration-300) var(--motion-ease);border-top-right-radius:var(--border-radius-300);border-bottom-right-radius:var(--border-radius-300);background-color:var(--color-elevation-surface-elevation);color:var(--color-text-primary);vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:var(--color-elevation-surface-raised);box-shadow:var(--shadow-searchbar-raised);}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;height:48px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:48px}input{box-sizing:content-box;margin:1px 0;height:48px;min-width:70px;outline:none;border:none;box-shadow:var(--shadow-searchbar-elevation);transition:box-shadow var(--motion-duration-200) var(--motion-ease),color var(--motion-duration-300) var(--motion-ease),background-color var(--motion-duration-300) var(--motion-ease);background-color:var(--color-elevation-surface-elevation);color:var(--color-text-primary);vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px!important;border-radius:var(--border-radius-300) 0 0 var(--border-radius-300)}#${def.const.rightButton} input{padding:0 18px 1px 12px!important;border-radius:0 var(--border-radius-300) var(--border-radius-300) 0}input:hover{background-color:var(--color-elevation-surface-raised);box-shadow:var(--shadow-searchbar-raised)}`,
               resultListProp: { qs: `div[data-testid="containerWeb"] div[data-testid="sectionWeb"]>div>div,.is-sidebar>div>div div[style="display: block;"]`, delay: 50 },
               keywords: "mark",
               antiRedirectFn: null,
-              antiAdsFn: () =>
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "qwant_ad", immed: true })({
-                  selectors: `div[data-testid="containerWeb"] section div[style="display: block;"]:has([data-testid="aserpok"]),.is-sidebar>div>div:has([data-testid="aserpok"]),[data-testid="containerWeb"] section>div>div:last-child`,
-                  siteName: "Qwant",
-                }),
+              antiAdsFn: () => {
+                const selectors = `div[data-testid="containerWeb"] section div[style="display: block;"]:has([data-testid="aserpok"]),.is-sidebar>div>div:has([data-testid="aserpok"]),[data-testid="containerWeb"] section>div>div:last-child`;
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "qwant_ad", immed: true })({ selectors, siteName: "Qwant" });
+              },
             },
             yandex: {
               siteTypeID: 7,
@@ -1583,17 +1570,15 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: "header form.HeaderForm",
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;top:0;left:-12px;z-index:1999999995;margin:0;padding:0;width:max-content;height:52px;cursor:pointer;-webkit-appearance:none}#${def.const.leftButton}{display:inline-block;height:52px}#${def.const.rightButton}{display:inline-block;margin:0 0 0 -1px;height:52px}#${def.const.leftButton} input{padding:0 12px 0 18px!important;height:52px;min-width:100px;border:none;box-shadow:0 0 0 2px inset var(--depot-color-header-form-border);border-bottom-left-radius:28px;border-top-left-radius:28px;background:#fff;color:var(--depot-color-text-quaternary);vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{padding:0 18px 0 12px!important;height:52px;min-width:100px;border:none;box-shadow:0 0 0 2px inset var(--depot-color-header-form-border);border-top-right-radius:28px;border-bottom-right-radius:28px;background:#fff;color:var(--depot-color-text-quaternary);vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:unset;color:var(--depot-color-link-hovered)}`,
-              darkModeCss: `#${def.const.leftButton} input,#${def.const.rightButton} input{color:var(--depot-color-text-quaternary);background:unset;box-shadow:0 0 0 2px inset var(--depot-color-header-form-border);}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{color:var(--depot-color-link-hovered);background:var(--depot-color-control-secondary)}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:0 5px 0 -10px;padding:0;width:auto;height:52px;cursor:pointer;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0;height:52px}input{height:52px;min-width:110px;border:none;box-shadow:0 0 0 2px inset var(--depot-color-header-form-border);background:transparent;color:var(--depot-color-text-primary);font-weight:500;font-size:18px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:28px 0 0 28px;}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 28px 28px 0}input:hover{background:var(--depot-color-control-secondary);color:var(--depot-color-link-hovered)}`,
+              darkModeCss: `:host(.${def.const.darkmode}) input{color:var(--depot-color-text-quaternary);box-shadow:0 0 0 2px inset var(--depot-color-header-form-border)}:host(.${def.const.darkmode}) input:hover{color:var(--depot-color-link-hovered);background:var(--depot-color-control-secondary)}`,
               resultListProp: { qs: "#search-result>li[data-fast]", delay: 10 },
               keywords: ".OrganicTitleContentSpan b,.OrganicTextContentSpan b",
               antiRedirectFn: () => deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yandex_ar" })("Yandex", "#search-result>li.serp-item a", { useNewTab: true, removeDataSet: true }),
-              antiAdsFn: () =>
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "yandex_ad", immed: true })({
-                  selectors: `#distr-pcode-container>div,div.HeaderDesktopActions-Distribution.HeaderDesktopActions-Item,div[tabindex][class*='location_right-bottom'],span.distr-nav,div.market-cart,.SerpListFeature :is(.DirectInlineContainer,.Skeleton_type_ad_search),div[id*='-cross-page-']`,
-                  siteName: "Yandex",
-                  isRemoveNodes: true,
-                }),
+              antiAdsFn: () => {
+                const selectors = `#distr-pcode-container>div,div.HeaderDesktopActions-Distribution.HeaderDesktopActions-Item,div[tabindex][class*='location_right-bottom'],span.distr-nav,div.market-cart,.SerpListFeature :is(.DirectInlineContainer,.Skeleton_type_ad_search),div[id*='-cross-page-']`;
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "yandex_ad", immed: true })({ selectors, siteName: "Yandex", isRemoveNodes: true });
+              },
             },
             so360: {
               siteTypeID: 8,
@@ -1602,25 +1587,21 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               siteHostName: "www.so.com",
               webURL: "https://www.so.com/s?ie=utf-8&q=",
               imageURL: "https://image.so.com/i?q=",
-              imageType: ["i", "view"],
+              imageType: ["i"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: "input[type='submit'][value='搜索'],button[type='submit'][class~='so-search__button']",
               overrideCss: `#hd-rtools{z-index:199!important}`,
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;top:0;left:0;margin:0 0 0 5px;padding:0;width:auto;height:40px;cursor:pointer;-webkit-appearance:none}#${def.const.leftButton}{display:inline-block;padding:0 1px 0 0;height:40px;vertical-align:top}#${def.const.rightButton}{display:inline-block;height:40px;vertical-align:top}#${def.const.leftButton} input{margin:0 -2px 0 0;padding:0 18px!important;height:40px;min-width:100px;border:1px solid #0fb264;border-bottom-left-radius:8px;border-top-left-radius:8px;background:#0fb264;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 18px!important;height:40px;min-width:100px;border:1px solid #0fb264;border-top-right-radius:8px;border-bottom-right-radius:8px;background:#0fb264;color:#fff;vertical-align:top;font-weight:400;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{box-shadow: 0 1px 2px #0000001a;background:#2dc471}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;display:inline-flex;z-index:99999;margin:0 0 0 5px;padding:0;width:auto;height:40px;cursor:pointer;justify-content:center;align-items:center;flex-wrap:nowrap;vertical-align:top}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;padding:0 2px 0 0;height:40px}input{margin:0;padding:0 18px 1px 18px;height:40px;min-width:100px;border:1px solid #0fb264;background:#0fb264;color:#fff;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;vertical-align:top;cursor:pointer}#${def.const.leftButton} input{border-radius:8px 0 0 8px;}#${def.const.rightButton} input{border-radius:0 8px 8px 0}input:hover{box-shadow: 0 1px 2px #0000001a;background:#2dc471}`,
               resultListProp: { qs: `ul.result>li.res-list`, delay: 10 },
               keywords: "em,#mohe-newdict_dict .mh-exsentence b",
-              antiRedirectFn: () =>
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "so360_ar" })("So360", ".res-list a[href*='//www.so.com/link?m=']", {
-                  useNewTab: true,
-                  cleanAttr: ["e_href", "data-res"],
-                  advancedAnti: true,
-                }),
-              antiAdsFn: () =>
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "so360_ad", immed: true })({
-                  selectors: `#so_bd-ad,#e_idea_pp,#righttop_box,[id^='mohe-360pic_ext--'],.res-mediav,.map_business_con,.lianmeng-ad,.res-mediav-right,.atom-adv,.e-buss,.spread,ul[data-so-biz-monitor-so-display],.related_query li.cm,ul>div.inline-recommend,div#so_top,div#so-activity-entry,div.mh-relate-text,.section li[data-id^="related_query_init_"],#mohe-know_side_nlp,#rs-top>dd.rs-top`,
-                  siteName: "So360",
-                  isRemoveNodes: true,
-                }),
+              antiRedirectFn: () => {
+                const selector = ".res-list a[href*='//www.so.com/link?m=']";
+                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "so360_ar" })("So360", selector, { useNewTab: true, cleanAttr: ["e_href", "data-res"], advancedAnti: true });
+              },
+              antiAdsFn: () => {
+                const selectors = `#so_bd-ad,#e_idea_pp,#righttop_box,[id^='mohe-360pic_ext--'],.res-mediav,.map_business_con,.lianmeng-ad,.res-mediav-right,.atom-adv,.e-buss,.spread,ul[data-so-biz-monitor-so-display],.related_query li.cm,ul>div.inline-recommend,div#so_top,div#so-activity-entry,div.mh-relate-text,.section li[data-id^="related_query_init_"],#mohe-know_side_nlp,#rs-top>dd.rs-top`;
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "so360_ad", immed: true })({ selectors, siteName: "So360", isRemoveNodes: true });
+              },
             },
             toutiao: {
               siteTypeID: 9,
@@ -1632,7 +1613,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["atlas"],
               splitTypeName: "pd",
               mainSelector: "div[class^='search'][data-log-click]",
-              buttonCssText: `#${def.const.rndButtonID}{position:absolute;top:0;right:-160px;z-index:1999999995;margin:-1px;padding:0;width:auto;height:44px;cursor:pointer;-webkit-appearance:none}#${def.const.leftButton}{display:inline-block;height:44px}#${def.const.rightButton}{display:inline-block;margin:0 0 0 -2px;height:44px}#${def.const.leftButton} input{margin:0;padding:1px 10px 1px 15px!important;height:44px;min-width:100px;border:1px solid transparent;border-bottom-left-radius:8px;border-top-left-radius:8px;background:#f04142;color:#fff;vertical-align:top;font-weight:500;font-size:18px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:1px 15px 1px 10px!important;height:44px;min-width:100px;border:1px solid transparent;border-top-right-radius:8px;border-bottom-right-radius:8px;background:#f04142;color:#fff;vertical-align:top;font-weight:500;font-size:18px;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background-color:#f04142b3;color:#fff}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;display:inline-flex;top:-1px;right:var(--right,unset);z-index:99999;margin:0;padding:0;width:auto;height:44px;cursor:pointer;justify-content:center;align-items:center;flex-wrap:nowrap;opacity:var(--opacity,0)}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 2px 0 0;height:44px}input{margin:0;height:44px;min-width:100px;border:1px solid transparent;background:#f04142;color:#fff;vertical-align:top;font-weight:500;font-size:17px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 10px 1px 15px;border-radius:8px 0 0 8px}#${def.const.rightButton} input{padding:0 15px 1px 10px;border-radius:0 8px 8px 0}input:hover{background-color:#f04142b3;color:#fff}`,
               resultListProp: { qs: `div.s-result-list:not(.pd-video)>div.result-content[data-i]`, delay: 10 },
               keywords: "em",
               antiRedirectFn: () =>
@@ -1650,7 +1631,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               splitTypeName: "",
               mainSelector: "div#search-box-container .ant-input-group-addon",
               overrideCss: `.ant-input-group-addon{background:transparent!important}`,
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:1999999995;display:inline-block;margin-left:4px;height:40px;vertical-align:bottom}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:40px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:40px}#${def.const.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;height:40px;min-width:100px;border:1px solid var(--ee-brand-6);border-bottom-left-radius:10px;border-top-left-radius:10px;background:var(--ee-brand-6);color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;height:40px;min-width:100px;border:1px solid var(--ee-brand-6);border-top-right-radius:10px;border-bottom-right-radius:10px;background:var(--ee-brand-6);color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid var(--ee-brand-5);background:var(--ee-brand-5)}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;left:5px;z-index:99999;display:inline-flex;margin:0;height:40px;vertical-align:top;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0;height:40px}input{margin:0;height:40px;min-width:90px;border:1px solid var(--ee-brand-6);background:var(--ee-brand-6);color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:10px 0 0 10px}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 10px 10px 0}input:hover{border:1px solid var(--ee-brand-5);background:var(--ee-brand-5)}`,
               resultListProp: { qs: `ul.ant-list-items>li.ant-list-item`, delay: 10 },
               keywords: "mark",
               antiRedirectFn: null,
@@ -1666,20 +1647,15 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: "form[role='search'][class~='search-form'][data-test-id='main-header-search-form']",
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:1999999995;display:inline-block;margin-left:2px;height:40px}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:40px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:40px}#${def.const.leftButton} input{margin:0;padding:1px 12px 1px 18px!important;height:40px;min-width:100px;border:1px solid var(--color-form-border-default);border-bottom-left-radius:20px;border-top-left-radius:20px;background:var(--color-background-primary);box-shadow:0 1px 2px #1a1a1a2e,0 0 8px #1a1a1a0f;color:var(--color-button-content-tertiary);vertical-align:top;font-weight:700;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:1px 18px 1px 12px!important;height:40px;min-width:100px;border:1px solid var(--color-form-border-default);border-top-right-radius:20px;border-bottom-right-radius:20px;background:var(--color-background-primary);box-shadow:0 1px 2px #1a1a1a2e,0 0 8px #1a1a1a0f;color:var(--color-button-content-tertiary);vertical-align:top;font-weight:700;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid var(--color-button-background-primary-hover);background:var(--color-button-background-primary-hover);color:var(--color-button-content-primary)}`,
-              resultListProp: { qs: `.mainline__content>div:not([class])>div[data-test-id="mainline-result-web"],aside>article[position="sidebar"]`, delay: 150 },
-              keywords: "",
-              antiRedirectFn: function () {
-                ["adBlockNoticeDismissed", "personalCounterTooltipSearch"].forEach(item => localStorage?.setItem(item, 1));
-                const fn = option => !/:nt=1:/.test(gbCookies.getItem("ECFG")) && gbCookies.setItem(option) && location.replace(location.href);
-                const sValue = `a=0:as=1:cs=0:dt=pc:f=i:fr=0:fs=1:l=en:lt=${Date.now()}:mc=en-ww:nf=1:nt=1:pz=0:t=1:tt=0:tu=auto:wu=auto:ma=1`;
-                deBounce({ fn, timer: "ecosia_cookie", immed: true, once: true })({ sKey: "ECFG", sValue, sEnd: Infinity, sDomain: ".ecosia.org", sPath: "/", sSomeSite: "Lax" });
+              overrideCss: `.mainline__result-wrapper{visibility:visible!important}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:0;height:40px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0;height:40px}input{margin:0;height:40px;min-width:100px;border:1px solid var(--color-form-border-default);background:var(--color-background-primary);box-shadow:0 1px 2px #1a1a1a2e,0 0 8px #1a1a1a0f;color:var(--color-button-content-tertiary);vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:20px 0 0 20px;}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 20px 20px 0}input:hover{border:1px solid var(--color-button-background-primary-hover);background:var(--color-button-background-primary-hover);color:var(--color-button-content-primary)}`,
+              resultListProp: { qs: `.mainline__content>div>div.mainline__result-wrapper,aside>article[position="sidebar"]`, delay: 150 },
+              keywords: null,
+              antiRedirectFn: null,
+              antiAdsFn: () => {
+                const selectors = `div[data-test-id="sidebar-onboarding"][href],div.main-header__install-cta,div.main-footer-visual__cards,div.personal-counter__tooltip,div.cookie-wrapper,div.mainline__footer>a[data-test-id='chat-entry'],[data-test-id="mainline-result-ad"],div.related-queries__bottom[data-test-id="web-related-queries"]`;
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "ecosia_ad", immed: true })({ selectors, siteName: "Ecosia" });
               },
-              antiAdsFn: () =>
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "ecosia_ad", immed: true })({
-                  selectors: `div[data-test-id="sidebar-onboarding"][href],div.main-header__install-cta,div.main-footer-visual__cards,div.personal-counter__tooltip,div.cookie-wrapper,div.mainline__footer>a[data-test-id='chat-entry'],[data-test-id="mainline-result-ad"],div.related-queries__bottom[data-test-id="web-related-queries"]`,
-                  siteName: "Ecosia",
-                }),
             },
             yahoo: {
               siteTypeID: 12,
@@ -1690,21 +1666,18 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageURL: "https://images.search.yahoo.com/search/images?p=",
               imageType: ["images"],
               splitTypeName: () => CUR_HOST_NAME.split(".").slice(-4, -3)[0],
-              mainSelector: "#hd div.sbx form#sf,header.hd section#sbx form#sf",
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;position:absolute;z-index:1999999995;display:inline-block;margin-left:4px;width:max-content;height:44px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;margin-left:2px;height:44px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:44px}#${def.const.leftButton} input{box-sizing:content-box;margin:0;padding:0 12px 0 18px!important;height:44px;min-width:60px;border:none;border-bottom-left-radius:100px;border-top-left-radius:100px;background:#7e1fff;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{box-sizing:content-box;margin:0;padding:0 18px 0 12px!important;height:44px;min-width:60px;border:none;border-top-right-radius:100px;border-bottom-right-radius:100px;background:#7e1fff;color:#fff;vertical-align:top;font-weight:500;font-size:16px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:none;background:#6001d2;color:#fff}`,
+              mainSelector: "#hd div.sbx form#sf,#sh>#sbx>form#sf",
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;margin:0 0 0 10px;width:max-content;height:44px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0;height:44px}input{box-sizing:content-box;margin:0;height:44px;min-width:70px;border:none;background:#7e1fff;color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:100px 0 0 100px;}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 100px 100px 0}input:hover{border:none;background:#6001d2;color:#fff}`,
               resultListProp: { qs: `#web>ol>li`, delay: 10 },
               keywords: "strong",
-              antiRedirectFn: () =>
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yahoo_ar" })(
-                  "Yahoo",
-                  "#main a:is([href^='https://r.search.yahoo.com/_ylt='],[href^='https://images.search.yahoo.com/search/images;_ylt='],[href^='https://video.search.yahoo.com/search/video;_ylt='])",
-                  { useNewTab: true, advancedAnti: true }
-                ),
-              antiAdsFn: () =>
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "yahoo_ad", immed: true })({
-                  selectors: `#main ol.searchCenterBottomAds,#main ol.searchCenterTopAds`,
-                  siteName: "Yahoo",
-                }),
+              antiRedirectFn: () => {
+                const selector = `#main a:is([href^='https://r.search.yahoo.com/_ylt='],[href^='https://images.search.yahoo.com/search/images;_ylt='],[href^='https://video.search.yahoo.com/search/video;_ylt='])`;
+                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yahoo_ar" })("Yahoo", selector, { useNewTab: true, advancedAnti: true });
+              },
+              antiAdsFn: () => {
+                const selectors = `#main ol.searchCenterBottomAds,#main ol.searchCenterTopAds`;
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "yahoo_ad", immed: true })({ selectors, siteName: "Yahoo" });
+              },
             },
             you: {
               siteTypeID: 13,
@@ -1716,20 +1689,12 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["isch"],
               splitTypeName: "tbm",
               mainSelector: "#ChatQueryBar>form [class^='_1975xbj']>[data-state='closed']",
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline;margin:0;height:32px;width:190%;max-width:fit-content}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:32px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-2px;height:32px}#${def.const.leftButton} input{margin:0;padding:0 10px;height:32px;min-width:80px;border:1px solid #596ced;border-bottom-left-radius:8px;border-top-left-radius:8px;background-color:#596ced;color:#fff;vertical-align:top;font-weight:400;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 10px;height:32px;min-width:80px;border:1px solid #596ced;border-top-right-radius:8px;border-bottom-right-radius:8px;background-color:#596ced;color:#fff;vertical-align:top;font-weight:400;font-size:14px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #7a89f0;background-color:#7a89f0;color:#fff}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:0;height:32px;width:190%;max-width:fit-content;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0;height:32px}input{margin:0;padding:0 16px 1px 16px;height:32px;min-width:80px;border:1px solid #596ced;background-color:#596ced;color:#fff;vertical-align:middle;font-weight:500;font-size:15px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{border-radius:8px 0 0 8px}#${def.const.rightButton} input{border-radius:0 8px 8px 0}input:hover{border:1px solid #7a89f0;background-color:#7a89f0;color:#fff}`,
               darkModeCss: `#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #4d5cc3;background-color:#4d5cc3;}`,
-              resultListProp: {
-                qs: `[data-floating-ui-portal]>[role='dialog'][data-open='true'] section>article,div[data-eventappname="web_results"] section>article,div[data-eventappname="web_results"] ul>li`,
-                delay: 10,
-              },
-              keywords: `div[data-testid="app-mainline"] p strong,div[data-testid="app-mainline"] p b`,
-              antiRedirectFn: () =>
-                deBounce({ fn: parameters => parameters.forEach(item => localStorage?.setItem(item, true)), timer: "you_set", immed: true, once: true })([
-                  "openLinksInNewTabs",
-                  "hasSeenP13nAnnouncement",
-                  "hasUserClosedExtensionModal",
-                ]),
-              antiAdsFn: null,
+              resultListProp: null,
+              keywords: null,
+              antiRedirectFn: null,
+              antiAdsFn: () => deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "you_ad", immed: true })({ selectors: `[id=":rn:"][data-floating-ui-focusable]`, siteName: "You" }),
             },
             startpage: {
               siteTypeID: 14,
@@ -1741,22 +1706,15 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: "cat",
               mainSelector: "#search[role='search'] button.search-btn",
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;z-index:999;display:inline-block;margin:-1px 5px 0 0;height:40px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:40px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:0;height:40px}#${def.const.leftButton} input{margin:0;padding:0 10px 0 20px!important;height:40px;min-width:95px;border:0 solid transparent;border-bottom-left-radius:2rem;border-top-left-radius:2rem;background:#f1f3ff;box-shadow:0 0 2px #a4a5bb;color:#2e39b3;font-weight:600;font-size:15px!important;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 20px 0 10px!important;height:40px;min-width:95px;border:0 solid transparent;border-top-right-radius:2rem;border-bottom-right-radius:2rem;background:#f1f3ff;box-shadow:0 0 2px #a4a5bb;color:#2e39b3;font-weight:600;font-size:15px!important;line-height:100%;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#6573ff;color:#fff}`,
-              darkModeCss: `#${def.const.leftButton} input{border:1px solid #252b3b;background:#252b3b;color:#fff}#${def.const.rightButton} input{border:1px solid #252b3b;background:#252b3b;color:#fff}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #6573ff;background:#6573ff;color:#222}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:0 2px 0 0;padding:0;height:40px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:40px}input{margin:0;height:40px;min-width:90px;border:0 solid transparent;background:#f1f3ff;box-shadow:0 0 2px #a4a5bb;color:#2e39b3;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 16px 1px 20px;border-radius:2rem 0 0 2rem}#${def.const.rightButton} input{padding:0 20px 1px 16px;border-radius: 0 2rem 2rem 0}input:hover{background:#6573ff;color:#fff}`,
+              darkModeCss: `:host(.${def.const.darkmode}) input{border:1px solid #252b3b;background:#252b3b;color:#fff}:host(.${def.const.darkmode}) input:hover{border:1px solid #6573ff;background:#6573ff;color:#222}`,
               resultListProp: { qs: `#main>.w-gl>div.result,.wiki-container>div[role="region"]`, delay: 1e2 },
               keywords: `.result b`,
-              antiRedirectFn: function () {
-                const setGBCookie = option =>
-                  !/disable_open_in_new_windowEEE0|enable_post_methodEEE0/.test(gbCookies.getItem("preferences")) && gbCookies.setItem(option) && location.replace(location.href);
-                const sValue = `date_timeEEEworldN1Ndisable_family_filterEEE0N1Ndisable_open_in_new_windowEEE0N1Nenable_post_methodEEE0N1Nenable_proxy_safety_suggestEEE1N1Nenable_stay_controlEEE0N1Ninstant_answersEEE1N1Nlang_homepageEEEs/device/enN1NlanguageEEEenglishN1Nlanguage_uiEEEenglishN1Nnum_of_resultsEEE20N1Nsearch_results_regionEEEallN1NsuggestionsEEE1N1Nwt_unitEEEcelsius`;
-                const option = { sKey: "preferences", sValue, sEnd: Infinity, sDomain: ".startpage.com", sPath: "/", sSecure: true };
-                deBounce({ fn: setGBCookie, timer: "startpage_cookie", delay: 20, immed: true, once: true })(option);
+              antiRedirectFn: null,
+              antiAdsFn: () => {
+                const selectors = `section.a-gl-tp,div.widget-install-legacy,div.mainline-results>div.block-display,.Firefox-promo`;
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "startpage_ad", immed: true })({ selectors, siteName: "Startpage" });
               },
-              antiAdsFn: () =>
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "startpage_ad", immed: true })({
-                  selectors: `section.a-gl-tp,div.widget-install-legacy,div.mainline-results>div.block-display,.Firefox-promo`,
-                  siteName: "Startpage",
-                }),
             },
             brave: {
               siteTypeID: 15,
@@ -1768,18 +1726,11 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: "div#autocomplete",
-              buttonCssText: `#${def.const.rndButtonID}{position:absolute;z-index:999;display:inline;margin:0 0 0 10px;padding:0;width:max-content;height:var(--search-form-height)}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.rightButton},#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:100%}#${def.const.leftButton} input{margin:0;padding:0 12px 0 18px!important;height:var(--search-form-height);min-width:100px;border:none;outline:1px solid var(--color-serp-divider-subtle-container);box-shadow:0 2px 2px #00000008;border-bottom-left-radius:var(--border-radius-xxl);border-top-left-radius:var(--border-radius-xxl);background:var(--color-serp-bar-bg);color:var(--color-text-primary);vertical-align:top;font-weight:600;font-size:16px!important;line-height:16px;box-sizing:border-box;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:0 18px 0 12px!important;height:var(--search-form-height);min-width:100px;border:none;outline:1px solid var(--color-serp-divider-subtle-container);box-shadow:0 2px 2px #00000008;border-top-right-radius:var(--border-radius-xxl);border-bottom-right-radius:var(--border-radius-xxl);background:var(--color-serp-bar-bg);color:var(--color-text-primary);vertical-align:top;font-weight:600;font-size:16px!important;line-height:16px;box-sizing:border-box;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{color:var(--color-primitive-white, #fff);background:linear-gradient(314deg,#fa7250 8.49%,#ff1893 43.72%,#a78aff 99.51%);}`,
-              darkModeCss: `#${def.const.leftButton} input,#${def.const.rightButton} input{height:calc(var(--search-form-height) - 2px)}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;margin:0;padding:0;width:max-content;height:var(--search-form-height);justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.rightButton},#${def.const.leftButton}{display:inline-block;margin:0 4px 0 0;padding:0;height:100%}input{box-sizing:border-box;margin:0;height:calc(var(--search-form-height) - 1px);min-width:100px;border:none;outline:1px solid var(--color-serp-divider-subtle-container);box-shadow:2px 2px 3px #00000038;background:var(--color-serp-bar-bg);color:var(--color-text-primary);vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 16px 0 24px;border-radius:var(--border-radius-xxl) 0 0 var(--border-radius-xxl)}#${def.const.rightButton} input{padding:0 24px 0 16px;border-radius:0 var(--border-radius-xxl) var(--border-radius-xxl) 0}input:hover{color:var(--color-primitive-white, #fff);background:linear-gradient(314deg,#fa7250 8.49%,#ff1893 43.72%,#a78aff 99.51%)}`,
               resultListProp: { qs: `#results>div.snippet[data-type],#results>.standalone>.video-item`, delay: 10 },
               keywords: `.snippet-content strong`,
-              antiRedirectFn: function () {
-                localStorage?.setItem("app.aiPromoDismissCount", 10);
-                const option = { sKey: "olnt", sValue: "1", sEnd: Infinity, sDomain: "search.brave.com", sPath: "/", sSameSite: "Lax", sSecure: true };
-                const fn = opt => gbCookies.getItem("olnt") !== "1" && gbCookies.setItem(opt) && location.replace(location.href);
-                deBounce({ fn, timer: "brave_cookie", immed: true, once: true })(option);
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "brave_ar" })("Brave", "#results>div#search-elsewhere a", { useNewTab: true, forceNewTab: true, removeDataSet: true });
-              },
-              antiAdsFn: () => deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "brave_ad" })({ siteName: "Brave" }),
+              antiRedirectFn: null,
+              antiAdsFn: null,
             },
             yep: {
               siteTypeID: 16,
@@ -1791,15 +1742,13 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: `form div[class$="-addon"]`,
-              buttonCssText: `#${def.const.rndButtonID}{position:absolute;top:.5em;z-index:112;display:block;margin:-6px 0 0;padding:0;height:50px}#${def.const.rndButtonID} *{text-shadow:none!important;-webkit-text-stroke:0 transparent!important}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:50px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;margin-left:-1px;height:50px}#${def.const.leftButton} input{margin:0;padding:4px 15px 4px 25px!important;height:48px;min-width:95px;border:1px solid #f1dc1b;border-bottom-left-radius:25px;border-top-left-radius:25px;background:var(--background--brand);color:#333;vertical-align:top;font-weight:600;font-size:16px!important;line-height:16px;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:4px 25px 4px 15px!important;height:48px;min-width:95px;border:1px solid #f1dc1b;border-top-right-radius:25px;border-bottom-right-radius:25px;background:var(--background--brand);color:#333;vertical-align:top;font-weight:600;font-size:16px!important;line-height:16px;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:var(--background--brandHover)}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:112;display:inline-flex;margin:0;padding:0;height:50px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 2px 0 0;height:50px}input{margin:0;height:48px;min-width:100px;border:1px solid #f1dc1b;background:var(--background--brand);color:#333;vertical-align:top;font-weight:500;font-size:18px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 15px 1px 25px;border-radius:25px 0 0 25px;}#${def.const.rightButton} input{padding:0 25px 1px 15px;border-radius:0 25px 25px 0}input:hover{background:var(--background--brandHover)}`,
               resultListProp: { qs: `div[class*='-results']>div>div>div[class*='-card'],div[class*='-sidebar']>div>div>div>div[class*='-stack']`, delay: 20 },
               keywords: ``,
-              antiRedirectFn: () =>
-                deBounce({ fn: parsingAntiRedirect, delay: 30, timer: "yep_ar", immed: true })(
-                  "Yep",
-                  "div[class*='-results']>div>div>div[class*='-card'] a,div[class*='-results']>div>div>div[class*='-block'] a,div[class*='-results']>div>div>div[class*='-incut'] div[class*='-newsIncut'] a,div[class*='-results']>div>div>div[class*='-incut'] div[class*='-container'] a",
-                  { useNewTab: true, forceNewTab: true, cleanAttr: ["referrerpolicy"] }
-                ),
+              antiRedirectFn: () => {
+                const selector = `div[class*='-results']>div>div>div[class*='-card'] a,div[class*='-results']>div>div>div[class*='-block'] a,div[class*='-results']>div>div>div[class*='-incut'] div[class*='-newsIncut'] a,div[class*='-results']>div>div>div[class*='-incut'] div[class*='-container'] a`;
+                deBounce({ fn: parsingAntiRedirect, delay: 30, timer: "yep_ar", immed: true })("Yep", selector, { useNewTab: true, cleanAttr: ["referrerpolicy"] });
+              },
               antiAdsFn: null,
             },
             mojeek: {
@@ -1812,10 +1761,11 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: "fmt",
               mainSelector: "form[name='sf1']",
-              buttonCssText: `#${def.const.rndButtonID}{position:absolute;top:-1px;z-index:100;display:block;margin:0;padding:0;height:42px}#${def.const.rndButtonID} #${def.const.leftButton}{display:inline-block;height:42px}#${def.const.rndButtonID} #${def.const.rightButton}{display:inline-block;height:42px}#${def.const.leftButton} input{margin:0;padding:0;height:42px;min-width:90px;border:1px solid #c7c7c7;border-bottom-left-radius:4px;border-top-left-radius:4px;background:#fff;color:#111;box-shadow:0 2px 3px #0000000f;vertical-align:top;font-weight:400;font-size:14px!important;line-height:100%;letter-spacing:normal;cursor:pointer}#${def.const.rightButton} input{margin:0 0 0 -2px;padding:0;height:42px;min-width:90px;border:1px solid #c7c7c7;border-top-right-radius:4px;border-bottom-right-radius:4px;background:#fff;color:#111;box-shadow:0 2px 3px #0000000f;vertical-align:top;font-weight:400;font-size:14px!important;line-height:100%;letter-spacing:normal;cursor:pointer}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{background:#fafafa;box-shadow:0 2px 5px #00000033;transition:box-shadow .1s cubic-bezier(.4,0,.2,1), -webkit-box-shadow .1s cubic-bezier(.4,0,.2,1)}`,
-              resultListProp: { qs: `.results ul.results-standard>li`, delay: 10 },
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:-1px;right:var(--right,unset);z-index:100;display:inline-flex;margin:0;padding:0;height:42px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 2px 0 0;height:42px}input{margin:0;padding:0;height:42px;min-width:90px;border:1px solid #c7c7c7;background:#fff;color:#111;box-shadow:0 2px 3px #0000000f;vertical-align:top;font-weight:500;font-size:15px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;letter-spacing:normal;cursor:pointer}#${def.const.leftButton} input{border-radius:4px 0 0 4px}#${def.const.rightButton} input{border-radius:0 4px 4px 0}input:hover{background:#fafafa;box-shadow:0 2px 5px #00000033;transition:box-shadow .1s cubic-bezier(.4,0,.2,1), -webkit-box-shadow .1s cubic-bezier(.4,0,.2,1)}`,
+              darkModeCss: `:host(.${def.const.darkmode}) input{background:#1e1e1e;color:#fff;border:1px solid grey;box-shadow:0 2px 3px rgba(0, 0, 0, .06)}:host(.${def.const.darkmode}) input:hover{background:#303030;color:#fafafa}`,
+              resultListProp: { qs: `.results>ul.results-standard>li`, delay: 10 },
               keywords: `b, strong`,
-              antiRedirectFn: null,
+              antiRedirectFn: () => deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "mojeek_ar" })("Mojeek", ".results>ul>li :is(:not(.more)>a,>a)", { useNewTab: true }),
               antiAdsFn: () => deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "mojeek_ad", immed: true })({ selectors: ".sf1>form>button~a", siteName: "mojeek" }),
             },
             searxng: {
@@ -1823,15 +1773,15 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               siteButtonName: "𝐒𝐞𝐚𝐫𝐗𝐍𝐆",
               siteNickName: IS_CHN ? "𝐒𝐞𝐚𝐫𝐗𝐍𝐆 搜索" : "𝐒𝐞𝐚𝐫𝐗𝐍𝐆 ©",
               siteHostName: "searx.space",
-              webURL: "https://priv.au/search?category_general=&language=all&time_range=&safesearch=0&theme=simple&q=",
-              imageURL: "https://priv.au/search?category_images=&language=all&time_range=&safesearch=0&theme=simple&q=",
+              webURL: "https://au.priv.au/search?category_general=1&language=all&time_range=&safesearch=0&theme=simple&q=",
+              imageURL: "https://au.priv.au/search?categories=images&language=all&time_range=&safesearch=0&theme=simple&q=",
               imageType: ["images"],
-              splitTypeName: () => global.location.search.match(/category_([a-z]+)/)?.[1],
+              splitTypeName: "categories",
               mainSelector: "#search_view>div.search_box",
-              buttonCssText: `#${def.const.rndButtonID}{position:relative;top:0;right:-10px;width:0;z-index:199995;display:block;height:45px}#${def.const.leftButton}{display:inline-block;height:45px}#${def.const.rightButton}{display:inline-block;margin:0;height:45px}#${def.const.leftButton} input{margin:0;padding:1px 10px 1px 15px!important;height:45px;min-width:100px;border:0 solid #ccc;border-bottom-left-radius:.8rem;border-top-left-radius:.8rem;background:var(--color-search-background);box-shadow:var(--color-search-shadow);color:var(--color-search-font);vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rightButton} input{margin:0;padding:1px 15px 1px 10px!important;height:45px;min-width:100px;border:0;border-top-right-radius:.8rem;border-bottom-right-radius:.8rem;background:var(--color-search-background);box-shadow:var(--color-search-shadow);color:var(--color-search-font);vertical-align:top;font-weight:400;font-size:16px;line-height:100%;cursor:pointer}#${def.const.rndButtonID}:hover #${def.const.leftButton} input,#${def.const.rndButtonID}:hover #${def.const.rightButton} input{background-color:var(--color-search-background);color:var(--color-search-font);}#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid transparent;background-color:var(--color-search-background-hover)!important;color:var(--color-search-background)!important}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;top:0;right:-10px;width:0;z-index:99999;display:block;height:auto}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 -1px 0 0}input{margin:0;min-width:90px;border:1px solid var(--color-search-border);outline:none;background:var(--color-search-background);box-shadow: var(--color-search-shadow);color:var(--color-search-font);font-weight:500;font-size:1.2rem;line-height:122%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:.8rem 15px .86rem 20px;border-radius:.8rem 0 0 .8rem}#${def.const.rightButton} input{padding:.8rem 20px .86rem 15px;border-radius:0 .8rem .8rem 0}input:hover{background-color:var(--color-search-background-hover);color:var(--color-search-background)}`,
               resultListProp: { qs: `div#urls article.result`, delay: 10 },
               keywords: ".highlight",
-              antiRedirectFn: () => deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "searxng_ar" })("SearXNG", "div#urls article.result a", { useNewTab: true }),
+              antiRedirectFn: null,
               antiAdsFn: null,
             },
             other: { siteTypeID: 0 },
@@ -1908,19 +1858,19 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           /* DEFINE_GLOBAL_STYLES */
 
           def.var.style = String(
-            `.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before {box-sizing:content-box;line-height:normal}.${def.notice.animated}{animation-duration:1s;animation-fill-mode:both}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.${def.notice.random}_fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.${def.notice.random}_fadeOut{animation-name:fadeOut}.${def.notice.appear}{display:block!important}.${def.notice.noticeX},.${def.notice.noticeX} *{text-shadow:none!important;font-family:Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:0 transparent!important}.${def.notice.noticeX}-top{top:0;width:100%}.${def.notice.noticeX}-top .${def.notice.item}{margin:0!important;border-radius:0!important}.${def.notice.noticeX}-topRight{top:10px;right:20px;z-index:2147483646!important}.${def.notice.noticeX}-topLeft{top:10px;left:10px}.${def.notice.noticeX}-topCenter{top:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX}-middleLeft,.${def.notice.noticeX}-middleRight{right:20px;top:50%;transform:translateY(-50%)}.${def.notice.noticeX}-middleLeft{left:10px}.${def.notice.noticeX}-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.${def.notice.noticeX}-bottom{bottom:0;width:100%}.${def.notice.noticeX}-bottom .${def.notice.item}{border-radius:0!important;margin:0!important}.${def.notice.noticeX}-bottomRight{bottom:10px;right:20px;z-index:2147483647!important}.${def.notice.noticeX}-bottomLeft{bottom:10px;left:10px}.${def.notice.noticeX}-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX} .${def.notice.item}{margin:0 0 10px;border-radius:6px;overflow:hidden}.${def.var.translucent} *{display:none!important}.${def.var.translucent} notice-label{display:block!important}.${def.var.filtered},.${def.var.disappear}{display:none!important}[gb-filter-notice]{display:block!important;min-width:430px;margin:18px 0 28px 10px!important;padding:10px 2px!important;font:normal 400 14px/100% 'WenQuanYi Micro Hei','PingFang SC','Microsoft YaHei',sans-serif!important;-webkit-text-stroke:0 transparent!important;color:grey!important;line-height:1!important}gb-filters.code{display:block;margin:20px 0;word-break:break-word;font-size:12px!important}` +
+            `.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before {box-sizing:content-box;line-height:normal}.${def.notice.animated}{animation-duration:1s;animation-fill-mode:both}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.${def.notice.random}_fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.${def.notice.random}_fadeOut{animation-name:fadeOut}.${def.notice.appear}{display:block!important}.${def.notice.noticeX},.${def.notice.noticeX} *{text-shadow:none!important;font-family:Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:0 transparent!important}.${def.notice.noticeX}-top{top:0;width:100%}.${def.notice.noticeX}-top .${def.notice.item}{margin:0!important;border-radius:0!important}.${def.notice.noticeX}-topRight{top:10px;right:20px;z-index:2147483646!important}.${def.notice.noticeX}-topLeft{top:10px;left:10px}.${def.notice.noticeX}-topCenter{top:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX}-middleLeft,.${def.notice.noticeX}-middleRight{right:20px;top:50%;transform:translateY(-50%)}.${def.notice.noticeX}-middleLeft{left:10px}.${def.notice.noticeX}-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.${def.notice.noticeX}-bottom{bottom:0;width:100%}.${def.notice.noticeX}-bottom .${def.notice.item}{border-radius:0!important;margin:0!important}.${def.notice.noticeX}-bottomRight{bottom:10px;right:20px;z-index:2147483647!important}.${def.notice.noticeX}-bottomLeft{bottom:10px;left:10px}.${def.notice.noticeX}-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX} .${def.notice.item}{margin:0 0 10px;border-radius:6px;overflow:hidden}.${def.const.translucent} *{display:none!important}.${def.const.translucent} notice-label{display:block!important}.${def.const.filtered},.${def.const.disappear}{display:none!important}[${def.const.const.warn}]{display:block!important;min-width:430px;margin:18px 0 28px 10px!important;padding:10px 2px!important;font:normal 400 14px/100% 'WenQuanYi Micro Hei','PingFang SC','Microsoft YaHei',sans-serif!important;-webkit-text-stroke:0 transparent!important;color:grey!important;line-height:1!important}gb-filters.code{display:block;margin:20px 0;word-break:break-word;font-size:12px!important}` +
               `.${def.notice.noticeX} .${def.notice.item} .${def.notice.close}{float:right;margin-right:7px;color:#fff;text-shadow:0 1px 0 #fff;font-weight:700;font-size:18px!important;line-height:1;opacity:1}.${def.notice.noticeX} .${def.notice.item} .${def.notice.close}:hover{color:#000;opacity:.5;cursor:pointer}.${def.notice.noticeX} .${def.notice.item} a{border-bottom:1px dashed #fff;color:#fff}.${def.notice.noticeX} .${def.notice.item} a,.${def.notice.noticeX} .${def.notice.item} a:hover{text-decoration:none}.${def.notice.noticeX} .${def.notice.success}{background-color:#64ce83!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-heading{padding:10px;background-color:#3da95c;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-body{padding:10px!important;color:#fff;}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.info}{background-color:#3ea2ff!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-heading{padding:10px;background-color:#067cea;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-body{padding:10px!important;color:#fff}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.warning}{background-color:#ff7f48!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#f97038;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-body{color:#fff;padding:10px}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.error}{background-color:#e74c3c!important}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#e93724;color:#fff;font-weight:700;font-size:14px!important}` +
               `.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-body{padding:10px;color:#fff}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.configuration} input[disabled],.${def.notice.configuration} select[disabled]{color:#bbb;background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:20px 20px!important;background-color:#fff7f7!important}.${def.notice.noticeX} .${def.notice.configuration}{background:linear-gradient(to right,#fcfcfc,#f2f2f7);background:-webkit-gradient(linear,0 0,0 100%,from(#fcfcfc),to(#f2f2f7));box-shadow:0 0 5px #888}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.close}{float:right;margin-right:7px;color:#000000;text-shadow:0 1px 0 #aaa;font-weight:700;font-size:18px!important;line-height:1;opacity:1}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.close}:hover{color:#555;opacity:.5;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#e7e7e7;color:#333;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-body{padding:10px;color:#333333}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.noticeX}-heading-title{display:inline-block;vertical-align:middle;overflow:hidden;max-width:90%;text-overflow:ellipsis;white-space:nowrap}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#64ce83}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#3da95c}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#3ea2ff}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#067cea;}` +
               `.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#ff7f48}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#f44e06}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#fd5f4e}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#ba2c1d}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#efefef}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#ccc}@keyframes ${def.notice.noticeX}-progress{0%{width:100%}to{width:0}}@keyframes ${def.notice.noticeX}-fadeOut{0%{opacity:1}to{opacity:0}}.${def.notice.noticeX}-fadeOut{animation-name:${def.notice.noticeX}-fadeOut}.${def.notice.noticeX}{position:fixed;z-index:2147483645}.${def.notice.noticeX} ::-webkit-scrollbar{width:8px}.${def.notice.noticeX} ::-webkit-scrollbar-button{width:8px;height:8px}.${def.notice.noticeX} ::-webkit-scrollbar-track{border-radius:3px}.${def.notice.noticeX} ::-webkit-scrollbar-thumb{background:#e1e1e1;border-radius:3px}.${def.notice.noticeX} ::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.rName}{padding:2px!important}.${def.notice.noticeX} .${def.notice.rName} dl{margin:0!important;padding:1px!important}.${def.notice.noticeX} .${def.notice.rName} dl dt{margin:2px 0 6px!important;font-weight:900!important;font-size:16px!important}.${def.notice.noticeX} .${def.notice.rName} dl dd{margin:2px 2px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${def.notice.noticeX} .${def.notice.rName} .${def.notice.center}{width:100%;text-align:center!important}.${def.notice.noticeX} .${def.notice.rName} dl dd em{padding:0 5px;color:#fff;font-style:italic;font-size:24px!important;font-family:Candara,sans-serif!important}.${def.notice.noticeX} .${def.notice.rName} dl dd span{margin-right:8px;font-weight:700;font-size:15px!important}.${def.notice.noticeX} .${def.notice.rName} dl dd i{font-size:20px!important;font-family:Candara,sans-serif!important}` +
               `.${def.notice.noticeX} .${def.notice.rName} dl dd .im{padding:0 3px;color:gold;font-weight:900;font-size:16px!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} ul{display:inline-block;margin:0 0 0 8px;padding:4px 4px 8px;width:95%;color:#ffffffcc;counter-reset:xxx 0;vertical-align:top;text-align:left}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} li{position:relative;margin:0 0 0 2px;padding:0 0 2px 2px;list-style:none;font-style:italic!important;line-height:150%;-webkit-transition:.12s;transition:.12s}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} li::before{display:inline-block;margin-left:-1.5em;width:1.5em;content:counter(xxx,decimal) "、";counter-increment:xxx 1;font-size:14px;font-family:Candara,sans-serif;-webkit-transition:.5s;transition:.5s}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.rName} #${def.notice.stopUpdate}{float:right;margin:0 5px!important;font-size:12px!important;cursor:help}.${def.const.loading}{position:relative;}.${def.const.loading}::after{content:" \u21ba";animation:fade 1.25s infinite;}@keyframes fade{0%{opacity:0.1}50%{opacity:0.5}to{opacity:0}}.${def.notice.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important;color:#999}#${def.notice.stopUpdate} input[type='checkbox']{box-sizing:content-box;margin:2px 4px 0 0;width:14px;height:14px;border:2px solid #fff;border-radius:50%;background:#ffa077;vertical-align:top;cursor:help;-webkit-appearance:none}#${def.notice.stopUpdate}:hover input,#${def.notice.stopUpdate} input:hover{background:#ba2c1d;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}{display:none!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label{position:relative;display:inline-block;-webkit-box-sizing:content-box;box-sizing:content-box;margin:0 0 0 25px;padding:11px 9px;width:58px;height:10px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 20px #0000001a,0 0 10px #f5929266;word-wrap:normal!important;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;-webkit-border-radius:7px;border-radius:7px;background:#fff;box-shadow:0 0 1px #00000099;color:#fff;content:" "}` +
               `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}+label::after{position:absolute;top:2px;left:28px;-webkit-box-sizing:content-box;box-sizing:content-box;padding:5px;-webkit-border-radius:100px;border-radius:100px;color:#fff;content:"OFF";font-weight:700;font-size:14px}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label{-webkit-box-sizing:content-box;box-sizing:content-box;margin:0 0 0 25px;background:#67a5df!important;box-shadow:inset 0 0 20px #0000001a,0 0 10px #92c4f566;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label::after{top:2px;left:10px;content:"ON"}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}.${def.notice.noticeX} .${def.notice.configuration} button.${def.notice.searchButton}{display:flex;position:relative;margin:0 0 10px;padding:6px 0;width:162px;height:25px;border:2px solid #eee;border-radius:6px;background:#fff;box-shadow:1px 1px 0 1px #aaa;font-size:14px!important;cursor:pointer;align-content:center;justify-content:center;align-items:center}.${def.notice.noticeX} .${def.notice.configuration} button.${def.notice.searchButton}:hover{box-shadow:1px 1px 3px 0 #888;color:#ff0000}.${def.notice.noticeX} .${def.notice.configuration} span.${def.notice.favicon}{margin:0 6px 0 0;width:32px;height:32px}.${def.notice.noticeX} .${def.notice.configuration} ul.${def.notice.searchList}{margin:5px;padding:2px;list-style:none}.${def.notice.noticeX} .${def.notice.configuration} ul.${def.notice.searchList} li{margin:0;list-style:none;font-style:normal}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.fieldset}{display:block;margin:2px;padding:4px 6px;width:auto;height:auto;border:2px dashed #dfdfdf;border-radius:10px;background:transparent!important;text-align:left}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.legend}{display:block;margin:0;padding:0 8px;width:auto;color:#8b0000!important;font-weight:900!important;font-size:14px!important;-webkit-user-select:all;user-select:all}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList}{margin:0;padding:0;background:transparent!important}` +
-              `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li{float:none;display:flex;margin:3px 0;padding:2px 8px 2px 12px;height:36px;border:none;background:transparent!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none;align-content:center;justify-content:space-between}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li div{font:normal 700 14px/150% Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button{box-sizing:border-box;margin:0 0 0 8px;padding:4px 8px;height:36px;min-width:65px;border:1px solid #ccc;border-radius:8px;background:#fafafa;box-shadow:1px 1px 1px 0 #ccc;color:#5e5e5e;font-weight:700;font-size:14px!important;letter-spacing:normal;text-transform:none;text-decoration:none}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info{font-weight:400!important;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info em{color:#dc143c!important;font-style:normal;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_textarea{padding: 6px 0;margin:0}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter{display:block;margin:0;height:100%}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar{width:8px;height:8px}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb{border-radius:4px;background:#cfcfcf}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.random}_filter_textarea textarea::placeholder{color:#555;font:normal 500 16px/150% ui-monospace,monospace,system-ui,-apple-system,BlinkMacSystemFont!important;opacity:0.85;white-space:break-spaces}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{box-sizing:border-box;margin:0;padding:5px;max-height:423px;width:100%;min-height:280px;outline:0!important;border:1px solid #bbb;border-radius:6px;background:#fff;color:#111;white-space:pre;font:normal 400 14px/150% ui-monospace,monospace,sans-serif!important;resize:vertical;overscroll-behavior:contain;word-break:keep-all!important;cursor:auto}` +
-              `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content::placeholder{font:normal 400 14px/150% ui-monospace,monospace!important}.${def.notice.noticeX} .${def.notice.configuration} #${def.notice.random}_customColor{margin:0;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button:hover{background:#fff;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}__content{display:block;margin:0;height:268px}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{overflow-x:hidden;overflow-y:auto;box-sizing:border-box;margin:4px 0 3px;padding:8px;width:266px;max-height:237px;overscroll-behavior:contain}.${def.notice.card} h2{margin:0;padding:0;border:0;vertical-align:baseline;font:inherit;font-size:100%;line-height:135%;}#${def.notice.random}_help{position:relative;margin:0;padding:4px 15px!important;border:1px solid transparent;background:#f07f6a;box-shadow:0 0 6px 0 #f5846f;color:#fff;cursor:help}#${def.notice.random}_help:hover{background:#ed6248;box-shadow:0 0 6px 0 #f34525;}#${def.notice.random}_clear{margin:0;color:#666;font-weight:500;cursor:pointer}#${def.notice.random}_clear:hover{color:#ff0000}#${def.notice.random}_clear u{padding:0 2px;text-decoration:none}.${def.notice.linkerror},.${def.notice.linkerror}:hover,.${def.notice.linkerror} *,.${def.notice.linkerror} *:hover{color:#a9a9a9!important;text-decoration-line:line-through!important;text-decoration-color:#ff0000!important;text-decoration-style:wavy!important}@-moz-document url-prefix() {.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before,.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{scrollbar-color:#bbbb #eee1;scrollbar-width:thin}}.${def.notice.card}{margin:0;padding:0;--background:#fff;--background-chackbox:#0082ff;--background-image:#fff,#006baf33;--text-color:#666;--text-headline:#000;--card-shadow:#0082ff;--card-height:48px;--card-witght:240px;--card-radius:12px;--header-height:47px;--blend-mode:overlay;--transition:0.15s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.${def.notice.card}__input{position:absolute;display:none;margin:0;padding:0;outline:none;border:none;background:none;-webkit-appearance:none}` +
-              `.${def.notice.card}__input:checked ~ .${def.notice.card}__body{--shadow:0 0 0 3px var(--card-shadow);}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox{--chack-bg:var(--background-chackbox);--chack-border:#fff;--chack-scale:1;--chack-opacity:1;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox--svg{--stroke-color:#fff;--stroke-dashoffset:0;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover:after{--opacity-bg:0;}.${def.notice.random}_iconText{color:#333;font-weight:400;letter-spacing:normal;text-transform:none;text-decoration:none}.${def.notice.random}_iconText:hover{color:#dc143c}.${def.notice.random}_iconText>sup{position:absolute;font-size:25px;top:-10px;right:-2px}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body{cursor:not-allowed;opacity:0.5;}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body:active{--scale:1;}.${def.notice.card}__body{position:relative;display:grid;overflow:hidden;width:var(--card-witght);height:var(--card-height);border-radius:var(--card-radius);background:var(--background);box-shadow:var(--shadow,1px 1px 3px 1px #ccc);cursor:pointer;-webkit-transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:transform var(--transition),box-shadow var(--transition);transition:transform var(--transition),box-shadow var(--transition),-webkit-transform var(--transition);-webkit-transform:scale(var(--scale,1)) translateZ(0);transform:scale(var(--scale,1)) translateZ(0);grid-auto-rows:calc(var(--card-height) - var(--header-height)) auto}.${def.notice.card}__body:active{--scale:0.96;}.${def.notice.card}__body-cover-image{position:absolute;top:8px;left:10px;z-index:100;width:32px;height:32px}.${def.notice.card}__body-cover-image span.${def.notice.favicons}{display:block;width:32px;height:32px}.${def.notice.card}__body-cover-chackbox{position:absolute;top:10px;right:10px;z-index:1;width:28px;height:28px;border:2px solid var(--chack-border,#fff);border-radius:50%;background:var(--chack-bg,var(--background-chackbox));opacity:var(--chack-opacity,0);transition:transform var(--transition),opacity calc(var(--transition)*1.2) linear,-webkit-transform var(--transition) ease;-webkit-transform:scale(var(--chack-scale,0));transform:scale(var(--chack-scale,0))}` +
-              `.${def.notice.card}__body-cover-chackbox--svg{display:inline-block;visibility:visible!important;margin:8px 0 0 7px;width:13px;height:11px;vertical-align:top;-webkit-transition:stroke-dashoffset .4s ease var(--transition);transition:stroke-dashoffset .4s ease var(--transition);fill:none;stroke:var(--stroke-color,#fff);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16px;stroke-dashoffset:var(--stroke-dashoffset,16px)}.${def.notice.card}__body-header{padding:4px 10px 6px 50px;height:var(--header-height);background:var(--background)}.${def.notice.card}__body-header-title{margin-bottom:0!important;color:var(--text-headline);font-weight:700!important;font-size:15px!important}.${def.notice.card}__body-header-subtitle{color:var(--text-color);font-weight:500;font-size:13px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{display:grid;grid-template-columns:repeat(1, 1fr);grid-gap:10px;}.${def.notice.gberror}{display:block;margin:0 0 4px -6px;padding:6px;width:max-content;border:1px dashed #ffb78c;border-radius:4px;color:#ffb78c}`
+              `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li{float:none;display:flex;margin:3px 0;padding:2px 8px 2px 12px;height:36px;border:none;background:transparent!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none;align-content:center;justify-content:space-between}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li div{font:normal 700 14px/150% Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button{box-sizing:border-box;margin:0 0 0 8px;padding:4px 8px;height:36px;min-width:65px;border:1px solid #ccc;border-radius:8px;background:#fafafa;box-shadow:1px 1px 1px 0 #ccc;color:#5e5e5e;font-weight:700;font-size:14px!important;letter-spacing:normal;text-transform:none;text-align:center;text-decoration:none}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info{font-weight:400!important;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info em{color:#dc143c!important;font-style:normal;}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_textarea{padding: 6px 0;margin:0}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter{display:block;margin:0;height:100%}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar{width:8px;height:8px}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb{border-radius:4px;background:#cfcfcf}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.random}_filter_textarea textarea::placeholder{color:#555;font:normal 500 16px/150% ui-monospace,monospace,system-ui,-apple-system,BlinkMacSystemFont!important;opacity:0.85;white-space:break-spaces}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{box-sizing:border-box;margin:0;padding:5px;max-height:423px;width:100%;min-height:280px;outline:0!important;border:1px solid #bbb;border-radius:6px;background:#fff;color:#111;white-space:pre;font:normal 400 14px/150% ui-monospace,monospace,sans-serif!important;resize:vertical;overscroll-behavior:contain;word-break:keep-all!important;cursor:auto}` +
+              `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content::placeholder{font:normal 400 14px/150% ui-monospace,monospace!important}.${def.notice.noticeX} .${def.notice.configuration} #${def.notice.random}_customColor{margin:0;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button:hover{background:#fff;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}__content{display:block;margin:0;height:268px}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{overflow-x:hidden;overflow-y:auto;box-sizing:border-box;margin:4px 0 3px;padding:8px;width:266px;max-height:237px;overscroll-behavior:contain}.${def.notice.card} h2{margin:0;padding:0;border:0;vertical-align:baseline;font:inherit;font-size:100%;line-height:135%;}#${def.notice.random}_help{position:relative;margin:0;padding:4px 15px!important;border:1px solid transparent;background:#f07f6a;box-shadow:0 0 6px 0 #f5846f;color:#fff;cursor:help}#${def.notice.random}_help:hover{background:#ed6248;box-shadow:0 0 6px 0 #f34525;}#${def.notice.random}_clear{margin:0;color:#666;font-weight:500;cursor:pointer}#${def.notice.random}_clear:hover{color:#ff0000}#${def.notice.random}_clear u{padding:0 2px;text-decoration:none}.${def.notice.linkerror},.${def.notice.linkerror}:hover{color:#a9a9a9!important;text-decoration-line:underline!important;text-decoration-color:#ff0000!important;text-decoration-style:wavy!important;text-decoration-thickness:1px!important;text-underline-offset:2px!important}.${def.notice.linkerror} *,.${def.notice.linkerror} *:hover{color:#a9a9a9!important;text-decoration:none!important}@-moz-document url-prefix() {.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before,.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{scrollbar-color:#bbbb #eee1;scrollbar-width:thin}}` +
+              `.${def.notice.card}{margin:0;padding:0;--background:#fff;--background-chackbox:#0082ff;--background-image:#fff,#006baf33;--text-color:#666;--text-headline:#000;--card-shadow:#0082ff;--card-height:48px;--card-witght:240px;--card-radius:12px;--header-height:47px;--blend-mode:overlay;--transition:0.15s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.${def.notice.card}__input{position:absolute;display:none;margin:0;padding:0;outline:none;border:none;background:none;-webkit-appearance:none}.${def.notice.card}__input:checked ~ .${def.notice.card}__body{--shadow:0 0 0 3px var(--card-shadow);}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox{--chack-bg:var(--background-chackbox);--chack-border:#fff;--chack-scale:1;--chack-opacity:1;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox--svg{--stroke-color:#fff;--stroke-dashoffset:0;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover:after{--opacity-bg:0;}.${def.notice.random}_iconText{color:#333;font-weight:400;letter-spacing:normal;text-transform:none;text-decoration:none}.${def.notice.random}_iconText:hover{color:#dc143c}.${def.notice.random}_iconText>sup{position:absolute;font-size:25px;top:-10px;right:-2px}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body{cursor:not-allowed;opacity:0.5;}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body:active{--scale:1;}.${def.notice.card}__body{position:relative;display:grid;overflow:hidden;width:var(--card-witght);height:var(--card-height);border-radius:var(--card-radius);background:var(--background);box-shadow:var(--shadow,1px 1px 3px 1px #ccc);cursor:pointer;-webkit-transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:transform var(--transition),box-shadow var(--transition);transition:transform var(--transition),box-shadow var(--transition),-webkit-transform var(--transition);-webkit-transform:scale(var(--scale,1)) translateZ(0);transform:scale(var(--scale,1)) translateZ(0);grid-auto-rows:calc(var(--card-height) - var(--header-height)) auto}` +
+              `.${def.notice.card}__body:active{--scale:0.96;}.${def.notice.card}__body-cover-image{position:absolute;top:8px;left:10px;z-index:100;width:32px;height:32px}.${def.notice.card}__body-cover-image span.${def.notice.favicons}{display:block;width:32px;height:32px}.${def.notice.card}__body-cover-chackbox{position:absolute;top:10px;right:10px;z-index:1;width:28px;height:28px;border:2px solid var(--chack-border,#fff);border-radius:50%;background:var(--chack-bg,var(--background-chackbox));opacity:var(--chack-opacity,0);transition:transform var(--transition),opacity calc(var(--transition)*1.2) linear,-webkit-transform var(--transition) ease;-webkit-transform:scale(var(--chack-scale,0));transform:scale(var(--chack-scale,0))}.${def.notice.card}__body-cover-chackbox--svg{display:inline-block;visibility:visible!important;margin:8px 0 0 7px;width:13px;height:11px;vertical-align:top;-webkit-transition:stroke-dashoffset .4s ease var(--transition);transition:stroke-dashoffset .4s ease var(--transition);fill:none;stroke:var(--stroke-color,#fff);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16px;stroke-dashoffset:var(--stroke-dashoffset,16px)}.${def.notice.card}__body-header{padding:4px 10px 6px 50px;height:var(--header-height);background:var(--background)}.${def.notice.card}__body-header-title{margin-bottom:0!important;color:var(--text-headline);font-weight:700!important;font-size:15px!important}.${def.notice.card}__body-header-subtitle{color:var(--text-color);font-weight:500;font-size:13px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{display:grid;grid-template-columns:repeat(1, 1fr);grid-gap:10px;}.${def.notice.gberror}{display:block;margin:0 0 4px -6px;padding:6px;width:max-content;border:1px dashed #ffb78c;border-radius:4px;color:#ffb78c}`
           );
           def.var.iconbg = iconBase64Data ? `url('${iconBase64Data}')` : `url('${def.url.backupIcon}'),url('${yandexIconsAPIUrl}')`;
-          def.var.button = `${currentSite.siteTypeID === newSiteType.GOOGLE ? "<span jsname='s1VaRe' class='ACRAdd M2vV3'></span>" : ""}
+          def.var.button = `${currentSite.siteTypeID === newSiteType.GOOGLE ? "<span class='ACRAdd'></span>" : ""}
             <span id="${def.const.leftButton}" sn="${selectedSite[0].siteTypeID}">
               <input type="button" title="${selectedSite[0].siteNickName}" value="${selectedSite[0].siteButtonName}"/>
             </span>
@@ -1951,20 +1901,18 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           }
 
           function checkIndexPage() {
-            return [newSiteType.DUCKDUCKGO, newSiteType.QWANT].includes(currentSite.siteTypeID) ? !getUrlParam("q") : location.pathname === "/";
+            for (const key of searchProperties.searchKeys) if (getUrlParam(key)) return false;
+            return CUR_PATH_NAME === "/";
           }
 
           function getSecurityPolicy() {
-            const currentSearchType = getUrlParam(currentSite.splitTypeName);
-            return (
-              (currentSite.siteTypeID === newSiteType.GOOGLE && /^(26|28|50)$/.test(currentSearchType)) ||
-              (currentSite.siteTypeID === newSiteType.BING && (/^maps$/.test(currentSearchType) || CUR_PATH_NAME.includes("/relatedvideo"))) ||
-              (currentSite.siteTypeID === newSiteType.SOGOU && /^(fanyi|hanyu|as)/.test(CUR_HOST_NAME)) ||
-              (currentSite.siteTypeID === newSiteType.DUCKDUCKGO && /^maps$/.test(getUrlParam("iaxm"))) ||
-              (currentSite.siteTypeID === newSiteType.YANDEX && location.pathname.includes("/direct")) ||
-              (currentSite.siteTypeID === newSiteType.YAHOO && CUR_HOST_NAME.search(/news|video/) !== -1) ||
-              (currentSite.siteTypeID === newSiteType.SEARXNG && /^map$/.test(currentSearchType))
-            );
+            const currentSearchType = getUrlParam(listCurrentSite.splitTypeName);
+            const useSecurityPolicy =
+              (listCurrentSite.siteTypeID === newSiteType.BING && currentSearchType === "maps") ||
+              (listCurrentSite.siteTypeID === newSiteType.GOOGLE && ["26", "28", "50"].includes(currentSearchType)) ||
+              (listCurrentSite.siteTypeID === newSiteType.SOGOU && /^(?:fanyi|hanyu|as)\./.test(CUR_HOST_NAME)) ||
+              (listCurrentSite.siteTypeID === newSiteType.DUCKDUCKGO && getUrlParam("iaxm") === "maps");
+            return useSecurityPolicy;
           }
 
           function findCurrentSite() {
@@ -1996,7 +1944,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               if (iconDataURL) cache.set(REMOTEICONS, iconDataURL, 2592e6) ?? DEBUG("%cRemote icon data parsing successed.", "color:#006400");
               else DEBUG("%cRemote icon data parsing failed.", "color:#ff0000");
             } catch (e) {
-              ERROR("updateToRequestIcon: Can't fetch the iconData.", e.message);
+              ERROR(`${e.name} in UpdateToRequestIcon:`, e.message);
             }
           }
 
@@ -2032,7 +1980,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               .then(u => openUpdateWindow(u))
               .then(() => showUpdateNotify())
               .then(r => removeLoadingElement(r))
-              .catch(e => ERROR("preInstall:", e.message));
+              .catch(e => void ERROR(`${e.name} in PreInstall:`, e.message));
           }
 
           function extractVersion(res) {
@@ -2051,7 +1999,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 const updateinfo = IS_CHN ? parsedNote.CN : parsedNote.EN;
                 updateInfoList += updateinfo ? `<li>${updateinfo}</li>` : ``;
               } catch (e) {
-                updateInfoList += `<li>${note}</li>`;
+                e && (updateInfoList += `<li>${note}</li>`);
               }
               return updateInfoList;
             }, "");
@@ -2325,7 +2273,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               } catch (e) {
                 const errorMessage = IS_CHN ? "设置数据格式有误，请修正后重新提交。" : "The setting data format is incorrect!";
                 const errorText = `<dd><e style="font-size:24px;vertical-align:bottom">\ud83d\ude31\u0020</e>${errorMessage}</dd>`;
-                GMnotification({ text: createNoticeHTML(errorText), type: def.notice.error, newestOnTop: true, closeWith: ["click"] });
+                e && GMnotification({ text: createNoticeHTML(errorText), type: def.notice.error, newestOnTop: true, closeWith: ["click"] });
               }
             }
 
@@ -2341,11 +2289,11 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 const currentScrollTop = _this.scrollTop;
                 _this.value = formattedValue;
                 _this.setAttribute("style", "border: 1px solid #999");
-                await sleep(10, { instant: true });
+                await sleep(10, { instance: true });
                 _this.scrollTop = currentScrollTop;
                 _this.setSelectionRange(newCursorPosition, newCursorPosition);
               } catch (e) {
-                _this.setAttribute("style", "border: 2px solid #dc143c");
+                e && _this.setAttribute("style", "border: 2px solid #dc143c");
               }
             }
 
@@ -2386,7 +2334,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             function submitKeywordColor() {
               let inputFgColor, inputBgColor;
               const colorReg =
-                /^#[0-9a-f]{3}$|^#[0-9a-f]{6}$|^#[0-9a-f]{8}$|^rgba\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*((?!1.[1-9])[0-1]?(\.[0-9]{1,3})?)\)$|^rgb\(((([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))))|(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))\s+([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))\s+([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))(\s+\/\s+((\d+%)|1|(0\.\d+)))?))\)$|^transparent$|^currentcolor$/i;
+                /^(?:#[0-9a-f]{3,4}|#[0-9a-f]{6}|#[0-9a-f]{8}|rgba\(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*((?!1.[1-9])[0-1]?(\.[0-9]{1,3})?)\)|rgb\(((([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))),\s*([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5]))))|(([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))\s+([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))\s+([0-9]|([1-9][0-9])|(1[0-9][0-9])|(2([0-4][0-9]|5[0-5])))(\s+\/\s+((\d+%)|1|(0\.\d+)))?))\)|transparent|currentcolor)$/i;
               const foregroundColorText = IS_CHN
                 ? `请输入关键词前景色（字体颜色），默认为“#f73131cd”，支持HEX, HEXA, RGB, RGBA, currentcolor的颜色格式。`
                 : `𝐏𝐥𝐞𝐚𝐬𝐞 𝐞𝐧𝐭𝐞𝐫 𝐭𝐡𝐞 𝐤𝐞𝐲𝐰𝐨𝐫𝐝 𝐟𝐨𝐫𝐞𝐠𝐫𝐨𝐮𝐧𝐝-𝐜𝐨𝐥𝐨𝐫 (𝐟𝐨𝐧𝐭 𝐜𝐨𝐥𝐨𝐫):\r\nThe default is "#f73131cd" and supports the color formats of HEX, HEXA, RGB, RGBA and currentcolor.`;
@@ -2408,8 +2356,8 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 inputBgColor = prompt(backgroundColorText, customColor.backgroundColor);
                 if (inputBgColor === null) return;
                 else if (colorReg.test(inputBgColor.trim())) {
-                  const confirmForegroundColor = /^#/gi.test(inputFgColor.trim()) ? inputFgColor.trim().toUpperCase() : inputFgColor.trim().toLowerCase();
-                  const confirmbackgroundColor = /^#/gi.test(inputBgColor.trim()) ? inputBgColor.trim().toUpperCase() : inputBgColor.trim().toLowerCase();
+                  const confirmForegroundColor = inputFgColor.trim().startsWith("#") ? inputFgColor.trim().toUpperCase() : inputFgColor.trim().toLowerCase();
+                  const confirmbackgroundColor = inputBgColor.trim().startsWith("#") ? inputBgColor.trim().toUpperCase() : inputBgColor.trim().toLowerCase();
                   const confirmText = `${confirmColorsText}${confirmfgColorText}${confirmForegroundColor}${fonfirmbgColorText}${confirmbackgroundColor}`;
                   if (!confirm(confirmText)) return;
                   const text = createNoticeHTML(IS_CHN ? "<dd>搜索关键词自定义颜色已保存，当前页面即将刷新！</dd>" : "<dd>Search keywords custom color has been saved!</dd>");
@@ -2458,7 +2406,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
             function insertHotkey() {
               document.addEventListener("keydown", e => {
-                const ekey = (e.altKey || e.code === "AltRight") && !e.ctrlKey && !e.shiftKey && !e.metaKey;
+                const ekey = (e.altKey || e.key === "Alt" || e.code === "AltRight" || e.code === "AltLeft") && !e.ctrlKey && !e.shiftKey && !e.metaKey;
                 if (e.code === "KeyE" && ekey) handleClickEvent("setConfigure", 1e3, e);
                 else if (e.code === "KeyV" && ekey) handleClickEvent("listEngine", 1e3, e);
                 else if (e.code === "KeyB" && ekey) handleClickEvent("filterResult", 1e3, e);
@@ -2472,51 +2420,46 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             }
 
             function showSystemInfo() {
-              const darkModeNotice = IS_CHN
-                ? "当前浏览器处于深色模式，可能会影响脚本的显示效果！请尝试将站点深色模式切换为跟随设备（或设备默认），以实现自动切换。"
-                : "The current browser is in dark mode, which may affect the display effect of the script! Please try to switch site dark mode to follow device (or device default) for automatic switching.";
-              if (CUR_WINDOW_TOP && window.matchMedia("(prefers-color-scheme: dark)").matches) __console("warn", `${def.var.scriptName}\n${darkModeNotice}`);
-              if (CUR_WINDOW_TOP && listCurrentSite.siteTypeID !== newSiteType.OTHERS) {
-                const isFavEngine = currentSite.siteTypeID !== newSiteType.OTHERS;
-                const securityPolicy = getSecurityPolicy();
-                const fontStyle = `text-transform:capitalize;font:italic 16px/130% Candara,'Times New Roman'`;
-                __console(
-                  "shown_system_info",
-                  `%c${def.var.scriptName}\r\n%cINTRO.URL:\u0020https://f9y4ng.likes.fans/Search-Engine-Assistant\r\n%c%s%cV%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s`,
-                  "font:normal 700 16px/150% system-ui,-apple-system,BlinkMacSystemFont,sans-serif;color:#dc143c",
-                  "color:#777;font:italic 400 10px/180% monospace",
-                  "font-size:12px;font-weight:700;color:#4682b4",
-                  IS_CHN ? "脚本版本：" : "Version:\u0020",
-                  "color:#708090;font:italic 600 14px/150% Candara,Times New Roman",
-                  def.var.curVersion,
-                  "color:darkred;font:italic 11px/150% Candara,'Times New Roman'",
-                  IS_CHEAT_UA ? "\u3000(CHEAT-UA)" : "",
-                  "font-size:12px;font-weight:700;color:#4682b4",
-                  IS_CHN ? "当前搜索引擎：" : "CurrentEngine:\u0020",
-                  `color:#dc143c;${fontStyle};font-weight:700`,
-                  currentSiteName,
-                  "font-size:12px;font-weight:700;color:#4682b4",
-                  IS_CHN ? "常用的搜索引擎：" : "YourFavEngine:\u0020",
-                  `color:${isFavEngine ? "#006400" : "#0000ff"};${fontStyle}`,
-                  isFavEngine,
-                  "font-size:12px;font-weight:700;color:#4682b4",
-                  IS_CHN ? "移除链接重定向：" : "antiRedirectFn:\u0020",
-                  `color:${antiLinkRedirect ? "#006400" : "#0000ff"};${fontStyle}`,
-                  antiLinkRedirect,
-                  "font-size:12px;font-weight:700;color:#4682b4",
-                  IS_CHN ? "去除搜索结果广告：" : "AntiAdvertising:\u0020",
-                  `color:${antiAds ? "#006400" : "#0000ff"};${fontStyle}`,
-                  antiAds,
-                  "font-size:12px;font-weight:700;color:#4682b4",
-                  IS_CHN ? "搜索结果关键词过滤：" : "SearchResultFilter:\u0020",
-                  `color:${antiResultsFilter ? "#006400" : "#0000ff"};${fontStyle}`,
-                  antiResultsFilter,
-                  "font-size:12px;font-weight:700;color:#4682b4",
-                  IS_CHN ? "因安全策略被阻止：" : "SecurityPolicy:\u0020",
-                  `color:${securityPolicy ? "#006400" : "#0000ff"};${fontStyle}`,
-                  securityPolicy
-                );
-              }
+              if (!CUR_WINDOW_TOP || listCurrentSite.siteTypeID === newSiteType.OTHERS) return;
+              const isFavEngine = currentSite.siteTypeID !== newSiteType.OTHERS;
+              const securityPolicy = getSecurityPolicy();
+              const fontStyle = `text-transform:capitalize;font:italic 16px/130% Candara,'Times New Roman'`;
+              __console(
+                "shown_system_info",
+                `%c${def.var.scriptName}\r\n%cINTRO.URL:\u0020https://f9y4ng.likes.fans/Search-Engine-Assistant\r\n%c%s%cV%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s`,
+                "font:normal 700 16px/150% system-ui,-apple-system,BlinkMacSystemFont,sans-serif;color:#dc143c",
+                "color:#777;font:italic 400 10px/180% monospace",
+                "font-size:12px;font-weight:700;color:#4682b4",
+                IS_CHN ? "脚本版本：" : "Version:\u0020",
+                "color:#708090;font:italic 600 14px/150% Candara,Times New Roman",
+                def.var.curVersion,
+                "color:darkred;font:italic 11px/150% Candara,'Times New Roman'",
+                IS_CHEAT_UA ? "\u3000(CHEAT-UA)" : "",
+                "font-size:12px;font-weight:700;color:#4682b4",
+                IS_CHN ? "当前搜索引擎：" : "CurrentEngine:\u0020",
+                `color:#dc143c;${fontStyle};font-weight:700`,
+                currentSiteName,
+                "font-size:12px;font-weight:700;color:#4682b4",
+                IS_CHN ? "常用的搜索引擎：" : "YourFavEngine:\u0020",
+                `color:${isFavEngine ? "#006400" : "#0000ff"};${fontStyle}`,
+                isFavEngine,
+                "font-size:12px;font-weight:700;color:#4682b4",
+                IS_CHN ? "移除链接重定向：" : "antiRedirectFn:\u0020",
+                `color:${antiLinkRedirect ? "#006400" : "#0000ff"};${fontStyle}`,
+                antiLinkRedirect,
+                "font-size:12px;font-weight:700;color:#4682b4",
+                IS_CHN ? "去除搜索结果广告：" : "AntiAdvertising:\u0020",
+                `color:${antiAds ? "#006400" : "#0000ff"};${fontStyle}`,
+                antiAds,
+                "font-size:12px;font-weight:700;color:#4682b4",
+                IS_CHN ? "搜索结果关键词过滤：" : "SearchResultFilter:\u0020",
+                `color:${antiResultsFilter ? "#006400" : "#0000ff"};${fontStyle}`,
+                antiResultsFilter,
+                "font-size:12px;font-weight:700;color:#4682b4",
+                IS_CHN ? "因安全策略被阻止：" : "SecurityPolicy:\u0020",
+                `color:${securityPolicy ? "#006400" : "#0000ff"};${fontStyle}`,
+                securityPolicy
+              );
             }
 
             /* SEARCH_ENGINE_ASSISTANT_COMMAND_FUNCTIONS */
@@ -2525,50 +2468,81 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               baidu: {
                 listTypes: { target: "#content_left", listName: "div", className: "result-op" },
                 clear: () => safeRemoveNode("#con-ar"),
-                applyButton: ({ buttonSection, target }) => {
+                applyButton: async ({ buttonSection, target, shadow }) => {
                   insertAfter(buttonSection, target);
-                  const width = buttonSection.getBoundingClientRect().width || 2e2;
-                  buttonSection.style.right = `-${width + 8}px`;
-                  switch (getUrlParam(currentSite.splitTypeName)) {
-                    case currentSite.imageType[0]:
-                    case currentSite.imageType[1]:
-                    case "note":
-                      qA(`#${def.const.rndButtonID} input`).forEach(node => (node.style.cssText = "margin:0;background:#4e6ef2"));
-                      break;
-                    case "news":
-                    case "vsearch":
-                      qA(`#${def.const.rndButtonID} input`).forEach(node => (node.style.cssText = "margin:0;background:#4e6ef2"));
-                      qS(`#${def.const.rightButton} input`).style.marginLeft = "3px";
-                      break;
+                  await sleep(0, { instance: true });
+                  const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                  buttonSection.style.setProperty("--right", `-${width + 8}px`);
+                  if ([...currentSite.imageType, "note", "news", "vsearch"].includes(getUrlParam(currentSite.splitTypeName))) {
+                    buttonSection.style.setProperty("--margin", "0px");
+                    qA(`input`, shadow).forEach(node => node.style.setProperty("--background", "#4e6ef2"));
                   }
                 },
               },
               google: {
                 listTypes: { target: "div.MjjYud", listName: "div" },
                 applyButton: ({ buttonSection, target }) => {
-                  getGlobalGoogle("www.google.com", googleJump);
                   insertAfter(buttonSection, target);
+                  qS(`meta[name="color-scheme"]`) && buttonSection.classList.add(def.const.darkmode);
+                  getGlobalGoogle(googleJump);
                 },
               },
               bing: {
                 listTypes: { target: "#b_results", listName: "li", className: "b_algo" },
                 clear: () => safeRemoveNode("aside>ol#b_context"),
-                applyButton: ({ buttonSection, target }) => {
+                applyCookie: () => safeWindow.Object.assign(GMunsafeWindow, { AwayTimeScrollTopPoleRS: false, AwayTimeThresholdCustomControl: false, AwayTimeThreshold: 864e3 }),
+                applyButton: ({ buttonSection, target, shadow }) => {
                   insertAfter(buttonSection, target);
-                  const formBox = qS(".b_searchboxForm");
-                  if (formBox && getUrlParam("view") === "detailV2") {
-                    formBox.style.cssText += "width:max-content!important;z-index:1000;position:relative;";
-                    qA(`#${def.const.rndButtonID} input`).forEach(input => {
-                      input.style.cssText += "height:34px!important;border-radius:6px!important;padding:0 12px!important;margin:0 0 0 2px!important;";
-                    });
-                  }
+                  if (document.body.classList.contains("b_dark")) buttonSection.classList.add(def.const.darkmode);
+                  const formBox = qS(".b_searchboxForm:has(input.b_searchbox)");
+                  if (!formBox || (getUrlParam("view") !== "detailV2" && getUrlParam("view") !== "detailv2")) return;
+                  formBox.classList.add(`${def.const.scrollbarsV2}.width`);
+                  buttonSection.style.setProperty("--margin", "1px -2px 0 6px");
+                  qA(`input`, shadow).forEach(i => i.classList.add(def.const.scrollbarsV2));
                 },
               },
               duckduckgo: {
                 listTypes: { target: "ol.react-results--main", listName: "li" },
                 applyButton: ({ buttonSection, target }) => {
-                  target.parentNode.appendChild(buttonSection);
-                  sleep(0)(buttonSection.getBoundingClientRect().width || 2e2).then(sectionWidth => (buttonSection.style.right = `-${sectionWidth + 8}px`));
+                  insertAfter(buttonSection, target);
+                  const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                  buttonSection.style.setProperty("--right", `-${width + 8}px`);
+                },
+              },
+              sogou: {
+                listTypes: { target: "div.results", listName: "div", className: "vrwrap" },
+                clear: () => safeRemoveNode("#right"),
+                applyButton: async ({ buttonSection, target, shadow }) => {
+                  const currentSearchType = getUrlParam(currentSite.splitTypeName);
+                  if (currentSite.imageType.includes(currentSearchType)) {
+                    await sleep(1e2, { instance: true });
+                    if (qS(`#${def.const.rndButtonID}`) || !target) return;
+                    insertAfter(buttonSection, target);
+                    const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                    buttonSection.style.cssText += `--right:-${width + 10}px;--opacity:1`;
+                    qA(`input`, shadow).forEach(node => node.classList.add(`${def.notice.random}_images`));
+                  } else if (currentSearchType === "weixin") {
+                    insertAfter(buttonSection, target);
+                    buttonSection.style.cssText += "--position:relative;--opacity:1";
+                    qA(`input`, shadow).forEach(node => node.classList.add(`${def.notice.random}_weixin`));
+                  } else {
+                    insertAfter(buttonSection, target);
+                    await sleep(0, { instance: true });
+                    const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                    buttonSection.style.cssText += `--right:-${width + 10}px;--opacity:1`;
+                    qS(`#searchBtn2`)?.style.setProperty("right", `-${width + 120}px`);
+                  }
+                  addSearchButtonEvent(shadow);
+                },
+              },
+              qwant: {
+                listTypes: { target: "div[data-testid='containerWeb'] div[data-testid='sectionWeb']>div", listName: "div" },
+                applyButton: async ({ buttonSection, target }) => {
+                  insertAfter(buttonSection, target);
+                  await sleep(0, { instance: true });
+                  const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                  const llmButtonWidth = parseInt(qS(`div[data-testid="llm-button-force"][class]`)?.getBoundingClientRect().width || 0);
+                  buttonSection.style.setProperty("--right", `-${width + llmButtonWidth + 10}px`);
                 },
               },
               yandex: {
@@ -2576,132 +2550,91 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 clear: () => safeRemoveNode("div.content__right>div"),
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
-                  sleep(0)(buttonSection.getBoundingClientRect().width || 2e2).then(sectionWidth => {
-                    buttonSection.style.width = `${sectionWidth + 12}px`;
-                  });
+                  if (document.body.classList.contains("i-ua_skin_dark")) buttonSection.classList.add(def.const.darkmode);
                 },
               },
-              qwant: {
-                listTypes: { target: "div[data-testid='containerWeb'] div[data-testid='sectionWeb']>div", listName: "div" },
-                applyButton: ({ buttonSection, target }) => {
-                  target.parentNode.appendChild(buttonSection);
-                  sleep(0)(buttonSection.getBoundingClientRect().width || 2e2).then(sectionWidth => {
-                    const llmButtonWidth = qS(`div[data-testid="llm-button-force"][class]`)?.getBoundingClientRect().width || 0;
-                    buttonSection.style.right = `-${sectionWidth + 10 + llmButtonWidth}px`;
-                  });
-                },
-              },
-              sogou: {
-                listTypes: { target: "div.results", listName: "div", className: "vrwrap" },
-                clear: () => safeRemoveNode("#right"),
-                applyButton: ({ buttonSection, buttonID, target }) => {
-                  const currentSearchType = getUrlParam(currentSite.splitTypeName);
-                  if (currentSite.imageType.includes(currentSearchType)) {
-                    sleep(1e2).then(() => {
-                      if (qS(buttonID) || !target) return;
-                      insertAfter(buttonSection, target);
-                      const sectionWidth = buttonSection.getBoundingClientRect().width;
-                      buttonSection.style.right = `-${sectionWidth + 10}px`;
-                      qA(`${buttonID} input`).forEach(node => node.classList.add(`${def.notice.random}_images`));
-                      addSearchButtonEvent(qA(`${buttonID} span[sn]:not([event-insert])`));
-                    });
-                  } else if (currentSearchType === "weixin") {
-                    insertAfter(buttonSection, target);
-                    buttonSection.style = "position:relative";
-                    qA(`${buttonID} input`).forEach(node => node.classList.add(`${def.notice.random}_weixin`));
-                  } else {
-                    insertAfter(buttonSection, target);
-                    safeRemoveNode(qS(`#searchBtn2[value="\u5168\u7f51\u641c\u7d22"]`));
-                    sleep(0).then(() => {
-                      const sectionWidth = buttonSection.getBoundingClientRect().width || 2e2;
-                      buttonSection.style.right = `-${sectionWidth + 10}px`;
-                      const btn2 = qS(`#searchBtn2`);
-                      if (btn2) btn2.style.right = `-${sectionWidth + 120}px`;
-                    });
-                  }
-                },
+              so360: {
+                listTypes: { target: "#main>ul.result", listName: "li", className: "res-list" },
+                clear: () => safeRemoveNode("#side_wrap"),
               },
               toutiao: {
                 listTypes: { target: "div.s-result-list", listName: "div", className: "result-content" },
                 clear: () => safeRemoveNode(".main>.s-side-list>.result-content"),
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
-                  sleep(0)(buttonSection.getBoundingClientRect().width || 2e2).then(sectionWidth => (buttonSection.style.right = `-${sectionWidth + 10}px`));
-                },
-              },
-              so360: {
-                listTypes: { target: "#main>ul.result", listName: "li", className: "res-list" },
-                clear: () => safeRemoveNode("#side_wrap"),
-                applyButton: ({ buttonSection, buttonID, target }) => {
-                  insertAfter(buttonSection, target);
-                  if (currentSite.imageType.includes(getUrlParam(currentSite.splitTypeName))) {
-                    qA(`${buttonID} input`).forEach(node => (node.style = "margin:0 0 0 1px;"));
-                    sleep(5e2).then(() => qS("#tools_close")?.click());
-                  }
+                  const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                  buttonSection.style.cssText += `--right:-${width + 10}px;--opacity:1`;
                 },
               },
               kaifa: {
                 listTypes: { target: "ul.ant-list-items", listName: "li", className: "ant-list-item" },
                 applyButton: ({ buttonSection, target }) => {
-                  target.appendChild(buttonSection);
                   const input = qS("#search-box-container input[class~='ant-input']");
-                  if (input) input.style.cssText += `width:580px!important`;
+                  const width = parseInt(gCS(input).width || 604);
+                  target.appendChild(buttonSection);
+                  input?.style.setProperty("width", `${width}px`, "important");
                 },
               },
               ecosia: {
                 listTypes: { target: ".mainline__content>div:not([class])", listName: "div" },
                 clear: () => safeRemoveNode("aside>div[data-test-id='sidebar-web-related-queries']"),
-                applyButton: ({ buttonSection, buttonID, target }) => {
-                  if (IS_GREASEMONKEY) insertAfter(buttonSection, target);
-                  else {
-                    sleep(5e2).then(() => {
-                      if (qS(buttonID) || !target) return;
-                      insertAfter(buttonSection, target);
-                      addSearchButtonEvent(qA(`${buttonID} span[sn]:not([event-insert])`));
-                    });
-                  }
+                applyCookie: () => {
+                  const sValue = `a=0:as=1:cs=0:dt=pc:f=i:fr=0:fs=1:l=en:lt=${Date.now()}:mc=en-ww:nf=1:nt=1:pz=0:t=1:tt=0:tu=auto:wu=auto:ma=1`;
+                  const option = { sKey: "ECFG", sValue, sEnd: 30, sDomain: "ecosia.org", sPath: "/", sSomeSite: "Lax" };
+                  !/:nt=1:/.test(gbCookies.getItem("ECFG")) && setPreferences(option);
+                },
+                applyButton: ({ buttonSection, target, shadow }) => {
+                  const insertButtonsFn = () => !qS(`#${def.const.rndButtonID}`) && target && (insertAfter(buttonSection, target), addSearchButtonEvent(shadow));
+                  def.var.requestIdleCallback(insertButtonsFn, { timeout: 8e2 });
                 },
               },
               yahoo: {
                 listTypes: { target: "#web>ol", listName: "li" },
                 clear: () => safeRemoveNode("#right>ol"),
                 applyButton: ({ buttonSection, target }) => {
-                  try {
-                    if (currentSite.imageType.includes(getUrlParam(currentSite.splitTypeName))) target.appendChild(buttonSection);
-                    else {
-                      insertAfter(buttonSection, target);
-                      const sectionWidth = buttonSection.getBoundingClientRect().width ?? 224;
-                      buttonSection.style.cssText = `position:absolute;top:0;right:-${4 + sectionWidth}px`;
-                    }
-                  } catch (e) {
-                    ERROR("insertButtons.YAHOO:", e.message);
-                  }
-                },
-              },
-              startpage: {
-                listTypes: { target: "#main>div.w-gl", listName: "div", className: "result" },
-                applyButton: ({ buttonSection, target }) => {
+                  if ([...currentSite.imageType, "video", "news"].includes(getUrlParam(currentSite.splitTypeName))) return target.appendChild(buttonSection);
                   insertAfter(buttonSection, target);
-                  const sectionWidth = buttonSection.getBoundingClientRect().width || 2e2;
-                  const formSection = qS(`#header-search-form>.search-form-relative-container`);
-                  formSection.style.cssText = `max-width:${parseFloat(gCS(formSection).getPropertyValue("max-width")) + sectionWidth}px`;
+                  const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                  buttonSection.style.setProperty("--right", `-${10 + width}px`);
                 },
               },
               you: { listTypes: { target: "[data-floating-ui-portal]>[role='dialog'][data-open='true'] div>section", listName: "article" } },
-              brave: {
-                listTypes: { target: "#results", listName: "div", className: "snippet" },
+              startpage: {
+                listTypes: { target: "#main>div.w-gl", listName: "div", className: "result" },
+                applyCookie: () => {
+                  const sValue = `date_timeEEEworldN1Ndisable_family_filterEEE0N1Ndisable_open_in_new_windowEEE0N1Nenable_post_methodEEE0N1Nenable_proxy_safety_suggestEEE1N1Nenable_stay_controlEEE0N1Ninstant_answersEEE1N1Nlang_homepageEEEs/device/enN1NlanguageEEEenglishN1Nlanguage_uiEEEenglishN1Nnum_of_resultsEEE20N1Nsearch_results_regionEEEallN1NsuggestionsEEE1N1Nwt_unitEEEcelsius`;
+                  const option = { sKey: "preferences", sValue, sEnd: 30, sDomain: "startpage.com", sPath: "/", sSecure: true };
+                  !/(?:disable_open_in_new_windowEEE0|enable_post_methodEEE0)/.test(gbCookies.getItem("preferences")) && setPreferences(option);
+                },
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
-                  sleep(0)(buttonSection.getBoundingClientRect().width || 2e2).then(sectionWidth => (buttonSection.style.right = `-${sectionWidth + 10}px`));
+                  qS("meta[name='theme-color']")?.getAttribute("content") === "#0c0d0f" && buttonSection.classList.add(def.const.darkmode);
+                  const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                  const formSection = qS(`#header-search-form>.search-form-relative-container`);
+                  const maxWidth = parseInt(gCS(formSection).maxWidth) + width;
+                  formSection?.style.setProperty("max-width", `${maxWidth}px`);
+                },
+              },
+              brave: {
+                listTypes: { target: "#results", listName: "div", className: "snippet" },
+                applyCookie: () => {
+                  const option = { sKey: "olnt", sValue: "1", sEnd: 30, sPath: "/", sSameSite: "Lax", sSecure: true };
+                  gbCookies.getItem("olnt") !== "1" && setPreferences(option);
+                },
+                applyButton: ({ buttonSection, target }) => {
+                  insertAfter(buttonSection, target);
+                  const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                  buttonSection.style.setProperty("--right", `-${width + 10}px`);
                 },
                 clear: () => safeRemoveNode("aside>div"),
               },
               yep: {
                 listTypes: { target: "div[class$='-results']>div>div", listName: "div" },
-                applyButton: ({ buttonSection, target }) => {
+                applyButton: async ({ buttonSection, target }) => {
+                  await sleep(0, { instance: true });
                   insertAfter(buttonSection, target);
-                  const sectionWidth = buttonSection.getBoundingClientRect().width || 2e2;
-                  buttonSection.style.right = `-${10 + sectionWidth}px`;
+                  const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                  buttonSection.style.setProperty("--right", `-${10 + width}px`);
                 },
               },
               mojeek: {
@@ -2709,103 +2642,116 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 clear: () => safeRemoveNode(".right-col div.infobox.infobox-right"),
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
-                  sleep(0)
-                    .then(() => buttonSection.getBoundingClientRect().width || 2e2)
-                    .then(sectionWidth => (buttonSection.style.right = `-${5 + sectionWidth}px`));
+                  qS(`link#theme`)?.href.includes("dark") && buttonSection.classList.add(def.const.darkmode);
+                  const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                  buttonSection.style.setProperty("--right", `-${10 + width}px`);
                 },
               },
               searxng: {
                 listTypes: { target: "div#urls", listName: "article", className: "result" },
                 clear: () => safeRemoveNode("#infoboxes"),
+                applyCookie: () => {
+                  (gbCookies.getItem("method") !== "GET" || gbCookies.getItem("results_on_new_tab") !== "1") &&
+                    setPreferences(
+                      { sKey: "method", sValue: "GET", sEnd: 30, sPath: "/" },
+                      { sKey: "results_on_new_tab", sValue: "1", sEnd: 30, sPath: "/" },
+                      { sKey: "theme", sValue: "simple", sEnd: 30, sPath: "/" },
+                      { sKey: "simple_style", sValue: "auto", sEnd: 30, sPath: "/" }
+                    );
+                },
                 applyButton: ({ buttonSection, target }) => void target.appendChild(buttonSection),
               },
             };
 
-            function insertCSS(isOverwrite = false) {
+            function setPreferences(...ops) {
+              const loadText = tTP.createHTML(`<center><h2>Loading preset preferences...</h2></center>`);
+              return ops.forEach(o => gbCookies.setItem(o)), (document.documentElement.innerHTML = loadText), location.replace(location.href);
+            }
+
+            function insertCSS(currentSite, overwrite = false) {
               try {
-                const overrideCssText = currentSite.overrideCss ?? "";
-                const darkModeCssText = currentSite.darkModeCss ? `@media (prefers-color-scheme: dark){${currentSite.darkModeCss}}` : "";
-                const cssText = currentSite.buttonCssText ? `@charset "UTF-8";${overrideCssText}${currentSite.buttonCssText}${darkModeCssText}` : "";
-                addStyle({ target: document.head, styleId: def.const.rndclassName, media: "all", styleContent: cssText, isOverwrite });
+                const cssText = currentSite.overrideCss ? `@charset "UTF-8";${currentSite.overrideCss}` : ``;
+                cssText && addStyle({ target: document.head, id: def.const.rndclassName, media: "all", cssText, overwrite });
               } catch (e) {
-                ERROR("insertCSS:", e.message);
+                ERROR(`${e.name} in InsertCSS:`, e.message);
               }
             }
 
             function insertStyle() {
               try {
-                const noticeStyle = `@charset "UTF-8";` + def.var.style + def.var.iconstyle + String(keywordHighlight ? def.var.hlstyle : "");
-                addStyle({ target: document.head, styleId: def.const.rndstyleName, media: "screen", styleContent: noticeStyle, isOverwrite: false });
+                const cssText = `@charset "UTF-8";` + def.var.style + def.var.iconstyle + String(keywordHighlight ? def.var.hlstyle : "");
+                addStyle({ target: document.head, id: def.const.rndstyleName, media: "all", cssText });
               } catch (e) {
-                ERROR("insertStyle:", e.message);
+                ERROR(`${e.name} in InsertStyle:`, e.message);
+              }
+            }
+
+            function updateAdoptedStyleSheets(shadow, css, id) {
+              try {
+                if (!shadow.adoptedStyleSheets || typeof shadow.adoptedStyleSheets.push !== "function") throw new Error("use inlineStyle");
+                const sheet = new CSSStyleSheet();
+                (sheet.id = id) && sheet.replaceSync(css);
+                !asArray(shadow.adoptedStyleSheets).SomeX(s => s.id === id) && shadow.adoptedStyleSheets.push(sheet);
+              } catch (error) {
+                try {
+                  if (!qS(`style#${id}`, shadow)) shadow.prepend(cE("style", { id, media: "all", type: "text/css", textContent: css }));
+                } catch (e) {
+                  error && ERROR(`${e.name} in UpdateAdoptedStyleSheets:`, e.message, error.message);
+                }
               }
             }
 
             async function insertButtons() {
               try {
                 const target = qS(currentSite.mainSelector);
-                if (checkIndexPage() || !getQueryString() || !target || qS(`#${def.const.rndButtonID}`)) return;
-                const buttonSection = cE("gb-button", { id: def.const.rndButtonID, innerHTML: tTP.createHTML(def.var.button) });
-                const spans = await applyButtons(buttonSection, target);
-                if (!spans) return;
-                addSearchButtonEvent(spans);
-                scrollDetect();
+                if (!target || !getQueryString()) return;
+                const buttonSection = cE("gb-button", { id: def.const.rndButtonID });
+                const shadow = def.var.attachShadow.call(buttonSection, { mode: "closed" });
+                const darkModeCssText = currentSite.darkModeCss ? `${currentSite.darkModeCss}` : ``;
+                const buttonCssText = `@charset "UTF-8";${currentSite.buttonCssText}${darkModeCssText}`;
+                shadow.innerHTML = tTP.createHTML(def.var.button);
+                updateAdoptedStyleSheets(shadow, buttonCssText, def.const.buttons);
+                applyButtons(buttonSection, target, shadow);
+                addSearchButtonEvent(shadow);
+                scrollDetect(shadow, target);
               } catch (e) {
-                ERROR("insertButtons:", e.message);
+                ERROR(`${e.name} in InsertButtons:`, e.message);
               }
             }
 
-            async function applyButtons(buttonSection, target) {
-              if (currentSite.siteTypeID === newSiteType.OTHERS) return null;
-              const [buttonID, applyButtonMethod] = [`#${buttonSection.id}`, siteConfigMap[currentSiteName]?.applyButton];
-              if (typeof applyButtonMethod === "function") await applyButtonMethod({ buttonSection, buttonID, target });
-              else insertAfter(buttonSection, target);
-              return qA(`${buttonID} span[sn]:not([event-insert])`);
+            function applyButtons(buttonSection, target, shadow) {
+              if (currentSite.siteTypeID === newSiteType.OTHERS) return;
+              const applyCookieMethod = siteConfigMap[currentSiteName]?.applyCookie;
+              const applyButtonMethod = siteConfigMap[currentSiteName]?.applyButton;
+              typeof applyCookieMethod === "function" && applyCookieMethod();
+              typeof applyButtonMethod === "function" ? applyButtonMethod({ buttonSection, target, shadow }) : insertAfter(buttonSection, target);
             }
 
-            function setupScrollButton(selector, className, scrollOffset) {
-              const element = qS(selector);
+            function setupScrollButton(selector, shadow, className, target) {
+              const element = qS(selector, shadow);
               if (!element) return;
-              const offsetTop = element.getBoundingClientRect().top;
-              const toggleClass = () => {
-                const scrollTop = global.scrollY || document.documentElement?.scrollTop || 0;
-                element.classList.toggle(className, scrollTop > offsetTop + scrollOffset);
+              const toggleScrollingClass = mini => {
+                if (currentSite.siteTypeID === newSiteType.GOOGLE) mini = (mini = qS(`div#searchform.minidiv`)) && mini.style.top !== "20px" && target.getBoundingClientRect().height < 35;
+                else if (currentSite.siteTypeID === newSiteType.BING) mini = qS(`#miniheader`)?.style.marginTop === "0px";
+                else return;
+                element.classList.toggle(className, Boolean(mini));
               };
-              toggleClass();
-              document.addEventListener("scroll", toggleClass);
+              toggleScrollingClass();
+              document.addEventListener("scroll", deBounce({ fn: toggleScrollingClass, timer: selector, delay: 0 }));
             }
 
-            function scrollDetect() {
-              if (checkIndexPage()) return;
-              let scrollspan, scrollbars, height, searchType;
-              const currentSearchType = getUrlParam(currentSite.splitTypeName);
-              switch (currentSite.siteTypeID) {
-                case newSiteType.GOOGLE:
-                  searchType = /^isch|2$/.test(currentSearchType);
-                  scrollspan = def.const.scrollspan;
-                  scrollbars = def.const.scrollbars;
-                  height = searchType ? 100 : 80;
-                  break;
-                case newSiteType.BING:
-                  searchType = /^(images|videos)$/.test(currentSearchType);
-                  scrollspan = searchType ? def.const.scrollspan2 : def.const.scrollspan;
-                  scrollbars = searchType ? def.const.scrollbars2 : def.const.scrollbars;
-                  height = 50;
-                  break;
-                default:
-                  return;
-              }
-              setupScrollButton(`#${def.const.rndButtonID}`, scrollspan, height);
-              setupScrollButton(`#${def.const.rndButtonID} #${def.const.leftButton} input`, scrollbars, height);
-              setupScrollButton(`#${def.const.rndButtonID} #${def.const.rightButton} input`, scrollbars, height);
+            function scrollDetect(shadow, target) {
+              setupScrollButton(`#${def.const.rndButtonID}`, document, def.const.scrollspan, target);
+              setupScrollButton(`#${def.const.leftButton} input`, shadow, def.const.scrollbars, target);
+              setupScrollButton(`#${def.const.rightButton} input`, shadow, def.const.scrollbars, target);
             }
 
-            function addSearchButtonEvent(nodes) {
-              if (!Array.isArray(nodes) || nodes.length === 0) return;
-              nodes.forEach(node => {
+            function addSearchButtonEvent(shadow) {
+              qA(`span[sn]:not([event-insert])`, shadow).forEach(node => {
                 node.setAttribute("event-insert", true);
                 const inputElement = qS("input", node);
                 const siteTypeID = Number(node.getAttribute("sn"));
+                inputElement.addEventListener("mousedown", stopEventPropagation);
                 inputElement.addEventListener("click", () => {
                   const imageSearch = getUrlParam(currentSite.splitTypeName)?.trim();
                   let selectedSiteData;
@@ -2826,7 +2772,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               const noticeText = IS_CHN ? "本页所有搜索结果均被屏蔽，如异常请检查过滤词。" : "All results are blocked, Check the filters if abnormal.";
               const filterArray = userdFilter ? `<gb-filters class="code">${IS_CHN ? "过滤词:" : "Filter:"} [${userdFilter}]</gb-filters>` : ``;
               const tips = `<br/>✄┏━┓╋┏┓╋╋╋┏━━━┓╋╋╋╋╋╋╋╋┏┓┏┓╋┏┓<br/>✄┃┃┗┓┃┃╋╋╋┃┏━┓┃╋╋╋╋╋╋╋╋┃┣┛┗┓┃┃<br/>✄┃┏┓┗┛┣━━┓┃┗━┛┣━━┳━━┳┓┏┫┣┓┏┛┃┃<br/>✄┃┃┗┓┃┃┏┓┃┃┏┓┏┫┃━┫━━┫┃┃┃┃┃┃╋┗┛<br/>✄┃┃╋┃┃┃┗┛┃┃┃┃┗┫┃━╋━━┃┗┛┃┗┫┗┓┏┓<br/>✄┗┛╋┗━┻━━┛┗┛┗━┻━━┻━━┻━━┻━┻━┛┗┛<br/><br/>`;
-              const noticeCode = tTP.createHTML(`<${listName}${listAttrib} gb-filter-notice>${tips}${noticeText} — ${def.var.scriptName}${filterArray}</${listName}>`);
+              const noticeCode = tTP.createHTML(`<${listName}${listAttrib} ${def.const.const.warn}>${tips}${noticeText} — ${def.var.scriptName}${filterArray}</${listName}>`);
               return noticeCode;
             }
 
@@ -2834,23 +2780,22 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               const siteConfig = siteConfigMap[siteName];
               if (!siteConfig) return;
               const { target, listName, className } = siteConfig.listTypes;
-              const noticeNode = qS(`${target} [gb-filter-notice]`);
+              const noticeNode = qS(`${target} [${def.const.const.warn}]`);
               if (noticeNode) return;
               const usedFilterWordsStr = escapeHTML([...usedFilterWords].join(", "));
               const noticeCode = createNotice(listName, className, usedFilterWordsStr);
               const el = qS(target)?.firstElementChild;
-              if (el) el.insertAdjacentHTML(el.classList.contains(def.var.translucent) || el.classList.contains(def.var.disappear) ? "beforebegin" : "afterend", noticeCode);
+              if (el) el.insertAdjacentHTML(el.classList.contains(def.const.translucent) || el.classList.contains(def.const.disappear) ? "beforebegin" : "afterend", noticeCode);
               usedFilterWords.clear();
             }
 
             function filterSearchResults(filterObj) {
               if (resultFilters.length === 0 || getUrlParam("iframeid")) return;
               const { qs, delay } = filterObj ?? {};
-              deBounce({ fn: filterSearchResultsProcess, timer: "filterSearchResults", delay: delay || 50 })(qs);
+              qs && deBounce({ fn: filterSearchResultsProcess, timer: "filterSearchResults", delay: delay || 50 })(qs);
             }
 
             async function filterSearchResultsProcess(querystring) {
-              if (!querystring) return;
               const selectors = buildSelectors(querystring);
               const elements = qA(selectors);
               if (elements.length === 0) return;
@@ -2858,7 +2803,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               elements.forEach(item => processANodeURL(item, returnContent));
               if (returnContent.size === 0) return;
               returnContent.forEach((content, item) => matchFilters(item, content));
-              await sleep(1e2, { instant: true });
+              await sleep(1e2, { instance: true });
               if (usedFilterWords.size > 0 && qA(querystring.split(/,(?![^()]*\))/g)[0]).length >= 2) handleRemainingResults(qA(selectors.split(/,(?![^()]*\))/g)[0]).length);
               returnContent.clear();
             }
@@ -2866,8 +2811,8 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             function processMatchedItem(item, content, filter) {
               if (IS_DEBUG) addDebugNotice(item, filter);
               usedFilterWords.add(filter);
-              item.classList.add(IS_DEBUG ? def.var.translucent : def.var.disappear);
-              DEBUG("Filter.match:", { filter, item, content }) ?? qA("a", item).forEach(node => node.setAttribute("gd-antiredirect-status", "blocked"));
+              item.classList.add(IS_DEBUG ? def.const.translucent : def.const.disappear);
+              DEBUG("Filter.match:", { filter, item, content }) ?? qA("a", item).forEach(node => node.setAttribute(def.const.const.anti, "blocked"));
             }
 
             function addDebugNotice(item, filter) {
@@ -2882,13 +2827,13 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
             function buildSelectors(querystring) {
               const array = querystring.split(/,(?![^()]*\))/g);
-              return array.map(item => `${item}:not(.${def.var.disappear},.${def.var.translucent},[gb-filter-notice])`).join(",");
+              return array.map(item => `${item}:not(.${def.const.disappear},.${def.const.translucent},[${def.const.const.warn}])`).join(",");
             }
 
             function processANodeURL(item, returnContent) {
               if (item.nodeType !== Node.ELEMENT_NODE) return;
               const href = qS("a:not([data-testid='result-extras-site-search-link']):not([aria-label^='Anonymous']):not([href*='.bing.com/ck/a?'])", item)?.href ?? "";
-              const url = [1, 5, 8, 12].includes(listCurrentSite.siteTypeID) ? qS(`.${def.var.filtered}`, item)?.textContent.trim() || "" : href;
+              const url = [1, 5, 8, 12].includes(listCurrentSite.siteTypeID) ? qS(`.${def.const.filtered}`, item)?.textContent.trim() || "" : href;
               const content = item.innerText?.replace(/[\t\r\n\ue62b]/g, "").trim() + getDecodeURI(url);
               if (content) returnContent.set(item, content);
             }
@@ -2898,48 +2843,51 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               try {
                 resultFilters.forEach(filter => new RegExp(filter, "i").test(content) && processMatchedItem(item, content, filter));
               } catch (e) {
-                ERROR("Filter.match:", e.message);
+                ERROR(`${e.name} in MatchFilters:`, e.message);
               }
             }
 
             function handleRemainingResults(remainingResults) {
               if (remainingResults > 2) return;
-              remainingResults === 0 ? showEmptyNotice(currentSiteName) : qS(`[gb-filter-notice]`)?.remove();
+              remainingResults === 0 ? showEmptyNotice(currentSiteName) : qS(`[${def.const.const.warn}]`)?.remove();
               adjustUI(currentSiteName);
             }
 
-            function getDecodeURI(href) {
+            function getDecodeURI(href, temp) {
               if (!href || typeof href !== "string" || href.startsWith("javascript:")) return "";
-              return `\ue620${decodeURIComponent(href)}\ue620`;
+              const fixPercent = s => s.replace(/%(?![0-9A-Fa-f]{2})/g, "%25");
+              let result = fixPercent(href);
+              while (((temp = result), (result = decodeURIComponent(fixPercent(result))), result !== temp));
+              return `\ue620${result}\ue620`;
             }
 
-            function getGlobalGoogle(NCRHost, permission) {
-              if (!permission || CUR_HOST_NAME === NCRHost) return;
+            function getGlobalGoogle(permission, host = "www.google.com") {
+              if (!permission || CUR_HOST_NAME === host) return;
               try {
-                const url = `${CUR_PROTOCOL}//${NCRHost}/ncr?prev=${CUR_PATH_NAME}${encodeURIComponent(location.search)}`;
+                const url = `${CUR_PROTOCOL}//${host}/ncr?prev=${CUR_PATH_NAME}${encodeURIComponent(location.search)}`;
                 const text = createNoticeHTML(`<dd class="${def.notice.center}">${IS_CHN ? "即将跳转至 Google.com (NCR)" : "Jump to Google.com (NCR)"}</dd>`);
                 GMnotification({ title: "Google NCR", text, type: def.notice.info, callbacks: { beforeClose: [() => top.location.replace(url)] } });
               } catch (e) {
-                ERROR("getGlobalGoogle:", e.message);
+                ERROR(`${e.name} in GetGlobalGoogle:`, e.message);
               }
             }
 
             function processMainThreadTasks() {
-              const { siteTypeID } = currentSite;
-              if (siteTypeID !== newSiteType.OTHERS && !getSecurityPolicy()) {
-                !qS(`#${def.const.rndclassName}`) && insertCSS();
-                !qS(`#${def.const.rndButtonID}`) && insertButtons();
-              }
-              const { siteTypeID: listSiteTypeID, antiAdsFn, resultListProp, antiRedirectFn } = listCurrentSite;
-              if (listSiteTypeID === newSiteType.OTHERS) return;
+              const indexPage = checkIndexPage();
+              const securityPolicy = getSecurityPolicy();
+              const { siteTypeID: currentSiteID } = currentSite;
+              if (currentSiteID !== newSiteType.OTHERS && !indexPage && !securityPolicy && !qS(`#${def.const.rndButtonID}`)) insertButtons();
+              const { siteTypeID: listSiteID, antiAdsFn, resultListProp, antiRedirectFn } = listCurrentSite;
+              if (listSiteID === newSiteType.OTHERS) return;
+              !indexPage && !securityPolicy && !qS(`#${def.const.rndclassName}`) && insertCSS(listCurrentSite);
               !qS(`#${def.const.rndstyleName}`) && insertStyle();
-              antiAds && antiAdsFn?.();
-              antiResultsFilter && filterSearchResults(resultListProp);
-              antiLinkRedirect && !checkIndexPage() && antiRedirectFn?.();
+              !securityPolicy && antiAds && antiAdsFn?.();
+              !indexPage && !securityPolicy && antiResultsFilter && filterSearchResults(resultListProp);
+              !indexPage && !securityPolicy && antiLinkRedirect && antiRedirectFn?.();
             }
 
             function searchButtonAndStylesObserve() {
-              const observer = new MutationObserver(deBounce({ fn: processMainThreadTasks, delay: 16, timer: "main", immed: true }));
+              const observer = new MutationObserver(processMainThreadTasks);
               observer.observe(document, { childList: true, subtree: true });
               if (global.navigation) global.navigation.addEventListener("navigate", processMainThreadTasks);
               else ["pushState", "replaceState"].forEach(event => global.addEventListener(event, processMainThreadTasks));
@@ -2951,26 +2899,26 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 DEBUG("%cRequest icons for script update...", "color:#25f") ?? updateToRequestIcon();
                 GMsetValue(VERSION, encrypt(def.var.curVersion));
               } catch (e) {
-                ERROR("requestIconsForScriptUpdate:", e.message);
+                ERROR(`${e.name} in RequestIconsForScriptUpdate:`, e.message);
               }
             }
 
             /* SEARCH_ENGINE_ASSISTANT_MAIN_PROCESS */
 
             void (function (updateFlag, requestVersion) {
+              searchButtonAndStylesObserve();
               if (CUR_WINDOW_TOP) {
                 parseUpdateInformatio(getUpdateInformation(updateFlag));
                 showSystemInfo();
                 insertMenus();
                 requestIconsForScriptUpdate(requestVersion);
               }
-              searchButtonAndStylesObserve();
             })(await cache.get(AUTOCHECK), await GMgetValue(VERSION));
           })(
             updateFlag => {
               if (!CUR_WINDOW_TOP || !isAutoUpdate || (updateFlag && !setDebuggerMode())) return;
               const updateDetectionResponses = updateDetectionAddress.map(addr => fetchUpdateResponse(addr));
-              return Promise.any(updateDetectionResponses).catch(e => ERROR("getUpdateInformation:", e.message));
+              return Promise.any(updateDetectionResponses).catch(e => void ERROR(`${e.name} in GetUpdateInformation:`, e.message));
             },
             async updateResponse => {
               try {
@@ -2984,7 +2932,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 if (versionCompare(def.var.curVersion, version)) showNewUpdateNotify(version, newUpdateHTML, url);
                 else showSuccessUpdateNotify();
               } catch (e) {
-                ERROR(`parseUpdateInformation: ${e?.message}`);
+                ERROR(`${e.name} in ParseUpdateInformation: ${e?.message}`);
               }
             }
           );
@@ -3020,7 +2968,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             const config_date = JSON.parse(decrypt(configure));
             return { ...defaults, ...config_date, selectedEngine: Array.isArray(config_date.selectedEngine) ? config_date.selectedEngine : defaults.selectedEngine };
           } catch (e) {
-            return defaults;
+            return e && defaults;
           }
         },
         async () => {
@@ -3031,7 +2979,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             const { filter, trigger } = JSON.parse(decrypt(resultFilter));
             return { filter: Array.isArray(filter) ? filter : [], trigger };
           } catch (e) {
-            return defaults;
+            return e && defaults;
           }
         },
         url => {
@@ -3042,7 +2990,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               if (response.readyState !== 4) return;
               if (response.status === 200) {
                 const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
+                reader.onload = () => resolve(reader.result.replace("data:data:image/png;base64,", "data:"));
                 reader.onerror = () => reject(new Error("Convert failed"));
                 reader.readAsDataURL(response.response);
               } else if (response.status !== 0) reject(new Error("NoAccessError"));
@@ -3056,11 +3004,11 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           try {
             return new NoticeX({ ...options }).show();
           } catch (e) {
-            ERROR("GMnotification:", e.message);
+            ERROR(`${e.name} in GMnotification:`, e.message);
           }
         }
       );
-    })(createTrustedTypePolicy());
+    })(createTrustedTypePolicy(), sessionStorage?.getItem(def.const.const.navinfo));
   },
   {
     method: Object.entries({
@@ -3083,10 +3031,10 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     };
     const tS = storageType => {
       try {
-        ctx.addEventListener("error", event => event.message.includes("SecurityError") && event.preventDefault(), { once: true });
+        ctx.addEventListener("error", event => (event.error?.name === "SecurityError" || event.message?.includes("SecurityError")) && event.preventDefault(), { once: true });
         return ctx[storageType].setItem("__gb_storage_test__", true), ctx[storageType].removeItem("__gb_storage_test__"), ctx[storageType];
       } catch (e) {
-        return null;
+        return e && null;
       }
     };
     return { oC, mS, eH, lS: tS("localStorage"), sS: tS("sessionStorage") };
