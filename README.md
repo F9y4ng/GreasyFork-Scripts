@@ -4,8 +4,8 @@
 
 [![LICENSE](https://img.shields.io/badge/License-GPL--3.0--only-blue.svg?style=for-the-badge&logo=github "LICENSE")](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/LICENSE) [![LAST COMMIT](https://img.shields.io/github/last-commit/F9y4ng/GreasyFork-Scripts?color=blue&logo=github&style=for-the-badge "LAST COMMIT")](https://github.com/F9y4ng/GreasyFork-Scripts/commits/master) [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues) [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/F9y4ng/GreasyFork-Scripts/stargazers)
 
-- 请先安装**脚本管理器**扩展(如：Tampermonkey, Violentmonkey, Greasemonkey)，然后再**安装脚本**。
-- **Chrome**, **Firefox** 推荐安装 **Tampermonkey/Violentmonkey**，**Safari** 推荐安装 **Tampermonkey**.
+- 请先安装**脚本管理器**扩展(如：Tampermonkey, Violentmonkey, Greasemonkey 等)，然后再**安装脚本**。
+- **Chrome** 推荐安装 **Tampermonkey/Scriptcat**，**Firefox** 推荐安装 **Violentmonkey**，**Safari** 推荐安装 **Tampermonkey/Userscripts**。
 - 使用 **Adguard桌面版** 或 **Userscripts** 等脚本管理器，可通过**键盘快捷键**呼出脚本管理菜单。
 
 ---
