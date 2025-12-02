@@ -8,7 +8,7 @@
 [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/F9y4ng/GreasyFork-Scripts/stargazers)
 
 - 请先安装**脚本管理器**扩展(如：Tampermonkey, Violentmonkey, Greasemonkey 等)，再**安装脚本**。
-- **Chrome** 推荐安装 **Tampermonkey/Scriptcat**，**Firefox** 推荐安装 **Violentmonkey**，**Safari** 推荐安装 **Tampermonkey/Userscripts**。
+- **Chrome** 推荐安装 **Tampermonkey**，**Firefox** 推荐安装 **Violentmonkey**，**Safari** 推荐安装 **Tampermonkey/Userscripts**。
 - 使用 **Adguard桌面版** 或 **Userscripts** 等脚本管理器，可通过 [键盘快捷键](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E5%AD%97%E4%BD%93%E6%B8%B2%E6%9F%93%EF%BC%88%E8%87%AA%E7%94%A8%E8%84%9A%E6%9C%AC%EF%BC%89#user-content-hotkey) 呼出脚本管理菜单。
 
 ***
