@@ -8,7 +8,7 @@
 [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/F9y4ng/GreasyFork-Scripts/stargazers)
 
 - Please install the **script-manager** extension first (e.g. Tampermonkey, Violentmonkey, Greasemonkey, etc.) before installing the script.
-- **Tampermonkey/Scriptcat** is recommended for **Chrome**, **Violentmonkey** is recommended for **Firefox**,  and **Tampermonkey/Userscripts** is recommended for **Safari**.
+- **Tampermonkey** is recommended for **Chrome**, **Violentmonkey** is recommended for **Firefox**,  and **Tampermonkey/Userscripts** is recommended for **Safari**.
 - Using a script-manager such as **Adguard Desktop** or **Userscripts**, you can use **keyboard shortcuts** to call up the scripts menu.
 
 ***
