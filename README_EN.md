@@ -5,7 +5,7 @@
 [![LICENSE](https://img.shields.io/badge/License-GPL--3.0--only-blue.svg?style=for-the-badge&logo=github "LICENSE")](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/LICENSE) [![LAST COMMIT](https://img.shields.io/github/last-commit/F9y4ng/GreasyFork-Scripts?color=blue&logo=github&style=for-the-badge "LAST COMMIT")](https://github.com/F9y4ng/GreasyFork-Scripts/commits/master) [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues) [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/F9y4ng/GreasyFork-Scripts/stargazers)
 
 - Please install the **script-manager** extension first (e.g. Tampermonkey, Violentmonkey, Greasemonkey, etc.) before installing the script.
-- **Tampermonkey/Scriptcat** is recommended for **Chrome**, **Violentmonkey** is recommended for **Firefox**,  and **Tampermonkey/Userscripts** is recommended for **Safari**.
+- **Tampermonkey** is recommended for **Chrome**, **Violentmonkey** is recommended for **Firefox**,  and **Tampermonkey/Userscripts** is recommended for **Safari**.
 - Using a script-manager such as **Adguard Desktop** or **Userscripts**, you can use **keyboard shortcuts** to call up the scripts menu.
 
 ---
@@ -25,12 +25,13 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data promptly and don't use backup files from unknown sources!
 
-### version 2025.11.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2025.12.06.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ Refactored core functions to improve compatibility.
-@ Optimized Bold-Fix script conflict detection threshold.
-@ Fixed various hidden issues in the shadow colorpicker.
+@ Optimized to compatible with more script managers.
+@ Optimized the loading mode of font rendering style.
+@ Fixed frames not rendering in sync with parent page.
+@ Fixed a few memory leaks or low performance issues.
 @ Fixed some known issues, optimized code & style.
 ```
 
@@ -131,13 +132,13 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-### version 2025.11.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2025.12.06.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Refactored core functions to improve compatibility.
-@ Refactored the loading mode of jump buttons.
-@ Optimize the real-time styles of all jump buttons.
-@ Perfect solution for button issues in darkmode.
+@ Optimized code for compatibility with more script managers
+@ Optimized scroll compatibility for Google A/B test.
+@ Optimized search link color for Bing.com dark mode.
+@ Optimized style loading mode to improve performance.
 @ Fixed some known issues, optimized code & style.
 ```
 
