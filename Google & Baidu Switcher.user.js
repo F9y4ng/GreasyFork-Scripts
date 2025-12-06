@@ -5,9 +5,9 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            Помощник поисковой системы
 // @name:ja            優雅な検索エンジン助手
-// @version            2025.11.01.1
+// @version            2025.12.06.1
 // @author             F9y4ng
-// @description        “Elegant Search Engine Assistant” facilite la navigation entre moteurs de recherche, personnalise les préférences, met en évidence les mots-clés, élimine les redirections et publicités, et filtre les résultats. Compatible avec divers moteurs tels que Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, etc.
+// @description        Alias "Search Engine Assistant", le script aide à la navigation entre les moteurs de recherche, à la personnalisation des préférences, à la mise en évidence des mots-clés, à l'élimination des redirections et des publicités et au filtrage des résultats. Compatible avec Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG et bien d'autres moteurs de recherche célèbres.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG and more.
 // @description:zh-CN  “优雅的搜索引擎助手”方便用户在不同的搜索引擎之间跳转；支持自定义常用搜索引擎、关键词高亮渲染；还提供去除搜索链接重定向、屏蔽搜索结果广告、使用关键词过滤搜索结果、和自动更新检测等高级功能；兼容如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、You、Startpage、Brave、Yahoo、Yep、Mojeek、searXNG等多个搜索引擎。
 // @description:zh-TW  「優雅的搜尋引擎助手」方便使用者在不同的搜尋引擎之間跳轉；支援自定義常用搜尋引擎、關鍵詞高亮渲染；還提供去除搜尋連結重定向、遮蔽搜尋結果廣告、使用關鍵詞過濾搜尋結果、和自動更新檢測等高階功能；相容如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、You、Startpage、Brave、Yahoo、Yep、Mojeek、searXNG等多個搜尋引擎。
@@ -239,10 +239,7 @@
 // @exclude            *://www.baidu.com/link*
 // @exclude            *://www.sogou.com/link*
 // @exclude            *://so.toutiao.com/search/jump*
-// @connect            baidu.com
-// @connect            bing.com
-// @connect            sogou.com
-// @connect            so.com
+// @connect            self
 // @connect            greasyfork.org
 // @connect            openuserjs.org
 // @connect            githubusercontent.com
@@ -262,10 +259,10 @@
 // @grant              GM.registerMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
-// @note               {"CN":"优化重构脚本核心函数，提升脚本兼容性。","EN":"Refactored core functions to improve compatibility."}
-// @note               {"CN":"重构搜索引擎跳转按钮的载入模式。","EN":"Refactored the loading mode of jump buttons."}
-// @note               {"CN":"优化所有搜索引擎跳转按钮的实时样式。","EN":"Optimize the real-time styles of all jump buttons."}
-// @note               {"CN":"完美解决暗黑模式按钮及链接的颜色问题。","EN":"Perfect solution for button issues in darkmode."}
+// @note               {"CN":"优化脚本核心代码，兼容更多脚本管理器。","EN":"Optimized code for compatibility with more script managers."}
+// @note               {"CN":"优化 Google 各种灰度测试版本的滚动兼容。","EN":"Optimized scroll compatibility for Google A/B test."}
+// @note               {"CN":"优化 Bing.com 暗黑模式的搜索链接颜色。","EN":"Optimized search link color for Bing dark mode."}
+// @note               {"CN":"优化脚本样式的载入模式，提升性能及兼容性。","EN":"Optimize the loading mode of script styles."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         edge version≥88 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Chrome version≥88 (Compatible Tampermonkey, Violentmonkey)
@@ -279,7 +276,7 @@
 
 /* jshint esversion: 11 */
 
-void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
+void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
   "use strict";
 
   /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -298,38 +295,46 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
   const toolkit = {
     debugging: IS_OPEN_DEBUG,
-    atob: sctx.atob.bind(sctx),
-    btoa: sctx.btoa.bind(sctx),
-    alert: ctx.alert.bind(ctx),
-    prompt: ctx.prompt.bind(ctx),
-    confirm: ctx.confirm.bind(ctx),
-    setTimeout: ctx.setTimeout.bind(ctx),
-    console: sctx.Object.assign(customFns.oC(), ctx.console),
+    safeSandbox: {
+      atob: sctx.atob.bind(sctx),
+      btoa: sctx.btoa.bind(sctx),
+      alert: ctx.alert.bind(ctx),
+      prompt: ctx.prompt.bind(ctx),
+      confirm: ctx.confirm.bind(ctx),
+      setTimeout: ctx.setTimeout.bind(uctx),
+      requestAnimationFrame: ctx.requestAnimationFrame.bind(uctx),
+      cancelAnimationFrame: ctx.cancelAnimationFrame.bind(uctx),
+      console: sctx.Object.assign(customFns.oC(), ctx.console),
+    },
+    safeArray: customFns.sP(sctx.Object, sctx.Array),
+    safeObject: customFns.sP(sctx.Object, sctx.Object),
+    safeJSON: sctx.JSON.parse ? sctx.JSON : ctx.JSON.parse ? ctx.JSON : JSON ?? uctx.JSON,
     info: typeof GM_info !== "undefined" ? GM_info : typeof GM !== "undefined" && GM.info ? GM.info : { script: {} },
   };
-  const wrappedFrom = ctx.wrappedJSObject ? Array.from : sctx.Array.from;
+  const wrappedFrom = ctx.wrappedJSObject ? ctx.Array.from : toolkit.safeArray.from;
   const asArray = o => (arrayProxy.method.every(([k, v]) => Reflect.defineProperty(o, k, { value: v.bind(o), ...arrayProxy.option })), o);
   const orginalFns = { oS: sctx.Object.prototype.toString, hP: sctx.Object.prototype.hasOwnProperty, aF: (...af) => wrappedFrom(...af), aS: (...as) => asArray(wrappedFrom(...as)) };
-  if (!ctx.navigation) ["pushState", "replaceState"].forEach(m => void (ctx.history[m] = customFns.eH(m)));
-  searchEngineAssistant(ctx, sctx, toolkit, { ...orginalFns, ...customFns, cS: customFns.mS.filter(isNaN) });
+  typeof ctx.navigation === "undefined" && ["pushState", "replaceState"].forEach(m => void (ctx.history[m] = customFns.eH(m)));
+  searchEngineAssistant(ctx, uctx, toolkit, { ...orginalFns, ...customFns, cS: customFns.mS.filter(isNaN) });
 })(
   typeof window !== "undefined" ? window : this,
+  typeof unsafeWindow !== "undefined" ? unsafeWindow : this,
   ((originalWindow, iframe) => {
     if (typeof GM_addElement === "undefined") return originalWindow;
     try {
-      const { contentWindow } = (iframe = GM_addElement("iframe", { id: "𝐬𝐚𝐟𝐞.𝐰𝐢𝐧𝐝𝐨𝐰", style: "display:none" }));
-      if (!originalWindow.wrappedJSObject) iframe?.remove();
-      return contentWindow ?? originalWindow;
-    } catch (e) {
-      return e && iframe?.remove(), originalWindow;
+      const { contentWindow } = (iframe = GM_addElement("iframe", { id: "𝐬𝐚𝐟e.𝐰𝐢𝐧𝐝𝐨𝐰", style: "display:none", width: 0, height: 0 }));
+      return !originalWindow.wrappedJSObject && iframe?.remove(), contentWindow ?? originalWindow;
+    } catch (_) {
+      return iframe?.remove(), originalWindow;
     }
   })(typeof window !== "undefined" ? window : this, null),
-  function (global, safeWindow, secureVars, customFuntions) {
+  function (global, GMunsafeWindow, secureVars, customFuntions) {
     "use strict";
 
     /* PERFECTLY COMPATIBLE FOR GREASEMONKEY, TAMPERMONKEY, VIOLENTMONKEY, USERSCRIPTS 2024-03-15 F9Y4NG */
 
-    const { atob, btoa, alert, prompt, confirm, console, setTimeout, debugging, info: GMinfo } = secureVars;
+    const { safeArray, safeObject, safeJSON, safeSandbox, debugging, info: GMinfo } = secureVars;
+    const { atob, btoa, alert, prompt, confirm, console, setTimeout, requestAnimationFrame, cancelAnimationFrame } = safeSandbox;
     const { mS, cS, aF: arrayFrom, aS: asArray, oS: getObjectType, hP: hasOwnProperty, lS: localStorage, oC: object } = customFuntions;
     const GMversion = GMinfo.version ?? GMinfo.scriptHandlerVersion ?? "unknown";
     const GMscriptHandler = GMinfo.scriptHandler;
@@ -340,7 +345,6 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     const GMopenInTab = gmSelector("openInTab");
     const GMregisterMenuCommand = gmSelector("registerMenuCommand");
     const GMxmlhttpRequest = gmSelector("xmlhttpRequest");
-    const GMunsafeWindow = gmSelector("unsafeWindow");
     const GMcontextMode = gmSelector("contextMode");
 
     /* INITIALIZE_DEBUG_FUNCTIONS */
@@ -357,17 +361,17 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     const def = {
       count: { clickTimer: 0, duplicate: 0 },
       const: {
-        raf: Symbol(`פֿ${generateRandomString(8, "hex")}`),
-        caf: Symbol(`פֿ${generateRandomString(8, "hex")}`),
-        bing: Symbol(`פֿ${generateRandomString(8, "hex")}`),
+        bing: Symbol(`${generateRandomString(10, "hex")}`),
+        raf: Symbol.for(`𐠱${generateRandomString(10, "date")}𐠔`),
+        caf: Symbol.for(`𐠱${generateRandomString(10, "date")}𐠲`),
         cssAttrName: `gb-css-${generateRandomString(8, "hex")}`,
         rndclassName: `SC${generateRandomString(8, "number")}`,
         rndstyleName: `SS${generateRandomString(8, "number")}`,
         rndadvName: `SA${generateRandomString(8, "number")}`,
         filtered: `ͼ${generateRandomString(6, "char")}ͼ`,
-        disappear: `ͽ${generateRandomString(10, "date")}ͼ`,
-        translucent: `ͼ${generateRandomString(10, "date")}ͽ`,
-        rndButtonID: generateRandomString(12, "char"),
+        disappear: `ͽ${generateRandomString(7, "date")}ͼ`,
+        translucent: `ͼ${generateRandomString(7, "date")}ͽ`,
+        rndButtonID: generateRandomString(10, "char"),
         visited: generateRandomString(6, "mix"),
         buttons: generateRandomString(6, "mix"),
         loading: generateRandomString(6, "char"),
@@ -377,14 +381,14 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         scrollspan: generateRandomString(8, "char"),
         scrollbars: generateRandomString(8, "char"),
         scrollbarsV2: generateRandomString(8, "mix"),
+        attachShadow: Element.prototype.attachShadow,
+        stopImmediatePropagation: Event.prototype.stopImmediatePropagation,
+        requestIdleCallback: global.requestIdleCallback?.bind(GMunsafeWindow) ?? ((callback, { timeout }) => sleep(timeout).then(callback)),
         const: { once: "gb-init-once", purge: "gd-purge-success", anti: "gd-anti-redirect", warn: "data-filter-warn", navinfo: "__Navigation#INFO__" },
       },
       var: {
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.11.01.0",
-        scriptName: getMetaValue(`name:${getLanguages()}`) ?? GMinfo.script.locales?.[getLanguages()]?.name ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
-        requestIdleCallback: global.requestIdleCallback?.bind(GMunsafeWindow) ?? ((callback, { timeout }) => sleep(timeout).then(callback)),
-        stopImmediatePropagation: Event.prototype.stopImmediatePropagation,
-        attachShadow: Element.prototype.attachShadow,
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.12.06.0",
+        scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       },
       url: {
         redundant: decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRnJlZHVuZGFudC1pc3N1ZQ=="),
@@ -395,7 +399,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       },
       notice: {
         rName: generateRandomString(8, "char"),
-        random: generateRandomString(5, "char"),
+        random: generateRandomString(6, "char"),
         noticeX: generateRandomString(7, "char"),
         appear: generateRandomString(6, "char"),
         gberror: generateRandomString(6, "mix"),
@@ -419,13 +423,13 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         legend: generateRandomString(6, "char"),
         settingList: generateRandomString(7, "mix"),
         readonly: generateRandomString(8, "mix"),
-        hk: generateRandomString(5, "mix"),
-        gj: generateRandomString(5, "mix"),
-        lw: generateRandomString(5, "mix"),
-        kh: generateRandomString(5, "mix"),
-        ar: generateRandomString(5, "mix"),
-        aa: generateRandomString(5, "mix"),
-        au: generateRandomString(5, "mix"),
+        hk: generateRandomString(6, "mix"),
+        gj: generateRandomString(6, "mix"),
+        lw: generateRandomString(6, "mix"),
+        kh: generateRandomString(6, "mix"),
+        ar: generateRandomString(6, "mix"),
+        aa: generateRandomString(6, "mix"),
+        au: generateRandomString(6, "mix"),
         grid: generateRandomString(7, "char"),
         card: generateRandomString(7, "char"),
       },
@@ -437,15 +441,9 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
     class RAF {
       constructor(context) {
-        safeWindow.Object.assign(this, { context, timerMap: { timeout: {}, interval: {} } });
-        this._registerAnimationFrame(context);
+        safeObject.assign(this, { context, timerMap: { timeout: {}, interval: {} } });
+        GMunsafeWindow[def.const.raf] || safeObject.assign(GMunsafeWindow, { [def.const.raf]: requestAnimationFrame, [def.const.caf]: cancelAnimationFrame });
         ["setTimeout", "setInterval", "clearTimeout", "clearInterval"].forEach(m => (this[m] = this[m].bind(this)));
-      }
-      _registerAnimationFrame(scope) {
-        const vendor = asArray(["ms", "moz", "webkit", "o"]).FindX(vendor => scope[`${vendor}RequestAnimationFrame`]);
-        const raf = scope.requestAnimationFrame || scope[`${vendor}RequestAnimationFrame`];
-        const caf = scope.cancelAnimationFrame || scope[`${vendor}CancelAnimationFrame`] || scope[`${vendor}CancelRequestAnimationFrame`];
-        safeWindow.Object.assign(scope, { [def.const.raf]: raf.bind(GMunsafeWindow), [def.const.caf]: caf.bind(GMunsafeWindow) });
       }
       _ticking(fn, type, interval, ...args) {
         let lastTime = performance.now();
@@ -460,10 +458,10 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         return timerSymbol;
       }
       _setTimerMap(timerSymbol, type, step) {
-        this.timerMap[type][timerSymbol] = this.context[def.const.raf](step);
+        this.timerMap[type][timerSymbol] = GMunsafeWindow[def.const.raf](step);
       }
       _clearTimerMap(timerSymbol, type) {
-        this.context[def.const.caf](this.timerMap[type][timerSymbol]);
+        GMunsafeWindow[def.const.caf](this.timerMap[type][timerSymbol]);
         delete this.timerMap[type][timerSymbol];
       }
       setTimeout(fn, interval, ...args) {
@@ -489,11 +487,10 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         setValue: typeof GM_setValue !== "undefined" ? GM_setValue : typeof GM !== "undefined" ? GM.setValue : localStorage?.setItem.bind(localStorage),
         getValue: typeof GM_getValue !== "undefined" ? GM_getValue : typeof GM !== "undefined" ? GM.getValue : localStorage?.getItem.bind(localStorage),
         deleteValue: typeof GM_deleteValue !== "undefined" ? GM_deleteValue : typeof GM !== "undefined" ? GM.deleteValue : localStorage?.removeItem.bind(localStorage),
-        listValues: typeof GM_listValues !== "undefined" ? GM_listValues : typeof GM !== "undefined" ? GM.listValues : () => Object.keys(localStorage ?? {}),
+        listValues: typeof GM_listValues !== "undefined" ? GM_listValues : typeof GM !== "undefined" ? GM.listValues : () => safeObject.keys(localStorage ?? {}),
         openInTab: typeof GM_openInTab !== "undefined" ? GM_openInTab : typeof GM !== "undefined" ? GM.openInTab : global.open.bind(global),
         registerMenuCommand: typeof GM_registerMenuCommand !== "undefined" ? GM_registerMenuCommand : typeof GM !== "undefined" ? GM.registerMenuCommand : void 0,
         xmlhttpRequest: typeof GM_xmlhttpRequest !== "undefined" ? GM_xmlhttpRequest : typeof GM !== "undefined" ? GM.xmlHttpRequest : void 0,
-        unsafeWindow: typeof unsafeWindow !== "undefined" ? unsafeWindow : global,
         contextMode: GMinfo.injectInto === "content" || GMinfo.script["inject-into"] === "content" || ["dom", "js"].includes(GMinfo.sandboxMode),
       };
       return gmFunctions[rec] ?? __console("warn", `Grant 'GM.${rec}' is not available.`) ?? (() => {});
@@ -520,21 +517,21 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     function qS(expr, target = document) {
       try {
         return target.querySelector(expr);
-      } catch (e) {
-        return e && null;
+      } catch (_) {
+        return null;
       }
     }
 
     function qA(expr, target = document) {
       try {
         return asArray(target.querySelectorAll(expr));
-      } catch (e) {
-        return e && asArray([]);
+      } catch (_) {
+        return asArray([]);
       }
     }
 
     function uniq(array) {
-      return Array.isArray(array) ? arrayFrom(new Set(array)) : [];
+      return safeArray.isArray(array) ? arrayFrom(new Set(array)) : [];
     }
 
     function toString(value) {
@@ -545,8 +542,8 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     function cE(nodeName, attributes) {
       const el = document.createElement(nodeName);
       if (getObjectType.call(attributes) !== "[object Object]") return el;
-      for (const [key, value] of Object.entries(attributes)) {
-        if (key === "class") Array.isArray(value) ? el.classList.add(...value) : el.classList.add(value);
+      for (const [key, value] of safeObject.entries(attributes)) {
+        if (key === "class") safeArray.isArray(value) ? el.classList.add(...value) : el.classList.add(value);
         else if (["innerHTML", "textContent"].includes(key)) el[key] = value;
         else el.setAttribute(key, value);
       }
@@ -569,12 +566,10 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     }
 
     function encrypt(string, encode = true) {
-      if (typeof string !== "string") string = toString(string);
       try {
-        const req = encode ? encodeURIComponent(string) : string;
-        return btoa(req);
-      } catch (e) {
-        return e && "";
+        return btoa(encode ? encodeURIComponent(toString(string)) : toString(string));
+      } catch (_) {
+        return "";
       }
     }
 
@@ -583,13 +578,13 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       try {
         const rst = atob(string.replace(/[^A-Za-z0-9+/=]/g, ""));
         return decode ? decodeURIComponent(rst) : rst;
-      } catch (e) {
-        return e && "";
+      } catch (_) {
+        return "";
       }
     }
 
     function generateRandomString(length, type, p, m = mS, c = cS) {
-      if (type === "date") return (p = new Date().setHours(20, 30, 40, 50).toString(16)), p.padEnd(length, p);
+      if (type === "date") return (p = new Date()), (p = (p.setHours(10, 20, 30, 40) * p.getDate()).toString(16)).padEnd(length, p);
       if (type === "hex" || type === "number") return (p = type === "hex" ? 16 : 10), arrayFrom(random({ range: p, length, type: "floor" }), v => v.toString(p)).join("");
       return (p = type === "mix" ? m : c), arrayFrom(random({ range: p.length, length }), (v, i) => (p === m && !i ? c[random({ range: 70 })] : p[v])).join("");
     }
@@ -604,7 +599,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       return element.innerHTML;
     }
 
-    function createTrustedTypePolicy() {
+    function initTrustedTypesPolicy() {
       const policyOptions = { createHTML: s => s, createScript: s => s, createScriptURL: u => u };
       if (!global.trustedTypes?.createPolicy) return policyOptions;
       const originalCreatePolicy = global.trustedTypes.createPolicy.bind(global.trustedTypes);
@@ -623,12 +618,10 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         const troubleshoot = `\ufff8\ud83d\uded1 ${IS_CHN ? "发现冗余安装的脚本，点击排查！" : "Troubleshoot Redundant Issue"}`;
         return CUR_WINDOW_TOP && (__console("error", errorText), GMregisterMenuCommand(troubleshoot, () => GMopenInTab(`${def.url.feedback}/117`, false))), true;
       };
-      const contentText = IS_CHN
-        ? `${def.var.scriptName}警告：脚本的注入模式已设置为"content"，部分脚本功能可能受到限制。`
-        : `${def.var.scriptName} Warning: The injection mode is set to "content" and some functions may be limited.`;
-      if (GMcontextMode && CUR_WINDOW_TOP) __console("warn", contentText);
+      const contentText = IS_CHN ? `警告：脚本的注入模式已设置为"content"，部分脚本功能可能受到限制。` : `Warning: The injection mode is set to "content" and some functions may be limited.`;
+      if (GMcontextMode && CUR_WINDOW_TOP) __console("warn", `${def.var.scriptName} ${contentText}`);
       if (global[def.const.const.once] === true || document.documentElement?.hasAttribute(def.const.const.once)) return reportRedundanceError();
-      (global[def.const.const.once] = true) && safeWindow.Object.freeze(def.const) && document.documentElement?.setAttribute(def.const.const.once, "");
+      (global[def.const.const.once] = true) && safeObject.freeze(def.const) && document.documentElement?.setAttribute(def.const.const.once, "");
     }
 
     async function getNavigatorInfo() {
@@ -637,14 +630,14 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       return userAgentData ? getGlobalInfoFromUAD(userAgentData) : getGlobalInfoFromUA(navigator.userAgent);
 
       function getGlobalInfoFromUAD(uad) {
-        const platform = getFullPlatformName(uad.platform);
+        const os = getFullPlatformName(uad.platform);
         const mapBrandPath = ({ brand: b, version: v }) => `${/Not[^a-z]*A[^a-z]*Brand/i.test(b) ? 9 : /^(?:Chrom(?:e|ium)|Firefox|Safari)$/i.test(b) ? 5 : 1}${b}\r${v}`;
         const [brand, brandVersion] = uad.brands?.map(mapBrandPath).sort()[0]?.slice(1).split("\r") ?? [];
         const engineMap = { Chrome: "Blink", Chromium: "Blink", Firefox: "Gecko", Safari: "WebKit" };
         const mapEnginePath = ({ brand, version }) => /^(?:Chrom(?:e|ium)|Firefox|Safari)$/i.test(brand) && `${brand}\r${version}`;
         const [engine, engineVersion] = uad.brands?.map(mapEnginePath).filter(Boolean)[0]?.split("\r") ?? [brand, brandVersion];
         const engineInfo = { engine: engineMap[capitalize(engine)] ?? getEngineFromUA(navigator.userAgent), engineVersion: parseFloat(engineVersion) || 99, creditEngine };
-        const browserInfo = { brand: (brand?.split(/\s/) ?? []).slice(-1)[0] ?? "Unknown", brandVersion: formatVersion(brandVersion), platform };
+        const browserInfo = { brand: (brand?.split(/\s/) ?? []).slice(-1)[0] ?? "Unknown", brandVersion: formatVersion(brandVersion), os };
         return { ...engineInfo, ...browserInfo, source: uad.source ?? "uad", voucher: uad.voucher ?? null };
       }
 
@@ -652,8 +645,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         const checkString = (str, exp = "") => new RegExp(str, exp).test(ua);
         const getVersion = (str, offset) => checkString(str) && ua.slice(ua.indexOf(str) + offset).match(/\d+(\.\d+)*/)?.[0];
         const { brand, brandVersion, engine, engineVersion } = getBrowserInfoFromUA(ua, checkString, getVersion);
-        const platform = getOSInfoFromUA(checkString);
-        return { engine, engineVersion, creditEngine, brand, brandVersion, platform, source: "ua", voucher: null };
+        return { engine, engineVersion, creditEngine, brand, brandVersion, os: getOSInfoFromUA(checkString), source: "ua", voucher: null };
       }
 
       async function getUserAgentDataFromExtension(voucher) {
@@ -676,11 +668,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         };
         if ((voucher.startsWith("Tampermonkey") || voucher.startsWith("ScriptCat")) && GMinfo.userAgentData) return getTMUserAgentData(GMinfo.userAgentData);
         const getUADHighEntropyValues = async uad =>
-          await uad.getHighEntropyValues(["bitness", "architecture", "fullVersionList"]).then(rst => {
-            rst.brands = rst.fullVersionList;
-            delete rst.fullVersionList;
-            return rst;
-          });
+          await uad.getHighEntropyValues(["bitness", "architecture", "fullVersionList"]).then(rst => (rst.brands = rst.fullVersionList) && delete rst.fullVersionList && rst);
         if (navigator.userAgentData?.brands?.[0]) return await getUADHighEntropyValues(navigator.userAgentData);
         return null;
       }
@@ -704,7 +692,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           Trident: { brand: "IE", engine: "Trident", verset: ["MSIE", "rv"] },
           Presto: { brand: "Opera", engine: "Presto" },
         };
-        for (const [key, { brand, engine, verset, as }] of Object.entries(brandMap)) {
+        for (const [key, { brand, engine, verset, as }] of safeObject.entries(brandMap)) {
           if (!checkString(key)) continue;
           const versionKey = asArray(verset ?? []).FindX(k => checkString(k)) || key;
           let brandVersion = getVersion(versionKey, versionKey.length + 1);
@@ -762,34 +750,43 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     }
 
     function getMetaValue(str) {
-      const queryReg = new RegExp(`//\\s+@${str}\\s+(.+)`);
-      const metaValue = (GMinfo.scriptMetaStr || GMinfo.scriptSource)?.match(queryReg);
-      return metaValue?.[1];
+      const queryRegexp = new RegExp(`//\\s+@${toString(str)}\\s+(.+)`);
+      const metaValue = (GMinfo.scriptMetaStr || GMinfo.scriptSource)?.match(queryRegexp);
+      return metaValue?.[1] ?? ((str = str.match(/^name:([a-zA-Z-]+)$/)) && GMinfo.script.locales?.[str[1]]?.name);
     }
 
     function getLanguages(lang = navigator.language) {
-      const languages = new Set(["zh-CN", "zh-TW", "en", "ja", "ko"]);
-      return languages.has(lang) ? lang : lang.startsWith("zh") ? "zh-CN" : "en";
+      const languages = new Set(["zh-CN", "zh-TW", "en", "ja", "ru"]);
+      return languages.has(lang) ? lang : lang.startsWith("zh") ? "zh-TW" : "en";
     }
 
     function setDebuggerMode() {
       const key = decrypt("\u0052\u006a\u006c\u0035\u004e\u0047\u0035\u006e");
       const value = new URLSearchParams(global.location.search).get("whoami");
-      return Object.is(key, value);
+      return safeObject.is(key, value);
     }
 
     function sleep(delay, { useCachedSetTimeout, instance } = {}) {
       const timeoutFunction = useCachedSetTimeout ? setTimeout : rAF.setTimeout;
-      const sleepPromise = new Promise(resolve => {
-        timeoutFunction(resolve, delay);
-      });
+      const resolveFunction = resolve => void timeoutFunction(resolve, delay);
+      const sleepPromise = new Promise(resolveFunction);
       const promiseFunction = value => sleepPromise.then(() => value);
       promiseFunction.then = sleepPromise.then.bind(sleepPromise);
       promiseFunction.catch = sleepPromise.catch.bind(sleepPromise);
       return instance ? sleepPromise : promiseFunction;
     }
 
-    function deBounce({ fn, timer, delay, immed = false, once = false } = {}) {
+    function throttle({ fn, timer, delay, immed = false }) {
+      if (typeof fn !== "function" || !timer) return () => {};
+      return function (...args) {
+        const [name, context] = [Symbol.for(toString(timer)), this];
+        if (def.count[name]) return;
+        if (immed && def.count[name] !== null) fn.apply(context, args);
+        def.count[name] = rAF.setTimeout(() => ((def.count[name] = null), fn.apply(context, args)), Number(delay) || 0);
+      };
+    }
+
+    function deBounce({ fn, timer, delay, immed = false, once = false }) {
       if (typeof fn !== "function" || !timer) return () => {};
       return function (...args) {
         const [name, context] = [Symbol.for(toString(timer)), this];
@@ -810,15 +807,15 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
     function safeRemoveNode(expr, scope) {
       if (!expr) return false;
-      const pendingNodes = Array.isArray(expr) ? expr : typeof expr === "string" ? qA(expr, scope) : expr?.nodeType ? [expr] : [];
+      const pendingNodes = safeArray.isArray(expr) ? expr : typeof expr === "string" ? qA(expr, scope) : [1, 3, 8].includes(expr?.nodeType) ? [expr] : [];
       return pendingNodes.every(el => el.remove() || el.parentNode === null);
     }
 
-    void (async function (tTP, navigatorInfo) {
+    void (async function (tTP, JSON, navigatorInfo) {
       const [CONFIGURE, VERSION, AUTOCHECK, RESULTFILTER, REMOTEICONS] = ["_configures_", "_version_", "_autoupdate_", "_resultFilter_", "_remoteicons_"];
       const { engine, creditEngine, brand, voucher } = (navigatorInfo =
         JSON.parse(navigatorInfo || null) || (sessionStorage?.setItem(def.const.const.navinfo, JSON.stringify((navigatorInfo = await getNavigatorInfo()))), navigatorInfo));
-      const [IS_REAL_BLINK, IS_REAL_GECKO, IS_REAL_WEBKIT] = ["Blink", "Gecko", "WebKit"].map(cE => cE === creditEngine);
+      const [IS_REAL_BLINK, IS_REAL_WEBKIT] = ["Blink", "WebKit"].map(cE => cE === creditEngine);
       const IS_CHEAT_UA = voucher === null && (engine !== creditEngine || checkBlinkCheatingUA(navigator.userAgentData));
       const IS_GREASEMONKEY = ["Greasemonkey", "Userscripts", "FireMonkey", "tamp", "OrangeMonkey"].includes(GMscriptHandler);
       const createNoticeHTML = html => `<div class="${def.notice.rName}"><dl>${html}</dl></div>`;
@@ -833,8 +830,8 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             const current = Date.now();
             const { data, expired } = JSON.parse(decrypt(encryptedValue));
             return data && expired > current ? data : cache.remove(key);
-          } catch (e) {
-            return e && cache.remove(key);
+          } catch (_) {
+            return cache.remove(key);
           }
         },
         remove: key => void GMdeleteValue(key),
@@ -842,35 +839,20 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
       class NoticeX {
         constructor(options = {}) {
-          const defaultOptions = {
-            title: "",
-            text: "",
-            type: def.notice.success,
-            position: "bottomRight",
-            newestOnTop: false,
-            timeout: 2e3,
-            progressBar: true,
-            closeWith: ["button"],
-            animation: { open: `${def.notice.animated} ${def.notice.random}_fadeIn`, close: `${def.notice.animated} ${def.notice.random}_fadeOut` },
-            width: 400,
-            scroll: { maxHeight: 400, showOnHover: false },
-            callbacks: { beforeShow: [], onShow: [], afterShow: [], beforeClose: [], onClose: [], afterClose: [], onClick: [], onHover: [] },
-          };
-          this.options = { ...defaultOptions, ...options };
-          this._registerCallbacks();
+          const animation = { open: `${def.notice.animated} ${def.notice.random}_fadeIn`, close: `${def.notice.animated} ${def.notice.random}_fadeOut` };
+          const callbacks = { beforeShow: [], onShow: [], afterShow: [], beforeClose: [], onClose: [], afterClose: [], onClick: [], onHover: [] };
+          this.options = { title: "", text: "", type: def.notice.success, position: "bottomRight", newestOnTop: false, timeout: 2e3, progressBar: true };
+          safeObject.assign(this.options, { closeWith: ["button"], animation, width: 400, scroll: { maxHeight: 400, showOnHover: false }, callbacks, ...options });
         }
         static close(item) {
           if (!item) return true;
           item.classList.add(def.notice.animated, `${def.notice.random}_fadeOut`);
           const closetNode = item.closest(`.${def.notice.noticeX}`);
           const position = closetNode?.className.match(/\b(\w+-\w+)\b/)?.[1] || `${def.notice.noticeX}-topRight`;
-          return sleep(3e2)
-            .then(() => safeRemoveNode(item))
-            .then(() => qA(`.${position} .${def.notice.item}`).length === 0 && safeRemoveNode(`.${position}`));
+          return sleep(3e2).then(() => safeRemoveNode(item) && !qA(`.${position} .${def.notice.item}`).length && safeRemoveNode(`.${position}`));
         }
         show() {
-          this._createContainer();
-          return this._appendNoticeX(this._createHeader(), this._createBody(), this._createProgressBar());
+          return this._createContainer(), this._appendNoticeX(this._createHeader(), this._createBody(), this._createProgressBar());
         }
         _createContainer() {
           const position = `${def.notice.noticeX}-${this.options.position}`;
@@ -889,10 +871,9 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           const body = cE("div", { class: `${def.notice.noticeX}-body` });
           const content = cE("div", { class: `${def.notice.noticeX}-content`, innerHTML: tTP.createHTML(this.options.text) });
           body.appendChild(content);
-          if (this.options.scroll?.maxHeight) {
-            body.style.overflowY = "auto";
-            body.style.maxHeight = `min(calc(92vh - 50px), ${this.options.scroll.maxHeight}px)`;
-            if (this.options.scroll?.showOnHover) body.style.visibility = "hidden";
+          if (this.options.scroll.maxHeight) {
+            body.style.cssText += `overflow-y:auto;max-height:min(calc(92vh - 50px), ${this.options.scroll.maxHeight}px)`;
+            if (this.options.scroll.showOnHover) body.style.visibility = "hidden";
           }
           return body;
         }
@@ -902,70 +883,46 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           progressBar.appendChild(bar);
           if (this.options.progressBar && typeof this.options.timeout === "number") {
             progressBar.style.animation = `${def.notice.noticeX}-progress ${this.options.timeout / 1e3}s linear forwards`;
-            sleep(this.options.timeout, { useCachedSetTimeout: true }).then(() => {
-              const item = progressBar.closest(`div.${def.notice.item}`);
-              if (item) this._closeWithAnimation(item);
-            });
+            sleep(this.options.timeout).then(item => (item = progressBar.closest(`div.${def.notice.item}`)) && this._closeWithAnimation(item));
           }
           return progressBar;
         }
         _appendNoticeX(header, body, progressBar) {
-          const targetClass = `.${def.notice.noticeX}-${this.options.position}`;
+          const target = qS(`.${def.notice.noticeX}-${this.options.position}`);
           const noticeItem = cE("div", { class: [def.notice.item, this.options.type] });
           if (this.options.width && Number.isInteger(this.options.width)) noticeItem.style.width = `${this.options.width}px`;
           [header, body, progressBar].forEach(el => el && noticeItem.appendChild(el));
-          if (["top", "bottom"].includes(this.options.position)) qS(targetClass).textContent = "";
-          if (this.options?.animation?.open) noticeItem.className += ` ${this.options.animation.open}`;
+          if (["top", "bottom"].includes(this.options.position)) target.textContent = "";
+          if (this.options.animation.open) noticeItem.className += ` ${this.options.animation.open}`;
           this._executeCallbacks("beforeShow");
           this._addListeners(noticeItem);
-          const target = qS(targetClass);
           this._executeCallbacks("onShow");
-          this.options.newestOnTop && target ? target.insertAdjacentElement("afterbegin", noticeItem) : target.appendChild(noticeItem);
+          this.options.newestOnTop ? target.insertAdjacentElement("afterbegin", noticeItem) : target.appendChild(noticeItem);
           this._executeCallbacks("afterShow");
           return noticeItem;
         }
         _closeWithAnimation(item) {
-          if (this.options.animation?.close) {
-            item.className += ` ${this.options.animation.close}`;
-            sleep(5e2).then(() => this._closeItem(item));
-          } else this._closeItem(item);
+          if (this.options.animation?.close) sleep(5e2)((item.className += ` ${this.options.animation.close}`)).then(() => this._closeItem(item));
+          else this._closeItem(item);
         }
         _addListeners(item) {
           const closeBtn = qS(`.${def.notice.close}`, item);
-          const handleClick = () => this._closeItem(item);
-          if (this.options.closeWith.includes("button")) closeBtn?.addEventListener("click", handleClick);
+          if (this.options.closeWith.includes("button")) closeBtn?.addEventListener("click", () => this._closeItem(item));
           if (this.options.closeWith.includes("click")) {
             item.style.cursor = "pointer";
-            item.addEventListener("click", e => {
-              if (e.target.className === def.notice.close) return;
-              this._executeCallbacks("onClick");
-              handleClick();
-            });
+            item.addEventListener("click", e => e.target.className !== def.notice.close && (this._executeCallbacks("onClick"), this._closeItem(item)));
           } else item.addEventListener("click", e => e.target.className !== def.notice.close && this._executeCallbacks("onClick"));
           item.addEventListener("mouseenter", () => this._executeCallbacks("onHover"));
         }
         _closeItem(item) {
-          const closetNode = item.closest(`.${def.notice.noticeX}`);
-          const position = closetNode?.className.match(/\b(\w+-\w+)\b/)?.[1] || `${def.notice.noticeX}-bottomRight`;
+          const position = item.closest(`.${def.notice.noticeX}`)?.className.match(/\b(\w+-\w+)\b/)?.[1] || `${def.notice.noticeX}-bottomRight`;
           this._executeCallbacks("beforeClose");
           sleep(3e2)
             .then(() => this._executeCallbacks("onClose"))
-            .then(() => safeRemoveNode(item))
-            .then(() => qA(`.${position} .${def.notice.item}`).length === 0 && safeRemoveNode(`.${position}`))
-            .then(() => this._executeCallbacks("afterClose"));
+            .then(() => safeRemoveNode(item) && !qA(`.${position} .${def.notice.item}`).length && safeRemoveNode(`.${position}`) && this._executeCallbacks("afterClose"));
         }
         _executeCallbacks(eventName) {
-          this.options.callbacks[eventName]?.forEach(cb => cb?.call(this));
-        }
-        _registerCallbacks() {
-          Object.keys(this.options.callbacks).forEach(eventName => {
-            const cb = this.options.callbacks[eventName];
-            if (typeof cb === "function") this._on(eventName, cb);
-          });
-        }
-        _on(eventName, cb = () => {}) {
-          if (typeof cb === "function" && this.options.callbacks[eventName]) this.options.callbacks[eventName].push(cb);
-          return this;
+          this.options.callbacks[eventName]?.forEach(cb => cb.call(this));
         }
       }
 
@@ -978,17 +935,39 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         if (newNode && target) target.parentNode.insertBefore(newNode, target.nextElementSibling);
       }
 
-      function addStyle({ target, id, cssText, media, overwrite = false }) {
-        if (!target || !id || !cssText || !media) return;
+      function getSheetMetadata(sheet) {
+        const rootRule = sheet.cssRules[0];
+        if (!rootRule || rootRule.selectorText !== ":host(sheet-metadata)") return object();
+        const rawValue = rootRule.style.getPropertyValue("--sheet-metadata");
+        return rawValue ? JSON.parse(rawValue.trim()) : object();
+      }
+
+      function createStyleSheet(id, css, primary, sheet) {
+        const metadata = `:host(sheet-metadata){--sheet-metadata:${JSON.stringify({ id, ...(primary && { [def.const.cssAttrName]: false }) })}}`;
+        return (sheet = new CSSStyleSheet()), sheet.media.appendMedium("all"), sheet.replaceSync(css), sheet.insertRule(metadata, 0), sheet;
+      }
+
+      function updateAdoptedStyleSheets(target, css, id) {
+        const isShadowRoot = target instanceof ShadowRoot;
         try {
-          let existingStyles = qA(`#${id}`, target);
-          if (overwrite) existingStyles.forEach(style => (style.dataset.frRemoved = true) && safeRemoveNode(style));
-          else if (existingStyles.length > 0) return true;
-          if (typeof GM_addElement !== "undefined") return GM_addElement(target, "style", { id, media, type: "text/css", textContent: cssText, [def.const.cssAttrName]: overwrite }) && true;
-          return target.appendChild(cE("style", { id, media, type: "text/css", textContent: cssText ?? "", [def.const.cssAttrName]: overwrite })) && true;
-        } catch (e) {
-          ERROR(`${e.name} in AddStyle:`, e.message);
+          if (typeof target.adoptedStyleSheets?.push !== "function") throw new Error("use inlineStyle");
+          if (asArray(target.adoptedStyleSheets).SomeX(sheet => getSheetMetadata(sheet).id === id)) return true;
+          return target.adoptedStyleSheets.push(createStyleSheet(id, css, !isShadowRoot, null)) && true;
+        } catch (error) {
+          try {
+            target = isShadowRoot ? target : target.head;
+            if (qS(`style#${id}`, target)) return true;
+            const option = { id, media: "all", type: "text/css", textContent: css, ...(!isShadowRoot && { [def.const.cssAttrName]: false }) };
+            if (typeof GM_addElement !== "undefined") return GM_addElement(target, "style", option) && true;
+            return target.appendChild(cE("style", option)) && true;
+          } catch (e) {
+            error && ERROR(`${e.name} in UpdateAdoptedStyleSheets:`, e.message, `(${error.message})`);
+          }
         }
+      }
+
+      function findAdoptedStyleSheet(id) {
+        return Boolean(qS(`style#${id}`, document.head) || asArray(document.adoptedStyleSheets).SomeX(s => getSheetMetadata(s).id === id));
       }
 
       function getUrlParam(parameter) {
@@ -1045,8 +1024,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       }
 
       void (async function (getConfigureData, getResultFilterData, requestRemoteIcon, GMnotification) {
-        let [_config_date_, _filter_Data_] = await Promise.all([getConfigureData(), getResultFilterData()]);
-        const { trigger: antiResultsFilter, filter: resultFilters } = _filter_Data_;
+        let [_config_date_, { trigger: antiResultsFilter, filter: resultFilters }] = await Promise.all([getConfigureData(), getResultFilterData()]);
         const { isAutoUpdate, keywordHighlight, isHotkey, selectedEngine, localWindow, googleJump, antiLinkRedirect, antiAds, customColor } = _config_date_;
         const [gbCookies, cachedRequestLinks, usedFilterWords, selectedSite] = [manageCookies(), antiLinkRedirect ? new Map() : null, antiResultsFilter ? new Set() : null, []];
 
@@ -1066,8 +1044,8 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         function updateNodeAttributes(options, node, result = 0) {
           if (options.useNewTab && ++result) node.setAttribute("target", "_blank");
           if (options.forceSelf && ++result) node.setAttribute("target", "_self");
-          if (Array.isArray(options.cleanAttr) && options.cleanAttr.length > 0 && ++result) options.cleanAttr.forEach(item => node.removeAttribute(item));
-          if (options.removeDataSet && ++result) Object.keys(node.dataset).forEach(ds => delete node.dataset[ds]);
+          if (safeArray.isArray(options.cleanAttr) && options.cleanAttr.length > 0 && ++result) options.cleanAttr.forEach(item => node.removeAttribute(item));
+          if (options.removeDataSet && ++result) safeObject.keys(node.dataset).forEach(ds => delete node.dataset[ds]);
           if (options.forceNewTab && ++result) node.addEventListener("click", e => forceNewTabAction(e, node));
           if (result) node.setAttribute(def.const.const.purge, "");
         }
@@ -1077,9 +1055,13 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           event.currentTarget.getAttribute(def.const.const.anti) === "success" && event.currentTarget.classList.add(def.const.visited);
         }
 
-        function stopEventPropagation(event, { preventDefault = true } = {}) {
-          if (preventDefault) event.preventDefault();
-          def.var.stopImmediatePropagation.call(event);
+        function stopEventPropagation(event, { prevent = true } = {}) {
+          if (prevent) event.preventDefault();
+          try {
+            def.const.stopImmediatePropagation.call(event);
+          } catch (_) {
+            event.stopImmediatePropagation();
+          }
         }
 
         function getRealHref(node) {
@@ -1102,8 +1084,8 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             node.hasAttribute(def.const.const.purge) &&
               ((options.useNewTab && node.target !== "_blank") ||
                 (options.forceSelf && node.target !== "_self") ||
-                (Array.isArray(options.cleanAttr) && asArray(options.cleanAttr).SomeX(attr => node.hasAttribute(attr))) ||
-                (options.removeDataSet && Object.keys(node.dataset).length > 0)) &&
+                (safeArray.isArray(options.cleanAttr) && asArray(options.cleanAttr).SomeX(attr => node.hasAttribute(attr))) ||
+                (options.removeDataSet && safeObject.keys(node.dataset).length > 0)) &&
               node.removeAttribute(def.const.const.purge);
             return !node.hasAttribute(def.const.const.purge);
           });
@@ -1120,7 +1102,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         function fetchData(url, resolve, reject, readystate, error, timeout) {
           const headers = { Accept: "*/*", Referer: global.location.origin.replace(/^http:/i, "https:") };
           const [onload, onerror, ontimeout] = [readystate(resolve, reject), error(reject, resolve), timeout(reject)];
-          GMxmlhttpRequest({ url, headers, method: "GET", timeout: 25e3, onload, onerror, ontimeout });
+          GMxmlhttpRequest({ url, headers, method: "GET", fetch: true, timeout: 25e3, onload, onerror, ontimeout });
         }
 
         async function getRealUrl(url, node, name, { onloadFunc, onerrorFunc, ontimeoutFunc }) {
@@ -1353,9 +1335,9 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         };
 
         function parseAntiAdvertising({ selectors, siteName, isRemoveNodes }) {
-          if (selectors && typeof selectors === "string" && !qS(`#${def.const.rndadvName}`)) {
+          if (selectors && typeof selectors === "string" && !findAdoptedStyleSheet(def.const.rndadvName)) {
             const cssText = `:root :is(${selectors}){display:none!important;opacity:0!important}`;
-            addStyle({ target: document.head, id: def.const.rndadvName, media: "all", cssText }) && COUNT(`[${siteName}-Anti-Ads]`);
+            updateAdoptedStyleSheets(document, cssText, def.const.rndadvName) && COUNT(`[${siteName}-Anti-Ads]`);
             isRemoveNodes === true && safeRemoveNode(selectors);
           }
           AdvancedAntiAdvertising(siteName, isRemoveNodes);
@@ -1397,11 +1379,10 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           try {
             const iconBase64Data = await cache.get(REMOTEICONS);
             if (!iconBase64Data || setDebuggerMode()) {
-              iconDataURL = DEBUG("%cRequest remote icon data...", "color:#25f") ?? (await requestRemoteIcon(remoteURL));
-              iconDataURL
-                ? cache.set(REMOTEICONS, iconDataURL, 2592e6) ?? GMsetValue(VERSION, encrypt(def.var.curVersion)) ?? DEBUG("%cRemote icon data parsing successed.", "color:#006400")
-                : DEBUG("%cRemote icon data parsing failed.", "color:#ff0000");
-            } else iconDataURL = DEBUG("%cGet local cached icon data.", "color:#006400") ?? iconBase64Data;
+              iconDataURL = DEBUG("%cRequest and initialize remote icon data.", "color:#25f") ?? (await requestRemoteIcon(remoteURL));
+              if (!iconDataURL) DEBUG("%cRemote icon data initialized failed.", "color:#ff0000");
+              else cache.set(REMOTEICONS, iconDataURL, 2592e6) ?? GMsetValue(VERSION, encrypt(def.var.curVersion)) ?? DEBUG("%cRemote icon data initialized successed.", "color:#006400");
+            } else iconDataURL = DEBUG("%cApplied local icon caching data.", "color:#006400") ?? iconBase64Data;
           } catch (e) {
             ERROR(`FetchAndCacheRemoteIcons: Can't request the icon data.`, e?.message);
           }
@@ -1429,7 +1410,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "baidu_ar" })("Baidu", selector, { useNewTab: true, removeDataSet: true, advancedAnti: true });
               },
               antiAdsFn: () => {
-                const selectors = `#s-hotsearch-wrapper,.result-op[tpl='sp_hot_sale'],.result-op[tpl='b2b_prod'],.result-op.cr-content[tpl^='recommend_list_'],#content_left>div:not([class]):not([style]),div[data-placeid],[id$='_canvas'],div.result.c-container:not([class~='xpath-log']),.imgpage .imglist>li.newfcImgli,.ec_wise_ad,div[class^='result-op'][tpl='right_tabs'][data-click],div[class^='result-op'][tpl='right_links'][data-click],#searchTag,#content_left>div.c-container[tpl="recommend_list"],#con-ar div:is([tpl='interactive'],[tpl="right_recommends_merge"]),div.result-op.cr-content:has([id='ai-accompanies-container']),div.result-molecule[tpl="app/rs"],.hint_right_top:has([tpl='app/hint-chat-entry']),.hint_right_middle:has([tpl='app/hint-head-top'])`;
+                const selectors = `#s-hotsearch-wrapper,#s_wrap,#bottom_layer,.result-op[tpl='sp_hot_sale'],.result-op[tpl='b2b_prod'],.result-op.cr-content[tpl^='recommend_list_'],#content_left>div:not([class]):not([style]),div[data-placeid],[id$='_canvas'],div.result.c-container:not([class~='xpath-log']),.imgpage .imglist>li.newfcImgli,.ec_wise_ad,div[class^='result-op'][tpl='right_tabs'][data-click],div[class^='result-op'][tpl='right_links'][data-click],#searchTag,#content_left>div.c-container[tpl="recommend_list"],#con-ar div:is([tpl='interactive'],[tpl="right_recommends_merge"]),div.result-op.cr-content:has([id='ai-accompanies-container']),div.result-molecule[tpl="app/rs"],.hint_right_top:has([tpl='app/hint-chat-entry']),.hint_right_middle:has([tpl='app/hint-head-top'])`;
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "baidu_ad", immed: true })({ selectors, siteName: "Baidu", isRemoveNodes: true });
               },
             },
@@ -1444,8 +1425,8 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               splitTypeName: "udm",
               mainSelector: "form button[type='submit']",
               overrideCss: `#pnnext>span:nth-child(2){clear:left}`,
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:0 5px 0 -3px;justify-content:center;align-items:center;flex-wrap:nowrap}.ACRAdd{border-left:1px solid #dadce0;height:65%;padding:0 10px 0 0}#${def.const.leftButton},#${def.const.leftButton}{display:inline-block;margin:0 2px 0 0}input{margin:0;height:39px;min-width:90px;border:0;background:#0b57d0;color:#fff;box-shadow:0 0 2px rgba(0,0,0,.35);font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:24px 0 0 24px}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 24px 24px 0}input:hover{opacity:.88}:host(.${def.const.scrollspan}){margin-top:-1px!important;min-height:24px!important}.${def.const.scrollbars}{display:inline-block;margin:0;padding-bottom:0!important;height:24px!important;font-size:12px!important}`,
-              darkModeCss: `:host(.${def.const.darkmode}) input{background:#c2e7ff;color:#001d35}:host(.${def.const.darkmode}) .ACRAdd{border-left:1px solid rgba(248, 249, 250, 0.25)}:host(.${def.const.darkmode}) input:hover{opacity:.85}}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:-1px 5px 0 -3px;justify-content:center;align-items:center;flex-wrap:nowrap}.ACRAdd{border-left:1px solid #dadce0;height:65%;padding:0 10px 0 0}#${def.const.leftButton},#${def.const.leftButton}{display:inline-block;margin:0 2px 0 0}input{margin:0;height:40px;min-width:90px;border:0;background:#0b57d0;color:#fff;box-shadow:0 0 2px #00000059;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:24px 0 0 24px}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 24px 24px 0}input:hover{opacity:.88}:host(.${def.const.scrollspan}){min-height:24px!important}.${def.const.scrollbars}{display:inline-block;margin:0;padding-bottom:0!important;height:24px!important;font-size:12px!important}`,
+              darkModeCss: `:host(.${def.const.darkmode}) input{background:#c2e7ff;color:#001d35}:host(.${def.const.darkmode}) .ACRAdd{border-left:1px solid #f8f9fa40}:host(.${def.const.darkmode}) input:hover{opacity:.85}}`,
               resultListProp: { qs: `div.MjjYud div.Ww4FFb.vt6azd[data-hveid^="C"][data-hveid$="AA"]:not(:has(div[jscontroller="TvBckd"]))`, delay: 10 },
               keywords: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
               antiRedirectFn: () => {
@@ -1468,10 +1449,10 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               splitTypeName: { split: "/", index: 1 },
               mainSelector: `.b_searchboxForm>input[type="hidden"][name="form"]`,
               overrideCss:
-                `.${def.const.scrollbarsV2}\\.width{width:max-content!important;z-index:999!important}` +
+                `html{overflow-x:hidden}.${def.const.scrollbarsV2}\\.width{width:max-content!important;z-index:999!important}` +
                 `#b_content{--smtc-ctrl-link-foreground-brand-rest:#3c3c3c}a,#b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.nslist_card_title,.nscardlite_title,.nscardcal_title,.product-card-info--title,#b_results :is(li a.feedback-binded,li.b_vtl_deeplinks>a,li:not(:has(.b_loccardans)) :not(.b_rc_gb_sub_title,.mmtitle,#mt_tleWrp h2,#ns_mag_ht h2,.b_rcGbMod,.b_paractl)>a:not(.iacf_head,.vsb_tr_t,.b_wikiGbModHero,.wiki_seemore,.gs_mdlink,[role='button'],:has(.b_dynamicMrsSuggestionText),.acf_p_title,#imc_pbtn),.b_no a,.na_t,.l_ecrd_txt_gl>h2,.b_RichCardAnswerV2 .b_paractl>a)){color:#2440b3}#b_content #b_results .product-card-info--title{color:#2440b3!important}a:visited,#b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.nslist_card_title,.nscardlite_title,.nscardcal_title,.product-card-info--title,#b_results :is(li a.feedback-binded,li.b_vtl_deeplinks>a,li:not(:has(.b_loccardans)) :not(.b_rc_gb_sub_title,.mmtitle,#mt_tleWrp h2,#ns_mag_ht h2,.b_rcGbMod,.b_paractl)>a:not(.iacf_head,.vsb_tr_t,.b_wikiGbModHero,.wiki_seemore,.gs_mdlink,[role='button'],:has(.b_dynamicMrsSuggestionText),.acf_p_title,#imc_pbtn),.b_no a,.na_t,.l_ecrd_txt_gl>h2,.b_RichCardAnswerV2 .b_paractl>a)):visited{color:#4007a2}#b_content #b_results li :is(h2>a,h3>a).${def.const.visited}{color:#4007a2!important}` +
-                `.b_dark #b_content{--smtc-ctrl-link-foreground-brand-rest:#d2d0ce}.b_dark a,.b_dark #b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.nslist_card_title,.nscardlite_title,.nscardcal_title,.product-card-info--title,#b_results :is(li a.feedback-binded,li.b_vtl_deeplinks>a,li:not(:has(.b_loccardans)) :not(.b_rc_gb_sub_title,.mmtitle,#mt_tleWrp h2,#ns_mag_ht h2,.b_rcGbMod,.b_paractl)>a:not(.iacf_head,.vsb_tr_t,.b_wikiGbModHero,.wiki_seemore,.gs_mdlink,[role='button'],:has(.b_dynamicMrsSuggestionText),.acf_p_title,#imc_pbtn),.b_no a,.na_t,.l_ecrd_txt_gl>h2,.b_RichCardAnswerV2 .b_paractl>a)){color:#82c7ff}.b_dark #b_content #b_results .product-card-info--title{color:#82c7ff!important}.b_dark a:visited,.b_dark #b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.nslist_card_title,.nscardlite_title,.nscardcal_title,.product-card-info--title,#b_results :is(li a.feedback-binded,li.b_vtl_deeplinks>a,li:not(:has(.b_loccardans)) :not(.b_rc_gb_sub_title,.mmtitle,#mt_tleWrp h2,#ns_mag_ht h2,.b_rcGbMod,.b_paractl)>a:not(.iacf_head,.vsb_tr_t,.b_wikiGbModHero,.wiki_seemore,.gs_mdlink,[role='button'],:has(.b_dynamicMrsSuggestionText),.acf_p_title,#imc_pbtn),.b_no a,.na_t,.l_ecrd_txt_gl>h2,.b_RichCardAnswerV2 .b_paractl>a)):visited{color:#7b7fec}.b_dark #b_content #b_results li :is(h2>a,h3>a).${def.const.visited}{color:#7b7fec!important}`,
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:6;display:inline-flex;margin:var(--margin,4px 0 0 0);padding:0 4px 0 0;width:auto;height:38px;min-width:180px;vertical-align:top;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0}input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 1px 18px;border-radius:24px 0 0 24px}#${def.const.rightButton} input{margin:0;padding:0 18px 1px 12px;border-radius:0 24px 24px 0}:host(.${def.const.scrollspan}){margin:0!important;padding:4px 2px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars}{margin-right:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}.${def.const.scrollbarsV2}{height:34px!important;border-radius:6px!important;padding:0 12px!important}input:hover{background:#f0f3f6;box-shadow:0 0 4px #174ae4;transition:background .1s linear,box-shadow .2s linear}`,
+                `.b_dark #b_content{--smtc-ctrl-link-foreground-brand-rest:#d2d0ce;--alinkcol:#a2b7f4}.b_dark a,.b_dark #b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.nslist_card_title,.nscardlite_title,.nscardcal_title,.product-card-info--title,#b_results :is(li a.feedback-binded,li.b_vtl_deeplinks>a,li:not(:has(.b_loccardans)) :not(.b_rc_gb_sub_title,.mmtitle,#mt_tleWrp h2,#ns_mag_ht h2,.b_rcGbMod,.b_paractl)>a:not(.iacf_head,.vsb_tr_t,.b_wikiGbModHero,.wiki_seemore,.gs_mdlink,[role='button'],:has(.b_dynamicMrsSuggestionText),.acf_p_title,#imc_pbtn),.b_no a,.na_t,.l_ecrd_txt_gl>h2,.b_RichCardAnswerV2 .b_paractl>a)){color:#a2b7f4}.b_dark #b_content #b_results .product-card-info--title{color:#a2b7f4!important}.b_dark a:visited,.b_dark #b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.nslist_card_title,.nscardlite_title,.nscardcal_title,.product-card-info--title,#b_results :is(li a.feedback-binded,li.b_vtl_deeplinks>a,li:not(:has(.b_loccardans)) :not(.b_rc_gb_sub_title,.mmtitle,#mt_tleWrp h2,#ns_mag_ht h2,.b_rcGbMod,.b_paractl)>a:not(.iacf_head,.vsb_tr_t,.b_wikiGbModHero,.wiki_seemore,.gs_mdlink,[role='button'],:has(.b_dynamicMrsSuggestionText),.acf_p_title,#imc_pbtn),.b_no a,.na_t,.l_ecrd_txt_gl>h2,.b_RichCardAnswerV2 .b_paractl>a)):visited{color:#7b7fec}.b_dark #b_content #b_results li :is(h2>a,h3>a).${def.const.visited}{color:#7b7fec!important}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:6;display:inline-flex;margin:var(--margin,4px 0 0 0);padding:0 4px 0 0;width:auto;height:38px;min-width:180px;vertical-align:top;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0}input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 1px 18px;border-radius:24px 0 0 24px}#${def.const.rightButton} input{margin:0;padding:0 18px 1px 12px;border-radius:0 24px 24px 0}:host(.${def.const.scrollspan}){margin:0!important;padding:4px 3px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars}{margin:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}.${def.const.scrollbarsV2}{margin:0 0 0 1px!important;height:34px!important;border-radius:6px!important;padding:0 12px!important}input:hover{background:#f0f3f6;box-shadow:0 0 4px #174ae4;transition:background .1s linear,box-shadow .2s linear}`,
               darkModeCss: `:host(.${def.const.darkmode}) input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}:host(.${def.const.darkmode}) input:hover{background:#a2b7f4;color:#333}`,
               resultListProp: {
                 qs: `#b_results>li.b_algo:not(.b_algoBorder,.b_topborder),#b_results>li.b_vidAns .mmlist>div[id],#b_results>li.b_mop .b_slidebar>div.slide,#b_topw>li.b_ans,aside>ol#b_context>li.b_algo`,
@@ -1509,7 +1490,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: "ia",
               mainSelector: "#search_form",
-              buttonCssText: `:host(#${def.const.rndButtonID}){box-sizing:border-box;position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;height:50px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{box-sizing:border-box;margin:0 3px 0 0;padding:2px 0;height:100%}input{box-sizing:border-box;margin:0;height:99%;min-width:100px;border:none;background:var(--sds-color-background-01);box-shadow:0 0 0 1px rgba(0,0,0,.08),0 2px 3px 0 rgba(0,0,0,.06);color:var(--theme-col-txt-button-secondary);vertical-align:top;font-weight:500;font-size:18px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 10px 1px 15px;border-radius:13px 0 0 13px}#${def.const.rightButton} input{padding:0 15px 1px 10px;border-radius:0 13px 13px 0}input:hover{background-color:var(--sds-color-background-accent-01-state-01);color:var(--sds-color-text-on-color)}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){box-sizing:border-box;position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;height:50px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{box-sizing:border-box;margin:0 3px 0 0;padding:2px 0;height:100%}input{box-sizing:border-box;margin:0;height:99%;min-width:100px;border:none;background:var(--sds-color-background-01);box-shadow:0 0 0 1px #00000014,0 2px 3px 0 #0000000f;color:var(--theme-col-txt-button-secondary);vertical-align:top;font-weight:500;font-size:18px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 10px 1px 15px;border-radius:13px 0 0 13px}#${def.const.rightButton} input{padding:0 15px 1px 10px;border-radius:0 13px 13px 0}input:hover{background-color:var(--sds-color-background-accent-01-state-01);color:var(--sds-color-text-on-color)}`,
               resultListProp: {
                 qs: `ol.react-results--main>li[data-layout="organic"],ol.react-results--main>li[data-layout="videos"] div.module--carousel__item,ol.react-results--main>li:has(div[data-react-module-id="about"])`,
                 delay: 10,
@@ -1762,7 +1743,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               splitTypeName: "fmt",
               mainSelector: "form[name='sf1']",
               buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:-1px;right:var(--right,unset);z-index:100;display:inline-flex;margin:0;padding:0;height:42px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 2px 0 0;height:42px}input{margin:0;padding:0;height:42px;min-width:90px;border:1px solid #c7c7c7;background:#fff;color:#111;box-shadow:0 2px 3px #0000000f;vertical-align:top;font-weight:500;font-size:15px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;letter-spacing:normal;cursor:pointer}#${def.const.leftButton} input{border-radius:4px 0 0 4px}#${def.const.rightButton} input{border-radius:0 4px 4px 0}input:hover{background:#fafafa;box-shadow:0 2px 5px #00000033;transition:box-shadow .1s cubic-bezier(.4,0,.2,1), -webkit-box-shadow .1s cubic-bezier(.4,0,.2,1)}`,
-              darkModeCss: `:host(.${def.const.darkmode}) input{background:#1e1e1e;color:#fff;border:1px solid grey;box-shadow:0 2px 3px rgba(0, 0, 0, .06)}:host(.${def.const.darkmode}) input:hover{background:#303030;color:#fafafa}`,
+              darkModeCss: `:host(.${def.const.darkmode}) input{background:#1e1e1e;color:#fff;border:1px solid grey;box-shadow:0 2px 3px #0000000f}:host(.${def.const.darkmode}) input:hover{background:#303030;color:#fafafa}`,
               resultListProp: { qs: `.results>ul.results-standard>li`, delay: 10 },
               keywords: `b, strong`,
               antiRedirectFn: () => deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "mojeek_ar" })("Mojeek", ".results>ul>li :is(:not(.more)>a,>a)", { useNewTab: true }),
@@ -1880,7 +1861,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           def.var.hlstyle = listCurrentSite.keywords ? `${listCurrentSite.keywords}{background-color:${bgcolor}!important;color:${fgcolor}!important;font-weight:600}` : ``;
           def.var.iconstyle = `.${def.notice.noticeX} .${def.notice.configuration} span.${def.notice.favicon},.${def.notice.card}__body-cover-image span.${def.notice.favicons}{background-color:transparent;background-image:${def.var.iconbg};background-repeat:no-repeat;}`;
 
-          function getQueryString() {
+          function getQueryString(logged = true) {
             if (currentSite.siteTypeID === newSiteType.YOU) {
               const textWord = qS(`textarea#search-input-textarea[name='query']`)?.value.trim();
               if (textWord) return encodeURIComponent(textWord);
@@ -1889,13 +1870,12 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             }
             const { inputArray, searchKeys } = searchProperties;
             const inputValue = qA(inputArray.join()).FindX(item => item.value)?.value;
-            if (inputValue) return DEBUG("QueryString[INPUT]:", { value: inputValue }) ?? encodeURIComponent(inputValue);
+            if (inputValue) return logged && DEBUG("QueryString[INPUT]:", { value: inputValue }), encodeURIComponent(inputValue);
             for (const key of searchKeys) {
               const queryString = getUrlParam(key);
               if (!queryString) continue;
               const decodedValue = queryString.replace(/\+/g, " ");
-              DEBUG("QueryString[URL]:", { queryKey: key, value: decodedValue });
-              return encodeURIComponent(decodedValue);
+              return logged && DEBUG("QueryString[URL]:", { queryKey: key, value: decodedValue }), encodeURIComponent(decodedValue);
             }
             return "";
           }
@@ -1948,38 +1928,24 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             }
           }
 
-          function openUpdateWindow(url) {
-            if (IS_REAL_GECKO || IS_REAL_WEBKIT || (IS_REAL_BLINK && GMscriptHandler === "Tampermonkey" && parseFloat(GMversion) >= 5.2)) {
-              def.var.updateWindow = GMopenInTab(IS_GREASEMONKEY ? url.replace(/\?\w+/g, "") : url, false);
-            } else global.location.href = url;
-          }
-
-          function showUpdateNotify() {
+          function showUpdateNotification(updateWindow) {
             const title = IS_CHN ? "升级提示" : "Update Tips";
-            const loadingTip = IS_REAL_GECKO
-              ? `${IS_CHN ? "已经在新窗口打开脚本升级页面，请注意切换！" : "The upgrade page is opened in new window!"}`
-              : `${IS_CHN ? "正在申请脚本更新安装页面，请稍后……" : "Installation page is requested, please wait..."}`;
+            const loadingTip = IS_CHN ? "正在申请脚本更新安装页面，请稍后……" : "Installation page is requested, please wait...";
             const okTip = IS_CHN ? "<dd><b>若您已更新完成</b>，请点此刷新页面，以使新版脚本生效！</dd>" : "<dd><b>If updated</b>, click here to make the script effective!</dd>";
             const text = createNoticeHTML(`<dd id="${def.notice.random}_loading" style="color:#ffff00;font-weight:600">${loadingTip}</dd>${okTip}`);
             GMnotification({ title, text, type: def.notice.info, closeWith: ["click"], timeout: false, position: "topRight", callbacks: { onClose: [reload] } });
-            if (def.var.updateWindow) {
-              sleep(6e3, { useCachedSetTimeout: true }).then(() => {
-                def.var.updateWindow.onclose = () => delete def.var.updateWindow;
-                def.var.updateWindow.close?.();
-              });
-            }
-            return qS(`#${def.notice.random}_loading`);
-          }
-
-          function removeLoadingElement(node) {
-            sleep(4e3, { useCachedSetTimeout: true }).then(() => safeRemoveNode(node));
+            const node = qS(`#${def.notice.random}_loading`);
+            if (updateWindow && typeof updateWindow.close === "function" && (!IS_REAL_BLINK || GMscriptHandler !== "Violentmonkey")) {
+              sleep(3e3, { useCachedSetTimeout: true }).then(() => updateWindow.close());
+              updateWindow.onclose = () => void safeRemoveNode(node);
+            } else return node;
           }
 
           function preInstall(url) {
             sleep(5e2)(url.replace(".meta.", ".user."))
-              .then(u => openUpdateWindow(u))
-              .then(() => showUpdateNotify())
-              .then(r => removeLoadingElement(r))
+              .then(u => GMopenInTab(IS_GREASEMONKEY ? u.replace(/\?\w+/g, "") : u, false))
+              .then(updateWindow => showUpdateNotification(updateWindow))
+              .then(node => node && sleep(3e3, { useCachedSetTimeout: true })(node).then(safeRemoveNode))
               .catch(e => void ERROR(`${e.name} in PreInstall:`, e.message));
           }
 
@@ -1998,8 +1964,8 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 const parsedNote = JSON.parse(note);
                 const updateinfo = IS_CHN ? parsedNote.CN : parsedNote.EN;
                 updateInfoList += updateinfo ? `<li>${updateinfo}</li>` : ``;
-              } catch (e) {
-                e && (updateInfoList += `<li>${note}</li>`);
+              } catch (_) {
+                updateInfoList += `<li>${note}</li>`;
               }
               return updateInfoList;
             }, "");
@@ -2021,7 +1987,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               cache.set(AUTOCHECK, def.var.curVersion);
             });
             const props = ["font-weight:bold;color:#dc143c", "color:0", "color:#dc143c", "color:0"];
-            __console("shown_new_update", `%c[GB-Update]%c\r\nWe found a new version: %c${version}%c, which you can update now!`, ...props);
+            __console("shown_new_update", `%c[Update Found] %cWe found a new version: %c${version}%c, which you can update now!`, ...props);
           }
 
           function showSuccessUpdateNotify() {
@@ -2032,20 +1998,17 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             GMnotification({ title, text: createNoticeHTML(successHTML), timeout: 3e3, closeWith: ["click"] });
             cache.set(AUTOCHECK, def.var.curVersion);
             const props = ["font-weight:700;color:#008b8b", "color:0", "color:#dc143c", "color:0"];
-            __console("shown_update_info", `%c[GB-Update]%c\r\nCurretVersion: %c${def.var.curVersion}%c is up-to-date!`, ...props);
+            __console("shown_update_info", `%c[Update Succeed] %cCurretVersion: %c${def.var.curVersion}%c is up-to-date!`, ...props);
           }
 
           function showUpdateError() {
             const props = ["font-weight:bold;color:#dc143c", "color:#800000"];
-            __console("error", "%c[GB-UpdateError]%c\r\nRefused to connect to 'the UpdateList URLs', Please check your Network or local DNS!", ...props);
+            __console("error", "%c[Update Failed] %cRefused to connect to 'the UpdateList URLs', Please check your Network or local DNS!", ...props);
           }
 
           void (async function (getUpdateInformation, parseUpdateInformatio) {
             const addAction = {
-              closeConfig: async () => {
-                const configureSelector = `.${def.notice.noticeX} .${def.notice.configuration}`;
-                return await NoticeX.close(qS(configureSelector));
-              },
+              closeConfig: async () => await NoticeX.close(qS(`.${def.notice.noticeX} .${def.notice.configuration}`)),
               listSearchEngine: currentSite => {
                 let returnHtml = "";
                 for (let site in listSite) {
@@ -2061,7 +2024,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                     </button>
                   </li>`;
                 }
-                return String(`<ul class="${def.notice.searchList}">${returnHtml}</ul>`);
+                return `<ul class="${def.notice.searchList}">${returnHtml}</ul>`;
               },
               listSelectSearchEngine: () => {
                 let returnHtml = "";
@@ -2190,14 +2153,13 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               filterResult: () => {
                 sleep(5e2)(addAction.closeConfig()).then(async isClosed => {
                   if (!isClosed) return;
-                  const _filter_Data_ = await getResultFilterData();
-                  const { trigger: antiResultsFilter, filter: resultFilters } = _filter_Data_;
+                  const { trigger: antiResultsFilter, filter: resultFilters } = await getResultFilterData();
                   const infoText = IS_CHN
                     ? `设置拦截关键词以数组为标准格式，每行一组过滤关键词（注意：非正则语句须转义字符，且最末行尾无逗号），支持高级正则表达式语法，不区分大小写。<em>详细设置规则请查看『设置指引』。</em>`
                     : `Filter keyword settings use Array as standard format, one filter keyword per line. Supports regular expressions and is not case-sensitive. <em>See "Guide" for detailed setting rules!</em>`;
                   const placeholder = IS_CHN
                     ? `设置如下数组格式：\n[\n   "任意关键词",\n   "任意网址但要注意转义",\n   "\\\\/\\\\/test\\\\.cn\\\\/id-\\\\d+",\n   "\\\\(\\\\?\\\\=非正则须转义\\\\)",`
-                    : `Set Array as follows: \n[\n   "Any keywords",\n   "Any URLs but must be escaped",\n   "v\\\\.test\\\\.com\\\\/test\\\\.html",\n   \\\\(\\\\?\\\\:Non-regex escaped\\\\)",`;
+                    : `Set Array as follows: \n[\n   "Any keywords",\n   "Any URLs must be escaped",\n   "v\\\\.test\\\\.com\\\\/test\\\\.html",\n   \\\\(\\\\?\\\\:Non-regex escaped\\\\)",`;
                   const placeholderText = placeholder + `\n   "www\\\\.example\\\\.[a-z]{2,3}",\n   "(a|b)\\\\.test\\\\.com",\n   "keyword1|keyword[2345]",\n   "^(?!.*B).*A.*$"\n]`;
                   const resultFiltersJSON = resultFilters.length ? JSON.stringify(resultFilters, null, "  ") : "";
                   const filterHTML = `<fieldset class="${def.notice.fieldset}">
@@ -2220,11 +2182,11 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                           <textarea class="${def.notice.random}_filter_content" placeholder='${placeholderText}'>${resultFiltersJSON}</textarea>
                         </div>
                         <div style="text-align:center;padding:0 0 6px 0">
-                        ${IS_CHN ? "(程序仅检测搜索结果列表内的可见文字)" : "(ONLY DETECT VISIBLE TEXT IN RESULT)"}
+                        ${IS_CHN ? "(仅检测搜索结果列表内的可见文字和链接)" : "(ONLY DETECT VISIBLE TEXT AND LINKS)"}
                         </div>
                       </li>
                       <li style="display:flex;justify-content:space-between;">
-                        <button id="${def.notice.random}_help" title="${IS_CHN ? "查看详细设置规则请单击设置指引！" : "See document for detailed setting rules! (Chinese)"}">
+                        <button id="${def.notice.random}_help" title="${IS_CHN ? "查看详细设置规则" : "View detailed setting rules (Chinese)"}">
                         ${IS_CHN ? "设置指引" : "Guide!"}
                         </button>
                         <div style="display:flex">
@@ -2243,8 +2205,6 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                     textarea.setAttribute("readonly", true);
                   }
                   tigger?.addEventListener("change", changeEventOnTigger);
-                  textarea?.addEventListener("compositionstart", () => (def.var.composing = true));
-                  textarea?.addEventListener("compositionend", () => delete def.var.composing);
                   textarea?.addEventListener("input", addInputEventOnTextarea);
                   qS(`#${def.notice.random}_help`)?.addEventListener("click", () => void GMopenInTab(`${def.url.feedback}/288`, false));
                   qS(`#${def.notice.random}_cancel`)?.addEventListener("click", () => void NoticeX.close(filterInterface));
@@ -2253,10 +2213,10 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               },
             };
 
-            function changeEventOnTigger() {
+            function changeEventOnTigger(event) {
               const textarea = qS(`.${def.notice.random}_filter_textarea .${def.notice.random}_filter_content`);
-              textarea?.classList.toggle(def.notice.readonly, !this.checked);
-              textarea?.toggleAttribute("readonly", !this.checked);
+              textarea?.classList.toggle(def.notice.readonly, !event.target.checked);
+              textarea?.toggleAttribute("readonly", !event.target.checked);
             }
 
             async function saveFilterResultData() {
@@ -2264,36 +2224,35 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 const filterString = qS(`.${def.notice.random}_filter_textarea .${def.notice.random}_filter_content`).value.trim();
                 const filterTrigger = qS(`#${def.notice.rf}`).checked;
                 const parsedFilterString = filterString ? JSON.parse(filterString) : [];
-                if (!Array.isArray(parsedFilterString) || asArray(parsedFilterString).SomeX(item => typeof item !== "string")) throw new Error("Format Error");
+                if (!safeArray.isArray(parsedFilterString) || asArray(parsedFilterString).SomeX(item => typeof item !== "string")) throw new Error("Format Error");
                 const resultFilterData = { filter: uniq(parsedFilterString.filter(Boolean)), trigger: filterTrigger };
                 GMsetValue(RESULTFILTER, encrypt(JSON.stringify(resultFilterData)));
                 const successTitle = IS_CHN ? "保存成功！" : "Success!";
                 const successText = IS_CHN ? "<dd>设置参数已成功保存，页面稍后自动刷新！</dd>" : "<dd>The data is saved successfully, Page will refresh!</dd>";
                 if (await addAction.closeConfig()) GMnotification({ title: successTitle, text: createNoticeHTML(successText), callbacks: { onClose: [reload] } });
-              } catch (e) {
+              } catch (_) {
                 const errorMessage = IS_CHN ? "设置数据格式有误，请修正后重新提交。" : "The setting data format is incorrect!";
                 const errorText = `<dd><e style="font-size:24px;vertical-align:bottom">\ud83d\ude31\u0020</e>${errorMessage}</dd>`;
-                e && GMnotification({ text: createNoticeHTML(errorText), type: def.notice.error, newestOnTop: true, closeWith: ["click"] });
+                GMnotification({ text: createNoticeHTML(errorText), type: def.notice.error, newestOnTop: true, closeWith: ["click"] });
               }
             }
 
             async function addInputEventOnTextarea(event) {
-              const _this = this ?? event.target;
+              const target = event.target;
               try {
-                if (def.var.composing) return;
-                const value = _this.value.trim();
-                if (value.length === 0) return _this.setAttribute("style", "border: 1px solid #999");
-                const previousCursorPosition = _this.selectionStart;
+                const value = target.value.trim();
+                if (value.length === 0) return target.setAttribute("style", "border: 1px solid #999");
+                const previousCursorPosition = target.selectionStart;
                 const formattedValue = JSON.stringify(JSON.parse(value), null, 2);
-                const newCursorPosition = previousCursorPosition + formattedValue.length - _this.value.length;
-                const currentScrollTop = _this.scrollTop;
-                _this.value = formattedValue;
-                _this.setAttribute("style", "border: 1px solid #999");
+                const newCursorPosition = previousCursorPosition + formattedValue.length - target.value.length;
+                const currentScrollTop = target.scrollTop;
+                target.value = formattedValue;
+                target.setAttribute("style", "border: 1px solid #999");
                 await sleep(10, { instance: true });
-                _this.scrollTop = currentScrollTop;
-                _this.setSelectionRange(newCursorPosition, newCursorPosition);
-              } catch (e) {
-                e && _this.setAttribute("style", "border: 2px solid #dc143c");
+                target.scrollTop = currentScrollTop;
+                target.setSelectionRange(newCursorPosition, newCursorPosition);
+              } catch (_) {
+                target.setAttribute("style", "border: 2px solid #dc143c");
               }
             }
 
@@ -2302,7 +2261,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 const [itemID, queryString] = [Number(item.id), getQueryString()];
                 const splitTypeName = getUrlParam(listCurrentSite.splitTypeName).trim();
                 const isImageType = listCurrentSite.imageType.includes(splitTypeName);
-                for (const [type, typeID] of Object.entries(newSiteType)) {
+                for (const [type, typeID] of safeObject.entries(newSiteType)) {
                   if (typeID !== itemID) continue;
                   const siteType = type.toLowerCase();
                   const url = isImageType ? listSite[siteType].imageURL : listSite[siteType].webURL;
@@ -2325,9 +2284,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 if (input_checked < 3) {
                   qA(`input[name='${def.notice.card}_lists']:disabled`).forEach(item => (item.disabled = false));
                   qS(`#${def.notice.random}_clear`).style.display = input_checked === 0 ? "none" : "inline";
-                } else {
-                  qA(`input[name='${def.notice.card}_lists']:not(:checked)`).forEach(item => (item.disabled = true));
-                }
+                } else qA(`input[name='${def.notice.card}_lists']:not(:checked)`).forEach(item => (item.disabled = true));
               });
             }
 
@@ -2361,7 +2318,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                   const confirmText = `${confirmColorsText}${confirmfgColorText}${confirmForegroundColor}${fonfirmbgColorText}${confirmbackgroundColor}`;
                   if (!confirm(confirmText)) return;
                   const text = createNoticeHTML(IS_CHN ? "<dd>搜索关键词自定义颜色已保存，当前页面即将刷新！</dd>" : "<dd>Search keywords custom color has been saved!</dd>");
-                  GMnotification({ title: IS_CHN ? "自定义颜色保存" : "Save Custom Color", text, callbacks: { onShow: [saveData], onClose: [reload] } });
+                  addAction.closeConfig() && GMnotification({ title: IS_CHN ? "自定义颜色保存" : "Save Custom Color", text, callbacks: { onShow: [saveData], onClose: [reload] } });
                 } else alert(IS_CHN ? "背景色 格式输入错误！" : "Background-color input-format error!");
               } else alert(IS_CHN ? "前景色（字体颜色） 格式输入错误！" : "Foreground-color (font-color) input-format error!");
             }
@@ -2370,8 +2327,8 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               qA(`input[name='${def.notice.card}_lists']:checked:enabled`).forEach(node => node.click());
             }
 
-            function showCustomColor() {
-              qS(`#${def.notice.random}_customColor`).style.display = this.checked ? "inline-block" : "none";
+            function showCustomColor(event) {
+              qS(`#${def.notice.random}_customColor`).style.display = event.target.checked ? "inline-block" : "none";
             }
 
             async function saveConfigureData() {
@@ -2490,7 +2447,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               bing: {
                 listTypes: { target: "#b_results", listName: "li", className: "b_algo" },
                 clear: () => safeRemoveNode("aside>ol#b_context"),
-                applyCookie: () => safeWindow.Object.assign(GMunsafeWindow, { AwayTimeScrollTopPoleRS: false, AwayTimeThresholdCustomControl: false, AwayTimeThreshold: 864e3 }),
+                applyCookie: () => safeObject.assign(GMunsafeWindow, { AwayTimeScrollTopPoleRS: false, AwayTimeThresholdCustomControl: false, AwayTimeThreshold: 864e3 }),
                 applyButton: ({ buttonSection, target, shadow }) => {
                   insertAfter(buttonSection, target);
                   if (document.body.classList.contains("b_dark")) buttonSection.classList.add(def.const.darkmode);
@@ -2585,7 +2542,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 },
                 applyButton: ({ buttonSection, target, shadow }) => {
                   const insertButtonsFn = () => !qS(`#${def.const.rndButtonID}`) && target && (insertAfter(buttonSection, target), addSearchButtonEvent(shadow));
-                  def.var.requestIdleCallback(insertButtonsFn, { timeout: 8e2 });
+                  def.const.requestIdleCallback(insertButtonsFn, { timeout: 8e2 });
                 },
               },
               yahoo: {
@@ -2631,8 +2588,8 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               yep: {
                 listTypes: { target: "div[class$='-results']>div>div", listName: "div" },
                 applyButton: async ({ buttonSection, target }) => {
-                  await sleep(0, { instance: true });
                   insertAfter(buttonSection, target);
+                  await sleep(0, { instance: true });
                   const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
                   buttonSection.style.setProperty("--right", `-${10 + width}px`);
                 },
@@ -2668,52 +2625,27 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               return ops.forEach(o => gbCookies.setItem(o)), (document.documentElement.innerHTML = loadText), location.replace(location.href);
             }
 
-            function insertCSS(currentSite, overwrite = false) {
-              try {
-                const cssText = currentSite.overrideCss ? `@charset "UTF-8";${currentSite.overrideCss}` : ``;
-                cssText && addStyle({ target: document.head, id: def.const.rndclassName, media: "all", cssText, overwrite });
-              } catch (e) {
-                ERROR(`${e.name} in InsertCSS:`, e.message);
-              }
+            function insertCSS(currentSite) {
+              updateAdoptedStyleSheets(document, currentSite.overrideCss, def.const.rndclassName);
             }
 
             function insertStyle() {
-              try {
-                const cssText = `@charset "UTF-8";` + def.var.style + def.var.iconstyle + String(keywordHighlight ? def.var.hlstyle : "");
-                addStyle({ target: document.head, id: def.const.rndstyleName, media: "all", cssText });
-              } catch (e) {
-                ERROR(`${e.name} in InsertStyle:`, e.message);
-              }
+              updateAdoptedStyleSheets(document, `${def.var.style}${def.var.iconstyle}${keywordHighlight ? def.var.hlstyle : ""}`, def.const.rndstyleName);
             }
 
-            function updateAdoptedStyleSheets(shadow, css, id) {
-              try {
-                if (!shadow.adoptedStyleSheets || typeof shadow.adoptedStyleSheets.push !== "function") throw new Error("use inlineStyle");
-                const sheet = new CSSStyleSheet();
-                (sheet.id = id) && sheet.replaceSync(css);
-                !asArray(shadow.adoptedStyleSheets).SomeX(s => s.id === id) && shadow.adoptedStyleSheets.push(sheet);
-              } catch (error) {
-                try {
-                  if (!qS(`style#${id}`, shadow)) shadow.prepend(cE("style", { id, media: "all", type: "text/css", textContent: css }));
-                } catch (e) {
-                  error && ERROR(`${e.name} in UpdateAdoptedStyleSheets:`, e.message, error.message);
-                }
-              }
-            }
-
-            async function insertButtons() {
+            function insertButtons() {
               try {
                 const target = qS(currentSite.mainSelector);
-                if (!target || !getQueryString()) return;
+                if (!target || !getQueryString(false)) return;
                 const buttonSection = cE("gb-button", { id: def.const.rndButtonID });
-                const shadow = def.var.attachShadow.call(buttonSection, { mode: "closed" });
+                const shadow = def.const.attachShadow.call(buttonSection, { mode: "closed" });
                 const darkModeCssText = currentSite.darkModeCss ? `${currentSite.darkModeCss}` : ``;
-                const buttonCssText = `@charset "UTF-8";${currentSite.buttonCssText}${darkModeCssText}`;
+                const buttonCssText = `${currentSite.buttonCssText}${darkModeCssText}`;
                 shadow.innerHTML = tTP.createHTML(def.var.button);
                 updateAdoptedStyleSheets(shadow, buttonCssText, def.const.buttons);
                 applyButtons(buttonSection, target, shadow);
                 addSearchButtonEvent(shadow);
-                scrollDetect(shadow, target);
+                scrollDetect(shadow);
               } catch (e) {
                 ERROR(`${e.name} in InsertButtons:`, e.message);
               }
@@ -2727,34 +2659,37 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               typeof applyButtonMethod === "function" ? applyButtonMethod({ buttonSection, target, shadow }) : insertAfter(buttonSection, target);
             }
 
-            function setupScrollButton(selector, shadow, className, target) {
-              const element = qS(selector, shadow);
-              if (!element) return;
-              const toggleScrollingClass = mini => {
-                if (currentSite.siteTypeID === newSiteType.GOOGLE) mini = (mini = qS(`div#searchform.minidiv`)) && mini.style.top !== "20px" && target.getBoundingClientRect().height < 35;
-                else if (currentSite.siteTypeID === newSiteType.BING) mini = qS(`#miniheader`)?.style.marginTop === "0px";
-                else return;
-                element.classList.toggle(className, Boolean(mini));
+            function setupScrollButton(buttonSet) {
+              const toggleScrollClass = () => {
+                const result = qS(`#tsf button[type='submit']`)?.getBoundingClientRect().height < 35 || qS(`#miniheader`)?.style.marginTop === "0px";
+                buttonSet.forEach(([element, className]) => element?.classList.toggle(className, Boolean(result)));
+                return result;
               };
-              toggleScrollingClass();
-              document.addEventListener("scroll", deBounce({ fn: toggleScrollingClass, timer: selector, delay: 0 }));
+              const throttleToggleScroll = throttle({ fn: toggleScrollClass, timer: "scroll", delay: 50, immed: true });
+              document.addEventListener("scroll", throttleToggleScroll) ?? document.addEventListener("scrollend", toggleScrollClass);
+              const initInterval = rAF.setInterval(() => toggleScrollClass() && rAF.clearInterval(initInterval), 50);
+              const terminateInterval = async () => await sleep(2e3)(initInterval).then(rAF.clearInterval);
+              document.readyState === "complete" ? terminateInterval() : global.addEventListener("load", terminateInterval);
             }
 
-            function scrollDetect(shadow, target) {
-              setupScrollButton(`#${def.const.rndButtonID}`, document, def.const.scrollspan, target);
-              setupScrollButton(`#${def.const.leftButton} input`, shadow, def.const.scrollbars, target);
-              setupScrollButton(`#${def.const.rightButton} input`, shadow, def.const.scrollbars, target);
+            function scrollDetect(shadow, buttonSet = new Set()) {
+              if (![newSiteType.GOOGLE, newSiteType.BING].includes(currentSite.siteTypeID)) return;
+              buttonSet.add([qS(`#${def.const.rndButtonID}`, document), def.const.scrollspan]);
+              buttonSet.add([qS(`#${def.const.leftButton} input`, shadow), def.const.scrollbars]);
+              buttonSet.add([qS(`#${def.const.rightButton} input`, shadow), def.const.scrollbars]);
+              setupScrollButton(buttonSet);
             }
 
             function addSearchButtonEvent(shadow) {
+              if (!qS(`#${def.const.rndButtonID}`)) return;
               qA(`span[sn]:not([event-insert])`, shadow).forEach(node => {
+                if (node.hasAttribute("event-insert")) return;
                 node.setAttribute("event-insert", true);
                 const inputElement = qS("input", node);
                 const siteTypeID = Number(node.getAttribute("sn"));
                 inputElement.addEventListener("mousedown", stopEventPropagation);
-                inputElement.addEventListener("click", () => {
+                inputElement.addEventListener("click", (_, selectedSiteData) => {
                   const imageSearch = getUrlParam(currentSite.splitTypeName)?.trim();
-                  let selectedSiteData;
                   if (siteTypeID === selectedSite[0].siteTypeID) selectedSiteData = selectedSite[0];
                   else if (siteTypeID === selectedSite[1].siteTypeID) selectedSiteData = selectedSite[1];
                   else return;
@@ -2764,7 +2699,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                   if (localWindow) top.location.href = finalUrl;
                   else GMopenInTab(finalUrl, false);
                 });
-              });
+              }) ?? DEBUG("%cInstalling Search_Buttons", "color:#808080");
             }
 
             function createNotice(listName, className, userdFilter) {
@@ -2831,7 +2766,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             }
 
             function processANodeURL(item, returnContent) {
-              if (item.nodeType !== Node.ELEMENT_NODE) return;
+              if (item?.nodeType !== Node.ELEMENT_NODE) return;
               const href = qS("a:not([data-testid='result-extras-site-search-link']):not([aria-label^='Anonymous']):not([href*='.bing.com/ck/a?'])", item)?.href ?? "";
               const url = [1, 5, 8, 12].includes(listCurrentSite.siteTypeID) ? qS(`.${def.const.filtered}`, item)?.textContent.trim() || "" : href;
               const content = item.innerText?.replace(/[\t\r\n\ue62b]/g, "").trim() + getDecodeURI(url);
@@ -2841,7 +2776,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             function matchFilters(item, content) {
               if (item?.nodeType !== Node.ELEMENT_NODE) return;
               try {
-                resultFilters.forEach(filter => new RegExp(filter, "i").test(content) && processMatchedItem(item, content, filter));
+                for (const filter of resultFilters) if (new RegExp(filter, "i").test(content)) return processMatchedItem(item, content, filter);
               } catch (e) {
                 ERROR(`${e.name} in MatchFilters:`, e.message);
               }
@@ -2875,12 +2810,11 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             function processMainThreadTasks() {
               const indexPage = checkIndexPage();
               const securityPolicy = getSecurityPolicy();
-              const { siteTypeID: currentSiteID } = currentSite;
-              if (currentSiteID !== newSiteType.OTHERS && !indexPage && !securityPolicy && !qS(`#${def.const.rndButtonID}`)) insertButtons();
-              const { siteTypeID: listSiteID, antiAdsFn, resultListProp, antiRedirectFn } = listCurrentSite;
-              if (listSiteID === newSiteType.OTHERS) return;
-              !indexPage && !securityPolicy && !qS(`#${def.const.rndclassName}`) && insertCSS(listCurrentSite);
-              !qS(`#${def.const.rndstyleName}`) && insertStyle();
+              if (currentSite.siteTypeID !== newSiteType.OTHERS && !indexPage && !securityPolicy && !qS(`#${def.const.rndButtonID}`)) insertButtons();
+              const { siteTypeID, overrideCss, antiAdsFn, resultListProp, antiRedirectFn } = listCurrentSite;
+              if (siteTypeID === newSiteType.OTHERS) return;
+              !indexPage && !securityPolicy && overrideCss && !findAdoptedStyleSheet(def.const.rndclassName) && insertCSS(listCurrentSite);
+              !findAdoptedStyleSheet(def.const.rndstyleName) && insertStyle();
               !securityPolicy && antiAds && antiAdsFn?.();
               !indexPage && !securityPolicy && antiResultsFilter && filterSearchResults(resultListProp);
               !indexPage && !securityPolicy && antiLinkRedirect && antiRedirectFn?.();
@@ -2888,7 +2822,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
             function searchButtonAndStylesObserve() {
               const observer = new MutationObserver(processMainThreadTasks);
-              observer.observe(document, { childList: true, subtree: true });
+              observer.observe(document, { childList: true, subtree: true }) ?? processMainThreadTasks();
               if (global.navigation) global.navigation.addEventListener("navigate", processMainThreadTasks);
               else ["pushState", "replaceState"].forEach(event => global.addEventListener(event, processMainThreadTasks));
             }
@@ -2896,8 +2830,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             function requestIconsForScriptUpdate(requestVersion) {
               try {
                 if (decrypt(requestVersion) === def.var.curVersion) return;
-                DEBUG("%cRequest icons for script update...", "color:#25f") ?? updateToRequestIcon();
-                GMsetValue(VERSION, encrypt(def.var.curVersion));
+                DEBUG("%cRequest Remote icon data for script update.", "color:#25f") ?? GMsetValue(VERSION, encrypt(def.var.curVersion)) ?? updateToRequestIcon();
               } catch (e) {
                 ERROR(`${e.name} in RequestIconsForScriptUpdate:`, e.message);
               }
@@ -2907,25 +2840,24 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
             void (function (updateFlag, requestVersion) {
               searchButtonAndStylesObserve();
-              if (CUR_WINDOW_TOP) {
-                parseUpdateInformatio(getUpdateInformation(updateFlag));
-                showSystemInfo();
-                insertMenus();
-                requestIconsForScriptUpdate(requestVersion);
-              }
+              if (!CUR_WINDOW_TOP) return;
+              parseUpdateInformatio(getUpdateInformation(updateFlag));
+              showSystemInfo();
+              insertMenus();
+              requestIconsForScriptUpdate(requestVersion);
             })(await cache.get(AUTOCHECK), await GMgetValue(VERSION));
           })(
             updateFlag => {
               if (!CUR_WINDOW_TOP || !isAutoUpdate || (updateFlag && !setDebuggerMode())) return;
               const updateDetectionResponses = updateDetectionAddress.map(addr => fetchUpdateResponse(addr));
-              return Promise.any(updateDetectionResponses).catch(e => void ERROR(`${e.name} in GetUpdateInformation:`, e.message));
+              return Promise.any(updateDetectionResponses).catch(e => ERROR(`${e.name} in GetUpdateInformation:`, e.message) ?? object());
             },
             async updateResponse => {
               try {
                 const response = await updateResponse;
                 if (!response) return;
                 const { res, url } = response;
-                if (!res) return showUpdateError();
+                if (!res || !url) return showUpdateError();
                 const [version, notes] = [extractVersion(res), extractNotes(res)];
                 if (!version) return;
                 const newUpdateHTML = generateUpdateHTML(version, generateUpdateList(notes));
@@ -2946,29 +2878,20 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         });
       })(
         async () => {
-          const defaults = {
-            isAutoUpdate: true,
-            keywordHighlight: false,
-            isHotkey: true,
-            selectedEngine: [1, 2, 3],
-            localWindow: true,
-            googleJump: true,
-            antiLinkRedirect: true,
-            antiAds: false,
-            customColor: { foregroundColor: "#f73131cd", backgroundColor: "#ffff80ad" },
-          };
+          const customColor = { foregroundColor: "#f73131cd", backgroundColor: "#ffff80ad" };
+          const defaults = { isAutoUpdate: true, keywordHighlight: false, isHotkey: true, selectedEngine: [1, 2, 3], localWindow: true };
+          safeObject.assign(defaults, { googleJump: true, antiLinkRedirect: true, antiAds: false, customColor });
           const configure = await GMgetValue(CONFIGURE);
           if (!configure) {
             const values = await GMlistValues();
             values.forEach(key => GMdeleteValue(key));
-            GMsetValue(CONFIGURE, encrypt(JSON.stringify(defaults)));
-            return defaults;
+            return GMsetValue(CONFIGURE, encrypt(JSON.stringify(defaults))), defaults;
           }
           try {
             const config_date = JSON.parse(decrypt(configure));
-            return { ...defaults, ...config_date, selectedEngine: Array.isArray(config_date.selectedEngine) ? config_date.selectedEngine : defaults.selectedEngine };
-          } catch (e) {
-            return e && defaults;
+            return { ...defaults, ...config_date, selectedEngine: safeArray.isArray(config_date.selectedEngine) ? config_date.selectedEngine : defaults.selectedEngine };
+          } catch (_) {
+            return defaults;
           }
         },
         async () => {
@@ -2977,9 +2900,9 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             const resultFilter = await GMgetValue(RESULTFILTER);
             if (!resultFilter) return defaults;
             const { filter, trigger } = JSON.parse(decrypt(resultFilter));
-            return { filter: Array.isArray(filter) ? filter : [], trigger };
-          } catch (e) {
-            return e && defaults;
+            return { filter: safeArray.isArray(filter) ? filter : [], trigger };
+          } catch (_) {
+            return defaults;
           }
         },
         url => {
@@ -2998,17 +2921,17 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             const onerror = () => reject(new Error("NetworkError"));
             const ontimeout = () => reject(new Error("TimeoutError"));
             GMxmlhttpRequest({ url, headers, method: "GET", timeout: 5e3, responseType: "blob", onload, onerror, ontimeout });
-          }).catch(e => Promise.reject(new Error("requestRemoteIcon: " + e.message)));
+          }).catch(e => Promise.reject(new Error("RequestRemoteIcon: " + e.message)));
         },
         options => {
           try {
             return new NoticeX({ ...options }).show();
           } catch (e) {
-            ERROR(`${e.name} in GMnotification:`, e.message);
+            ERROR(`${e.name} in GMnotification:`, e);
           }
         }
       );
-    })(createTrustedTypePolicy(), sessionStorage?.getItem(def.const.const.navinfo));
+    })(initTrustedTypesPolicy(), safeJSON, sessionStorage?.getItem(def.const.const.navinfo));
   },
   {
     method: Object.entries({
@@ -3023,6 +2946,7 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
   },
   ((ctx, mS = [..."t𝚁TjLWO𝙳ZR𝚖𝚜i𝚗gE𝚎𝚠2H𝚘8YkxC𝙲N0GcBrF5Qda4𝙺XoK𝚆𝚣hIn7uw1e𝚌bpM𝚞PUJlS9szD𝚝Avm3𝚟6qfV𝚡y𝚊"]) => {
     const oC = ctx.Object.create.bind(null, null);
+    const sP = (O, o) => O.create(O.getPrototypeOf(o), O.getOwnPropertyDescriptors(o));
     const eH = type => {
       const original = ctx.history[type];
       return function () {
@@ -3031,12 +2955,12 @@ void (function (ctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     };
     const tS = storageType => {
       try {
-        ctx.addEventListener("error", event => (event.error?.name === "SecurityError" || event.message?.includes("SecurityError")) && event.preventDefault(), { once: true });
+        ctx.addEventListener("error", e => (e.error?.name === "SecurityError" || e.message?.includes("SecurityError")) && e.preventDefault(), { once: true });
         return ctx[storageType].setItem("__gb_storage_test__", true), ctx[storageType].removeItem("__gb_storage_test__"), ctx[storageType];
-      } catch (e) {
-        return e && null;
+      } catch (_) {
+        return null;
       }
     };
-    return { oC, mS, eH, lS: tS("localStorage"), sS: tS("sessionStorage") };
+    return { oC, mS, sP, eH, lS: tS("localStorage"), sS: tS("sessionStorage") };
   })(typeof window !== "undefined" ? window : this)
 );
