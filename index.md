@@ -29,12 +29,13 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2025.11.01.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2025.12.06.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 优化重构脚本核心函数，提升脚本兼容性。
-@ 优化粗体描边样式修正脚本冲突检测阈值。
-@ 修复字体阴影拾色器中的各种隐藏问题。
+@ 优化脚本核心代码，兼容更多脚本管理器。
+@ 优化脚本字体渲染样式的载入模式以提升性能。
+@ 修复框架页面（含嵌套）未跟随父页面同步渲染的问题。
+@ 修复脚本中可能存在的内存泄漏或性能低下的问题。
 @ 修复一些已知的问题，优化代码，优化样式。
 ```
 
@@ -104,13 +105,13 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2025.11.01.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2025.12.06.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ 优化重构脚本核心函数，提升脚本兼容性。
-@ 重构搜索引擎跳转按钮的载入模式。
-@ 优化所有搜索引擎跳转按钮的实时样式。
-@ 完美解决暗黑模式按钮及链接的颜色问题。
+@ 优化脚本核心代码，兼容更多脚本管理器。
+@ 优化 Google 各种灰度测试版本的滚动兼容。
+@ 优化 Bing.com 暗黑模式的搜索链接颜色。
+@ 优化脚本样式的载入模式，提升性能及兼容性。
 @ 修正一些已知问题，优化代码，优化样式。
 ```
 
