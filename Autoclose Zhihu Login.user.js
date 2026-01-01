@@ -3,7 +3,7 @@
 // @name:en            Autoclose Zhihu Login Prompt
 // @name:zh-CN         自动关闭知乎登录提示
 // @name:zh-TW         自動關閉知乎登錄提示
-// @version            2025.09.14.1
+// @version            2026.01.01.1
 // @author             F9y4ng
 // @description        自动关闭知乎自动弹出的登录与注册提示，仅仅用于关闭自动弹出的登录提示。
 // @description:en     Autoclose Zhihu Login Prompt is only used to close the pop-up login and registration prompt.
@@ -25,13 +25,13 @@
 // @compatible         Opera version>=91
 // @compatible         Safari version>=15.4
 // @license            GPL-3.0-only
-// @copyright          2023-2025, F9y4ng
+// @copyright          2023-2026, F9y4ng
 // @run-at             document-start
 // ==/UserScript==
 
 /* jshint esversion: 11 */
 
-void (function (w) {
+void (function (global) {
   "use strict";
 
   if (location.hostname.startsWith("link.")) {
@@ -48,7 +48,7 @@ void (function (w) {
     const loginNode = node.querySelector(`button[aria-label="关闭"][class~='Modal-closeButton']`);
     if (!loginNode) return;
     document.documentElement.removeAttribute("style");
-    if (!w.event || w.event.type === "load") loginNode.click();
+    if (!global.event || global.event.type === "load") loginNode.click();
   }
 
   function hiddenFloatNode(node) {

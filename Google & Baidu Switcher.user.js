@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            Помощник поисковой системы
 // @name:ja            優雅な検索エンジン助手
-// @version            2025.12.06.1
+// @version            2026.01.01.1
 // @author             F9y4ng
 // @description        Alias "Search Engine Assistant", le script aide à la navigation entre les moteurs de recherche, à la personnalisation des préférences, à la mise en évidence des mots-clés, à l'élimination des redirections et des publicités et au filtrage des résultats. Compatible avec Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG et bien d'autres moteurs de recherche célèbres.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG and more.
@@ -43,198 +43,193 @@
 // @match              *://yep.com/*
 // @match              *://www.mojeek.com/search*
 // @match              *://au.priv.au/search*
-// @match              *://*.google.com/search*
-// @match              *://*.google.ad/search*
-// @match              *://*.google.ae/search*
-// @match              *://*.google.com.af/search*
-// @match              *://*.google.com.ag/search*
-// @match              *://*.google.com.ai/search*
-// @match              *://*.google.al/search*
-// @match              *://*.google.am/search*
-// @match              *://*.google.co.ao/search*
-// @match              *://*.google.com.ar/search*
-// @match              *://*.google.as/search*
-// @match              *://*.google.at/search*
-// @match              *://*.google.com.au/search*
-// @match              *://*.google.az/search*
-// @match              *://*.google.ba/search*
-// @match              *://*.google.com.bd/search*
-// @match              *://*.google.be/search*
-// @match              *://*.google.bf/search*
-// @match              *://*.google.bg/search*
-// @match              *://*.google.com.bh/search*
-// @match              *://*.google.bi/search*
-// @match              *://*.google.bj/search*
-// @match              *://*.google.com.bn/search*
-// @match              *://*.google.com.bo/search*
-// @match              *://*.google.com.br/search*
-// @match              *://*.google.bs/search*
-// @match              *://*.google.bt/search*
-// @match              *://*.google.co.bw/search*
-// @match              *://*.google.by/search*
-// @match              *://*.google.com.bz/search*
-// @match              *://*.google.ca/search*
-// @match              *://*.google.cd/search*
-// @match              *://*.google.cf/search*
-// @match              *://*.google.cg/search*
-// @match              *://*.google.ch/search*
-// @match              *://*.google.ci/search*
-// @match              *://*.google.co.ck/search*
-// @match              *://*.google.cl/search*
-// @match              *://*.google.cm/search*
-// @match              *://*.google.cn/search*
-// @match              *://*.google.com.co/search*
-// @match              *://*.google.co.cr/search*
-// @match              *://*.google.com.cu/search*
-// @match              *://*.google.cv/search*
-// @match              *://*.google.com.cy/search*
-// @match              *://*.google.cz/search*
-// @match              *://*.google.de/search*
-// @match              *://*.google.dj/search*
-// @match              *://*.google.dk/search*
-// @match              *://*.google.dm/search*
-// @match              *://*.google.com.do/search*
-// @match              *://*.google.dz/search*
-// @match              *://*.google.com.ec/search*
-// @match              *://*.google.ee/search*
-// @match              *://*.google.com.eg/search*
-// @match              *://*.google.es/search*
-// @match              *://*.google.com.et/search*
-// @match              *://*.google.fi/search*
-// @match              *://*.google.com.fj/search*
-// @match              *://*.google.fm/search*
-// @match              *://*.google.fr/search*
-// @match              *://*.google.ga/search*
-// @match              *://*.google.ge/search*
-// @match              *://*.google.gg/search*
-// @match              *://*.google.com.gh/search*
-// @match              *://*.google.com.gi/search*
-// @match              *://*.google.gl/search*
-// @match              *://*.google.gm/search*
-// @match              *://*.google.gr/search*
-// @match              *://*.google.com.gt/search*
-// @match              *://*.google.gy/search*
-// @match              *://*.google.hk/search*
-// @match              *://*.google.com.hk/search*
-// @match              *://*.google.hn/search*
-// @match              *://*.google.hr/search*
-// @match              *://*.google.ht/search*
-// @match              *://*.google.hu/search*
-// @match              *://*.google.co.id/search*
-// @match              *://*.google.ie/search*
-// @match              *://*.google.co.il/search*
-// @match              *://*.google.im/search*
-// @match              *://*.google.co.in/search*
-// @match              *://*.google.iq/search*
-// @match              *://*.google.is/search*
-// @match              *://*.google.it/search*
-// @match              *://*.google.je/search*
-// @match              *://*.google.com.jm/search*
-// @match              *://*.google.jo/search*
-// @match              *://*.google.jp/search*
-// @match              *://*.google.co.jp/search*
-// @match              *://*.google.co.ke/search*
-// @match              *://*.google.com.kh/search*
-// @match              *://*.google.ki/search*
-// @match              *://*.google.kg/search*
-// @match              *://*.google.co.kr/search*
-// @match              *://*.google.com.kw/search*
-// @match              *://*.google.kz/search*
-// @match              *://*.google.la/search*
-// @match              *://*.google.com.lb/search*
-// @match              *://*.google.li/search*
-// @match              *://*.google.lk/search*
-// @match              *://*.google.co.ls/search*
-// @match              *://*.google.lt/search*
-// @match              *://*.google.lu/search*
-// @match              *://*.google.lv/search*
-// @match              *://*.google.com.ly/search*
-// @match              *://*.google.co.ma/search*
-// @match              *://*.google.md/search*
-// @match              *://*.google.me/search*
-// @match              *://*.google.mg/search*
-// @match              *://*.google.mk/search*
-// @match              *://*.google.ml/search*
-// @match              *://*.google.com.mm/search*
-// @match              *://*.google.mn/search*
-// @match              *://*.google.ms/search*
-// @match              *://*.google.com.mt/search*
-// @match              *://*.google.mu/search*
-// @match              *://*.google.mv/search*
-// @match              *://*.google.mw/search*
-// @match              *://*.google.com.mx/search*
-// @match              *://*.google.com.my/search*
-// @match              *://*.google.co.mz/search*
-// @match              *://*.google.com.na/search*
-// @match              *://*.google.com.ng/search*
-// @match              *://*.google.com.ni/search*
-// @match              *://*.google.ne/search*
-// @match              *://*.google.nl/search*
-// @match              *://*.google.no/search*
-// @match              *://*.google.com.np/search*
-// @match              *://*.google.nr/search*
-// @match              *://*.google.nu/search*
-// @match              *://*.google.co.nz/search*
-// @match              *://*.google.com.om/search*
-// @match              *://*.google.com.pa/search*
-// @match              *://*.google.com.pe/search*
-// @match              *://*.google.com.pg/search*
-// @match              *://*.google.com.ph/search*
-// @match              *://*.google.com.pk/search*
-// @match              *://*.google.pl/search*
-// @match              *://*.google.pn/search*
-// @match              *://*.google.com.pr/search*
-// @match              *://*.google.ps/search*
-// @match              *://*.google.pt/search*
-// @match              *://*.google.com.py/search*
-// @match              *://*.google.com.qa/search*
-// @match              *://*.google.ro/search*
-// @match              *://*.google.ru/search*
-// @match              *://*.google.rw/search*
-// @match              *://*.google.com.sa/search*
-// @match              *://*.google.com.sb/search*
-// @match              *://*.google.sc/search*
-// @match              *://*.google.se/search*
-// @match              *://*.google.com.sg/search*
-// @match              *://*.google.sh/search*
-// @match              *://*.google.si/search*
-// @match              *://*.google.sk/search*
-// @match              *://*.google.com.sl/search*
-// @match              *://*.google.sn/search*
-// @match              *://*.google.so/search*
-// @match              *://*.google.sm/search*
-// @match              *://*.google.sr/search*
-// @match              *://*.google.st/search*
-// @match              *://*.google.com.sv/search*
-// @match              *://*.google.td/search*
-// @match              *://*.google.tg/search*
-// @match              *://*.google.co.th/search*
-// @match              *://*.google.com.tj/search*
-// @match              *://*.google.tl/search*
-// @match              *://*.google.tm/search*
-// @match              *://*.google.tn/search*
-// @match              *://*.google.to/search*
-// @match              *://*.google.com.tr/search*
-// @match              *://*.google.tt/search*
-// @match              *://*.google.com.tw/search*
-// @match              *://*.google.co.tz/search*
-// @match              *://*.google.com.ua/search*
-// @match              *://*.google.co.ug/search*
-// @match              *://*.google.co.uk/search*
-// @match              *://*.google.com.uy/search*
-// @match              *://*.google.co.uz/search*
-// @match              *://*.google.com.vc/search*
-// @match              *://*.google.co.ve/search*
-// @match              *://*.google.vg/search*
-// @match              *://*.google.co.vi/search*
-// @match              *://*.google.com.vn/search*
-// @match              *://*.google.vu/search*
-// @match              *://*.google.ws/search*
-// @match              *://*.google.rs/search*
-// @match              *://*.google.co.za/search*
-// @match              *://*.google.co.zm/search*
-// @match              *://*.google.co.zw/search*
-// @match              *://*.google.cat/search*
+// @match              *://*.google.ad/search?*
+// @match              *://*.google.ae/search?*
+// @match              *://*.google.al/search?*
+// @match              *://*.google.am/search?*
+// @match              *://*.google.as/search?*
+// @match              *://*.google.at/search?*
+// @match              *://*.google.az/search?*
+// @match              *://*.google.ba/search?*
+// @match              *://*.google.be/search?*
+// @match              *://*.google.bf/search?*
+// @match              *://*.google.bg/search?*
+// @match              *://*.google.bi/search?*
+// @match              *://*.google.bj/search?*
+// @match              *://*.google.bs/search?*
+// @match              *://*.google.bt/search?*
+// @match              *://*.google.by/search?*
+// @match              *://*.google.ca/search?*
+// @match              *://*.google.cat/search?*
+// @match              *://*.google.cd/search?*
+// @match              *://*.google.cf/search?*
+// @match              *://*.google.cg/search?*
+// @match              *://*.google.ch/search?*
+// @match              *://*.google.ci/search?*
+// @match              *://*.google.cl/search?*
+// @match              *://*.google.cm/search?*
+// @match              *://*.google.cn/search?*
+// @match              *://*.google.co.ao/search?*
+// @match              *://*.google.co.bw/search?*
+// @match              *://*.google.co.ck/search?*
+// @match              *://*.google.co.cr/search?*
+// @match              *://*.google.co.id/search?*
+// @match              *://*.google.co.il/search?*
+// @match              *://*.google.co.in/search?*
+// @match              *://*.google.co.jp/search?*
+// @match              *://*.google.co.ke/search?*
+// @match              *://*.google.co.kr/search?*
+// @match              *://*.google.co.ls/search?*
+// @match              *://*.google.co.ma/search?*
+// @match              *://*.google.co.mz/search?*
+// @match              *://*.google.co.nz/search?*
+// @match              *://*.google.co.th/search?*
+// @match              *://*.google.co.tz/search?*
+// @match              *://*.google.co.ug/search?*
+// @match              *://*.google.co.uk/search?*
+// @match              *://*.google.co.uz/search?*
+// @match              *://*.google.co.ve/search?*
+// @match              *://*.google.co.vi/search?*
+// @match              *://*.google.co.za/search?*
+// @match              *://*.google.co.zm/search?*
+// @match              *://*.google.co.zw/search?*
+// @match              *://*.google.com/search?*
+// @match              *://*.google.com.af/search?*
+// @match              *://*.google.com.ag/search?*
+// @match              *://*.google.com.ar/search?*
+// @match              *://*.google.com.au/search?*
+// @match              *://*.google.com.bd/search?*
+// @match              *://*.google.com.bh/search?*
+// @match              *://*.google.com.bn/search?*
+// @match              *://*.google.com.bo/search?*
+// @match              *://*.google.com.br/search?*
+// @match              *://*.google.com.bz/search?*
+// @match              *://*.google.com.co/search?*
+// @match              *://*.google.com.cu/search?*
+// @match              *://*.google.com.cy/search?*
+// @match              *://*.google.com.do/search?*
+// @match              *://*.google.com.ec/search?*
+// @match              *://*.google.com.eg/search?*
+// @match              *://*.google.com.et/search?*
+// @match              *://*.google.com.fj/search?*
+// @match              *://*.google.com.gh/search?*
+// @match              *://*.google.com.gi/search?*
+// @match              *://*.google.com.gt/search?*
+// @match              *://*.google.com.hk/search?*
+// @match              *://*.google.com.jm/search?*
+// @match              *://*.google.com.kh/search?*
+// @match              *://*.google.com.kw/search?*
+// @match              *://*.google.com.lb/search?*
+// @match              *://*.google.com.ly/search?*
+// @match              *://*.google.com.mm/search?*
+// @match              *://*.google.com.mt/search?*
+// @match              *://*.google.com.mx/search?*
+// @match              *://*.google.com.my/search?*
+// @match              *://*.google.com.na/search?*
+// @match              *://*.google.com.ng/search?*
+// @match              *://*.google.com.ni/search?*
+// @match              *://*.google.com.np/search?*
+// @match              *://*.google.com.om/search?*
+// @match              *://*.google.com.pa/search?*
+// @match              *://*.google.com.pe/search?*
+// @match              *://*.google.com.pg/search?*
+// @match              *://*.google.com.ph/search?*
+// @match              *://*.google.com.pk/search?*
+// @match              *://*.google.com.pr/search?*
+// @match              *://*.google.com.py/search?*
+// @match              *://*.google.com.qa/search?*
+// @match              *://*.google.com.sa/search?*
+// @match              *://*.google.com.sb/search?*
+// @match              *://*.google.com.sg/search?*
+// @match              *://*.google.com.sl/search?*
+// @match              *://*.google.com.sv/search?*
+// @match              *://*.google.com.tj/search?*
+// @match              *://*.google.com.tr/search?*
+// @match              *://*.google.com.tw/search?*
+// @match              *://*.google.com.ua/search?*
+// @match              *://*.google.com.uy/search?*
+// @match              *://*.google.com.vc/search?*
+// @match              *://*.google.com.vn/search?*
+// @match              *://*.google.cv/search?*
+// @match              *://*.google.cz/search?*
+// @match              *://*.google.de/search?*
+// @match              *://*.google.dj/search?*
+// @match              *://*.google.dk/search?*
+// @match              *://*.google.dm/search?*
+// @match              *://*.google.dz/search?*
+// @match              *://*.google.ee/search?*
+// @match              *://*.google.es/search?*
+// @match              *://*.google.fi/search?*
+// @match              *://*.google.fm/search?*
+// @match              *://*.google.fr/search?*
+// @match              *://*.google.ga/search?*
+// @match              *://*.google.ge/search?*
+// @match              *://*.google.gg/search?*
+// @match              *://*.google.gl/search?*
+// @match              *://*.google.gm/search?*
+// @match              *://*.google.gr/search?*
+// @match              *://*.google.gy/search?*
+// @match              *://*.google.hn/search?*
+// @match              *://*.google.hr/search?*
+// @match              *://*.google.ht/search?*
+// @match              *://*.google.hu/search?*
+// @match              *://*.google.ie/search?*
+// @match              *://*.google.im/search?*
+// @match              *://*.google.iq/search?*
+// @match              *://*.google.is/search?*
+// @match              *://*.google.it/search?*
+// @match              *://*.google.je/search?*
+// @match              *://*.google.jo/search?*
+// @match              *://*.google.kg/search?*
+// @match              *://*.google.ki/search?*
+// @match              *://*.google.kz/search?*
+// @match              *://*.google.la/search?*
+// @match              *://*.google.li/search?*
+// @match              *://*.google.lk/search?*
+// @match              *://*.google.lt/search?*
+// @match              *://*.google.lu/search?*
+// @match              *://*.google.lv/search?*
+// @match              *://*.google.md/search?*
+// @match              *://*.google.me/search?*
+// @match              *://*.google.mg/search?*
+// @match              *://*.google.mk/search?*
+// @match              *://*.google.ml/search?*
+// @match              *://*.google.mn/search?*
+// @match              *://*.google.mu/search?*
+// @match              *://*.google.mv/search?*
+// @match              *://*.google.mw/search?*
+// @match              *://*.google.ne/search?*
+// @match              *://*.google.nl/search?*
+// @match              *://*.google.no/search?*
+// @match              *://*.google.nr/search?*
+// @match              *://*.google.nu/search?*
+// @match              *://*.google.pl/search?*
+// @match              *://*.google.pn/search?*
+// @match              *://*.google.ps/search?*
+// @match              *://*.google.pt/search?*
+// @match              *://*.google.ro/search?*
+// @match              *://*.google.rs/search?*
+// @match              *://*.google.ru/search?*
+// @match              *://*.google.rw/search?*
+// @match              *://*.google.sc/search?*
+// @match              *://*.google.se/search?*
+// @match              *://*.google.sh/search?*
+// @match              *://*.google.si/search?*
+// @match              *://*.google.sk/search?*
+// @match              *://*.google.sm/search?*
+// @match              *://*.google.sn/search?*
+// @match              *://*.google.so/search?*
+// @match              *://*.google.sr/search?*
+// @match              *://*.google.st/search?*
+// @match              *://*.google.td/search?*
+// @match              *://*.google.tg/search?*
+// @match              *://*.google.tl/search?*
+// @match              *://*.google.tm/search?*
+// @match              *://*.google.tn/search?*
+// @match              *://*.google.to/search?*
+// @match              *://*.google.tt/search?*
+// @match              *://*.google.vu/search?*
+// @match              *://*.google.ws/search?*
 // @exclude            *://www.google.com/sorry*
 // @exclude            *://www.baidu.com/link*
 // @exclude            *://www.sogou.com/link*
@@ -259,10 +254,10 @@
 // @grant              GM.registerMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
-// @note               {"CN":"优化脚本核心代码，兼容更多脚本管理器。","EN":"Optimized code for compatibility with more script managers."}
-// @note               {"CN":"优化 Google 各种灰度测试版本的滚动兼容。","EN":"Optimized scroll compatibility for Google A/B test."}
-// @note               {"CN":"优化 Bing.com 暗黑模式的搜索链接颜色。","EN":"Optimized search link color for Bing dark mode."}
-// @note               {"CN":"优化脚本样式的载入模式，提升性能及兼容性。","EN":"Optimize the loading mode of script styles."}
+// @note               {"CN":"🎉恭祝各位用户 𝟐𝟎𝟐𝟔 新年快乐，万事如意。🎊","EN":"🎉Wishing all users a happy New Year in 𝟐𝟎𝟐𝟔.🎊"}
+// @note               {"CN":"更新 2026 年度脚本版权信息（第十一年度）。","EN":"Updated script copyright information in 2026."}
+// @note               {"CN":"修复 Bing.com 新的灰度测试中搜索过滤问题。","EN":"Fixed search filter issue in Bing's A/B test."}
+// @note               {"CN":"修复部分搜索引擎跳转按钮的样式问题。","EN":"Fixed jump buttons issue of some search engine."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         edge version≥88 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Chrome version≥88 (Compatible Tampermonkey, Violentmonkey)
@@ -270,7 +265,7 @@
 // @compatible         Opera version≥75 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Safari version≥14 (Compatible Tampermonkey, Userscripts)
 // @license            GPL-3.0-only
-// @copyright          2015-2025, F9y4ng
+// @copyright          2015-2026, F9y4ng
 // @run-at             document-start
 // ==/UserScript==
 
@@ -387,7 +382,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         const: { once: "gb-init-once", purge: "gd-purge-success", anti: "gd-anti-redirect", warn: "data-filter-warn", navinfo: "__Navigation#INFO__" },
       },
       var: {
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.12.06.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2026.01.01.0",
         scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       },
       url: {
@@ -815,7 +810,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       const [CONFIGURE, VERSION, AUTOCHECK, RESULTFILTER, REMOTEICONS] = ["_configures_", "_version_", "_autoupdate_", "_resultFilter_", "_remoteicons_"];
       const { engine, creditEngine, brand, voucher } = (navigatorInfo =
         JSON.parse(navigatorInfo || null) || (sessionStorage?.setItem(def.const.const.navinfo, JSON.stringify((navigatorInfo = await getNavigatorInfo()))), navigatorInfo));
-      const [IS_REAL_BLINK, IS_REAL_WEBKIT] = ["Blink", "WebKit"].map(cE => cE === creditEngine);
+      const [IS_REAL_BLINK, IS_REAL_GECKO, IS_REAL_WEBKIT] = ["Blink", "Gecko", "WebKit"].map(cE => cE === creditEngine);
       const IS_CHEAT_UA = voucher === null && (engine !== creditEngine || checkBlinkCheatingUA(navigator.userAgentData));
       const IS_GREASEMONKEY = ["Greasemonkey", "Userscripts", "FireMonkey", "tamp", "OrangeMonkey"].includes(GMscriptHandler);
       const createNoticeHTML = html => `<div class="${def.notice.rName}"><dl>${html}</dl></div>`;
@@ -1310,6 +1305,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             });
           },
           Yandex: (siteName, clean) => {
+            qS(`div.DistributionPopup_location_right-top.DistributionPopup_visible>button.Button.DistributionButtonClose_view_cross`)?.click();
             if (qA(".OrganicHost-Content .OrganicHost-Description>div>span[class$='-Text'],[class*='Organic_with']>[class*='Organic']>span[class$='-Text']").length === 0) return;
             COUNT(`[${siteName}-Anti-Ads-Deep-exp]`);
             qA("li[data-fast][class]").forEach(node => {
@@ -1400,9 +1396,9 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageURL: "https://image.baidu.com/search/index?tn=baiduimage&ps=1&ie=utf-8&word=",
               imageType: ["baiduimage", "baiduimagedetail"],
               splitTypeName: ["tn", "pd"],
-              mainSelector: "#chat-input-main,.s_btn_wr,#sugOut,span[class^='submit-btn']",
+              mainSelector: "#chat-input-main,#ci-main",
               overrideCss: `a,a em{text-decoration:none!important}:not([class^="page-inner"])>a:not(.${def.notice.linkerror}):hover{text-decoration:underline!important}#form{white-space:nowrap}#u{z-index:1!important}`,
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;z-index:99999;right:var(--right,unset);margin:var(--margin,3px 0);padding:0;display:inline-flex;justify-content:center;align-items:flex-start;flex-wrap:nowrap;height:40px}#${def.const.leftButton},#${def.const.rightButton}{margin:0 2px 0 0;height:42px}input{margin:0;height:40px;min-width:95px;border:none;outline:none;color:#fff;font-weight:500;font-size:17px;box-shadow:none;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px!important;border-radius:10px 0 0 10px;background:var(--background,linear-gradient(315deg,#286aff,#4e6ef2,#7274f9,#9f66ff))}#${def.const.rightButton} input{padding:0 18px 1px 12px!important;border-radius:0 10px 10px 0;background:var(--background,linear-gradient(135deg,#286aff,#4e6ef2,#7274f9,#9f66ff))}#${def.const.leftButton} input:hover{background:linear-gradient(#00000017,#00000017), linear-gradient(90deg,#286aff,#4e6ef2,#7274f9,#9f66ff)}#${def.const.rightButton} input:hover{background:linear-gradient(#00000017,#00000017), linear-gradient(270deg,#286aff,#4e6ef2,#7274f9,#9f66ff)}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;z-index:99999;right:var(--right,unset);margin:var(--margin,3px 0)!important;padding:0!important;display:inline-flex;justify-content:center;align-items:flex-start;flex-wrap:nowrap;height:40px}#${def.const.leftButton},#${def.const.rightButton}{margin:0 2px 0 0;height:42px}input{margin:0;height:40px;min-width:95px;border:none;outline:none;color:#fff;font-weight:500;font-size:17px;box-shadow:none;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px!important;border-radius:10px 0 0 10px;background:var(--background,linear-gradient(315deg,#286aff,#4e6ef2,#7274f9,#9f66ff))}#${def.const.rightButton} input{padding:0 18px 1px 12px!important;border-radius:0 10px 10px 0;background:var(--background,linear-gradient(135deg,#286aff,#4e6ef2,#7274f9,#9f66ff))}#${def.const.leftButton} input:hover{background:linear-gradient(#00000017,#00000017), linear-gradient(90deg,#286aff,#4e6ef2,#7274f9,#9f66ff)}#${def.const.rightButton} input:hover{background:linear-gradient(#00000017,#00000017), linear-gradient(270deg,#286aff,#4e6ef2,#7274f9,#9f66ff)}`,
               resultListProp: { qs: `#content_left div.c-container:not([tpl="recommend_list"]):not([tpl^="rel-"])`, delay: 10 },
               keywords: "#wrapper_wrapper em,.c-gap-top-small b",
               antiRedirectFn: () => {
@@ -1455,7 +1451,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:6;display:inline-flex;margin:var(--margin,4px 0 0 0);padding:0 4px 0 0;width:auto;height:38px;min-width:180px;vertical-align:top;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0}input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 1px 18px;border-radius:24px 0 0 24px}#${def.const.rightButton} input{margin:0;padding:0 18px 1px 12px;border-radius:0 24px 24px 0}:host(.${def.const.scrollspan}){margin:0!important;padding:4px 3px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars}{margin:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}.${def.const.scrollbarsV2}{margin:0 0 0 1px!important;height:34px!important;border-radius:6px!important;padding:0 12px!important}input:hover{background:#f0f3f6;box-shadow:0 0 4px #174ae4;transition:background .1s linear,box-shadow .2s linear}`,
               darkModeCss: `:host(.${def.const.darkmode}) input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}:host(.${def.const.darkmode}) input:hover{background:#a2b7f4;color:#333}`,
               resultListProp: {
-                qs: `#b_results>li.b_algo:not(.b_algoBorder,.b_topborder),#b_results>li.b_vidAns .mmlist>div[id],#b_results>li.b_mop .b_slidebar>div.slide,#b_topw>li.b_ans,aside>ol#b_context>li.b_algo`,
+                qs: `#b_results li.b_algo:not(.b_algoBorder,.b_topborder),#b_results li.b_vidAns .mmlist>div[id],#b_results li.b_mop .b_slidebar>div.slide,#b_topw li.b_ans,aside ol#b_context li.b_algo`,
                 delay: 10,
               },
               keywords:
@@ -1465,7 +1461,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               antiRedirectFn: () => {
                 const checkAllRegionsRedirection = () => {
                   parsingAntiRedirect("Bing", "#b_content li.b_pag a.b_widePag", { forceSelf: true, cleanAttr: ["h"] });
-                  parsingAntiRedirect("Bing", "#b_results>li:not(.b_pag) a:not([role='button']):not([href*='.bing.com/ck/a?'])", { useNewTab: true });
+                  parsingAntiRedirect("Bing", "#b_results li:not(.b_pag) a:not([role='button'],.b_widePag):not([href*='.bing.com/ck/a?'])", { useNewTab: true });
                   parsingAntiRedirect("Bing", ".b_scopebar li:is(#b-scopeListItem-conv,#b-scopeListItem-local)>a:not([href*='.bing.com/ck/a?'])", { useNewTab: true });
                   parsingAntiRedirect("Bing", ".b_scopebar li:not(#b-scopeListItem-local,#b-scopeListItem-conv)>a:not([href*='.bing.com/ck/a?'])", { forceSelf: true });
                   parsingAntiRedirect("Bing", "#b_content a[href*='.bing.com/ck/a?'][role='button']", { advancedAnti: true, cleanAttr: ["h"] });
@@ -1513,12 +1509,12 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               splitTypeName: { split: "/", index: 1 },
               mainSelector: `input#searchBtn,input[type='button'][uigs='search_article'],input[type='submit']:is(.search-btn,.sbtn1)`,
               buttonCssText: `:host(#${def.const.rndButtonID}){position:var(--position,absolute);top:-2px;right:var(--right,unset);z-index:99999;display:inline-flex;margin:0;padding:0;width:auto;height:40px;cursor:pointer;-webkit-appearance:none;opacity:var(--opacity,0);justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:40px}input{margin:0;padding:0 18px 1px 18px;height:40px;min-width:100px;border:2px solid #222;border-radius:12px;background:#f5f5f5;color:#000;font-weight:500;font-size:15px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}input:hover{border:2px solid #205aef;background:#e9f2ff;color:#205aef}.${def.notice.random}_images{margin-top:1px;height:34px!important;border:1px solid #ababab!important;border-radius:3px!important;background:##fafafa!important}.${def.notice.random}_weixin{margin-top:2px;height:34px!important;border:1px solid #00a06a!important;border-radius:2px!important;background:#fff!important;color:#00a06a!important;font-size:15px!important}.${def.notice.random}_weixin:hover{background:#f7fffd!important}`,
-              resultListProp: { qs: `div.results>div.vrwrap,div.results>div.rb`, delay: 10 },
+              resultListProp: { qs: `div.results div.vrwrap,div.results div.rb`, delay: 10 },
               keywords: "#wrapper em",
               antiRedirectFn: () =>
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "sogou_ar" })("Sogou", "#wrapper a[href^='/link?url=']:not([uigs])", { useNewTab: true, advancedAnti: true }),
               antiAdsFn: () => {
-                const selectors = `#biz_tip_box_tuiguang_float,.pz_pc_new_container,.share-wrap,.sponsored,.tgad-box,[class~="ext_query"][id*="sq_ext_"],div.top-better-hintBox,#right>div.rvr-model:not([tpl]),.results>.reactResult,.results>div.vrwrap.middle-better-hintBox,#right>.reactResult,#searchBtn2[value="\u5168\u7f51\u641c\u7d22"]`;
+                const selectors = `#biz_tip_box_tuiguang_float,.pz_pc_new_container,.share-wrap,.sponsored,.tgad-box,[class~="ext_query"][id*="sq_ext_"],div.top-better-hintBox,#right>div.rvr-model:not([tpl]),.results .reactResult,.results div.vrwrap.middle-better-hintBox,#right>.reactResult,#searchBtn2[value="\u5168\u7f51\u641c\u7d22"]`;
                 deBounce({ fn: parseAntiAdvertising, delay: 10, timer: "sogou_ad", immed: true })({ selectors, siteName: "Sogou", isRemoveNodes: true });
               },
             },
@@ -1629,7 +1625,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               splitTypeName: { split: "/", index: 1 },
               mainSelector: "form[role='search'][class~='search-form'][data-test-id='main-header-search-form']",
               overrideCss: `.mainline__result-wrapper{visibility:visible!important}`,
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:0;height:40px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0;height:40px}input{margin:0;height:40px;min-width:100px;border:1px solid var(--color-form-border-default);background:var(--color-background-primary);box-shadow:0 1px 2px #1a1a1a2e,0 0 8px #1a1a1a0f;color:var(--color-button-content-tertiary);vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:20px 0 0 20px;}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 20px 20px 0}input:hover{border:1px solid var(--color-button-background-primary-hover);background:var(--color-button-background-primary-hover);color:var(--color-button-content-primary)}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:0;height:40px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0;height:40px}input{margin:0;height:40px;min-width:100px;border:1px solid var(--color-form-border-default);background:var(--color-background-primary);box-shadow:0 1px 2px #1a1a1a2e,0 0 8px #1a1a1a0f;color:var(--color-brand-primary);vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:20px 0 0 20px;}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 20px 20px 0}input:hover{border:1px solid var(--color-button-background-primary-hover);background:var(--color-button-background-primary-hover);color:var(--color-button-content-primary)}`,
               resultListProp: { qs: `.mainline__content>div>div.mainline__result-wrapper,aside>article[position="sidebar"]`, delay: 150 },
               keywords: null,
               antiRedirectFn: null,
@@ -1648,7 +1644,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: () => CUR_HOST_NAME.split(".").slice(-4, -3)[0],
               mainSelector: "#hd div.sbx form#sf,#sh>#sbx>form#sf",
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;margin:0 0 0 10px;width:max-content;height:44px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0;height:44px}input{box-sizing:content-box;margin:0;height:44px;min-width:70px;border:none;background:#7e1fff;color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:100px 0 0 100px;}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 100px 100px 0}input:hover{border:none;background:#6001d2;color:#fff}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;margin:0 0 0 10px;width:max-content;height:var(--height,52px);justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0;height:var(--height,52px)}input{box-sizing:content-box;margin:0;height:var(--height,52px);min-width:70px;border:none;background:#7e1fff;color:#fff;vertical-align:top;font-weight:500;font-size:18px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:100px 0 0 100px;}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 100px 100px 0}input:hover{border:none;background:#6001d2;color:#fff}`,
               resultListProp: { qs: `#web>ol>li`, delay: 10 },
               keywords: "strong",
               antiRedirectFn: () => {
@@ -1707,7 +1703,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: "div#autocomplete",
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;margin:0;padding:0;width:max-content;height:var(--search-form-height);justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.rightButton},#${def.const.leftButton}{display:inline-block;margin:0 4px 0 0;padding:0;height:100%}input{box-sizing:border-box;margin:0;height:calc(var(--search-form-height) - 1px);min-width:100px;border:none;outline:1px solid var(--color-serp-divider-subtle-container);box-shadow:2px 2px 3px #00000038;background:var(--color-serp-bar-bg);color:var(--color-text-primary);vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 16px 0 24px;border-radius:var(--border-radius-xxl) 0 0 var(--border-radius-xxl)}#${def.const.rightButton} input{padding:0 24px 0 16px;border-radius:0 var(--border-radius-xxl) var(--border-radius-xxl) 0}input:hover{color:var(--color-primitive-white, #fff);background:linear-gradient(314deg,#fa7250 8.49%,#ff1893 43.72%,#a78aff 99.51%)}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;margin:0;padding:0;width:max-content;height:var(--search-form-height);justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.rightButton},#${def.const.leftButton}{display:inline-block;margin:0 3px 0 0;padding:0;height:100%}input{box-sizing:border-box;margin:0;height:calc(var(--search-form-height) - 1px);min-width:100px;border:none;outline:1px solid var(--color-serp-divider-subtle-container);box-shadow:-1px 2px 3px #00000038;background:var(--color-search-background-search-bar);color:var(--color-text-primary);vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 16px 0 24px;border-radius:var(--border-radius-xxl) 0 0 var(--border-radius-xxl)}#${def.const.rightButton} input{padding:0 24px 0 16px;border-radius:0 var(--border-radius-xxl) var(--border-radius-xxl) 0}input:hover{color:var(--color-primitive-white, #fff);background:linear-gradient(314deg,#fa7250 8.49%,#ff1893 43.72%,#a78aff 99.51%)}`,
               resultListProp: { qs: `#results>div.snippet[data-type],#results>.standalone>.video-item`, delay: 10 },
               keywords: `.snippet-content strong`,
               antiRedirectFn: null,
@@ -1723,7 +1719,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: `form div[class$="-addon"]`,
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:112;display:inline-flex;margin:0;padding:0;height:50px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 2px 0 0;height:50px}input{margin:0;height:48px;min-width:100px;border:1px solid #f1dc1b;background:var(--background--brand);color:#333;vertical-align:top;font-weight:500;font-size:18px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 15px 1px 25px;border-radius:25px 0 0 25px;}#${def.const.rightButton} input{padding:0 25px 1px 15px;border-radius:0 25px 25px 0}input:hover{background:var(--background--brandHover)}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:112;display:inline-flex;margin:0;padding:0;height:50px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 2px 0 0;height:50px}input{margin:0;height:48px;min-width:100px;border:1px solid #f1dc1b;background:var(--background--brand);color:#333;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 15px 1px 25px;border-radius:25px 0 0 25px;}#${def.const.rightButton} input{padding:0 25px 1px 15px;border-radius:0 25px 25px 0}input:hover{background:var(--background--brandHover)}`,
               resultListProp: { qs: `div[class*='-results']>div>div>div[class*='-card'],div[class*='-sidebar']>div>div>div>div[class*='-stack']`, delay: 20 },
               keywords: ``,
               antiRedirectFn: () => {
@@ -1742,7 +1738,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: "fmt",
               mainSelector: "form[name='sf1']",
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:-1px;right:var(--right,unset);z-index:100;display:inline-flex;margin:0;padding:0;height:42px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 2px 0 0;height:42px}input{margin:0;padding:0;height:42px;min-width:90px;border:1px solid #c7c7c7;background:#fff;color:#111;box-shadow:0 2px 3px #0000000f;vertical-align:top;font-weight:500;font-size:15px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;letter-spacing:normal;cursor:pointer}#${def.const.leftButton} input{border-radius:4px 0 0 4px}#${def.const.rightButton} input{border-radius:0 4px 4px 0}input:hover{background:#fafafa;box-shadow:0 2px 5px #00000033;transition:box-shadow .1s cubic-bezier(.4,0,.2,1), -webkit-box-shadow .1s cubic-bezier(.4,0,.2,1)}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:100;display:inline-flex;margin:0;padding:0;height:42px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 2px 0 0;height:42px}input{    box-sizing:content-box;margin:0;padding:4px 0;height:32px;min-width:90px;border:1px solid #c7c7c7;background:#fff;color:#111;box-shadow:0 2px 3px #0000000f;vertical-align:top;font-weight:500;font-size:15px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;letter-spacing:normal;cursor:pointer}#${def.const.leftButton} input{border-radius:4px 0 0 4px}#${def.const.rightButton} input{border-radius:0 4px 4px 0}input:hover{background:#fafafa;box-shadow:0 2px 5px #00000033;transition:box-shadow .1s cubic-bezier(.4,0,.2,1), -webkit-box-shadow .1s cubic-bezier(.4,0,.2,1)}`,
               darkModeCss: `:host(.${def.const.darkmode}) input{background:#1e1e1e;color:#fff;border:1px solid grey;box-shadow:0 2px 3px #0000000f}:host(.${def.const.darkmode}) input:hover{background:#303030;color:#fafafa}`,
               resultListProp: { qs: `.results>ul.results-standard>li`, delay: 10 },
               keywords: `b, strong`,
@@ -1861,7 +1857,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           def.var.hlstyle = listCurrentSite.keywords ? `${listCurrentSite.keywords}{background-color:${bgcolor}!important;color:${fgcolor}!important;font-weight:600}` : ``;
           def.var.iconstyle = `.${def.notice.noticeX} .${def.notice.configuration} span.${def.notice.favicon},.${def.notice.card}__body-cover-image span.${def.notice.favicons}{background-color:transparent;background-image:${def.var.iconbg};background-repeat:no-repeat;}`;
 
-          function getQueryString(logged = true) {
+          function getQueryString() {
             if (currentSite.siteTypeID === newSiteType.YOU) {
               const textWord = qS(`textarea#search-input-textarea[name='query']`)?.value.trim();
               if (textWord) return encodeURIComponent(textWord);
@@ -1870,12 +1866,12 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             }
             const { inputArray, searchKeys } = searchProperties;
             const inputValue = qA(inputArray.join()).FindX(item => item.value)?.value;
-            if (inputValue) return logged && DEBUG("QueryString[INPUT]:", { value: inputValue }), encodeURIComponent(inputValue);
+            if (inputValue) return DEBUG("QueryString[INPUT]:", { value: inputValue }), encodeURIComponent(inputValue);
             for (const key of searchKeys) {
               const queryString = getUrlParam(key);
               if (!queryString) continue;
               const decodedValue = queryString.replace(/\+/g, " ");
-              return logged && DEBUG("QueryString[URL]:", { queryKey: key, value: decodedValue }), encodeURIComponent(decodedValue);
+              return DEBUG("QueryString[URL]:", { queryKey: key, value: decodedValue }), encodeURIComponent(decodedValue);
             }
             return "";
           }
@@ -2258,14 +2254,13 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
             function setupClickEventOnCard(item) {
               item?.addEventListener("click", () => {
-                const [itemID, queryString] = [Number(item.id), getQueryString()];
                 const splitTypeName = getUrlParam(listCurrentSite.splitTypeName).trim();
                 const isImageType = listCurrentSite.imageType.includes(splitTypeName);
                 for (const [type, typeID] of safeObject.entries(newSiteType)) {
-                  if (typeID !== itemID) continue;
+                  if (typeID !== Number(item.id)) continue;
                   const siteType = type.toLowerCase();
                   const url = isImageType ? listSite[siteType].imageURL : listSite[siteType].webURL;
-                  const fullURL = decodeURI(url + queryString);
+                  const fullURL = decodeURI(url + getQueryString());
                   if (localWindow) top.location.href = fullURL;
                   else GMopenInTab(fullURL, false);
                   break;
@@ -2425,15 +2420,10 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               baidu: {
                 listTypes: { target: "#content_left", listName: "div", className: "result-op" },
                 clear: () => safeRemoveNode("#con-ar"),
-                applyButton: async ({ buttonSection, target, shadow }) => {
+                applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
-                  await sleep(0, { instance: true });
                   const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
                   buttonSection.style.setProperty("--right", `-${width + 8}px`);
-                  if ([...currentSite.imageType, "note", "news", "vsearch"].includes(getUrlParam(currentSite.splitTypeName))) {
-                    buttonSection.style.setProperty("--margin", "0px");
-                    qA(`input`, shadow).forEach(node => node.style.setProperty("--background", "#4e6ef2"));
-                  }
                 },
               },
               google: {
@@ -2451,8 +2441,9 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 applyButton: ({ buttonSection, target, shadow }) => {
                   insertAfter(buttonSection, target);
                   if (document.body.classList.contains("b_dark")) buttonSection.classList.add(def.const.darkmode);
+                  if (IS_REAL_GECKO && CUR_PATH_NAME.includes("riverview/relatedvideo")) return buttonSection.style.setProperty("--margin", "3px 1px 0 0");
                   const formBox = qS(".b_searchboxForm:has(input.b_searchbox)");
-                  if (!formBox || (getUrlParam("view") !== "detailV2" && getUrlParam("view") !== "detailv2")) return;
+                  if (!formBox || !/^detail(?:V|v)2$/.test(getUrlParam("view"))) return;
                   formBox.classList.add(`${def.const.scrollbarsV2}.width`);
                   buttonSection.style.setProperty("--margin", "1px -2px 0 6px");
                   qA(`input`, shadow).forEach(i => i.classList.add(def.const.scrollbarsV2));
@@ -2549,10 +2540,14 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 listTypes: { target: "#web>ol", listName: "li" },
                 clear: () => safeRemoveNode("#right>ol"),
                 applyButton: ({ buttonSection, target }) => {
-                  if ([...currentSite.imageType, "video", "news"].includes(getUrlParam(currentSite.splitTypeName))) return target.appendChild(buttonSection);
-                  insertAfter(buttonSection, target);
-                  const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
-                  buttonSection.style.setProperty("--right", `-${10 + width}px`);
+                  if ([...currentSite.imageType, "video", "news"].includes(getUrlParam(currentSite.splitTypeName))) {
+                    target.appendChild(buttonSection);
+                    buttonSection.style.setProperty("--height", `44px`);
+                  } else {
+                    insertAfter(buttonSection, target);
+                    const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                    buttonSection.style.setProperty("--right", `-${10 + width}px`);
+                  }
                 },
               },
               you: { listTypes: { target: "[data-floating-ui-portal]>[role='dialog'][data-open='true'] div>section", listName: "article" } },
@@ -2636,7 +2631,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             function insertButtons() {
               try {
                 const target = qS(currentSite.mainSelector);
-                if (!target || !getQueryString(false)) return;
+                if (!target || !getQueryString()) return;
                 const buttonSection = cE("gb-button", { id: def.const.rndButtonID });
                 const shadow = def.const.attachShadow.call(buttonSection, { mode: "closed" });
                 const darkModeCssText = currentSite.darkModeCss ? `${currentSite.darkModeCss}` : ``;
@@ -2652,7 +2647,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             }
 
             function applyButtons(buttonSection, target, shadow) {
-              if (currentSite.siteTypeID === newSiteType.OTHERS) return;
+              if (currentSite.siteTypeID === newSiteType.OTHERS || qS(`#${def.const.rndButtonID}`)) return;
               const applyCookieMethod = siteConfigMap[currentSiteName]?.applyCookie;
               const applyButtonMethod = siteConfigMap[currentSiteName]?.applyButton;
               typeof applyCookieMethod === "function" && applyCookieMethod();
@@ -2673,7 +2668,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             }
 
             function scrollDetect(shadow, buttonSet = new Set()) {
-              if (![newSiteType.GOOGLE, newSiteType.BING].includes(currentSite.siteTypeID)) return;
+              if (!qS(`#${def.const.rndButtonID}`) || ![newSiteType.GOOGLE, newSiteType.BING].includes(currentSite.siteTypeID)) return;
               buttonSet.add([qS(`#${def.const.rndButtonID}`, document), def.const.scrollspan]);
               buttonSet.add([qS(`#${def.const.leftButton} input`, shadow), def.const.scrollbars]);
               buttonSet.add([qS(`#${def.const.rightButton} input`, shadow), def.const.scrollbars]);

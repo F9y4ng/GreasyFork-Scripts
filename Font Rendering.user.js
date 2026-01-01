@@ -5,7 +5,7 @@
 // @name:en            Font Rendering (Customized)
 // @name:ko            글꼴 렌더링 (자체 사용 스크립트)
 // @name:ja            フォントのレンダリング
-// @version            2025.12.06.1
+// @version            2026.01.01.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -42,7 +42,7 @@
 // @compatible         Opera version≥78 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Safari version≥15.4 (Compatible Tampermonkey, Userscripts)
 // @license            GPL-3.0-only
-// @copyright          2020-2025, F9y4ng
+// @copyright          2020-2026, F9y4ng
 // @run-at             document-start
 // ==/UserScript==
 
@@ -156,7 +156,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         const: { once: "fr-init-once", conflict: "fr-callback-conflict", vpu: "data-fr-processed", navinfo: "__Navigation#INFO__" },
       },
       var: {
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2025.12.06.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2026.01.01.0",
         scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
         scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("Rjl5NG5n"),
       },
@@ -420,7 +420,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
 
     function safeAddElement(...args) {
       try {
-        return GM_addElement(...args);
+        return GMscriptHandler === "Tampermonkey" && typeof args[0] !== "string" && args[0].ownerDocument !== document ? generalAddElement(...args) : GM_addElement(...args);
       } catch (_) {
         return generalAddElement(...args);
       }
@@ -820,15 +820,17 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
       /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
       const UPDATE_VERSION_NOTICE = IS_CHN
-        ? `<li class="${def.const.seed}.fixed">优化脚本核心代码，兼容更多脚本管理器。</li>
-            <li class="${def.const.seed}.fixed">优化脚本字体渲染样式的载入模式以提升性能。</li>
-            <li class="${def.const.seed}.fixed">修复框架页面（含嵌套）未跟随父页面同步渲染的问题。</li>
-            <li class="${def.const.seed}.fixed">修复脚本中可能存在的内存泄漏或性能低下的问题。</li>
+        ? `<li class="${def.const.seed}.info">🎉恭祝各位用户 𝟐𝟎𝟐𝟔 新年快乐，万事如意。🎊</li>
+            <li class="${def.const.seed}.added">更新 2026 年度脚本版权信息（第六年度）。</li>
+            <li class="${def.const.seed}.fixed">优化自定义等宽字体可在单条规则中定义多个根域名。</li>
+            <li class="${def.const.seed}.fixed">修复节点监视器未返回有效节点时出现的错误。</li>
+            <li class="${def.const.seed}.fixed">修复排除站点渲染后非必要函数再运行的问题。</li>
             <li class="${def.const.seed}.fixed">修复一些已知的问题，优化代码，优化样式。</li>`
-        : `<li class="${def.const.seed}.fixed">Optimized to compatible with more script managers.</li>
-            <li class="${def.const.seed}.fixed">Optimized the loading mode of font rendering style.</li>
-            <li class="${def.const.seed}.fixed">Fixed frames not rendering in sync with parent page.</li>
-            <li class="${def.const.seed}.fixed">Fixed a few memory leaks or low performance issues.</li>
+        : `<li class="${def.const.seed}.info">🎉Wishing all users a happy New Year in 𝟐𝟎𝟐𝟔.🎊</li>
+            <li class="${def.const.seed}.added">Updated script copyright information in 2026.</li>
+            <li class="${def.const.seed}.fixed">Optimized monospaced fonts can match multiple root domain names in a single rule.</li>
+            <li class="${def.const.seed}.fixed">Fixed Node Observer not returning valid nodes.</li>
+            <li class="${def.const.seed}.fixed">Fixed non-essential functions running after exclude.</li>
             <li class="${def.const.seed}.fixed">Fixed some known issues, optimized code & style.</li>`;
 
       /* INITIALIZE_FONT_LIBRARY */
@@ -900,7 +902,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
       def.var.style = safeObject.freeze({
         firefox: `input:is([type='text'],[type='password'],[type='search'],[type='email'],[type='tel'],[type='url'],[type='number']),input:not([type]){font-family:serif!important}`,
         frDialog: `:root>dialog#${def.const.dialog}{display:block!important;visibility:visible!important;width:auto!important;height:auto!important;background:none!important;opacity:1!important;border:none!important;outline:none!important;z-index:2147483647!important}:root>dialog#${def.const.dialog}::backdrop{background:transparent!important}@font-face{font-family:Anton;font-style:normal;font-weight:400;font-display:swap;src:local("Impact"),url(${def.url.Anton}) format("woff2");unicode-range:U+00??,U+0131,U+0152-0153,U+02bb-02bc,U+02c6,U+02da,U+02dc,U+0304,U+0308,U+0329,U+2000-206f,U+2074,U+20ac,U+2122,U+2191,U+2193,U+2212,U+2215,U+feff,U+fffd}`,
-        shared: `:host(fr-dialogbox),:host(fr-configure){position:fixed!important;top:0!important;left:0!important;width:100%!important;height:100%!important;background:0 0!important;pointer-events:none!important;--fr-shared-fontfamily:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif;--fr-shared-monospace:ui-monospace,'Operator Mono Lig','JetBrains Mono',monospace,${INITIAL_VALUES.fontSelect},sans-serif;--fr-shared-emoji:system-ui,-apple-system,BlinkMacSystemFont,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji,Android Emoji,mojiSymbol,EmojiOne Mozilla,Twemoji Mozilla,bwi-font;}.${def.const.seed}\\.disp\\:inline\\.block{display:inline-block!important}.${def.const.seed}\\.disp\\:block{display:block!important}.${def.const.seed}\\.disp\\:none{display:none!important}.${def.const.seed}\\.vis\\:visible{visibility:visible!important}.${def.const.seed}\\.vis\\:hidden{visibility:hidden!important}.${def.const.seed}\\.clr\\:8b0000{color:#8b0000!important}.${def.const.seed}\\.clr\\:cecece{color:#cecece!important}.${def.const.seed}\\.clr\\:crimson{color:#dc143c!important}.${def.const.seed}\\.fw\\:700{font-weight:700!important}.${def.const.seed}\\.opac\\:1{opacity:1!important}:is(#${def.id.container},.${def.class.db}) .${def.class.emoji}{text-shadow:1px 1px 2px #4b5b6b!important;vertical-align:2px;font:normal 400 16px/150% var(--fr-shared-emoji)!important}.${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}`,
+        shared: `:host(fr-dialogbox),:host(fr-configure){position:fixed!important;top:0!important;left:0!important;width:100%!important;height:100%!important;background:0 0!important;pointer-events:none!important;--fr-shared-fontfamily:${INITIAL_VALUES.fontSelect},system-ui,-apple-system,BlinkMacSystemFont,sans-serif;--fr-shared-monospace:ui-monospace,SFMono-Regular,'Operator Mono Lig','JetBrains Mono','Cascadia Code',Monaco,Menlo,Consolas,'Liberation Mono','Courier New','PingFang SC','Microsoft YaHei',monospace;--fr-shared-emoji:system-ui,-apple-system,BlinkMacSystemFont,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji,Android Emoji,mojiSymbol,EmojiOne Mozilla,Twemoji Mozilla,bwi-font;}.${def.const.seed}\\.disp\\:inline\\.block{display:inline-block!important}.${def.const.seed}\\.disp\\:block{display:block!important}.${def.const.seed}\\.disp\\:none{display:none!important}.${def.const.seed}\\.vis\\:visible{visibility:visible!important}.${def.const.seed}\\.vis\\:hidden{visibility:hidden!important}.${def.const.seed}\\.clr\\:8b0000{color:#8b0000!important}.${def.const.seed}\\.clr\\:cecece{color:#cecece!important}.${def.const.seed}\\.clr\\:crimson{color:#dc143c!important}.${def.const.seed}\\.fw\\:700{font-weight:700!important}.${def.const.seed}\\.opac\\:1{opacity:1!important}:is(#${def.id.container},.${def.class.db}) .${def.class.emoji}{text-shadow:1px 1px 2px #4b5b6b!important;vertical-align:2px;font:normal 400 16px/150% var(--fr-shared-emoji)!important}.${def.class.readonly}{background:linear-gradient(45deg,#ffe9e9,#ffe9e9 25%,transparent 0,transparent 50%,#ffe9e9 0,#ffe9e9 75%,transparent 0,transparent)!important;background-color:#fff7f7!important;background-size:50px 50px!important}`,
         frDialogBox:
           `:host(#${def.id.dialogbox}){z-index:2147483647}.${def.class.db}{position:absolute;top:calc(12% + 10px);right:20px;z-index:99999;display:block;overflow:hidden;box-sizing:content-box;width:100%;max-width:420px;border:2px solid #efefef;border-radius:6px;background:#fff;box-shadow:0 0 10px 0 #0000004d;color:#444;transition:opacity .5s;pointer-events:auto;opacity:0}.${def.class.db} *{text-shadow:0 0 1.25px #3d3d3d5f!important;font-family:var(--fr-shared-fontfamily),var(--fr-shared-emoji)!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}.${def.class.db} textarea,.${def.class.db} input{background:#fefefe;color:#333}.${def.class.dbt}{display:flex;margin-top:0;padding:10px 15px;width:auto;background:#efefef;text-align:left;font-weight:700;font-size:18px!important;flex-wrap:nowrap;justify-content:space-between;align-items:center;align-content:center}#${def.const.seed}\\.dialog\\.close{cursor:pointer;color:gray}#${def.const.seed}\\.dialog\\.close:hover{transform:scale(1.8);color:grey}.${def.class.dbt},.${def.class.dbt} *{font-weight:700;font-size:20px!important;font-family:Candara,Times,var(--fr-shared-fontfamily)!important}.${def.class.dbm}{display:block;margin:5px;padding:10px;color:#444;text-align:left;font-weight:500;font-size:16px!important}.${def.class.dbb}{display:inline-block;box-sizing:content-box;margin:2px 1%;padding:8px 12px;min-width:12%;border-radius:4px;text-align:center;text-decoration:none!important;letter-spacing:0;font-weight:400;cursor:pointer}.${def.const.seed}\\.gradient\\.bg{background:#e7ffd9;animation:gradient 2s ease-in-out forwards}@keyframes gradient{0%{background:#e7ffd9}to{background:transparent}}.${def.class.db} .${def.class.dbt},.${def.class.db} .${def.class.dbb}{text-shadow:none!important;-webkit-text-stroke:0 transparent!important;-webkit-user-select:none;user-select:none}.${def.class.db} .${def.class.dbb}:hover{box-sizing:content-box;color:#fff;text-decoration:none!important;font-weight:700;opacity:.8}.${def.class.db} .${def.class.dbbf}:hover{box-shadow:0 0 3px #d93223!important}.${def.class.db} .${def.class.dbbf}{border:1px solid #d93223!important;border-radius:6px;background:#d93223!important;color:#fff!important;font-size:14px!important}.${def.class.db} .${def.class.dbbt}{border:1px solid #038c5a!important;border-radius:6px;background:#038c5a!important;color:#fff!important;font-size:14px!important}.${def.class.db} .${def.class.dbbt}:hover{box-shadow:0 0 3px #038c5a!important}` +
           `.${def.class.db} .${def.class.dbbn}{border:1px solid #777!important;border-radius:6px;background:#777!important;color:#fff!important;font-size:14px!important}.${def.class.db} .${def.class.dbbn}:hover{box-shadow:0 0 3px #777!important}.${def.class.dbbc}{display:block;padding:2.5%;background:#efefef;color:#fff;text-align:right;font-size:initial}.${def.class.dbm} textarea{cursor:auto;overscroll-behavior:contain;scrollbar-color:auto}.${def.class.dbm} textarea::-webkit-scrollbar{width:8px;height:8px}.${def.class.dbm} textarea::-webkit-scrollbar-corner{border-radius:2px;background:#efefef;box-shadow:inset 0 0 3px #aaa}.${def.class.dbm} textarea::-webkit-scrollbar-thumb{border-radius:2px;background:#cfcfcf;box-shadow:inset 0 0 5px #999}.${def.class.dbm} textarea::-webkit-scrollbar-track{border-radius:2px;background:#efefef;box-shadow:inset 0 0 5px #aaa;}.${def.class.dbm} button:hover{background:#f6f6f6!important;box-shadow:0 0 3px #a7a7a7!important;cursor:pointer}.${def.class.dbm} p{margin:5px 0!important;text-align:left;text-indent:0;font-weight:400;font-size:16px;line-height:1.5!important;-webkit-user-select:none;user-select:none}.${def.class.dbm} ul{margin:0 0 0 10px!important;padding:2px;color:#808080;list-style:none;font:italic 400 14px/150% var(--fr-shared-fontfamily)!important;-webkit-user-select:none;user-select:none}.${def.class.dbm} ul::-webkit-scrollbar{width:10px;height:1px}.${def.class.dbm} ul::-webkit-scrollbar-thumb{border-radius:10px;background:#cfcfcf;box-shadow:inset 0 0 5px #999;}.${def.class.dbm} ul::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #aaa}.${def.class.dbm} ul li{display:list-item;list-style-type:none;word-break:break-all}.${def.class.dbm} li:before{display:none}.${def.class.dbm} ul#${def.const.seed}\\.vlist li:hover{background:#fdf6eccc!important}#${def.const.seed}\\.temp{padding:18px 8px;text-align:center;color:#555;font-size:14px!important}#${def.id.bk},#${def.id.pv},#${def.id.fs},#${def.id.fvp},#${def.id.hk},#${def.id.ct},#${def.id.mps},#${def.id.pdr},#${def.id.flc},#${def.id.gc},#${def.id.cm},#${def.id.fi}{display:flex;box-sizing:content-box;margin:0;padding:2px 4px!important;width:calc(98% - 10px);height:max-content;min-width:auto;min-height:40px;list-style:none;font-style:normal;justify-content:space-between;align-items:flex-start;word-break:break-word}` +
@@ -949,7 +951,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
           return !INFO(this.info, fullStyle(background), "color:0", remarkStyle("0"), remarkStyle("#a9a9a9"));
         }
         _asyncLoadHandler() {
-          sleep(6e2)(2e2).then(t => sleep(t)(this.loadingHandler("#2160b7", "[DOC.LOAD]", "inactive")).then(() => this.loadedHandler("#008080", "[DOC.LOAD]")));
+          sleep(6e2)(2e2).then(t => sleep(t)(this.loadingHandler("#2160b7", "[DOC.LOAD]", "preparing")).then(() => this.loadedHandler("#008080", "[DOC.LOAD]")));
         }
         _registeringEventListeners() {
           if (this.isRegistered || IS_GREASEMONKEY) return !this.isRegistered && this._asyncLoadHandler();
@@ -1385,7 +1387,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
       }
 
       async function setRootSelector() {
-        const rootID = await requestHTML.startObserver().then(res => res.target.id); // Fit::IS_GREASEMONKEY & Blink < 130::IFRAME_STYLE_PARSING
+        const rootID = await requestHTML.startObserver().then(res => res?.target.id); // Fit::IS_GREASEMONKEY & Blink < 130::IFRAME_STYLE_PARSING
         return !rootID || (!CUR_WINDOW_TOP && (compareVersion({ BLINK: 130, more: null }) || IS_GREASEMONKEY)) ? `:root ` : `:root#${rootID} `;
       }
 
@@ -1403,7 +1405,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
       function applyPredefinedRenderRules(predefinedData, data) {
         if (!predefinedData) return data;
         try {
-          const findFn = ([host]) => host.includes(CUR_HOST_NAME) || String(host) === "ALL" || asArray(host).SomeX(h => h.startsWith("*") && CUR_HOST_NAME.endsWith(h.slice(1)));
+          const findFn = ([host]) => host.includes(CUR_HOST_NAME) || asArray(host).SomeX(h => h.startsWith("*") && CUR_HOST_NAME.endsWith(h.slice(1)));
           const rules = asArray(JSON.parse(JSON.parse(decrypt(predefinedData)))).FindX(findFn);
           if (!(def.var.apply = Boolean(rules))) return data;
           for (const [key, rule] of safeObject.entries(rules[1])) {
@@ -1470,7 +1472,6 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         const fontFamilyStyle = fontFamily ? `${globalPrefix}::placeholder,${globalPrefix}:is(${inText}${discuzIcon}){${fontFamily}}` : ``;
         const fontAdvenceedStyle = `${globalPrefix}:is(${inText}){${textShadow}${textStroke}${smoothing}}`;
         const fontStyle = `${fontFaces}${bodyScalecssText}${fontFamilyStyle}${fontAdvenceedStyle}${selectionCssText}${cssExclude}${codeFonts}${boldFixCSSText}`;
-        const textShadowFix = `0 0 ${shadow_r}px ${shadow_c.toLowerCase().slice(0, 7).concat("2b")}`;
         const firefoxInputFix = IS_REAL_GECKO & fontface_i && isFixInputEnabled(localStorage?.getItem(IS_DISCUZ)) ? def.var.style.firefox : "";
         const [monoAllowed, isEditorBlock, supportMix] = [Boolean(isCustomMono), Boolean(CONST_VALUES.o.isEditorBlock), CSS.supports("(color:color-mix(in srgb, tan, red))")];
         const monoShadowColor = monoAllowed && supportMix ? `--fr-mono-shadowcolor:color-mix(in display-p3, #4545461b 70%, currentcolor 20%);` : ``;
@@ -1479,7 +1480,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         const monoFeatureText = monoAllowed ? `--fr-mono-feature:${monoFeature || INITIAL_REMARKS.monospacedFeature};` : ``;
         const monoFallback = monoAllowed ? `--fr-mono-fallback:ui-monospace,'Courier New','Liberation Mono',Courier;` : ``;
         const sharpRender = CONST_VALUES.o.renderCanvas ? `--fr-render-shape:geometricPrecision;` : ``;
-        const rootPseudoClass = `:root{--fr-font-basefont:${INITIAL_REMARKS.fontBase};--fr-font-emoji:${INITIAL_REMARKS.fontEmoji};${customFontFeature}--fr-font-fontscale:${fontsize_r};--fr-font-family:${CONST_VALUES.o.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-no-stroke:0px transparent;--fr-fix-stroke:var(--fr-no-stroke);--fr-fix-shadow:${textShadowFix};--fr-render-text:optimizeLegibility;${sharpRender}--fr-render-image:auto;${monoFontText}${monoFallback}${monoShadowColor}${monoShadow}${monoFeatureText}}`;
+        const rootPseudoClass = `:root{--fr-font-basefont:${INITIAL_REMARKS.fontBase};--fr-font-emoji:${INITIAL_REMARKS.fontEmoji};${customFontFeature}--fr-font-fontscale:${fontsize_r};--fr-font-family:${CONST_VALUES.o.fontSelect};--fr-font-shadow:${shadowCssText};--fr-font-stroke:${strokeCssText};--fr-no-stroke:0px transparent;--fr-fix-stroke:var(--fr-no-stroke);--fr-fix-shadow:none;--fr-render-text:optimizeLegibility;${sharpRender}--fr-render-image:auto;${monoFontText}${monoFallback}${monoShadowColor}${monoShadow}${monoFeatureText}}`;
         const IS_CURRENTSITE_ALLOWED = NOT_IN_EXCLUSION_LIST && !IS_EMPTY_CONFIG;
         const tStyle = IS_CURRENTSITE_ALLOWED ? `${rootPseudoClass}${firefoxInputFix}${fontStyle}` : ``;
 
@@ -1760,10 +1761,8 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
             setAdoptedStyleSheets({ target: document, css, id, primary: true }) && COUNT(`[FRAME:${document.documentElement.id}][ACT:Message|${action}]`);
           };
           const postRequestMessage = () => GMunsafeWindow.top.postMessage({ fontRenderX: { command: "𝐫𝐞𝐪𝐮𝐞𝐬𝐭", action: "DOMLoaded" } }, "*");
-          addLoadEvents.addFn(postRequestMessage) && safeAddEventListener(GMunsafeWindow, "message", fontMessageFn);
-          document.readyState === "loading" ? global.addEventListener("DOMContentLoaded", postRequestMessage) : postRequestMessage();
-          const messageInterval = rAF.setInterval(() => safeAddEventListener(GMunsafeWindow, "message", fontMessageFn), 50);
-          rAF.setTimeout(() => rAF.clearInterval(messageInterval), 2e3);
+          sleep(2e3)(rAF.setInterval(() => safeAddEventListener(GMunsafeWindow, "message", fontMessageFn), 50)).then(interval => rAF.clearInterval(interval));
+          document.readyState === "loading" ? addLoadEvents.addFn(postRequestMessage) : postRequestMessage();
         }
 
         function loadPreview(hasPreviewPermission, styleText = tStyle, shouldReturn = true) {
@@ -1983,8 +1982,8 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
 
         async function setExcludeSites() {
           const messageText = IS_CHN
-            ? `<p id="${def.const.seed}.exSite.add">${TOP_HOST}</p><p class="${def.const.seed}.clr:8b0000">该域名下所有页面将被禁止字体渲染！</p><p>确定后当前页面将自动刷新，请确认是否排除？</p>`
-            : `<p id="${def.const.seed}.exSite.add">${TOP_HOST}</p><p class="${def.const.seed}.clr:8b0000">The fonts of all web pages under this domain name will be prohibited from rendering!</p><p>Please confirm to exclude?</p>`;
+            ? `<p id="${def.const.seed}.exSite.add">${TOP_HOST}</p><p class="${def.const.seed}.clr:8b0000">该域名下所有页面将被禁止字体渲染！</p><p>页面将在确定后刷新，请确认是否排除该域名？</p>`
+            : `<p id="${def.const.seed}.exSite.add">${TOP_HOST}</p><p class="${def.const.seed}.clr:8b0000">Font rendering will be disabled for all pages under this domain! Please confirm to exclude this site?</p>`;
           const [trueButtonText, falseButtonText] = IS_CHN ? ["确 定", "自定义排除"] : ["OK", "Exclusion"];
           const [neutralButtonText, titleText] = IS_CHN ? ["取 消", "排除字体渲染"] : ["Cancel", "Exclude Font Rendering"];
           const frDialog = new FrDialogBox({ trueButtonText, falseButtonText, neutralButtonText, messageText, titleText });
@@ -2168,8 +2167,8 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
 
         async function setIncludeSites() {
           const messageText = IS_CHN
-            ? `<p class="${def.const.seed}.exclusion">${TOP_HOST}</p><p class="${def.const.seed}.clr:green">该域名下所有页面将重新进行字体渲染！</p><p>确定后当前页面将自动刷新，请确认是否恢复？</p>`
-            : `<p class="${def.const.seed}.exclusion">${TOP_HOST}</p><p class="${def.const.seed}.clr:green">The fonts of all web pages under this domain name will be allowed from rendering!</p><p>Please confirm to re-rendering?</p>`;
+            ? `<p class="${def.const.seed}.exclusion">${TOP_HOST}</p><p class="${def.const.seed}.clr:green">该域名下所有页面将重新进行字体渲染！</p><p>页面将在确定后刷新，请确认是否恢复该域名？</p>`
+            : `<p class="${def.const.seed}.exclusion">${TOP_HOST}</p><p class="${def.const.seed}.clr:green">Font rendering will be enabled for all pages under this domain! Please confirm to enable this site?</p>`;
           const [trueButtonText, falseButtonText] = IS_CHN ? ["确 定", "自定义排除"] : ["OK", "Exclusion"];
           const [neutralButtonText, titleText] = IS_CHN ? ["取 消", "恢复字体渲染"] : ["Cancel", "Allow Font Rendering"];
           const frDialog = new FrDialogBox({ trueButtonText, falseButtonText, neutralButtonText, messageText, titleText });
@@ -2621,7 +2620,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         }
 
         async function correctFontScaleOffset() {
-          if (!isFontsize || def.var.curScale === 1) return;
+          if (!NOT_IN_EXCLUSION_LIST || !isFontsize || def.var.curScale === 1) return;
           try {
             const predefinedSitesProps = await getFontScaleDef();
             const currentDomainProps = asArray(safeObject.entries(predefinedSitesProps)).FindX(([domain]) => CUR_HOST_NAME.endsWith(domain))?.[1];
@@ -2629,24 +2628,24 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
             const { Window: W, Element: E, HTMLElement: H } = currentDomainProps;
             def.array.props = { window: uniq(W), element: uniq(E), html: uniq(H) };
           } catch (e) {
-            DEBUG(`correctFontScaleOffset${IN_FRAMES}:\r\n%c${e.message} for ${CUR_HOST_NAME}`, "display:block;padding-left:18px;color:#808080");
+            DEBUG(`CorrectFontScaleOffset${IN_FRAMES}:\r\n%c${e.message} for ${CUR_HOST_NAME}`, "display:block;padding-left:18px;color:#808080");
           }
           adjustCoordinateOffset({ cur: def.var.curScale, props: def.array.props });
         }
 
-        function funcCodefont(text, isOverride, isAllowCustomMonospace, isShadowRoot) {
+        function funcCodefont(text, isRewritable, isAllowCustomMonospace, isShadowRoot) {
           if (!isAllowCustomMonospace) return "";
           const code = ["pre", "code"].filter(keyword => new RegExp(`\\b${keyword}\\b`, "i").test(text)).flatMap(key => [key, `${key} *`]);
           const editor = [".ace_editor *", ".monaco-editor *", ".cm-editor *", ".CodeMirror *", ".code", ".code *"];
           const siterules = ["@github.com##textarea,.blob-num,.blob-num *,.blob-code,.blob-code *,.react-line-numbers *,.react-code-lines *", ...monoSiteRules];
-          const regexp = /@([\w[\]\-.:]+)##((?![^@]+##)[\w\-*.#:+>()~[\]=^$|,' ]+)/;
+          const regexp = /@((?:[\w[\]\-.:]+\|?)+)##((?![^@]+##)[\w\-*.#:+>()~[\]=^$|,' ]+)/;
           const customRules = siterules.reduce((rules, siterule) => {
-            const [, domain, fontRules] = regexp.exec(siterule) || [];
-            if (CUR_HOST.endsWith(domain)) rules.push(...fontRules.split(","));
+            const [, domains, fontRules] = regexp.exec(siterule) || [];
+            for (const domain of domains.split("|")) if (CUR_HOST.endsWith(domain)) return rules.concat(fontRules.split(","));
             return rules;
           }, []);
           const codeSelectors = uniq([...code, ...editor, ...customRules]).join();
-          const baseMonoFont = (isOverride ? "var(--fr-mono-fallback),var(--fr-font-family)," : "ui-monospace,monospace,") + "var(--fr-font-emoji)";
+          const baseMonoFont = (isRewritable ? "var(--fr-mono-fallback),var(--fr-font-family)," : "ui-monospace,monospace,") + "var(--fr-font-emoji)";
           const [userSelect, prefix] = [IS_REAL_WEBKIT ? `-webkit-user-select:text!important` : `user-select:text!important`, isShadowRoot ? "" : globalPrefix];
           return `${prefix}:is(${codeSelectors}):not([class*='icon' i],[class*='symbols' i],md-icon){font-family:var(--fr-mono-font),${baseMonoFont}!important;text-shadow:var(--fr-mono-shadow)!important;-webkit-text-stroke:var(--fr-no-stroke)!important;font-feature-settings:var(--fr-mono-feature, unset)!important;${userSelect}}${prefix}:is(${codeSelectors})::selection{color:#fff!important;background:#fe7300ed!important;-webkit-text-stroke-width:0!important;text-shadow:1px 1px 1px #4c4c4ccc!important}`;
         }
@@ -3072,8 +3071,8 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
                 const [_config_data_, { monoSiteRules: siteRule, monoFontList: fontlist, monoFeature: feature }] = await Promise.all([getConfigureData(), getCustomMonoData()]);
                 const [monospacedsiterules, monospacedfont, monospacedfeature] = [siteRule.join("\r\n").trim(), fontlist.trim(), feature.trim()];
                 const customMonoTextareasHTML = IS_CHN
-                  ? `<p class="${def.const.seed}.mono.notify">\u2474 以下文本域可设置需应用等宽字体的根域及元素选择器。<br/><span class="${def.const.seed}.clr:crimson">如果您不了解站点样式规则，请保持留空【<a href="${def.url.feedback}/74" target="_blank">查看推荐规则</a>】</span></p><p><textarea id="${def.const.seed}.monospaced.siterules" placeholder="每行只能允许一组规则，相同站点不同规则可重复添加。\r\n格式如：@网站域名##元素选择器1,元素选择器2,……\r\n例如：\r\n@github.com##[class~='blob-code'] *\r\n@github.com##.example,#abc,div:not(.test)\r\n@github.dev###test:not([class*='test'])">${monospacedsiterules}\r\n</textarea></p><p class="${def.const.seed}.mono.notify">\u2475 以下可设置自定义英文等宽字体，请按示例格式填写。<br/><span class="${def.const.seed}.clr:crimson">请注意：monospace字体族已程序内置，无需重复添加。</span></p><p><input id="${def.const.seed}.monospaced.font" placeholder="例如：'Source Code Pro','Mono','Monaco'" value="${monospacedfont}"></p><p class="${def.const.seed}.mono.notify">\u2476 以下设置 OpenType 字体 <a href="https://learn.microsoft.com/zh-cn/typography/opentype/spec/featurelist" target="_blank">font-feature-settings</a> 属性。<br/><span class="${def.const.seed}.clr:crimson">如果您设置的等宽字体非 OpenType 字体，请保持留空。</span></p><p><input id="${def.const.seed}.monospaced.feature" placeholder='例如："liga" 0,"tnum","zero"' value='${monospacedfeature}'></p>`
-                  : `<p class="${def.const.seed}.mono.notify">\u2474 Set the root field and selector for monospaced font.<br/><span class="${def.const.seed}.clr:crimson">It is recommended that check out the <a href="${def.url.feedback}/74" target="_blank">Author's Proposal</a></span></p><p><textarea id="${def.const.seed}.monospaced.siterules" placeholder="Only One set of rules per line, different rules for the same site can be repeated. Such as:\r\n@github.com##[class~='blob-code'] *\r\n@github.com##.example,#abc,div:not(.test)\r\n@github.dev###test:not([class*='test'])">${monospacedsiterules}\r\n</textarea></p><p class="${def.const.seed}.mono.notify">\u2475 Set custom monospaced font according to example.<br/><span class="${def.const.seed}.clr:crimson">Note: monospace is built-in, do not add it repeatedly.</span></p><p><input id="${def.const.seed}.monospaced.font" placeholder="Such as: 'Source Code Pro','Mono','Monaco'" value="${monospacedfont}"></p><p class="${def.const.seed}.mono.notify">\u2476 Set OpenType font <a href="https://learn.microsoft.com/en-us/typography/opentype/spec/featurelist" target="_blank">font-feature-settings</a> property.<br/><span class="${def.const.seed}.clr:crimson">Leave blank if using custom font that is not OpenType.</span></p><p><input id="${def.const.seed}.monospaced.feature" placeholder='Such as: "liga" 0,"tnum","zero"' value='${monospacedfeature}'></p>`;
+                  ? `<p class="${def.const.seed}.mono.notify">\u2474 以下文本域可设置需应用等宽字体的根域及元素选择器。<br/><span class="${def.const.seed}.clr:crimson">如果您不了解站点样式规则，请保持留空【<a href="${def.url.feedback}/74" target="_blank">查看推荐规则</a>】</span></p><p><textarea id="${def.const.seed}.monospaced.siterules" placeholder="每行只能允许一组规则，相同站点不同规则可重复添加，相同样式选择器可定义多个根域名进行匹配。例如：\r\n@github.com##[class~='blob-code'] *\r\n@github.com##.example,#abc,div:not(.test)\r\n@github.dev|github.io###test:not([class*='test'])">${monospacedsiterules}\r\n</textarea></p><p class="${def.const.seed}.mono.notify">\u2475 以下可设置自定义英文等宽字体，请按示例格式填写。<br/><span class="${def.const.seed}.clr:crimson">请注意：monospace字体族已程序内置，无需重复添加。</span></p><p><input id="${def.const.seed}.monospaced.font" placeholder="例如：'Source Code Pro','Mono','Monaco'" value="${monospacedfont}"></p><p class="${def.const.seed}.mono.notify">\u2476 以下设置 OpenType 字体 <a href="https://learn.microsoft.com/zh-cn/typography/opentype/spec/featurelist" target="_blank">font-feature-settings</a> 属性。<br/><span class="${def.const.seed}.clr:crimson">如果您设置的等宽字体非 OpenType 字体，请保持留空。</span></p><p><input id="${def.const.seed}.monospaced.feature" placeholder='例如："liga" 0,"tnum","zero"' value='${monospacedfeature}'></p>`
+                  : `<p class="${def.const.seed}.mono.notify">\u2474 Set root domains and selectors for monospaced font.<br/><span class="${def.const.seed}.clr:crimson">It is recommended that check out the <a href="${def.url.feedback}/74" target="_blank">Author's Proposal</a></span></p><p><textarea id="${def.const.seed}.monospaced.siterules" placeholder="Each line allows a set of rules, different rules for the same site can be added repeatedly, and the same selector can match multiple root domains. Such as:\r\n@github.com##[class~='blob-code'] *\r\n@github.com##.example,#abc,div:not(.test)\r\n@github.dev|github.io###test:not([class*='test'])">${monospacedsiterules}\r\n</textarea></p><p class="${def.const.seed}.mono.notify">\u2475 Set custom monospaced font according to example.<br/><span class="${def.const.seed}.clr:crimson">Note: monospace is built-in, do not add it repeatedly.</span></p><p><input id="${def.const.seed}.monospaced.font" placeholder="Such as: 'Source Code Pro','Mono','Monaco'" value="${monospacedfont}"></p><p class="${def.const.seed}.mono.notify">\u2476 Set OpenType font <a href="https://learn.microsoft.com/en-us/typography/opentype/spec/featurelist" target="_blank">font-feature-settings</a> property.<br/><span class="${def.const.seed}.clr:crimson">Leave blank if using custom font that is not OpenType.</span></p><p><input id="${def.const.seed}.monospaced.feature" placeholder='Such as: "liga" 0,"tnum","zero"' value='${monospacedfeature}'></p>`;
                 const titleText = IS_CHN ? "设置自定义等宽字体" : "Set Custom Monospaced Font";
                 const messageText = `<div id="${def.id.cm}">
                     <span class="${def.const.seed}.cusmono">${IS_CHN ? "开启自定义等宽字体（默认：关闭）" : "Enable Custom Monospaced Font"}</span>
@@ -3095,7 +3094,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
                 monoFontNode.addEventListener("change", () => (custom_MonoFontList = standardizeString(monoFontNode, false, true, /'(?:ui-)?monospace',?/gi)));
                 monoFeatureNode.addEventListener("change", () => (custom_MonoFontFeature = standardizeString(monoFeatureNode, true, true, /[^\w",\- ]/g)));
                 if (await frDialog.respond()) {
-                  const monoSiteRulesArray = custom_MonoSiteRules.match(/@[\w\-.:]+##(?![^@]*##)[\w\-*.#:+>()~[\]=^$|,' ]+/g);
+                  const monoSiteRulesArray = custom_MonoSiteRules.match(/@((?:[\w[\]\-.:]+\|?)+)##(?![^@]*##)[\w\-*.#:+>()~[\]=^$|,' ]+/g);
                   if (custom_MonoSiteRules && !monoSiteRulesArray) {
                     const messageText = IS_CHN
                       ? `<p class="${def.const.seed}.clr:crimson">自定义根域及元素选择器有误，请重新输入。</p><p>注意：先前提交的信息已自动保存至剪切板中。</p>`
@@ -3248,9 +3247,8 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
                   const _fixfontstroke = fixfstroke ? getBoldFixCssText(_noTextShadowCss) : "";
                   const _tFontStyle = `${_fontfaces}${_bodyscale}${globalPrefix}::placeholder,${globalPrefix}:is(${fontcss}${discuzIcon}){${_fontfamily}}${globalPrefix}:is(${fontcss}){${_shadow}${_stroke}${_smoothing}}${_excludeCssText}${_codefont}${_fixfontstroke}`;
                   const _firefoxInputFix = IS_REAL_GECKO && fontface ? def.var.style.firefox : "";
-                  const _textShadowFix = `0 0 ${fshadow}px ${fscolor.toLowerCase().slice(0, 7).concat("2b")}`;
                   const _sharpRender = rendercanvas ? `--fr-render-shape:geometricPrecision;` : ``;
-                  const _rootpseudoclass = `:root{--fr-font-basefont:${INITIAL_REMARKS.fontBase};--fr-font-emoji:${INITIAL_REMARKS.fontEmoji};${customFontFeature}--fr-font-fontscale:${fscale};--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-no-stroke:0px transparent;--fr-fix-stroke:var(--fr-no-stroke);--fr-fix-shadow:${_textShadowFix};--fr-render-text:optimizeLegibility;${_sharpRender}--fr-render-image:auto;${monoFontText}${monoFallback}${monoShadowColor}${monoShadow}${monoFeatureText}}`;
+                  const _rootpseudoclass = `:root{--fr-font-basefont:${INITIAL_REMARKS.fontBase};--fr-font-emoji:${INITIAL_REMARKS.fontEmoji};${customFontFeature}--fr-font-fontscale:${fscale};--fr-font-family:${fontselect};--fr-font-shadow:${_shadowcsstext};--fr-font-stroke:${_strokecsstext};--fr-no-stroke:0px transparent;--fr-fix-stroke:var(--fr-no-stroke);--fr-fix-shadow:none;--fr-render-text:optimizeLegibility;${_sharpRender}--fr-render-image:auto;${monoFontText}${monoFallback}${monoShadowColor}${monoShadow}${monoFeatureText}}`;
                   const __tFontStyle = _IS_EMPTY_CONFIG ? `` : `${_rootpseudoclass}${_firefoxInputFix}${_tFontStyle}`;
                   restoreSaveButton({ button: this, isRestore: false });
                   getCurrentFontName(fontface, _selectedFont).then(inputPlaceholder);
@@ -3604,7 +3602,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         /* FIX_CANVAS_FONT_RENDERING. NEW UPDATE: 2024-09-11 F9Y4NG */
 
         function overrideCanvasFont(renderFont) {
-          if (!IS_CURRENTSITE_ALLOWED || !CONST_VALUES.o.renderCanvas || !CONST_VALUES.o.fontFace) return;
+          if (!NOT_IN_EXCLUSION_LIST || !CONST_VALUES.o.renderCanvas || !CONST_VALUES.o.fontFace) return;
           const fontRegexp = /^((?:[a-z-]+\s)+|[0-9]+\s)?(\d*\.?\d+(?:px|em|pt|%|rem)\s)?(.+)$/i;
           const fontName = `${CONST_VALUES.o.fontSelect},${INITIAL_REMARKS.fontBase}`;
           const modifyFont = fontText => {
@@ -3633,7 +3631,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         const [localFlag, sessionFlag] = [localStorage, sessionStorage].map(storage => Boolean(storage?.getItem(def.const.const.conflict)));
         const [checkConflict, watermark] = [{ flag: localFlag, counter: new Map(), threshold: Math.min(threads * 20, 2e2), interval: 1e2 }, /watermark/i];
         const [changeAttribute, deBounceFixPassive] = [createChangeAttribute(def.const.boldAttrName, !localFlag), createDeBounce({ fn: correctBoldPassive, delay: 50 })];
-        const hasPermission = () => IS_CAUSED_BOLDSTROKEERROR && IS_CURRENTSITE_ALLOWED && def.var.fixStroke && !sessionStorage?.getItem(def.const.const.conflict);
+        const hasPermission = () => IS_CAUSED_BOLDSTROKEERROR && def.var.fixStroke && !sessionStorage?.getItem(def.const.const.conflict);
         const applyLazyLoad = (fn, ...parameter) => void (CONST_VALUES.o.lazyload ? GMunsafeWindow[def.const.raf](fn.bind(null, ...parameter)) : fn(...parameter));
 
         function correctBoldPassive(event, cssText, target = document, recheck = false) {
@@ -3655,8 +3653,8 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         }
 
         function processShadowRootNode(shadow, cssText, observer) {
-          shadowRootNodeInsertCss(shadow, cssText);
-          if (hasPermission()) handleRootNodeObserve(shadow, observer);
+          NOT_IN_EXCLUSION_LIST && shadowRootNodeInsertCss(shadow, cssText);
+          hasPermission() && handleRootNodeObserve(shadow, observer);
         }
 
         function isBold(element, recheck) {
@@ -3690,9 +3688,10 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
 
         function shadowRootNodeInsertCss(shadow, syncStyle) {
           const hostName = getNodeName(shadow.host);
-          setAdoptedStyleSheets({ target: shadow, css: `${selectionCssText}${shadowCode}`, id: `${hostName}-fix-selection`, writable: false, minor: true });
-          if (!IS_CAUSED_BOLDSTROKEERROR || !IS_CURRENTSITE_ALLOWED || sessionStorage?.getItem(def.const.const.conflict)) return;
-          const css = syncStyle ? `:host(${hostName}){--fr-fix-stroke:0px transparent;--fr-fix-shadow:${textShadowFix}}${syncStyle}` : ``;
+          setAdoptedStyleSheets({ target: shadow, css: shadowCode, id: `${hostName}-shadowroot-code`, writable: false, minor: true });
+          selectionCssText && setAdoptedStyleSheets({ target: shadow, css: selectionCssText, id: `${hostName}-fix-selection`, writable: false, minor: true });
+          if (!IS_CAUSED_BOLDSTROKEERROR || sessionStorage?.getItem(def.const.const.conflict)) return;
+          const css = syncStyle ? `:host(${hostName}){--fr-fix-stroke:0px transparent;--fr-fix-shadow:none}${syncStyle}` : ``;
           setAdoptedStyleSheets({ target: shadow, css, id: `${hostName}-fix-boldstroke`, minor: true });
         }
 
@@ -3728,13 +3727,13 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
 
         async function correctBoldStrokeProcess() {
           def.var.fixStroke = CONST_VALUES.o.fixStroke;
-          def.var.obsFontBold = await new NodeObserver().startObserver({ name: "correctBoldStroke", callback: correctBoldHandler, config: _Config }).then(r => r.observer);
+          def.var.obsFontBold = await new NodeObserver().startObserver({ name: "correctBoldStroke", callback: correctBoldHandler, config: _Config }).then(r => r?.observer);
           handleRootNodeObserve(document, def.var.obsFontBold);
           if (!hasPermission()) return;
           addLoadEvents.addFinalFn(correctBoldPassive, "readystatechange", boldFixCSSText, document, true);
           if (global.navigation) global.navigation.addEventListener("navigate", handleNavigateEvent);
           else ["pushState", "replaceState"].forEach(event => global.addEventListener(event, handleNavigateEvent));
-          DEBUG(`CorrectBold.Active${IN_FRAMES}:`, { eventType: "init" });
+          return !DEBUG(`CorrectBold.Active${IN_FRAMES}:`, { eventType: "init" });
 
           function correctBoldHandler({ mutations, observer }) {
             try {
@@ -3863,17 +3862,14 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
 
         /* FIX_VIEWPORT_ZOOM_STYLE_ERRORS. NEW UPDATE: 2024-08-10 F9Y4NG */
 
-        function correctViewportUnits(allowedInlineStyle) {
+        function correctViewportUnits(isAllowInlineStyle) {
           const vRegexp = /(\.?\d+(?:\.\d+)?)([dsl]?(?:v[wh]|vmin|vmax))\b(?![\\=/+_-])/g;
           const uRegexp = /url\((?![`'"]?(?:([\w.-]+)?#\b|https?:\/\/|data:|\/\/|\/\B))([^)]+)\)/g;
-          const withPermission = IS_CURRENTSITE_ALLOWED && isFixViewport && CONST_VALUES.o.fixViewport && def.var.curScale !== 1;
+          const hasPermission = NOT_IN_EXCLUSION_LIST && isFixViewport && CONST_VALUES.o.fixViewport && def.var.curScale !== 1;
           const getAttributes = node => arrayFrom(node.attributes).reduce((atr, { name, value }) => (!["href", "rel"].includes(name) && (atr[name] = value), atr), {});
-          if (withPermission) addLoadEvents.addFinalFn(correctViewport) && DEBUG(`correct.ViewportUnit${IN_FRAMES}:`, { eventType: "init" });
-          return { withPermission, correctViewport };
-
-          function correctViewport() {
-            return Promise.all([fixViewportLinks(), fixViewportStyles()]);
-          }
+          const correctViewport = () => void Promise.all([fixViewportLinks(), fixViewportStyles()]);
+          if (hasPermission) addLoadEvents.addFinalFn(correctViewport) && DEBUG(`correct.ViewportUnit${IN_FRAMES}:`, { eventType: "init" });
+          return IS_CURRENTSITE_ALLOWED ? { hasPermission, correctViewport } : object();
 
           async function fixViewportLinks() {
             const links = qA(`link[rel~="stylesheet" i]:not([${def.const.const.vpu}])`).map(async link => {
@@ -3892,7 +3888,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
               const attributes = { id: node.id || generateRandomString(6), ...getAttributes(node), type: "text/css", "data-href": url, [def.const.const.vpu]: "link" };
               const parent = node.parentNode ?? document.head;
               const style = GMaddElement(parent, "style", { ...attributes, textContent: processedCssText });
-              ((allowedInlineStyle && style && parent.contains(node) && parent.replaceChild(style, node)) || (style && safeRemoveNode(node))) &&
+              ((isAllowInlineStyle && style && parent.contains(node) && parent.replaceChild(style, node)) || (style && safeRemoveNode(node))) &&
                 DEBUG("Fixed.viewport.Link:", { linkNode: style });
             } catch (e) {
               ERROR(`${e.name} in ApplyStyleToOriginLink${IN_FRAMES}:`, e.message);
@@ -3965,8 +3961,8 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
 
         /* CSS_STYLE_PROCESSING_MAIN_THREAD */
 
-        function monitorMainStyleProcess({ withPermission, correctViewport }) {
-          if (!CUR_WINDOW_TOP && !IS_CURRENTSITE_ALLOWED) return;
+        function monitorMainStyleProcess({ hasPermission, correctViewport }) {
+          if (typeof hasPermission !== "boolean" && typeof correctViewport !== "function") return;
           const deBounceViewport = createDeBounce({ fn: correctViewport, delay: 10, immed: false });
           const checkStyleNode = (node, nodeName) => {
             if (nodeName === "link") return node.getAttribute("rel")?.includes("stylesheet") && node.getAttribute("href");
@@ -3974,7 +3970,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
           };
           const handleChildListMutation = (target, addedNodes) => {
             if (target === document.documentElement) return updateFlagAtRootElement(target);
-            if (withPermission) for (const node of addedNodes) if (checkStyleNode(node, getNodeName(node))) return deBounceViewport();
+            if (hasPermission) for (const node of addedNodes) if (checkStyleNode(node, getNodeName(node))) return deBounceViewport();
           };
           const getCssText = cssRules => cssRules?.constructor.name === "CSSRuleList" && arrayFrom(cssRules, rule => rule.cssText).join("");
           const updateStyleWithNewRootID = htmlID => {
@@ -4034,7 +4030,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
 
         void (async function (CSP, initMenus) {
           monitorMainStyleProcess(correctViewportUnits(CSP));
-          await correctBoldStrokeProcess();
+          if (IS_CURRENTSITE_ALLOWED) await correctBoldStrokeProcess();
           if (!NON_FRAMEWORK) handleFrameworkEvent();
           if (CUR_WINDOW_TOP) {
             if (await initializeConfigData(RC2)) showUpdateInfo(def.var.versionStatus);

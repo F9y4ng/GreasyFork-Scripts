@@ -25,13 +25,14 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data promptly and don't use backup files from unknown sources!
 
-### version 2025.12.06.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2026.01.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ Optimized to compatible with more script managers.
-@ Optimized the loading mode of font rendering style.
-@ Fixed frames not rendering in sync with parent page.
-@ Fixed a few memory leaks or low performance issues.
+# 🎉Wishing all users a happy New Year in 𝟐𝟎𝟐𝟔.🎊
++ Updated script copyright information in 2026.
+@ Optimized monospaced fonts can match multiple root domain names in a single rule.
+@ Fixed Node Observer not returning valid nodes.
+@ Fixed non-essential functions running after exclude.
 @ Fixed some known issues, optimized code & style.
 ```
 
@@ -132,13 +133,13 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-### version 2025.12.06.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2026.01.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Optimized code for compatibility with more script managers
-@ Optimized scroll compatibility for Google A/B test.
-@ Optimized search link color for Bing.com dark mode.
-@ Optimized style loading mode to improve performance.
+# 🎉Wishing all users a happy New Year in 𝟐𝟎𝟐𝟔.🎊
++ Updated script copyright information in 2026.
+@ Fixed search filter issue in Bing.com's A/B test.
+@ Fixed jump buttons issue of some search engine.
 @ Fixed some known issues, optimized code & style.
 ```
 
@@ -165,10 +166,10 @@ The "**Automatic Update**" function is enabled by default. If you do not need it
 
 **Introduction:** "Autoclose Zhihu Login Prompt" is only used to close the automatically pop-up login prompt. It does nothing else and will not do anything else in the future.
 
-### version 2025.09.14.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
+### version 2026.01.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Autoclose%20Zhihu%20Login.user.js)】
 
 ```log
-@ Fixed the login dialogBox can't be closed automatically.
++ Updated script copyright information in 2026.
 ```
 
 ### Important
