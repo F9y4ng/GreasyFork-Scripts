@@ -5,7 +5,7 @@
 // @name:en            Font Rendering (Customized)
 // @name:ko            글꼴 렌더링 (자체 사용 스크립트)
 // @name:ja            フォントのレンダリング
-// @version            2026.01.01.1
+// @version            2026.02.07.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -36,7 +36,7 @@
 // @grant              GM_registerMenuCommand
 // @grant              GM.registerMenuCommand
 // @grant              GM_unregisterMenuCommand
-// @compatible         edge version≥90 (Compatible Tampermonkey, Violentmonkey)
+// @compatible         Edge version≥90 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Chrome version≥90 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Firefox version≥84 (Compatible Greasemonkey, Tampermonkey, Violentmonkey)
 // @compatible         Opera version≥78 (Compatible Tampermonkey, Violentmonkey)
@@ -156,13 +156,11 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         const: { once: "fr-init-once", conflict: "fr-callback-conflict", vpu: "data-fr-processed", navinfo: "__Navigation#INFO__" },
       },
       var: {
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2026.01.01.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2026.02.07.0",
         scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
         scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("Rjl5NG5n"),
       },
       url: {
-        introURL: decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRkZvbnQtUmVuZGVyaW5n"),
-        redundant: decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRnJlZHVuZGFudC1pc3N1ZQ=="),
         fontlistImg: decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcuZ2l0aHViLmlvJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJGaW1hZ2VzJTJGZm9udGxpc3QuZ2lm"),
         loadingImg: decrypt("aHR0cHMlM0ElMkYlMkZwLnNkYTEuZGV2JTJGMjklMkZlMzIyM2U3YzVlZjI0ZTlhOGZhZDM5NTc3ZDVlMGQ4MCUyRjAzOGRkZTQ1OGY5YTg3NGE4MDEyMTYwZjc0MTdmNmUuZ2lm"),
         Anton: decrypt("aHR0cHMlM0ElMkYlMkZmb250cy5nc3RhdGljLmNvbSUyRnMlMkZhbnRvbiUyRnYyNSUyRjFQdGdnODdMUk95QW0zS3otQzgud29mZjI="),
@@ -348,11 +346,10 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
             reject(new ReferenceError(`Target node not found within ${timeout / 1e3} seconds.`));
           }, timeout);
           this.initialObserver = new MutationObserver(() => {
-            if ((this.targetNode = this.checkTarget())) {
-              rAF.clearTimeout(timer);
-              this.initialObserver = this.initialObserver.disconnect() ?? null;
-              resolve(this.targetNode);
-            }
+            if (!(this.targetNode = this.checkTarget())) return;
+            rAF.clearTimeout(timer);
+            this.initialObserver = this.initialObserver.disconnect() ?? null;
+            resolve(this.targetNode);
           });
           this.initialObserver.observe(document, { childList: true, subtree: true });
         });
@@ -566,8 +563,8 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
       if (!CUR_WINDOW_TOP && isAccessProhibited(CUR_HREF)) return true;
       const reportRedundanceError = () => {
         const errorText = IS_CHN
-          ? `\ud83d\udea9【脚本冗余警告】发现冗余安装的脚本: "${def.var.scriptName}"，如刷新后问题依旧，请访问 ${def.url.redundant} 排查错误。`
-          : `\ud83d\udea9 [Redundance Warning] Found Redundant Scripts: '${def.var.scriptName}', if persists after reloading, please visit ${def.url.redundant} to troubleshoot.`;
+          ? `\ud83d\udea9【脚本冗余警告】发现冗余安装的脚本: "${def.var.scriptName}"，如刷新后问题依旧，请访问 ${def.url.feedback}/117 排查错误。`
+          : `\ud83d\udea9 [Redundance Warning] Found Redundant Scripts: '${def.var.scriptName}', if persists after reloading, please visit ${def.url.feedback}/117 to troubleshoot.`;
         const troubleshoot = `\ufff8\ud83d\uded1 ${IS_CHN ? "发现冗余安装的脚本，点击排查！" : "Troubleshoot Redundant Issue"}`;
         return CUR_WINDOW_TOP && (__console("error", errorText), GMregisterMenuCommand(troubleshoot, () => GMopenInTab(`${def.url.feedback}/117`, false))), true;
       };
@@ -820,17 +817,9 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
       /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
       const UPDATE_VERSION_NOTICE = IS_CHN
-        ? `<li class="${def.const.seed}.info">🎉恭祝各位用户 𝟐𝟎𝟐𝟔 新年快乐，万事如意。🎊</li>
-            <li class="${def.const.seed}.added">更新 2026 年度脚本版权信息（第六年度）。</li>
-            <li class="${def.const.seed}.fixed">优化自定义等宽字体可在单条规则中定义多个根域名。</li>
-            <li class="${def.const.seed}.fixed">修复节点监视器未返回有效节点时出现的错误。</li>
-            <li class="${def.const.seed}.fixed">修复排除站点渲染后非必要函数再运行的问题。</li>
+        ? `<li class="${def.const.seed}.fixed">优化脚本中所有的指引链接地址。</li>
             <li class="${def.const.seed}.fixed">修复一些已知的问题，优化代码，优化样式。</li>`
-        : `<li class="${def.const.seed}.info">🎉Wishing all users a happy New Year in 𝟐𝟎𝟐𝟔.🎊</li>
-            <li class="${def.const.seed}.added">Updated script copyright information in 2026.</li>
-            <li class="${def.const.seed}.fixed">Optimized monospaced fonts can match multiple root domain names in a single rule.</li>
-            <li class="${def.const.seed}.fixed">Fixed Node Observer not returning valid nodes.</li>
-            <li class="${def.const.seed}.fixed">Fixed non-essential functions running after exclude.</li>
+        : `<li class="${def.const.seed}.fixed">Optimized all guideline link addresses in script.</li>
             <li class="${def.const.seed}.fixed">Fixed some known issues, optimized code & style.</li>`;
 
       /* INITIALIZE_FONT_LIBRARY */
@@ -1063,7 +1052,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         const rootRule = sheet.cssRules?.[0];
         if (rootRule?.selectorText !== ":host(sheet-metadata)") return object();
         const rawValue = rootRule.style.getPropertyValue("--sheet-metadata");
-        return rawValue ? JSON.parse(rawValue.trim()) : object();
+        return rawValue ? (sheet.disabled = false) || JSON.parse(rawValue.trim()) : object();
       }
 
       function getMainStyleSheets({ primary = false, target = document, forceStyle = false, preset = {} }) {
@@ -1653,7 +1642,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
               "color:#dc143c;font:normal 700 16px/150% ui-monospace,monospace",
               def.var.scriptName,
               "color:#777;font:italic 400 10px/180% ui-monospace,monospace",
-              def.url.introURL,
+              def.url.homepage,
               "color:#708090;font-size:12px;line-height:180%",
               "color:#708090;font:italic 600 14px/150% Candara,Times",
               def.var.curVersion,
@@ -1700,7 +1689,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
           },
           logMessage: (type, message, color) => {
             const msgStyle = ["color:#dc143c;font:normal 700 16px/150% monospace", "color:#777;font:italic 400 10px/180% monospace", `color:${color};font:normal 500 12px/180% monospace`];
-            __console(type, `%c${def.var.scriptName}\r\n%cINTRO.URL: ${def.url.introURL}\r\n%c${message}`, ...msgStyle);
+            __console(type, `%c${def.var.scriptName}\r\n%cINTRO.URL: ${def.url.homepage}\r\n%c${message}`, ...msgStyle);
           },
         };
 
@@ -2639,12 +2628,13 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
           const editor = [".ace_editor *", ".monaco-editor *", ".cm-editor *", ".CodeMirror *", ".code", ".code *"];
           const siterules = ["@github.com##textarea,.blob-num,.blob-num *,.blob-code,.blob-code *,.react-line-numbers *,.react-code-lines *", ...monoSiteRules];
           const regexp = /@((?:[\w[\]\-.:]+\|?)+)##((?![^@]+##)[\w\-*.#:+>()~[\]=^$|,' ]+)/;
-          const customRules = siterules.reduce((rules, siterule) => {
-            const [, domains, fontRules] = regexp.exec(siterule) || [];
-            for (const domain of domains.split("|")) if (CUR_HOST.endsWith(domain)) return rules.concat(fontRules.split(","));
-            return rules;
-          }, []);
-          const codeSelectors = uniq([...code, ...editor, ...customRules]).join();
+          !safeArray.isArray(def.var.customRules) &&
+            (def.var.customRules = siterules.reduce((rules, siterule) => {
+              const [, domains, fontRules] = regexp.exec(siterule);
+              if (asArray(domains.split("|")).SomeX(domain => CUR_HOST.endsWith(domain))) rules.push(...fontRules.split(","));
+              return rules;
+            }, []));
+          const codeSelectors = uniq([...code, ...editor, ...def.var.customRules]).join();
           const baseMonoFont = (isRewritable ? "var(--fr-mono-fallback),var(--fr-font-family)," : "ui-monospace,monospace,") + "var(--fr-font-emoji)";
           const [userSelect, prefix] = [IS_REAL_WEBKIT ? `-webkit-user-select:text!important` : `user-select:text!important`, isShadowRoot ? "" : globalPrefix];
           return `${prefix}:is(${codeSelectors}):not([class*='icon' i],[class*='symbols' i],md-icon){font-family:var(--fr-mono-font),${baseMonoFont}!important;text-shadow:var(--fr-mono-shadow)!important;-webkit-text-stroke:var(--fr-no-stroke)!important;font-feature-settings:var(--fr-mono-feature, unset)!important;${userSelect}}${prefix}:is(${codeSelectors})::selection{color:#fff!important;background:#fe7300ed!important;-webkit-text-stroke-width:0!important;text-shadow:1px 1px 1px #4c4c4ccc!important}`;
