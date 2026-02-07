@@ -25,15 +25,11 @@
 - 脚本错误、异常请反馈至{[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)}, 字体、渲染样式、乱码问题请反馈至{[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)}。
 - 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-### version 2026.01.01.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2026.02.07.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-# 🎉恭祝各位用户 𝟐𝟎𝟐𝟔 新年快乐，万事如意。🎊
-+ 更新 2026 年度脚本版权信息（第六年度）。
-@ 优化自定义等宽字体可在单条规则中定义多个根域名。
-@ 修复节点监视器未返回有效节点时出现的错误。
-@ 修复排除站点渲染后非必要函数再运行的问题。
-@ 修复一些已知的问题，优化代码，优化样式。
+@ 优化脚本中所有的指引链接地址。
+@ 修正一些已知问题，优化代码，优化样式。
 ```
 
 ### **字体渲染** 新版本，使用前请注意以下事项：
@@ -125,13 +121,11 @@
 - [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 - 自动更新检测默认开启，如无更新提示需求，可在“**搜索引擎助手高级设置**”中关闭它。
 
-### version 2026.01.01.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2026.02.07.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-# 🎉恭祝各位用户 𝟐𝟎𝟐𝟔 新年快乐，万事如意。🎊
-+ 更新 2026 年度脚本版权信息（第十一年度）。
-@ 修复 Bing.com 新的灰度测试中搜索过滤问题。
-@ 修复部分搜索引擎跳转按钮的样式问题。
+@ 优化 Bing 首位卡片结果的过滤问题。
+@ 优化脚本中所有的指引链接地址。
 @ 修正一些已知问题，优化代码，优化样式。
 ```
 

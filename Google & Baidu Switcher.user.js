@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            Помощник поисковой системы
 // @name:ja            優雅な検索エンジン助手
-// @version            2026.01.01.1
+// @version            2026.02.07.1
 // @author             F9y4ng
 // @description        Alias "Search Engine Assistant", le script aide à la navigation entre les moteurs de recherche, à la personnalisation des préférences, à la mise en évidence des mots-clés, à l'élimination des redirections et des publicités et au filtrage des résultats. Compatible avec Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG et bien d'autres moteurs de recherche célèbres.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG and more.
@@ -254,12 +254,10 @@
 // @grant              GM.registerMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
-// @note               {"CN":"🎉恭祝各位用户 𝟐𝟎𝟐𝟔 新年快乐，万事如意。🎊","EN":"🎉Wishing all users a happy New Year in 𝟐𝟎𝟐𝟔.🎊"}
-// @note               {"CN":"更新 2026 年度脚本版权信息（第十一年度）。","EN":"Updated script copyright information in 2026."}
-// @note               {"CN":"修复 Bing.com 新的灰度测试中搜索过滤问题。","EN":"Fixed search filter issue in Bing's A/B test."}
-// @note               {"CN":"修复部分搜索引擎跳转按钮的样式问题。","EN":"Fixed jump buttons issue of some search engine."}
+// @note               {"CN":"优化 Bing 首位卡片结果的过滤问题。","EN":"Optimized Bing top card result filter issue."}
+// @note               {"CN":"优化脚本中所有的指引链接地址。","EN":"Optimized all guideline link addresses in script."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
-// @compatible         edge version≥88 (Compatible Tampermonkey, Violentmonkey)
+// @compatible         Edge version≥88 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Chrome version≥88 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Firefox version≥78 (Compatible Greasemonkey, Tampermonkey, Violentmonkey)
 // @compatible         Opera version≥75 (Compatible Tampermonkey, Violentmonkey)
@@ -382,11 +380,10 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         const: { once: "gb-init-once", purge: "gd-purge-success", anti: "gd-anti-redirect", warn: "data-filter-warn", navinfo: "__Navigation#INFO__" },
       },
       var: {
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2026.01.01.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2026.02.07.0",
         scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
       },
       url: {
-        redundant: decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcubGlrZXMuZmFucyUyRnJlZHVuZGFudC1pc3N1ZQ=="),
         yandexIcon: decrypt("aHR0cHMlM0ElMkYlMkZmYXZpY29uLnlhbmRleC5uZXQlMkZmYXZpY29uJTJGdjI="),
         backupIcon: decrypt("aHR0cHMlM0ElMkYlMkZzMjEuYXgxeC5jb20lMkYyMDI1JTJGMDclMkYyMCUyRnBWOGVMaTYucG5n"),
         feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? decrypt("aHR0cHMlM0ElMkYlMkZnaXRodWIuY29tJTJGRjl5NG5nJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJGaXNzdWVz"),
@@ -608,8 +605,8 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     function checkRedundantScript(global) {
       const reportRedundanceError = () => {
         const errorText = IS_CHN
-          ? `\ud83d\udea9【脚本冗余警告】发现冗余安装的脚本: "${def.var.scriptName}"，如刷新后问题依旧，请访问 ${def.url.redundant} 排查错误。`
-          : `\ud83d\udea9 [Redundance Warning] Found Redundant Scripts: '${def.var.scriptName}', if persists after reloading, please visit ${def.url.redundant} to troubleshoot.`;
+          ? `\ud83d\udea9【脚本冗余警告】发现冗余安装的脚本: "${def.var.scriptName}"，如刷新后问题依旧，请访问 ${def.url.feedback}/117 排查错误。`
+          : `\ud83d\udea9 [Redundance Warning] Found Redundant Scripts: '${def.var.scriptName}', if persists after reloading, please visit ${def.url.feedback}/117 to troubleshoot.`;
         const troubleshoot = `\ufff8\ud83d\uded1 ${IS_CHN ? "发现冗余安装的脚本，点击排查！" : "Troubleshoot Redundant Issue"}`;
         return CUR_WINDOW_TOP && (__console("error", errorText), GMregisterMenuCommand(troubleshoot, () => GMopenInTab(`${def.url.feedback}/117`, false))), true;
       };
@@ -1451,7 +1448,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:6;display:inline-flex;margin:var(--margin,4px 0 0 0);padding:0 4px 0 0;width:auto;height:38px;min-width:180px;vertical-align:top;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0}input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 1px 18px;border-radius:24px 0 0 24px}#${def.const.rightButton} input{margin:0;padding:0 18px 1px 12px;border-radius:0 24px 24px 0}:host(.${def.const.scrollspan}){margin:0!important;padding:4px 3px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars}{margin:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}.${def.const.scrollbarsV2}{margin:0 0 0 1px!important;height:34px!important;border-radius:6px!important;padding:0 12px!important}input:hover{background:#f0f3f6;box-shadow:0 0 4px #174ae4;transition:background .1s linear,box-shadow .2s linear}`,
               darkModeCss: `:host(.${def.const.darkmode}) input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}:host(.${def.const.darkmode}) input:hover{background:#a2b7f4;color:#333}`,
               resultListProp: {
-                qs: `#b_results li.b_algo:not(.b_algoBorder,.b_topborder),#b_results li.b_vidAns .mmlist>div[id],#b_results li.b_mop .b_slidebar>div.slide,#b_topw li.b_ans,aside ol#b_context li.b_algo`,
+                qs: `#b_results li.b_algo:not(.b_algoBorder,.b_topborder),#b_results li.b_vidAns .mmlist>div[id],#b_results li.b_mop .b_slidebar>div.slide,#b_topw li.b_ans,aside ol#b_context li.b_algo,#b_results li.b_ans.b_top:has(#richdev_ans)`,
                 delay: 10,
               },
               keywords:
@@ -1515,7 +1512,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "sogou_ar" })("Sogou", "#wrapper a[href^='/link?url=']:not([uigs])", { useNewTab: true, advancedAnti: true }),
               antiAdsFn: () => {
                 const selectors = `#biz_tip_box_tuiguang_float,.pz_pc_new_container,.share-wrap,.sponsored,.tgad-box,[class~="ext_query"][id*="sq_ext_"],div.top-better-hintBox,#right>div.rvr-model:not([tpl]),.results .reactResult,.results div.vrwrap.middle-better-hintBox,#right>.reactResult,#searchBtn2[value="\u5168\u7f51\u641c\u7d22"]`;
-                deBounce({ fn: parseAntiAdvertising, delay: 10, timer: "sogou_ad", immed: true })({ selectors, siteName: "Sogou", isRemoveNodes: true });
+                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "sogou_ad", immed: true })({ selectors, siteName: "Sogou", isRemoveNodes: true });
               },
             },
             qwant: {
@@ -2378,7 +2375,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               const fontStyle = `text-transform:capitalize;font:italic 16px/130% Candara,'Times New Roman'`;
               __console(
                 "shown_system_info",
-                `%c${def.var.scriptName}\r\n%cINTRO.URL:\u0020https://f9y4ng.likes.fans/Search-Engine-Assistant\r\n%c%s%cV%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s`,
+                `%c${def.var.scriptName}\r\n%cINTRO.URL:\u0020${def.url.homepage}\r\n%c%s%cV%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s\r\n%c%s%c%s`,
                 "font:normal 700 16px/150% system-ui,-apple-system,BlinkMacSystemFont,sans-serif;color:#dc143c",
                 "color:#777;font:italic 400 10px/180% monospace",
                 "font-size:12px;font-weight:700;color:#4682b4",
@@ -2804,15 +2801,15 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
             function processMainThreadTasks() {
               const indexPage = checkIndexPage();
-              const securityPolicy = getSecurityPolicy();
-              if (currentSite.siteTypeID !== newSiteType.OTHERS && !indexPage && !securityPolicy && !qS(`#${def.const.rndButtonID}`)) insertButtons();
+              const securePage = getSecurityPolicy();
+              if (currentSite.siteTypeID !== newSiteType.OTHERS && !indexPage && !securePage && !qS(`#${def.const.rndButtonID}`)) insertButtons();
               const { siteTypeID, overrideCss, antiAdsFn, resultListProp, antiRedirectFn } = listCurrentSite;
               if (siteTypeID === newSiteType.OTHERS) return;
-              !indexPage && !securityPolicy && overrideCss && !findAdoptedStyleSheet(def.const.rndclassName) && insertCSS(listCurrentSite);
+              !indexPage && !securePage && overrideCss && !findAdoptedStyleSheet(def.const.rndclassName) && insertCSS(listCurrentSite);
               !findAdoptedStyleSheet(def.const.rndstyleName) && insertStyle();
-              !securityPolicy && antiAds && antiAdsFn?.();
-              !indexPage && !securityPolicy && antiResultsFilter && filterSearchResults(resultListProp);
-              !indexPage && !securityPolicy && antiLinkRedirect && antiRedirectFn?.();
+              !securePage && antiAds && antiAdsFn?.();
+              !indexPage && !securePage && antiResultsFilter && filterSearchResults(resultListProp);
+              !indexPage && !securePage && antiLinkRedirect && antiRedirectFn?.();
             }
 
             function searchButtonAndStylesObserve() {
