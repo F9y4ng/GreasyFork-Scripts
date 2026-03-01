@@ -7,7 +7,7 @@
 [![ISSUES](https://img.shields.io/github/issues/F9y4ng/GreasyFork-Scripts?logo=github&style=for-the-badge "ISSUES")](https://github.com/F9y4ng/GreasyFork-Scripts/issues)
 [![STARS](https://img.shields.io/github/stars/F9y4ng/GreasyFork-Scripts?color=brightgreen&logo=github&style=for-the-badge "STARS")](https://github.com/F9y4ng/GreasyFork-Scripts/stargazers)
 
-- Please install the **script-manager** extension first (e.g. Tampermonkey, Violentmonkey, Greasemonkey, etc.) before installing the script.
+- Please install the **Script Manager** extension first (e.g. Tampermonkey, Violentmonkey, Greasemonkey, etc.) before installing the script.
 - **Tampermonkey** is recommended for **Chrome**, **Violentmonkey** is recommended for **Firefox**,  and **Tampermonkey/Userscripts** is recommended for **Safari**.
 - Using a script-manager such as **Adguard Desktop** or **Userscripts**, you can use **keyboard shortcuts** to call up the scripts menu.
 
@@ -28,10 +28,11 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data in a timely manner. Do not use backup files from unknown sources!
 
-## version 2026.02.07.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2026.03.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ Optimized all guideline link addresses in script.
+@ Optimized script's multi-language settings interface.
+@ Optimized support for more simple script managers.
 @ Fixed some known issues, optimized code & style.
 ```
 
@@ -107,11 +108,10 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-## version 2026.02.07.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2026.03.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Optimized Bing top card result filter issue.
-@ Optimized all guideline link addresses in script.
+@ Fixed misalignment of Bing jump buttons caused by screen size differences.
 @ Fixed some known issues, optimized code & style.
 ```
 
