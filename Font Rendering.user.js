@@ -5,7 +5,7 @@
 // @name:en            Font Rendering (Customized)
 // @name:ko            글꼴 렌더링 (자체 사용 스크립트)
 // @name:ja            フォントのレンダリング
-// @version            2026.02.07.1
+// @version            2026.03.01.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -156,8 +156,8 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         const: { once: "fr-init-once", conflict: "fr-callback-conflict", vpu: "data-fr-processed", navinfo: "__Navigation#INFO__" },
       },
       var: {
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2026.02.07.0",
-        scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZw=="),
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2026.03.01.0",
+        scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZyUyMChDdXN0b21pemVkKQ=="),
         scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("Rjl5NG5n"),
       },
       url: {
@@ -565,7 +565,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         const errorText = IS_CHN
           ? `\ud83d\udea9【脚本冗余警告】发现冗余安装的脚本: "${def.var.scriptName}"，如刷新后问题依旧，请访问 ${def.url.feedback}/117 排查错误。`
           : `\ud83d\udea9 [Redundance Warning] Found Redundant Scripts: '${def.var.scriptName}', if persists after reloading, please visit ${def.url.feedback}/117 to troubleshoot.`;
-        const troubleshoot = `\ufff8\ud83d\uded1 ${IS_CHN ? "发现冗余安装的脚本，点击排查！" : "Troubleshoot Redundant Issue"}`;
+        const troubleshoot = `\ufff8\ud83d\uded1 ${IS_CHN ? "发现冗余安装的脚本，点击排查！" : "Troubleshoot Redundance!"}`;
         return CUR_WINDOW_TOP && (__console("error", errorText), GMregisterMenuCommand(troubleshoot, () => GMopenInTab(`${def.url.feedback}/117`, false))), true;
       };
       const contentText = IS_CHN
@@ -817,9 +817,11 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
       /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
       const UPDATE_VERSION_NOTICE = IS_CHN
-        ? `<li class="${def.const.seed}.fixed">优化脚本中所有的指引链接地址。</li>
+        ? `<li class="${def.const.seed}.fixed">优化调整脚本的多语言设置界面内容。</li>
+            <li class="${def.const.seed}.fixed">优化对更多简易版脚本管理器的支持。</li>
             <li class="${def.const.seed}.fixed">修复一些已知的问题，优化代码，优化样式。</li>`
-        : `<li class="${def.const.seed}.fixed">Optimized all guideline link addresses in script.</li>
+        : `<li class="${def.const.seed}.fixed">Optimized script's multi-language settings interface.</li>
+            <li class="${def.const.seed}.fixed">Optimized support for more simple script managers.</li>
             <li class="${def.const.seed}.fixed">Fixed some known issues, optimized code & style.</li>`;
 
       /* INITIALIZE_FONT_LIBRARY */
@@ -874,7 +876,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
 
       const INITIAL_FEATURES = { isBackupFunction: true, isPreview: false, isFontsize: false, isFixViewport: false, isHotkey: true, isCloseTip: false, maxPersonalSites: 1e2 };
       const INITIAL_CONFIGURE = { ...INITIAL_FEATURES, rebuild: void 0, curVersion: void 0, globalDisable: false, isCustomMono: false };
-      const GUIDELINE_URL = `${def.url.feedback}/../wiki/${encodeURIComponent(getMetaValue(`name:${IS_CHN ? "zh-CN" : "en"}`).replaceAll(" ", "-"))}`;
+      const GUIDELINE_URL = `${def.url.feedback}/../wiki/${encodeURIComponent((getMetaValue(`name:${IS_CHN ? "zh-CN" : "en"}`) ?? GMinfo.script.name ?? "").replaceAll(" ", "-"))}`;
       const INITIAL_REMARKS = {
         fontBase: `system-ui,-apple-system,BlinkMacSystemFont,sans-serif`,
         fontEmoji: `'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','Android Emoji',EmojiSymbols,'EmojiOne Mozilla','Twemoji Mozilla','Segoe UI Symbol','Noto Color Emoji Compat','Font Awesome 6 Pro','Font Awesome 5 Pro',FontAwesome,emoji,codicon,iconfont,icomoon,IcoFont,bwi-font,fontello,themify,bootstrap-icons,'Segoe Fluent Icons','Material Icons','Material Icons Extended','Material Icons Outlined','Material Icons Round','Material Icons Sharp','Material Icons Two Tone','Google Material Icons','Google Material Icons Filled','Material Symbols Outlined','Material Symbols Round','Material Symbols Rounded','Material Symbols Sharp','Google Symbols'`,
@@ -904,7 +906,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         frConfigure:
           `:host(#${def.id.configure}){z-index:2147483645}#${def.id.container}{position:absolute;top:10px;right:24px;z-index:99999;display:block;box-sizing:content-box;padding:4px;border-radius:12px;background:#f0f6ff!important;box-shadow:0 0 4px 0 #0000004d;color:#333;text-align:left;font-weight:700;font-size:16px!important;opacity:0;transition:opacity .5s;width:auto;overflow:hidden;pointer-events:auto}#${def.id.container} .${def.const.seed}\\.dialog\\.scrollbar{display:block;visibility:hidden;overflow-x:hidden;overflow-y:auto;max-height:max(calc(98vh - 10px),100px);min-height:10%;scrollbar-color:auto;overscroll-behavior:contain}#${def.id.container} .${def.const.seed}\\.dialog\\.scrollbar:hover{visibility:visible}#${def.id.container} .${def.const.seed}\\.dialog\\.scrollbar::-webkit-scrollbar{width:6px;height:1px}#${def.id.container} .${def.const.seed}\\.dialog\\.scrollbar::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df}#${def.id.container} .${def.const.seed}\\.dialog\\.scrollbar::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df}#${def.id.container} *{text-shadow:none!important;font-weight:700;font-size:16px;font-family:var(--fr-shared-fontfamily),var(--fr-shared-emoji)!important;line-height:1.5!important;-webkit-text-stroke:0 transparent!important}#${def.id.container} fieldset{display:block;visibility:visible;margin:2px;padding:4px 6px;width:auto;height:auto;min-height:475px;border:2px groove #67a5df!important;border-radius:10px;background:#f0f6ff}#${def.id.container} legend{position:relative;float:none;display:block;visibility:visible;box-sizing:content-box;margin:0;padding:0 32px 0 8px;width:auto!important;height:auto!important;border:none!important;border-radius:6px;background:#f0f6ff!important;font:normal 700 16px/150% var(--fr-shared-fontfamily)!important}#${def.id.container} fieldset ul{margin:0;padding:0;background:#f0f6ff!important}#${def.id.container} ul li{float:none;display:block;box-sizing:content-box;margin:3px 0;min-width:-webkit-fill-available;min-width:-moz-available;border:none;background:#f0f6ff!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none}#${def.id.container} ul li:before{display:none}#${def.id.container} .${def.class.rotation} svg{visibility:visible!important;overflow:hidden;width:24px;height:24px;vertical-align:initial!important;fill:#67a5df}` +
           `#${def.id.container} .${def.class.rotation} svg:hover{cursor:help}#${def.const.seed}\\.scriptname{display:inline-block;margin:0 4px 0 0;vertical-align:bottom;overflow:hidden;min-width:130px;max-width:225px;text-overflow:ellipsis;white-space:nowrap;font-weight:700!important;-webkit-user-select:all;user-select:all}#${def.const.seed}\\.scriptname:hover{cursor:help}#${def.id.container} .${def.class.title} .${def.class.guide}{position:absolute;display:inline-block;cursor:pointer}@keyframes rotation{0%{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(1turn)}}.${def.class.title} .${def.class.rotation}{position:relative;display:inline-block;top:auto;right:auto;bottom:auto;left:auto;margin:0;padding:0;width:24px;height:24px;-webkit-transform:rotate(1turn);transform-origin:center 50% 0;animation:rotation 6s linear infinite}#${def.id.container} input:not([type='range'],[type='checkbox']):focus,#${def.id.container} textarea:focus{box-shadow:inset 0 1px 3px #0000001a,0 0 6px #52a8ec99!important}#${def.id.fontList}{padding:2px 10px 0;min-height:73px}#${def.id.fontFace},#${def.id.fontSmooth}{display:flex!important;padding:2px 10px;width:calc(100% - 18px);height:40px;min-width:auto;align-items:center;justify-content:space-between}#${def.id.fontSize}{padding:2px 10px;height:60px}#${def.id.fontStroke}{padding:2px 10px;height:60px}#${def.id.fontShadow}{padding:2px 10px;height:60px}#${def.id.container} #${def.id.shadowColor}{display:flex;padding:2px 10px;width:auto;min-height:45px;align-items:center;justify-content:space-around;flex-wrap:nowrap;flex-direction:row}#${def.id.fontCss},#${def.id.fontEx}{padding:2px 10px;height:110px;min-height:110px;min-width:254px!important}#${def.id.submit}{padding:2px 10px;height:40px;display:flex!important}#${def.id.fontList} .${def.class.selector} a{text-decoration:none;font-weight:400}#${def.id.fontList} .${def.class.label}{display:inline-block;margin:-1px 4px 5px 0;padding:0;height:34px;line-height:100%!important}#${def.id.fontList} .${def.class.label} span{display:inline-block;overflow:hidden;box-sizing:border-box;padding:5px;width:max-content;height:max-content;max-width:200px;min-width:12px;background:#67a5df;color:#fff;text-overflow:ellipsis;white-space:nowrap;font-weight:400;font-size:16px!important}#${def.id.fontList} .${def.class.close}:hover{border-radius:2px;background:#2d7dca;color:#ff6347}#${def.id.fontList} .${def.class.close}{width:12px}` +
-          `#${def.id.fontList} .${def.class.selector}{overflow-x:hidden;box-sizing:border-box;margin:0 0 6px 0;padding:6px 0 0 6px;width:100%;max-width:254px;max-height:90px;min-width:100%;min-height:45px;border:2px solid #67a5df!important;border-radius:6px;overscroll-behavior:contain;scrollbar-color:auto}#${def.id.selector}{width:100%;max-width:100%;display:none}#${def.id.selector} label{display:block;margin:0 0 4px;color:#333;cursor:auto}#${def.id.cleaner}{margin-left:5px;cursor:pointer}#${def.id.cleaner}:hover{color:#dc143c}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontList} .${def.class.selectFontID} span.${def.class.spanlabel},#${def.id.selector} span.${def.class.spanlabel}{display:block!important;margin:0!important;padding:0 0 4px;width:auto;border:0;background:transparent!important;color:#333;text-align:left!important}#${def.id.fontList} .${def.class.selectFontID}{width:auto}#${def.id.fontList} .${def.class.selectFontID} input{overflow:hidden;box-sizing:border-box;margin:0;padding:1px 4px 1px 0px;width:230px;height:42px;max-width:100%;min-width:100%;outline:none;border:2px solid #67a5df;border-radius:6px;background:#fafafa;text-indent:8px;text-overflow:ellipsis;color:#333;font:normal 700 16px/150% var(--fr-shared-fontfamily)!important}#${def.id.fontList} .${def.class.selectFontID} input[disabled]{pointer-events:none!important}#${def.id.fontList} input[disabled]::placeholder{color:#444a!important}#${def.id.fontList} .${def.class.selectFontID} input:focus:not(:placeholder-shown)~span{display:none}#${def.id.fontList} .${def.class.selectFontID} input::-webkit-search-cancel-button{margin:auto 4px;cursor:pointer}#${def.id.fontList} .${def.class.selectFontID} dl{display:none;position:absolute;z-index:1000;overflow-x:hidden;box-sizing:content-box;margin:4px 0 0;padding:4px 8px;width:auto;max-width:calc(100% - 68px);max-height:298px;min-width:60%;border:2px solid #67a5df!important;border-radius:6px;background:#fff;white-space:nowrap;font-size:18px!important;overscroll-behavior:contain;scrollbar-color:auto}#${def.const.seed}\\.fontoverride\\.def:hover,#${def.const.seed}\\.fontscale\\.def:hover{cursor:help;color:#8b0000}` +
+          `#${def.id.fontList} .${def.class.selector}{overflow-x:hidden;box-sizing:border-box;margin:0 0 6px 0;padding:6px 0 0 6px;width:100%;max-width:254px;max-height:90px;min-width:100%;min-height:45px;border:2px solid #67a5df!important;border-radius:6px;overscroll-behavior:contain;scrollbar-color:auto}#${def.id.selector}{width:100%;max-width:100%;display:none}#${def.id.selector} label{display:block;margin:0 0 4px;color:#333;cursor:auto}#${def.id.cleaner}{margin-left:5px;cursor:pointer}#${def.id.cleaner}:hover{color:#dc143c}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontList} .${def.class.selector}::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontList} .${def.class.selectFontID} span.${def.class.spanlabel},#${def.id.selector} span.${def.class.spanlabel}{display:block!important;margin:0!important;padding:0 0 4px;width:auto;border:0;background:transparent!important;color:#333;text-align:left!important}#${def.id.fontList} .${def.class.selectFontID}{width:auto}#${def.id.fontList} .${def.class.selectFontID} input{overflow:hidden;box-sizing:border-box;margin:0;padding:1px 4px 1px 0px;width:230px;height:42px;max-width:100%;min-width:100%;outline:none;border:2px solid #67a5df;border-radius:6px;background:#fafafa;text-indent:8px;text-overflow:ellipsis;color:#333;font:normal 700 16px/150% var(--fr-shared-fontfamily)!important}#${def.id.fontList} .${def.class.selectFontID} input[disabled]{pointer-events:none!important}#${def.id.fontList} input[disabled]::placeholder{color:#444a!important}#${def.id.fontList} .${def.class.selectFontID} input:focus:not(:placeholder-shown)~span{display:none}#${def.id.fontList} .${def.class.selectFontID} input::-webkit-search-cancel-button{margin:auto 4px;cursor:pointer}#${def.id.fontList} .${def.class.selectFontID} dl{display:none;position:absolute;z-index:1000;overflow-x:hidden;box-sizing:content-box;margin:4px 0 0;padding:4px 8px;width:auto;max-width:calc(100% - 68px);max-height:298px;min-width:60%;border:2px solid #67a5df!important;border-radius:6px;background:#fff;white-space:nowrap;font-size:18px!important;overscroll-behavior:contain;scrollbar-color:auto}#${def.const.seed}\\.fontrewrite\\.def:hover,#${def.const.seed}\\.fontscale\\.def:hover{cursor:help;color:#8b0000}` +
           `#${def.const.seed}\\.search::placeholder{color:#3699!important;font:normal 700 16px/150% var(--fr-shared-fontfamily)!important}#${def.id.fontList} .${def.class.selectFontID} dl::-webkit-scrollbar{width:10px;height:1px}#${def.id.fontList} .${def.class.selectFontID} dl::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 5px #67a5df}#${def.id.fontList} .${def.class.selectFontID} dl::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 5px #67a5df}#${def.id.fontList} .${def.class.selectFontID} dl dd{display:block;overflow-x:hidden;box-sizing:content-box;margin:1px 8px;padding:5px 0;width:-moz-available;width:-webkit-fill-available;max-width:100%;min-width:100%;text-overflow:ellipsis;font-weight:400;font-size:21px!important}#${def.id.fontList} .${def.class.selectFontID} dl dd:hover{overflow-x:hidden;box-sizing:content-box;min-width:-moz-available;min-width:-webkit-fill-available;background:#67a5df;color:#fff;text-overflow:ellipsis}.${def.class.checkbox}{display:none!important}.${def.class.checkbox}+label{position:relative;display:inline-block;box-sizing:content-box;margin:0 2px 0 0;padding:0;width:76px;height:32px;border-radius:7px;background:#f7836d;box-shadow:inset 0 0 10px #0000001a,0 0 5px #f5929266;white-space:nowrap;cursor:pointer}.${def.class.checkbox}+label::before{position:absolute;top:0;left:0;z-index:99;width:24px;height:32px;border-radius:7px;background:#fff;box-shadow:0 0 1px #00000099;color:#fff;content:" "}.${def.class.checkbox}+label::after{position:absolute;top:0;left:28px;padding:5px;border-radius:100px;color:#fff;content:"OFF";font-weight:700;font-style:normal;font-size:16px}.${def.class.checkbox}:checked+label{margin:0 2px 0 0;background:#67a5df!important;box-shadow:inset 0 0 10px #0000001a,0 0 5px #92c4f566;cursor:pointer}.${def.class.checkbox}:checked+label::after{left:10px;content:"ON"}.${def.class.checkbox}:checked+label::before{position:absolute;left:52px;z-index:99;content:" "}#${def.id.fface} label,#${def.id.fface}+label::after,#${def.id.fface}+label::before,#${def.id.smooth} label,#${def.id.smooth}+label::after,#${def.id.smooth}+label::before{-webkit-transition:all .3s ease-in;transition:all .3s ease-in}` +
           `#${def.id.fontShadow} div.${def.class.flex}:before,#${def.id.fontShadow} div.${def.class.flex}:after,#${def.id.fontStroke} div.${def.class.flex}:before,#${def.id.fontStroke} div.${def.class.flex}:after,#${def.id.fontSize} div.${def.class.flex}:before,#${def.id.fontSize} div.${def.class.flex}:after{display:none}#${def.id.shadowSize},#${def.id.strokeSize},#${def.id.fontScale}{box-sizing:content-box;margin:0 10px 0 0!important;padding:0;width:56px!important;height:32px!important;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:#fafafa!important;color:#111!important;text-align:center;text-indent:0;font-weight:400!important;font-size:17px!important;font-family:'Anton',Impact,serif!important}#${def.id.fontScale}[disabled]{background:#e4e7edd1!important;color:#555!important;filter:grayscale(.9)}#${def.id.fviewport},#${def.id.fstroke},#${def.id.rdCanvas}{visibility:visible;width:auto;color:#666;font-size:12px!important}#${def.id.fviewport}>label,#${def.id.fstroke}>label,#${def.id.rdCanvas}>label{float:none!important;display:inline!important;margin:0!important;padding:0 4px 0 2px!important;color:#666!important;font-size:12px!important;cursor:help!important}#${def.id.fixViewport},#${def.id.fixStroke},#${def.id.renderCanvas}{display:inline-block;margin:0 2px 0 0!important;width:14px!important;height:14px!important;vertical-align:text-bottom;cursor:pointer;-webkit-appearance:none!important}#${def.id.fixViewport}:checked::after,#${def.id.fixStroke}:checked::after,#${def.id.renderCanvas}:checked::after{border:0!important;background:#65a0db;color:#fff;content:"\u2713";font-weight:700;font-size:12px;line-height:14px}.${def.class.flex}{display:flex;width:auto;min-width:100%;align-items:center;justify-content:space-between;flex-wrap:nowrap;flex-direction:row}.${def.class.slider} input{visibility:hidden}#${def.id.fixViewport}::after,#${def.id.fixStroke}::after,#${def.id.renderCanvas}::after{position:relative;top:0;display:inline-block;margin:0;padding:0;width:14px;height:14px;border-radius:3px;background:#aaa;color:#fff;content:"\u2717";vertical-align:top;text-align:center;font-weight:700;font-size:10px;line-height:14px}` +
           `#${def.id.shadowColor} .${def.class.frColorPicker} #${def.id.color}{box-sizing:border-box;margin:0;padding:0 8px 0 0;min-width:160px;max-width:160px;height:35px!important;outline:none!important;border:2px solid #67a5df!important;border-radius:4px;background:#fdfdffb0;color:#333!important;text-align:center;text-indent:0;font-weight:400!important;font-size:18px!important;font-family:'Anton',Impact,serif!important;cursor:pointer}#${def.id.fontCss} textarea,#${def.id.fontEx} textarea{display:block;box-sizing:border-box;margin:0;padding:5px;width:calc(100% - 2px)!important;height:78px;max-width:calc(100% - 2px);max-height:78px;min-width:calc(100% - 2px);min-height:78px;outline:none!important;border:2px solid #67a5df!important;border-radius:6px;scrollbar-color:auto;color:#0b5b9c!important;font:normal 600 14px/150% var(--fr-shared-monospace)!important;resize:none;cursor:auto;word-break:break-all;overscroll-behavior:contain;scrollbar-color:auto}#${def.id.fontCss} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontCss} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontCss} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #00000033}#${def.id.fontEx} textarea{background:#fafafa!important}#${def.id.fontEx} textarea::-webkit-scrollbar{width:6px;height:1px}#${def.id.fontEx} textarea::-webkit-scrollbar-thumb{border-radius:10px;background:#487baf;box-shadow:inset 0 0 2px #67a5df}#${def.id.fontEx} textarea::-webkit-scrollbar-track{border-radius:10px;background:#efefef;box-shadow:inset 0 0 2px #67a5df}.${def.class.switcher}{float:right;box-sizing:border-box;margin:-2px 4px 0 0;padding:0 6px;border:2px double #67a5df;border-radius:4px;color:#0a68c1;}#${def.id.fontCss} textarea::placeholder,#${def.id.fontEx} textarea::placeholder{color:#555;font:italic 500 14px/150% var(--fr-shared-fontfamily)!important;opacity:.85}#${def.id.cSwitch}:hover,#${def.id.eSwitch}:hover{cursor:pointer;-webkit-user-select:none;user-select:none}.${def.class.notreadonly}{background:linear-gradient(45deg,#e9ffe9,#e9ffe9 25%,transparent 0,transparent 50%,#e9ffe9 0,#e9ffe9 75%,transparent 0,transparent)!important;background-color:#f7fff7!important;background-size:50px 50px!important}#${def.id.submit} .${def.class.submit}{margin-left:auto}#${def.id.backup}{display:none}` +
@@ -1486,12 +1488,10 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
           ? `<label title="修正字体比例缩放后视口单位出现数据偏移的问题。如开启后页面排版出现异常请关闭它。">视口修正</label>`
           : `<label title="Fixed viewport unit offset after font scaling. Please turn it off if occurs layout error.">Fix vpu</label>`;
         const tFixViewport = `<span id="${def.id.fviewport}">(${fixViewportLabel}<input type="checkbox" id="${def.id.fixViewport}" ${CONST_VALUES.fixViewport ? "checked" : ""}/>)</span>`;
-        const fontSizeSpan = IS_CHN
-          ? `<span class="${def.const.seed}.mg:0.pd:0" title="双击编辑站点缩放修正设置数据" id="${def.const.seed}.fontscale.def">字体比例缩放</span>`
-          : `<span class="${def.const.seed}.mg:0.pd:0" title="Double-click to edit the site scaling correction setting" id="${def.const.seed}.fontscale.def">Font Scaling</span>`;
+        const fontSizeSpan = IS_CHN ? ["双击编辑站点缩放修正设置数据", "字体比例缩放"] : ["Double-click to edit the site scaling correction setting", "Font Scaling"];
         const tFontSizeHTML = `<li id="${def.id.fontSize}">
             <div class="${def.class.flex}">
-              ${fontSizeSpan}${isFixViewport ? tFixViewport : ""}
+              <span class="${def.const.seed}.mg:0.pd:0" title="${fontSizeSpan[0]}" id="${def.const.seed}.fontscale.def">${fontSizeSpan[1]}</span>${isFixViewport ? tFixViewport : ""}
               <input id="${def.id.fontScale}" type="text" data-fr-type="number" maxlength="5" ${isDisabled}/>
             </div>
             <div class="${def.class.range}" data-ticks-position="top" ${isDisabled}></div>
@@ -1499,12 +1499,8 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         const FixStrokeLabel = IS_CHN
           ? `<label title="修正 Chromium 96.0 以上版本对粗体样式附加描边的渲染错误。默认开启，如出现严重卡顿请关闭之。">粗体修正</label>`
           : `<label title="Fixed rendering issues of Chromium above 96.0 on bold with text-stroke. Default by ON, please turn it off if lagging.">Fix bold</label>`;
-        const fixShadowLabel = IS_CHN
-          ? `修正 Chromium 123.0 以上版本对粗体样式附加阴影效果的渲染错误，默认关闭。`
-          : `Fixed rendering issues of Chromium above 123.0 on bold with text-shadow.`;
-        const lazyloadLabel = IS_CHN
-          ? `延迟加载修正程序，默认关闭，请注意：仅在出现样式异常或修正冲突时开启。`
-          : `Lazy loading the fixer, Only turn it on when style loading error or conflict.`;
+        const fixShadowLabel = IS_CHN ? `修正 Chromium 123.0+ 对粗体样式附加阴影的渲染错误，默认关闭。` : `Fixed rendering issues of Chromium 123.0+ on bold with text-shadow.`;
+        const lazyloadLabel = IS_CHN ? `延迟加载修正程序，默认关闭，仅样式加载异常或执行冲突时开启。` : `Lazy loading the fixer, Only turn it on when style loading error or conflict.`;
         const tFixShadowHTML = `<div id="${def.id.fshadow}.shadow.label" class="${def.const.seed}.fix.label">
             <span>${IS_CHN ? "附加阴影样式修正：" : "Add Shadow Fix: "}</span>
             <input type="checkbox" class="${def.class.checkbox}" id="${def.id.fixShadow}" ${CONST_VALUES.fixShadow ? "checked" : ""} ${CONST_VALUES.fixStroke ? "" : "disabled"} />
@@ -1521,27 +1517,25 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
             (${FixStrokeLabel}<input type="checkbox" id="${def.id.fixStroke}" ${CONST_VALUES.fixStroke ? "checked" : ""} />)
             <div id="${def.id.fshadow}">${IS_CAUSED_BOLDSHADOWERROR ? tFixShadowHTML : ""}${tLazyloadHTML}</div>
           </span>`;
-        const fontfaceHTML = IS_CHN
-          ? `<span title="双击编辑自定义字体重写数据" id="${def.const.seed}.fontoverride.def">字体重写</span>（默认：开）`
-          : `<span title="Double-click to edit custom font rewrite data"  id="${def.const.seed}.fontoverride.def">Font Rewrite (ON*)</span>`;
+        const fontfaceSpan = IS_CHN ? ["双击编辑自定义字体重写数据", "字体重写（默认：开）"] : ["Double-click to edit custom font rewrite data", "Font Rewrite (ON*)"];
         const colorFormat = global.FRColorPicker ? "RGB, RGBA, HEX, HEXA" : "HEXA (#AABBCCDD)";
         const shadowColorTipHTML = IS_CHN
           ? `<p>阴影颜色可通过点击激活拾色器选择，也可自行填写，格式支持: <em class="${def.const.seed}.clr:cecece">${colorFormat}.</em> 纯白色的所有格式表示自身颜色 <em class="${def.const.seed}.clr:cecece">currentcolor.</em></p><p><em class="${def.const.seed}.clr:8b0000">注意：输入数值会自动转化为HEXA格式，但数值保持一致性。错误格式会被替换为刚刚正确显示的数值。</em></p>`
           : `<p>Shadow colors can be selected by clicking color-block to activate the colorpicker, or custom filled in format that supports: <em class="${def.const.seed}.clr:cecece">${colorFormat}.</em> "Pure white" in all formats resolves to its own color <em class="${def.const.seed}.clr:cecece">currentcolor</em></p><p><em class="${def.const.seed}.clr:8b0000">Note: The value is converted to HEXA. The incorrect value is replaced with the final correct value.</em></p>`;
         const fontCSSTipHTML = IS_CHN
-          ? `<p>默认为排除大多数网站常用的特殊CSS样式后需要渲染的页面元素。填写格式：<em class="${def.const.seed}.clr:cecece">:not(.fa)</em> 或 <em class="${def.const.seed}.clr:cecece">:not([class*="fa"])</em> 或 <em class="${def.const.seed}.clr:cecece">,div.className</em></p><p><em class="${def.const.seed}.clr:8b0000">该选项为重要参数，默认只读，双击解锁。请尽量不要修改，避免造成样式失效。若失效请重置。</em></p><p>如果文字或图标变为乱码或方块，请双击 <span class="${def.class.emoji}">\ud83d\udd14</span> 打开样式修复帮助页面。</p>`
+          ? `<p>默认排除大多数网站常用的特殊CSS样式后需要渲染的页面元素。填写格式：<em class="${def.const.seed}.clr:cecece">:not(.fa)</em> 或 <em class="${def.const.seed}.clr:cecece">:not([class*="fa"])</em> 或 <em class="${def.const.seed}.clr:cecece">,div.className</em></p><p><em class="${def.const.seed}.clr:8b0000">该选项为重要参数，默认只读，双击解锁。请尽量不要随意修改，避免造成样式失效。若失效请重置。</em></p><p>如果文字或图标变为乱码或方块，请双击 <span class="${def.class.emoji}">\ud83d\udd14</span> 打开样式修复帮助页面。</p>`
           : `<p>Defaults to page elements that need to be rendered after excluding special CSS styles used on websites. Fill format: <em class="${def.const.seed}.clr:cecece">:not(.fa)</em> or <em class="${def.const.seed}.clr:cecece">:not([class*="fa"])</em></p><p><em class="${def.const.seed}.clr:8b0000">This option is an important parameter, read-only by default, double-click to unlock.</em></p><p>If part of text becomes garbled, Please double-click <span class="${def.class.emoji}">\ud83d\udd14</span> to open the style-fix help page.</p>`;
         const fontExTipHTML = IS_CHN
-          ? `<p>该选项排除渲染字体描边、字体阴影效果，请将排除渲染的HTML标签用逗号分隔。具体规则请点击顶部旋转的帮助文件图标。</p><p><em class="${def.const.seed}.clr:8b0000">编辑该选项需要CSS知识，如需要排除复杂的样式或标签可通过这里进行添加，样式若混乱请重置。</em></p><p>双击 <span class="${def.class.emoji}">\ud83d\udd14</span> 可打开自定义等宽字体添加工具，设置您需要的等宽字体。</p><p><em class="${def.const.seed}.clr:8b0000">请注意：使用自定义等宽字体时，请谨慎删除该文本域中的重要代码：<br/>『 <em class="${def.const.seed}.clr:cecece">pre,pre *,code,code *</em> 』</em></p>`
-          : `<p>This option excludes the rendering of font stroke, font shadow effects, please separate the excluded HTML tags with commas.</p><p><em class="${def.const.seed}.clr:8b0000">Knowledge of CSS is required to edit, If you need to exclude complex styles or tags you can add them here.</em></p><p>Double-click <span class="${def.class.emoji}">\ud83d\udd14</span> to open the Custom monospace Font Tool and set the isometric font you need.</p><p><em class="${def.const.seed}.clr:8b0000">Note: if using custom monospace fonts, Please be careful to delete important codes in this textarea:『 <em class="${def.const.seed}.clr:cecece">pre,pre *,code,code *</em> 』</em></p>`;
-        const title = IS_CHN ? `双击查看更新历史：${def.var.scriptName}` : `Double-click to view the update history of ${def.var.scriptName} `;
+          ? `<p>该选项排除渲染字体描边、字体阴影效果，请将排除渲染的HTML标签用逗号分隔。具体规则请点击顶部旋转的帮助文件图标。</p><p><em class="${def.const.seed}.clr:8b0000">编辑该选项需要CSS知识，如出现语法错误造成样式无效请重置。</em></p><p>双击 <span class="${def.class.emoji}">\ud83d\udd14</span> 可打开自定义等宽字体添加工具，设置您需要的等宽字体。</p><p><em class="${def.const.seed}.clr:8b0000">请注意：使用自定义等宽字体时，请谨慎删除该文本域中的重要代码：<br/>『 <em class="${def.const.seed}.clr:cecece">pre,pre *,code,code *</em> 』</em></p>`
+          : `<p>This option excludes the rendering of font stroke, font shadow effects, please separate the excluded HTML tags with commas.</p><p><em class="${def.const.seed}.clr:8b0000">Knowledge of CSS is required to edit this option, please reset if the style to be invalid.</em></p><p>Double-click <span class="${def.class.emoji}">\ud83d\udd14</span> to open the Custom monospace Font Tool and set the isometric font you need.</p><p><em class="${def.const.seed}.clr:8b0000">Note: if using custom monospace fonts, Please be careful to delete important codes in this textarea:『 <em class="${def.const.seed}.clr:cecece">pre,pre *,code,code *</em> 』</em></p>`;
+        const title = IS_CHN ? `双击查看更新历史：${def.var.scriptName}` : `Double-click to view the update history of ${def.var.scriptName}`;
         const tHTML = `<fr-container id="${def.id.container}">
           <fr-scrollbar class="${def.const.seed}.dialog.scrollbar">
             <fieldset id="${def.id.field}">
               <legend class="${def.class.title}">
-                <span id="${def.const.seed}.scriptname" title='${title}v${curVersion}' class="${def.const.seed}.clr:8b0000">${def.var.scriptName}</span>
+                <span id="${def.const.seed}.scriptname" title='${title} v${curVersion}' class="${def.const.seed}.clr:8b0000">${def.var.scriptName}</span>
                 <span class="${def.class.guide}">
-                  <span class="${def.class.rotation}" title="${IS_CHN ? "单击查看脚本使用帮助文档" : "Click to Open Usage Document"}" height="24" width="24">
+                  <span class="${def.class.rotation}" title="${IS_CHN ? "单击查看脚本使用文档" : "Click to Open Usage Document"}" height="24" width="24">
                     <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="48px" height="48px" viewBox="0,0,255.99431,255.99431"><g transform="scale(0.5,0.5)"><path d="M504.1,256c0,-137 -111.1,-248.1 -248.1,-248.1c-137,0 -248.1,111.1 -248.1,248.1c0,137 111.1,248.1 248.1,248.1c137,0 248.1,-111.1 248.1,-248.1z" fill="#67a5df"/><path d="M146.1,181.5c0,-13.9 4.5,-28 13.4,-42.3c8.9,-14.3 22,-26.1 39.1,-35.5c17.1,-9.4 37.1,-14.1 60,-14.1c21.2,0 40,3.9 56.2,11.8c16.3,7.8 28.8,18.5 37.7,32c8.9,13.5 13.3,28.1 13.3,43.9c0,12.5 -2.5,23.4 -7.6,32.7c-5.1,9.4 -11.1,17.5 -18,24.3c-7,6.8 -19.4,18.3 -37.5,34.4c-5,4.5 -9,8.5 -12,12c-3,3.4 -5.2,6.6 -6.7,9.4c-1.5,2.9 -2.6,5.7 -3.4,8.6c-0.8,2.9 -2,7.9 -3.6,15.1c-2.8,15.2 -11.5,22.9 -26.1,22.9c-7.6,0 -14,-2.5 -19.2,-7.5c-5.2,-5 -7.8,-12.4 -7.8,-22.2c0,-12.3 1.9,-23 5.7,-32c3.8,-9 8.9,-16.9 15.2,-23.7c6.3,-6.8 14.8,-14.9 25.5,-24.3c9.4,-8.2 16.1,-14.4 20.3,-18.6c4.2,-4.2 7.7,-8.8 10.5,-14c2.9,-5.1 4.3,-10.7 4.3,-16.7c0,-11.7 -4.4,-21.6 -13.1,-29.7c-8.7,-8.1 -20,-12.1 -33.7,-12.1c-16.1,0 -28,4.1 -35.6,12.2c-7.6,8.1 -14.1,20.1 -19.3,35.9c-5,16.6 -14.4,24.8 -28.3,24.8c-8.2,0 -15.1,-2.9 -20.8,-8.7c-5.6,-5.6 -8.5,-11.8 -8.5,-18.6zM253.4,422.3c-8.9,0 -16.7,-2.9 -23.4,-8.7c-6.7,-5.8 -10,-13.9 -10,-24.3c0,-9.2 3.2,-17 9.7,-23.3c6.4,-6.3 14.4,-9.4 23.7,-9.4c9.2,0 17,3.2 23.3,9.4c6.3,6.3 9.4,14.1 9.4,23.3c0,10.3 -3.3,18.3 -9.9,24.2c-6.6,5.9 -14.2,8.8 -22.8,8.8z" fill="#fff"/></g></svg>
                   </span>
                 </span>
@@ -1551,7 +1545,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
                   <div class="${def.class.fontList}"></div>
                 </li>
                 <li id="${def.id.fontFace}">
-                  <div class="${def.const.seed}.mg:0.pd:0">${fontfaceHTML}</div>
+                  <div class="${def.const.seed}.mg:0.pd:0"><span title="${fontfaceSpan[0]}" id="${def.const.seed}.fontrewrite.def">${fontfaceSpan[1]}</span></div>
                   <div class="${def.const.seed}.mg:0.pd:0 ${def.const.seed}.checkbox">
                     <input type="checkbox" id="${def.id.fface}" class="${def.class.checkbox}" ${CONST_VALUES.fontFace ? "checked" : ""} />
                     <label for="${def.id.fface}"></label>
@@ -1585,7 +1579,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
                   <div class="${def.const.seed}.mg:0.pd:0">
                     <span class="${def.const.seed}.mg:0-3p.pd:0">${IS_CHN ? "阴影颜色" : "SDColor"}</span>
                     <span class="${def.class.tooltip}">
-                      <span class="${def.class.emoji}" title="${IS_CHN ? "按住查看帮助" : "Hold down for help"}">\ud83d\udd14</span>
+                      <span class="${def.class.emoji}" title="${IS_CHN ? "按住查看帮助" : "Press and hold for help"}">\ud83d\udd14</span>
                       <span class="${def.class.tooltip} ${def.class.ps3} ${def.const.seed}.mgl:-5p">
                         ${shadowColorTipHTML}
                       </span>
@@ -1598,24 +1592,24 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
                 <li id="${def.id.fontCss}">
                   <div class="${def.const.seed}.mgb:6p">${IS_CHN ? "需要渲染的网页元素" : "Rendered Elements"}
                     <span id="${def.id.render}" class="${def.class.tooltip}">
-                      <span class="${def.class.emoji}" title="${IS_CHN ? "按住查看帮助" : "Hold down for help"}">\ud83d\udd14</span>
+                      <span class="${def.class.emoji}" title="${IS_CHN ? "按住查看帮助" : "Press and hold for help"}">\ud83d\udd14</span>
                       <span class="${def.class.tooltip} ${def.class.ps4}">${fontCSSTipHTML}</span>
                     </span>
                     <div id="${def.id.cSwitch}" class="${def.class.switcher}" fr-button-switch="ON">\u2227</div>
                   </div>
-                  <textarea placeholder="${IS_CHN ? "请谨慎修改默认值，避免渲染失效。" : "Modify defaults carefully to avoid font rendering failures."}"
+                  <textarea placeholder="${IS_CHN ? "请谨慎修改默认值，避免渲染失效。" : "Please modify the default value carefully to avoid rendering failure."}"
                     class="${def.class.readonly}" title="${IS_CHN ? "重要参数，默认只读，双击解锁。" : "Read-only by default, Double-click to unlock."}"
                     id="${def.id.cssinclued}" readonly="readonly">${CONST_VALUES.fontCSS}</textarea>
                 </li>
                 <li id="${def.id.fontEx}">
                   <div class="${def.const.seed}.mgb:6p">${IS_CHN ? "排除渲染的HTML标签" : "Excluded HTML Labels"}
                     <span id="${def.id.mono}" class="${def.class.tooltip}">
-                      <span class="${def.class.emoji}" title="${IS_CHN ? "按住查看帮助" : "Hold down for help"}">\ud83d\udd14</span>
+                      <span class="${def.class.emoji}" title="${IS_CHN ? "按住查看帮助" : "Press and hold for help"}">\ud83d\udd14</span>
                       <span class="${def.class.tooltip} ${def.class.ps5}">${fontExTipHTML}</span>
                     </span>
                     <div id="${def.id.eSwitch}" class="${def.class.switcher}" fr-button-switch="ON">\u2227</div>
                   </div>
-                  <textarea placeholder="${IS_CHN ? "排除渲染描边与阴影的HTML标签，如:" : "Exclude HTML tags for render strokes and shadows, such as:"} input, em, div[id$='test']"
+                  <textarea placeholder="${IS_CHN ? "排除渲染描边与阴影的HTML标签，如:" : "Exclude HTML tags that render strokes and shadows, such as:"} input, em, div[id$='test']"
                     id="${def.id.cssexclude}">${CONST_VALUES.fontEx}</textarea>
                 </li>
                 <li id="${def.id.submit}">
@@ -2194,7 +2188,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
             listContents += `<li id="${def.const.seed}.vlist.item:${i}"><span>${number}. </span><span class="${def.const.seed}.domainlist" title="${domainName}">${domainName}</span>`;
             listContents += `<span>[<a id="${def.const.seed}.vlist.item.link:${i}" class="${def.const.seed}.clr:8b0000" data-fr-domain="${domainName}">${delText}</a>]</span></li>`;
           }
-          listContents = listContents || `<li id="${def.const.seed}.temp">---- ${IS_CHN ? "暂时没有自定义排除站点" : "No customized exclusion"} ----</li>`;
+          listContents = listContents || `<li id="${def.const.seed}.temp">---- ${IS_CHN ? "暂时没有自定义排除站点" : "No custom exclusion sites"} ----</li>`;
           const [searchBtn, addBtn] = IS_CHN ? ["查 询", "添 加"] : ["Search", "Add"];
           const customExsiteHTML = IS_CHN
             ? `<p class="${def.const.seed}.clr:555 ${def.const.seed}.fs:14p"><b class="${def.const.seed}.clr:8b0000">添加自定义排除站点</b>：在文本框中输入正确的域名，点击添加按钮，支持首位通配符的泛域名，如：*.example.com</p><p class="${def.const.seed}.clr:555 ${def.const.seed}.fs:14p"><b class="${def.const.seed}.clr:8b0000">数据保存</b>：完成所有添加、删除操作后需点击保存按钮才会使数据保存生效，保存数据后不能撤回，请谨慎操作。</p>`
@@ -2478,7 +2472,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
                 <input type="hidden" id="${def.id.fontsetList}" value="${CONST_VALUES.fontSelect}" />
                 <dl><dt></dt><dd></dd></dl>
                 <span class="${def.class.tooltip} ${def.class.ps1}" id="${def.id.fonttooltip}">
-                  <span class="${def.class.emoji}" title="${IS_CHN ? "按住查看帮助" : "Hold down for help"}">\ud83d\udd14</span>
+                  <span class="${def.class.emoji}" title="${IS_CHN ? "按住查看帮助" : "Press and hold for help"}">\ud83d\udd14</span>
                   <span class="${def.class.tooltip} ${def.class.ps2}">
                   ${selectFontTipHTML}
                   </span>
@@ -2819,7 +2813,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
           }
 
           function setFontOverrideDefTrigger(savedData) {
-            qS(`#${def.const.seed}\\.fontoverride\\.def`, def.var.configIf)?.addEventListener("dblclick", async e => {
+            qS(`#${def.const.seed}\\.fontrewrite\\.def`, def.var.configIf)?.addEventListener("dblclick", async e => {
               stopEventPropagation(e, { prevent: true });
               const _fontOverrideDef = JSON.stringify(savedData, null, 4);
               const rewriteText = IS_CHN
@@ -2858,7 +2852,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
                   const messageText = IS_CHN ? `自定义字体重写数据格式错误，请重新输入！` : `Custom-font-rewrite-data error, please re-enter!`;
                   const [trueButtonText, titleText] = IS_CHN ? ["确 定", "重写数据格式错误"] : ["OK", "Customized Font-Rewrite Data Error"];
                   const errorDialog = new FrDialogBox({ trueButtonText, messageText: `<p class="${def.const.seed}.clr:8b0000">${messageText}</p>`, titleText });
-                  if (await errorDialog.respond()) dblClick(qS(`#${def.const.seed}\\.fontoverride\\.def`, def.var.configIf));
+                  if (await errorDialog.respond()) dblClick(qS(`#${def.const.seed}\\.fontrewrite\\.def`, def.var.configIf));
                 }
               }
             });
