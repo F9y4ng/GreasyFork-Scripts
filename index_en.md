@@ -51,9 +51,9 @@
 * For **Violentmonkey**: Go to the **Dashboard**, enter the **Settings** tab, find and check "**Synchronous page mode**" in **Advanced - General**.
 
 ### Other useful links
-* [Occasional updates: How to fix websites font style errors?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42) (Chinese)
+* [How to correctly set font rendering parameters for different monitors and browsers?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160) (Chinese)
+* [Sharing settings about individual website style error corrections.](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42) (Chinese)
 * [How to set custom English and Chinese fonts for the website?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83) (Chinese)
-* [How to correctly set font rendering parameters for different browsers?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160) (Chinese)
   
 ## Feedback on issues
 
