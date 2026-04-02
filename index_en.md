@@ -50,15 +50,16 @@
 * For **Tampermonkey v5.1.1 and older**: Go to the **Dashboard**, enter the **Settings** tab, scroll down to "**Experimental**", and change **the injection mode** to "**Instant**".
 * For **Violentmonkey**: Go to the **Dashboard**, enter the **Settings** tab, find and check "**Synchronous page mode**" in **Advanced - General**.
 
+### Other useful links
+* [Occasional updates: How to fix websites font style errors?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42) (Chinese)
+* [How to set custom English and Chinese fonts for the website?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83) (Chinese)
+* [How to correctly set font rendering parameters for different browsers?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160) (Chinese)
+  
 ## Feedback on issues
 
 **Note**: Unknown compatibility errors may occur using the `Beta, Dev, Canary, Nightly` test branches of browsers and script managers, and normally we don't fix bugs caused by test builds. Due to a very small probability of data being abnormally initialized, **Please back up your local data in time**!.
 
 **Feedback Issues**: To report script errors or style issues, please send the **access URL** where the problem occurs when **only using this script**, the **browser version** used, **script manager version**, **error screenshots**, and the **operation process** or **error message** (if any). The problems you encounter may not be reproduced locally.
-
-* [Occasional updates: How to fix websites font style errors?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42) (Chinese)
-* [How to set custom English and Chinese fonts for the website?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83) (Chinese)
-* [How to correctly set font rendering parameters for different browsers?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160) (Chinese)
 
 > ### How to provide script error log?
 > 
