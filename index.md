@@ -47,9 +47,9 @@
 * [脚本延迟加载造成页面二次渲染问题的解决办法](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/368)
 
 ### 其他有用的链接
-* [特定网站样式错误修正的设置分享，不定期更新，自取自用。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42)
-* [分享：分别设置英文字体和中文字体的方法。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83)
-* [如何正确地对不同显示器、浏览器设定字体渲染参数？](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160)
+- [如何针对不同显示器与浏览器设定最佳渲染参数？](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160)
+- [个别网站样式错误修正配置分享。（不定期更新）](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42)
+- [分享：关于分别设置英文字体和中文字体的方法。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83)
 
 ## 问题反馈
 
