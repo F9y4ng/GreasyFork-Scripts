@@ -39,6 +39,7 @@
 - When upgrading from an older version to the latest version, if there are some style issues, you can try to correct it by resetting the data to use the latest rules. however, It is not recommended that you use backup restore for major version (data rebuild) updates, and it is recommended to reconfigure the parameters, save them, and back up the new data again.
 - **Note:** Under Win10/Win11, regardless of high or low resolution, as long as the system or browser applies a zoom ratio of more than 150%, the best rendering effect can be obtained, which is determined by the default rendering mechanism of Windows.
 
+### Handling of delayed script loading
 <details>
 <summary>Click to view - How to deal with script delayed loading?</summary>
 
@@ -51,15 +52,16 @@
 
 </details>
 
+### Other useful links
+* [How to correctly set font rendering parameters for different monitors and browsers?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160) (Chinese)
+* [Sharing settings about individual website style error corrections.](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42) (Chinese)
+* [How to set custom English and Chinese fonts for the website?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83) (Chinese)
+
 ### Feedback on issues
 
 **Note 1:** Unknown compatibility errors may occur when using the `Beta, Dev, Canary, Nightly` and other test branches of the browser or script manager, and the script will not correct errors of the test version. Since there is a rare chance that the data will be initialized abnormally, **please back up your local data in time**.
 
 **Note 2:** To report script errors or style issues, please provide **the URL**, **the browser and version**, **the script manager and version**, **error page screenshot**, and **operation process** or **error prompt** (if any) where the problem occurs when **using this script only**, etc., because the problem you encountered may not be reproduced locally in me.
-
-* [Occasional updates: How to fix websites font style errors?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42) (Chinese)
-* [How to set custom English and Chinese fonts for the website?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83) (Chinese)
-* [How to correctly set font rendering parameters for different browsers?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160) (Chinese)
 
 <details>
 <summary>Click to view - How to provide script error log?</summary>
