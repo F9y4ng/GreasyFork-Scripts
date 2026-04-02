@@ -52,9 +52,9 @@
 
 ## Feedback on issues
 
-**Note 1:** Unknown compatibility errors may occur when using the `Beta, Dev, Canary, Nightly` and other test branches of the browser or script manager, and the script will not correct errors of the test version. Since there is a rare chance that the data will be initialized abnormally, **please back up your local data in time**.
+**Note**: Unknown compatibility errors may occur using the `Beta, Dev, Canary, Nightly` test branches of browsers and script managers, and normally we don't fix bugs caused by test builds. Due to a very small probability of data being abnormally initialized, **Please back up your local data in time!!!! **.
 
-**Note 2:** To report script errors or style issues, please provide **the URL**, **the browser and version**, **the script manager and version**, **error page screenshot**, and **operation process** or **error prompt** (if any) where the problem occurs when **using this script only**, etc., because the problem you encountered may not be reproduced locally in me.
+**Feedback Issues**: To report script errors or style issues, please send the **access URL** where the problem occurs when **only using this script**, the **browser version** used, **script manager version**, **error screenshots**, and the **operation process** or **error message** (if any). The problems you encounter may not be reproduced locally.
 
 * [Occasional updates: How to fix websites font style errors?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42) (Chinese)
 * [How to set custom English and Chinese fonts for the website?](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83) (Chinese)
@@ -83,7 +83,7 @@ The format is as follows: ```{"ch":"鸿蒙黑体", "en":"HarmonyOS Sans SC", "ps
 When a new font is installed, be sure to **restart the browser** first and **rebuild the font-list cache** in the **advanced core settings** for it to take effect immediately.
 
 - Note 1: Editing and saving a custom font library will automatically trigger a rebuild of the font list's global cache, eliminating the need for additional manual processing.
-- Note 2: If you only install fonts defined by the built-in font library, you need to manually rebuild the global cache of the font list in the **Advanced Core Setting** after restarting the browser.
+- Note 2: 📣 If you only install fonts defined by the built-in font library, you need to manually rebuild the global cache of the font list in the **Advanced Core Setting** after restarting the browser.
 
 ## Font scaling (experimental)
 
