@@ -52,7 +52,7 @@
 
 ## Feedback on issues
 
-**Note**: Unknown compatibility errors may occur using the `Beta, Dev, Canary, Nightly` test branches of browsers and script managers, and normally we don't fix bugs caused by test builds. Due to a very small probability of data being abnormally initialized, **Please back up your local data in time!!!! **.
+**Note**: Unknown compatibility errors may occur using the `Beta, Dev, Canary, Nightly` test branches of browsers and script managers, and normally we don't fix bugs caused by test builds. Due to a very small probability of data being abnormally initialized, **Please back up your local data in time**!.
 
 **Feedback Issues**: To report script errors or style issues, please send the **access URL** where the problem occurs when **only using this script**, the **browser version** used, **script manager version**, **error screenshots**, and the **operation process** or **error message** (if any). The problems you encounter may not be reproduced locally.
 
