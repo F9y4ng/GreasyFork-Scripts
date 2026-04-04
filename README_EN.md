@@ -25,11 +25,13 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data promptly and don't use backup files from unknown sources!
 
-### version 2026.03.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2026.04.04.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ Optimized script's multi-language settings interface.
-@ Optimized support for more simple script managers.
+@ Optimized the font scaling correction function.
+@ Fixed conflict with Chrome v145+ built-in PDF viewer.
+@ Fixed font list cache rebuilt issue in Tampermonkey.
+@ Force replaceSync to accept TrustedScript types.
 @ Fixed some known issues, optimized code & style.
 ```
 
@@ -59,9 +61,9 @@
 
 ### Feedback on issues
 
-**Note 1:** Unknown compatibility errors may occur when using the `Beta, Dev, Canary, Nightly` and other test branches of the browser or script manager, and the script will not correct errors of the test version. Since there is a rare chance that the data will be initialized abnormally, **please back up your local data in time**.
+**Note**: Unknown compatibility errors may occur using the `Beta, Dev, Canary, Nightly` test branches of browsers and script managers, and normally we don't fix bugs caused by test builds. Due to a very small probability of data being abnormally initialized, **Please back up your local data in time**!
 
-**Note 2:** To report script errors or style issues, please provide **the URL**, **the browser and version**, **the script manager and version**, **error page screenshot**, and **operation process** or **error prompt** (if any) where the problem occurs when **using this script only**, etc., because the problem you encountered may not be reproduced locally in me.
+**Feedback Issues**: To report script errors or style issues, please send the **access URL** where the problem occurs when **only using this script**, the **browser version** used, **script manager version**, **error screenshots**, and the **operation process** or **error message** (if any). The problems you encounter may not be reproduced locally.
 
 <details>
 <summary>Click to view - How to provide script error log?</summary>
@@ -97,7 +99,7 @@ The format is as follows: ```{"ch":"鸿蒙黑体", "en":"HarmonyOS Sans SC", "ps
 When a new font is installed, be sure to **restart the browser** first and **rebuild the font-list cache** in the **advanced core settings** for it to take effect immediately.
 
 - Note 1: Editing and saving a custom font library will automatically trigger a rebuild of the font list's global cache, eliminating the need for additional manual processing.
-- Note 2: If you only install fonts defined by the built-in font library, you need to manually rebuild the global cache of the font list in the **Advanced Core Setting** after restarting the browser.
+- Note 2: 📣 If you only install fonts defined by the built-in font library, you need to manually rebuild the global cache of the font list in the **Advanced Core Setting** after restarting the browser.
 
 </details>
 
@@ -132,10 +134,13 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-### version 2026.03.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2026.04.04.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Fixed misalignment of Bing jump buttons caused by screen size differences.
++ Added double-click title to view update history.
++ Added search result blocking keyword adding tool.
+@ Optimized some search engine jump button styles.
+@ Force replaceSync to accept TrustedScript types.
 @ Fixed some known issues, optimized code & style.
 ```
 

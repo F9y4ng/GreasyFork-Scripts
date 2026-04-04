@@ -25,11 +25,13 @@
 - 脚本错误、异常请反馈至{[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)}, 字体、渲染样式、乱码问题请反馈至{[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)}。
 - 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-### version 2026.03.01.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2026.04.04.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 优化调整脚本的多语言设置界面内容。
-@ 优化对更多简易版脚本管理器的支持。
+@ 优化字体比例缩放的坐标数值修正函数。
+@ 修复与 Chrome v145+ 内置 PDF viewer 的冲突问题。
+@ 修复在 Tampermonkey 字体列表缓存重建无效的问题。
+@ 强制 replaceSync 接受 TrustedScript 类型。
 @ 修正一些已知问题，优化代码，优化样式。
 ```
 
@@ -42,15 +44,16 @@
 ### 脚本延迟加载的处理办法
 * [脚本延迟加载造成页面二次渲染问题的解决办法](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/368)
 
+### 其他有用的链接
+- [如何针对不同显示器与浏览器设定最佳渲染参数？](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160)
+- [个别网站样式错误修正配置分享。（不定期更新）](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42)
+- [分享：关于分别设置英文字体和中文字体的方法。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83)
+
 ### 问题反馈
 
-**注意**：使用浏览器、脚本管理器的`Beta、Dev、Canary、Nightly`等测试分支可能出现未知的兼容错误，脚本不会修正测试版本的错误，**如必须使用测试版本并对脚本有极高要求，建议你选择其他同类脚本**。因有极小概率发生数据被异常初始化，**请及时备份您的本地数据！！！**
+**注意**：使用浏览器、脚本管理器的`Beta、Dev、Canary、Nightly`等测试分支可能出现未知的兼容错误，通常情况下我们不会修正测试版本引发的错误。因有极小概率发生数据被异常初始化，**请及时备份您的本地数据！！！**
 
-**反馈问题请注意**：反馈脚本错误或样式问题，请把**仅使用本脚本**情况下发生问题的**访问网址**、使用的**浏览器版本**、**脚本管理器版本**、**错误截图**、以及**操作流程**或**错误提示**（如果有的话）发出来，你遇到的问题不一定能在我本地复现。
-
-- [特定网站样式错误修正的设置分享，不定期更新，自取自用。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/42)
-- [分享：关于分别设置英文字体和中文字体的方法。](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/83)
-- [如何正确地对不同显示器、浏览器设定字体渲染参数？](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/160)
+**反馈问题**：反馈脚本错误或样式问题，请把**仅使用本脚本**情况下发生问题的**访问网址**、使用的**浏览器版本**、**脚本管理器版本**、**错误截图**、以及**操作流程**或**错误提示**（如果有的话）发出来，你遇到的问题不一定能在我本地复现。
 
 <details>
 <summary>点击查看 - 如何提供脚本错误日志？</summary>
@@ -87,7 +90,7 @@
 每当计算机安装了新字体，要使其**立即生效**，请务必先**重启浏览器**，并在“**高级核心功能设置**”中重建字体列表缓存。
 
 - 注 1：自定义字体表的**编辑保存操作**会自动触发字体列表全局缓存的重建，无需额外手动处理。
-- 注 2：若仅安装**内置字体表**定义的字体，重启浏览器后，需要**手动**重建字体列表全局缓存。
+- 注 2：📣 若仅安装**内置字体表**定义的字体，重启浏览器后，需要**手动**重建字体列表全局缓存。
 </details>
 
 ### 字体比例缩放（实验性功能）
@@ -122,10 +125,13 @@
 - [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 - 自动更新检测默认开启，如无更新提示需求，可在“**搜索引擎助手高级设置**”中关闭它。
 
-### version 2026.03.01.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2026.04.04.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ 修正 Bing 跳转按钮因屏幕尺寸差异引发的错位。
++ 新增双击脚本标题栏查看更新记录。
++ 新增搜索结果屏蔽关键词添加工具。
+@ 优化部分搜索引擎跳转按钮样式。
+@ 强制 replaceSync 接受 TrustedScript 类型。
 @ 修正一些已知问题，优化代码，优化样式。
 ```
 
