@@ -29,11 +29,13 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-## version 2026.03.01.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2026.04.04.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 优化调整脚本的多语言设置界面内容。
-@ 优化对更多简易版脚本管理器的支持。
+@ 优化字体比例缩放的坐标数值修正函数。
+@ 修复与 Chrome v145+ 内置 PDF viewer 的冲突问题。
+@ 修复在 Tampermonkey 字体列表缓存重建无效的问题。
+@ 强制 replaceSync 接受 TrustedScript 类型。
 @ 修正一些已知问题，优化代码，优化样式。
 ```
 
@@ -102,10 +104,13 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-## version 2026.03.01.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2026.04.04.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ 修正 Bing 跳转按钮因屏幕尺寸差异引发的错位。
++ 新增双击脚本标题栏查看更新记录。
++ 新增搜索结果屏蔽关键词添加工具。
+@ 优化部分搜索引擎跳转按钮样式。
+@ 强制 replaceSync 接受 TrustedScript 类型。
 @ 修正一些已知问题，优化代码，优化样式。
 ```
 
