@@ -5,7 +5,7 @@
 // @name:en            Font Rendering (Customized)
 // @name:ko            글꼴 렌더링 (자체 사용 스크립트)
 // @name:ja            フォントのレンダリング
-// @version            2026.03.01.1
+// @version            2026.04.04.1
 // @author             F9y4ng
 // @description        无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
 // @description:zh-CN  无需安装MacType，优化浏览器字体渲染效果，让每个页面的字体变得更有质感。默认使用“微软雅黑”字体，也可根据喜好自定义其他字体使用。脚本针对浏览器字体渲染提供了字体重写、字体平滑、字体缩放、字体描边、字体阴影、对特殊样式元素的过滤和许可、自定义等宽字体等高级功能。脚本支持全局渲染与个性化渲染功能，可通过“单击脚本管理器图标”或“使用快捷键”呼出配置界面进行参数配置。脚本已兼容绝大部分主流浏览器及主流脚本管理器，且兼容常用的油猴脚本和浏览器扩展。
@@ -93,7 +93,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
   typeof window !== "undefined" ? window : this,
   typeof unsafeWindow !== "undefined" ? unsafeWindow : this,
   ((originalWindow, iframe) => {
-    if (typeof GM_addElement === "undefined") return originalWindow;
+    if (typeof GM_addElement === "undefined" || document.contentType === "application/pdf") return originalWindow;
     try {
       const { contentWindow } = (iframe = GM_addElement("iframe", { id: "𝐬𝐚𝐟𝐞.𝐰𝐢𝐧𝐝𝐨𝐰", style: "display:none", width: 0, height: 0 }));
       return !originalWindow.wrappedJSObject && iframe?.remove(), contentWindow ?? originalWindow;
@@ -156,7 +156,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         const: { once: "fr-init-once", conflict: "fr-callback-conflict", vpu: "data-fr-processed", navinfo: "__Navigation#INFO__" },
       },
       var: {
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2026.03.01.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2026.04.04.0",
         scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("Rm9udCUyMFJlbmRlcmluZyUyMChDdXN0b21pemVkKQ=="),
         scriptAuthor: getMetaValue("author") ?? GMinfo.script.author ?? decrypt("Rjl5NG5n"),
       },
@@ -417,7 +417,8 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
 
     function safeAddElement(...args) {
       try {
-        return GMscriptHandler === "Tampermonkey" && typeof args[0] !== "string" && args[0].ownerDocument !== document ? generalAddElement(...args) : GM_addElement(...args);
+        const isFaultyTM = GMscriptHandler === "Tampermonkey" && parseFloat(GMversion) < 5.5 && typeof args[0] !== "string" && args[0].ownerDocument !== document;
+        return isFaultyTM ? generalAddElement(...args) : GM_addElement(...args);
       } catch (_) {
         return generalAddElement(...args);
       }
@@ -718,7 +719,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
 
     function getMetaValue(str) {
       const queryRegexp = new RegExp(`//\\s+@${toString(str)}\\s+(.+)`);
-      const metaValue = (GMinfo.scriptMetaStr || GMinfo.scriptSource)?.match(queryRegexp);
+      const metaValue = GMinfo.scriptMetaStr?.match(queryRegexp);
       return metaValue?.[1] ?? ((str = str.match(/^name:([a-zA-Z-]+)$/)) && GMinfo.script.locales?.[str[1]]?.name);
     }
 
@@ -817,11 +818,15 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
       /* CUSTOMIZE_UPDATE_PROMPT_INFORMATION */
 
       const UPDATE_VERSION_NOTICE = IS_CHN
-        ? `<li class="${def.const.seed}.fixed">优化调整脚本的多语言设置界面内容。</li>
-            <li class="${def.const.seed}.fixed">优化对更多简易版脚本管理器的支持。</li>
+        ? `<li class="${def.const.seed}.fixed">优化字体比例缩放的坐标数值修正函数。</li>
+            <li class="${def.const.seed}.fixed">修复与 Chrome v145+ 内置 PDF viewer 的冲突问题。</li>
+            <li class="${def.const.seed}.fixed">修复在 Tampermonkey 字体列表缓存重建无效的问题。</li>
+            <li class="${def.const.seed}.fixed">强制 replaceSync 接受 TrustedScript 类型。</li>
             <li class="${def.const.seed}.fixed">修复一些已知的问题，优化代码，优化样式。</li>`
-        : `<li class="${def.const.seed}.fixed">Optimized script's multi-language settings interface.</li>
-            <li class="${def.const.seed}.fixed">Optimized support for more simple script managers.</li>
+        : `<li class="${def.const.seed}.fixed">Optimized the font scaling correction function.</li>
+            <li class="${def.const.seed}.fixed">Fixed conflict with Chrome v145+ built-in PDF viewer.</li>
+            <li class="${def.const.seed}.fixed">Fixed font list cache rebuilt issue in Tampermonkey.</li>
+            <li class="${def.const.seed}.fixed">Force replaceSync to accept TrustedScript types.</li>
             <li class="${def.const.seed}.fixed">Fixed some known issues, optimized code & style.</li>`;
 
       /* INITIALIZE_FONT_LIBRARY */
@@ -882,7 +887,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         fontEmoji: `'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji','Android Emoji',EmojiSymbols,'EmojiOne Mozilla','Twemoji Mozilla','Segoe UI Symbol','Noto Color Emoji Compat','Font Awesome 6 Pro','Font Awesome 5 Pro',FontAwesome,emoji,codicon,iconfont,icomoon,IcoFont,bwi-font,fontello,themify,bootstrap-icons,'Segoe Fluent Icons','Material Icons','Material Icons Extended','Material Icons Outlined','Material Icons Round','Material Icons Sharp','Material Icons Two Tone','Google Material Icons','Google Material Icons Filled','Material Symbols Outlined','Material Symbols Round','Material Symbols Rounded','Material Symbols Sharp','Google Symbols'`,
         monospacedFont: `'Operator Mono Lig','Fira Code','Source Code Pro','JetBrains Mono',Inconsolata,Monaco,'Roboto Mono','Ubuntu Mono','Anonymous Pro','Droid Sans Mono',Menlo,Consolas`,
         monospacedFeature: `"liga" 0,"tnum","zero"`,
-        editorialSiteList: `image.baidu.com|feishu.cn|github.com|github.dev|github1s.com|docs.google.com|fonts.google.com|mail.google.com|support.google.com|newassets.hcaptcha.com|kdocs.cn|leetcode.cn|leetcode.com|notion.site|notion.so|notion.com|docs.qq.com|weread.qq.com|regex101.com|shimo.im|addon.tencentsuite.com|tool.lu|vscode.dev|wolai.com|wqxuetang.com|xiezuocat.com|note.youdao.com|youtube.com|yuque.com`,
+        editorialSiteList: `addon.tencentsuite.com|developer.mozilla.org|docs.google.com|docs.qq.com|feishu.cn|fonts.google.com|github.com|github.dev|github1s.com|image.baidu.com|kdocs.cn|leetcode.cn|leetcode.com|mail.google.com|newassets.hcaptcha.com|note.youdao.com|notion.com|notion.site|notion.so|regex101.com|scriptcat.org|shimo.im|support.google.com|tool.lu|vscode.dev|weread.qq.com|wolai.com|wqxuetang.com|xiezuocat.com|youtube.com|yuque.com`,
       };
 
       /* INITIALIZE_SHADOWROOT_STYLE */
@@ -1002,10 +1007,9 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
           }
         }
         _append() {
-          if (CUR_WINDOW_TOP && this.container && FrDialogBox.closure()) {
-            this.root = createDialogModel(this.container, this.parent);
-            sleep(2e2).then(() => this.frDialog.classList.add(`${def.const.seed}.opac:1`));
-          }
+          if (!CUR_WINDOW_TOP || !this.container || !FrDialogBox.closure()) return;
+          this.root = createDialogModel(this.container, this.parent);
+          sleep(2e2).then(() => this.frDialog.classList.add(`${def.const.seed}.opac:1`));
         }
         _destroy() {
           if (!this.container) return;
@@ -1047,7 +1051,8 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
       function createStyleSheet(id, css, media, writable, primary) {
         const sheet = new CSSStyleSheet();
         const metadata = `:host(sheet-metadata){--sheet-metadata:${JSON.stringify({ id, ...(primary && { [def.const.cssAttrName]: Boolean(writable) }) })};}`;
-        return sheet.media.appendMedium(media), sheet.replaceSync(css.replace(/^\s*:host\(sheet-metadata\)\s*\{\s*.+?;\s*\}\s*/, "")), sheet.insertRule(metadata, 0), sheet;
+        const cssText = tTP.createScript(css.replace(/^\s*:host\(sheet-metadata\)\s*\{\s*.+?;\s*\}\s*/, ""));
+        return sheet.media.appendMedium(media), sheet.replaceSync(cssText), sheet.insertRule(metadata, 0), sheet;
       }
 
       function getSheetMetadata(sheet) {
@@ -1087,7 +1092,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
           if (writable) existStyles.forEach(style => (style.dataset.frRemoved = true) && safeRemoveNode(style));
           else if (existStyles.length > 0) return true;
           const options = { id, media, type: "text/css", textContent: css, ...(primary && { [def.const.cssAttrName]: Boolean(writable) }) };
-          return GMaddElement(target instanceof ShadowRoot ? target : target.head, "style", options) && true;
+          return GMaddElement(target instanceof ShadowRoot ? target : target.head, "style", options), true;
         } catch (e) {
           ERROR(`${e.name} in UpdateInlineStyle:`, e.message);
         }
@@ -1148,15 +1153,14 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
       function adjustCoordinateOffset({ cur, prev = 1, props, results = debugging && new Set() }) {
         if (!CUR_WINDOW_TOP && (compareVersion({ BLINK: 128 }) || compareVersion({ GECKO: 126, more: null }))) return;
         const eventPropertiesMap = [
-          { objs: [MouseEvent.prototype], props: ["clientX", "clientY", "pageX", "pageY", "layerX", "layerY", "offsetX", "offsetY", "screenX", "screenY", "x", "y"] },
-          { objs: [global, GMunsafeWindow], props: ["pageXOffset", "pageYOffset", "scrollX", "scrollY", ...props.window] },
+          { objs: [MouseEvent.prototype], props: ["clientX", "clientY", "pageX", "pageY", "layerX", "layerY", "offsetX", "offsetY", "x", "y"] },
+          { objs: [global, GMunsafeWindow], props: ["innerWidth", "innerHeight", "pageXOffset", "pageYOffset", "scrollX", "scrollY", ...props.window] },
           { objs: [Element.prototype], props: ["scrollLeft", "scrollTop", ...props.element] },
           { objs: [HTMLElement.prototype], props: [...props.html] },
         ];
         const processProps = ({ objs, props }) => {
-          const uniqueObjects = uniq(objs);
-          const uniqueProperties = uniq(props);
-          uniqueObjects.forEach(obj => uniqueProperties.forEach(prop => definePropertyProcess(obj, prop, Reflect.getOwnPropertyDescriptor(obj, prop))));
+          const [uO, uP] = [objs, props].map(o => uniq(o));
+          uO.forEach(obj => uP.forEach(prop => definePropertyProcess(obj, prop, Reflect.getOwnPropertyDescriptor(obj, prop))));
         };
         safeObject.assign(global, { frDOMRects: { toggle: compareVersion({ BLINK: 128 }) || IS_REAL_GECKO, cur, prev } });
         try {
@@ -1169,25 +1173,23 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         }
 
         function definePropertyProcess(obj, prop, descriptor) {
+          if (!descriptor || typeof descriptor.get !== "function") return;
+          const isScrollProp = "scrollLeft" === prop || "scrollTop" === prop;
+          const target = isScrollProp ? HTMLHtmlElement.prototype : obj;
+          const scale = isScrollProp ? cur : cur / prev;
+          const value = {
+            configurable: true,
+            enumerable: true,
+            get() {
+              return descriptor.get.call(this) / scale;
+            },
+          };
+          isScrollProp &&
+            (value.set = function (Value) {
+              if (Number.isFinite(Value)) this.scrollTo({ [prop === "scrollLeft" ? "left" : "top"]: Value * scale });
+            });
           try {
-            if (typeof descriptor?.get !== "function") return;
-            const isScrollProp = ["scrollLeft", "scrollTop"].includes(prop);
-            const target = isScrollProp ? HTMLHtmlElement.prototype : obj;
-            const scale = isScrollProp ? cur : cur / prev;
-            const value = {
-              configurable: true,
-              enumerable: true,
-              get() {
-                return descriptor.get.call(this) / scale;
-              },
-              ...(isScrollProp && {
-                set(Value) {
-                  typeof Value === "number" && !isNaN(Value) && void (prop === "scrollLeft" && this.scrollTo(Value * cur, 0), prop === "scrollTop" && this.scrollTo(0, Value * cur));
-                },
-              }),
-            };
-            Reflect.defineProperty(target, prop, value);
-            debugging && results.add({ obj: getObjectType.call(target), prop });
+            Reflect.defineProperty(target, prop, value) && debugging && results.add({ obj: getObjectType.call(target), prop });
           } catch (e) {
             ERROR(`${e.name} in definePropertyProcess '${prop}':`, e.message);
           }
@@ -1198,8 +1200,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
             value: function () {
               const originalMatrix = def.const.getScreenCTM.call(this);
               const newSVGMatrix = this.ownerSVGElement?.createSVGMatrix() ?? document.createElementNS("http://www.w3.org/2000/svg", "svg").createSVGMatrix();
-              safeObject.assign(newSVGMatrix, ...["a", "b", "c", "d", "e", "f"].map(prop => ({ [prop]: originalMatrix[prop] / cur })));
-              return newSVGMatrix;
+              return safeObject.assign(newSVGMatrix, ...["a", "b", "c", "d", "e", "f"].map(prop => ({ [prop]: originalMatrix[prop] / cur })));
             },
           });
           debugging && results.add({ obj: getObjectType.call(svg), prop: "getScreenCTM()" });
@@ -1211,18 +1212,13 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
           debugging && results.add({ obj: getObjectType.call(element), prop: "getDOMRects" });
         }
 
-        function createProxy(T) {
-          return new Proxy(T, {
-            get: (target, prop) => {
-              const value = Reflect.get(target, prop);
-              return typeof value === "number" && !isNaN(value) ? value / cur : value;
-            },
-          });
+        function createRect(T, scale = 1 / cur) {
+          const r = DOMRect.fromRect(T);
+          return new DOMRect(r.x * scale, r.y * scale, r.width * scale, r.height * scale);
         }
 
         function overrideGetClientRects() {
-          const originalRects = def.const.getClientRects.call(this);
-          const rects = arrayFrom(originalRects, rect => DOMRect.fromRect(createProxy(rect)));
+          const rects = arrayFrom(def.const.getClientRects.call(this), rect => createRect(rect));
           rects.item = index => rects[index] ?? null;
           rects[Symbol.iterator] = function* iterator() {
             for (let i = 0; i < this.length; i++) yield this[i];
@@ -1231,8 +1227,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         }
 
         function overrideGetBoundingClientRect() {
-          const originalRect = def.const.getBoundingClientRect.call(this);
-          return DOMRect.fromRect(createProxy(originalRect));
+          return createRect(def.const.getBoundingClientRect.call(this));
         }
       }
 
@@ -1242,11 +1237,11 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         value: (data, eT) => ({ data, expired: Date.now() + (typeof eT === "number" ? eT : 6048e5) }),
         set: (key, ...options) => void GMsetValue(key, encrypt(JSON.stringify(cache.value(...options)))),
         get: async key => {
+          const savedValue = await GMgetValue(key);
+          if (!savedValue) return;
           try {
-            const encryptedValue = await GMgetValue(key);
-            if (!encryptedValue) return;
+            const { data, expired } = JSON.parse(decrypt(savedValue));
             const current = Date.now();
-            const { data, expired } = JSON.parse(decrypt(encryptedValue));
             DEBUG("cache Remaining: %c%s hrs", "color:#dc143c;font-weight:700", ((expired - current) / 36e5).toFixed(2));
             return data && expired > current ? data : cache.remove(key);
           } catch (_) {
@@ -1354,8 +1349,9 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
       }
 
       function convertHtmlToText(htmlString) {
-        if (typeof htmlString !== "string") return "";
-        const temp = cE("fr-safeInner", { innerHTML: tTP.createHTML(htmlString.replace(/expression\([^)]*\)|url\(.*?\)|\\u[0-9a-fA-F]{4}|\\x[0-9a-fA-F]{2}|`|{|}/gi, "")) });
+        if (typeof htmlString !== "string" || htmlString.trim().length === 0) return "";
+        const harmfulRegexp = /expression\s*(?=\()|url\s*(?=\()|@import(?=\s)|javascript\s*:|\\u[0-9a-fA-F]{4}|\\x[0-9a-fA-F]{2}|`|{|}/gi;
+        const temp = cE("fr-safeInner", { innerHTML: tTP.createHTML(htmlString.replace(harmfulRegexp, "")) });
         return temp.textContent.trim().replace(/(\s*,\s*)+$/, "");
       }
 
@@ -1382,12 +1378,13 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         return !rootID || (!CUR_WINDOW_TOP && (compareVersion({ BLINK: 130, more: null }) || IS_GREASEMONKEY)) ? `:root ` : `:root#${rootID} `;
       }
 
-      async function getRenderRules() {
+      async function getRenderRules(tmp) {
         try {
           const response = await fetch(`${def.url.predefined}?${generateRandomString(32, "hex")}`);
-          if (!response.ok) throw new Error(`Network response was not ok. Status: ${response.status}`);
+          if (!response.ok) throw new Error(`Network response was not OK. Status: ${response.status}`);
           const text = await response.text();
-          return DEBUG(`Pull predefined data: %c${text ? "Succeeded" : "Failed"} (${text?.length ?? 0})`, `color:${text ? "#008000" : "#dc143c"}`), text;
+          if (!safeArray.isArray((tmp = JSON.parse(text))) || !(tmp = tmp.length)) return ERROR("Error: Invalid predefined data!");
+          return DEBUG(`Pull predefined data: %cSucceeded (${text.length}, ${tmp})`, "color:#008000"), text;
         } catch (e) {
           ERROR(`${e.name} in getRenderRules:`, e.message);
         }
@@ -1952,15 +1949,14 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         }
 
         function setConfigureListener() {
-          const container = qS(`#${def.id.container}`, def.var.configIf);
-          const actualHeight = container.getBoundingClientRect().height * (IS_REAL_WEBKIT || compareVersion({ BLINK: 128, GECKO: 126, more: null }) ? 1 : def.var.curScale) + 18;
-          if (global.innerHeight <= actualHeight) qA(`#${def.id.cSwitch},#${def.id.eSwitch}`, def.var.configIf).forEach(item => void item.click());
+          const node = qS(`#${def.id.container}`, def.var.configIf);
+          if (global.innerHeight <= node.getBoundingClientRect().height + 18) qA(`#${def.id.cSwitch},#${def.id.eSwitch}`, def.var.configIf).forEach(item => void item.click());
           qS(`.${def.class.title} span.${def.class.guide}`, def.var.configIf)?.addEventListener("click", () => void GMopenInTab(GUIDELINE_URL, false));
-          qS(`#${def.id.render}`, def.var.configIf)?.addEventListener("dblclick", e => stopEventPropagation(e, { prevent: true }) || GMopenInTab(`${def.url.feedback}/42`, false));
+          qS(`#${def.id.render}`, def.var.configIf)?.addEventListener("dblclick", e => (stopEventPropagation(e, { prevent: true }), GMopenInTab(`${def.url.feedback}/42`, false)));
           qS(`#${def.id.field} #${def.const.seed}\\.scriptname`, def.var.configIf)?.addEventListener("dblclick", function (e) {
             return stopEventPropagation(e, { prevent: true }), this.classList.add(`${def.const.seed}.usel:none`), hintUpdateInfo(GUIDELINE_URL, def.var.curVersion);
           });
-          return { error: def.array.exps, node: container };
+          return { error: def.array.exps, node };
         }
 
         async function setExcludeSites() {
@@ -2134,8 +2130,8 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
             const [trueButtonText, titleText] = IS_CHN ? ["确 定", "字体列表全局缓存已重建"] : ["OK", "Rebuilt Fontlist Cache"];
             const rebuiltDialog = new FrDialogBox({ trueButtonText, messageText, titleText });
             const imgOption = { src: IS_CHN ? def.url.fontlistImg : def.url.fontlistImg.replace("fontlist.", "fontlist_en."), alt: rebuiltDialog.titleText };
-            GMaddElement(qS(`span.${def.const.seed}\\.cpsa`, def.var.dialogIf), "img", imgOption) && cache.remove(FONTCHECKLIST);
-            if (await rebuiltDialog.respond()) closeConfigurePage({ isReload: true });
+            GMaddElement(qS(`span.${def.const.seed}\\.cpsa`, def.var.dialogIf), "img", imgOption) && DEBUG("Rebuilding font list cache...");
+            if (await rebuiltDialog.respond(cache.remove(FONTCHECKLIST))) closeConfigurePage({ isReload: true });
           });
           qS(`#${def.id.feedback}`, def.var.dialogIf)?.addEventListener("click", () => void GMopenInTab(def.url.feedback, false));
           qA(queryNodes, def.var.dialogIf).forEach(item => item.addEventListener("change", () => ([_bk, _pv, _fs, _fvp, _hk, _ct, _mps] = parseQueryNodes(queryNodes))));
@@ -2530,7 +2526,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
               fontListTrigger(dlSelector);
               const sRegExp = new RegExp(searchText.replace(/[.:?*+^$[\-=\](){}/\\|]/g, "\\$&"), "i");
               selectFontNode.innerHTML = setPermitContent(isCFPE, fontData.length + getFontSearchList(def.id.fontName).length);
-              fontData.forEach(item => (sRegExp.test(item.ch) || sRegExp.test(item.en)) && (matched = GMaddElement(selectFontNode, "dd", setFontOpt(item)) ?? true));
+              fontData.forEach(item => (sRegExp.test(item.ch) || sRegExp.test(item.en)) && (GMaddElement(selectFontNode, "dd", setFontOpt(item)), (matched = true)));
               if (!matched) selectFontNode.innerHTML += tTP.createHTML(`<dd>${IS_CHN ? "\u6ca1\u6709\u5339\u914d\u7684\u5b57\u4f53" : "No matching fonts"}</dd>`);
               clickEvents();
             }
@@ -2556,7 +2552,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
                 }
                 selectorHidden();
               };
-              const promptAction = () => (cache.remove(FONTCHECKLIST), !isCFPE && GMopenInTab(`${def.url.feedback}/46`, false), reload());
+              const promptAction = () => void (cache.remove(FONTCHECKLIST), !isCFPE && GMopenInTab(`${def.url.feedback}/46`, false), reload());
               qA(`#${def.id.fontList} .${def.class.selectFontID} dl dd`, def.var.configIf).forEach(item => void (item.onclick = parseClick));
               qS(`#${def.id.fontList} .${def.class.selectFontID} dl dt`, def.var.configIf)?.addEventListener("click", promptAction);
               document.addEventListener("click", selectorHidden);
@@ -2606,8 +2602,8 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
           if (!NOT_IN_EXCLUSION_LIST || !isFontsize || def.var.curScale === 1) return;
           try {
             const predefinedSitesProps = await getFontScaleDef();
-            const currentDomainProps = asArray(safeObject.entries(predefinedSitesProps)).FindX(([domain]) => CUR_HOST_NAME.endsWith(domain))?.[1];
-            if (!currentDomainProps) throw new Error("No extra correction properties");
+            const currentDomainProps = asArray(safeObject.entries(predefinedSitesProps)).FindX(([domain]) => domain && CUR_HOST_NAME.endsWith(domain))?.[1];
+            if (!currentDomainProps || getObjectType.call(currentDomainProps) !== "[object Object]") throw new Error("No extra correction properties");
             const { Window: W, Element: E, HTMLElement: H } = currentDomainProps;
             def.array.props = { window: uniq(W), element: uniq(E), html: uniq(H) };
           } catch (e) {
@@ -2767,8 +2763,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
                       : `<p class="${def.const.seed}.clr:indigo">Custom font library initialized successfully!<p><p>The Fontlist cache has been rebuilt and reload.</p>`;
                     const [trueButtonText, titleText] = IS_CHN ? ["确 定", "自定义字体数据重置"] : ["OK", "Customized FontData Reset"];
                     const successDialog = new FrDialogBox({ trueButtonText, messageText, titleText });
-                    cache.remove(FONTCHECKLIST);
-                    if (await successDialog.respond()) closeConfigurePage({ isReload: true });
+                    if (await successDialog.respond(cache.remove(FONTCHECKLIST))) closeConfigurePage({ isReload: true });
                   } else if (safeArray.isArray(fontListArray) && fontListArray.length > 0) {
                     saveData(CUSTOMFONTS, getNonDuplicateFontArray(getUniqueFontlist(fontListArray.map(JSON.parse)), fontCheck));
                     const messageText = IS_CHN
@@ -2776,8 +2771,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
                       : `<p class="${def.const.seed}.clr:green">The customized font saved successfully!<p><p>The Fontlist cache has been rebuilt and reload.</p><p class="${def.const.seed}.clr:ff7f50 ${def.const.seed}.fs:12p">Note: Incorrectly or duplicate fonts were filtered.</p>`;
                     const [trueButtonText, titleText] = IS_CHN ? ["确 定", "自定义字体数据保存"] : ["OK", "Customized FontData Save"];
                     const successDialog = new FrDialogBox({ trueButtonText, messageText, titleText });
-                    cache.remove(FONTCHECKLIST);
-                    if (await successDialog.respond()) closeConfigurePage({ isReload: true });
+                    if (await successDialog.respond(cache.remove(FONTCHECKLIST))) closeConfigurePage({ isReload: true });
                   } else {
                     const messageText = IS_CHN
                       ? `<p class="${def.const.seed}.clr:crimson">您所提交的自定义字体数据格式有误，请重新输入。<p><p>注意：先前提交的信息已自动保存至剪切板中。</p>`
@@ -2793,17 +2787,20 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
             }
           }
 
-          function checkTextareaFormat(textarea) {
+          function checkTextareaFormat(textarea, type) {
             const handleInput = async event => {
               const target = event.target;
               const value = target.value.trim();
-              if (!value) return target.classList.remove(`${def.const.seed}.bd:crimson`);
+              if (value.length === 0) return target.classList.remove(`${def.const.seed}.bd:crimson`);
               try {
+                const parsedValue = JSON.parse(value);
+                if (type === "object" && getObjectType.call(parsedValue) !== "[object Object]") throw new Error("Format Error");
+                if (type === "array" && (!safeArray.isArray(parsedValue) || asArray(parsedValue).SomeX(v => typeof v !== "string"))) throw new Error("Format Error");
                 const previousCursorPosition = target.selectionStart;
-                const formattedValue = JSON.stringify(JSON.parse(value), null, 4);
+                const formattedValue = JSON.stringify(parsedValue, null, 4);
                 const newCursorPosition = previousCursorPosition + formattedValue.length - target.value.length;
                 const scrollTop = ((target.value = formattedValue), target.classList.remove(`${def.const.seed}.bd:crimson`), target.scrollTop);
-                sleep(16.7)(scrollTop).then(t => (target.scrollTop = t), target.setSelectionRange(newCursorPosition, newCursorPosition));
+                sleep(10)(scrollTop).then(t => (target.scrollTop = t), target.setSelectionRange(newCursorPosition, newCursorPosition));
               } catch (_) {
                 target.classList.add(`${def.const.seed}.bd:crimson`);
               }
@@ -2830,18 +2827,19 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
               const frDialog = new FrDialogBox({ trueButtonText, neutralButtonText, messageText, titleText });
               const [fixInputNode, fontOverrideNode] = ["fixinput", "fontoverride\\.defarray"].map(s => qS(`#${def.const.seed}\\.${s}`, def.var.dialogIf));
               removeKeyboardEvent(fontOverrideNode);
-              checkTextareaFormat(fontOverrideNode);
+              checkTextareaFormat(fontOverrideNode, "array");
               if (await frDialog.respond()) {
                 const fontOverrideDefValue = fontOverrideNode.value.trim();
                 try {
-                  const parsedFontOverrideDef = fontOverrideDefValue ? uniq(JSON.parse(fontOverrideDefValue), item => item && typeof item === "string") : [];
+                  const parsedFontOverrideDef = fontOverrideDefValue ? JSON.parse(fontOverrideDefValue) : [];
+                  if (!safeArray.isArray(parsedFontOverrideDef) || asArray(parsedFontOverrideDef).SomeX(d => typeof d !== "string")) throw new Error("Format Error");
                   let fontCheckList = await cache.get(FONTCHECKLIST);
                   fontCheckList = safeArray.isArray(fontCheckList) && fontCheckList.length > 0 ? fontCheckList : [];
                   const fontCheckArray = fontCheckList.filter(item => item.en !== "Microsoft YaHei").map(item => (item.en.startsWith("\\") ? `{${item.ch}}` : item.en));
                   const baseFontArray = INITIAL_REMARKS.fontBase.replace(/'/g, "").split(",");
                   const monoFontArray = (monoFontList || INITIAL_REMARKS.monospacedFont).replace(/'/g, "").split(",");
                   const filterFonts = uniq(["Courier New", "Courier", "monospace", ...baseFontArray, ...fontCheckArray, ...monoFontArray]);
-                  const fontOverrideData = parsedFontOverrideDef.filter(item => !filterFonts.includes(item)).sort();
+                  const fontOverrideData = uniq(parsedFontOverrideDef, item => item && typeof item === "string" && !filterFonts.includes(item)).sort();
                   if (fixInputNode) localStorage?.setItem(IS_DISCUZ, fixInputNode.checked);
                   saveData(FONTOVERRIDE, fontOverrideData);
                   const messageText = IS_CHN ? `自定义字体重写数据已成功保存！页面即将刷新。` : `Custom-font-rewrite-data was saved, refresh now!`;
@@ -2898,7 +2896,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
               const frDialog = new FrDialogBox({ trueButtonText, neutralButtonText, messageText, titleText });
               const fontScaleNode = qS(`#${def.const.seed}\\.fontscale\\.defjson`, def.var.dialogIf);
               removeKeyboardEvent(fontScaleNode);
-              checkTextareaFormat(fontScaleNode);
+              checkTextareaFormat(fontScaleNode, "object");
               if (await frDialog.respond()) {
                 const fontScaleDefValue = fontScaleNode.value.trim();
                 try {
@@ -3847,13 +3845,14 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
         /* FIX_VIEWPORT_ZOOM_STYLE_ERRORS. NEW UPDATE: 2024-08-10 F9Y4NG */
 
         function correctViewportUnits(isAllowInlineStyle) {
+          if (!IS_CURRENTSITE_ALLOWED) return object();
           const vRegexp = /(\.?\d+(?:\.\d+)?)([dsl]?(?:v[wh]|vmin|vmax))\b(?![\\=/+_-])/g;
           const uRegexp = /url\((?![`'"]?(?:([\w.-]+)?#\b|https?:\/\/|data:|\/\/|\/\B))([^)]+)\)/g;
           const hasPermission = NOT_IN_EXCLUSION_LIST && isFixViewport && CONST_VALUES.o.fixViewport && def.var.curScale !== 1;
           const getAttributes = node => arrayFrom(node.attributes).reduce((atr, { name, value }) => (!["href", "rel"].includes(name) && (atr[name] = value), atr), {});
           const correctViewport = () => void Promise.all([fixViewportLinks(), fixViewportStyles()]);
           if (hasPermission) addLoadEvents.addFinalFn(correctViewport) && DEBUG(`correct.ViewportUnit${IN_FRAMES}:`, { eventType: "init" });
-          return IS_CURRENTSITE_ALLOWED ? { hasPermission, correctViewport } : object();
+          return { hasPermission, correctViewport };
 
           async function fixViewportLinks() {
             const links = qA(`link[rel~="stylesheet" i]:not([${def.const.const.vpu}])`).map(async link => {
@@ -3973,22 +3972,10 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
           const handleRemovedNodesMutation = removedNodes => {
             for (const node of removedNodes) if (node.id === def.id.rndStyle && !node.dataset.frRemoved) return adoptMainStyleSheet({ review: true });
           };
-          const check_start_time = performance.now();
-          const resetFontScaleForModernEditors = (fontScale, editorSel) => {
-            if (fontScale === 1 || typeof def.var.editor !== "undefined" || performance.now() - check_start_time > 5e3) return;
-            const { elementSet } = qAS(`:not(${selectors})`, document.body);
-            for (const el of elementSet) {
-              if (!el.matches(editorSel)) continue;
-              (def.var.editor = true) && adjustCoordinateOffset({ cur: 1, prev: fontScale, props: def.array.props });
-              return document.documentElement.style.setProperty("--fr-font-fontscale", "1.0");
-            }
-          };
-          const deBounceResetFontScale = createDeBounce({ fn: resetFontScaleForModernEditors, delay: 50 });
           const deBounceApotedStyleCheck = createDeBounce({ fn: adoptMainStyleSheet, delay: 20 });
           const mainHTMLHandler = ({ mutations }) => {
             mutations.forEach(mutation => void handleHTMLProcess(mutation));
             CUR_WINDOW_TOP && IS_ADOPTEDSTYLESHEET_MUTABLE && deBounceApotedStyleCheck({ review: true });
-            deBounceResetFontScale(def.var.curScale, `.CodeMirror,.cm-editor,.monaco-editor`);
           };
           const config = { childList: true, subtree: true, attributeOldValue: true, attributeFilter: ["id"] };
           new NodeObserver().startObserver({ name: "Observe-element:html-style-link", callback: mainHTMLHandler, config });
@@ -4127,7 +4114,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
             const fontScaleDefRule = storedFontScaleDef ? JSON.parse(decrypt(storedFontScaleDef)) : defaultScaleRule;
             if (getObjectType.call(fontScaleDefRule) === "[object Object]" && safeObject.keys(fontScaleDefRule).length > 0) return fontScaleDefRule;
           } catch (e) {
-            return ERROR(`${e.name} in FontScaleDef.JSON.parse:`, e.message), GMdeleteValue(FONTSCALE), defaultScaleRule;
+            ERROR(`${e.name} in FontScaleDef.JSON.parse:`, e.message) ?? GMdeleteValue(FONTSCALE);
           }
           return saveData(FONTSCALE, defaultScaleRule), defaultScaleRule;
         },
@@ -4139,7 +4126,7 @@ void (function (ctx, uctx, sctx, fontRendering, arrayProxy, customFns) {
             const fontOverride = fontOverrideDef ? JSON.parse(decrypt(fontOverrideDef)) : defaultFontRule;
             if (safeArray.isArray(fontOverride) && fontOverride.length > 0) return fontOverride;
           } catch (e) {
-            return ERROR(`${e.name} in FontOverrideDef.JSON.parse:`, e.message), GMdeleteValue(FONTOVERRIDE), defaultFontRule;
+            ERROR(`${e.name} in FontOverrideDef.JSON.parse:`, e.message) ?? GMdeleteValue(FONTOVERRIDE);
           }
           return saveData(FONTOVERRIDE, defaultFontRule), defaultFontRule;
         },
