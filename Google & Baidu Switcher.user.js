@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            Помощник поисковой системы
 // @name:ja            優雅な検索エンジン助手
-// @version            2026.04.04.1
+// @version            2026.05.02.1
 // @author             F9y4ng
 // @description        Alias "Search Engine Assistant", le script aide à la navigation entre les moteurs de recherche, à la personnalisation des préférences, à la mise en évidence des mots-clés, à l'élimination des redirections et des publicités et au filtrage des résultats. Compatible avec Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG et bien d'autres moteurs de recherche célèbres.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG and more.
@@ -253,10 +253,10 @@
 // @grant              GM.registerMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
-// @note               {"CN":"新增双击脚本标题栏查看更新记录。","EN":"Added double-click title to view update history."}
-// @note               {"CN":"新增搜索结果屏蔽关键词添加工具。","EN":"Added search result blocking keyword adding tool."}
-// @note               {"CN":"优化部分搜索引擎跳转按钮样式。","EN":"Optimized some search engine jump button styles."}
-// @note               {"CN":"强制 replaceSync 接受 TrustedScript 类型。","EN":"Force replaceSync to accept TrustedScript types."}
+// @note               {"CN":"改进关键词屏蔽设置的自动纠错功能。","EN":"Improved auto-correct for keyword filter setting."}
+// @note               {"CN":"优化部分搜索引擎的广告过滤规则。","EN":"Optimized ads filter rules of some search engines."}
+// @note               {"CN":"优化部分搜索引擎的链接重定向规则。","EN":"Optimized link redirection of some search engines."}
+// @note               {"CN":"优化脚本核心基础函数以提升运行性能。","EN":"Optimized script core functions for performance."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         Edge version≥88 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Chrome version≥88 (Compatible Tampermonkey, Violentmonkey)
@@ -302,19 +302,18 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     },
     safeArray: customFns.sP(sctx.Object, sctx.Array),
     safeObject: customFns.sP(sctx.Object, sctx.Object),
-    safeJSON: sctx.JSON.parse ? sctx.JSON : ctx.JSON.parse ? ctx.JSON : JSON ?? uctx.JSON,
+    safeJSON: sctx.JSON.parse ? sctx.JSON : ctx.JSON.parse ? ctx.JSON : JSON.parse ? JSON : uctx.JSON,
     info: typeof GM_info !== "undefined" ? GM_info : typeof GM !== "undefined" && GM.info ? GM.info : { script: {} },
   };
-  const wrappedFrom = ctx.wrappedJSObject ? ctx.Array.from : toolkit.safeArray.from;
-  const asArray = o => (arrayProxy.method.every(([k, v]) => Reflect.defineProperty(o, k, { value: v.bind(o), ...arrayProxy.option })), o);
-  const orginalFns = { oS: sctx.Object.prototype.toString, hP: sctx.Object.prototype.hasOwnProperty, aF: (...af) => wrappedFrom(...af), aS: (...as) => asArray(wrappedFrom(...as)) };
-  typeof ctx.navigation === "undefined" && ["pushState", "replaceState"].forEach(m => void (ctx.history[m] = customFns.eH(m)));
+  const wrappedFrom = toolkit.safeArray.from ?? ctx.Array.from ?? uctx.Array.from;
+  const orginalFns = { oS: sctx.Object.prototype.toString, aF: (...af) => wrappedFrom(...af), aS: (...as) => arrayProxy(wrappedFrom(...as)) };
+  typeof ctx.navigation === "undefined" && ["pushState", "replaceState"].forEach(m => (ctx.history[m] = customFns.eH(m)));
   searchEngineAssistant(ctx, uctx, toolkit, { ...orginalFns, ...customFns, cS: customFns.mS.filter(isNaN) });
 })(
   typeof window !== "undefined" ? window : this,
   typeof unsafeWindow !== "undefined" ? unsafeWindow : this,
   ((originalWindow, iframe) => {
-    if (typeof GM_addElement === "undefined") return originalWindow;
+    if (typeof GM_addElement === "undefined" || document.contentType === "application/pdf") return originalWindow;
     try {
       const { contentWindow } = (iframe = GM_addElement("iframe", { id: "𝐬𝐚𝐟e.𝐰𝐢𝐧𝐝𝐨𝐰", style: "display:none", width: 0, height: 0 }));
       return !originalWindow.wrappedJSObject && iframe?.remove(), contentWindow ?? originalWindow;
@@ -329,7 +328,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
     const { safeArray, safeObject, safeJSON, safeSandbox, debugging, info: GMinfo } = secureVars;
     const { atob, btoa, alert, prompt, confirm, console, setTimeout, requestAnimationFrame, cancelAnimationFrame } = safeSandbox;
-    const { mS, cS, aF: arrayFrom, aS: asArray, oS: getObjectType, hP: hasOwnProperty, lS: localStorage, oC: object } = customFuntions;
+    const { mS, cS, aF: arrayFrom, aS: asArray, oS: getObjectType, lS: localStorage, oC: object } = customFuntions;
     const GMversion = GMinfo.version ?? GMinfo.scriptHandlerVersion ?? "unknown";
     const GMscriptHandler = GMinfo.scriptHandler;
     const GMsetValue = gmSelector("setValue");
@@ -362,6 +361,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         rndclassName: `SC${generateRandomString(8, "number")}`,
         rndstyleName: `SS${generateRandomString(8, "number")}`,
         rndadvName: `SA${generateRandomString(8, "number")}`,
+        expend: `ͽ${generateRandomString(6, "char")}ͽ`,
         filtered: `ͼ${generateRandomString(6, "char")}ͼ`,
         disappear: `ͽ${generateRandomString(7, "date")}ͼ`,
         translucent: `ͼ${generateRandomString(7, "date")}ͽ`,
@@ -377,12 +377,12 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         scrollbarsV2: generateRandomString(8, "mix"),
         attachShadow: Element.prototype.attachShadow,
         stopImmediatePropagation: Event.prototype.stopImmediatePropagation,
-        requestIdleCallback: global.requestIdleCallback?.bind(GMunsafeWindow) ?? ((callback, { timeout }) => sleep(timeout).then(callback)),
-        const: { once: "gb-init-once", purge: "gd-purge-success", anti: "gd-anti-redirect", warn: "data-filter-warn", navinfo: "__Navigation#INFO__" },
       },
+      static: { once: "gb-init-once", purge: "gd-purge-attribute", anti: "gd-anti-redirect", warn: "data-filter-warn", navinfo: "__Navigation#INFO__" },
       var: {
-        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2026.04.04.0",
+        curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2026.05.02.0",
         scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
+        rIC: global.requestIdleCallback ? global.requestIdleCallback.bind(GMunsafeWindow) : (callback, { timeout }) => sleep(timeout).then(callback),
       },
       url: {
         yandexIcon: decrypt("aHR0cHMlM0ElMkYlMkZmYXZpY29uLnlhbmRleC5uZXQlMkZmYXZpY29uJTJGdjI="),
@@ -439,13 +439,14 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         ["setTimeout", "setInterval", "clearTimeout", "clearInterval"].forEach(m => (this[m] = this[m].bind(this)));
       }
       _ticking(fn, type, interval, ...args) {
+        const parsedInterval = Number(interval) || 0;
         let lastTime = performance.now();
         const timerSymbol = Symbol(type);
-        const step = () => {
-          const currentTime = performance.now();
-          if (currentTime - lastTime < (Number(interval) || 0)) return this._setTimerMap(timerSymbol, type, step);
-          type === "interval" ? (lastTime = currentTime) && this._setTimerMap(timerSymbol, type, step) : this.clearTimeout(timerSymbol);
-          typeof fn === "function" && fn.apply(this.context, args);
+        const step = (currentTime = performance.now()) => {
+          const elapsed = currentTime - lastTime;
+          if (elapsed < parsedInterval) return this._setTimerMap(timerSymbol, type, step);
+          type === "interval" ? (lastTime = currentTime - (elapsed % parsedInterval)) && this._setTimerMap(timerSymbol, type, step) : this.clearTimeout(timerSymbol);
+          if (typeof fn === "function") fn.apply(this.context, args);
         };
         this._setTimerMap(timerSymbol, type, step);
         return timerSymbol;
@@ -454,8 +455,8 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         this.timerMap[type][timerSymbol] = GMunsafeWindow[def.const.raf](step);
       }
       _clearTimerMap(timerSymbol, type) {
-        GMunsafeWindow[def.const.caf](this.timerMap[type][timerSymbol]);
-        delete this.timerMap[type][timerSymbol];
+        const timerId = this.timerMap[type][timerSymbol];
+        if (typeof timerId !== "undefined" && delete this.timerMap[type][timerSymbol]) GMunsafeWindow[def.const.caf](timerId);
       }
       setTimeout(fn, interval, ...args) {
         return this._ticking(fn, "timeout", interval, ...args);
@@ -471,10 +472,9 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       }
     }
 
-    const rAF = new RAF(global);
-
     /* GLOBAL_GENERAL_FUNCTIONS */
 
+    const rAF = new RAF(global);
     function gmSelector(rec) {
       const gmFunctions = {
         setValue: typeof GM_setValue !== "undefined" ? GM_setValue : typeof GM !== "undefined" ? GM.setValue : localStorage?.setItem.bind(localStorage),
@@ -536,7 +536,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       const el = document.createElement(nodeName);
       if (getObjectType.call(attributes) !== "[object Object]") return el;
       for (const [key, value] of safeObject.entries(attributes)) {
-        if (key === "class") safeArray.isArray(value) ? el.classList.add(...value) : el.classList.add(value);
+        if (["class", "className"].includes(key)) safeArray.isArray(value) ? el.classList.add(...value) : el.classList.add(value);
         else if (["innerHTML", "textContent"].includes(key)) el[key] = value;
         else el.setAttribute(key, value);
       }
@@ -549,7 +549,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     }
 
     function gCS(node, opt = null) {
-      if (node?.nodeType !== Node.ELEMENT_NODE) return new Proxy(object(), { get: () => NaN });
+      if (node?.nodeType !== 1) return new Proxy(object(), { get: () => NaN });
       return global.getComputedStyle(node, opt);
     }
 
@@ -583,7 +583,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     }
 
     function reload() {
-      return sleep(5e2, { useCachedSetTimeout: true }).then(() => global.location.reload(true));
+      sleep(5e2, { useCachedSetTimeout: true }).then(() => global.location.reload(true));
     }
 
     function escapeHTML(string) {
@@ -613,8 +613,8 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       };
       const contentText = IS_CHN ? `警告：脚本的注入模式已设置为"content"，部分脚本功能可能受到限制。` : `Warning: The injection mode is set to "content" and some functions may be limited.`;
       if (GMcontextMode && CUR_WINDOW_TOP) __console("warn", `${def.var.scriptName} ${contentText}`);
-      if (global[def.const.const.once] === true || document.documentElement?.hasAttribute(def.const.const.once)) return reportRedundanceError();
-      (global[def.const.const.once] = true) && safeObject.freeze(def.const) && document.documentElement?.setAttribute(def.const.const.once, "");
+      if (global[def.static.once] === true || document.documentElement?.hasAttribute(def.static.once)) return reportRedundanceError();
+      (global[def.static.once] = true) && safeObject.freeze(def.const) && document.documentElement?.setAttribute(def.static.once, "");
     }
 
     async function getNavigatorInfo() {
@@ -807,8 +807,8 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     void (async function (tTP, JSON, navigatorInfo) {
       const [CONFIGURE, VERSION, AUTOCHECK, RESULTFILTER, REMOTEICONS] = ["_configures_", "_version_", "_autoupdate_", "_resultFilter_", "_remoteicons_"];
       const { engine, creditEngine, brand, voucher } = (navigatorInfo =
-        JSON.parse(navigatorInfo || null) || (sessionStorage?.setItem(def.const.const.navinfo, JSON.stringify((navigatorInfo = await getNavigatorInfo()))), navigatorInfo));
-      const [IS_REAL_BLINK, IS_REAL_GECKO, IS_REAL_WEBKIT] = ["Blink", "Gecko", "WebKit"].map(cE => cE === creditEngine);
+        JSON.parse(navigatorInfo || null) || (sessionStorage?.setItem(def.static.navinfo, JSON.stringify((navigatorInfo = await getNavigatorInfo()))), navigatorInfo));
+      const [IS_REAL_BLINK, IS_REAL_GECKO] = ["Blink", "Gecko"].map(cE => cE === creditEngine);
       const IS_CHEAT_UA = voucher === null && (engine !== creditEngine || checkBlinkCheatingUA(navigator.userAgentData));
       const IS_GREASEMONKEY = ["Greasemonkey", "Userscripts", "FireMonkey", "tamp", "OrangeMonkey"].includes(GMscriptHandler);
       const createNoticeHTML = html => `<div class="${def.notice.rName}"><dl>${html}</dl></div>`;
@@ -1019,7 +1019,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       void (async function (getConfigureData, getResultFilterData, requestRemoteIcon, GMnotification) {
         let [_config_date_, { trigger: antiResultsFilter, filter: resultFilters }] = await Promise.all([getConfigureData(), getResultFilterData()]);
         const { isAutoUpdate, keywordHighlight, isHotkey, selectedEngine, localWindow, googleJump, antiLinkRedirect, antiAds, customColor } = _config_date_;
-        const [gbCookies, cachedRequestLinks, usedFilterWords, selectedSite] = [manageCookies(), antiLinkRedirect ? new Map() : null, antiResultsFilter ? new Set() : null, []];
+        const [gbCookies, cachedRequestLinks, usedFilterWords, TIMEOUT, httpRegex, selectedSite] = [manageCookies(), new Map(), new Set(), 2e4, /^http:\/\//i, []];
 
         /* ANTIREDIRECT_FUNCTIONS */
 
@@ -1040,12 +1040,12 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           if (safeArray.isArray(options.cleanAttr) && options.cleanAttr.length > 0 && ++result) options.cleanAttr.forEach(item => node.removeAttribute(item));
           if (options.removeDataSet && ++result) safeObject.keys(node.dataset).forEach(ds => delete node.dataset[ds]);
           if (options.forceNewTab && ++result) node.addEventListener("click", e => forceNewTabAction(e, node));
-          if (result) node.setAttribute(def.const.const.purge, "");
+          if (result) node.setAttribute(def.static.purge, "");
         }
 
         function forceNewTabAction(event, node) {
           stopEventPropagation(event) ?? GMopenInTab(getRealHref(node), false);
-          event.currentTarget.getAttribute(def.const.const.anti) === "success" && event.currentTarget.classList.add(def.const.visited);
+          event.currentTarget.getAttribute(def.static.anti) === "success" && event.currentTarget.classList.add(def.const.visited);
         }
 
         function stopEventPropagation(event, { prevent = true } = {}) {
@@ -1063,39 +1063,47 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         }
 
         function setAdvancedAntiRedirect(node, tasks, siteName) {
-          node.setAttribute(def.const.const.anti, "pending");
+          node.setAttribute(def.static.anti, "pending");
           const task = advancedAntiRedirection(siteName, node, () => Promise.resolve(NaN));
           if (typeof task === "function") tasks.push(task);
         }
 
-        function parsingAntiRedirect(siteName, selectors, options) {
-          if (typeof selectors !== "string" || selectors.trim() === "") return;
-          options = validateOptions(options);
+        async function parsingAntiRedirect(siteName, selectors, options) {
+          if (typeof selectors !== "string" || !selectors.trim()) return;
+          const config = validateOptions(options);
           const selectorArray = selectors.split(/,(?![^()]*\))/g);
-          const queryString = selectorArray.map(item => `${item}:not([href^='javascript:' i]):not([href^='#']):not([${def.const.const.anti}])`).join(",");
-          const aNodes = qA(queryString).filter(node => {
-            node.hasAttribute(def.const.const.purge) &&
-              ((options.useNewTab && node.target !== "_blank") ||
-                (options.forceSelf && node.target !== "_self") ||
-                (safeArray.isArray(options.cleanAttr) && asArray(options.cleanAttr).SomeX(attr => node.hasAttribute(attr))) ||
-                (options.removeDataSet && safeObject.keys(node.dataset).length > 0)) &&
-              node.removeAttribute(def.const.const.purge);
-            return !node.hasAttribute(def.const.const.purge);
+          const query = selectorArray.map(s => `${s.trim()}:not([href^='javascript:' i]):not([href^='#']):not([${def.static.anti}])`).join(",");
+          const nodes = qA(query);
+          if (nodes.length === 0) return;
+          const targetNodes = nodes.filter(node => {
+            if (shouldResetPurge(node, config, def.static.purge)) node.removeAttribute(def.static.purge);
+            return !node.hasAttribute(def.static.purge);
           });
-          if (aNodes.length === 0) return;
+          if (targetNodes.length === 0) return;
           COUNT(`[${siteName}-Anti-Redirect]`);
-          const taskList = aNodes.reduce((tasks, node) => {
-            updateNodeAttributes(options, node);
-            options.advancedAnti && setAdvancedAntiRedirect(node, tasks, siteName);
-            return tasks;
-          }, []);
-          parallelTasks(taskList, 10);
+          const taskList = [];
+          for (const node of targetNodes) {
+            updateNodeAttributes(config, node);
+            if (config.advancedAnti) setAdvancedAntiRedirect(node, taskList, siteName);
+          }
+          if (taskList.length === 0) return;
+          const results = await parallelTasks(taskList, 10);
+          deBounce({ fn: handlePageCheck, delay: 1e3, timer: "doTask" })(results[results.length - 1]);
+        }
+
+        function shouldResetPurge(node, options, purgeAttr) {
+          if (!node.hasAttribute(purgeAttr)) return false;
+          const hasNewTabMismatch = options.useNewTab && node.target !== "_blank";
+          const hasForceSelfMismatch = options.forceSelf && node.target !== "_self";
+          const hasDirtyAttr = Array.isArray(options.cleanAttr) && options.cleanAttr.some(attr => node.hasAttribute(attr));
+          const hasDataSet = options.removeDataSet && Object.keys(node.dataset).length > 0;
+          return hasNewTabMismatch || hasForceSelfMismatch || hasDirtyAttr || hasDataSet;
         }
 
         function fetchData(url, resolve, reject, readystate, error, timeout) {
-          const headers = { Accept: "*/*", Referer: global.location.origin.replace(/^http:/i, "https:") };
-          const [onload, onerror, ontimeout] = [readystate(resolve, reject), error(reject, resolve), timeout(reject)];
-          GMxmlhttpRequest({ url, headers, method: "GET", fetch: true, timeout: 25e3, onload, onerror, ontimeout });
+          const headers = { Accept: "*/*", Referer: global.location.origin.replace(httpRegex, "https://") };
+          const onEvents = { onload: readystate(resolve, reject), onerror: error(reject, resolve), ontimeout: timeout(reject) };
+          GMxmlhttpRequest({ url, headers, method: "GET", fetch: true, timeout: TIMEOUT, ...onEvents });
         }
 
         async function getRealUrl(url, node, name, { onloadFunc, onerrorFunc, ontimeoutFunc }) {
@@ -1134,17 +1142,16 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
         function handleDuplicateLinksError(url, node) {
           def.count.duplicate++;
+          const startTime = Date.now();
           const attemptToFindCacheLink = rAF.setInterval(() => {
             const cachedRealLinks = cachedRequestLinks.get(url);
-            if (!cachedRealLinks) return;
-            if (cachedRealLinks === url) setErrorLink(node);
-            else {
-              DEBUG("Duplicate link:", { node, url: cachedRealLinks });
-              setRealLink(node, cachedRealLinks);
-            }
+            const isTimeout = Date.now() - startTime > TIMEOUT;
+            if (!cachedRealLinks && !isTimeout) return;
+            rAF.clearInterval(attemptToFindCacheLink);
             def.count.duplicate--;
             toggleLoadClass(node)?.remove();
-            rAF.clearInterval(attemptToFindCacheLink);
+            if (cachedRealLinks && cachedRealLinks !== url) return DEBUG("Duplicate link:", { node, url: cachedRealLinks }), setRealLink(node, cachedRealLinks);
+            setErrorLink(node);
           }, 2e2);
         }
 
@@ -1154,7 +1161,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
         function handleBingLink(e) {
           const node = e.target;
-          node?.nodeName === "A" && node.getAttribute(def.const.const.anti) === "success" && (stopEventPropagation(e) ?? node.setAttribute("href", getRealHref(node)));
+          node?.nodeName === "A" && node.getAttribute(def.static.anti) === "success" && (stopEventPropagation(e) ?? node.setAttribute("href", getRealHref(node)));
         }
 
         function setRealLink(node, url) {
@@ -1164,33 +1171,38 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             !global[def.const.bing] && actions.forEach(act => void document.addEventListener(act, handleBingLink, (global[def.const.bing] = true)));
             node.setAttribute("gb-real-href", `\x61\x30${encrypt(url)}\x3d`);
           }
-          IS_REAL_WEBKIT && node.setAttribute("title", url);
-          node.setAttribute(def.const.const.anti, "success");
+          node.setAttribute(def.static.anti, "success");
         }
 
         function setErrorLink(node) {
           node.classList.add(def.notice.linkerror);
-          node.setAttribute(def.const.const.anti, "failed");
+          node.setAttribute(def.static.anti, "failed");
           node.setAttribute("title", `${IS_CHN ? "此链接可能不再可用，您仍可尝试访问它。" : "This link may no longer be available, you can still try to access it."}`);
         }
 
         function handlePageCheck(count) {
           DEBUG(`(${count ?? cachedRequestLinks.size}) Task Done! (${def.count.duplicate}) Dup.Task!`);
-          if (antiLinkRedirect && cachedRequestLinks.size > 0 && def.count.duplicate === 0) !cachedRequestLinks.clear() && DEBUG("Task Clear!");
-          if (antiResultsFilter && usedFilterWords.size > 0) !usedFilterWords.clear() && DEBUG("Filter Clear!");
+          if (antiLinkRedirect && cachedRequestLinks.size > 0 && def.count.duplicate === 0) cachedRequestLinks.clear() || DEBUG("Task Clear!");
+          if (antiResultsFilter && usedFilterWords.size > 0) usedFilterWords.clear() || DEBUG("Filter Clear!");
         }
 
-        function parallelTasks(tasks, maxCount = 3) {
+        async function parallelTasks(tasks, maxCount = 3) {
+          const results = [];
           const taskLength = tasks.length;
-          if (taskLength === 0) return;
-          let [currentIndex, finishedCount] = [0, 0];
-          const taskCount = Math.min(maxCount, taskLength);
-          function nextTask() {
-            if (currentIndex >= taskLength) return;
-            const task = tasks[currentIndex++];
-            task().then(result => void (++finishedCount === taskLength ? deBounce({ fn: handlePageCheck, delay: 1e3, timer: "doTask" })(result) : nextTask()));
-          }
-          for (let i = 0; i < taskCount; i++) nextTask();
+          if (taskLength === 0) return results;
+          let currentIndex = 0;
+          const executor = async () => {
+            while (currentIndex < taskLength) {
+              const index = currentIndex++;
+              const task = tasks[index];
+              results[index] = await task();
+            }
+          };
+          const workers = [];
+          const initialCount = Math.min(maxCount, taskLength);
+          for (let i = 0; i < initialCount; i++) workers.push(executor());
+          await Promise.all(workers);
+          return results;
         }
 
         function reportIDMHijacking() {
@@ -1219,8 +1231,14 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               const target = qA(`.vrwrap`).FindX(el => el.contains(node));
               return target && qS(`div.r-sech[style="display:none"]`, target)?.dataset.url;
             }
-            case "Toutiao":
-              return decodeURIComponent(new URL(url).searchParams.get("url") ?? "") || node.href;
+            case "Toutiao": {
+              let temp;
+              while ((temp = decodeURIComponent(new URL(url).searchParams.get("url") ?? ""))) {
+                if (!temp.includes("/search/jump?url=")) break;
+                url = temp;
+              }
+              return temp || node.href;
+            }
             case "Yahoo":
               return decodeURIComponent(url.match(/(\/RU|&rurl|&imgurl)=([^/&]+)(\/|&)/)?.[2] ?? "") || node.href;
             default:
@@ -1228,15 +1246,12 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           }
         }
 
-        async function getNoneXHRDecodeURI(url, node, siteName, decodeUrl) {
+        function getNoneXHRDecodeURI(url, node, siteName, decodeUrl) {
           try {
-            const d = await new Promise((resolve, reject) => {
-              if (!cachedRequestLinks.has(url)) {
-                cachedRequestLinks.set(url, null);
-                resolve(decodeUrl || url);
-              } else reject(new RangeError("DuplicateLinksError"));
-            });
-            return handleSuccess(d, url, node);
+            if (cachedRequestLinks.has(url)) throw new RangeError("DuplicateLinksError");
+            cachedRequestLinks.set(url, null);
+            const res = decodeUrl || url;
+            return handleSuccess(res, url, node);
           } catch (e) {
             return handleError(e, url, node, siteName);
           }
@@ -1262,7 +1277,11 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 const realUrl = e.error?.toString().match(/Refused to connect to "([^"]+)"/)?.[1];
                 if (!realUrl || realUrl.includes("/search/error") || realUrl.includes("/static/captcha")) reject(new Error("URLNotExistError"));
                 resolve(realUrl);
-              } else reject(new Error("URLBrokenError"));
+              } else {
+                const res = e.responseHeaders?.match(/Location:\s*([\S]+)/i);
+                if (res?.[1] && res[1] !== e.finalUrl) resolve(res[1]);
+                reject(new Error("URLBrokenError"));
+              }
             },
             ontimeoutFunc: reject => () => reject(new Error("TimeoutError")),
           });
@@ -1270,7 +1289,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
         function advancedAntiRedirection(siteName, node, task) {
           if (!node?.href) return;
-          const url = node.href.replace(/^http:/i, "https:");
+          const url = node.href.replace(httpRegex, "https:");
           toggleLoadClass(node)?.add();
           switch (siteName) {
             case "Baidu":
@@ -1405,7 +1424,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "baidu_ar" })("Baidu", selector, { useNewTab: true, removeDataSet: true, advancedAnti: true });
               },
               antiAdsFn: () => {
-                const selectors = `#s-hotsearch-wrapper,#s_wrap,#bottom_layer,.result-op[tpl='sp_hot_sale'],.result-op[tpl='b2b_prod'],.result-op.cr-content[tpl^='recommend_list_'],#content_left>div:not([class]):not([style]),div[data-placeid],[id$='_canvas'],div.result.c-container:not([class~='xpath-log']),.imgpage .imglist>li.newfcImgli,.ec_wise_ad,div[class^='result-op'][tpl='right_tabs'][data-click],div[class^='result-op'][tpl='right_links'][data-click],#searchTag,#content_left>div.c-container[tpl="recommend_list"],#con-ar div:is([tpl='interactive'],[tpl="right_recommends_merge"]),div.result-op.cr-content:has([id='ai-accompanies-container']),div.result-molecule[tpl="app/rs"],.hint_right_top:has([tpl='app/hint-chat-entry']),.hint_right_middle:has([tpl='app/hint-head-top'])`;
+                const selectors = `#s-hotsearch-wrapper,#s_wrap,#bottom_layer,.result-op[tpl='sp_hot_sale'],.result-op[tpl='b2b_prod'],.result-op.cr-content[tpl^='recommend_list_'],#content_left>div:not([class]):not([style]),div[data-placeid],[id$='_canvas'],div.result.c-container:not([class~='xpath-log']),.imgpage .imglist>li.newfcImgli,.ec_wise_ad,div[class^='result-op'][tpl='right_tabs'][data-click],div[class^='result-op'][tpl='right_links'][data-click],#searchTag,#content_left>div.c-container[tpl="recommend_list"],#con-ar div:is([tpl='interactive'],[tpl="right_recommends_merge"]),div.result-op.cr-content:has([id='ai-accompanies-container']),div.result-molecule[tpl="app/rs"],.hint_right_top:has([tpl='app/hint-chat-entry']),.hint_right_middle:has([tpl='app/hint-head-top']),div.new-pmd:has(.c-recommend)`;
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "baidu_ad", immed: true })({ selectors, siteName: "Baidu", isRemoveNodes: true });
               },
             },
@@ -1456,7 +1475,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               keywords:
                 Number(getUrlParam("ensearch")) || Number(gbCookies.getItem("ENSEARCH")?.match(/[=](\d)/)?.[1])
                   ? "strong,.b_no h4,.b_strong,.b_ad .b_adlabel strong,.cbl"
-                  : "#sp_requery strong,#sp_recourse strong,.sb_adTA_title_link_cn strong,.b_ad .ad_esltitle~div strong,h2 strong,#b_results .b_algo p strong,.b_caption p strong,.b_snippetBigText strong,.recommendationsTableTitle+.b_slideexp strong,.recommendationsTableTitle+table strong,.recommendationsTableTitle+ul strong,.pageRecoContainer .b_module_expansion_control strong,.pageRecoContainer .b_title>strong,.b_rs strong,.b_rrsr strong,.richrswrapper strong,#dict_ans strong,.b_listnav>.b_ans_stamp>strong,#b_content #ans_nws .na_cnt strong,.b_vidAns strong,.adltwrnmsg strong",
+                  : ".sb_adTA .b_adTopIcon_domain .b_icondomian strong,.sb_adTA .b_adTopIcon_container .b_attribution strong,.sb_adTA .sb_adTextInfo .sb_TextCTA .sb_DispAndDesc strong,#b_context .b_ans strong,.sp_requery strong,.sp_recourse strong,.sb_adTA_title_link_cn strong,.b_ad .ad_esltitle ~ div strong,h2 strong,#b_results .b_algo p strong,.b_caption p strong,.b_caption .b_ad_description strong,.b_snippetBigText strong,.recommendationsTableTitle + .b_slideexp strong,.recommendationsTableTitle + table strong,.recommendationsTableTitle + ul strong,.pageRecoContainer .b_module_expansion_control strong,.pageRecoContainer .b_title > strong,.b_rs strong,#dict_ans strong,.b_listnav > .b_ans_stamp > strong,#b_content #ans_nws .na_cnt strong,.b_vidAns strong,.adltwrnmsg strong,.sb_adTA .b_adTopIcon_domain .b_icondomian strong,.b_ad .ad_esltitle~div strong,.recommendationsTableTitle+.b_slideexp strong,.recommendationsTableTitle+table strong,.recommendationsTableTitle+ul strong,.pageRecoContainer .b_title>strong,.b_listnav>.b_ans_stamp>strong",
               antiRedirectFn: () => {
                 const checkAllRegionsRedirection = () => {
                   parsingAntiRedirect("Bing", "#b_content li.b_pag a.b_widePag", { forceSelf: true, cleanAttr: ["h"] });
@@ -1471,7 +1490,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 deBounce({ fn: checkAllRegionsRedirection, delay: 20, timer: "bing_ar" })();
               },
               antiAdsFn: () => {
-                const selectors = `li.b_ans>div.wpt_bc_container,li.b_ans>#relatedSearchesLGWContainer,li.b_ans>.b_rs,li.b_ad,#b_pole,#b_content .b_underSearchbox,#b_header>div[id^="bnp."][data-vertical],#b_context li.b_ans .b_spa_adblock,.ad_sc,.b_adBottom,.b_adLastChild,.b_adPATitleBlock,.b_spa_adblock,.mapsTextAds,.pa_sb,.productAd,[id$="adsMvCarousel"],a[href*="/aclick?ld="],div.pagereco_anim,#inline_rs,#ev_talkbox_wrapper,#b_content>main[aria-label]>#b_ims_bza_pole,.shop_page .br-poleoffcarousel,#b_content>div#pole>div[class="ra_car_block ra_pole"]>div.ra_car_container,#pole>.productAd[data-ad-carousel],.b_adPATitleBlock+div,a.sb_meta[href^="http://advertise.bingads.microsoft.com"],.promotion-panel-inner,.ins_exp.vsp,li[class="b_algo"]:has(.b_attribution[data-partnertag] + p[class]),.b_ans:has([class^="xm_"][class*="_ansCont"]),.b_inline_ajax_rs,div[id^="bnp.nid"][data-viewname="VerticalHeaderFlyout"]`;
+                const selectors = `li.b_ans>div.wpt_bc_container,li.b_ans>#relatedSearchesLGWContainer,li.b_ans>.b_rs,#b_topw:has(li.b_ad),#b_pole,#b_content .b_underSearchbox,#b_header>div[id^="bnp."][data-vertical],#b_context li.b_ans .b_spa_adblock,.ad_sc,.b_adBottom,.b_adLastChild,.b_adPATitleBlock,.b_spa_adblock,.mapsTextAds,.pa_sb,.productAd,[id$="adsMvCarousel"],a[href*="/aclick?ld="],div.pagereco_anim,#inline_rs,#ev_talkbox_wrapper,#b_content>main[aria-label]>#b_ims_bza_pole,.shop_page .br-poleoffcarousel,#b_content>div#pole>div[class="ra_car_block ra_pole"]>div.ra_car_container,#pole>.productAd[data-ad-carousel],.b_adPATitleBlock+div,a.sb_meta[href^="http://advertise.bingads.microsoft.com"],.promotion-panel-inner,.ins_exp.vsp,li[class="b_algo"]:has(.b_attribution[data-partnertag] + p[class]),.b_ans:has([class^="xm_"][class*="_ansCont"]),.b_inline_ajax_rs,div[id^="bnp.nid"][data-viewname="VerticalHeaderFlyout"]`;
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "bing_ad", immed: true })({ selectors, siteName: "Bing" });
               },
             },
@@ -1513,7 +1532,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               antiRedirectFn: () =>
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "sogou_ar" })("Sogou", "#wrapper a[href^='/link?url=']:not([uigs])", { useNewTab: true, advancedAnti: true }),
               antiAdsFn: () => {
-                const selectors = `#biz_tip_box_tuiguang_float,.pz_pc_new_container,.share-wrap,.sponsored,.tgad-box,[class~="ext_query"][id*="sq_ext_"],div.top-better-hintBox,#right>div.rvr-model:not([tpl]),.results .reactResult,.results div.vrwrap.middle-better-hintBox,#right>.reactResult,#searchBtn2[value="\u5168\u7f51\u641c\u7d22"]`;
+                const selectors = `#biz_tip_box_tuiguang_float,.pz_pc_new_container,.share-wrap,.sponsored,.tgad-box,[class~="ext_query"][id*="sq_ext_"],div.top-better-hintBox,#right>div.rvr-model:not([tpl]),.results .reactResult,.results div.vrwrap.middle-better-hintBox,#right>.reactResult,#searchBtn2[value="\u5168\u7f51\u641c\u7d22"],div.result_list.click-better-sugg`;
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "sogou_ad", immed: true })({ selectors, siteName: "Sogou", isRemoveNodes: true });
               },
             },
@@ -1834,7 +1853,8 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           /* DEFINE_GLOBAL_STYLES */
 
           def.var.style = String(
-            `.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before {box-sizing:content-box;line-height:normal}.${def.notice.animated}{animation-duration:1s;animation-fill-mode:both}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.${def.notice.random}_fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.${def.notice.random}_fadeOut{animation-name:fadeOut}.${def.notice.appear}{display:block!important}.${def.notice.noticeX},.${def.notice.noticeX} *{text-shadow:none!important;font-family:Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:0 transparent!important}.${def.notice.noticeX}-top{top:0;width:100%}.${def.notice.noticeX}-top .${def.notice.item}{margin:0!important;border-radius:0!important}.${def.notice.noticeX}-topRight{top:10px;right:20px;z-index:2147483646!important}.${def.notice.noticeX}-topLeft{top:10px;left:10px}.${def.notice.noticeX}-topCenter{top:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX}-middleLeft,.${def.notice.noticeX}-middleRight{right:20px;top:50%;transform:translateY(-50%)}.${def.notice.noticeX}-middleLeft{left:10px}.${def.notice.noticeX}-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.${def.notice.noticeX}-bottom{bottom:0;width:100%}.${def.notice.noticeX}-bottom .${def.notice.item}{border-radius:0!important;margin:0!important}.${def.notice.noticeX}-bottomRight{bottom:10px;right:20px;z-index:2147483647!important}.${def.notice.noticeX}-bottomLeft{bottom:10px;left:10px}.${def.notice.noticeX}-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX} .${def.notice.item}{margin:0 0 10px;border-radius:6px;overflow:hidden}.${def.const.translucent} *{display:none!important}.${def.const.translucent} notice-label{display:block!important}.${def.const.filtered},.${def.const.disappear}{display:none!important}[${def.const.const.warn}]{display:block!important;min-width:430px;margin:18px 0 28px 10px!important;padding:10px 2px!important;font:normal 400 14px/100% 'WenQuanYi Micro Hei','PingFang SC','Microsoft YaHei',sans-serif!important;-webkit-text-stroke:0 transparent!important;color:grey!important;line-height:1!important}gb-filters.code{display:block;margin:20px 0;word-break:break-word;font-size:12px!important}` +
+            `.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before {box-sizing:content-box;line-height:normal}.${def.notice.animated}{animation-duration:1s;animation-fill-mode:both}@keyframes fadeIn{from{opacity:0}to{opacity:1}}.${def.notice.random}_fadeIn{animation-name:fadeIn}@keyframes fadeOut{from{opacity:1}to{opacity:0}}.${def.notice.random}_fadeOut{animation-name:fadeOut}.${def.notice.appear}{display:block!important}.${def.notice.noticeX},.${def.notice.noticeX} *{text-shadow:none!important;font-family:Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important;-webkit-text-stroke:0 transparent!important}.${def.notice.noticeX}-top{top:0;width:100%}.${def.notice.noticeX}-top .${def.notice.item}{margin:0!important;border-radius:0!important}.${def.notice.noticeX}-topRight{top:10px;right:20px;z-index:2147483646!important}.${def.notice.noticeX}-topLeft{top:10px;left:10px}.${def.notice.noticeX}-topCenter{top:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX}-middleLeft,.${def.notice.noticeX}-middleRight{right:20px;top:50%;transform:translateY(-50%)}.${def.notice.noticeX}-middleLeft{left:10px}.${def.notice.noticeX}-middleCenter{top:50%;left:50%;transform:translate(-50%,-50%)}.${def.notice.noticeX}-bottom{bottom:0;width:100%}` +
+              `.${def.notice.noticeX}-bottom .${def.notice.item}{border-radius:0!important;margin:0!important}.${def.notice.noticeX}-bottomRight{bottom:10px;right:20px;z-index:2147483647!important}.${def.notice.noticeX}-bottomLeft{bottom:10px;left:10px}.${def.notice.noticeX}-bottomCenter{bottom:10px;left:50%;transform:translate(-50%)}.${def.notice.noticeX} .${def.notice.item}{margin:0 0 10px;border-radius:6px;overflow:hidden}notice-label{display:block;margin:0 0 8px 0;color:#999}.${def.const.translucent}:not(.${def.const.expend}) *{display:none!important}.${def.const.translucent}:not(.${def.const.expend}) notice-label{display:block!important;cursor:zoom-in}.${def.const.translucent}.${def.const.expend} notice-label{display:block!important;cursor:zoom-out}.${def.const.translucent}:not(.${def.const.expend}) notice-label:after{content:"[\u5c55\u5f00]";margin:0 0 0 12px;font-size:12px;cursor:zoom-in}.${def.const.translucent}.${def.const.expend} notice-label:after{content:"[\u5173\u95ed]";margin:0 0 0 12px;font-size:12px;color:#e93724;cursor:zoom-out}.${def.const.filtered},.${def.const.disappear}{display:none!important}[${def.static.warn}]{display:block!important;min-width:430px;margin:18px 0 28px 10px!important;padding:10px 2px!important;font:normal 400 14px/100% 'WenQuanYi Micro Hei','PingFang SC','Microsoft YaHei',sans-serif!important;-webkit-text-stroke:0 transparent!important;color:grey!important;line-height:1!important}gb-filters.code{display:block;margin:20px 0;word-break:break-word;font-size:12px!important}` +
               `.${def.notice.noticeX} .${def.notice.item} .${def.notice.close}{float:right;margin-right:7px;color:#fff;text-shadow:0 1px 0 #fff;font-weight:700;font-size:18px!important;line-height:1;opacity:1}.${def.notice.noticeX} .${def.notice.item} .${def.notice.close}:hover{color:#000;opacity:.5;cursor:pointer}.${def.notice.noticeX} .${def.notice.item} a{border-bottom:1px dashed #fff;color:#fff}.${def.notice.noticeX} .${def.notice.item} a,.${def.notice.noticeX} .${def.notice.item} a:hover{text-decoration:none}.${def.notice.noticeX} .${def.notice.success}{background-color:#64ce83!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-heading{padding:10px;background-color:#3da95c;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-body{padding:10px!important;color:#fff;}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.info}{background-color:#3ea2ff!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-heading{padding:10px;background-color:#067cea;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-body{padding:10px!important;color:#fff}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.warning}{background-color:#ff7f48!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#f97038;color:#fff;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-body{color:#fff;padding:10px}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.error}{background-color:#e74c3c!important}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#e93724;color:#fff;font-weight:700;font-size:14px!important}` +
               `.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-body{padding:10px;color:#fff}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.configuration} input[disabled],.${def.notice.configuration} select[disabled]{color:#bbb;background:linear-gradient(45deg,#ffe9e9 0,#ffe9e9 25%,transparent 25%,transparent 50%,#ffe9e9 50%,#ffe9e9 75%,transparent 75%,transparent)!important;background-size:20px 20px!important;background-color:#fff7f7!important}.${def.notice.noticeX} .${def.notice.configuration}{background:linear-gradient(to right,#fcfcfc,#f2f2f7);background:-webkit-gradient(linear,0 0,0 100%,from(#fcfcfc),to(#f2f2f7));box-shadow:0 0 5px #888}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.close}{float:right;margin-right:7px;color:#000000;text-shadow:0 1px 0 #aaa;font-weight:700;font-size:18px!important;line-height:1;opacity:1}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.close}:hover{color:#555;opacity:.5;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-heading{padding:10px!important;background-color:#e7e7e7;color:#333;font-weight:700;font-size:14px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-body{padding:10px;color:#333333}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-body:hover{visibility:visible!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-content{visibility:visible}.${def.notice.noticeX} .${def.notice.noticeX}-heading-title{display:inline-block;vertical-align:middle;overflow:hidden;max-width:90%;text-overflow:ellipsis;white-space:nowrap;-webkit-user-select:none;user-select:none;cursor:pointer}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#64ce83}.${def.notice.noticeX} .${def.notice.success} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#3da95c}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#3ea2ff}.${def.notice.noticeX} .${def.notice.info} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#067cea;}` +
               `.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#ff7f48}.${def.notice.noticeX} .${def.notice.warning} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#f44e06}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#fd5f4e}.${def.notice.noticeX} .${def.notice.error} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#ba2c1d}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-progressbar{margin-top:-1px;width:100%;background-color:#efefef}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.noticeX}-progressbar .${def.notice.noticeX}-bar{width:100%;height:5px;background:#ccc}@keyframes ${def.notice.noticeX}-progress{0%{width:100%}to{width:0}}@keyframes ${def.notice.noticeX}-fadeOut{0%{opacity:1}to{opacity:0}}.${def.notice.noticeX}-fadeOut{animation-name:${def.notice.noticeX}-fadeOut}.${def.notice.noticeX}{position:fixed;z-index:2147483645}.${def.notice.noticeX} ::-webkit-scrollbar{width:8px}.${def.notice.noticeX} ::-webkit-scrollbar-button{width:8px;height:8px}.${def.notice.noticeX} ::-webkit-scrollbar-track{border-radius:3px}.${def.notice.noticeX} ::-webkit-scrollbar-thumb{background:#e1e1e1;border-radius:3px}.${def.notice.noticeX} ::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.rName}{padding:2px!important}.${def.notice.noticeX} .${def.notice.rName} dl{margin:0!important;padding:1px!important}.${def.notice.noticeX} .${def.notice.rName} dl dt{margin:2px 0 6px!important;font-weight:900!important;font-size:16px!important}.${def.notice.noticeX} .${def.notice.rName} dl dd{margin:2px 2px 0 0!important;font-size:14px!important;line-height:180%!important;margin-inline-start:10px!important}.${def.notice.noticeX} .${def.notice.rName} .${def.notice.center}{width:100%;text-align:center!important}.${def.notice.noticeX} .${def.notice.rName} dl dd em{padding:0 5px;color:#fff;font-style:italic;font-size:24px!important;font-family:Candara,sans-serif!important}.${def.notice.noticeX} .${def.notice.rName} dl dd span{margin-right:8px;font-weight:700;font-size:15px!important}.${def.notice.noticeX} .${def.notice.rName} dl dd i{font-size:20px!important;font-family:Candara,sans-serif!important}` +
@@ -1891,18 +1911,17 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           }
 
           function findCurrentSite() {
-            for (const regex in engineMap) {
-              if (!hasOwnProperty.call(engineMap, regex) || !new RegExp(regex).test(CUR_HOST_NAME)) continue;
+            for (const regex of safeObject.keys(engineMap)) {
+              if (!new RegExp(regex).test(CUR_HOST_NAME)) continue;
               const { siteType, site } = engineMap[regex];
               const currentSite = selectedEngine.includes(siteType) ? site : listSite.other;
               return { currentSite, listCurrentSite: site };
             }
-            return {};
+            return object();
           }
 
           function updateSiteInformation(currentSiteName = "", allSiteURIs = "") {
-            for (let site in listSite) {
-              if (!hasOwnProperty.call(listSite, site)) continue;
+            for (const site of safeObject.keys(listSite)) {
               if (listSite[site].siteTypeID !== newSiteType.OTHERS) allSiteURIs += listSite[site].siteHostName + ";";
               if (listSite[site].siteTypeID === listCurrentSite.siteTypeID) currentSiteName = site;
               if (listSite[site].siteTypeID !== currentSite.siteTypeID && selectedEngine.includes(Number(listSite[site].siteTypeID))) {
@@ -1996,8 +2015,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           }
 
           function showUpdateError() {
-            const props = ["font-weight:bold;color:#dc143c", "color:#800000"];
-            __console("error", "%c[Update Failed] %cRefused to connect to 'the UpdateList URLs', Please check your Network or local DNS!", ...props);
+            __console("error", "[Update Failed] Refused to connect to 'the UpdateList URLs', Please check your Network or local DNS!");
           }
 
           void (async function (getUpdateInformation, parseUpdateInformatio) {
@@ -2005,8 +2023,8 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               closeConfig: async () => await NoticeX.close(qS(`.${def.notice.noticeX} .${def.notice.configuration}`)),
               listSearchEngine: currentSite => {
                 let returnHtml = "";
-                for (let site in listSite) {
-                  if (!hasOwnProperty.call(listSite, site) || listSite[site].siteTypeID === 0 || listSite[site].siteTypeID === currentSite.siteTypeID) continue;
+                for (const site of safeObject.keys(listSite)) {
+                  if (listSite[site].siteTypeID === 0 || listSite[site].siteTypeID === currentSite.siteTypeID) continue;
                   const iconStyle = `background-position:0 ${(1 - listSite[site].siteTypeID) * 32}px;background-attachment:local;background-size:32px auto;transform:scale(0.75);`;
                   const buttonTitle = selectedEngine.includes(listSite[site].siteTypeID) ? `title="${IS_CHN ? "您常用的搜索引擎" : "Commonly used search engine"}"` : ``;
                   returnHtml += `<li>
@@ -2022,8 +2040,8 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               },
               listSelectSearchEngine: () => {
                 let returnHtml = "";
-                for (let site in listSite) {
-                  if (!hasOwnProperty.call(listSite, site) || listSite[site].siteTypeID === 0) continue;
+                for (const site of safeObject.keys(listSite)) {
+                  if (listSite[site].siteTypeID === 0) continue;
                   const iconStyle = `background-position:0 ${(1 - listSite[site].siteTypeID) * 32}px;background-attachment:local;background-size:32px auto;`;
                   const inputStatus = selectedEngine.includes(listSite[site].siteTypeID) ? "checked" : "disabled";
                   returnHtml += `<label class="${def.notice.card}">
@@ -2200,6 +2218,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                   const tigger = qS(`#${def.notice.rf}`);
                   tigger && !tigger.checked && void (textarea.classList.add(def.notice.readonly), textarea.setAttribute("readonly", true));
                   tigger?.addEventListener("change", changeEventOnTigger);
+                  removeKeyboardEvent(textarea);
                   textarea?.addEventListener("input", addInputEventOnTextarea);
                   qS(`#${def.notice.random}_help`)?.addEventListener("click", () => void GMopenInTab(`${def.url.feedback}/288#discussioncomment-8917302`, false));
                   qS(`#${def.notice.random}_cancel`)?.addEventListener("click", () => void NoticeX.close(filterInterface));
@@ -2223,6 +2242,10 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               const textarea = qS(`.${def.notice.random}_filter_textarea .${def.notice.random}_filter_content`);
               textarea?.classList.toggle(def.notice.readonly, !event.target.checked);
               textarea?.toggleAttribute("readonly", !event.target.checked);
+            }
+
+            function removeKeyboardEvent(target) {
+              ["keydown", "keyup", "keypress", "paste"].forEach(eventType => target?.addEventListener(eventType, e => stopEventPropagation(e, { prevent: false })));
             }
 
             async function saveFilterResultData() {
@@ -2250,7 +2273,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 filterInfo?.removeAttribute("disabled");
                 const value = target.value.trim();
                 if (value.length === 0) return target.setAttribute("style", "border: 1px solid #999");
-                const parsedValue = JSON.parse(value);
+                const parsedValue = JSON.parse(value.replace(/,\s+]$/, "]"));
                 if (!safeArray.isArray(parsedValue) || asArray(parsedValue).SomeX(item => typeof item !== "string")) throw new Error("Format Error");
                 const previousCursorPosition = target.selectionStart;
                 const formattedValue = JSON.stringify(parsedValue, null, 2);
@@ -2437,7 +2460,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 clear: () => safeRemoveNode("#con-ar"),
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
-                  const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                  const width = buttonSection.clientWidth || 2e2;
                   buttonSection.style.setProperty("--right", `-${width + 8}px`);
                 },
               },
@@ -2451,7 +2474,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               },
               bing: {
                 listTypes: { target: "#b_results", listName: "li", className: "b_algo" },
-                clear: () => safeRemoveNode("aside>ol#b_context"),
+                clear: () => safeRemoveNode("aside[aria-label]"),
                 applyCookie: () => safeObject.assign(GMunsafeWindow, { AwayTimeScrollTopPoleRS: false, AwayTimeThresholdCustomControl: false, AwayTimeThreshold: 864e3 }),
                 applyButton: ({ buttonSection, target, shadow }) => {
                   insertAfter(buttonSection, target);
@@ -2468,7 +2491,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 listTypes: { target: "ol.react-results--main", listName: "li" },
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
-                  const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                  const width = buttonSection.clientWidth || 2e2;
                   buttonSection.style.setProperty("--right", `-${width + 8}px`);
                 },
               },
@@ -2479,9 +2502,9 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                   const currentSearchType = getUrlParam(currentSite.splitTypeName);
                   if (currentSite.imageType.includes(currentSearchType)) {
                     await sleep(1e2, { instance: true });
-                    if (qS(`#${def.const.rndButtonID}`) || !target) return;
+                    if (!target || qS(`#${def.const.rndButtonID}`, target.parentNode)) return;
                     insertAfter(buttonSection, target);
-                    const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                    const width = buttonSection.clientWidth || 2e2;
                     buttonSection.style.cssText += `--right:-${width + 10}px;--opacity:1`;
                     qA(`input`, shadow).forEach(node => node.classList.add(`${def.notice.random}_images`));
                   } else if (currentSearchType === "weixin") {
@@ -2491,11 +2514,11 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                   } else {
                     insertAfter(buttonSection, target);
                     await sleep(0, { instance: true });
-                    const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                    const width = buttonSection.clientWidth || 2e2;
                     buttonSection.style.cssText += `--right:-${width + 10}px;--opacity:1`;
                     qS(`#searchBtn2`)?.style.setProperty("right", `-${width + 120}px`);
                   }
-                  addSearchButtonEvent(shadow);
+                  addSearchButtonEvent(shadow, target);
                 },
               },
               qwant: {
@@ -2503,8 +2526,8 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 applyButton: async ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
                   await sleep(0, { instance: true });
-                  const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
-                  const llmButtonWidth = parseInt(qS(`div[data-testid="llm-button-force"][class]`)?.getBoundingClientRect().width || 0);
+                  const width = buttonSection.clientWidth || 2e2;
+                  const llmButtonWidth = qS(`div[data-testid="llm-button-force"][class]`)?.clientWidth || 0;
                   buttonSection.style.setProperty("--right", `-${width + llmButtonWidth + 10}px`);
                 },
               },
@@ -2525,7 +2548,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 clear: () => safeRemoveNode(".main>.s-side-list>.result-content"),
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
-                  const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                  const width = buttonSection.clientWidth || 2e2;
                   buttonSection.style.cssText += `--right:-${width + 10}px;--opacity:1`;
                 },
               },
@@ -2547,8 +2570,8 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                   !/:nt=1:/.test(gbCookies.getItem("ECFG")) && setPreferences(option);
                 },
                 applyButton: ({ buttonSection, target, shadow }) => {
-                  const insertButtonsFn = () => !qS(`#${def.const.rndButtonID}`) && target && (insertAfter(buttonSection, target), addSearchButtonEvent(shadow));
-                  def.const.requestIdleCallback(insertButtonsFn, { timeout: 8e2 });
+                  const btnFn = () => target && !qS(`#${def.const.rndButtonID}`, target.parentNode) && (insertAfter(buttonSection, target), addSearchButtonEvent(shadow, target));
+                  def.var.rIC.call(btnFn, { timeout: 1e3 });
                 },
               },
               yahoo: {
@@ -2560,7 +2583,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                     buttonSection.style.setProperty("--height", `44px`);
                   } else {
                     insertAfter(buttonSection, target);
-                    const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                    const width = buttonSection.clientWidth || 2e2;
                     buttonSection.style.setProperty("--right", `-${10 + width}px`);
                   }
                 },
@@ -2576,7 +2599,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
                   qS("meta[name='theme-color']")?.getAttribute("content") === "#0c0d0f" && buttonSection.classList.add(def.const.darkmode);
-                  const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                  const width = buttonSection.clientWidth || 2e2;
                   const formSection = qS(`#header-search-form>.search-form-relative-container`);
                   const maxWidth = parseInt(gCS(formSection).maxWidth) + width;
                   formSection?.style.setProperty("max-width", `${maxWidth}px`);
@@ -2590,7 +2613,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 },
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
-                  const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                  const width = buttonSection.clientWidth || 2e2;
                   buttonSection.style.setProperty("--right", `-${width + 10}px`);
                 },
                 clear: () => safeRemoveNode("aside>div"),
@@ -2600,7 +2623,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 applyButton: async ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
                   await sleep(0, { instance: true });
-                  const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                  const width = buttonSection.clientWidth || 2e2;
                   buttonSection.style.setProperty("--right", `-${10 + width}px`);
                 },
               },
@@ -2610,7 +2633,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target);
                   qS(`link#theme`)?.href.includes("dark") && buttonSection.classList.add(def.const.darkmode);
-                  const width = parseInt(buttonSection.getBoundingClientRect().width || 2e2);
+                  const width = buttonSection.clientWidth || 2e2;
                   buttonSection.style.setProperty("--right", `-${10 + width}px`);
                 },
               },
@@ -2646,7 +2669,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             function insertButtons() {
               try {
                 const target = qS(currentSite.mainSelector);
-                if (!target || !getQueryString()) return;
+                if (!target || !getQueryString() || !safeRemoveNode("gb-button")) return;
                 const buttonSection = cE("gb-button", { id: def.const.rndButtonID });
                 const shadow = def.const.attachShadow.call(buttonSection, { mode: "closed" });
                 const darkModeCssText = currentSite.darkModeCss ? `${currentSite.darkModeCss}` : ``;
@@ -2654,15 +2677,15 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 shadow.innerHTML = tTP.createHTML(def.var.button);
                 updateAdoptedStyleSheets(shadow, buttonCssText, def.const.buttons);
                 applyButtons(buttonSection, target, shadow);
-                addSearchButtonEvent(shadow);
-                scrollDetect(shadow);
+                addSearchButtonEvent(shadow, target);
+                scrollDetect(shadow, target);
               } catch (e) {
                 ERROR(`${e.name} in InsertButtons:`, e.message);
               }
             }
 
             function applyButtons(buttonSection, target, shadow) {
-              if (currentSite.siteTypeID === newSiteType.OTHERS || qS(`#${def.const.rndButtonID}`)) return;
+              if (currentSite.siteTypeID === newSiteType.OTHERS || qS(`#${def.const.rndButtonID}`, target.parentNode)) return;
               const applyCookieMethod = siteConfigMap[currentSiteName]?.applyCookie;
               const applyButtonMethod = siteConfigMap[currentSiteName]?.applyButton;
               typeof applyCookieMethod === "function" && applyCookieMethod();
@@ -2679,19 +2702,21 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               document.addEventListener("scroll", throttleToggleScroll) ?? document.addEventListener("scrollend", toggleScrollClass);
               const initInterval = rAF.setInterval(() => toggleScrollClass() && rAF.clearInterval(initInterval), 50);
               const terminateInterval = async () => await sleep(2e3)(initInterval).then(rAF.clearInterval);
-              document.readyState === "complete" ? terminateInterval() : global.addEventListener("load", terminateInterval);
+              document.readyState === "complete" ? terminateInterval() : document.addEventListener("DOMContentLoaded", terminateInterval);
             }
 
-            function scrollDetect(shadow, buttonSet = new Set()) {
-              if (!qS(`#${def.const.rndButtonID}`) || ![newSiteType.GOOGLE, newSiteType.BING].includes(currentSite.siteTypeID)) return;
-              buttonSet.add([qS(`#${def.const.rndButtonID}`, document), def.const.scrollspan]);
-              buttonSet.add([qS(`#${def.const.leftButton} input`, shadow), def.const.scrollbars]);
-              buttonSet.add([qS(`#${def.const.rightButton} input`, shadow), def.const.scrollbars]);
+            function scrollDetect(shadow, target) {
+              const buttonSet = new Set();
+              const btnContainer = qS(`#${def.const.rndButtonID}`, target.parentNode);
+              const leftBtn = qS(`#${def.const.leftButton} input`, shadow);
+              const rightBtn = qS(`#${def.const.rightButton} input`, shadow);
+              if (!btnContainer || !leftBtn || !rightBtn || ![newSiteType.GOOGLE, newSiteType.BING].includes(currentSite.siteTypeID)) return;
+              buttonSet.add([btnContainer, def.const.scrollspan]).add([leftBtn, def.const.scrollbars]).add([rightBtn, def.const.scrollbars]);
               setupScrollButton(buttonSet);
             }
 
-            function addSearchButtonEvent(shadow) {
-              if (!qS(`#${def.const.rndButtonID}`)) return;
+            function addSearchButtonEvent(shadow, target) {
+              if (!qS(`#${def.const.rndButtonID}`, target.parentNode)) return;
               qA(`span[sn]:not([event-insert])`, shadow).forEach(node => {
                 if (node.hasAttribute("event-insert")) return;
                 node.setAttribute("event-insert", true);
@@ -2717,7 +2742,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               const noticeText = IS_CHN ? "本页所有搜索结果均被屏蔽，如异常请检查过滤词。" : "All results are blocked, Check the filters if abnormal.";
               const filterArray = userdFilter ? `<gb-filters class="code">${IS_CHN ? "过滤词:" : "Filter:"} [${userdFilter}]</gb-filters>` : ``;
               const tips = `<br/>✄┏━┓╋┏┓╋╋╋┏━━━┓╋╋╋╋╋╋╋╋┏┓┏┓╋┏┓<br/>✄┃┃┗┓┃┃╋╋╋┃┏━┓┃╋╋╋╋╋╋╋╋┃┣┛┗┓┃┃<br/>✄┃┏┓┗┛┣━━┓┃┗━┛┣━━┳━━┳┓┏┫┣┓┏┛┃┃<br/>✄┃┃┗┓┃┃┏┓┃┃┏┓┏┫┃━┫━━┫┃┃┃┃┃┃╋┗┛<br/>✄┃┃╋┃┃┃┗┛┃┃┃┃┗┫┃━╋━━┃┗┛┃┗┫┗┓┏┓<br/>✄┗┛╋┗━┻━━┛┗┛┗━┻━━┻━━┻━━┻━┻━┛┗┛<br/><br/>`;
-              const noticeCode = tTP.createHTML(`<${listName}${listAttrib} ${def.const.const.warn}>${tips}${noticeText} — ${def.var.scriptName}${filterArray}</${listName}>`);
+              const noticeCode = tTP.createHTML(`<${listName}${listAttrib} ${def.static.warn}>${tips}${noticeText} — ${def.var.scriptName}${filterArray}</${listName}>`);
               return noticeCode;
             }
 
@@ -2725,7 +2750,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               const siteConfig = siteConfigMap[siteName];
               if (!siteConfig) return;
               const { target, listName, className } = siteConfig.listTypes;
-              const noticeNode = qS(`${target} [${def.const.const.warn}]`);
+              const noticeNode = qS(`${target} [${def.static.warn}]`);
               if (noticeNode) return;
               const usedFilterWordsStr = escapeHTML([...usedFilterWords].join(", "));
               const noticeCode = createNotice(listName, className, usedFilterWordsStr);
@@ -2735,8 +2760,8 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             }
 
             function filterSearchResults(filterObj) {
-              if (resultFilters.length === 0 || getUrlParam("iframeid")) return;
-              const { qs, delay } = filterObj ?? {};
+              if (!filterObj || resultFilters.length === 0 || getUrlParam("iframeid")) return;
+              const { qs, delay } = filterObj;
               qs && deBounce({ fn: filterSearchResultsProcess, timer: "filterSearchResults", delay: delay || 50 })(qs);
             }
 
@@ -2749,20 +2774,32 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               if (returnContent.size === 0) return;
               returnContent.forEach((content, item) => matchFilters(item, content));
               await sleep(1e2, { instance: true });
-              if (usedFilterWords.size > 0 && qA(querystring.split(/,(?![^()]*\))/g)[0]).length >= 2) handleRemainingResults(qA(selectors.split(/,(?![^()]*\))/g)[0]).length);
+              const complexCommaRegex = /,(?![^()]*\))/g;
+              if (usedFilterWords.size > 0) {
+                const firstQuerySelector = querystring.split(complexCommaRegex)[0];
+                const queryElementsCount = qA(firstQuerySelector).length;
+                if (queryElementsCount >= 2) {
+                  const firstSelectorInList = selectors.split(complexCommaRegex)[0];
+                  const remainingResultsCount = qA(firstSelectorInList).length;
+                  handleRemainingResults(remainingResultsCount);
+                }
+              }
               returnContent.clear();
             }
 
             function processMatchedItem(item, content, filter) {
-              if (IS_DEBUG) addDebugNotice(item, filter);
               usedFilterWords.add(filter);
               item.classList.add(IS_DEBUG ? def.const.translucent : def.const.disappear);
-              DEBUG("Filter.match:", { filter, item, content }) ?? qA("a", item).forEach(node => node.setAttribute(def.const.const.anti, "blocked"));
+              if (IS_DEBUG) addDebugNotice(item, filter);
+              qA("a", item).forEach(node => node.setAttribute(def.static.anti, "blocked"));
+              return DEBUG("Filter.match:", { filter, item, content });
             }
 
             function addDebugNotice(item, filter) {
-              if (qS("notice-label", item)) return;
-              item.prepend(cE("notice-label", { class: "code", textContent: `<![CDATA[ "${filter}" ]]>` }));
+              if (!item || qS("notice-label", item)) return;
+              const label = cE("notice-label", { class: "code", textContent: `<![CDATA[ "${filter}" ]]>` });
+              item.prepend(label);
+              label.addEventListener("click", e => e.target.parentNode?.classList.toggle(def.const.expend));
             }
 
             function adjustUI(siteName) {
@@ -2772,19 +2809,19 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
             function buildSelectors(querystring) {
               const array = querystring.split(/,(?![^()]*\))/g);
-              return array.map(item => `${item}:not(.${def.const.disappear},.${def.const.translucent},[${def.const.const.warn}])`).join(",");
+              return array.map(item => `${item}:not(.${def.const.disappear},.${def.const.translucent},[${def.static.warn}])`).join(",");
             }
 
             function processANodeURL(item, returnContent) {
-              if (item?.nodeType !== Node.ELEMENT_NODE) return;
-              const href = qS("a:not([data-testid='result-extras-site-search-link']):not([aria-label^='Anonymous']):not([href*='.bing.com/ck/a?'])", item)?.href ?? "";
+              if (item?.nodeType !== 1) return;
+              const href = qS("a:not(.link--color-null,[role='menuitem'],[data-testid='result-extras-site-search-link'],[title])", item)?.href ?? "";
               const url = [1, 5, 8, 12].includes(listCurrentSite.siteTypeID) ? qS(`.${def.const.filtered}`, item)?.textContent.trim() || "" : href;
-              const content = item.innerText?.replace(/[\t\r\n\ue62b]/g, "").trim() + getDecodeURI(url);
+              const content = item.innerText?.replace(/[\t\r\n\ue62b]+/g, "").trim() + getDecodeURI(url);
               if (content) returnContent.set(item, content);
             }
 
             function matchFilters(item, content) {
-              if (item?.nodeType !== Node.ELEMENT_NODE) return;
+              if (item?.nodeType !== 1) return;
               try {
                 for (const filter of resultFilters) if (new RegExp(filter, "i").test(content)) return processMatchedItem(item, content, filter);
               } catch (e) {
@@ -2794,40 +2831,39 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
             function handleRemainingResults(remainingResults) {
               if (remainingResults > 2) return;
-              remainingResults === 0 ? showEmptyNotice(currentSiteName) : qS(`[${def.const.const.warn}]`)?.remove();
+              remainingResults === 0 ? showEmptyNotice(currentSiteName) : qS(`[${def.static.warn}]`)?.remove();
               adjustUI(currentSiteName);
             }
 
             function getDecodeURI(href, temp) {
               if (!href || typeof href !== "string" || href.startsWith("javascript:")) return "";
-              const fixPercent = s => s.replace(/%(?![0-9A-Fa-f]{2})/g, "%25");
-              let result = fixPercent(href);
-              while (((temp = result), (result = decodeURIComponent(fixPercent(result))), result !== temp));
+              const invalidPercentRegex = /%(?![0-9A-Fa-f]{2})/g;
+              let result = href.replace(invalidPercentRegex, "%25");
+              while (((temp = result), (result = decodeURIComponent(result.replace(invalidPercentRegex, "%25"))), result !== temp));
               return `\ue620${result}\ue620`;
             }
 
-            function getGlobalGoogle(permission, host = "www.google.com") {
-              if (!permission || CUR_HOST_NAME === host) return;
-              try {
-                const url = `${CUR_PROTOCOL}//${host}/ncr?prev=${CUR_PATH_NAME}${encodeURIComponent(location.search)}`;
-                const text = createNoticeHTML(`<dd class="${def.notice.center}">${IS_CHN ? "即将跳转至 Google.com (NCR)" : "Jump to Google.com (NCR)"}</dd>`);
-                GMnotification({ title: "Google NCR", text, type: def.notice.info, callbacks: { beforeClose: [() => top.location.replace(url)] } });
-              } catch (e) {
-                ERROR(`${e.name} in GetGlobalGoogle:`, e.message);
-              }
+            function getGlobalGoogle(permission) {
+              if (!permission || CUR_HOST_NAME === "www.google.com") return;
+              const url = `${CUR_PROTOCOL}//www.google.com/ncr?prev=${CUR_PATH_NAME}${encodeURIComponent(location.search)}`;
+              const text = createNoticeHTML(`<dd class="${def.notice.center}">${IS_CHN ? "即将跳转至 Google.com (NCR)" : "Jump to Google.com (NCR)"}</dd>`);
+              GMnotification({ title: "Google NCR", text, type: def.notice.info, callbacks: { beforeClose: [() => top.location.replace(url)] } });
             }
 
             function processMainThreadTasks() {
               const indexPage = checkIndexPage();
               const securePage = getSecurityPolicy();
-              if (currentSite.siteTypeID !== newSiteType.OTHERS && !indexPage && !securePage && !qS(`#${def.const.rndButtonID}`)) insertButtons();
-              const { siteTypeID, overrideCss, antiAdsFn, resultListProp, antiRedirectFn } = listCurrentSite;
+              const { siteTypeID, overrideCss, mainSelector, antiAdsFn, resultListProp, antiRedirectFn } = listCurrentSite;
               if (siteTypeID === newSiteType.OTHERS) return;
-              !indexPage && !securePage && overrideCss && !findAdoptedStyleSheet(def.const.rndclassName) && insertCSS(listCurrentSite);
-              !findAdoptedStyleSheet(def.const.rndstyleName) && insertStyle();
-              !securePage && antiAds && antiAdsFn?.();
-              !indexPage && !securePage && antiResultsFilter && filterSearchResults(resultListProp);
-              !indexPage && !securePage && antiLinkRedirect && antiRedirectFn?.();
+              if (!findAdoptedStyleSheet(def.const.rndstyleName)) insertStyle();
+              if (securePage) return;
+              if (antiAds && typeof antiAdsFn === "function") antiAdsFn();
+              if (indexPage) return;
+              const target = qS(mainSelector);
+              target && !qS(`#${def.const.rndButtonID}`, target.parentNode) && insertButtons();
+              if (overrideCss && !findAdoptedStyleSheet(def.const.rndclassName)) insertCSS(listCurrentSite);
+              if (antiResultsFilter) filterSearchResults(resultListProp);
+              if (antiLinkRedirect && typeof antiRedirectFn === "function") antiRedirectFn();
             }
 
             function searchButtonAndStylesObserve() {
@@ -2838,12 +2874,10 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             }
 
             function requestIconsForScriptUpdate(requestVersion) {
-              try {
-                if (decrypt(requestVersion) === def.var.curVersion) return;
-                DEBUG("%cRequest Remote icon data for script update.", "color:#25f") ?? GMsetValue(VERSION, encrypt(def.var.curVersion)) ?? updateToRequestIcon();
-              } catch (e) {
-                ERROR(`${e.name} in RequestIconsForScriptUpdate:`, e.message);
-              }
+              if (decrypt(requestVersion) === def.var.curVersion) return;
+              DEBUG("%cRequest Remote icon data for script update.", "color:#25f");
+              GMsetValue(VERSION, encrypt(def.var.curVersion));
+              updateToRequestIcon();
             }
 
             /* SEARCH_ENGINE_ASSISTANT_MAIN_PROCESS */
@@ -2941,26 +2975,36 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           }
         }
       );
-    })(initTrustedTypesPolicy(), safeJSON, sessionStorage?.getItem(def.const.const.navinfo));
+    })(initTrustedTypesPolicy(), safeJSON, sessionStorage?.getItem(def.static.navinfo));
   },
-  {
-    method: Object.entries({
-      SomeX(callback, thisArg = this) {
-        for (let i = 0; i < this.length; i++) if (callback.call(thisArg, this[i], i, this)) return true;
+  (function (methods) {
+    const methodMap = new Map(Object.entries(methods));
+    const handler = {
+      get(target, prop, receiver) {
+        const method = methodMap.get(prop);
+        return method ? (...args) => method.apply(target, args) : Reflect.get(target, prop, receiver);
       },
-      FindX(callback, thisArg = this) {
-        for (let i = 0; i < this.length; i++) if (callback.call(thisArg, this[i], i, this)) return this[i];
-      },
-    }),
-    option: { writable: false, configurable: false, enumerable: false },
-  },
+    };
+    return array => (Array.isArray(array) ? new Proxy(array, handler) : array);
+  })({
+    SomeX(callback, thisArg = this) {
+      for (let i = 0; i < this.length; i++) if (callback.call(thisArg, this[i], i, this)) return true;
+    },
+    FindX(callback, thisArg = this) {
+      for (let i = 0; i < this.length; i++) if (callback.call(thisArg, this[i], i, this)) return this[i];
+    },
+  }),
   ((ctx, mS = [..."t𝚁TjLWO𝙳ZR𝚖𝚜i𝚗gE𝚎𝚠2H𝚘8YkxC𝙲N0GcBrF5Qda4𝙺XoK𝚆𝚣hIn7uw1e𝚌bpM𝚞PUJlS9szD𝚝Avm3𝚟6qfV𝚡y𝚊"]) => {
-    const oC = ctx.Object.create.bind(null, null);
-    const sP = (O, o) => O.create(O.getPrototypeOf(o), O.getOwnPropertyDescriptors(o));
+    const oC = Object.create.bind(null, null);
+    const sP = (O, o) => {
+      const clone = O.create(O.getPrototypeOf(o));
+      for (const key of Reflect.ownKeys(o)) Reflect.defineProperty(clone, key, O.getOwnPropertyDescriptor(o, key));
+      return clone;
+    };
     const eH = type => {
       const original = ctx.history[type];
       return function () {
-        return ctx.dispatchEvent(new CustomEvent(type, { detail: [...arguments] })), original.apply(this, arguments);
+        return ctx.dispatchEvent(new CustomEvent(type, { detail: { state: arguments[0], title: arguments[1], url: arguments[2] } })), original.apply(this, arguments);
       };
     };
     const tS = storageType => {
