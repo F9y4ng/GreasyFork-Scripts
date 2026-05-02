@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            Помощник поисковой системы
 // @name:ja            優雅な検索エンジン助手
-// @version            2026.05.02.1
+// @version            2026.05.02.2
 // @author             F9y4ng
 // @description        Alias "Search Engine Assistant", le script aide à la navigation entre les moteurs de recherche, à la personnalisation des préférences, à la mise en évidence des mots-clés, à l'élimination des redirections et des publicités et au filtrage des résultats. Compatible avec Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG et bien d'autres moteurs de recherche célèbres.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG and more.
@@ -1289,7 +1289,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
         function advancedAntiRedirection(siteName, node, task) {
           if (!node?.href) return;
-          const url = node.href.replace(httpRegex, "https:");
+          const url = node.href.replace(httpRegex, "https://");
           toggleLoadClass(node)?.add();
           switch (siteName) {
             case "Baidu":
@@ -2830,7 +2830,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             }
 
             function handleRemainingResults(remainingResults) {
-              if (remainingResults > 2) return;
+              if (remainingResults > 3) return;
               remainingResults === 0 ? showEmptyNotice(currentSiteName) : qS(`[${def.static.warn}]`)?.remove();
               adjustUI(currentSiteName);
             }

@@ -5,7 +5,7 @@
 // @name:zh-TW   優雅的搜尋引擎助手
 // @name:ru      Помощник поисковой системы
 // @name:ja      優雅な検索エンジン助手
-// @version      2026.05.02.1
+// @version      2026.05.02.2
 // @author       F9y4ng
 // @description  "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG and more.
 // @namespace    https://github.com/F9y4ng/GreasyFork-Scripts/
