@@ -28,13 +28,14 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data in a timely manner. Do not use backup files from unknown sources!
 
-## version 2026.04.04.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+## version 2026.05.02.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ Optimized the font scaling correction function.
-@ Fixed conflict with Chrome v145+ built-in PDF viewer.
-@ Fixed font list cache rebuilt issue in Tampermonkey.
-@ Force replaceSync to accept TrustedScript types.
+@ Improved performance of Bold style correction.
+@ Improved site scaling setting data rules: domain name matching can include port numbers.
+@ Improved send mode for cross-origin communication.
+@ Enhanced support for GM_API::GM_addElement.
+@ Optimized script core functions for performance.
 @ Fixed some known issues, optimized code & style.
 ```
 
@@ -111,13 +112,13 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-## version 2026.04.04.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+## version 2026.05.02.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-+ Added double-click title to view update history.
-+ Added search result blocking keyword adding tool.
-@ Optimized some search engine jump button styles.
-@ Force replaceSync to accept TrustedScript types.
+@ Improved auto-correct for keyword filter setting.
+@ Optimized ads filter rules of some search engines.
+@ Optimized link redirection of some search engines.
+@ Optimized script core functions for performance.
 @ Fixed some known issues, optimized code & style.
 ```
 
