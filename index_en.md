@@ -22,21 +22,18 @@
 # Font Rendering (Customized) `Font Rendering.user.js`
  　[[View source code](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Font%20Rendering.user.js)] 　[[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)] 　[[Visit GreasyFork](https://greasyfork.org/scripts/416688)] _(No issues handled on GreasyFork)_
 
-**Introduction:** Enhance browser's font rendering without installing MacType. This script offers a high-quality, customizable experience with default 'Microsoft YaHei' font. It provides advanced features like font rewriting, smoothing, scaling, stroking, shadowing, and filtering of special style elements. It supports global and personalized rendering, compatible with most mainstream browsers, script managers, and common userscripts & browser extensions. Configure parameters via the script manager icon or shortcuts.
+**Introduction:** Without MacType, enjoy a high-quality web reading experience. Applies "Microsoft YaHei" by default with custom replacement support. Advanced features include font rewriting, anti-aliasing, dynamic scaling, stroking/shadows, element filtering (whitelist), and custom monospace configuration. Supports global rendering and per-site customization, invoked via hotkey or icon. Fully compatible with major browsers, script managers, and extensions.
 
 * [Before using, please read the introduction in Wiki and the related precautions on this page.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Font-Rendering-(Customized))
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data in a timely manner. Do not use backup files from unknown sources!
 
-## version 2026.06.10.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2026.07.11.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ Fixed custom monospces function cannot turning on.
-@ Fixed rendering issues with async-loading iframe.
-@ Optimized style inserter to reduce memory leaks.
-@ Optimized event listener to reduce memory leaks.
-@ Optimized script core functions for performance.
-@ Fixed some known issues, optimized code & style.
+# Due to code refactoring, data will be initialized after updates. It is recommended that reconfigure the data.
++ The script code refactored for better features and performance.
+@ New version code, if encounter errors or problems, please feedback.
 ```
 
 ## Please note the following before using a new version:
@@ -112,10 +109,10 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-## version 2026.06.06.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2026.07.11.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ IOptimized script core functions for performance.
+@ Fixed a runtime error in Greasemonkey.
 @ Fixed some known issues, optimized code & style.
 ```
 
