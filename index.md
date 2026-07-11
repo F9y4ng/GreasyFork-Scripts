@@ -29,12 +29,15 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-### version 2026.07.11.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2026.07.11.2 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
 # 由于代码重构，更新后数据将会自动初始化。推荐您重新配置数据。
 + 脚本代码完全重构，功能更完善，性能更高效。
 @ 新版代码，如有遇到错误或问题，请及时向作者反馈。
+
+@ 修复粗体样式修正对表单元素的监控。
+@ 修复 Tampermonkey 在 content context 模式下产生的隐藏错误。
 ```
 
 ## 字体渲染新版本，使用前请注意以下事项：
