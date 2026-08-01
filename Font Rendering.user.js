@@ -5,7 +5,7 @@
 // @name:en            Font Rendering (Customized)
 // @name:ja            フォントレンダリング (カスタム)
 // @name:ko            폰트 렌더링 (개인용 스크립트)
-// @version            2026.07.11.2
+// @version            2026.08.01.1
 // @author             F9y4ng
 // @description        无需 MacType，享受细腻高质感的网页阅读体验。脚本默认采用“微软雅黑”，支持自定义替换。面向进阶排版需求，集成字体重写、抗锯齿平滑、动态缩放、描边阴影、特殊样式过滤（白名单）及自定义等宽字体等高级功能。完美支持“全局渲染”与“站点个性化”双模式，点击图标或快捷键即可唤出配置面板。全面兼容主流浏览器、脚本管理器及常用扩展。
 // @description:zh-CN  无需 MacType，享受细腻高质感的网页阅读体验。脚本默认采用“微软雅黑”，支持自定义替换。面向进阶排版需求，集成字体重写、抗锯齿平滑、动态缩放、描边阴影、特殊样式过滤（白名单）及自定义等宽字体等高级功能。完美支持“全局渲染”与“站点个性化”双模式，点击图标或快捷键即可唤出配置面板。全面兼容主流浏览器、脚本管理器及常用扩展。
@@ -90,8 +90,8 @@ void (function (ctx, uctx, sctx) {
     const localeMatch = key.match(/^name:([a-zA-Z-]+)$/); if (localeMatch) { return GMinfo.script.locales?.[localeMatch[1]]?.name || null } return null;
   }
   function getLocationInfo() {
-    const { host: h, href: hR, hostname: hN, pathname: pN, protocol: pT } = location, iT = ctx.self === ctx.top, iF = iT ? "" : "[IFRAME]"; let tH = h;
-    if (!iT) { try { tH = ctx.top.location.host } catch { const referrer = document.referrer; tH = referrer ? new URL(referrer).host : h } } return { h, hR, hN, pN, pT, tH, iT, iF };
+    const { host: h, href: hR, hostname: hN, pathname: pN, protocol: pT } = ctx.location, iT = ctx.self === ctx.top, iF = iT ? "" : "[IFRAME]"; let tH = h;
+    if (!iT) { try { tH = ctx.top.location.host } catch { const ref = document.referrer; if (ref) { tH = new URL(ref).host } } } return { h, hR, hN, pN, pT, tH, iT, iF };
   }
 
   class LRUCache {
@@ -115,18 +115,13 @@ void (function (ctx, uctx, sctx) {
     static _createFallback() {
       const store = new LRUCache(1e3); return {
         store, getItem: key => (store.has(key) ? store.get(key) : null), setItem: (key, value) => { store.set(key, String(value)) },
-        removeItem: key => { store.delete(key) }, clear: () => { store.clear() }
+        removeItem: key => { store.delete(key) }, clear: () => { store.clear() },
       };
     }
   }
 
   void (function BuiltInSandbox($, $$) {
-    const { atob, btoa, console_log, console_warn, console_error, setTimeout, clearTimeout, structuredClone, queueMicrotask, requestAnimationFrame: rAF, cancelAnimationFrame: cAF,
-      requestIdleCallback, JSON_parse, JSON_stringify, Reflect_get, Reflect_set, Reflect_defineProperty, Element_attachShadow: attachShadow, Element_hasAttribute: hasAttribute, Element_getAttribute: getAttribute, Element_setAttribute: setAttribute, Element_removeAttribute: removeAttribute, Reflect_getOwnPropertyDescriptor: Reflect_getOwnDesc,
-      Object_create, Object_keys, Object_entries, Object_is, Object_assign, Object_toString, Object_freeze, Array_isArray, Array_from, Array_push, Array_some, Array_filter,
-      Array_forEach, Array_splice, Array_sort, Array_includes, Array_join, Array_map, Array_find, Array_unshift, Array_findIndex, Array_flatMap, Function_call, Function_apply,
-      String_fromCharCode, Event_preventDefault: preventDefault, Event_stopPropagation: stopPropagation, Event_stopImmediatePropagation: stopImmediatePropagation,
-      Event_composedPath, EventTarget_addEventListener: addListener, EventTarget_removeEventListener: removeListener, EventTarget_dispatchEvent: dispatchEvent } = $$,
+    const { atob, btoa, console_log, console_warn, console_error, setTimeout, clearTimeout, structuredClone, queueMicrotask, requestAnimationFrame: rAF, cancelAnimationFrame: cAF, requestIdleCallback, JSON_parse, JSON_stringify, Reflect_get, Reflect_set, Reflect_defineProperty, Element_attachShadow: attachShadow, Element_hasAttribute: hasAttribute, Element_getAttribute: getAttribute, Element_setAttribute: setAttribute, Element_removeAttribute: removeAttribute, Reflect_getOwnPropertyDescriptor: Reflect_getOwnDesc, Object_create, Object_keys, Object_entries, Object_is, Object_assign, Object_toString, Object_freeze, Array_isArray, Array_from, Array_push, Array_some, Array_filter, Array_forEach, Array_splice, Array_sort, Array_includes, Array_join, Array_map, Array_find, Array_unshift, Array_findIndex, Array_flatMap, Function_call, Function_apply, String_fromCharCode, Event_preventDefault: preventDefault, Event_stopPropagation: stopPropagation, Event_stopImmediatePropagation: stopImmediatePropagation, Event_composedPath, EventTarget_addEventListener: addListener, EventTarget_removeEventListener: removeListener, EventTarget_dispatchEvent: dispatchEvent } = $$,
       { h: CUR_HOST, hR: CUR_HREF, hN: CUR_HOST_NAME, tH: TOP_HOST, iT: CUR_WINDOW_TOP, iF: IN_FRAME } = getLocationInfo(), CURRENT_LANG = "__Language#CURRENT_",
       secureStorage = new SecureStorage(), sessionStorage = secureStorage.getSessionStorage, localStorage = secureStorage.getLocalStorage;
 
@@ -150,8 +145,8 @@ void (function (ctx, uctx, sctx) {
       } return el;
     },
       appendNode = (parent, ...children) => {
-        if (!parent || !children.length) { return false } const fragment = document.createDocumentFragment();
-        let lastNode = null; for (let i = 0, l = children.length; i < l; ++i) {
+        if (!parent || !children.length) { return false } let lastNode = null;
+        const fragment = document.createDocumentFragment(); for (let i = 0, l = children.length; i < l; ++i) {
           const item = children[i]; if (item === null || item === void 0) { continue }
           const node = typeof item?.nodeType === "number" ? item : new Text(item); fragment.appendChild(node); lastNode = node;
         } parent.appendChild(fragment); return lastNode;
@@ -182,12 +177,12 @@ void (function (ctx, uctx, sctx) {
       randomString = (len, mode = "lowercase") => {
         const result = [], buf = new Uint8Array(1), check = {
           lowercase: c => c >= 97 && c <= 122, alpha: c => (c >= 65 && c <= 90) || (c >= 97 && c <= 122),
-          numeric: c => c >= 48 && c <= 57, all: c => (c >= 48 && c <= 57) || (c >= 65 && c <= 90) || (c >= 97 && c <= 122)
+          numeric: c => c >= 48 && c <= 57, all: c => (c >= 48 && c <= 57) || (c >= 65 && c <= 90) || (c >= 97 && c <= 122),
         }[mode]; while (result.length < len) {
           $.crypto.getRandomValues(buf); const code = 48 + (buf[0] % 75); if (check(code)) { Array_push(result, String_fromCharCode(code)) }
         } return Array_join(result, "");
       },
-      randomInt = (min, max) => { const len = String(max).length + 1, num = parseInt(randomString(len, "numeric")); return min + (num % (max - min + 1)) },
+      randomInt = (min, max) => { const len = String(max).length + 1, num = parseInt(randomString(len, "numeric"), 10); return min + (num % (max - min + 1)) },
       isDebugModeFromURL = () => { const value = new URL(CUR_HREF).searchParams.get("whoami"); return Object_is(GMscriptAuthor, value) },
       toUnicodeEscapes = str => {
         if (!str || typeof str !== "string") { return "" } const result = []; for (const char of str) {
@@ -202,27 +197,28 @@ void (function (ctx, uctx, sctx) {
           logTag: dark ? "background:#ffffff1f;border:1px solid #ffffff26;color:#fff;" : "background:#242426;border:1px solid #454549;color:#fff;",
           warnTag: dark ? "background:#ff9f0a26;border:1px solid #ff9f0a40;color:#ff9f0a;" : "background:#fff9e6;border:1px solid #ffe099;color:#bf7e00;",
           errTag: dark ? "background:#ff453a26;border:1px solid #ff453a40;color:#ff453a;" : "background:#ffebec;border:1px solid #ffccd0;color:#e3000f;",
-          warnMsg: dark ? "color:#ff9f0a;" : "color:#bf7e00;", logMsg: dark ? "color:#ffffffd9;" : "color:#1d1d1f;", errMsg: dark ? "color:#ff453a;" : "color:#e3000f;"
+          warnMsg: dark ? "color:#ff9f0a;" : "color:#bf7e00;", logMsg: dark ? "color:#ffffffd9;" : "color:#1d1d1f;", errMsg: dark ? "color:#ff453a;" : "color:#e3000f;",
         }))($.matchMedia && $.matchMedia("(prefers-color-scheme: dark)").matches); return {
           log(m, ...a) { if (debug) { [m, a] = k(m, ...a); console_log(`%c${LOGO}%c${m}`, `${s.logo}${s.logTag}`, `${s.msgBase}${s.logMsg}`, ...a) } },
           warn(m, ...a) { if (debug) { [m, a] = k(m, ...a); console_warn(`%c${LOGO}%c${m}`, `${s.logo}${s.warnTag}`, `${s.msgBase}${s.warnMsg}`, ...a) } },
           info(m, ...a) { [m, a] = k(m, ...a); console_log(`%c${LOGO}%c${m}`, `${s.logo}${s.logTag}`, `${s.msgBase}${s.logMsg}`, ...a) },
-          error(m, ...a) { [m, a] = k(m, ...a); console_error(`%c${LOGO}%c${m}`, `${s.logo}${s.errTag}`, `${s.msgBase}${s.errMsg}`, ...a) }
+          error(m, ...a) { [m, a] = k(m, ...a); console_error(`%c${LOGO}%c${m}`, `${s.logo}${s.errTag}`, `${s.msgBase}${s.errMsg}`, ...a) },
         };
       }, { log, warn, info, error } = createConsoleLogger(isDebugModeFromURL() || IS_OPEN_DEBUG), ID_REGEXP = /:root#(?:[\w-]|\\\\[0-9a-fA-F]{1,6}\s?|\\\\.)+/g,
       convertCSS = (doc, cssText, compare) => {
         const htmlID = doc?.documentElement?.id, filter = !htmlID || isRawGreasemonkey || compare({ BLINK: 130, more: false }) ? ":root " : `:root#${CSS.escape(htmlID)} `,
           css = cssText.replace(ID_REGEXP, filter); return compare({ BLINK: 128, GECKO: 138 }) ? css.replace("var(--fr-font-fontscale)", "initial") : css;
       },
+      safeDeepClone = obj => { if (structuredClone) { return structuredClone(obj) } try { return JSON_parse(JSON_stringify(obj)) } catch { return obj } },
       isFrameHidden = n => (n.checkVisibility ? !n.checkVisibility({ visibilityProperty: true }) : (n.offsetWidth === 0 || $.getComputedStyle(n).visibility === "hidden")),
       languagePacks = {
-        "en-US": { Worker: "Web Worker stopped due to CSP or permissions. Demoted to sync mode.", FrameErr: "Cross-origin or security restriction:", TrustedHTML: "Trusted Types policy creation failed:", StyleInsertErr: "Failed to insert style:", StyleRemoveErr: "Failed to remove style:", StyleRestoreErr: "Failed to restore style!", IllegalData: "Unauthorized data modification detected. If unexpected, contact the author.", RemoteDataErr: "Data parsing failed. Please refetch.", TamperErr: "Unauthorized data or code tampering detected.", RebuildErr: "Initialization command detected. Refresh page to complete.", LoadMenu: "Loading script menu, please wait...", Reinstall: "Reinstall script from official", RenderSetting: "Font Rendering Settings ", StopRender: "Exclude {h} from Rendering", CoreSetting: "Advanced Core Settings", GlobalDisable: "Global font rendering disabled. Reconfigure global data to turn on.", ReRender: "Re-render {h}", Feedback: "Feedback & Support", ToRerender: "{h} is already in the excluded rendering list. Enable it via the script menu to re-render.", ModuleLoaded: "Font rendering module v{v} loaded successfully.", Preview: "Prvw", Redundant: "Redundant scripts detected", RunMode: "Script running in content context. Compatibility issues may occur.", Incompatible: "Browser version outdated. Script may not function correctly.", RestoreDone: "Backup data imported and loaded successfully." },
-        "zh-CN": { Worker: "因内容安全策略（CSP）或权限限制，Web Worker 停止运行，已降级为同步模式。", FrameErr: "跨域或安全策略限制：", TrustedHTML: "受信任类型（Trusted Types）策略创建失败：", StyleInsertErr: "插入样式失败：", StyleRemoveErr: "移除样式失败：", StyleRestoreErr: "恢复样式失败！", IllegalData: "检测到未经授权的数据更改。若非本人操作，请及时联系作者。", RemoteDataErr: "云端数据解析失败，请重新拉取。", RebuildErr: "检测到程序初始化指令（通常由作者触发），请刷新页面以完成初始化。", TamperErr: "检测到未经授权的数据或代码篡改。", LoadMenu: "正在载入脚本菜单，请稍候……", Reinstall: "请访问官方网站重新安装脚本", RenderSetting: "字体渲染设置", StopRender: "排除渲染 {h}", CoreSetting: "高级核心配置设置", ReRender: "重新渲染 {h}", Feedback: "向作者反馈问题或提出建议", GlobalDisable: "全局字体渲染已停用！如需启用请重新配置并保存为全局数据。", ToRerender: "{h} 已处于排除渲染列表中。如需重新渲染，请在脚本菜单中启用。", ModuleLoaded: "字体渲染模块 v{v} 已成功加载。", Save: "保存", Preview: "预览", Redundant: "检测到冗余的字体渲染脚本冲突", RunMode: "脚本正运行于 content context 模式，可能会出现兼容性问题。", Incompatible: "您的浏览器版本过低，脚本部分功能可能无法正常运行！", RestoreDone: "备份数据已成功导入并加载。" },
-        "zh-TW": { Worker: "因內容安全政策（CSP）或權限限制，Web Worker 停止執行，已降級為同步模式。", FrameErr: "跨網域或安全政策限制：", TrustedHTML: "受信任類型（Trusted Types）策略建立失敗：", StyleInsertErr: "插入樣式失敗：", StyleRemoveErr: "移除樣式失敗：", StyleRestoreErr: "還原樣式失敗！", IllegalData: "偵測到未經授權的資料變更。若非本人操作，請及時聯絡作者。", RemoteDataErr: "雲端資料解析失敗，請重新拉取。", RebuildErr: "偵測到程式初始化指令（通常由作者觸發），請重新整理頁面以完成初始化。", TamperErr: "偵測到未經授權的資料或程式碼篡改。", LoadMenu: "正在載入指令碼功能表，請稍候……", Reinstall: "請造訪官方網站重新安裝指令碼", RenderSetting: "字型渲染設定", StopRender: "排除轉譯 {h}", CoreSetting: "進階核心組態設定", ReRender: "重新轉譯 {h}", Feedback: "向作者意見反應與建議", GlobalDisable: "全域字型渲染已停用！如需啟用請重新設定並儲存為全域資料。", ToRerender: "{h} 已處於排除轉譯列表中。如需重新轉譯，請在指令碼功能表中啟用。", ModuleLoaded: "字型渲染模組 v{v} 已成功載入。", Save: "儲存", Preview: "預覽", Redundant: "偵測到備份/多餘的字型渲染指令碼衝突", RunMode: "指令碼正執行於 content context 模式，可能會出現相容性問題。", Incompatible: "您的瀏覽器版本過舊，指令碼部分功能可能無法正常執行！", RestoreDone: "備份資料已成功匯入並載入。" }
+        "en-US": { Worker: "Web Worker stopped due to CSP or permissions. Demoted to sync mode.", FrameErr: "Cross-origin or security restriction:", TrustedHTML: "Trusted Types policy creation failed:", StyleInsertErr: "Failed to insert style:", StyleRemoveErr: "Failed to remove style:", StyleRestoreErr: "Failed to restore style!", IllegalData: "Unauthorized data modification detected. If unexpected, contact the author.", RemoteDataErr: "Data parsing failed. Please refetch.", TamperErr: "Unauthorized data or code tampering detected, please reinstall the genuine script.", RebuildErr: "Initialization command detected. Refresh page to complete.", LoadMenu: "Loading script menu, please wait...", Reinstall: "Reinstall script from official", RenderSetting: "Font Rendering Settings ", StopRender: "Exclude {h} from Rendering", CoreSetting: "Advanced Core Settings", GlobalDisable: "Global font rendering disabled. Reconfigure global data to turn on.", ReRender: "Re-render {h}", Feedback: "Feedback & Support", ToRerender: "{h} is already in the excluded rendering list. Enable it via the script menu to re-render.", ModuleLoaded: "Font rendering module v{v} loaded successfully.", Preview: "Prvw", Redundant: "Redundant scripts detected", RunMode: "Script running in content context. Compatibility issues may occur.", Incompatible: "Browser version outdated. Script may not function correctly.", RestoreDone: "Backup data imported and loaded successfully." },
+        "zh-CN": { Worker: "因内容安全策略（CSP）或权限限制，Web Worker 停止运行，已降级为同步模式。", FrameErr: "跨域或安全策略限制：", TrustedHTML: "受信任类型（Trusted Types）策略创建失败：", StyleInsertErr: "插入样式失败：", StyleRemoveErr: "移除样式失败：", StyleRestoreErr: "恢复样式失败！", IllegalData: "检测到未经授权的数据更改。若非本人操作，请及时联系作者。", RemoteDataErr: "云端数据解析失败，请重新拉取。", RebuildErr: "检测到程序初始化指令（通常由作者触发），请刷新页面以完成初始化。", TamperErr: "检测到未经授权的数据或代码篡改，请访问官方站点重新安装脚本。", LoadMenu: "正在载入脚本菜单，请稍候……", Reinstall: "请访问官方网站重新安装脚本", RenderSetting: "字体渲染设置", StopRender: "排除渲染 {h}", CoreSetting: "高级核心配置设置", ReRender: "重新渲染 {h}", Feedback: "向作者反馈问题或提出建议", GlobalDisable: "全局字体渲染已停用！如需启用请重新配置并保存为全局数据。", ToRerender: "{h} 已处于排除渲染列表中。如需重新渲染，请在脚本菜单中启用。", ModuleLoaded: "字体渲染模块 v{v} 已成功加载。", Save: "保存", Preview: "预览", Redundant: "检测到冗余的字体渲染脚本冲突", RunMode: "脚本正运行于 content context 模式，可能会出现兼容性问题。", Incompatible: "您的浏览器版本过低，脚本部分功能可能无法正常运行！", RestoreDone: "备份数据已成功导入并加载。" },
+        "zh-TW": { Worker: "因內容安全政策（CSP）或權限限制，Web Worker 停止執行，已降級為同步模式。", FrameErr: "跨網域或安全政策限制：", TrustedHTML: "受信任類型（Trusted Types）策略建立失敗：", StyleInsertErr: "插入樣式失敗：", StyleRemoveErr: "移除樣式失敗：", StyleRestoreErr: "還原樣式失敗！", IllegalData: "偵測到未經授權的資料變更。若非本人操作，請及時聯絡作者。", RemoteDataErr: "雲端資料解析失敗，請重新拉取。", RebuildErr: "偵測到程式初始化指令（通常由作者觸發），請重新整理頁面以完成初始化。", TamperErr: "偵測到未經授權的資料或程式碼篡改，請訪問官方網站重新安裝脚本。", LoadMenu: "正在載入指令碼功能表，請稍候……", Reinstall: "請造訪官方網站重新安裝指令碼", RenderSetting: "字型渲染設定", StopRender: "排除轉譯 {h}", CoreSetting: "進階核心組態設定", ReRender: "重新轉譯 {h}", Feedback: "向作者意見反應與建議", GlobalDisable: "全域字型渲染已停用！如需啟用請重新設定並儲存為全域資料。", ToRerender: "{h} 已處於排除轉譯列表中。如需重新轉譯，請在指令碼功能表中啟用。", ModuleLoaded: "字型渲染模組 v{v} 已成功載入。", Save: "儲存", Preview: "預覽", Redundant: "偵測到備份/多餘的字型渲染指令碼衝突", RunMode: "指令碼正執行於 content context 模式，可能會出現相容性問題。", Incompatible: "您的瀏覽器版本過舊，指令碼部分功能可能無法正常執行！", RestoreDone: "備份資料已成功匯入並載入。" },
       }, i18n = new I18n(languagePacks, getLanguage("zh-CN"), "en-US");
 
-    void (function InitializedFunctions(tTP, NetworkTracker) {
-      const LOAD_ONCE = "fr-init-once", NAVIGATORINFO = "__Navigation#INFO__", MAIN_STYLE_NAME = "main-document-style", MAIN_STYLE_TYPE = "main-document",
+    void (function InitializedFunctions(tTP) {
+      const LOAD_ONCE = "fr-init-once", NAVIGATORINFO = "__Navigation#INFO__", MAIN_STYLE_ID = "main-document-style", MAIN_STYLE_TYPE = "main-document",
         BOLD_STYLE_NAME = "ultimate-bold-style-", BOLD_STYLE_TYPE = "ultimate-bold", BOLD_FIXER_ATTR = "ultimate-bold-correct", CONFLICT_NAME = "fr-callback-conflict",
         CONFIGURE = "_CONFIGURE_", EXCLUDESITES = "_EXCLUDE_SITES_", FONTSET = "_FONTS_SET_", DOMAINFONTSET = "_DOMAINS_FONTS_SET_", CUSTOMFONTLIST = "_CUSTOM_FONTLIST_",
         CUSTOMPROPERTY = "_CUSTOM_PROPERTY_", MONOFONTLIST = "_MONOSPACED_FONTLIST_", MONOSITERULES = "_MONOSPACED_SITERULES_", MONOFEATURE = "_MONOSPACED_FEATURE_",
@@ -236,15 +232,15 @@ void (function (ctx, uctx, sctx) {
       (function shieldMutationRecord() {
         const descAttrName = Reflect_getOwnDesc($.MutationRecord.prototype, "attributeName"), descTarget = Reflect_getOwnDesc($.MutationRecord.prototype, "target");
         if (!descAttrName || !descTarget) { return } const originalAttrNameGet = descAttrName.get, originalTargetGet = descTarget.get, ghostString = "data-ignored-lock-void";
+        Element.prototype.setAttribute = function (name, value) { if (name === ghostString) { return } return setAttribute(this, name, value) };
+        Element.prototype.getAttribute = function (name) { if (name === ghostString) { return null } return getAttribute(this, name) };
         Reflect_defineProperty($.MutationRecord.prototype, "attributeName", {
           configurable: true, enumerable: true, get: function () {
             const realAttrName = Function_call(originalAttrNameGet, this), realTarget = Function_call(originalTargetGet, this),
               isBoldFixerTarget = realTarget && realTarget.nodeType === 1 && (realAttrName === BOLD_FIXER_ATTR || realTarget.classList.contains(BOLD_FIXER_ATTR));
             if (isBoldFixerTarget) { if (this.__is_fr_reading__) { return realAttrName } return ghostString } return realAttrName;
-          }
+          },
         });
-        Element.prototype.setAttribute = function (name, value) { if (name === ghostString) { return } return setAttribute(this, name, value) };
-        Element.prototype.getAttribute = function (name) { if (name === ghostString) { return null } return getAttribute(this, name) };
       })();
 
       const NavigatorInfoFetcher = (function () {
@@ -256,7 +252,7 @@ void (function (ctx, uctx, sctx) {
           REGEX_BLACKLIST = /version|mozilla|applewebkit|safari|khtml|like|gecko|mobile|chrome|firefox/i,
           REGEX_EXTRACT_ALL = /([^/\s()]+)\/([\d.]+)/g, REGEX_UNREGISTERED_EV = /(?:Chrom(?:e|ium)|Firefox|Version)\/(\d+[.0-9]*)/i,
           BROWSER_CONFIGS = [{ key: "OPR", brand: "Opera", engine: "Blink", as: "Chrome" }, { key: "YaBrowser", brand: "Yandex", engine: "Blink", as: "Chrome" }, { key: "Edg", brand: "Edge", engine: "Blink", as: "Chrome" }, { key: "Chrome", brand: "Chrome", engine: "Blink" }, { key: "Chromium", brand: "Chromium", engine: "Blink" }, { key: "LibreWolf", brand: "LibreWolf", engine: "Gecko", as: "Firefox" }, { key: "Zen", brand: "Zen", engine: "Gecko", as: "Firefox" }, { key: "PaleMoon", brand: "PaleMoon", engine: "Gecko", as: "Firefox" }, { key: "Waterfox", brand: "Waterfox", engine: "Gecko", as: "Firefox" }, { key: "Firefox", brand: "Firefox", engine: "Gecko" }, { key: "Safari", brand: "Safari", engine: "WebKit", as: "Version", verset: ["Version"] }],
-          formatVersion = version => { const p = version?.split(".") ?? []; return `${parseInt(p[0]) || 0}.${parseInt(p[1]) || 0}.${parseInt(p[2]) || 0}.${parseInt(p[3]) || 0}` },
+          formatVersion = version => { const p = version?.split(".") ?? []; return `${parseInt(p[0], 10) || 0}.${parseInt(p[1], 10) || 0}.${parseInt(p[2], 10) || 0}.${parseInt(p[3], 10) || 0}` },
           getLastWord = str => { if (!str) { return } const idx = str.lastIndexOf(" "); return idx !== -1 ? str.substring(idx + 1) : str };
         return class {
           constructor(context) { this.ua = navigator.userAgent; this.voucher = `${GMscriptHandler} ${GMversion}`; this.creditEngine = this.constructor.getRealEngine(context) }
@@ -273,8 +269,7 @@ void (function (ctx, uctx, sctx) {
                 const matches = this.ua.match(/\s(Firefox)\/(\d+[.0-9]*)/i); if (matches) { extData.brands.unshift({ brand: capitalize(matches[1]), version: matches[2] }) }
               } return { ...extData, source: "ext", voucher: this.voucher };
             } else if ((extData = navigator.userAgentData) && extData.getHighEntropyValues && extData.brands?.[0]) {
-              const data = await extData.getHighEntropyValues(["bitness", "architecture", "fullVersionList"]);
-              return { ...data, brands: data.fullVersionList || data.brands, voucher: this.voucher };
+              const data = await extData.getHighEntropyValues(["bitness", "architecture", "fullVersionList"]); return { ...data, brands: data.fullVersionList || data.brands, voucher: this.voucher };
             } return null;
           }
           static getRealEngine(w) {
@@ -287,9 +282,7 @@ void (function (ctx, uctx, sctx) {
                 if (bestBrandStr === null || str < bestBrandStr) { bestBrandStr = str; finalBrand = b; finalVersion = v }
               }
             } let engine = finalBrand, engineVersion = finalVersion; if (uad.brands) {
-              for (let i = 0; i < uad.brands.length; ++i) {
-                const b = uad.brands[i].brand; if (REGEX_KNOWN_BRANDS_LOOSE.test(b)) { engine = b; engineVersion = uad.brands[i].version; break }
-              }
+              for (let i = 0; i < uad.brands.length; ++i) { const b = uad.brands[i].brand; if (REGEX_KNOWN_BRANDS_LOOSE.test(b)) { engine = b; engineVersion = uad.brands[i].version; break } }
             } const parsedEngine = capitalize(getLastWord(engine) ?? "Unknown"),
               engineInfo = { engine: ENGINE_MAP[parsedEngine] ?? this.getEngineFromUA(), engineVersion: parseFloat(engineVersion) || 99, creditEngine: this.creditEngine },
               browserInfo = { brand: getLastWord(finalBrand) ?? "Unknown", brandVersion: formatVersion(finalVersion), os: PLATFORM_MAP[uad.platform] ?? uad.platform };
@@ -361,14 +354,13 @@ void (function (ctx, uctx, sctx) {
         }
         remove(id, target = document) {
           const mountPoint = this._resolveMountPoint(target), store = this.targetStyles.get(mountPoint);
-          if (!store) { return } const record = store.byId.get(id); if (!record) { return } if (record.isAdopted) {
-            mountPoint.adoptedStyleSheets = Array_filter(mountPoint.adoptedStyleSheets, s => s !== record.ref);
-          } else if (record.ref && typeof record.ref.remove === "function") { record.ref.remove() }
+          if (!store) { return } const record = store.byId.get(id); if (!record) { return }
+          if (record.isAdopted) { mountPoint.adoptedStyleSheets = Array_filter(mountPoint.adoptedStyleSheets, s => s !== record.ref) } else
+            if (record.ref && typeof record.ref.remove === "function") { record.ref.remove() }
           store.byId.delete(id); store.byCss.delete(record.cssText);
         }
         query({ id, type, media, target } = {}) {
-          const results = [], searchMp = target ? this._resolveMountPoint(target) : null;
-          for (const mpRef of this.knownMountPoints) {
+          const results = [], searchMp = target ? this._resolveMountPoint(target) : null; for (const mpRef of this.knownMountPoints) {
             const mp = mpRef.deref(); if (!mp) { this.knownMountPoints.delete(mpRef); continue } if (searchMp && mp !== searchMp) { continue }
             const store = this.targetStyles.get(mp); if (!store) { continue } for (const record of store.byId.values()) {
               if (id !== void 0 && record.id !== id) { continue } if (type !== void 0 && record.type !== type) { continue }
@@ -393,8 +385,8 @@ void (function (ctx, uctx, sctx) {
         }
         remove(id, target = document) {
           this.__hasChanges = true; try {
-            super.remove(id, target); const mountPoint = this._resolveMountPoint(target),
-              store = this.targetStyles.get(mountPoint); if (!store || store.byId.size === 0) { this._stopMonitoring(mountPoint) }
+            super.remove(id, target); const mountPoint = this._resolveMountPoint(target), store = this.targetStyles.get(mountPoint);
+            if (!store || store.byId.size === 0) { this._stopMonitoring(mountPoint) }
           } catch (e) { error(i18n.t("StyleRemoveErr"), id, e.message) } finally { this.__hasChanges = false }
         }
         _setupProtect(mountPoint) {
@@ -404,12 +396,9 @@ void (function (ctx, uctx, sctx) {
             const observer = new MutationObserver(mutations => {
               if (this.__hasChanges) { return } let needRestore = false; for (let i = 0, l = mutations.length; i < l; ++i) {
                 const mu = mutations[i]; if (mu.type === "childList") {
-                  const removed = Array_from(mu.removedNodes);
-                  for (const record of store.byId.values()) { if (!record.isAdopted && Array_includes(removed, record.ref)) { needRestore = true } }
+                  const removed = Array_from(mu.removedNodes); for (const record of store.byId.values()) { if (!record.isAdopted && Array_includes(removed, record.ref)) { needRestore = true } }
                 } else if (mu.target.nodeName === "STYLE") {
-                  for (const record of store.byId.values()) {
-                    if (!record.isAdopted && record.ref === mu.target) { if (mu.target.textContent !== record.cssText || mu.target.media !== record.media) { needRestore = true } }
-                  }
+                  for (const record of store.byId.values()) { if (!record.isAdopted && record.ref === mu.target) { if (mu.target.textContent !== record.cssText) { needRestore = true } } }
                 } if (needRestore) { break }
               } if (needRestore) { this._restoreStyles(mountPoint, store) }
             }); observer.observe(mountPoint, { childList: true, subtree: true, characterData: true, attributes: true }); this.observers.set(mountPoint, observer);
@@ -423,25 +412,27 @@ void (function (ctx, uctx, sctx) {
                   if (self.proxyCache.has(this)) { const cacheData = self.proxyCache.get(this); if (cacheData.target === nativeArr) { return cacheData.proxy } }
                   const proxyHandler = {
                     get(target, prop, receiver) {
-                      const value = Reflect_get(target, prop, receiver);
-                      if (typeof value === "function" && !self.__hasChanges) {
-                        const mutateMethods = ["push", "pop", "shift", "unshift", "splice", "reverse", "sort"];
-                        if (Array_includes(mutateMethods, prop)) {
-                          return function (...args) { self.__hasChanges = true; try { const result = Function_apply(value, target, args); try { self._enforceAdopted(mountPoint, _nativeDesc) } catch (e) { warn(e.message) } return result } finally { self.__hasChanges = false } };
+                      const value = Reflect_get(target, prop, receiver); if (typeof value === "function" && !self.__hasChanges) {
+                        const mutateMethods = ["push", "pop", "shift", "unshift", "splice", "reverse", "sort"]; if (Array_includes(mutateMethods, prop)) {
+                          return function (...args) {
+                            self.__hasChanges = true; try {
+                              const result = Function_apply(value, target, args); try { self._enforceAdopted(mountPoint, _nativeDesc) } catch (e) { warn(e.message) } return result;
+                            } catch { void 0 } finally { self.__hasChanges = false }
+                          };
                         }
                       } return typeof value === "function" ? value.bind(target) : value;
                     }, set(target, prop, value, receiver) {
-                      const result = Reflect_set(target, prop, value, receiver);
-                      if (!self.__hasChanges && prop !== "length") { self.__hasChanges = true; self._enforceAdopted(mountPoint, _nativeDesc); self.__hasChanges = false }
-                      return result;
-                    }
+                      const result = Reflect_set(target, prop, value, receiver); if (!self.__hasChanges && prop !== "length") {
+                        self.__hasChanges = true; self._enforceAdopted(mountPoint, _nativeDesc); self.__hasChanges = false;
+                      } return result;
+                    },
                   }, proxyArr = new Proxy(nativeArr, proxyHandler); self.proxyCache.set(this, { target: nativeArr, proxy: proxyArr }); return proxyArr;
                 }, set(newSheets) {
                   if (self.__hasChanges) { Function_call(_nativeDesc.set, this, newSheets); return } const store = self.targetStyles.get(this),
                     incoming = Array_from(newSheets || []), ourSheets = store ? Array_map(Array_filter(Array_from(store.byId.values()), r => r.isAdopted), r => r.ref) : [];
                   Array_forEach(ourSheets, sheet => { if (!Array_includes(incoming, sheet)) { Array_push(incoming, sheet) } });
                   Function_call(_nativeDesc.set, this, incoming); self.proxyCache.delete(this);
-                }
+                },
               }); mountPoint._isAdoptedProtected = true;
             }
           }
@@ -466,298 +457,337 @@ void (function (ctx, uctx, sctx) {
       }
 
       const ThemeDetector = (() => {
-        const nameRegex = /(?:data-theme|-mode|-color|-scheme)/i, darkRegex = /(?:dark|night|black)/i, lightRegex = /(?:light|day|white)/i,
-          noEqualRegex = /(?:light dark|auto|default)/i, noiseNodes = new Set(["TEXTAREA", "INPUT", "IMG", "SVG", "PRE", "CODE", "VIDEO", "CANVAS", "A", "BUTTON"]);
+        const nameRegex = /(?:data-theme|-mode|-color|-scheme)/i, darkRegex = /(?:dark|night|black)/i, lightRegex = /(?:light|day|white)/i, noEqualRegex = /(?:light dark|auto|default)/i,
+          noiseNodes = new Set(["TEXTAREA", "INPUT", "IMG", "SVG", "PRE", "CODE", "VIDEO", "CANVAS", "A", "BUTTON"]), noop = () => { };
         return class {
           constructor(options = {}) {
-            this.onThemeChange = options.onThemeChange || null; this.brightnessThreshold = 128; this.currentTheme = "light"; this.cacheKey = "__Theme#DETECT__";
-            this.useCache = options.useCache !== false; this._mediaQuery = $.matchMedia ? $.matchMedia("(prefers-color-scheme: dark)") : null;
+            this.onThemeChange = options.onThemeChange || noop; this.brightnessThreshold = 128; this.currentTheme = "light"; this.cacheKey = "__Theme#DETECT__"; this._timeoutId = null;
+            this._observer = null; this.useCache = options.useCache !== false; this._mediaQuery = $.matchMedia ? $.matchMedia("(prefers-color-scheme: dark)") : null;
             this._onDOMLoaded = this._onDOMLoaded.bind(this); this._onWindowLoad = this._onWindowLoad.bind(this); this._handleSystemChange = this._handleSystemChange.bind(this);
-            this._timeoutId = null; this._observer = null;
+            this._handleMutaions = this._handleMutaions.bind(this); this._mutationCallback = () => { this.updateTheme(document.readyState === "complete") };
           }
           init() {
             if (this.useCache) {
-              const cached = this._getCache(); if (cached) { this.currentTheme = cached; this._triggerCallback(this.currentTheme); this._bindEvents(); return this.currentTheme }
-            } this.currentTheme = this._isDarkBySystem() ? "dark" : "light"; this._triggerCallback(this.currentTheme); this._bindEvents(); return this.currentTheme;
+              const cached = sessionStorage.getItem(this.cacheKey); if (cached) { this.currentTheme = cached; this.onThemeChange(this.currentTheme); this._bindEvents(); return this.currentTheme }
+            } this.currentTheme = this._isDarkBySystem() ? "dark" : "light"; this.onThemeChange(this.currentTheme); this._bindEvents(); return this.currentTheme;
           }
           _bindEvents() {
             if (document.readyState === "loading") { addListener(document, "DOMContentLoaded", this._onDOMLoaded) } else { this._onDOMLoaded() }
             addListener($, "load", this._onWindowLoad); if (this._mediaQuery) { addListener(this._mediaQuery, "change", this._handleSystemChange) }
           }
-          _getCache() { return sessionStorage.getItem(this.cacheKey) }
           _setCache(theme) { if (this.useCache) { sessionStorage.setItem(this.cacheKey, theme) } }
           _handleMutaions(mutations) {
-            for (let i = 0, l = mutations.length; i < l; ++i) {
-              const attrName = mutations[i].attributeName; if (attrName !== "class" && !nameRegex.test(attrName)) { continue } clearTimeout(this._timeoutId);
-              this._timeoutId = setTimeout(() => { this.updateTheme(document.readyState === "complete"); this._animationFrameId = null }, 200); break;
+            let attrName; for (let i = 0, muLength = mutations.length; i < muLength; ++i) {
+              attrName = mutations[i].attributeName; if (attrName !== "class" && !nameRegex.test(attrName)) { continue }
+              if (this._timeoutId) { clearTimeout(this._timeoutId) } this._timeoutId = setTimeout(this._mutationCallback, 200); break;
             }
           }
           _onDOMLoaded() {
-            removeListener(document, "DOMContentLoaded", this._onDOMLoaded); this.updateTheme(false);
-            if (this._observer) { return } this._observer = new MutationObserver(mutations => this._handleMutaions(mutations));
+            removeListener(document, "DOMContentLoaded", this._onDOMLoaded); this.updateTheme(false); if (this._observer) { return } this._observer = new MutationObserver(this._handleMutaions);
             this._observer.observe(document.documentElement, { attributes: true }); this._observer.observe(document.body, { attributes: true });
           }
           _onWindowLoad() { removeListener($, "load", this._onWindowLoad); this.updateTheme(true) }
           _handleSystemChange() { this.updateTheme(true) }
           updateTheme(allowComputedStyle = false) {
             if (!document.documentElement) { return } let detectedTheme = null;
-            if (this._hasExplicitDarkDOM()) { detectedTheme = "dark" } else if (this._isLightByDOM()) { detectedTheme = "light" } else
+            if (this.checkByDOM(nameRegex, darkRegex, noEqualRegex)) { detectedTheme = "dark" } else if (this.checkByDOM(nameRegex, lightRegex, noEqualRegex)) { detectedTheme = "light" } else
               if (allowComputedStyle) { detectedTheme = this._getThemeByBackground() } if (detectedTheme === null) { detectedTheme = this._isDarkBySystem() ? "dark" : "light" }
-            if (detectedTheme !== this.currentTheme || allowComputedStyle) { this.currentTheme = detectedTheme; this._triggerCallback(this.currentTheme); this._setCache(detectedTheme) }
+            if (detectedTheme !== this.currentTheme || allowComputedStyle) { this.currentTheme = detectedTheme; this.onThemeChange(this.currentTheme); this._setCache(detectedTheme) }
           }
-          _triggerCallback(theme) { if (typeof this.onThemeChange === "function") { this.onThemeChange(theme) } }
           _isDarkBySystem() { return this._mediaQuery && this._mediaQuery.matches }
-          _isLightByDOM() { return this.constructor.checkByDOM(nameRegex, lightRegex, noEqualRegex) }
-          _hasExplicitDarkDOM() { return this.constructor.checkByDOM(nameRegex, darkRegex, noEqualRegex) }
           _isElementDark(el) {
-            const style = $.getComputedStyle(el), { backgroundColor, display, visibility, opacity } = style;
-            if (display === "none" || visibility === "hidden" || opacity === "0" || backgroundColor === "rgba(0, 0, 0, 0)" || backgroundColor === "transparent") { return null }
-            const rgbaMatch = backgroundColor.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/); if (!rgbaMatch) { return null } const a = rgbaMatch[4];
-            if (a !== void 0 && parseFloat(a) === 0) { return null } const r = parseInt(rgbaMatch[1]), g = parseInt(rgbaMatch[2]), b = parseInt(rgbaMatch[3]),
-              brightness = (r * 299 + g * 587 + b * 114) / 1e3; return brightness < this.brightnessThreshold;
+            const style = $.getComputedStyle(el), bg = style.backgroundColor;
+            if (style.display === "none" || style.visibility === "hidden" || style.opacity === "0" || bg === "rgba(0, 0, 0, 0)" || bg === "transparent") { return null }
+            if (!bg.startsWith("rgb")) { return null } const parts = bg.substring(bg.indexOf("(") + 1, bg.indexOf(")")).split(","); if (parts.length >= 4 && parseFloat(parts[3]) === 0) { return null }
+            const r = parseInt(parts[0], 10), g = parseInt(parts[1], 10), b = parseInt(parts[2], 10); return ((r * 299 + g * 587 + b * 114) / 1e3) < this.brightnessThreshold;
           }
-          static checkByDOM(nameRegex, valueRegex, noEqualRegex) {
-            const targets = [document.documentElement, document.body]; for (const el of targets) {
-              if (!el) { continue } for (const cls of el.classList) { if (valueRegex.test(cls) && !noEqualRegex.test(cls)) { return true } }
-              for (const attr of el.attributes) { if (nameRegex.test(attr.name) && valueRegex.test(attr.value) && !noEqualRegex.test(attr.value)) { return true } }
+          checkByDOM(nameRegex, valueRegex, noEqualRegex) {
+            const targets = [document.documentElement, document.body]; for (let i = 0; i < 2; ++i) {
+              const el = targets[i]; if (!el) { continue } const className = typeof el.className === "string" ? el.className : (el.className.baseVal || "");
+              if (className && valueRegex.test(className) && !noEqualRegex.test(className)) { return true } const attrs = el.attributes, attrsLen = attrs.length;
+              for (let j = 0; j < attrsLen; ++j) { const attr = attrs[j]; if (nameRegex.test(attr.name) && valueRegex.test(attr.value) && !noEqualRegex.test(attr.value)) { return true } }
             } return false;
           }
           _getThemeByBackground() {
-            const seed = randomInt(0, 100), x = window.innerWidth / 2 + seed, y = window.innerHeight / 2 + seed; let el = document.elementFromPoint(x, y);
-            if (!el) { return null } while (el && el !== document.documentElement) {
-              if (noiseNodes.has(el.nodeName)) { el = el.parentElement; continue }
-              const isDark = this._isElementDark(el); if (isDark !== null) { return isDark ? "dark" : "light" }
-              el = el.parentElement;
+            const seed = randomInt(20, 200), x = ($.innerWidth / 2) + seed, y = ($.innerHeight / 2) + seed;
+            let el = document.elementFromPoint(x, y); if (!el) { return null } const root = document.documentElement; while (el && el !== root) {
+              if (noiseNodes.has(el.nodeName)) { el = el.parentElement; continue } const isDark = this._isElementDark(el);
+              if (isDark !== null) { return isDark ? "dark" : "light" } el = el.parentElement;
             } if (document.body) { const bodyDark = this._isElementDark(document.body); if (bodyDark !== null) { return bodyDark ? "dark" : "light" } }
-            const htmlDark = this._isElementDark(document.documentElement); if (htmlDark !== null) { return htmlDark ? "dark" : "light" }
-            return null;
+            const htmlDark = this._isElementDark(root); if (htmlDark !== null) { return htmlDark ? "dark" : "light" } return null;
           }
         };
       })();
 
       class FrameSyncManager {
         constructor(styleManager, ultimateBold, compareVersion) {
-          this.styleManager = styleManager; this.ultimateBold = ultimateBold; this.compareVersion = compareVersion;
-          this.sources = new Set(); this.top = $.top; this.TOKEN = "74f7322595760896a5e4b15d5c62cecd54941d4e";
+          this.styleManager = styleManager; this.ultimateBold = ultimateBold; this.compareVersion = compareVersion; this.top = $.top;
+          this.sources = new Set(); this.TOKEN = "74f7322595760896a5e4b15d5c62cecd54941d4e"; this._privateChannel = null;
+          this._onTopMessage = this._onTopMessage.bind(this); this._onKeydown = this._onKeydown.bind(this); this._onPageHide = this._onPageHide.bind(this);
         }
         start() { if (CUR_WINDOW_TOP) { this.initTopWindow() } else { this.initIframe() } }
-        initTopWindow() {
-          const frameMessageEvent = event => {
-            if (!event.ports || !event.ports.length) { return } const payload = event.data?.fontRenderX;
-            if (payload?.command !== "request" || payload?.token !== this.TOKEN) { return } const portFromIframe = event.ports[0]; this.sources.add(portFromIframe);
-            portFromIframe.onmessage = e => {
-              const data = e.data?.fontRenderX; if (!data) { return } if (data.command === "keydown" && data.eventData) {
-                const broadEvent = new KeyboardEvent("keydown", { ...data.eventData, bubbles: true, cancelable: true }); dispatchEvent(document, broadEvent); return;
-              } if (data.command === "disconnect") { this.sources.delete(portFromIframe); portFromIframe.close() }
-            }; const currentStyleData = this.getTopWindowStyle(); portFromIframe.postMessage({ fontRenderX: { command: "send", data: currentStyleData } });
-          }; addListener(this.top, "message", frameMessageEvent, true);
+        initTopWindow() { addListener(this.top, "message", this._onTopMessage, true) }
+        _onTopMessage(event) {
+          const ports = event.ports; if (!ports || ports.length === 0) { return }
+          const payload = event.data?.fontRenderX; if (!payload || payload.command !== "request" || payload.token !== this.TOKEN) { return }
+          const portFromIframe = ports[0]; this.sources.add(portFromIframe); portFromIframe.onmessage = e => {
+            const msg = e.data?.fontRenderX; if (!msg) { return } const cmd = msg.command; if (cmd === "keydown") {
+              const ed = msg.eventData; if (ed) { const broadEvent = new KeyboardEvent("keydown", { ...ed, bubbles: true, cancelable: true }); dispatchEvent(document, broadEvent) } return;
+            } if (cmd === "disconnect") { portFromIframe.onmessage = null; this.sources.delete(portFromIframe); try { portFromIframe.close() } catch { void 0 } }
+          }; portFromIframe.postMessage({ fontRenderX: { command: "send", data: this.getTopWindowStyle() } });
         }
         initIframe() {
-          const channel = new MessageChannel(), privateChannel = channel.port1; privateChannel.onmessage = event => {
-            const payload = event.data?.fontRenderX; if (payload?.command !== "send") { return } const { data } = payload ?? {};
-            if (this.styleManager && data?.id) { this.styleManager.insert(data.id, convertCSS(document, data.cssText, this.compareVersion), { type: MAIN_STYLE_TYPE }) }
-            if (this.ultimateBold && data?.temporary) { !this.ultimateBold.temporaryChangeStatus(...data.cssArray) && this.ultimateBold.scanAll(true, data.cssArray[0]) }
-          }; addListener(document, "keydown", e => {
-            const eventData = { key: e.key, code: e.code, keyCode: e.keyCode, ctrlKey: e.ctrlKey, altKey: e.altKey, shiftKey: e.shiftKey, metaKey: e.metaKey };
-            privateChannel.postMessage({ fontRenderX: { command: "keydown", eventData } });
-          }); const postRequestMessage = () => { this.top.postMessage({ fontRenderX: { command: "request", token: this.TOKEN } }, "*", [channel.port2]) };
-          addListener($, "pagehide", e => { if (!e.persisted) { privateChannel.postMessage({ fontRenderX: { command: "disconnect" } }); privateChannel.close() } });
+          const channel = new MessageChannel(); this._privateChannel = channel.port1; this._privateChannel.onmessage = event => {
+            const payload = event.data?.fontRenderX; if (!payload || payload.command !== "send") { return } const data = payload.data; if (!data) { return }
+            const sm = this.styleManager; if (sm && data.id) { sm.insert(data.id, convertCSS(document, data.cssText, this.compareVersion), { type: MAIN_STYLE_TYPE }) }
+            const ub = this.ultimateBold; if (ub && data.temporary) { const cA = data.cssArray; if (cA) { !Function_apply(ub.temporaryChangeStatus, ub, cA) && ub.scanAll(true, cA[0]) } }
+          }; addListener(document, "keydown", this._onKeydown); addListener($, "pagehide", this._onPageHide);
+          const port2 = channel.port2, postRequestMessage = () => { this.top.postMessage({ fontRenderX: { command: "request", token: this.TOKEN } }, "*", [port2]) };
           if (document.readyState === "loading") { addListener($, "DOMContentLoaded", postRequestMessage, { once: true }) } else { postRequestMessage() }
         }
-        getTopWindowStyle() { const sA = this.styleManager.query({ id: MAIN_STYLE_NAME }), cssText = sA?.[0]?.cssText ?? ""; return { id: MAIN_STYLE_NAME, cssText } }
-        broadcastStyleToIframes(customData) { if (CUR_WINDOW_TOP) { this.sources.forEach(port => { port.postMessage({ fontRenderX: { command: "send", data: customData } }) }) } }
+        _onKeydown(e) {
+          if (!this._privateChannel) { return } const eventData = { key: e.key, code: e.code, keyCode: e.keyCode, ctrlKey: e.ctrlKey, altKey: e.altKey, shiftKey: e.shiftKey, metaKey: e.metaKey };
+          this._privateChannel.postMessage({ fontRenderX: { command: "keydown", eventData } });
+        }
+        _onPageHide(e) {
+          if (e.persisted || !this._privateChannel) { return } try { this._privateChannel.postMessage({ fontRenderX: { command: "disconnect" } }) } catch { void 0 }
+          this._privateChannel.onmessage = null; this._privateChannel.close(); this._privateChannel = null;
+        }
+        getTopWindowStyle() { const sA = this.styleManager.query({ id: MAIN_STYLE_ID }), cssText = sA[0]?.cssText ?? ""; return { id: MAIN_STYLE_ID, cssText } }
+        broadcastStyleToIframes(customData) {
+          if (!CUR_WINDOW_TOP || this.sources.size === 0) { return } const payload = { fontRenderX: { command: "send", data: customData } };
+          for (const port of this.sources) { try { port.postMessage(payload) } catch { port.onmessage = null; this.sources.delete(port); port.close() } }
+        }
       }
 
       const SecureCipherSuite = (function () {
-        const HEX_ENCODE_TABLE = new Array(256), HEX_DECODE_TABLE = Object_create(null);
-        for (let i = 0; i < 256; ++i) { const hexStr = i.toString(16).padStart(2, "0"); HEX_ENCODE_TABLE[i] = hexStr; HEX_DECODE_TABLE[hexStr] = i }
+        const HEX_ENCODE_TABLE = new Array(256), HEX_DECODE_TABLE = new Uint8Array(128); for (let i = 0; i < 256; ++i) { HEX_ENCODE_TABLE[i] = (i < 16 ? "0" : "") + i.toString(16) }
+        for (let i = 0; i < 10; ++i) { HEX_DECODE_TABLE[i + 48] = i } for (let i = 0; i < 6; ++i) { HEX_DECODE_TABLE[i + 97] = 10 + i; HEX_DECODE_TABLE[i + 65] = 10 + i }
+        const LATIN1_DECODER = typeof TextDecoder !== "undefined" ? new TextDecoder("iso-8859-1") : null, bytesToString = bytes => {
+          if (LATIN1_DECODER) { return LATIN1_DECODER.decode(bytes) } let str = ""; const CHUNK = 8192, byteLength = bytes.length;
+          for (let i = 0; i < byteLength; i += CHUNK) { str += Function_apply(String.fromCharCode, null, bytes.subarray(i, i + CHUNK)) } return str;
+        }, reduceSeed = seedStr => { while (seedStr.length > 10) { seedStr = (parseInt(seedStr.slice(0, 10), 10) + parseInt(seedStr.slice(10), 10)).toString() } return parseInt(seedStr, 10) },
+          createInspectResult = (resultVal, keysObj) => { return { keycode: () => resultVal, search: key => (key !== null ? decrypt(key).search(GMscriptAuthor) !== -1 : keysObj) } };
         return class {
-          constructor(passphrase) {
-            let seedStr = ""; for (let i = 0; i < passphrase.length; ++i) { seedStr += passphrase.charCodeAt(i) } this.passwordSeedString = seedStr;
-            this.stepSize = Math.floor(seedStr.length / 5); this.lcgIncrement = Math.ceil(passphrase.length / 2); this.lcgModulus = 2147483647;
-            let multiplierStr = ""; for (let i = 1; i <= 5; ++i) { multiplierStr += seedStr[this.stepSize * i] } this.lcgMultiplier = parseInt(multiplierStr);
+          constructor(secretKey) {
+            let baseSeed = ""; const len = secretKey.length; for (let i = 0; i < len; i++) { baseSeed += secretKey.charCodeAt(i) }
+            this.baseSeed = baseSeed; const baseLen = baseSeed.length; this.step = (baseLen / 5) | 0; this.lcgIncrement = (len + 1) >>> 1;
+            this.lcgModulus = 2147483647; const step = this.step, getChar = idx => baseSeed[idx < baseLen ? idx : baseLen - 1] || "0";
+            this.lcgMultiplier = parseInt(getChar(step) + getChar(step * 2) + getChar(step * 3) + getChar(step * 4) + getChar(step * 5), 10);
           }
-          _calculateInitialState(saltKey) {
-            let stateStr = this.passwordSeedString + Number(saltKey); while (stateStr.length > 10) {
-              const part1 = parseInt(stateStr.slice(0, 10)), part2 = parseInt(stateStr.slice(10)); if (isNaN(part1) || isNaN(part2)) { break } stateStr = (part1 + part2).toString();
-            } const numericState = Number(stateStr); if (isNaN(numericState)) { return NaN } return (this.lcgMultiplier * numericState + this.lcgIncrement) % this.lcgModulus;
-          }
-          encrypt(inputText) {
-            if (this.lcgMultiplier < 2 || !inputText) { return "" } const saltKey = randomInt(1e7, 99999999); let lcgState = this._calculateInitialState(saltKey);
-            inputText = encodeURIComponent(inputText); const inputLength = inputText.length, outputBuffer = new Array(inputLength); for (let i = 0; i < inputLength; ++i) {
-              const pseudoRandomByte = isNaN(lcgState) ? 0 : ((lcgState / this.lcgModulus) * 255) | 0, xoredByte = inputText.charCodeAt(i) ^ pseudoRandomByte;
-              outputBuffer[i] = HEX_ENCODE_TABLE[xoredByte]; if (!isNaN(lcgState)) { lcgState = (this.lcgMultiplier * lcgState + this.lcgIncrement) % this.lcgModulus }
-            } const saltHex = saltKey.toString(16).padStart(8, "0"); return Array_join(outputBuffer, "") + saltHex;
+          encrypt(plainText) {
+            if (this.lcgMultiplier < 2 || !plainText) { return "" } const randomNonce = randomInt(1e7, 99999999); let seedNum = reduceSeed(this.baseSeed + randomNonce);
+            const modulus = this.lcgModulus, multiplier = this.lcgMultiplier, increment = this.lcgIncrement, invModulus = 255 / modulus; seedNum = (multiplier * seedNum + increment) % modulus;
+            const textLength = plainText.length, cipherTextArray = new Array(textLength); for (let i = 0; i < textLength; ++i) {
+              const randomByte = (seedNum * invModulus) | 0, xoredByte = plainText.charCodeAt(i) ^ randomByte;
+              cipherTextArray[i] = HEX_ENCODE_TABLE[xoredByte]; seedNum = (multiplier * seedNum + increment) % modulus;
+            } const nonceHex = randomNonce.toString(16).padStart(8, "0"); return Array_join(cipherTextArray, "") + nonceHex;
           }
           decrypt(cipherText) {
-            if (this.lcgMultiplier < 2 || !cipherText) { return "" } const totalLength = cipherText.length; if (totalLength < 8) { return "" }
-            const saltHex = cipherText.slice(-8), saltKey = parseInt(saltHex, 16), actualCipherText = cipherText.slice(0, -8), actualLength = actualCipherText.length;
-            let lcgState = this._calculateInitialState(saltKey); const byteLength = actualLength / 2, outputBuffer = new Array(byteLength); let bufferIndex = 0;
-            for (let i = 0; i < actualLength; i += 2) {
-              const pseudoRandomByte = isNaN(lcgState) ? 0 : ((lcgState / this.lcgModulus) * 255) | 0, hexPair = actualCipherText[i] + actualCipherText[i + 1],
-                xoredByte = HEX_DECODE_TABLE[hexPair] ^ pseudoRandomByte; outputBuffer[bufferIndex++] = String_fromCharCode(xoredByte);
-              if (!isNaN(lcgState)) { lcgState = (this.lcgMultiplier * lcgState + this.lcgIncrement) % this.lcgModulus }
-            } return decodeURIComponent(Array_join(outputBuffer, ""));
+            if (this.lcgMultiplier < 2 || !cipherText) { return "" } const cipherLen = cipherText.length, randomNonce = parseInt(cipherText.slice(cipherLen - 8), 16), textLength = cipherLen - 8;
+            let seedNum = reduceSeed(this.baseSeed + randomNonce); const modulus = this.lcgModulus, multiplier = this.lcgMultiplier, increment = this.lcgIncrement, invModulus = 255 / modulus;
+            seedNum = (multiplier * seedNum + increment) % modulus; const bytesLen = textLength >> 1, bytes = new Uint8Array(bytesLen); for (let i = 0, j = 0; i < textLength; i += 2, ++j) {
+              const randomByte = (seedNum * invModulus) | 0, encryptedByte = (HEX_DECODE_TABLE[cipherText.charCodeAt(i)] << 4) | HEX_DECODE_TABLE[cipherText.charCodeAt(i + 1)];
+              bytes[j] = encryptedByte ^ randomByte; seedNum = (multiplier * seedNum + increment) % modulus;
+            } return decodeURIComponent(bytesToString(bytes));
           }
           async inspect(source, odata, config) {
             try {
-              let privateKey = true; const configure = await config.get(CONFIGURE), { rebuild, curVersion } = configure,
-                result = this.decrypt(encrypt(decodeURI(source), false)), localKey = Boolean(odata && odata.date === this.decrypt(odata.flag));
-              if (rebuild !== void 0) { privateKey = odata.date === this.decrypt(rebuild) } else {
-                if (curVersion === GMscritpVersion) { info(i18n.t("RestoreDone")) } await config.set(CONFIGURE, { ...configure, rebuild: this.encrypt(odata.date) });
-              } const defaultKey = decrypt(result).search(GMscriptAuthor) !== -1, keys = { defaultKey, localKey, privateKey, __proto__: null };
-              return { keycode: () => result, search: key => (key !== null ? decrypt(key).search(GMscriptAuthor) !== -1 : keys) };
+              let privateKey = true; const configure = await config.get(CONFIGURE), { rebuild, curVersion } = configure, result = this.decrypt(encrypt(decodeURI(source), false)),
+                localKey = Boolean(odata && odata.date === this.decrypt(odata.flag)); if (rebuild !== void 0) { privateKey = odata.date === this.decrypt(rebuild) } else {
+                  if (curVersion === GMscritpVersion) { info(i18n.t("RestoreDone")) } await config.set(CONFIGURE, { ...configure, rebuild: this.encrypt(odata.date) });
+                } const defaultKey = decrypt(result).search(GMscriptAuthor) !== -1, keys = { defaultKey, localKey, privateKey, __proto__: null }; return createInspectResult(result, keys);
             } catch (e) { error(e.message); return { keycode: () => null, search: () => null } }
           }
         };
       })();
 
       class DataManager {
-        constructor(schema) { this.schema = schema; this.cache = new Map(); this.isSupportListener = typeof GMchangeListener === "function" }
+        constructor(schema) { this.schema = schema; this.cache = new Map(); this.writeLock = Promise.resolve(); this.pending = Object_create(null); this.isSupportListener = typeof GMchangeListener === "function" }
         static isExpired(val) { return val && typeof val === "object" && val.__isExpData && Date.now() > val.expired }
         static unwrap(val) { return val && typeof val === "object" && val.__isExpData ? val.data : val }
+        static isInvalid(val) { return val === void 0 || val === null || val === "dW5kZWZpbmVk" || val === "bnVsbA==" }
+        _getDefault(key) { const val = this.schema[key]; return val && typeof val === "object" ? safeDeepClone(val) : val }
         async init() {
           const keys = Object_keys(this.schema), dataMap = Array_map(keys, async key => {
-            let finalValue; const defaultValue = this.schema[key], value = await GMgetValue(key);
-            if (value === void 0) { await this.set(key, defaultValue); finalValue = defaultValue } else {
-              let parsed; try { parsed = JSON_parse(decrypt(value)) } catch { parsed = defaultValue }
-              if (this.constructor.isExpired(parsed)) { await this.delete(key); await this.set(key, defaultValue); finalValue = defaultValue } else { finalValue = parsed }
-            } if (this.isSupportListener) { this.cache.set(key, finalValue) } return finalValue;
+            const defaultValue = this._getDefault(key); let value; try {
+              value = await GMgetValue(key); if (DataManager.isInvalid(value)) { return await this._reset(key, defaultValue) }
+              const parsed = JSON_parse(decrypt(value)); if (DataManager.isExpired(parsed)) { return await this._reset(key, defaultValue) }
+              if (this.isSupportListener) { this.cache.set(key, parsed) } return parsed;
+            } catch { return await this._reset(key, defaultValue) }
           }); await Promise.all(dataMap); if (this.isSupportListener) { this._setupListener() }
         }
         _setupListener() {
           for (const key of Object_keys(this.schema)) {
-            const valueChangeHandler = (k, _, v, remote) => {
-              if (!remote) { return } const value = this.schema[k];
-              try { const val = v === void 0 ? value : JSON_parse(decrypt(v)); this.cache.set(k, val) } catch { this.cache.set(k, value); error(i18n.t("IllegalData")) }
+            const value = this._getDefault(key), valueChangeHandler = (k, _, v, remote) => {
+              if (remote) { try { const val = v === void 0 || v === null ? value : JSON_parse(decrypt(v)); this.cache.set(k, val) } catch { this.cache.set(k, value); error(i18n.t("IllegalData")) } }
             }; GMchangeListener(key, valueChangeHandler);
           }
         }
         async exportData() {
-          const data = Object_create(null), keys = Object_keys(this.schema), dataMap = Array_map(keys, async key => { data[key] = await GMgetValue(key) });
-          await Promise.all(dataMap); return data;
+          const data = Object_create(null), dataMap = Array_map(Object_keys(this.schema), async key => {
+            let value = await GMgetValue(key); if (DataManager.isInvalid(value)) { await this._reset(key, this._getDefault(key)); value = await GMgetValue(key) } data[key] = value;
+          }); await Promise.all(dataMap); return data;
+        }
+        _enqueueWrite(taskFn, key) {
+          const nextTask = this.writeLock.then(async () => await taskFn()).catch(e => { error(key, e.message); throw e }); this.writeLock = nextTask.catch(() => { }); return nextTask;
         }
         async set(key, value, { isStringify = true, expired = null } = {}) {
-          let dataToSave = value; if (typeof expired === "number") { dataToSave = { __isExpData: true, data: value, expired: Date.now() + expired } }
-          if (this.isSupportListener) { this.cache.set(key, dataToSave) } await GMsetValue(key, isStringify ? encrypt(JSON_stringify(dataToSave)) : encrypt(dataToSave));
+          return this._enqueueWrite(async () => {
+            let dataToSave = value; if (typeof expired === "number") { dataToSave = { __isExpData: true, data: value, expired: Date.now() + expired } }
+            if (this.isSupportListener) { this.cache.set(key, dataToSave) } await GMsetValue(key, isStringify ? encrypt(JSON_stringify(dataToSave)) : encrypt(dataToSave));
+          }, key);
         }
         async get(key) {
-          const defaultValue = this.schema[key]; let val;
-          if (this.isSupportListener) { val = this.cache.has(key) ? this.cache.get(key) : defaultValue } else {
-            const rawVal = await GMgetValue(key); if (rawVal === void 0) { val = defaultValue } else { try { val = JSON_parse(decrypt(rawVal)) } catch { val = defaultValue } }
-          } if (this.constructor.isExpired(val)) { await this.delete(key); return defaultValue } return this.constructor.unwrap(val);
+          const defaultValue = this._getDefault(key); if (this.isSupportListener) {
+            const cachedVal = this.cache.has(key) ? this.cache.get(key) : defaultValue;
+            if (cachedVal !== defaultValue && DataManager.isExpired(cachedVal)) { return await this._debounceReset(key, defaultValue) } return DataManager.unwrap(cachedVal);
+          } let val; try {
+            const rawVal = await GMgetValue(key); if (DataManager.isInvalid(rawVal)) { throw "Invalid" } val = JSON_parse(decrypt(rawVal)); if (DataManager.isExpired(val)) { throw "Expired" }
+          } catch { return await this._debounceReset(key, defaultValue) } return DataManager.unwrap(val);
         }
-        async delete(key) { this.cache.delete(key); await GMdeleteValue(key) }
+        async _reset(key, defaultValue) { await this.set(key, defaultValue); return DataManager.unwrap(defaultValue) }
+        _debounceReset(key, value) { if (!this.pending[key]) { this.pending[key] = this._reset(key, value).finally(() => { delete this.pending[key] }) } return this.pending[key] }
+        async delete(key) { if (this.isSupportListener) { this.cache.delete(key) } return this._enqueueWrite(async () => { await GMdeleteValue(key) }, key) }
       }
 
       const ViewportUnitScaler = (function () {
-        const transformCore = (cssText, zoom) => {
+        const VPU_STATUS = "data-viewport-fixed", ORIGIN_HREF = "data-original-href", transformCore = (cssText, zoom, arrayPush = (arr, item) => arr.push(item)) => {
           const quickCheckRegex = /(?:\d*\.\d+|\d+)[sld]?(?:vw|vh|vmin|vmax|vi|vb)\b/i; if (!quickCheckRegex.test(cssText)) { return cssText }
-          const placeholders = [], protectRegex = /\/\*[\s\S]*?\*\/|url\(\s*(?:(["'])(?:(?!\1)[^\\]|\\.)*\1|[^)]+)\s*\)|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/gi,
-            safeText = cssText.replace(protectRegex, match => { Array_push(placeholders, match); return `___VP_PLACEHOLDER_${placeholders.length - 1}___` }),
-            unitRegex = /(^|[^\w\-[\]\\])(-?(?:\d*\.\d+|\d+))([sld]?(?:vw|vh|vmin|vmax|vi|vb))\b/gi;
-          let parsedText = safeText.replace(unitRegex, (_, prefix, num, unit) => { const newVal = parseFloat(num) / zoom; return `${prefix}${parseFloat(newVal.toFixed(4))}${unit}` });
-          if (placeholders.length > 0) { parsedText = parsedText.replace(/___VP_PLACEHOLDER_(\d+)___/g, (_, index) => placeholders[parseInt(index)]) } return parsedText;
+          const protectRegex = /\/\*[\s\S]*?\*\/|url\(\s*(?:"[\s\S]*?"|'[\s\S]*?'|[^"')[\\\s][^)]*)\s*\)|"[\s\S]*?"|'[\s\S]*?'/gi,
+            unitRegex = /(^|[\s:,(\n])(-?(?:\d+\.\d+|\.\d+|\d+))([sld]?(?:vw|vh|vmin|vmax|vi|vb))\b/gi, placeholders = [],
+            safeText = cssText.replace(protectRegex, match => { arrayPush(placeholders, match); return `___VP_PH_${placeholders.length - 1}___` }),
+            parsedText = safeText.replace(unitRegex, (_, prefix, num, unit) => { const newVal = parseFloat(num) / zoom; return `${prefix}${Math.round(newVal * 1e4) / 1e4}${unit}` });
+          if (placeholders.length === 0) { return parsedText } const segments = parsedText.split(/___VP_PH_(\d+)___/g);
+          for (let i = 1; i < segments.length; i += 2) { const index = parseInt(segments[i], 10); segments[i] = placeholders[index] ?? "" } return segments.join("");
+        }, hashString = str => {
+          let hash = 0x811c9dc5; if (str) { for (let i = 0, len = str.length; i < len; ++i) { hash ^= str.charCodeAt(i); hash = Math.imul(hash, 0x01000193) } } return (hash >>> 0).toString(36);
         }, WorkerCore = () => {
           const transform = __TRANSFORM_CORE_PLACEHOLDER__; self.onmessage = function (event) {
-            const { id, cssText, zoom } = event.data;
-            try { const result = transform(cssText, zoom); self.postMessage({ id, success: true, result }) } catch (err) { self.postMessage({ id, success: false, error: err.message }) }
+            const { id, cssText, zoom } = event.data; if (id === void 0 || typeof cssText !== "string" || typeof zoom !== "number") { return }
+            try { const result = transform(cssText, zoom); self.postMessage({ id, success: true, result, cssText, zoom }) } catch { self.postMessage({ id, success: false }) }
           };
-        };
-        return class {
+        }; return class {
           constructor(zoomRatio) {
-            this.zoom = zoomRatio; this.urlCache = new LRUCache(); this.fetchingMap = new LRUCache(); this.observer = null;
-            this.workerTaskId = 0; this.workerCallbacks = new Map(); this.worker = this.initWorker();
+            this.zoom = zoomRatio; this.fetchingMap = new Map(); this.workerCallbacks = new Map(); this.urlCache = new LRUCache(); this.cssCache = new LRUCache(50);
+            this.workerTaskId = 0; this.poolSize = Math.min(navigator.hardwareConcurrency || 4, 8); this.workers = []; this.taskQueue = [];
+            this.isWorkerSupported = true; this.pendingNodes = new Set(); this.isSchedulePending = false; this.debounceTimer = null;
           }
           initWorker() {
-            try {
+            if (!this.isWorkerSupported) { return null } try {
               let workerCode = WorkerCore.toString(); workerCode = workerCode.replace("__TRANSFORM_CORE_PLACEHOLDER__", transformCore.toString());
               const blob = new Blob([`(${workerCode})()`], { type: "application/javascript" }), workerUrl = URL.createObjectURL(blob),
-                worker = new Worker(tTP.createScriptURL(workerUrl)); worker.onmessage = e => {
-                  const { id, success, result } = e.data, resolve = this.workerCallbacks.get(id);
-                  if (resolve) { resolve(success ? result : null); this.workerCallbacks.delete(id) }
+                worker = new Worker(tTP.createScriptURL(workerUrl)); worker.__vp_timer = null; worker.__vp_busy = false; worker.onmessage = event => {
+                  const { id, success, result, cssText, zoom } = event.data, hash = `${zoom}::${hashString(cssText)}`, callback = this.workerCallbacks.get(id);
+                  if (callback) { if (success) { callback.resolve(result); this.cssCache.set(hash, result) } else { callback.resolve(null) } this.workerCallbacks.delete(id) }
+                  this.resetIdleTimer(worker); if (this.taskQueue.length === 0) { worker.__vp_busy = false; return }
+                  const task = this.taskQueue.shift(), cb = this.workerCallbacks.get(task.id);
+                  if (cb) { cb.worker = worker; worker.__vp_busy = true; worker.postMessage(task) } else { worker.__vp_busy = false }
                 }; worker.onerror = () => {
-                  for (const resolve of this.workerCallbacks.values()) { resolve(null) } this.workerCallbacks.clear(); this.worker = null; warn(i18n.t("Worker"));
+                  for (const [id, taskInfo] of this.workerCallbacks.entries()) { if (taskInfo.worker === worker) { taskInfo.resolve(null); this.workerCallbacks.delete(id) } }
+                  worker.__vp_busy = false; this.workers = this.workers.filter(w => w !== worker); warn(i18n.t("Worker"));
                 }; URL.revokeObjectURL(workerUrl); return worker;
-            } catch { return null }
+            } catch { this.isWorkerSupported = false; return null }
           }
           dispatchTransform(cssText) {
-            if (!this.worker) { return Promise.resolve(transformCore(cssText, this.zoom)) }
-            return new Promise(resolve => { const id = this.workerTaskId++; this.workerCallbacks.set(id, resolve); this.worker.postMessage({ id, cssText, zoom: this.zoom }) });
+            const key = this.zoom + "::" + hashString(cssText); if (this.cssCache.has(key)) { return Promise.resolve(this.cssCache.get(key)) }
+            if (!this.isWorkerSupported || cssText.length <= 5e4) { const rst = transformCore(cssText, this.zoom, Array_push); this.cssCache.set(key, rst); return Promise.resolve(rst) }
+            return new Promise(resolve => {
+              const id = this.workerTaskId++, task = { id, cssText, zoom: this.zoom }; let availableWorker = Array_find(this.workers, w => !w.__vp_busy);
+              if (!availableWorker && this.workers.length < this.poolSize) {
+                const newWorker = this.initWorker(); if (newWorker) { Array_push(this.workers, newWorker); availableWorker = newWorker }
+              } if (availableWorker) { this.workerCallbacks.set(id, { resolve, worker: availableWorker }); availableWorker.__vp_busy = true; availableWorker.postMessage(task) } else
+                if (this.workers.length === 0) { const result = transformCore(cssText, this.zoom, Array_push); this.cssCache.set(key, result); resolve(result) } else {
+                  this.workerCallbacks.set(id, { resolve, worker: null }); Array_push(this.taskQueue, task);
+                }
+            });
+          }
+          resetIdleTimer(worker) {
+            if (worker.__vp_timer) { clearTimeout(worker.__vp_timer) } worker.__vp_timer = setTimeout(() => {
+              for (const [id, taskInfo] of this.workerCallbacks.entries()) { if (taskInfo.worker === worker) { taskInfo.resolve(null); this.workerCallbacks.delete(id) } }
+              worker.terminate(); this.workers = this.workers.filter(w => w !== worker);
+            }, 3e4);
           }
           start() {
-            if (this.observer) { return } const initScan = () => { this.scanAndProcess(document) };
-            if (document.readyState === "loading") { addListener(document, "DOMContentLoaded", initScan, { once: true }) } else { initScan() }
+            const initScan = () => { Array_forEach(qA(`link[rel="stylesheet"]:not([${VPU_STATUS}]),style:not([${VPU_STATUS}])`), el => this.processNode(el)) };
+            if (this.observer) { return } if (document.readyState === "loading") { addListener(document, "DOMContentLoaded", initScan, { once: true }) } else { initScan() }
             this.observer = new MutationObserver(mutations => {
-              const addedNodes = []; for (const mutation of mutations) {
-                for (const node of mutation.addedNodes) { if (node.nodeType === Node.ELEMENT_NODE) { Array_push(addedNodes, node) } }
-              } if (addedNodes.length === 0) { return } const schedule = requestIdleCallback || setTimeout;
-              schedule(() => { for (const node of addedNodes) { if (node.isConnected) { this.scanAndProcess(node) } } });
+              let hasNewNodes = false; for (const mutation of mutations) {
+                for (const node of mutation.addedNodes) {
+                  if (node.nodeType !== Node.ELEMENT_NODE) { continue }
+                  if (node.tagName === "STYLE" || (node.tagName === "LINK" && node.rel === "stylesheet")) { this.pendingNodes.add(node); hasNewNodes = true } else
+                    if (node.childElementCount === 0) { continue } const elements = qA(`link[rel="stylesheet"]:not([${VPU_STATUS}]),style:not([${VPU_STATUS}])`, node);
+                  if (elements.length > 0) { Array_forEach(elements, el => { this.pendingNodes.add(el) }); hasNewNodes = true }
+                }
+              } if (!hasNewNodes || this.isSchedulePending) { return } const schedule = requestIdleCallback || setTimeout;
+              this.isSchedulePending = true; this.debounceTimer = schedule(() => {
+                const nodesToProcess = Array.from(this.pendingNodes); this.pendingNodes.clear(); this.isSchedulePending = false;
+                for (const node of nodesToProcess) { if (node.isConnected && !hasAttribute(node, VPU_STATUS)) { this.processNode(node) } }
+              });
             }); this.observer.observe(document.documentElement, { childList: true, subtree: true });
           }
-          scanAndProcess(root) {
-            if ((root.tagName === "STYLE" || (root.tagName === "LINK" && root.rel === "stylesheet")) && !root.dataset.viewportFixed) { this.processNode(root) }
-            Array_forEach(qA(`link[rel="stylesheet"]:not([data-viewport-fixed]), style:not([data-viewport-fixed])`, root), el => this.processNode(el));
+          stop() {
+            if (this.observer) { this.observer.disconnect(); this.observer = null } if (this.pendingNodes) { this.pendingNodes.clear() }
+            if (this.debounceTimer) { const cancelSchedule = cancelIdleCallback || clearTimeout; cancelSchedule(this.debounceTimer); this.debounceTimer = null } this.isSchedulePending = false;
           }
           async processNode(node) {
-            if (node.dataset.viewportFixed) { return } node.dataset.viewportFixed = "processing"; try {
+            if (hasAttribute(node, VPU_STATUS)) { return } setAttribute(node, VPU_STATUS, "processing"); try {
               if (node.tagName === "LINK") { await this.processLink(node) } else if (node.tagName === "STYLE") { await this.processStyle(node) }
-            } catch { node.dataset.viewportFixed = "failed" }
+            } catch { setAttribute(node, VPU_STATUS, "failed") }
           }
           async processLink(linkNode) {
-            const href = linkNode.href || linkNode.dataset.href; if (!href || href.startsWith("about:") || href.startsWith("data:")) { linkNode.dataset.viewportFixed = "ignore"; return }
-            const cssText = await this.fetchCSS(href); if (!cssText) { linkNode.dataset.viewportFixed = "failed"; return }
-            const processedCSS = await this.compileCSSText(cssText, href); if (processedCSS !== cssText) {
-              const parent = linkNode.parentNode; if (!linkNode.isConnected || !parent) { return } const opt = { "data-viewport-fixed": "link", "data-original-href": href },
-                newStyle = GMaddElement(parent, "style", opt) ?? qS(`style[data-original-href="${href}"][data-viewport-fixed]`, parent);
+            const href = linkNode.href || linkNode.dataset.href; if (href && !href.startsWith("about:") && !href.startsWith("data:")) {
+              const cssText = await this.fetchCSS(href); if (!cssText) { setAttribute(linkNode, VPU_STATUS, "failed"); return }
+              const processedCSS = await this.compileCSSText(cssText, href); if (processedCSS === cssText) { setAttribute(linkNode, VPU_STATUS, "ignore"); return }
+              if (!linkNode.isConnected) { return } const parent = linkNode.parentNode; if (!parent) { return }
+              const opt = { [VPU_STATUS]: "link", [ORIGIN_HREF]: href }; if (linkNode.nonce) { opt.nonce = linkNode.nonce } if (linkNode.media) { opt.media = linkNode.media }
+              const newStyle = GMaddElement(parent, "style", opt) ?? qS(`style[${ORIGIN_HREF}="${href}"][${VPU_STATUS}="link"]`, parent);
               newStyle.textContent = processedCSS; parent.insertBefore(newStyle, linkNode); parent.removeChild(linkNode); log(`${IN_FRAME} ▶ links`);
-            } else { linkNode.dataset.viewportFixed = "ignore" }
+            } setAttribute(linkNode, VPU_STATUS, "ignore");
           }
           async processStyle(styleNode) {
-            const originalText = styleNode.textContent; if (!originalText || !originalText.trim()) { styleNode.dataset.viewportFixed = "ignore"; return }
-            const processedCSS = await this.compileCSSText(originalText, CUR_HREF); if (processedCSS !== originalText) {
-              styleNode.dataset.viewportFixed = "style"; if (styleNode.isConnected) { styleNode.textContent = processedCSS; log(`${IN_FRAME} ▶ styles`) }
-            } else { styleNode.dataset.viewportFixed = "ignore" }
+            const rawText = styleNode.textContent.trim(); if (!rawText) { setAttribute(styleNode, VPU_STATUS, "ignore"); return } const handleCSSText = (cssText, state) => {
+              setAttribute(styleNode, VPU_STATUS, cssText === rawText ? "ignore" : "style"); if (cssText === rawText) { return }
+              if (styleNode.isConnected) { styleNode.textContent = cssText; log(`${IN_FRAME} ▶ styles (${state})`) }
+            }; if (!rawText.includes("@import") && rawText.length <= 5e4) { handleCSSText(transformCore(rawText, this.zoom, Array_push), "sync"); return }
+            const processedCSS = await this.compileCSSText(rawText, CUR_HREF); handleCSSText(processedCSS, "async");
           }
-          async compileCSSText(cssText, baseUrl, depth = 0) {
-            if (depth > 5 || !cssText) { return cssText } let targetText = cssText; if (targetText.includes("@import")) {
+          async compileCSSText(cssText, baseUrl, depth = 0, visitedUrls = new Set()) {
+            if (depth > 5 || !cssText) { return cssText } if (visitedUrls.has(baseUrl)) { return "" }
+            let targetText = cssText; visitedUrls.add(baseUrl); if (targetText.includes("@import")) {
               const importRegex = /@import\s+(?:url\(\s*)?['"]?([^'");]+)['"]?\s*\)?(?:[^;]*);/gi, importsToProcess = []; let match;
               while ((match = importRegex.exec(targetText)) !== null) { Array_push(importsToProcess, { fullMatch: match[0], url: match[1] }) }
               const importsToProcessMap = Array_map(importsToProcess, async imp => {
-                try {
-                  const importUrl = new URL(imp.url, baseUrl).href, importedCss = await this.fetchCSS(importUrl),
-                    processedImport = await this.compileCSSText(importedCss, importUrl, depth + 1); targetText = targetText.replace(imp.fullMatch, processedImport);
-                } catch { void 0 }
+                let importUrl; try { importUrl = new URL(imp.url, baseUrl).href } catch { importUrl = imp.url } const importedCss = await this.fetchCSS(importUrl),
+                  processedImport = await this.compileCSSText(importedCss, importUrl, depth + 1, visitedUrls); targetText = targetText.replace(imp.fullMatch, processedImport);
               }); await Promise.all(importsToProcessMap);
-            } const finalCSS = await this.dispatchTransform(targetText); return finalCSS || targetText;
+            } const urlRegex = /url\(\s*(?:"([^"]+)"|'([^']+)'|([^"'\s)]+))\s*\)/gi; targetText = targetText.replace(urlRegex, (match, p1, p2, p3) => {
+              const path = (p1 || p2 || p3 || "").trim(); if (!path || path.startsWith("data:") || path.startsWith("about:") || path.startsWith("#")) { return match }
+              try { const absoluteUrl = new URL(path, baseUrl).href; return `url("${absoluteUrl}")` } catch { return match }
+            }); if (depth !== 0) { return targetText } const finalCSS = await this.dispatchTransform(targetText), resolvedCSS = finalCSS || targetText;
+            if (resolvedCSS === targetText) { return cssText } return resolvedCSS;
           }
           async fetchCSS(url, retries = 1) {
             if (this.urlCache.has(url)) { return this.urlCache.get(url) } if (this.fetchingMap.has(url)) { return this.fetchingMap.get(url) }
             const fetchPromise = (async () => {
               for (let i = 0; i <= retries; ++i) {
-                try {
-                  const response = await fetch(url); if (!response.ok) { throw new Error(`HTTP ${response.status}`) }
-                  const text = await response.text(); this.urlCache.set(url, text); return text;
-                } catch { if (i < retries) { await sleep(500) } else { return "" } }
+                try { const response = await fetch(url); if (!response.ok) { throw new Error(`HTTP ${response.status}`) } const text = await response.text(); this.urlCache.set(url, text); return text } catch { if (i < retries) { await sleep(500) } else { return "" } }
               }
-            })(); this.fetchingMap.set(url, fetchPromise); return fetchPromise;
+            })(); this.fetchingMap.set(url, fetchPromise); fetchPromise.finally(() => { this.fetchingMap.delete(url) }); return fetchPromise;
           }
         };
       })();
 
       class InputShield {
         constructor(container) {
-          this.container = container; this.events = ["keydown", "keyup", "keypress", "paste", "input"];
-          this._shieldHandler = this.constructor.stopPropagate.bind(this); this.isActive = false;
+          this.container = container; this.events = ["keydown", "keyup", "keypress", "paste", "input"]; this._shieldHandler = this.constructor.stopPropagate.bind(this); this.isActive = false;
         }
         static stopPropagate(e) { stopImmediatePropagation(e) }
         enable() {
-          if (this.isActive || !this.container) { return }
-          Array_forEach(this.events, eventType => { addListener(this.container, eventType, this._shieldHandler, false) }); this.isActive = true;
+          if (this.isActive || !this.container) { return } Array_forEach(this.events, eventType => { addListener(this.container, eventType, this._shieldHandler, false) }); this.isActive = true;
         }
         disable() {
-          if (!this.isActive || !this.container) { return }
-          Array_forEach(this.events, eventType => { removeListener(this.container, eventType, this._shieldHandler, false) }); this.isActive = false;
+          if (!this.isActive || !this.container) { return } Array_forEach(this.events, eventType => { removeListener(this.container, eventType, this._shieldHandler, false) }); this.isActive = false;
         }
         updateContainer(newContainer) { const wasActive = this.isActive; if (wasActive) { this.disable() } this.container = newContainer; if (wasActive) { this.enable() } }
       }
@@ -792,14 +822,14 @@ void (function (ctx, uctx, sctx) {
               if (isNaN(r) || isNaN(g) || isNaN(b) || isNaN(a)) { return null } return { ...this.rgbToHsl(r, g, b), a };
             }
             const rgbMatch = str.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/); if (rgbMatch) {
-              const r = parseInt(rgbMatch[1]), g = parseInt(rgbMatch[2]), b = parseInt(rgbMatch[3]), a = rgbMatch[4] !== void 0 ? parseFloat(rgbMatch[4]) : 1;
+              const r = parseInt(rgbMatch[1], 10), g = parseInt(rgbMatch[2], 10), b = parseInt(rgbMatch[3], 10), a = rgbMatch[4] !== void 0 ? parseFloat(rgbMatch[4]) : 1;
               if (r > 255 || g > 255 || b > 255 || a > 1 || a < 0) { return null } return { ...this.rgbToHsl(r, g, b), a };
             }
             const hslMatch = str.match(/^hsla?\(([\d.]+),\s*([\d.]+)%?,\s*([\d.]+)%?(?:,\s*([\d.]+))?\)$/); if (hslMatch) {
               const h = parseFloat(hslMatch[1]) % 360, s = parseFloat(hslMatch[2]), l = parseFloat(hslMatch[3]), a = hslMatch[4] !== void 0 ? parseFloat(hslMatch[4]) : 1;
               if (s > 100 || l > 100 || a > 1 || a < 0) { return null } return { h, s, l, a };
             } return null;
-          }
+          },
         };
         return class {
           constructor(defaultValue, styleManager, onChange) {
@@ -820,7 +850,7 @@ void (function (ctx, uctx, sctx) {
           _cacheElements() {
             const q = sel => qS(sel, this.container); this.elements = {
               input: q(".fused-text-input"), wrap: q(".color-fused-input-group"), popover: q(".color-popover"), rH: q(".cp-h"), rS: q(".cp-s"),
-              rL: q(".cp-l"), rA: q(".cp-a"), vH: q(".cp-val-h"), vS: q(".cp-val-s"), vL: q(".cp-val-l"), vA: q(".cp-val-a")
+              rL: q(".cp-l"), rA: q(".cp-a"), vH: q(".cp-val-h"), vS: q(".cp-val-s"), vL: q(".cp-val-l"), vA: q(".cp-val-a"),
             };
           }
           _trackEvent(el, type, handler) { addListener(el, type, handler); Array_push(this.listeners, { el, type, handler }) }
@@ -868,7 +898,7 @@ void (function (ctx, uctx, sctx) {
           this.instances.add(instance); this.bringToFront(instance); return true;
         }
         static unregister(instance) { this.instances.delete(instance); if (instance.type === "dialog" || instance.type === "panel") { this.closeByType("prompt") } }
-        static bringToFront(instance) { const baseZIndex = this.zIndexLayers[instance.type] || 10000; instance.setZIndex(baseZIndex) }
+        static bringToFront(instance) { const baseZIndex = this.zIndexLayers[instance.type] || 1e4; instance.setZIndex(baseZIndex) }
         static closeByType(type) { Array_forEach(Array_from(this.instances), ins => { if (ins.type === type) { ins.close() } }) }
         static closeAll() { Array_forEach(Array_from(this.instances), ins => { ins.close() }) }
         static broadcast(senderId, eventName, data) {
@@ -878,7 +908,7 @@ void (function (ctx, uctx, sctx) {
 
       class DialogPanelController {
         constructor({ id, type, html, css, styleManager }) {
-          if (!WindowManager.instances) { WindowManager.instances = new Set(); WindowManager.zIndexLayers = { panel: 10000, dialog: 20000, prompt: 30000 } }
+          if (!WindowManager.instances) { WindowManager.instances = new Set(); WindowManager.zIndexLayers = { panel: 1e4, dialog: 2e4, prompt: 3e4 } }
           this.id = id; this.type = type || "common"; this.isDestroyed = false; this.messageCallback = null; this.isScrollTicking = false; this.tooltipTimer = null;
           this.hostListeners = []; this.internalListeners = []; this.components = []; this.scrollRafId = null; this.styleManager = styleManager;
           this.managedEvents = ["keydown", "click", "dblclick", "mousedown", "input", "change", "mouseover", "mouseout", "mouseenter", "mouseleave"];
@@ -890,11 +920,9 @@ void (function (ctx, uctx, sctx) {
           this.constructor.importAnton(); this.styleManager.insert(`dialog-style-${id}`, commonCSS + css, { target: this.shadow, type: "dialog" });
         }
         static importAnton() {
-          const fontUrl = "https://fonts.googleapis.com/css2?family=Anton&display=swap"; if (!qS(`link[href="${fontUrl}"]`, document.head)) {
-            GMaddElement("link", { href: "https://fonts.googleapis.com", rel: "preconnect" });
-            GMaddElement("link", { href: "https://fonts.gstatic.com", rel: "preconnect", crossorigin: "" });
-            GMaddElement("link", { href: fontUrl, rel: "stylesheet", "data-viewport-fixed": "ignore" });
-          }
+          const fontUrl = "https://fonts.googleapis.com/css2?family=Anton&display=swap"; if (qS(`link[href="${fontUrl}"]`)) { return }
+          GMaddElement("link", { href: "https://fonts.googleapis.com", rel: "preconnect" }); GMaddElement("link", { href: "https://fonts.gstatic.com", rel: "preconnect", crossorigin: "" });
+          GMaddElement("link", { href: fontUrl, rel: "stylesheet", "data-viewport-fixed": "ignore" });
         }
         registerComponent(comp) { Array_push(this.components, comp) }
         trackInternal(element, type, handler, useCapture = false) {
@@ -902,14 +930,11 @@ void (function (ctx, uctx, sctx) {
         }
         mount() {
           if (this.isDestroyed) { return } if (!WindowManager.register(this)) { this.close(); return } this.trackInternal(this.dialog, "close", this); this.shield.enable();
-          const manageEventFn = type => { const capture = Array_includes(["mouseenter", "mouseleave"], type); this.trackInternal(this.dialog, type, this, capture) };
-          Array_forEach(this.managedEvents, manageEventFn); if (typeof this.dialog.showModal === "function") {
-            this.dialog.inert = true; this.dialog.showModal(); this.dialog.inert = null; this.dialog.blur();
-          } else { this.dialog.show() }
+          Array_forEach(this.managedEvents, type => { const capture = Array_includes(["mouseenter", "mouseleave"], type); this.trackInternal(this.dialog, type, this, capture) });
+          if (typeof this.dialog.showModal === "function") { this.dialog.inert = true; this.dialog.showModal(); this.dialog.inert = null; this.dialog.blur() } else { this.dialog.show() }
         }
         handleEvent(event) {
-          if (this.isDestroyed) { return } const type = event.type;
-          if (type === "close") { this.close(); return }
+          if (this.isDestroyed) { return } const type = event.type; if (type === "close") { this.close(); return }
           if (type === "mousedown") {
             WindowManager.bringToFront(this); const header = event.target.closest(".dialog-header"), isCloseBtn = event.target.closest(".close-btn");
             if (header && !isCloseBtn) {
@@ -1056,11 +1081,7 @@ void (function (ctx, uctx, sctx) {
               history.replaceState = (...args) => { Function_apply(originalReplaceState, history, args); this.handleSPARouteChange() };
             } addListener($, "popstate", () => { this.handleSPARouteChange() });
           }
-          handleSPARouteChange() {
-            let isResolved = false; this.reEvalNodesQueue.clear(); clearTimeout(this.spaTimer); const timeout = NetworkTracker ? 2e3 : 200,
-              triggerScan = () => { if (isResolved) { return } isResolved = true; clearTimeout(this.spaTimer); rAF(() => this.scanAll()) };
-            NetworkTracker?.startTracking(triggerScan); this.spaTimer = setTimeout(triggerScan, timeout);
-          }
+          handleSPARouteChange() { this.reEvalNodesQueue.clear(); clearTimeout(this.spaTimer); this.spaTimer = setTimeout(() => this.scanAll(), 50) }
           hijackShadowDOM() {
             const self = this; Element.prototype.attachShadow = function (init) {
               const shadowRoot = attachShadow(this, init); if (!self.observedRoots.has(shadowRoot)) {
@@ -1138,7 +1159,7 @@ void (function (ctx, uctx, sctx) {
               for (const el of nodesIterable) { this.reEvalNodesQueue.add(el) } clearTimeout(this.reEvalTimer); this.reEvalTimer = setTimeout(() => {
                 const nodesToReEval = new Set(this.reEvalNodesQueue); this.reEvalNodesQueue.clear(); if (nodesToReEval.size === 0) { return }
                 const localPrevOverride = this.isProcessingOverride; this.isProcessingOverride = true;
-                try { this.evaluateNodesExact(nodesToReEval, true) } finally { this.isProcessingOverride = localPrevOverride }
+                try { this.processBatch(nodesToReEval, true) } finally { this.isProcessingOverride = localPrevOverride }
               }, 50);
             } this.isProcessingOverride = previousOverride;
           }
@@ -1154,8 +1175,7 @@ void (function (ctx, uctx, sctx) {
           this._pagehideHandler = this._pagehideHandler.bind(this); this._beforeunloadHandler = this._beforeunloadHandler.bind(this);
         }
         static fontWeightToNumber(weight) {
-          const n = Number(weight); if (!isNaN(n)) { return n } const s = String(weight).trim().toLowerCase();
-          if (s === "bold") { return 700 } if (s === "bolder") { return 900 } return 400;
+          const n = Number(weight); if (!isNaN(n)) { return n } const s = String(weight).trim().toLowerCase(); if (s === "bold") { return 700 } if (s === "bolder") { return 900 } return 400;
         }
         static isWorthChecking(el) { const cs = $.getComputedStyle(el); return cs.display !== "none" && cs.visibility !== "hidden" && cs.opacity !== "0" }
         _isBoldValue(weight) {
@@ -1163,8 +1183,7 @@ void (function (ctx, uctx, sctx) {
           const isBold = this.constructor.fontWeightToNumber(weight) >= this.BOLD_THRESHOLD; this._weightCache[weight] = isBold; return isBold;
         }
         _hasDirectTextNode(el) {
-          if (!el.hasChildNodes()) { return false } let n = el.firstChild;
-          while (n) { if (n.nodeType === 3 && this.S_REG.test(n.nodeValue)) { return true } n = n.nextSibling } return false;
+          if (!el.hasChildNodes()) { return false } let n = el.firstChild; while (n) { if (n.nodeType === 3 && this.S_REG.test(n.nodeValue)) { return true } n = n.nextSibling } return false;
         }
         _applyClassIfChanged(el, isBold) {
           const s = this.state.get(el); if (!s || s.lastApplied === isBold) { return }
@@ -1190,9 +1209,8 @@ void (function (ctx, uctx, sctx) {
             const s = this.state.get(el), w = s._tempWeight; if (w === null) { this.stopWatch(el); continue }
             const bold = this._isBoldValue(w); s.stable = (s.lastVal === null || bold === s.lastVal) ? (s.stable || 0) + 1 : 1; s.lastVal = bold;
             if (now - s.startTime > this.MAX_POLL_MS) { this._applyClassIfChanged(el, bold); this.stopWatch(el); continue }
-            if (typeof s.targetIsBold === "boolean") {
-              if (s.stable >= this.STABLE_FRAMES && bold === s.targetIsBold) { this._applyClassIfChanged(el, bold); this.stopWatch(el) }
-            } else if (s.stable >= this.STABLE_FRAMES) { this._applyClassIfChanged(el, bold) }
+            if (typeof s.targetIsBold === "boolean") { if (s.stable >= this.STABLE_FRAMES && bold === s.targetIsBold) { this._applyClassIfChanged(el, bold); this.stopWatch(el) } } else
+              if (s.stable >= this.STABLE_FRAMES) { this._applyClassIfChanged(el, bold) }
           } if (this.watchSet.size > 0) { this.rafId = rAF(this._rafLoop) }
         }
         _forEachTextElement(rootEl, callback) {
@@ -1227,8 +1245,7 @@ void (function (ctx, uctx, sctx) {
           removeListener(document, this._enterEvent, this._onEnter, true); removeListener(document, this._leaveEvent, this._onLeave, true);
         }
         destroy() {
-          this.stop(); for (const timerId of this.activeTimers) { clearTimeout(timerId) }
-          this.activeTimers.clear(); const strategy = createMarkStrategy(BOLD_FIXER_ATTR, this.lazyload);
+          this.stop(); for (const timerId of this.activeTimers) { clearTimeout(timerId) } this.activeTimers.clear(); const strategy = createMarkStrategy(BOLD_FIXER_ATTR, this.lazyload);
           for (const el of this.watchSet) { strategy.remove(el); this.state.delete(el) } this.watchSet.clear(); this._weightCache = Object_create(null);
           removeListener($, "pagehide", this._pagehideHandler); removeListener($, "beforeunload", this._beforeunloadHandler);
         }
@@ -1240,22 +1257,17 @@ void (function (ctx, uctx, sctx) {
         const originFillText = CanvasRenderingContext2D.prototype.fillText, originStrokeText = CanvasRenderingContext2D.prototype.strokeText,
           FONT_REGEXP = /^((?:[a-z-]+\s)+|[0-9]+\s)?(\d*\.?\d+(?:px|em|pt|%|rem)\s)?(.+)$/i, BOLD_REGEXP = /(?:bold|bolder|[6789]\d{2})\s/i;
         return class {
-          constructor(options = {}) {
-            this.renderFont = options.renderFont; this.fontName = options.font; this.shadowR = options.radius; this.shadowC = options.color; this.isApplied = false;
-          }
-          modifyFont(fontText) {
-            if (!fontText) { return fontText } const matches = fontText.match(FONT_REGEXP);
-            return matches ? `${matches[1] || ""} ${matches[2] || ""} ${this.fontName}`.trim() : fontText;
-          }
-          apply() {
+          constructor(options = {}) { this.renderFont = options.renderFont; this.fontName = options.font; this.shadowR = options.radius; this.shadowC = options.color; this.isApplied = false }
+          modifyFont(text) { if (!text) { return text } const matches = text.match(FONT_REGEXP); return matches ? `${matches[1] || ""} ${matches[2] || ""} ${this.fontName}`.trim() : text }
+          deploy() {
             if (this.isApplied) { return } const self = this; CanvasRenderingContext2D.prototype.fillText = function (...args) {
               if (!this.frFontFace && this.font && !this.font.includes(self.renderFont)) {
                 this.font = self.modifyFont(this.font); if (self.shadowR > 0 && !BOLD_REGEXP.test(this.font)) {
-                  originFillText.apply(this, args); this.shadowColor = self.shadowC; this.shadowBlur = self.shadowR; this.shadowOffsetX = 0; this.shadowOffsetY = 0;
+                  Function_apply(originFillText, this, args); this.shadowColor = self.shadowC; this.shadowBlur = self.shadowR; this.shadowOffsetX = 0; this.shadowOffsetY = 0;
                 }
-              } originFillText.apply(this, args);
+              } Function_apply(originFillText, this, args);
             }; CanvasRenderingContext2D.prototype.strokeText = function (...args) {
-              if (!this.frFontFace && this.font && !this.font.includes(self.renderFont)) { this.font = self.modifyFont(this.font) } originStrokeText.apply(this, args);
+              if (!this.frFontFace && this.font && !this.font.includes(self.renderFont)) { this.font = self.modifyFont(this.font) } Function_apply(originStrokeText, this, args);
             }; this.isApplied = true;
           }
           restore() {
@@ -1326,7 +1338,7 @@ void (function (ctx, uctx, sctx) {
               if (!obj) { return } const descriptor = Reflect_getOwnDesc(obj, prop);
               if (!descriptor || typeof descriptor.get !== "function" || descriptor.get.__isPatchedByAdjuster) { return }
               const rawGet = descriptor.get, target = isScroll ? HTMLHtmlElement.prototype : obj,
-                newGet = isScroll ? function () { return rawGet.call(this) / self.scrollScale } : function () { return rawGet.call(this) / self.currentScale };
+                newGet = isScroll ? function () { return Function_call(rawGet, this) / self.scrollScale } : function () { return Function_call(rawGet, this) / self.currentScale };
               newGet.__isPatchedByAdjuster = true; const value = { configurable: true, enumerable: descriptor.enumerable, get: newGet }; if (isScroll) {
                 value.set = function (val) { if (Number.isFinite(val)) { this.scrollTo({ [prop === "scrollLeft" ? "left" : "top"]: val * self.scrollScale }) } };
               } else if (descriptor.set) { value.set = descriptor.set } Reflect_defineProperty(target, prop, value);
@@ -1342,19 +1354,19 @@ void (function (ctx, uctx, sctx) {
           patchMethods() {
             const self = this; Reflect_defineProperty(SVGGraphicsElement.prototype, "getScreenCTM", {
               value: function () {
-                const originalMatrix = rawScreenCTM.call(this); if (!originalMatrix) { return null }
+                const originalMatrix = Function_call(rawScreenCTM, this); if (!originalMatrix) { return null }
                 const newSVGMatrix = this.ownerSVGElement?.createSVGMatrix() || self.dummySVG.createSVGMatrix(), invScale = 1 / self.currentScale, matrixProps = self.matrixProps;
                 for (let i = 0; i < 6; ++i) { newSVGMatrix[matrixProps[i]] = originalMatrix[matrixProps[i]] * invScale } return newSVGMatrix;
               }, configurable: true,
             }); Reflect_defineProperty(Element.prototype, "getClientRects", {
               value: function () {
-                const rects = rawClientRects.call(this), len = rects.length, invScale = 1 / self.currentScale, result = new Array(len);
+                const rects = Function_call(rawClientRects, this), len = rects.length, invScale = 1 / self.currentScale, result = new Array(len);
                 for (let i = 0; i < len; ++i) { const r = rects[i]; result[i] = new DOMRect(r.x * invScale, r.y * invScale, r.width * invScale, r.height * invScale) }
                 result.item = staticItemFunc; return Object_freeze(result);
               }, configurable: true,
             }); Reflect_defineProperty(Element.prototype, "getBoundingClientRect", {
               value: function () {
-                const r = rawBoundingClientRect.call(this), invScale = 1 / self.currentScale;
+                const r = Function_call(rawBoundingClientRect, this), invScale = 1 / self.currentScale;
                 return new DOMRect(r.x * invScale, r.y * invScale, r.width * invScale, r.height * invScale);
               }, configurable: true,
             });
@@ -1394,22 +1406,20 @@ void (function (ctx, uctx, sctx) {
       }
 
       const FontFaceSetObserver = (function () {
-        let canvas = null, ctx = null, originFontData = null, pixelBuffer = null; const canvasWidth = 200, canvasHeight = 100,
-          fontSize = 50, fontText = "0字i體W", originFont = "'Courier New',Courier,monospace", originFontUpper = originFont.toUpperCase();
-        function initCanvas() {
-          if (canvas) { return } canvas = cE("canvas", { width: canvasWidth, height: canvasHeight }); ctx = canvas.getContext("2d", { willReadFrequently: true });
-          ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.frFontFace = true; pixelBuffer = new Uint32Array(canvasWidth * canvasHeight);
-        }
-        function checkFontInternal(name) {
-          try {
-            ctx.clearRect(0, 0, canvasWidth, canvasHeight); ctx.fillStyle = "#000000"; const isOrigin = originFontUpper === name.toUpperCase();
-            ctx.font = `${fontSize}px ${isOrigin ? originFont : `'${name}',${originFont}`}`; ctx.fillText(fontText, canvasWidth / 2, canvasHeight / 2);
-            const metrics = ctx.measureText(fontText), fontWidth = metrics.actualBoundingBoxLeft + metrics.actualBoundingBoxRight;
-            if (originFontData && originFontData.fontWidth !== fontWidth) { return { hash: -1, fontWidth } } const imgData = ctx.getImageData(0, 0, canvasWidth, canvasHeight),
-              data8 = imgData.data, totalPixels = data8.length >> 2, temp32 = new Uint32Array(data8.buffer, data8.byteOffset, totalPixels); pixelBuffer.set(temp32); let hash = 0;
-            for (let i = 0; i < totalPixels; ++i) { const pixel = pixelBuffer[i]; if (pixel !== 0) { hash ^= pixel; hash = Math.imul(hash, 16777619) } } return { hash, fontWidth };
-          } catch { return null }
-        }
+        let canvas = null, ctx = null, originFontData = null, pixelBuffer = null; const canvasWidth = 200, canvasHeight = 100, fontSize = 50,
+          fontText = "0字i體W", originFont = "'Courier New',Courier,monospace", originFontUpper = originFont.toUpperCase(), initCanvas = () => {
+            if (canvas) { return } canvas = cE("canvas", { width: canvasWidth, height: canvasHeight }); ctx = canvas.getContext("2d", { willReadFrequently: true });
+            ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.frFontFace = true; pixelBuffer = new Uint32Array(canvasWidth * canvasHeight);
+          }, checkFontInternal = name => {
+            try {
+              ctx.clearRect(0, 0, canvasWidth, canvasHeight); ctx.fillStyle = "#000000"; const isOrigin = originFontUpper === name.toUpperCase();
+              ctx.font = `${fontSize}px ${isOrigin ? originFont : `'${name}',${originFont}`}`; ctx.fillText(fontText, canvasWidth / 2, canvasHeight / 2);
+              const metrics = ctx.measureText(fontText), fontWidth = metrics.actualBoundingBoxLeft + metrics.actualBoundingBoxRight;
+              if (originFontData && originFontData.fontWidth !== fontWidth) { return { hash: -1, fontWidth } } const imgData = ctx.getImageData(0, 0, canvasWidth, canvasHeight),
+                data8 = imgData.data, totalPixels = data8.length >> 2, temp32 = new Uint32Array(data8.buffer, data8.byteOffset, totalPixels); pixelBuffer.set(temp32); let hash = 0;
+              for (let i = 0; i < totalPixels; ++i) { const pixel = pixelBuffer[i]; if (pixel !== 0) { hash ^= pixel; hash = Math.imul(hash, 16777619) } } return { hash, fontWidth };
+            } catch { return null }
+          };
         return class {
           constructor() { initCanvas(); originFontData = checkFontInternal(originFont); this.isSpoofed = null }
           checkFingerprintProtection(isFirefox) {
@@ -1435,12 +1445,12 @@ void (function (ctx, uctx, sctx) {
         }
         initData(dataArray) {
           if (!this.container) { return } this.originalValues = [...dataArray]; this.globalStatus = 0b000000000000000; const indexs = qA("[data-index]", this.container);
-          Array_forEach(indexs, i => { const idx = parseInt(i.dataset.index); if (this.originalValues[idx] !== void 0) { i.value = this.originalValues[idx] } }); this._renderUI();
+          Array_forEach(indexs, i => { const idx = parseInt(i.dataset.index, 10); if (this.originalValues[idx] !== void 0) { i.value = this.originalValues[idx] } }); this._renderUI();
         }
         _startListening() { if (!this.container) { return } addListener(this.container, "input", this._handleInput, true) }
         _handleInput(event) {
           const target = event.target; if (target.dataset.index === void 0) { return }
-          const index = parseInt(target.dataset.index), currentBit = 1 << index, currentValue = target.type === "checkbox" ? target.checked : target.value;
+          const index = parseInt(target.dataset.index, 10), currentBit = 1 << index, currentValue = target.type === "checkbox" ? target.checked : target.value;
           if (currentValue !== this.originalValues[index]) { this.globalStatus |= currentBit } else { this.globalStatus &= ~currentBit } this._renderUI();
         }
         _renderUI() {
@@ -1452,7 +1462,7 @@ void (function (ctx, uctx, sctx) {
         hasChanges() { return this.globalStatus !== 0 }
         saveSuccess() {
           if (!this.container) { return } const nodes = qA("[data-index]", this.container); for (let i = 0, l = nodes.length; i < l; ++i) {
-            const n = nodes[i], idx = parseInt(n.dataset.index); this.originalValues[idx] = n.type === "checkbox" ? n.checked : n.value;
+            const n = nodes[i], idx = parseInt(n.dataset.index, 10); this.originalValues[idx] = n.type === "checkbox" ? n.checked : n.value;
           } this.globalStatus = 0b000000000000000; this._renderUI();
         }
         destroy() {
@@ -1462,13 +1472,13 @@ void (function (ctx, uctx, sctx) {
       }
 
       const toSafeString = (() => {
-        const CSS_REGEXP = /url\s*\(.*?\)+|@import|javascript\s*:|\\[ux][0-9a-fA-F]{2,4}|[`{}]/gi, COMMA_REGEXP = /[\s,]+$/, domParser = new DOMParser();
-        return string => {
-          if (typeof string !== "string") { return "" } const trimmedString = string.trim(); if (!trimmedString) { return "" } try {
-            const doc = domParser.parseFromString(tTP.createHTML(trimmedString), "text/html"), rawText = doc.body?.textContent || "";
-            return rawText.replace(CSS_REGEXP, "").trim().replace(COMMA_REGEXP, "");
-          } catch { return "" }
-        };
+        const c = /[`{}]|url\s*\(|@import|\\x[0-9a-f]{2}|\\u[0-9a-f]{4}|([a-z][a-z0-9\s\x00-\x1F\x7F]{0,100}:)/gi, n = /[\s\x00-\x1F\x7F]+/g, // eslint-disable-line no-control-regex
+          h = /[<&]/, m = /\/\*[\s\S]*?\*\//g, e = /[\s,]+$/, b = new Set(["javascript:", "vbscript:", "data:"]); let t = null; return s => {
+            if (typeof s !== "string") { return "" } s = s.trim(); if (!s) { return "" }
+            if (h.test(s)) { try { if (!t) { t = cE("template") } t.innerHTML = tTP.createHTML(s); s = t.content.textContent || ""; t.content.textContent = "" } catch { return "" } }
+            const filter = (k, p) => { if (!p) { return "" } let r = n.test(p) ? p.replace(n, "") : p; if (/[A-Z]/.test(r)) { r = r.toLowerCase() } if (b.has(r)) { return "" } return k };
+            if (!s) { return "" } s = s.replace(m, "").replace(c, filter); return s.replace(e, "");
+          };
       })();
 
       void (async function InitEnvironment(navigatorInfo) {
@@ -1492,7 +1502,7 @@ void (function (ctx, uctx, sctx) {
                 timer = setTimeout(() => { this._queries = Array_filter(this._queries, q => q !== entry); resolve(null) }, timeout); Array_push(this._queries, entry);
               });
             },
-            destroy() { this._services.clear() }
+            destroy() { this._services.clear() },
           };
 
         void (async function InitData(bus) {
@@ -1503,11 +1513,11 @@ void (function (ctx, uctx, sctx) {
               fontSize: 1.0, fixViewport: false, fontStroke: IS_REAL_GECKO ? 0.03 : IS_REAL_BLINK ? 0.015 : 0.05, fixStroke: IS_REAL_BLINK, fixShadow: false,
               lazyload: false, selection: true, fontShadow: IS_REAL_GECKO ? 0.55 : IS_REAL_BLINK ? 0.75 : 0.45, shadowColor: "#7C7C7CDD", renderCanvas: false,
               fontCSS: `:not(i[class],head *):not(mjx-container *,.katex *):not([class*='glyph']):not([class*='symbols' i]):not([class*='icon' i]):not([class*='fa-']):not([class*='vjs-'])`,
-              fontEx: `[class*='watermark' i],.textLayer *,pre,pre *,code,code *`
+              fontEx: `[class*='watermark' i],.textLayer *,pre,pre *,code,code *`,
             }, _CUSTOM_FONTLIST_: [], _CUSTOM_PROPERTY_: Object.create(null), _DOMAINS_FONTS_SET_: [], _EXCLUDE_SITES_: ["127.0.0.1", "localhost"],
             _FONTOVERRIDE_DEF_: ["Arial", "FangSong", "Georgia", "HanHei SC", "Helvetica", "Helvetica Neue", "KaiTi", "Microsoft YaHei", "MingLiU", "NSimSun", "Noto Sans", "Open Sans", "PMingLiU", "PingFangHK-Medium", "PingFangHK-Regular", "PingFangSC-Medium", "PingFangSC-Regular", "PingFangSC-Semibold", "Roboto", "RobotoDraft", "SF Pro SC", "Segoe UI", "SimHei", "SimSun", "Tahoma", "Ubuntu", "Verdana", "{仿宋}", "{宋体}", "{微軟正黑體}", "{微软雅黑}", "{楷体}", "{黑体}"],
             _FONTSCALE_DEF_: { "www.ithome.com": { Element: ["scrollHeight"] }, "live.bilibili.com": { HTMLElement: ["offsetHeight"] }, ".smzdm.com": { Element: ["clientWidth"] } },
-            _MONOSPACED_FEATURE_: "", _MONOSPACED_FONTLIST_: "", _MONOSPACED_SITERULES_: [], _REMOTERENDERRULESDATA_: [], _FONTCHECKLIST_: []
+            _MONOSPACED_FEATURE_: "", _MONOSPACED_FONTLIST_: "", _MONOSPACED_SITERULES_: [], _REMOTERENDERRULESDATA_: [], _FONTCHECKLIST_: [],
           }, dataManager = new DataManager(INITIAL_CONFIG); await dataManager.init(); bus.register("InitData", { dataManager, INIT_VALUE: INITIAL_CONFIG._FONTS_SET_ });
         })(SERVICE_BUS);
 
@@ -1539,7 +1549,7 @@ void (function (ctx, uctx, sctx) {
               lazyload: Boolean(currentValue.fontStroke && currentValue.fixStroke && currentValue.lazyload), fontShadow: Number(currentValue.fontShadow),
               fixShadow: Boolean(currentValue.fontStroke && currentValue.fixStroke && currentValue.fontShadow && currentValue.fixShadow),
               renderCanvas: !isRawGreasemonkey && currentValue.fontFace && Boolean(currentValue.renderCanvas), shadowColor: toSafeString(currentValue.shadowColor),
-              fontCSS: toSafeString(currentValue.fontCSS), fontEx: toSafeString(currentValue.fontEx), isEditorBlock: currentValue.isEditorBlock, __proto__: null
+              fontCSS: toSafeString(currentValue.fontCSS), fontEx: toSafeString(currentValue.fontEx), isEditorBlock: currentValue.isEditorBlock, __proto__: null,
             }, ruleManager = new RenderRuleManager(CUR_HOST_NAME), parsedValue = ruleManager.applyRules(correctedFont, safeDeepClone(fontData)),
             themeDetector = new ThemeDetector({ useCache: true, onThemeChange: theme => { setAttribute(document.documentElement, LOAD_ONCE, theme) } });
           bus.register("ProcessSavedData", { value: { domainIndex, parsedValue, ...fontData }, excludeIndex, ruleManager, themeDetector });
@@ -1654,12 +1664,11 @@ void (function (ctx, uctx, sctx) {
             enabled = fontStroke && fixStroke, ultimateBold = new UltimateBoldProcessor(enabled, shadowRootCss, boldFixCss, boldSelector, lazyload, styleManager),
             frameSync = new FrameSyncManager(styleManager, ultimateBold, compareVersion), hoverDetector = new BoldHoverDetector(boldFixCss, lazyload, styleManager),
             options = { font: fontSelect, renderFont: activeFont, radius: shadowValue, color: shadowColor }, canvasFont = new CanvasFontInterceptor(options);
-          if (!isRawGreasemonkey) { frameSync.start() } bus.register("FontRendering", { ultimateBold, frameSync });
-          if (!isCurrentSiteAllowed) { return } if (configure.globalDisable && domainIndex === -1) { return } const onHeadReady = () => {
-            styleManager.insert(MAIN_STYLE_NAME, finalStyle, { type: MAIN_STYLE_TYPE }); ultimateBold.init();
-            if (enabled) { hoverDetector.start() } if (fontFace && renderCanvas) { canvasFont.apply() }
-          }; if (document.head) { onHeadReady(); return } const observer = new MutationObserver((_, obs) => { if (document.head) { obs.disconnect(); onHeadReady() } });
-          observer.observe(document.documentElement, { childList: true });
+          if (!isRawGreasemonkey) { frameSync.start() } bus.register("FontRendering", { ultimateBold, frameSync }); if (!isCurrentSiteAllowed) { return }
+          if (configure.globalDisable && domainIndex === -1) { return } const insertStyle = () => { styleManager.insert(MAIN_STYLE_ID, finalStyle, { type: MAIN_STYLE_TYPE }) },
+            onHeadReady = () => { insertStyle(); ultimateBold.init(); if (enabled) { hoverDetector.start() } if (fontFace && renderCanvas) { canvasFont.deploy() } };
+          if (document.head) { onHeadReady(); return } const observer = new MutationObserver((_, obs) => { if (document.head) { obs.disconnect(); onHeadReady() } });
+          observer.observe(document.documentElement, { childList: true }); addListener($, "load", insertStyle, { once: true });
         })(SERVICE_BUS);
 
         void (async function FixScaleOffset(bus) {
@@ -1683,7 +1692,7 @@ void (function (ctx, uctx, sctx) {
             { boldFixCss, finalStyle } = output.data, ultimateBold = rendering.ultimateBold, { fontStroke, fixStroke } = savedData.value.parsedValue,
             useBoldFixer = fontStroke && fixStroke, iframeCallbck = function (iframe, doc, win) {
               if (!iframe || isFrameHidden(iframe)) { return } if (doc.head) {
-                styleManager.insert(MAIN_STYLE_NAME, convertCSS(doc, finalStyle, compareVersion), { target: iframe, type: MAIN_STYLE_TYPE });
+                styleManager.insert(MAIN_STYLE_ID, convertCSS(doc, finalStyle, compareVersion), { target: iframe, type: MAIN_STYLE_TYPE });
                 if (useBoldFixer) { styleManager.insert(`${BOLD_STYLE_NAME}${randomString(8, "alpha")}`, boldFixCss, { target: iframe, type: BOLD_STYLE_TYPE }) }
               } if (doc.body) {
                 if (!useBoldFixer || !ultimateBold) { return } let processTimer;
@@ -1709,7 +1718,7 @@ void (function (ctx, uctx, sctx) {
             const isProhibited = (globalDisable && domainIndex === -1) || !isCurrentSiteAllowed; if (isProhibited) { return }
             const cssText = parseCsstextForIframe(finalStyle), processIframe = i => {
               if (hasAttribute(i, FRAME_STATUS)) { return } if (isFrameHidden(i)) { setAttribute(i, FRAME_STATUS, "ignore"); return } try {
-                const activeRender = () => { styleManager.insert(MAIN_STYLE_NAME, cssText, { target: i, type: MAIN_STYLE_TYPE }); setAttribute(i, FRAME_STATUS, "succeed") };
+                const activeRender = () => { styleManager.insert(MAIN_STYLE_ID, cssText, { target: i, type: MAIN_STYLE_TYPE }); setAttribute(i, FRAME_STATUS, "succeed") };
                 if (i._loadController) { i._loadController.abort() } const controller = new AbortController(); i._loadController = controller;
                 setAttribute(i, FRAME_STATUS, "pending"); addListener(i, "load", activeRender, { signal: controller.signal });
               } catch { setAttribute(i, FRAME_STATUS, "failed") }
@@ -1733,7 +1742,7 @@ void (function (ctx, uctx, sctx) {
                 let hasHtml = false; const { addedNodes } = mutation;
                 for (let i = 0, l = addedNodes.length; i < l; ++i) { if (addedNodes[i].nodeName === "HTML") { hasHtml = true; break } }
                 if (!hasHtml) { continue } observer.disconnect(); if (fallbackTimer) { clearTimeout(fallbackTimer) }
-                styleManager.insert(MAIN_STYLE_NAME, convertCSS(document, finalStyle, compareVersion), { type: MAIN_STYLE_TYPE }); return;
+                styleManager.insert(MAIN_STYLE_ID, convertCSS(document, finalStyle, compareVersion), { type: MAIN_STYLE_TYPE }); return;
               }
             }); observer.observe(document, { childList: true }); fallbackTimer = setTimeout(() => { observer.disconnect() }, 3e3);
           }
@@ -1776,10 +1785,10 @@ void (function (ctx, uctx, sctx) {
             const languagePacks = {
               "en-US": { Name: getMetaValue("name:en"), Lagend: "Font Rendering Settings", HelpTitle: "Click to open help documentation", Path: "../wiki/Font-Rendering-(Customized)", SelectFonts: "Selected Fonts:", ClearAll: "Clear All", FontRewrite: "Font Rewrite", FingerPrinting: "Fingerprint protection limits font detection. Update your browser's settings to proceed.", SetFont: "Set Font, Please Select:", InstallMoreFont: "Install fonts from our standard library, make your font list selection more diverse.", DefaultON: "（ON*）", UnknowFont: "Unkown Font", FontSmooth: "Font Smooth", FontSize: "Font Scaling", FontStroke: "Font Stroke", FontShadow: "Font Shadow", FixVP: "Fix vpu", FixBold: "Fix Bold", Rendered: "Rendered Elements", Unrendered: "Unrendered Elements", RenderedTitle: "Important data is read-only by default. Double-click to unlock and edit.", RenderedPH: "Please modify default values with caution to avoid rendering issues.", FixShadow: "Font Shadow Fixer", FixLazyload: "Use Lazyload Fixer", FixShadowText: "Fixes bold style shadow rendering issues in Chrome 123.0+. Disabled by default.", CurrentFont: "Current: {font}", FixLazyloadText: "Lazy load fix utility. Disabled by default. Enable only if style fail or script conflict.", FixSelection: "Text Selection Fixer", FixSelectionText: "Fixes text selection blur from font stroke or font shadow. Enabled by default.", InvalidData: "No data available", UnrenrenderedPH: `If you plan to use custom English monospaced fonts, do not delete "pre, pre *, code, code *" lightly.`, SearchPH: "Enter keywords to search", CustomFontTitle: "Double-click to open the custom font adding tool.", GarbledTitle: "Double-click to view solutions for garbled text, font ghosting, or layout glitches.", CustomMonoTitle: "Double-click to open Custom English Monospace Font Settings Tool.", FontRewriteData: "Double-click to edit custom font override data.", FontScaleData: "Double-click to edit site scaling fix data.", NoMatchedFont: "No matching fonts found", SiteDefault: "Website Font", Save: "Save", Preview: "Prvw", ClickToDo: "Click to re-detect permissions or font data." },
               "zh-CN": { Name: getMetaValue("name:zh-CN"), Lagend: "字体渲染参数设置", HelpTitle: "单击打开帮助文档", Path: `../wiki/${encodeURIComponent("字体渲染（自用脚本）")}`, SelectFonts: "已选定的字体：", ClearAll: "清空全部", SetFont: "设置字体，请选择：", FontRewrite: "字体重写", FingerPrinting: "您的浏览器处于指纹隐私保护状态，需调整设置以恢复字体检测。", InstallMoreFont: "建议下载内置字库中预设的字体，让您的字体列表选择更加丰富多元。", DefaultON: "（默认开启*）", FontSmooth: "字体平滑", FontSize: "字体缩放比例", FontStroke: "字体描边粗细", FontShadow: "字体阴影大小", FixVP: "视口修正", FixBold: "粗体修正", Canvas: "渲染画布", Rendered: "需要渲染的元素标签", Unrendered: "排除渲染的元素标签", RenderedTitle: "核心数据默认只读，双击可解锁编辑。", RenderedPH: "请谨慎修改默认值，以免导致渲染失效。", UnrenrenderedPH: "如需使用自定义英文等宽字体，请谨慎删除『pre, pre *, code, code *』", FixShadow: "附加阴影样式修正", FixLazyload: "使用延迟加载修正", Reset: "重置", FixShadowText: "用于修正 Chromium 123.0+ 粗体样式附加阴影的渲染异常，默认关闭。", FixLazyloadText: "延迟加载修正程序，默认关闭。仅在样式加载异常或产生执行冲突时开启。", FixSelection: "修复文本选择效果", FixSelectionText: "用于修复由于应用字体描边或阴影，导致文本选中时显示不清晰的问题，默认开启。", Close: "关闭", CustomFontTitle: "双击打开自定义字体添加工具", GarbledTitle: "双击查看文字乱码、字体重影、样式错乱的解决方案", CustomMonoTitle: "双击打开自定义英文等宽字体设定工具", FontRewriteData: "双击编辑自定义字体重写数据", FontScaleData: "双击编辑站点缩放修正设置数据", Backup: "备份", UnknowFont: "未知字体", CurrentFont: "当前字体：{font}", InvalidData: "字体源未包含有效的字体信息", NoMatchedFont: "未找到匹配的字体", SearchPH: "输入关键字搜索字体", SiteDefault: "网站默认字体", Save: "保存", Preview: "预览", ClickToDo: "点击重新检测权限或字体数据" },
-              "zh-TW": { Name: getMetaValue("name:zh-TW"), Lagend: "字型渲染參數設定", HelpTitle: "點擊查看說明文件", Path: `../wiki/${encodeURIComponent("字体渲染（自用脚本）")}`, SelectFonts: "已選定的字型：", ClearAll: "清空全部", SetFont: "設定字型，請選擇：", FontRewrite: "字型覆寫", FingerPrinting: "您的瀏覽器處於指紋隱私保護狀態，需調整設定以恢復字型偵測。", InstallMoreFont: "建議下載內建字庫中預設的字型，讓您的字型列表選擇更加豐富多元。", DefaultON: "（預設開啟*）", FontSmooth: "字型平滑", FontSize: "字型縮放比例", FontStroke: "字型描邊粗細", FontShadow: "字型陰影大小", FixVP: "視口修正", FixBold: "粗體修正", Canvas: "轉譯畫布", Rendered: "需要轉譯的元素標籤", Unrendered: "排除轉譯的元素標籤", RenderedTitle: "核心資料預設唯讀，雙擊可解鎖編輯。", RenderedPH: "請謹慎修改預設值，以免導致轉譯失效。", UnrenrenderedPH: "如需使用自訂英文等寬字型，請謹慎刪除「pre, pre *, code, code *」", FixShadow: "附加陰影樣式修正", FixLazyload: "使用延遲載入修正", Reset: "重設", FixShadowText: "用於修正 Chromium 123.0+ 粗體樣式附加陰影的轉譯異常，預設關閉。", FixLazyloadText: "延遲載入修正程式，預設關閉。僅在樣式載入異常或產生執行衝突時開啟。", FixSelection: "修復文字選取效果", FixSelectionText: "用於修復因套用字型描邊或陰影，導致文字選取時顯示不清晰的問題，預設開啓。", Close: "關閉", CustomFontTitle: "雙擊開啟自訂字型新增工具", GarbledTitle: "雙擊查看文字亂碼、字型重影、樣式錯亂的解決方案", CustomMonoTitle: "雙擊開啟自訂英文等寬字型設定工具", FontRewriteData: "雙擊編輯自訂字型覆寫資料", FontScaleData: "雙擊編輯網站縮放修正資料", Backup: "備份", UnknowFont: "未知字型", CurrentFont: "目前字型：{font}", InvalidData: "字型源未包含有效的字型資訊", NoMatchedFont: "未找到符合的字型", SearchPH: "輸入關鍵字搜尋字型", SiteDefault: "網站預設字型", Save: "儲存", Preview: "預覽", ClickToDo: "點擊重新偵測權限或字型資料" }
+              "zh-TW": { Name: getMetaValue("name:zh-TW"), Lagend: "字型渲染參數設定", HelpTitle: "點擊查看說明文件", Path: `../wiki/${encodeURIComponent("字体渲染（自用脚本）")}`, SelectFonts: "已選定的字型：", ClearAll: "清空全部", SetFont: "設定字型，請選擇：", FontRewrite: "字型覆寫", FingerPrinting: "您的瀏覽器處於指紋隱私保護狀態，需調整設定以恢復字型偵測。", InstallMoreFont: "建議下載內建字庫中預設的字型，讓您的字型列表選擇更加豐富多元。", DefaultON: "（預設開啟*）", FontSmooth: "字型平滑", FontSize: "字型縮放比例", FontStroke: "字型描邊粗細", FontShadow: "字型陰影大小", FixVP: "視口修正", FixBold: "粗體修正", Canvas: "轉譯畫布", Rendered: "需要轉譯的元素標籤", Unrendered: "排除轉譯的元素標籤", RenderedTitle: "核心資料預設唯讀，雙擊可解鎖編輯。", RenderedPH: "請謹慎修改預設值，以免導致轉譯失效。", UnrenrenderedPH: "如需使用自訂英文等寬字型，請謹慎刪除「pre, pre *, code, code *」", FixShadow: "附加陰影樣式修正", FixLazyload: "使用延遲載入修正", Reset: "重設", FixShadowText: "用於修正 Chromium 123.0+ 粗體樣式附加陰影的轉譯異常，預設關閉。", FixLazyloadText: "延遲載入修正程式，預設關閉。僅在樣式載入異常或產生執行衝突時開啟。", FixSelection: "修復文字選取效果", FixSelectionText: "用於修復因套用字型描邊或陰影，導致文字選取時顯示不清晰的問題，預設開啓。", Close: "關閉", CustomFontTitle: "雙擊開啟自訂字型新增工具", GarbledTitle: "雙擊查看文字亂碼、字型重影、樣式錯亂的解決方案", CustomMonoTitle: "雙擊開啟自訂英文等寬字型設定工具", FontRewriteData: "雙擊編輯自訂字型覆寫資料", FontScaleData: "雙擊編輯網站縮放修正資料", Backup: "備份", UnknowFont: "未知字型", CurrentFont: "目前字型：{font}", InvalidData: "字型源未包含有效的字型資訊", NoMatchedFont: "未找到符合的字型", SearchPH: "輸入關鍵字搜尋字型", SiteDefault: "網站預設字型", Save: "儲存", Preview: "預覽", ClickToDo: "點擊重新偵測權限或字型資料" },
             }, i18n = new I18n(languagePacks, getLanguage("zh-CN"), "en-US"), incompatible = compareVersion({ GECKO: 126, more: null }) || isRawContent,
               html = `<fieldset><legend><span>${i18n.t("Lagend")}</span><span class="help anchor-help tooltip" data-tooltip="${i18n.t("HelpTitle")}" data-current-anchor="--help" data-action="launch-help"><span class="rotation" height="24" width="24"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="48px" height="48px" viewBox="0,0,255.99431,255.99431"><g transform="scale(0.5,0.5)"><path d="M504.1,256c0,-137 -111.1,-248.1 -248.1,-248.1c-137,0 -248.1,111.1 -248.1,248.1c0,137 111.1,248.1 248.1,248.1c137,0 248.1,-111.1 248.1,-248.1z" fill="#67a5df"/><path d="M146.1,181.5c0,-13.9 4.5,-28 13.4,-42.3c8.9,-14.3 22,-26.1 39.1,-35.5c17.1,-9.4 37.1,-14.1 60,-14.1c21.2,0 40,3.9 56.2,11.8c16.3,7.8 28.8,18.5 37.7,32c8.9,13.5 13.3,28.1 13.3,43.9c0,12.5 -2.5,23.4 -7.6,32.7c-5.1,9.4 -11.1,17.5 -18,24.3c-7,6.8 -19.4,18.3 -37.5,34.4c-5,4.5 -9,8.5 -12,12c-3,3.4 -5.2,6.6 -6.7,9.4c-1.5,2.9 -2.6,5.7 -3.4,8.6c-0.8,2.9 -2,7.9 -3.6,15.1c-2.8,15.2 -11.5,22.9 -26.1,22.9c-7.6,0 -14,-2.5 -19.2,-7.5c-5.2,-5 -7.8,-12.4 -7.8,-22.2c0,-12.3 1.9,-23 5.7,-32c3.8,-9 8.9,-16.9 15.2,-23.7c6.3,-6.8 14.8,-14.9 25.5,-24.3c9.4,-8.2 16.1,-14.4 20.3,-18.6c4.2,-4.2 7.7,-8.8 10.5,-14c2.9,-5.1 4.3,-10.7 4.3,-16.7c0,-11.7 -4.4,-21.6 -13.1,-29.7c-8.7,-8.1 -20,-12.1 -33.7,-12.1c-16.1,0 -28,4.1 -35.6,12.2c-7.6,8.1 -14.1,20.1 -19.3,35.9c-5,16.6 -14.4,24.8 -28.3,24.8c-8.2,0 -15.1,-2.9 -20.8,-8.7c-5.6,-5.6 -8.5,-11.8 -8.5,-18.6zM253.4,422.3c-8.9,0 -16.7,-2.9 -23.4,-8.7c-6.7,-5.8 -10,-13.9 -10,-24.3c0,-9.2 3.2,-17 9.7,-23.3c6.4,-6.3 14.4,-9.4 23.7,-9.4c9.2,0 17,3.2 23.3,9.4c6.3,6.3 9.4,14.1 9.4,23.3c0,10.3 -3.3,18.3 -9.9,24.2c-6.6,5.9 -14.2,8.8 -22.8,8.8z" fill="#fff"/></g></svg></span></span></legend><div class="form-group" id="token-component-area"><div id="tags-wrapper-slot"><div id="tags-selected-area" class="hidden"><label>${i18n.t("SelectFonts")}</label><button id="btn-clear-tags" type="button">${i18n.t("ClearAll")}</button></div></div><label>${i18n.t("SetFont")}</label><input type="hidden" id="panel-selected-fonts" name="selectedFonts" data-index="0" value=""><input type="text" id="panel-tags-input" class="${fontFace ? "" : "readonly"}"${fontFace ? "" : " disabled"} autocomplete="off"><dl class="tags-dropdown hidden" id="panel-tags-dropdown"><dt class="hidden anchor-finger-print tooltip" data-current-anchor="--finger-print" data-action="redetect-font" data-tooltip="${i18n.t("ClickToDo")}"></dt><div id="panel-tags-empty-tip" class="bold hidden"></div></dl><span class="emoji anchor-add-font input-mark tooltip" data-current-anchor="--add-font" id="panel-add-font-data" data-action="launch-double" data-tooltip="${i18n.t("CustomFontTitle")}">🔔</span></div><div class="form-group form-inline"><label id="panel-rewrite-data" class="tooltip anchor-font-rewrite" data-action="launch-double" data-current-anchor="--font-rewrite" data-tooltip="${i18n.t("FontRewriteData")}">${i18n.t("FontRewrite")}</label><span class="bold">${i18n.t("DefaultON")}</span><span class="switch-container"><input type="checkbox" data-action="trigger-disabled" id="panel-rewrite-enable" data-index="1" ${fontFace ? "checked" : ""}><label for="panel-rewrite-enable" class="switch-slider"></label></span></div><div class="form-group form-inline"><label for="panel-smooth-enable">${i18n.t("FontSmooth")}</label><span class="bold">${i18n.t("DefaultON")}</span><span class="switch-container"><input type="checkbox" id="panel-smooth-enable" data-index="2" ${fontSmooth ? "checked" : ""}><label for="panel-smooth-enable" class="switch-slider"></label></span></div><div class="form-group${isFontsize && !isEditorBlocked && !incompatible ? "" : " vhidden"}"><div class="form-sub-group"><label id="panel-scale-data" class="anchor-scale-offset tooltip" data-action="launch-double" data-current-anchor="--scale-offset" data-tooltip="${i18n.t("FontScaleData")}">${i18n.t("FontSize")}</label><span class="fs12 grey bold${isFixViewport ? "" : " vhidden"}">&nbsp;(&nbsp;${i18n.t("FixVP")}&nbsp;<input id="fix-vpu" type="checkbox" class="small-checkbox" data-index="9"${fixViewport && fontSize !== 1 ? " checked" : fontSize === 1 ? " disabled" : ""} />)</span><input type="text" id="panel-delay-readout-scale" maxlength="5" data-index="3" value="${fontSize}"${isEditorBlocked ? " disabled" : ""} /></div><div id="font-scale" class="range"><input type="range" id="panel-delay-range-scale" min="0.8" max="2.5" step="0.001" value="${fontSize}" /><output></output><div class="rangeProgress"></div></div></div><div class="form-group"><div class="form-sub-group"><label>${i18n.t("FontStroke")}</label><span class="fs12 grey bold${isRawGreasemonkey ? " vhidden" : ""} ">&nbsp;(&nbsp;${i18n.t("FixBold")}&nbsp;<input id="fix-bold" type="checkbox" class="small-checkbox" data-index="10"${fixStroke ? " checked" : ""}${fontStroke ? "" : " disabled"} />)</span><input type="text" id="panel-delay-readout-stroke" maxlength="5" data-index="4" value="${fontStroke}" /><div id="panel-fix-stroke-more" class="vhidden${fixStroke ? "" : " grayscale"}"><div id="panel-sub-fix-shadow"><div class="panel-sub-label"><label for="fix-shadow">${i18n.t("FixShadow")}</label><span class="switch-container"><input type="checkbox" id="fix-shadow" data-index="12"${fixShadow ? " checked" : ""}${fixStroke ? "" : " disabled"} /><label for="fix-shadow" class="switch-slider"></label></span></div><div class="panel-sub-text">${i18n.t("FixShadowText")}</div></div><div class="panel-sub-label"><label for="fix-lazyload">${i18n.t("FixLazyload")}</label><span class="switch-container"><input type="checkbox" id="fix-lazyload" data-index="13"${lazyload ? " checked" : ""}${fixStroke ? "" : " disabled"} /><label for="fix-lazyload" class="switch-slider"></label></span></div><div class="panel-sub-text">${i18n.t("FixLazyloadText")}</div><div class="panel-sub-label"><label for="fix-selection">${i18n.t("FixSelection")}</label><span class="switch-container"><input type="checkbox" id="fix-selection" data-index="14"${selection ? " checked" : ""}${fixStroke ? "" : " disabled"} /><label for="fix-selection" class="switch-slider"></label></span></div><div class="panel-sub-text">${i18n.t("FixSelectionText")}</div></div></div><div id="font-stroke" class="range"><input type="range" id="panel-delay-range-stroke" min="0" max="1" step="0.001" value="${fontStroke}"><output></output><div class="rangeProgress"></div></div></div><div class="form-group"><div class="form-sub-group"><label>${i18n.t("FontShadow")}</label><span id="panel-render-canvas" class="fs12 grey bold${isRawGreasemonkey ? " vhidden" : ""} ">&nbsp;(&nbsp;${i18n.t("Canvas")}&nbsp;<input id="render-canvas" type="checkbox" class="small-checkbox" data-index="11"${renderCanvas ? " checked" : ""}${fontFace ? "" : " disabled"} />)</span><input type="text" id="panel-delay-readout-shadow" maxlength="4" data-index="5" value="${fontShadow}" /></div><div id="font-shadow" class="range"><input type="range" id="panel-delay-range-shadow" min="0" max="4" step="0.01" value="${fontShadow}"><output></output><div class="rangeProgress"></div></div></div><div class="form-group${fontShadow ? "" : " hidden"}" id="color-picker-component-area"><div id="picker-class-mount-point"></div></div><div class="form-group"><div class="form-sub-group"><label>${i18n.t("Rendered")}</label><span class="emoji inline-add anchor-render tooltip" data-current-anchor="--render" id="visit-garbled-solution" data-action="launch-double" data-tooltip="${i18n.t("GarbledTitle")}">🔔</span><div id="rendered-expand-switch" expand-switch="ON">\u2227</div></div><textarea id="rendered-elements" data-action="launch-double" class="readonly anchor-render-textarea tooltip" data-current-anchor="--render-textarea" data-tooltip="${i18n.t("RenderedTitle")}" data-index="7" placeholder="${i18n.t("RenderedPH")}" readonly>${fontCSS}</textarea></div><div class="form-group"><div class="form-sub-group"><label>${i18n.t("Unrendered")}</label><span class="emoji inline-add anchor-unrender tooltip" data-current-anchor="--unrender" id="panel-add-mono-data" data-action="launch-double" data-tooltip="${i18n.t("CustomMonoTitle")}">🔔</span><div id="unrendered-expand-switch" expand-switch="ON">\u2227</div></div><textarea id="unrendered-elements" data-index="8" placeholder="${i18n.t("UnrenrenderedPH")}">${fontEx}</textarea></div><div class="form-group form-inline"><button data-action="launch-reset" class="panel-btn">${i18n.t("Reset")}</button><button data-action="close" class="panel-btn">${i18n.t("Close")}</button><button data-action="launch-backup" class="panel-btn${isBackupFunction ? "" : " hidden"}">${i18n.t("Backup")}</button><button id="btn-save-data" data-action="launch-savedata" class="panel-btn">${i18n.t("Save")}</button></div></fieldset>`,
-              css = `dialog{animation:dialogScaleIn .25s cubic-bezier(.16,1,.3,1);box-shadow:0 20px 40px #0000001f,0 5px 15px #00000014;background:#f0f6ff;border:none;border-radius:12px;bottom:auto;display:flex;flex-direction:column;left:auto;max-height:calc(100vh - 40px);max-width:90vw;min-width:314px;position:fixed;right:20px;top:20px;transform:translate(var(--x,0),var(--y,0));width:min-content;will-change:transform}.dialog-header{background:#67a5df;padding:10px 20px}.dialog-body{margin:2px;padding:4px 6px 6px 6px;scrollbar-color:auto}.dialog-body input:not([type=range],[type=checkbox],[type=button]):focus,textarea:focus{box-shadow:inset 0 1px 3px #0000001a,0 0 6px #52a8ec99;outline:0}fieldset{background:#f0f6ff;border:2px groove #67a5df;border-radius:10px;display:flex;flex-direction:column;gap:4px}legend{border:none;border-radius:6px;margin:0;padding:0 8px;position:relative;width:fit-content}legend span{color:#8b0000;font-size:14px;font-weight:700}legend .help{cursor:pointer;display:inline-block;margin:0 0 0 8px;position:relative;vertical-align:middle}legend .help .rotation{animation:rotation 6s linear infinite;display:block;height:24px;margin:0;padding:0;position:relative;-webkit-transform:rotate(1turn);transform-origin:center 50% 0;width:24px}legend .help svg{fill:#67a5df;height:24px;overflow:hidden;vertical-align:initial;width:24px}@keyframes rotation{0%{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(1turn)}}#tags-selected-area{align-items:center;display:flex;justify-content:space-between;margin:4px 0}#btn-clear-tags{background:0 0;border:1px solid #487baf;border-radius:4px;color:#487baf;cursor:pointer;font-size:12px;margin:0 2px 0 0;padding:2px 8px}#panel-tags-input{background:#fafafa;border:2px solid #67a5df;border-radius:6px;box-sizing:border-box;cursor:text;height:40px;margin:0;outline:0;overflow:hidden;padding:1px 36px 1px 0;text-indent:10px;text-overflow:ellipsis;width:100%}#panel-tags-input::placeholder{color:#3699;font:normal 600 16px/100% sans-serif}.selected-tags-panel{animation:fadeIn .25s ease-out;background:0 0;border:2px solid #67a5df;border-radius:6px;display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;padding:4px}.tag-item{align-items:center;background:#67a5df;border:1px solid #67a5df;border-radius:4px;box-shadow:0 1px 2px #0000000d;color:#fff;cursor:pointer;display:inline-flex;font-size:14px;font-weight:500;gap:6px;padding:4px 10px;transition:all .2s;user-select:none}#btn-clear-tags:hover,.tag-item:hover{background:#fff1f0;border-color:#ff4d4f;color:#ff4d4f}.tag-item:after{content:"✖";font-size:10px;opacity:.6}.tags-dropdown{background:#fff;border:2px solid #67a5df;border-radius:6px;box-shadow:0 4px 12px #00000026;box-sizing:content-box;display:block;left:0;margin:0;max-height:312px;overflow-y:auto;overflow-x:hidden;padding:4px 0;position:absolute;right:0;top:100%;scrollbar-color:auto;overscroll-behavior:contain;scroll-behavior:smooth;white-space:nowrap;z-index:99999}.dialog-body::-webkit-scrollbar,dl::-webkit-scrollbar{height:6px;width:6px;scrollbar-color:auto}::-webkit-scrollbar-thumb{background:#487baf;border-radius:10px}::-webkit-scrollbar-thumb:hover{background:#67a5df}::-webkit-scrollbar-track{background:#efefef;border-radius:10px;box-shadow:inset 2px 2px 4px #67a5df}.tags-dropdown dt{all:initial;background:#e51111;border:1px solid #e51111;color:#efea11;cursor:progress;display:block;font-size:15px;line-height:150%;position:sticky;top:-4px;margin:-4px 0 -1px;padding:6px 8px;word-break:break-all}.tags-dropdown dd{box-sizing:border-box;color:#262626;cursor:pointer;display:block;font-size:22px;font-weight:400;margin:1px 0;max-width:100%;min-width:100%;overflow-x:hidden;padding:8px 8px 8px 14px;text-overflow:ellipsis;transition:background .3s}.tags-dropdown dd:hover{background:#67a5df;color:#fefefe}.input-mark{cursor:pointer;height:0;left:-8px;margin:0 0 0 auto;padding:0;position:relative;text-align:center;top:-37px;width:24px}#panel-rewrite-data:hover,#panel-scale-data:hover{color:#8b0000;cursor:pointer}#font-scale{--step:0.001;--min:0.8;--max:2.5;--value:${fontSize}}#font-stroke{--step:0.001;--min:0;--max:1;--value:${fontStroke}}#font-shadow{--step:0.01;--min:0;--max:4;--value:${fontShadow}}.form-sub-group{align-items:center;display:flex;flex-direction:row;gap:0;justify-content:space-between}.form-sub-group input[type=checkbox]{appearance:none;cursor:pointer;display:inline-block;height:0;margin:0 2px 0 0;vertical-align:text-bottom;width:0}.form-sub-group input[type=text]{background:#fafafa;border:2px solid #67a5df;border-radius:4px;box-sizing:border-box;color:#111;font-family:Anton,Impact,serif!important;font-size:16px;font-weight:400;height:32px;margin:0 6px 0 auto;outline:0;padding:0;text-align:center;text-indent:0;width:56px}.form-sub-group input[type=checkbox].small-checkbox{appearance:none;cursor:pointer;display:inline-block;height:14px;margin:0 2px 0 0;vertical-align:text-bottom;width:14px}.form-sub-group input[type=checkbox].small-checkbox:after{background:#aaa;border-radius:3px;color:#fff;content:"✗";display:inline-block;font-size:10px;font-weight:700;height:14px;line-height:14px;margin:0;padding:0;position:relative;text-align:center;top:0;vertical-align:top;width:14px}.form-sub-group input[type=checkbox][disabled].small-checkbox:after{color:#dc143c}.form-sub-group input[type=checkbox].small-checkbox:checked:after{background:#65a0db;border:0!important;color:#fff;content:"✓";font-size:12px;font-weight:700;line-height:14px}#panel-tags-empty-tip{color:#55779699;padding:12px;text-align:center}#rendered-expand-switch,#unrendered-expand-switch{border:2px double #67a5df;border-radius:4px;box-sizing:border-box;color:#0a68c1;font-size:16px;margin:0 1px 2px auto;padding:1px 5px}#rendered-expand-switch:hover,#unrendered-expand-switch:hover{cursor:pointer;-webkit-user-select:none;user-select:none}.inline-add{cursor:pointer;display:block;margin:-4px 0 0 4px}#rendered-elements,#unrendered-elements{border:2px solid #67a5df;border-radius:6px;box-sizing:border-box;color:#0b5b9c;cursor:auto;display:block;font:normal 600 14px/150% var(--fr-shared-monospaced)!important;height:78px;margin:0;min-height:78px;min-width:100%;outline:0;padding:5px;resize:auto;width:100%;word-break:break-all}#rendered-elements::-webkit-scrollbar,#unrendered-elements::-webkit-scrollbar{height:6px;width:6px}#rendered-elements::placeholder,#unrendered-elements::placeholder{color:#555;font:normal 400 14px/150% var(--fr-shared-fontfamily);opacity:.85}#unrendered-elements{background:#fafafa}.panel-btn{background:none #67a5df;border:2px solid #6ba7e0;border-radius:6px;box-sizing:border-box;color:#fff!important;cursor:pointer;font:normal 600 14px/150% var(--fr-shared-fontfamily)!important;height:35px;margin:0 4px 0 0;min-height:35px;min-width:58px;padding:5px 10px;width:auto}#panel-fix-stroke-more{background:#f0f6ff;border:2px solid #67a5df;border-radius:6px;color:#333;left:auto;opacity:.92;padding:6px 10px 10px;position:absolute;top:32px;z-index:9999}.panel-sub-label{align-items:center;display:flex;justify-content:space-around}.panel-sub-text{color:#808287;font-size:12px;font-weight:400;line-height:180%;margin:0;padding:0 2px;word-break:break-word}#btn-save-data{margin:0 0 0 auto}.panel-btn.preview{background:coral;border-color:coral}.anim{animation:jiggle 1.8s ease-in infinite;background:#dc143c;border:2px solid #dc143c}.anchor-help{anchor-name:--help}dt.anchor-finger-print{anchor-name:--finger-print}.anchor-add-font{anchor-name:--add-font}.anchor-font-rewrite{anchor-name:--font-rewrite}.anchor-scale-offset{anchor-name:--scale-offset}.anchor-render{anchor-name:--render}.anchor-unrender{anchor-name:--unrender}.anchor-render-textarea{anchor-name:--render-textarea}@keyframes jiggle{48%,62%{transform:scale(1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translateY(-5px)}59%{transform:scale(1) translateY(-3px)}}@-moz-document url-prefix(){.dialog-body,dl,textarea{scrollbar-color:#8e9bb1 #f1f0f012!important;scrollbar-width:thin}}`,
+              css = `dialog{animation:dialogScaleIn .25s cubic-bezier(.16,1,.3,1);box-shadow:0 20px 40px #0000001f,0 5px 15px #00000014;background:#f0f6ff;border:none;border-radius:12px;bottom:auto;display:flex;flex-direction:column;left:auto;max-height:calc(100vh - 40px);max-width:90vw;min-width:314px;position:fixed;right:20px;top:20px;transform:translate(var(--x,0),var(--y,0));width:min-content;will-change:transform}.dialog-header{background:#67a5df;padding:10px 20px}.dialog-body{margin:2px;padding:4px 6px 6px 6px;scrollbar-color:auto}.dialog-body input:not([type=range],[type=checkbox],[type=button]):focus,textarea:focus{box-shadow:inset 0 1px 3px #0000001a,0 0 6px #52a8ec99;outline:0}fieldset{background:#f0f6ff;border:2px groove #67a5df;border-radius:10px;display:flex;flex-direction:column;gap:4px}legend{border:none;border-radius:6px;margin:0;padding:0 8px;position:relative;width:fit-content}legend span{color:#8b0000;font-size:14px;font-weight:700}legend .help{cursor:pointer;display:inline-block;margin:0 0 0 8px;position:relative;vertical-align:middle}legend .help .rotation{animation:rotation 6s linear infinite;display:block;height:24px;margin:0;padding:0;position:relative;-webkit-transform:rotate(1turn);transform-origin:center 50% 0;width:24px}legend .help svg{fill:#67a5df;height:24px;overflow:hidden;vertical-align:initial;width:24px}@keyframes rotation{0%{-webkit-transform:rotate(0)}to{-webkit-transform:rotate(1turn)}}#tags-selected-area{align-items:center;display:flex;justify-content:space-between;margin:4px 0}#btn-clear-tags{background:0 0;border:1px solid #487baf;border-radius:4px;color:#487baf;cursor:pointer;font-size:12px;margin:0 2px 0 0;padding:2px 8px}#panel-tags-input{background:#fafafa;border:2px solid #67a5df;border-radius:6px;box-sizing:border-box;cursor:text;height:40px;margin:0;outline:0;overflow:hidden;padding:1px 36px 1px 0;text-indent:10px;text-overflow:ellipsis;width:100%}#panel-tags-input::placeholder{color:#3699;font:normal 600 16px/100% sans-serif}.selected-tags-panel{animation:fadeIn .25s ease-out;background:0 0;border:2px solid #67a5df;border-radius:6px;display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;padding:4px}.tag-item{align-items:center;background:#67a5df;border:1px solid #67a5df;border-radius:4px;box-shadow:0 1px 2px #0000000d;color:#fff;cursor:pointer;display:inline-flex;font-size:14px;font-weight:500;gap:6px;padding:4px 10px;transition:all .2s;user-select:none}#btn-clear-tags:hover,.tag-item:hover{background:#fff1f0;border-color:#ff4d4f;color:#ff4d4f}.tag-item:after{content:"✖";font-size:10px;opacity:.6}.tags-dropdown{background:#fff;border:2px solid #67a5df;border-radius:6px;box-shadow:0 4px 12px #00000026;box-sizing:content-box;display:block;left:0;margin:0;max-height:312px;overflow-y:auto;overflow-x:hidden;padding:4px 0;position:absolute;right:0;top:100%;scrollbar-color:auto;overscroll-behavior:contain;scroll-behavior:smooth;white-space:nowrap;z-index:99999}.dialog-body::-webkit-scrollbar,dl::-webkit-scrollbar{height:6px;width:6px;scrollbar-color:auto}::-webkit-scrollbar-thumb{background:#487baf;border-radius:10px}::-webkit-scrollbar-thumb:hover{background:#67a5df}::-webkit-scrollbar-track{background:#efefef;border-radius:10px;box-shadow:inset 2px 2px 4px #67a5df}.tags-dropdown dt{all:initial;background:#e51111;border:1px solid #e51111;color:#efea11;cursor:progress;display:block;font-size:15px;line-height:150%;position:sticky;top:-4px;margin:-4px 0 -1px;padding:6px 8px;word-break:break-all}.tags-dropdown dd{box-sizing:border-box;color:#262626;cursor:pointer;display:block;font-size:22px;font-weight:400;margin:1px 0;max-width:100%;min-width:100%;overflow-x:hidden;padding:8px 8px 8px 14px;text-overflow:ellipsis;transition:background .3s}.tags-dropdown dd:hover{background:#67a5df;color:#fefefe}.input-mark{cursor:pointer;height:0;left:-8px;margin:0 0 0 auto;padding:0;position:relative;text-align:center;top:-37px;width:24px}#panel-rewrite-data:hover,#panel-scale-data:hover{color:#8b0000;cursor:pointer}#font-scale{--step:0.001;--min:0.8;--max:2.5;--value:${fontSize}}#font-stroke{--step:0.001;--min:0;--max:1;--value:${fontStroke}}#font-shadow{--step:0.01;--min:0;--max:4;--value:${fontShadow}}.form-sub-group{align-items:center;display:flex;flex-direction:row;gap:0;justify-content:space-between}.form-sub-group input[type=checkbox]{appearance:none;cursor:pointer;display:inline-block;height:0;margin:0 2px 0 0;vertical-align:text-bottom;width:0}.form-sub-group input[type=text]{background:#fafafa;border:2px solid #67a5df;border-radius:4px;box-sizing:border-box;color:#111;font-family:Anton,Impact,serif!important;font-size:16px;font-weight:400;height:32px;margin:0 6px 0 auto;outline:0;padding:0;text-align:center;text-indent:0;width:56px}.form-sub-group input[type=checkbox].small-checkbox{appearance:none;cursor:pointer;display:inline-block;height:14px;margin:0 2px 0 0;vertical-align:text-bottom;width:14px}.form-sub-group input[type=checkbox].small-checkbox:after{background:#aaa;border-radius:3px;color:#fff;content:"✗";display:inline-block;font-size:10px;font-weight:700;height:14px;line-height:14px;margin:0;padding:0;position:relative;text-align:center;top:0;vertical-align:top;width:14px}.form-sub-group input[type=checkbox][disabled].small-checkbox:after{color:#dc143c}.form-sub-group input[type=checkbox].small-checkbox:checked:after{background:#65a0db;border:0!important;color:#fff;content:"✓";font-size:12px;font-weight:700;line-height:14px}#panel-tags-empty-tip{color:#55779699;padding:12px;text-align:center}#rendered-expand-switch,#unrendered-expand-switch{border:2px double #67a5df;border-radius:4px;box-sizing:border-box;color:#0a68c1;font-size:16px;margin:0 1px 2px auto;padding:1px 5px}#rendered-expand-switch:hover,#unrendered-expand-switch:hover{cursor:pointer;-webkit-user-select:none;user-select:none}.inline-add{cursor:pointer;display:block;margin:-4px 0 0 4px}#rendered-elements,#unrendered-elements{border:2px solid #67a5df;border-radius:6px;box-sizing:border-box;color:#0b5b9c;cursor:auto;display:block;font:normal 600 14px/150% var(--fr-shared-monospaced)!important;height:78px;margin:0;min-height:78px;min-width:100%;outline:0;padding:5px;resize:auto;width:100%;word-break:break-all}#rendered-elements::-webkit-scrollbar,#unrendered-elements::-webkit-scrollbar{height:6px;width:6px}#rendered-elements::placeholder,#unrendered-elements::placeholder{color:#555;font:normal 400 14px/150% var(--fr-shared-fontfamily);opacity:.85}#unrendered-elements{background:#fafafa}.panel-btn{background:none #67a5df;border:2px solid #6ba7e0;border-radius:6px;box-sizing:border-box;color:#fff!important;cursor:pointer;font:normal 600 14px/150% var(--fr-shared-fontfamily)!important;height:35px;margin:0 4px 0 0;min-height:35px;min-width:60px;padding:5px 10px;width:auto}#panel-fix-stroke-more{background:#f0f6ff;border:2px solid #67a5df;border-radius:6px;color:#333;left:auto;opacity:.92;padding:6px 10px 10px;position:absolute;top:32px;z-index:9999}.panel-sub-label{align-items:center;display:flex;justify-content:space-around}.panel-sub-text{color:#808287;font-size:12px;font-weight:400;line-height:180%;margin:0;padding:0 2px;word-break:break-word}#btn-save-data{margin:0 0 0 auto}.panel-btn.preview{background:coral;border-color:coral}.anim{animation:jiggle 1.8s ease-in infinite;background:#dc143c;border:2px solid #dc143c}.anchor-help{anchor-name:--help}dt.anchor-finger-print{anchor-name:--finger-print}.anchor-add-font{anchor-name:--add-font}.anchor-font-rewrite{anchor-name:--font-rewrite}.anchor-scale-offset{anchor-name:--scale-offset}.anchor-render{anchor-name:--render}.anchor-unrender{anchor-name:--unrender}.anchor-render-textarea{anchor-name:--render-textarea}@keyframes jiggle{48%,62%{transform:scale(1)}50%{transform:scale(1.1,.9)}56%{transform:scale(.9,1.1) translateY(-5px)}59%{transform:scale(1) translateY(-3px)}}@-moz-document url-prefix(){.dialog-body,dl,textarea{scrollbar-color:#8e9bb1 #f1f0f012!important;scrollbar-width:thin}}`,
               initStateValue = [fontSelect, fontFace, fontSmooth, Number(fontSize) === 1 ? "OFF" : Number(fontSize).toFixed(3),
                 Number(fontStroke) === 0 ? "OFF" : Number(fontStroke).toFixed(3), Number(fontShadow) === 0 ? "OFF" : Number(fontShadow).toFixed(2),
                 shadowColor, fontCSS, fontEx, fixViewport, fixStroke, renderCanvas, fixShadow, lazyload, selection], scriptName = i18n.t("Name"),
@@ -1910,7 +1919,7 @@ void (function (ctx, uctx, sctx) {
                 fontSize: Number(values["panel-delay-range-scale"]), fixViewport: values["fix-vpu"], fontStroke: Number(values["panel-delay-range-stroke"]),
                 fixStroke: values["fix-bold"], lazyload: values["fix-lazyload"], selection: values["fix-selection"], fontShadow: Number(values["panel-delay-readout-shadow"]),
                 fixShadow: values["fix-shadow"], renderCanvas: values["render-canvas"], shadowColor: toSafeString(values["panel-shadow-color"]),
-                fontCSS: toSafeString(values["rendered-elements"]), fontEx: toSafeString(values["unrendered-elements"])
+                fontCSS: toSafeString(values["rendered-elements"]), fontEx: toSafeString(values["unrendered-elements"]),
               }; if (saveBtn.classList.contains("preview")) {
                 const panel = qS(".selected-tags-panel", tagsSlot), fontFaceTag = qW("#panel-rewrite-enable");
                 let cnFontName; for (const fontname of fontList) {
@@ -1921,14 +1930,14 @@ void (function (ctx, uctx, sctx) {
                 saveBtn.classList.remove("preview"); saveBtn.textContent = i18n.t("Save");
                 const parsedValue = savedData.ruleManager.applyRules(correctedFont, { __proto__: null, ...submitData }),
                   renderData = await getRenderData(parsedValue), { shadowRootCss, boldFixCss, finalStyle } = renderData;
-                styleManager.insert(MAIN_STYLE_NAME, finalStyle, { type: MAIN_STYLE_TYPE });
+                styleManager.insert(MAIN_STYLE_ID, finalStyle, { type: MAIN_STYLE_TYPE });
                 if (submitData.fixStroke !== fixStroke && submitData.fontStroke && !fixStroke) { ultimateBold.scanAll(true, boldFixCss) }
                 if (isRawGreasemonkey) {
                   const ifs = gT("iframe", document.body), l = ifs.length, cssText = parseCsstextForIframe(finalStyle);
-                  if (l > 0) { for (let i = 0; i < l; ++i) { styleManager.insert(MAIN_STYLE_NAME, cssText, { target: ifs[i], type: MAIN_STYLE_TYPE }) } }
+                  if (l > 0) { for (let i = 0; i < l; ++i) { styleManager.insert(MAIN_STYLE_ID, cssText, { target: ifs[i], type: MAIN_STYLE_TYPE }) } }
                 } else {
                   const cssArray = [boldFixCss, shadowRootCss]; ultimateBold.temporaryChangeStatus(...cssArray); frameSync.broadcastStyleToIframes({ temporary: true, cssArray });
-                  frameSync.broadcastStyleToIframes({ id: MAIN_STYLE_NAME, cssText: finalStyle }); adjuster?.(scaleMatrix);
+                  frameSync.broadcastStyleToIframes({ id: MAIN_STYLE_ID, cssText: finalStyle }); adjuster?.(scaleMatrix);
                 } reRendered = true;
               } else { openSaveDataPanel(submitData) }
             });
@@ -1940,7 +1949,8 @@ void (function (ctx, uctx, sctx) {
               switch (e.eventName) {
                 case "TERMINAL_RESTORE_DEFAULTS": {
                   if (e.data?.source !== "ResetDataDialog" || !stateManager.hasChanges()) { return }
-                  styleManager.insert(MAIN_STYLE_NAME, finalStyle, { type: MAIN_STYLE_TYPE }); ultimateBold.temporaryChangeStatus(boldFixCss, shadowRootCss); frameSync.broadcastStyleToIframes({ id: MAIN_STYLE_NAME, cssText: finalStyle }); frameSync.broadcastStyleToIframes({ temporary: true, cssArray: [boldFixCss, shadowRootCss] });
+                  styleManager.insert(MAIN_STYLE_ID, finalStyle, { type: MAIN_STYLE_TYPE }); ultimateBold.temporaryChangeStatus(boldFixCss, shadowRootCss);
+                  frameSync.broadcastStyleToIframes({ id: MAIN_STYLE_ID, cssText: finalStyle }); frameSync.broadcastStyleToIframes({ temporary: true, cssArray: [boldFixCss, shadowRootCss] });
                   fontCache.forEach(item => { item.isSelected = false; item.el.classList.remove("hidden") });
                   tagsInput.value = ""; tagsEmptyTip.classList.add("hidden"); const panel = qS(".selected-tags-panel", tagsSlot);
                   if (panel) { panel.remove() } tagsSelectedArea.classList.add("hidden"); syncHiddenValue();
@@ -1996,12 +2006,12 @@ void (function (ctx, uctx, sctx) {
             }); win.mount();
             function rollbackLastStyle() {
               if (!tagsInput.matches(":hover")) { usedFontName = DEFAULT_FONT_CH; tagsInput.placeholder = i18n.t("CurrentFont", { font: usedFontName }) }
-              if (!reRendered) { return } styleManager.insert(MAIN_STYLE_NAME, finalStyle, { type: MAIN_STYLE_TYPE }); updateMatrix(fontSize); adjuster?.(scaleMatrix);
+              if (!reRendered) { return } styleManager.insert(MAIN_STYLE_ID, finalStyle, { type: MAIN_STYLE_TYPE }); updateMatrix(fontSize); adjuster?.(scaleMatrix);
               if (isRawGreasemonkey) {
                 const ifs = gT("iframe", document.body), l = ifs.length, cssText = parseCsstextForIframe(finalStyle);
-                if (l > 0) { for (let i = 0; i < l; ++i) { styleManager.insert(MAIN_STYLE_NAME, cssText, { target: ifs[i], type: MAIN_STYLE_TYPE }) } }
+                if (l > 0) { for (let i = 0; i < l; ++i) { styleManager.insert(MAIN_STYLE_ID, cssText, { target: ifs[i], type: MAIN_STYLE_TYPE }) } }
               } else {
-                ultimateBold.temporaryChangeStatus(boldFixCss, shadowRootCss); frameSync.broadcastStyleToIframes({ id: MAIN_STYLE_NAME, cssText: finalStyle });
+                ultimateBold.temporaryChangeStatus(boldFixCss, shadowRootCss); frameSync.broadcastStyleToIframes({ id: MAIN_STYLE_ID, cssText: finalStyle });
                 frameSync.broadcastStyleToIframes({ temporary: true, cssArray: [boldFixCss, shadowRootCss] });
               }
             }
@@ -2059,7 +2069,7 @@ void (function (ctx, uctx, sctx) {
             const languagePacks = {
               "en-US": { GlobalTitle: "Save to Global Data:", GlobalContent: "Save as global rendering data, which is used by default.", WebsiteTitle: "Save to Current Site Data:", WebsiteContent: "Save current settings for {host}.", EditDataList: "Manage site settings list", LastSave: "Last saved：", DeleteCurrent: "Delete current site data", GlobalSave: "Save to Global", WebsiteSave: "Save to Current Site", SaveDataTitle: "Save Settings", SaveGlobalContent: "Global rendering data saved successfully!", SaveSiteContent: "Current site rendering data saved successfully!", DeleteTitle: "Delete Settings", DeleteContent: "Current site rendering data deleted successfully!", DisableTitle: "Global Rendering Automatically Disabled", DisableContent: "No active styles detected upon saving. Global font rendering has been turned off. To re-enable, please configure valid parameters and save them as global data." },
               "zh-CN": { GlobalTitle: "保存到全局配置：", GlobalContent: "将当前配置保存为全局渲染规则，默认对所有网站生效。", WebsiteTitle: "保存到当前站点：", LastSave: "上次保存时间：", WebsiteContent: "将当前配置保存为 {host} 的专属渲染规则。", EditDataList: "管理所有配置站点列表", DeleteCurrent: "删除当前站点配置", GlobalSave: "保存到全局", WebsiteSave: "保存到当前站点", SaveDataTitle: "保存配置", SaveGlobalContent: "全局字体渲染配置已成功保存！", SaveSiteContent: "当前站点的专属字体渲染配置已成功保存！", DeleteTitle: "删除配置", DeleteContent: "当前站点的专属字体渲染配置已成功删除！", DisableTitle: "自动停用全局渲染", DisableContent: "检测到您在未应用任何有效样式的情况下进行了保存，系统已自动关闭全局字体渲染。如需重新启用，请配置有效参数并保存为全局数据。", Cancel: "取消" },
-              "zh-TW": { GlobalTitle: "儲存至全域設定：", GlobalContent: "將目前設定儲存為全域轉譯規則，預設對所有網站生效。", WebsiteTitle: "儲存至目前網站：", LastSave: "上次儲存時間：", WebsiteContent: "將目前設定儲存為 {host} 的專屬轉譯規則。", EditDataList: "管理所有設定網站列表", DeleteCurrent: "刪除目前網站設定", GlobalSave: "儲存至全域", WebsiteSave: "儲存至目前網站", SaveDataTitle: "儲存設定", SaveGlobalContent: "全域字型渲染設定已成功儲存！", SaveSiteContent: "目前網站的專屬字型渲染設定已成功儲存！", DeleteTitle: "刪除設定", DeleteContent: "目前網站的專屬字型渲染設定已成功刪除！", DisableTitle: "自動停用全域轉譯", DisableContent: "偵測到您在未套用任何有效樣式的情況下進行了儲存，系統已自動關閉全域字型渲染。如需重新啟用，請設定有效參數並儲存為全域資料。", Cancel: "取消" }
+              "zh-TW": { GlobalTitle: "儲存至全域設定：", GlobalContent: "將目前設定儲存為全域轉譯規則，預設對所有網站生效。", WebsiteTitle: "儲存至目前網站：", LastSave: "上次儲存時間：", WebsiteContent: "將目前設定儲存為 {host} 的專屬轉譯規則。", EditDataList: "管理所有設定網站列表", DeleteCurrent: "刪除目前網站設定", GlobalSave: "儲存至全域", WebsiteSave: "儲存至目前網站", SaveDataTitle: "儲存設定", SaveGlobalContent: "全域字型渲染設定已成功儲存！", SaveSiteContent: "目前網站的專屬字型渲染設定已成功儲存！", DeleteTitle: "刪除設定", DeleteContent: "目前網站的專屬字型渲染設定已成功刪除！", DisableTitle: "自動停用全域轉譯", DisableContent: "偵測到您在未套用任何有效樣式的情況下進行了儲存，系統已自動關閉全域字型渲染。如需重新啟用，請設定有效參數並儲存為全域資料。", Cancel: "取消" },
             }, i18n = new I18n(languagePacks, getLanguage("zh-CN"), "en-US"), stateManager = await bus.get("stateManager"), length = domainFont.length,
               html = `<div class="form-group"><p class="title darkgreen">${i18n.t("GlobalTitle")}</p><p>${i18n.t("GlobalContent")}</p></div><div class="form-group"><p class="title firebrick">${i18n.t("WebsiteTitle")}<button class="btn btn-action edit-datalist" data-action="edit-datalist"${length === 0 ? " disabled" : ""}>${i18n.t("EditDataList")} (${length})</button></p><p class="nowrap indigo">${domainIndex === -1 ? i18n.t("WebsiteContent", { host: TOP_HOST }) : `<span class="bold">${i18n.t("LastSave")}</span><span class="date">${await getSavedDate()}</span><button class="btn btn-action"data-action="delete-data">${i18n.t("DeleteCurrent")}</button>`}</p></div><div class="btn-box"><button data-action="save-global" class="btn btn-primary">${i18n.t("GlobalSave")}</button><button data-action="save-domain"class="btn btn-ok">${i18n.t("WebsiteSave")}</button><button data-action="close"class="btn">${i18n.t("Cancel")}</button></div>`,
               css = `dialog{min-width:500px;top:250px}.dialog-header{background:#1482ea}.form-group *{text-shadow:0 0 1px #7d7d7d40!important}.form-group p{margin:0;padding:3px}.form-group .title{font-weight:700}.btn-box{display:flex;gap:8px;justify-content:flex-end;margin:18px 0 0}button.btn-action{margin:0;padding:5px 10px}button.edit-datalist{margin:0 0 0 8px;background:#ffe8e8;border:1px solid #b22222;color:#b22222}.form-group span.date{padding:0 12px 0 0}`,
@@ -2099,7 +2109,7 @@ void (function (ctx, uctx, sctx) {
             const languagePacks = {
               "en-US": { SaveLocation: "Confirm Storage Location", ConfirmContent: "Are you sure you want to overwrite and save the <strong class='darkgreen'>Current site data</strong> to the <strong class='dodgerblue'>Global data</strong>?", OK: "Confirm" },
               "zh-CN": { SaveLocation: "确认存储位置", ConfirmContent: "确认要将 <strong class='darkgreen'>当前站点配置</strong> 覆盖并保存到 <strong class='dodgerblue'>全局配置</strong> 吗？", OK: "确定", Cancel: "取消" },
-              "zh-TW": { SaveLocation: "確認儲存位置", ConfirmContent: "確認要將 <strong class='darkgreen'>目前網站設定</strong> 覆蓋並儲存至 <strong class='dodgerblue'>全域設定</strong> 嗎？", OK: "確定", Cancel: "取消" }
+              "zh-TW": { SaveLocation: "確認儲存位置", ConfirmContent: "確認要將 <strong class='darkgreen'>目前網站設定</strong> 覆蓋並儲存至 <strong class='dodgerblue'>全域設定</strong> 嗎？", OK: "確定", Cancel: "取消" },
             }, i18n = new I18n(languagePacks, getLanguage("zh-CN"), "en-US"),
               html = `<div class="form-group"><p>${i18n.t("ConfirmContent")}</p></div><div class="btn-box"><button data-action="confirm-save"class="btn btn-extra">${i18n.t("OK")}</button><button data-action="close"class="btn">${i18n.t("Cancel")}</button></div>`,
               css = `dialog{min-width:450px;right:45px;top:300px}.dialog-header{background:#ea9f14}.form-group *{text-shadow:0 0 1px #7d7d7d40!important}.form-group p{margin:0;padding:3px;line-height:150%}.btn-box{display:flex;gap:8px;justify-content:flex-end;margin:18px 0 0}`,
@@ -2111,7 +2121,7 @@ void (function (ctx, uctx, sctx) {
             const languagePacks = {
               "en-US": { Title: "Custom Font Adding Panel", Content: `① Enter your entries in the text area below following the format to add them. We recommend using the "<a data-action="launch-addTool">Quick Add Tool</a>" first, or refer to the examples fill-in. The system automatically filters out invalid formats or items already in the "<a href="${GMsupportURL}/{path}" target="_blank">Built-in Font Library</a>".`, Placeholder: `Format example: (one font naming table entry per line)\n{ "ch": "Chinese name", "en": "English name" }\u21b2\n{ "ch": "Chinesen name", "en": "English name", "ps": "PostScript name" }\u21b2\n\nNote 1: If the "Font Chinese Name" is not available, it can be replaced by the unique name in English or other languages.\nNote 2: "ps" is the PostScript name, Provide it as much as possible.`, Warn: "Note: Adding too many custom fonts may slow down font detection.", CustomFontVariant: "②&nbsp;Configure the font-variant style properties for fonts below.", VariantWarn: "Leave blank if you are unfamiliar with this property to avoid rendering issues.", CustomOpenType: `③&nbsp;Configure the OpenType <a href="https://learn.microsoft.com/en-us/typography/opentype/spec/featurelist" target="_blank">font-feature-settings</a> attributes below.`, CustomOpenTypeWarn: "Leave blank if the font you are currently setting is not an OpenType font.", Path: "../wiki/Font-Rendering-(Customized)#built-in-font-library", AddTool: "Quick Add Tool", SaveTitle: "Custom Font Data Storage", SaveSuccess: `Custom font data saved successfully!<p class="fs12 darkorange">Note: Invalid or duplicate font data will be filtered out.</p>`, ErrTitle: "Validation Failed", ErrContent: "Invalid font data. Please re-check and try again.", ClearSuccess: "Custom font data has been successfully cleaned!", AddToolIntro: "Click to Open a toolbar that helps you to quickly add font naming table", Save: "Save Data" },
               "zh-CN": { Title: "自定义字体添加面板", Content: `① 请在下方文本域内按格式输入即可添加。建议您优先使用『<a data-action="launch-addTool">快速添加工具</a>』或参考示例填写。系统会自动过滤格式错误或与『<a href="${GMsupportURL}/{path}" target="_blank">内置字体表</a>』重复的条目。`, Placeholder: `格式样例：(每行一组字体命名表数据)\n{ "ch": "中文字体名一", "en": "英文字体名一" }\u21b2\n{ "ch": "中文字体名二", "en": "英文字体名二", "ps": "Post-Script 名称" }\u21b2\n\n注1：若无中文名称，可用英文或其他语言名称代替。\n注2：若无英文名称，请自定义一个唯一的英文标识。\n注3：“ps” 为字体的 PostScript 名称，建议尽可能提供。`, Warn: "提示：请勿添加过多的自定义字体，以免影响字体检测的运行速度。", CustomFontVariant: "②&nbsp;您可以在下方设置字体的 font-variant 变体样式属性。", VariantWarn: "如果您不了解该属性，请保持留空，以免导致字体渲染异常。", CustomOpenType: `③&nbsp;您可以在下方设置 OpenType 字体的 <a href="https://learn.microsoft.com/zh-cn/typography/opentype/spec/featurelist" target="_blank">font-feature-settings</a> 属性。`, CustomOpenTypeWarn: "如果您设置的常规字体不属于 OpenType 字体，请保持留空。", Path: "../wiki/字体渲染（自用脚本）#既定的字体表", AddTool: "快速添加工具", SaveTitle: "自定义字体数据存储", SaveSuccess: `自定义字体数据已成功保存！<p class="fs12 darkorange">注：格式错误或重复的字体数据将被自动过滤。</p>`, ErrTitle: "数据校验失败", ErrContent: "自定义字体数据格式无效，请检查后重试。", ClearSuccess: "自定义字体数据已为您清理成功！", AddToolIntro: "点击打开帮助您快速添加字体命名表的工具栏", Save: "保存数据", Cancel: "取消" },
-              "zh-TW": { Title: "自訂字型新增面板", Content: `① 请在下方文字區域內依格式輸入即可新增。建議優先使用『<a data-action="launch-addTool">快速新增工具</a>』或參考範例填寫。系統會自動過濾格式錯誤或與『<a href="${GMsupportURL}/{path}" target="_blank">內建字型表</a>』重複的項目。`, Placeholder: `格式範例：(每行一組字型命名表資料)\n{ "ch": "中文字型名一", "en": "英文字型名一" }\u21b2\n{ "ch": "中文字型名二", "en": "英文字型名二", "ps": "Post-Script 名稱" }\u21b2\n\n註1：若無中文名稱，可用英文或其他語言名稱代替。\n註2：若無英文名稱，請自訂一個唯一的英文標識。\n註3：「ps」為字型的 PostScript 名稱，建議儘可能提供。`, Warn: "提示：請勿新增過多的自訂字型，以免影響字型偵測的執行速度。", CustomFontVariant: "②&nbsp;您可以在下方設定字型的 font-variant 變體樣式屬性。", VariantWarn: "如果您不了解該屬性，請保持留空，以免導致字型渲染異常。", CustomOpenType: `③&nbsp;您可以在下方設定 OpenType 字型的 <a href="https://learn.microsoft.com/zh-tw/typography/opentype/spec/featurelist" target="_blank">font-feature-settings</a> 屬性。`, CustomOpenTypeWarn: "如果您設定的常規字型不屬於 OpenType 字型，請保持留空。", Path: "../wiki/字体渲染（自用脚本）#既定的字体表", AddTool: "快捷新增工具", SaveTitle: "自訂字型數據儲存", SaveSuccess: `自訂字型數據已成功保存！<p class="fs12 darkorange">註：格式錯誤或重複的字型資料將被自動過濾。</p>`, ErrTitle: "資料驗證失敗", ErrContent: "字型資料格式無效，請檢查後重試。", ClearSuccess: "自訂字體數據已為您清理成功！", AddToolIntro: "點擊開啓幫助您快速新增字型命名表的工具欄", Save: "儲存資料", Cancel: "取消" }
+              "zh-TW": { Title: "自訂字型新增面板", Content: `① 请在下方文字區域內依格式輸入即可新增。建議優先使用『<a data-action="launch-addTool">快速新增工具</a>』或參考範例填寫。系統會自動過濾格式錯誤或與『<a href="${GMsupportURL}/{path}" target="_blank">內建字型表</a>』重複的項目。`, Placeholder: `格式範例：(每行一組字型命名表資料)\n{ "ch": "中文字型名一", "en": "英文字型名一" }\u21b2\n{ "ch": "中文字型名二", "en": "英文字型名二", "ps": "Post-Script 名稱" }\u21b2\n\n註1：若無中文名稱，可用英文或其他語言名稱代替。\n註2：若無英文名稱，請自訂一個唯一的英文標識。\n註3：「ps」為字型的 PostScript 名稱，建議儘可能提供。`, Warn: "提示：請勿新增過多的自訂字型，以免影響字型偵測的執行速度。", CustomFontVariant: "②&nbsp;您可以在下方設定字型的 font-variant 變體樣式屬性。", VariantWarn: "如果您不了解該屬性，請保持留空，以免導致字型渲染異常。", CustomOpenType: `③&nbsp;您可以在下方設定 OpenType 字型的 <a href="https://learn.microsoft.com/zh-tw/typography/opentype/spec/featurelist" target="_blank">font-feature-settings</a> 屬性。`, CustomOpenTypeWarn: "如果您設定的常規字型不屬於 OpenType 字型，請保持留空。", Path: "../wiki/字体渲染（自用脚本）#既定的字体表", AddTool: "快捷新增工具", SaveTitle: "自訂字型數據儲存", SaveSuccess: `自訂字型數據已成功保存！<p class="fs12 darkorange">註：格式錯誤或重複的字型資料將被自動過濾。</p>`, ErrTitle: "資料驗證失敗", ErrContent: "字型資料格式無效，請檢查後重試。", ClearSuccess: "自訂字體數據已為您清理成功！", AddToolIntro: "點擊開啓幫助您快速新增字型命名表的工具欄", Save: "儲存資料", Cancel: "取消" },
             }, i18n = new I18n(languagePacks, getLanguage("zh-CN"), "en-US"), customFontPromises = [dataManager.get(CUSTOMFONTLIST), dataManager.get(CUSTOMPROPERTY)],
               [customFontData, customProperty] = await Promise.all(customFontPromises), { variant = "", feature = "" } = customProperty,
               customFontArray = Array_map(customFontData, fontData => JSON_stringify(fontData)), customFontList = Array_join(customFontArray, "\n"),
@@ -2149,10 +2159,10 @@ void (function (ctx, uctx, sctx) {
             const languagePacks = {
               "en-US": { Title: "Custom Monospaced Fonts", Switcher: "Enable Custom Monospaced Fonts (OFF*)", Content: `① Enter domains and site selectors below to apply monospace fonts. Separate multiple domains with <code>&nbsp;|&nbsp;</code>. Invalid entries will be automatically filtered out. <span class="firebrick fs14">(Recommended: See the <a class="fs14" href="${GMsupportURL}/74" target="_blank">Author's Guide [CHS]</a>)</span>`, SiterulePlaceholder: `One rule per line. Multiple rules can be added for the same site, and the same selector can match multiple domains. Format Example:\n\n@github.com##[class~='blob-code'] \n@github.com##.example,#abc,div:not(.test)\n@github.dev|github.io###test:not([class='test'])`, Warn: "Leave blank or use the author's rules if you are unfamiliar with style rules.", MonospaceList: "② Enter custom monospaced fonts below, follow the example.", MonospaceWarn: "Note: The standard 'monospaced' font family is built-in; no need to re-add.", MonospaceFeature: `③ Configure the OpenType <a href="https://learn.microsoft.com/en-us/typography/opentype/spec/featurelist" target="_blank">font-feature-settings</a> attributes below.`, MonospaceFeatureWarn: "Leave blank if your monospaced font is not an OpenType font.", RuleError: "Selector Activation Failed", RuleErrorContent: "Invalid root domain or element selector. Please check and retry.", MonoError: "Font Parsing Failed", MonoErrorContent: "Invalid monospaced font data format. Please check and retry.", Error: "Parsing Failed", ErrorContent: "Unable to read submitted data. Please check the format and try again.", SaveOkTitle: "Save Settings", SaveOkContent: "Custom monospaced font data saved successfully!", Save: "Save Data" },
               "zh-CN": { Title: "自定义英文等宽字体数据", Switcher: "启用自定义英文等宽字体（默认关闭）", Content: `① 您可在下方文本域内设置应用等宽字体的域名及元素选择器，多个域名请用<code>&nbsp;|&nbsp;</code>分隔，错误条目将被自动剔除。<span class="firebrick fs14">(建议您参考 <a class="fs14" href="${GMsupportURL}/74" target="_blank">作者推荐</a> 填写)</span>`, SiterulePlaceholder: `每行仅限填写一组规则。同一站点支持添加多条不同规则，同一选择器亦可关联多个域名。格式示例：\n\n@github.com##[class~='blob-code'] \n@github.com##.example,#abc,div:not(.test)\n@github.dev|github.io###test:not([class='test'])`, Warn: "若您不了解样式规则，请保持留空或直接使用作者提供的站点规则。", MonospaceList: "② 您可在下方设置自定义英文等宽字体，请按示例格式填写。", MonospaceWarn: "注意：系统已内置 monospaced 字体族，无需重复添加。", MonospaceFeature: `③ 您可以在下方设置 OpenType 字体的 <a href="https://learn.microsoft.com/zh-cn/typography/opentype/spec/featurelist" target="_blank">font-feature-settings</a> 属性。`, MonospaceFeatureWarn: "如果您设置的等宽字体不属于 OpenType 字体，请保持留空。", RuleError: "选择器配置未生效", RuleErrorContent: "自定义的根域名或元素选择器不正确，请检查后重试。", MonoError: "字体数据解析失败", MonoErrorContent: "自定义的等宽字体数据格式有误，请检查后重试。", Error: "数据解析失败", ErrorContent: "系统无法读取您提交的数据，请检查格式后重试。", SaveOkTitle: "保存等宽字体配置", SaveOkContent: "自定义英文等宽字体数据已成功保存！", Save: "保存数据", Cancel: "取消" },
-              "zh-TW": { Title: "自訂英文等寬字型資料", Switcher: "啓用自訂英文等寬字型（預設關閉）", Content: `① 您可在下方文字欄位內設定套用等寬字型的網域及元素選擇器，多個網域請用<code>&nbsp;|&nbsp;</code>分隔，錯誤項目將被自動剔除。<span class="firebrick fs14">(建議您參考 <a class="fs14" href="${GMsupportURL}/74" target="_blank">作者推薦</a> 填寫)</span>`, SiterulePlaceholder: `每行僅限填寫一組規則。同一網站支援新增多條不同規則，同一選取器亦可關聯多個網域。格式範例：\n\n@github.com##[class~='blob-code'] \n@github.com##.example,#abc,div:not(.test)\n@github.dev|github.io###test:not([class='test'])`, Warn: "若您不了解樣式規則，請保持留空或直接使用作者提供的網站規則。", MonospaceList: "② 您可在下方設定自訂英文等寬字型，請按範例格式填寫。", MonospaceWarn: "注意：系統已內建 monospaced 字型族，無需重複新增。", MonospaceFeature: `③ 您可以在下方設定 OpenType 字型的 <a href="https://learn.microsoft.com/zh-tw/typography/opentype/spec/featurelist" target="_blank">font-feature-settings</a> 屬性。`, MonospaceFeatureWarn: "如果您設定的等寬字型不屬於 OpenType 字型，請保持留空。", RuleError: "選取器設定未生效", RuleErrorContent: "自訂的根網域或元素選取器不正確，請檢查後重試。", MonoError: "字型資料解析失敗", MonoErrorContent: "等寬字型資料格式錯誤，請檢查後重試。", Error: "資料解析失敗", ErrorContent: "系統無法讀取您提交的資料，請檢查格式後重試。", SaveOkTitle: "儲存等寬字型設定", SaveOkContent: "自訂英文等寬字型資料已成功儲存！", Save: "儲存資料", Cancel: "取消" }
+              "zh-TW": { Title: "自訂英文等寬字型資料", Switcher: "啓用自訂英文等寬字型（預設關閉）", Content: `① 您可在下方文字欄位內設定套用等寬字型的網域及元素選擇器，多個網域請用<code>&nbsp;|&nbsp;</code>分隔，錯誤項目將被自動剔除。<span class="firebrick fs14">(建議您參考 <a class="fs14" href="${GMsupportURL}/74" target="_blank">作者推薦</a> 填寫)</span>`, SiterulePlaceholder: `每行僅限填寫一組規則。同一網站支援新增多條不同規則，同一選取器亦可關聯多個網域。格式範例：\n\n@github.com##[class~='blob-code'] \n@github.com##.example,#abc,div:not(.test)\n@github.dev|github.io###test:not([class='test'])`, Warn: "若您不了解樣式規則，請保持留空或直接使用作者提供的網站規則。", MonospaceList: "② 您可在下方設定自訂英文等寬字型，請按範例格式填寫。", MonospaceWarn: "注意：系統已內建 monospaced 字型族，無需重複新增。", MonospaceFeature: `③ 您可以在下方設定 OpenType 字型的 <a href="https://learn.microsoft.com/zh-tw/typography/opentype/spec/featurelist" target="_blank">font-feature-settings</a> 屬性。`, MonospaceFeatureWarn: "如果您設定的等寬字型不屬於 OpenType 字型，請保持留空。", RuleError: "選取器設定未生效", RuleErrorContent: "自訂的根網域或元素選取器不正確，請檢查後重試。", MonoError: "字型資料解析失敗", MonoErrorContent: "等寬字型資料格式錯誤，請檢查後重試。", Error: "資料解析失敗", ErrorContent: "系統無法讀取您提交的資料，請檢查格式後重試。", SaveOkTitle: "儲存等寬字型設定", SaveOkContent: "自訂英文等寬字型資料已成功儲存！", Save: "儲存資料", Cancel: "取消" },
             }, i18n = new I18n(languagePacks, getLanguage("zh-CN"), "en-US"),
               monospacePromises = [dataManager.get(CONFIGURE), dataManager.get(MONOSITERULES), dataManager.get(MONOFONTLIST), dataManager.get(MONOFEATURE)],
-              [configure, monoSiteRules, monoFontlist, monoFeature] = await Promise.all(monospacePromises), monoSiteRulelist = monoSiteRules.join("\n"),
+              [configure, monoSiteRules, monoFontlist, monoFeature] = await Promise.all(monospacePromises), monoSiteRulelist = Array_join(monoSiteRules, "\n"),
               html = `<div class="form-group form-inline porte"><label>${i18n.t("Switcher")}</label><span class="switch-container"><input type="checkbox" data-action="launch-enable" id="enable-monospaced"${configure.isCustomMono ? " checked" : ""} /><label for="enable-monospaced" class="switch-slider"></label></span></div><div class="form-group"><p class="fs14 grey">${i18n.t("Content")}</p><textarea id="siterules-content" placeholder="${i18n.t("SiterulePlaceholder")}">${monoSiteRulelist}</textarea><p class="warn firebrick fs12">${i18n.t("Warn")}</p></div><div class="form-group"><p class="fs14 grey">${i18n.t("MonospaceList")}</p><input type="text" id="monospaced-content" placeholder="'Source Code Pro','Mono','Monaco'" value="${monoFontlist}" /><p class="warn firebrick fs12">${i18n.t("MonospaceWarn")}</p></div><div class="form-group"><p class="fs14 grey">${i18n.t("MonospaceFeature")}</p><input type="text" id="monospaced-feature-content" placeholder='"liga" 0,"tnum","zero"' value='${monoFeature}' /><p class="warn firebrick fs12">${i18n.t("MonospaceFeatureWarn")}</p></div><div class="btn-box"><button data-action="launch-save" class="btn btn-ok">${i18n.t("Save")}</button><button data-action="close" class="btn">${i18n.t("Cancel")}</button></div>`,
               css = `dialog{min-width:530px;top:100px}.dialog-header{background:#fa8c16}.form-group{margin-bottom:6px}.form-group *{text-shadow:0 0 1px #7d7d7d40!important}.form-group p{line-height:150%;margin:0;padding:3px;color:#333}.btn-box{display:flex;gap:8px;justify-content:flex-end;margin:16px 0 0}.form-group code{background:#f0f2f5;border:1px solid #f0f2f5;font-size:14px;line-height:22px;border-radius: 4px;padding-block:0;padding-inline:4px}.form-group :is(input,textarea){padding:8px;min-width:100%;outline:0;border:1px solid #999;border-radius:6px;white-space:pre;overscroll-behavior:contain;scrollbar-color:auto;font:normal 400 15px/150% var(--fr-shared-monospaced)!important;cursor:auto}.form-group textarea{min-height:170px}:is(.form-group input, textarea)::placeholder{color:#aaa;white-space:pre-line;font:normal 400 14px/150% var(--fr-shared-fontfamily)!important;word-break:break-word}.form-group textarea::-webkit-scrollbar{height:8px;width:8px}p.warn{margin:-4px 0 0 2px}.form-group p a{font-size:14px;line-height:125%;color:#1482ea}.form-group p a[data-action]{cursor:pointer}.porte{padding-bottom:6px;border-bottom:1px solid #ccc}@-moz-document url-prefix(){textarea{scrollbar-color:#8e9bb1 #f1f0f012!important;scrollbar-width:thin}}`,
               win = new DialogPanelController({ id: randomString(6, "alpha"), type: "dialog", html, css, styleManager }), qW = s => qS(s, win.dialog),
@@ -2167,9 +2177,8 @@ void (function (ctx, uctx, sctx) {
                 siteRuleArray = siterules ? siterules.match(REGEX.rule) : null, monospaceArray = monospaces ? monospaces.match(REGEX.mono) : null;
               if (siterules && !siteRuleArray) { return openSimpleDialog(i18n.t("RuleError"), i18n.t("RuleErrorContent"), "prompt", false, false, "#b22222") }
               if (monospaces && !monospaceArray) { return openSimpleDialog(i18n.t("MonoError"), i18n.t("MonoErrorContent"), "prompt", false, false, "#b22222") }
-              const syncData = (key, val, process = v => v) => (val ? dataManager.set(key, process(val)) : dataManager.delete(key));
-              try {
-                const configure = await dataManager.get(CONFIGURE); await Promise.all([syncData(MONOSITERULES, siteRuleArray, uniq), syncData(MONOFONTLIST, monospaceArray, arr => uniq(arr).join()), syncData(MONOFEATURE, feature), dataManager.set(CONFIGURE, { ...configure, isCustomMono: enableMono })]);
+              const syncData = (key, val, process = v => v) => (val ? dataManager.set(key, process(val)) : dataManager.delete(key)); try {
+                const configure = await dataManager.get(CONFIGURE); await Promise.all([syncData(MONOSITERULES, siteRuleArray, uniq), syncData(MONOFONTLIST, monospaceArray, arr => Array_join(uniq(arr), ",")), syncData(MONOFEATURE, feature), dataManager.set(CONFIGURE, { ...configure, isCustomMono: enableMono })]);
                 win.close(); openSimpleDialog(i18n.t("SaveOkTitle"), i18n.t("SaveOkContent"), "dialog", true, true);
               } catch { openSimpleDialog(i18n.t("Error"), i18n.t("ErrorContent"), "dialog", false, false, "#b22222") }
             }); win.mount();
@@ -2182,7 +2191,7 @@ void (function (ctx, uctx, sctx) {
             const languagePacks = {
               "en-US": { Title: "Custom Site Settings List", SaveInfo: `<strong class="darkgreen">Note: </strong>Search matching domains are automatically selected. Please make sure everything looks right before saving, as changes are final.`, Search: "Search", Empty: "---- No custom site setting data ----", Delete: "Delete", Reset: "Reset", SaveSuccess: "Saved Successfully", SaveSuccessContent: "Custom site settings Saved Successfully!", Save: "Save Data" },
               "zh-CN": { Title: "网站个性化设置列表", SaveInfo: `<strong class="darkgreen">提示：</strong>搜索会自动选中匹配的域名。数据保存后将无法撤销，提交前请仔细确认。`, Search: "搜索域名", Empty: "---- 暂无个性化设置站点 ----", Delete: "删除", Reset: "重置", SaveSuccess: "保存成功", SaveSuccessContent: "您的个性化站点设置已保存成功！", Save: "保存数据", Cancel: "取消" },
-              "zh-TW": { Title: "網站個性化設定列表", SaveInfo: `<strong class="darkgreen">提示：</strong>搜索會自動選取相符的網域。資料儲存後將無法復原，提交前請仔細確認。`, Search: "搜尋網域", Empty: "---- 暫無個性化設定站點 ----", Delete: "刪除", Reset: "重置", SaveSuccess: "儲存成功", SaveSuccessContent: "您的個性化站點設定已儲存成功！", Save: "儲存數據", Cancel: "取消" }
+              "zh-TW": { Title: "網站個性化設定列表", SaveInfo: `<strong class="darkgreen">提示：</strong>搜索會自動選取相符的網域。資料儲存後將無法復原，提交前請仔細確認。`, Search: "搜尋網域", Empty: "---- 暫無個性化設定站點 ----", Delete: "刪除", Reset: "重置", SaveSuccess: "儲存成功", SaveSuccessContent: "您的個性化站點設定已儲存成功！", Save: "儲存數據", Cancel: "取消" },
             }, i18n = new I18n(languagePacks, getLanguage("zh-CN"), "en-US"),
               html = `<div class="form-group"><p class="fs14">${i18n.t("SaveInfo")}</p></div><div class="form-group"><div class="form-group form-sub form-inline"><input id="search-data" type="search"><button data-action="launch-search" id="search-data-search">${i18n.t("Search")}</button></div><ul id="search-data-list"></ul></div><div class="btn-box"><button data-action="launch-save" class="btn btn-ok">${i18n.t("Save")}</button><button data-action="close" class="btn">${i18n.t("Cancel")}</button></div>`,
               css = `dialog{min-width:560px;top:120px}.dialog-header{background:#ca095d}.form-group *{text-shadow:0 0 1px #7d7d7d40!important}.form-group p{line-height:150%;margin:0;padding:3px}.btn-box{display:flex;gap:8px;justify-content:flex-end;margin:12px 0 0}#search-data{margin:0;padding:4px 8px;width:80%;height:32px;border:1px solid #777;border-radius:4px; outline:none;font:normal 400 14px/150% var(--fr-shared-monospaced)!important}#search-data-search{margin:0;padding:4px 10px;width:19%;height:32px;background:#eee;color:#333;border:1px solid #777;border-radius:4px;font-size:14px;line-height:150%;outline:none;cursor:pointer}#search-data-search:hover{background:#f6f6f6;box-shadow:0 0 3px #a7a7a7}#search-data-list{overflow-x:hidden;margin:0;padding:0;list-style:none;max-height:315px;overscroll-behavior:contain;scrollbar-color:auto}#search-data-list::-webkit-scrollbar{height:10px;width:10px}#search-data-list li{display:flex;overflow:hidden;margin:0;padding:5px 10px;color:#555;list-style:none;white-space:nowrap;font:normal 400 14px/150% var(--fr-shared-fontfamily)!important;justify-content:space-between}#search-data-list li ::selection{background:#ca095d!important;color:#fff!important}li span.number{padding:2px}li span.list{margin-right:auto;padding:2px 8px 2px 0;width:85%;text-align:left;text-overflow:ellipsis;font-size:14px;font-weight:700;-webkit-user-select:all;user-select:all}li span a.action{color:#800000;font-size:14px;cursor:pointer;padding:2px}ul li:nth-child(2n-1){background-color:#fff8fccc}ul li:hover{background-color:#fdf6eccc}.reset{text-decoration:line-through;font-style: italic}ul li#empty{display:list-item;padding:18px 8px;text-align:center;color:#555}.serial{margin:0;padding:2px 8px 2px;font-size:14px}@-moz-document url-prefix(){ul{scrollbar-color:#8e9bb1 #f1f0f012!important;scrollbar-width:thin}}`,
@@ -2217,7 +2226,7 @@ void (function (ctx, uctx, sctx) {
             const languagePacks = {
               "en-US": { Title: "Reset or Restore Settings?", Intro: `Our『Reset & Restore』feature helps you change your current settings back to <strong class="slategray">initial state</strong>, or bring back to <strong class="slategray">the last saved settings</strong>. It is perfect for when you make a mistake or simply want to try out new features.`, ResetIntro: `<strong>Reset:</strong> Restore all settings to the initial state, manually saving required.`, RestoreIntro: "<strong>Restore:</strong> Retrieve the last saved data and automatically restore the preview rendering.", AbortIntro: "<strong>Cancel:</strong> Abort the current reset or restore action. ", NoChanged: "Settings have not changed, no need to restore!" },
               "zh-CN": { Title: "确认要重置或恢复设置吗？", Intro: `『重置与恢复』可以帮您把当前的设置还原至<strong class="slategray">初始状态</strong>，或者找回<strong class="slategray">上次保存的数据</strong>。当您不小心改错了设置，或者想尝试新的功能组合时，用它就能轻松搞定。`, ResetIntro: "<strong>重置：</strong>将所有设置恢复到初始状态，需要手动保存。", RestoreIntro: "<strong>恢复：</strong>一键找回上次保存的数据，自动恢复预览渲染。", AbortIntro: "<strong>取消：</strong>终止当前的重置或恢复流程。", NoChanged: "设置未发生变化，无需恢复！", Reset: "重置", Restore: "恢复", Cancel: "取消" },
-              "zh-TW": { Title: "確認要重設或還原設定嗎？", Intro: `「重設與還原」可以幫您將目前設定恢復至<strong class='slategray'>初始狀態</strong>，或找回<strong class='slategray'>上次儲存的資料</strong>。當您不小心改錯設定，或想嘗試新的參數組合時，可以用它輕鬆還原。`, ResetIntro: "<strong>重設：</strong>將所有設定恢復至初始狀態，需要手動儲存。", RestoreIntro: "<strong>還原：</strong>一鍵找回上次儲存的資料，自動恢復預覽渲染。", AbortIntro: "<strong>取消：</strong>終止目前的重設或還原流程。", NoChanged: "設定未發生變化，無需還原！", Reset: "重設", Restore: "還原", Cancel: "取消" }
+              "zh-TW": { Title: "確認要重設或還原設定嗎？", Intro: `「重設與還原」可以幫您將目前設定恢復至<strong class='slategray'>初始狀態</strong>，或找回<strong class='slategray'>上次儲存的資料</strong>。當您不小心改錯設定，或想嘗試新的參數組合時，可以用它輕鬆還原。`, ResetIntro: "<strong>重設：</strong>將所有設定恢復至初始狀態，需要手動儲存。", RestoreIntro: "<strong>還原：</strong>一鍵找回上次儲存的資料，自動恢復預覽渲染。", AbortIntro: "<strong>取消：</strong>終止目前的重設或還原流程。", NoChanged: "設定未發生變化，無需還原！", Reset: "重設", Restore: "還原", Cancel: "取消" },
             }, i18n = new I18n(languagePacks, getLanguage("zh-CN"), "en-US"),
               html = `<div class="form-group"><p>${i18n.t("Intro")}</p><p class="firebrick">${i18n.t("ResetIntro")}</p><p class="darkgreen">${i18n.t("RestoreIntro")}</p><p class="grey">${i18n.t("AbortIntro")}</p></div><div class="btn-box"><button data-action="trigger-reset" class="btn btn-extra">${i18n.t("Reset")}</button><button data-action="trigger-restore" class="btn btn-ok${hasChanges ? "" : " anchor-restore-data tooltip grayscale"}"${hasChanges ? "" : ` data-current-anchor="--restore-data" data-tooltip="${i18n.t("NoChanged")}" disabled`}>${i18n.t("Restore")}</button><button data-action="close" class="btn">${i18n.t("Cancel")}</button></div>`,
               css = `dialog{min-width:480px;top:150px}.dialog-header{background: #84bc13}.form-group *{text-shadow:0 0 1px #7d7d7d40!important}.form-group p{line-height:150%;margin:0;padding:3px;color: #333}.btn-box{display:flex;gap:8px;justify-content:flex-end;margin:12px 0 0}.form-group p.domain{font:italic 700 24px/150% Candara,Times!important;word-break:keep-all}.anchor-restore-data{anchor-name:--restore-data}`,
@@ -2231,7 +2240,7 @@ void (function (ctx, uctx, sctx) {
             const languagePacks = {
               "en-US": { Title: "Backup and Restore Data", BackupTitle: "Data Export & Backup", BuckupDone: "Data backup complete. Downloading now...<br/><span class='fs10 indigo'>{name}</span>", BT: "Backup to local file", BC: "Export and backup your current data locally and automatically download the *.sqlitedb file.", RT: "Restore from local file:", RC: "Click here to load *.sqlitedb backup file", RestoreOkTitle: "Restore Successful", RestoreOk: "Backup data restored successfully!", NoFileTitle: "No File Selected", NoFileContent: "The submitted file is empty. Please select a valid local backup file to restore.", DataErrorTitle: "Invalid File", DataErrorContent: "The submitted file verification failed. Please select a valid local backup file." },
               "zh-CN": { Title: "备份和还原数据", BackupTitle: "数据备份与导出", BuckupDone: "数据备份已完成，正在生成并下载……<br/><span class='fs10 indigo'>{name}</span>", BT: "备份到本地文件：", BC: "将当前的配置数据导出并下载为 *.sqlitedb 文件。", RT: "从本地文件还原：", RC: "点击此处选择并载入 *.sqlitedb 备份文件", Reselect: "重新选择", Backup: "备份数据", Restore: "还原数据", RestoreOkTitle: "数据还原成功", RestoreOk: "备份数据已成功还原至当前数据存储！", NoFileTitle: "未选择文件", NoFileContent: "载入的文件为空，请选择需要还原的备份文件。", DataErrorTitle: "文件校验失败", DataErrorContent: "该文件不是有效的备份数据，请选择正确的备份文件。", OK: "确定", Cancel: "取消" },
-              "zh-TW": { Title: "備份與還原資料", BackupTitle: "資料備份與匯出", BuckupDone: "資料備份已完成，正在產生並下載……<br/><span class='fs10 indigo'>{name}</span>", BT: "備份至本機檔案：", BC: "將目前的設定資料匯出並下載為 *.sqlitedb 檔案。", RT: "從本機檔案還原：", RC: "點擊此處選擇並載入 *.sqlitedb 備份檔案", Reselect: "重新選擇", Backup: "備份資料", Restore: "還原資料", RestoreOkTitle: "資料還原成功", RestoreOk: "備份數據已成功恢復至當前數據儲存！", NoFileTitle: "未選擇檔案", NoFileContent: "載入的檔案為空，請選擇需要還原的備份檔案。", DataErrorTitle: "檔案驗證失敗", DataErrorContent: "該檔案不是有效的備份資料，請選擇正確的備份檔案。", OK: "確定", Cancel: "取消" }
+              "zh-TW": { Title: "備份與還原資料", BackupTitle: "資料備份與匯出", BuckupDone: "資料備份已完成，正在產生並下載……<br/><span class='fs10 indigo'>{name}</span>", BT: "備份至本機檔案：", BC: "將目前的設定資料匯出並下載為 *.sqlitedb 檔案。", RT: "從本機檔案還原：", RC: "點擊此處選擇並載入 *.sqlitedb 備份檔案", Reselect: "重新選擇", Backup: "備份資料", Restore: "還原資料", RestoreOkTitle: "資料還原成功", RestoreOk: "備份數據已成功恢復至當前數據儲存！", NoFileTitle: "未選擇檔案", NoFileContent: "載入的檔案為空，請選擇需要還原的備份檔案。", DataErrorTitle: "檔案驗證失敗", DataErrorContent: "該檔案不是有效的備份資料，請選擇正確的備份檔案。", OK: "確定", Cancel: "取消" },
             }, i18n = new I18n(languagePacks, getLanguage("zh-CN"), "en-US"), selectText = `\ud83d\udd0e [${i18n.t("RC")}]`,
               html = `<div class="form-group"><p class="darkgreen bold">${i18n.t("BT")}</p><p>${i18n.t("BC")}</p><p class="indigo bold">${i18n.t("RT")}</p><p><span class="indigo" id="load_zone">${selectText}</span><input accept=".sqlitedb" class="hidden" type="file" id="load_file" /></p></div><div class="btn-box"><button data-action="launch-backup" class="btn btn-ok">${i18n.t("Backup")}</button><button data-action="launch-restore" class="btn btn-file">${i18n.t("Restore")}</button><button data-action="close" class="btn">${i18n.t("Cancel")}</button></div>`,
               css = `dialog{min-width:450px;top:250px}.dialog-header{background:#4c0459}.form-group *{text-shadow:0 0 1px #7d7d7d40!important}.form-group p{line-height:150%;margin:0;padding:3px}.btn-box{display:flex;gap:8px;justify-content:flex-end;margin:12px 0 0}.btn-box button.btn-file{background:#7410bd;border-color:#7410bd;color:#fff}.btn-box button.btn-file:hover{background:#7410bdd9;box-shadow:0 0 3px #7410bd}#load_zone{cursor:pointer}`,
@@ -2259,12 +2268,12 @@ void (function (ctx, uctx, sctx) {
             addListener(win, "action:launch-restore:click", async () => {
               try {
                 const file = loadFile?.files?.[0]; if (!file) { openSimpleDialog(i18n.t("NoFileTitle"), i18n.t("NoFileContent"), "prompt", false, false, "#b22222"); return }
-                const code = await cipher.inspect(SOURCE, RC2, dataManager), DEFAULT = { 3: [], 4: [] }, fileContentRaw = await new Promise((resolve, reject) => {
-                  const reader = new FileReader(); reader.onload = () => { resolve(reader.result) };
-                  reader.onerror = () => { reject(new Error("FileReader read error")) }; reader.readAsText(file);
+                const code = await cipher.inspect(SOURCE, RC2, dataManager), fileContentRaw = await new Promise((resolve, reject) => {
+                  const reader = new FileReader(); reader.onload = () => { resolve(reader.result) }; reader.onerror = () => { reject(new Error("reader error")) }; reader.readAsText(file);
                 }), decryptedData = Object.create(null); let fileContent = decrypt(String(fileContentRaw)), parsedData = JSON_parse(cipher.decrypt(fileContent));
                 decryptedData.db_0 = decrypt(parsedData.db_0); const backupDate = Date.parse(decryptedData.db_0); for (let i = 1; i <= 10; ++i) {
-                  const key = `db_${i}`, rawValue = parsedData[key]; if (rawValue) { decryptedData[key] = JSON_parse(decrypt(rawValue)) } else { decryptedData[key] = DEFAULT[i] ?? void 0 }
+                  const key = `db_${i}`, rawValue = parsedData[key]; if (rawValue === "dW5kZWZpbmVk" || rawValue === "bnVsbA==") { decryptedData[key] = void 0 } else
+                    if (rawValue) { decryptedData[key] = JSON_parse(decrypt(rawValue)) } else { decryptedData[key] = void 0 }
                 } if (isNaN(backupDate) || backupDate >= Date.now() || code.search(parsedData.db_R) === -1) { throw new Error("Invalid Data Error") }
                 const keys = await GMlistValues(); await Promise.allSettled(Array_map(keys, key => dataManager.delete(key)));
                 const writePromises = [dataManager.set(FONTSET, decryptedData.db_1), dataManager.set(EXCLUDESITES, decryptedData.db_2), dataManager.set(DOMAINFONTSET, decryptedData.db_3), dataManager.set(CUSTOMFONTLIST, decryptedData.db_4), dataManager.set(CONFIGURE, { ...decryptedData.db_5, curVersion: GMscritpVersion, rebuild: void 0 }), dataManager.set(MONOFONTLIST, decryptedData.db_6), dataManager.set(MONOSITERULES, decryptedData.db_7), dataManager.set(MONOFEATURE, decryptedData.db_8), dataManager.set(FONTSCALEFIX, decryptedData.db_9), dataManager.set(FONTOVERRIDE, decryptedData.db_10)], content = `<p class="indigo">${i18n.t("RestoreOk")}</p>`;
@@ -2276,8 +2285,8 @@ void (function (ctx, uctx, sctx) {
           async function openAdvancedCorePanel() {
             const languagePacks = {
               "en-US": { Lang: "Current Language：", Backup: "Local Backup & Restore (Enabled)", BackupContent: "Backups ensure data safety and are fully encrypted. Never import unknown backups to protect against malicious XSS script attacks.", Preview: "Preview Before Saving (Enabled)", PreviewContent: "Preview adjustments instantly without saving. Note: Features requiring a page refresh cannot be displayed in previews.", Scaling: "Font CSS Scaling (Experimental)", ScalingContent: "Experimental feature. Due to inconsistent CSS 'zoom' support across browsers, use only as needed.", Viewport: "Viewport Units Fixing (Disabled)", ViewportContent: `Auto-enables with Font Scaling to correct viewport unit offsets caused by CSS zoom. Can be toggled globally here or per site.`, Updatetip: "Update Notifications (Enabled)", UpdatetipContent: "Get alerts and changelogs when a new version releases. If disabled via popup, re-enable it here.", Hotkey: "Keyboard Shortcuts (Enabled)", HotkeyContent: "Quickly triggers script menus. Required if your script manager lacks a native menu. Disable if shortcuts conflict.", Personal: "Custom Site Limit (Default: 200)", PersonalContent: "Excessive custom site data may delay loading (highly optimized in new versions). The 200 limit is not strictly enforced.", Remote: "Cloud Preset Rendering Data", RemoteContent: "We maintain cloud parameters to fix styling issues on major websites, auto-syncing upon updates. You can also manually fetch them to fix layouts.", Pull: "Re-Pull", FontCache: "Global Font List Cache (30 Days)", FontCacheContent: "Font detection consumes CPU/RAM, so the list is cached and refreshed every 30 days. Force an update here if you install new system fonts.", White: "Whitelist Mode (Global Disable)", WhiteContent: `Disables font rendering globally except on specified sites. Note: Once enabled, it cannot be turned off manually; it auto-disables only when you reconfigure and save new 'Global Data'.`, CacheRebuild: "Font List Cache Cleared", CacheRebuildContent: "Legacy cache cleared. The system will automatically regenerate a new font list.", FetchTitle: "Fetch Remote Rendering Data", SavedTitle: "Advanced Core Settings Saved", SavedContent: "Advanced core settings has been saved successfully.", Advanced: "Advanced Core Settings", confirmDisableTitle: "Disable Global Rendering?", confirmDisableContent: `This turns off default global rendering. Rules will only apply to your specified domains. You must reconfigure and save global data to re-enable.<p class='bold'>Are you sure you want to disable global settings?</p>`, confirmScalingTitle: "Enable Font Scaling?", confirmScalingContent: `Font scaling causes viewport unit offsets, which can be resolved via the 'Viewport Units Fixing'. Toggle it here globally or per site in "Font Rendering settings" later.<p class='bold'>Are you sure you want to enable font scaling?</p>`, IncompTitle: "Compatibility Warning", IncompContent: "Firefox (version < 126) and script managers like Greasemonkey, Firemonkey, Orangemonkey, or Userscripts may cause severe layout glitching or broken page scripts.<p><strong>Highly Recommended:</strong><br/>1. Use native browser zoom or update your browser.<br/>2. Use modern script manager like Tampermonkey.</p>", Save: "Save All Settings" },
-              "zh-CN": { Lang: "当前语言设置：", Backup: "本地备份与恢复（默认开启）", BackupContent: "定期备份可保障数据安全。您的备份文件已进行加密处理。请勿导入来源不明的备份，以防遭受 XSS 恶意脚本攻击。", Preview: "保存前预览（默认开启）", PreviewContent: "修改参数后无需保存即可实时预览效果。部分需要刷新页面生效的功能，暂不支持在预览中呈现。", Scaling: "字体等比例缩放（默认关闭）", ScalingContent: "本功能为实验性功能。由于不同内核浏览器对 CSS zoom 属性的兼容性存在差异，建议您根据实际需求开启。", Viewport: "视口单位缩放修正（默认关闭）", ViewportContent: "若已开启『字体等比例缩放』，本功能将自动启用，用于修复因 CSS zoom 导致的视口单位（Viewport Units）偏移问题。您可以在特定站点内单独控制此功能，或在此处全局关闭。", Updatetip: "新版本更新提示（默认开启）", UpdatetipContent: "新版本发布后，您将收到脚本更新提示并可查看更新日志。若您在弹窗中关闭了此功能，需在此处重新开启。", Hotkey: "键盘快捷键（默认开启）", HotkeyContent: "可快速触发脚本菜单功能。部分脚本管理器若不支持脚本菜单，则必须使用快捷键打开菜单。如遇快捷键冲突，请在此处关闭本功能。", Personal: "自定义站点渲染数量上限（默认：200 条）", PersonalContent: "保存过多的自定义站点数据可能会导致脚本加载延迟（新版本已大幅优化）。虽然默认上限为 200 条，但实际使用时并无强制限制。", Remote: "获取云端预设渲染数据", RemoteContent: "为修复常用或知名站点的样式错误，我们维护了一套云端字体渲染参数，脚本会在版本更新后自动同步。如遇排版样式问题，您也可以手动拉取云端数据尝试修复。", Pull: "重新拉取", FontCache: "字体列表全局缓存（时效：30 天）", FontCacheContent: "由于检测系统字体会占用 CPU 和内存，脚本会缓存字体列表并每 30 天自动刷新一次。若您新安装了系统字体，可在此处手动强制更新缓存。", Rebuild: "重建缓存", White: "站点白名单模式（全局禁用）", WhiteContent: "开启后将全局禁用字体渲染，仅在您指定的特定站点中生效。请注意，此开关开启后无法手动关闭；如需恢复，请在字体渲染设置面板中重新配置数据并保存为『全局数据』”，届时本功能将自动关闭。", CacheRebuild: "字体列表缓存清理成功", CacheRebuildContent: "旧的字体缓存已清除，系统随后会自动重新生成。", FetchTitle: "获取远端的站点渲染数据", SavedTitle: "高级核心配置已保存", SavedContent: "高级核心配置数据已成功保存。", Advanced: "高级核心配置设置", confirmDisableTitle: "确认停用全局渲染", confirmDisableContent: `此操作将关闭默认的全局设置。关闭后，渲染数据将仅在您指定的域名中生效。若日后需要重新启用全局渲染，您必须重新配置并保存为全局数据。<p class='bold'>确认要停用全局设置吗？</p>`, confirmScalingTitle: "开启字体缩放功能", confirmScalingContent: `开启字体缩放会导致视口单位（Viewport Units）出现偏移，但可以通过『视口单位缩放修正』功能来解决此问题。您可以在此全局关闭该功能，也可以稍后在字体渲染设置中针对特定站点单独关闭。<p class='bold'>确认要开启字体等比例缩放吗？</p>`, IncompTitle: "兼容性提示", IncompContent: "由于 Firefox（版本低于 126）以及 Greasemonkey、Userscripts、Firemonkey、Orangemonkey 等脚本管理器存在兼容性限制，该功能可能会导致部分网站出现排版错乱或页面交互失效等严重问题。<p><strong>强烈建议您：</strong><br/>1. 使用浏览器的原生缩放功能，或更新浏览器版本。<br/>2. 更换为 Tampermonkey 等现代脚本管理器使用。</p>", Save: "保存所有设置", Cancel: "取消" },
-              "zh-TW": { Lang: "目前語言設定：", Backup: "本機備份與還原（預設開啟）", BackupContent: "定期備份可保障資料安全。您的備份檔案已進行加密處理。請勿匯入來源不明的備份，以防遭受 XSS 惡意指令碼攻擊。", Preview: "儲存前預覽（預設開啟）", PreviewContent: "修改參數後無需儲存即可即時預覽效果。部分需要重新整理頁面生效的功能，暫不支援在預覽中呈現。", Scaling: "字型等比例縮放（預設關閉）", ScalingContent: "本功能為實驗性功能。由於不同核心瀏覽器對 CSS zoom 屬性的相容性存在差異，建議您根據實際需求開啟。", Viewport: "視口單位縮放修正（預設關閉）", ViewportContent: "若已開啟「字型等比例縮放」，本功能將自動啟用，用於修復因 CSS zoom 導致的視口單位（Viewport Units）偏移問題。您可以在特定網站內單獨控制此功能，或在此處全域關閉。", Updatetip: "新版本更新提示（預設開啟）", UpdatetipContent: "新版本發布後，您將收到指令碼更新提示並可查看更新記錄。若您在彈出式視窗中關閉了此功能，需在此處重新開啟。", Hotkey: "鍵盤快速鍵（預設開啟）", HotkeyContent: "可可快速觸發指令碼功能表功能。部分指令碼管理員若不支援指令碼功能表，則必須使用快速鍵開啟功能表。如遇快速鍵衝突，請在此處關閉本功能。", Personal: "自訂網站轉譯數量上限（預設：200 條）", PersonalContent: "儲存過多的自訂網站資料可能會導致指令碼載入延遲（新版本已大幅最佳化）。雖然預設上限為 200 條，但實際使用時並無強制限制。", Remote: "取得雲端預設轉譯資料", RemoteContent: "為修復常用或知名網站的樣式錯誤，我們維護了一套雲端字型渲染參數，指令碼會在版本更新後自動同步。如遇排版樣式問題，您也可以手動拉取雲端資料嘗試修復。", Pull: "重新拉取", FontCache: "字型列表全域快取（時效：30 天）", FontCacheContent: "由於偵測系統字型會佔用 CPU 和記憶體，指令碼會快取字型列表並每 30 天自動重新整理一次。若您新安裝了系統字型，可在此處手動強制更新快取。", Rebuild: "重建快取", White: "網站白名單模式（全域停用）", WhiteContent: "開啟後將全域停用字型渲染，僅在您指定的特定網站中生效。請注意，此開關開啟後無法手動關閉；如需恢復，請在字型渲染設定面板中重新設定資料並儲存為「全域資料」，屆時本功能將自動關閉。", CacheRebuild: "字型列表快取清理成功", CacheRebuildContent: "舊的字型快取已清除，系統隨後會自動重新產生。", FetchTitle: "取得遠端的網站轉譯資料", SavedTitle: "進階核心設定已儲存", SavedContent: "進階核心設定資料已成功儲存。", Advanced: "進階核心組態設定", confirmDisableTitle: "確認停用全域轉譯", confirmDisableContent: `此操作將關閉預設的全域設定。關閉後，轉譯資料將僅在您指定的網域中生效。若日後需要重新啟用全域轉譯，您必須重新設定並儲存為全域資料。<p class='bold'>確認要停用全域設定嗎？</p>`, confirmScalingTitle: "開啟字型縮放功能", confirmScalingContent: `開啟字型縮放會導致視口單位（Viewport Units）出現偏移，但可以透過「視口單位縮放修正」功能來解決此問題。您可以在此全域關閉該功能，也可以稍後在字型渲染設定中針對特定網站個別關閉。<p class='bold'>確認要開啟字型等比例縮放嗎？</p>`, IncompTitle: "相容性提示", IncompContent: "由於 Firefox（版本低於 126）以及 Greasemonkey、Userscripts、Firemonkey、Orangemonkey 等指令碼管理員存在相容性限制，該功能可能會導致部分網站出現排版錯亂或頁面互動失效等嚴重問題。<p><strong>強烈建議您：</strong><br/>1. 使用瀏覽器的原生縮放功能，或更新瀏覽器版本。<br/>2. 更換為 Tampermonkey 等現代指令碼管理器使用。</p>", Save: "儲存所有設定", Cancel: "取消" }
+              "zh-CN": { Lang: "当前语言设置：", Backup: "本地备份与恢复（默认开启）", BackupContent: "定期备份可保障数据安全。您的备份文件已进行加密处理。请勿导入来源不明的备份，以防遭受 XSS 恶意脚本攻击。", Preview: "保存前预览（默认开启）", PreviewContent: "修改参数后无需保存即可实时预览效果。部分需要刷新页面生效的功能，暂不支持在预览中呈现。", Scaling: "字体等比例缩放（默认关闭）", ScalingContent: "本功能为实验性功能。由于不同内核浏览器对 CSS zoom 属性的兼容性存在差异，建议您根据实际需求开启。", Viewport: "视口单位缩放修正（默认关闭）", ViewportContent: "若已开启『字体等比例缩放』，本功能将自动启用，用于修复因 CSS zoom 导致的视口单位（Viewport Units）偏移问题。您可以在特定站点内单独控制此功能，或在此处全局关闭。", Updatetip: "新版本更新提示（默认开启）", UpdatetipContent: "新版本发布后，您将收到脚本更新提示并可查看更新日志。若您在弹窗中关闭了此功能，需在此处重新开启。", Hotkey: "键盘快捷键（默认开启）", HotkeyContent: "可快速触发脚本菜单功能。部分脚本管理器若不支持脚本菜单，则必须使用快捷键打开菜单。如遇快捷键冲突，请在此处关闭本功能。", Personal: "自定义站点渲染数量上限（默认：200 条）", PersonalContent: "保存过多的自定义站点数据可能会导致脚本加载延迟（新版本已大幅优化）。虽然默认上限为 200 条，但实际使用时并无强制限制。", Remote: "获取云端预设渲染数据", RemoteContent: "为修复常用或知名站点的样式错误，我们维护了一套云端字体渲染参数，脚本会在版本更新后自动同步。如遇排版样式问题，您也可以手动拉取云端数据尝试修复。", Pull: "重新拉取", FontCache: "字体列表全局缓存（时效：30 天）", FontCacheContent: "由于检测系统字体会占用 CPU 和内存，脚本会缓存字体列表并每 30 天自动刷新一次。若您新安装了系统字体，可在此处手动强制更新缓存。", Rebuild: "重建缓存", White: "站点白名单模式（全局禁用）", WhiteContent: "开启后将全局禁用字体渲染，仅在您指定的特定站点中生效。请注意，此开关开启后无法手动关闭；如需恢复，请在字体渲染设置面板中重新配置数据并保存为『全局数据』，届时本功能将自动关闭。", CacheRebuild: "字体列表缓存清理成功", CacheRebuildContent: "旧的字体缓存已清除，系统随后会自动重新生成。", FetchTitle: "获取远端的站点渲染数据", SavedTitle: "高级核心配置已保存", SavedContent: "高级核心配置数据已成功保存。", Advanced: "高级核心配置设置", confirmDisableTitle: "确认停用全局渲染", confirmDisableContent: `此操作将关闭默认的全局设置。关闭后，渲染数据将仅在您指定的域名中生效。若日后需要重新启用全局渲染，您必须重新配置并保存为全局数据。<p class='bold'>确认要停用全局设置吗？</p>`, confirmScalingTitle: "开启字体缩放功能", confirmScalingContent: `开启字体缩放会导致视口单位（Viewport Units）出现偏移，但可以通过『视口单位缩放修正』功能来解决此问题。您可以在此全局关闭该功能，也可以稍后在字体渲染设置中针对特定站点单独关闭。<p class='bold'>确认要开启字体等比例缩放吗？</p>`, IncompTitle: "兼容性提示", IncompContent: "由于 Firefox（版本低于 126）以及 Greasemonkey、Userscripts、Firemonkey、Orangemonkey 等脚本管理器存在兼容性限制，该功能可能会导致部分网站出现排版错乱或页面交互失效等严重问题。<p><strong>强烈建议您：</strong><br/>1. 使用浏览器的原生缩放功能，或更新浏览器版本。<br/>2. 更换为 Tampermonkey 等现代脚本管理器使用。</p>", Save: "保存所有设置", Cancel: "取消" },
+              "zh-TW": { Lang: "目前語言設定：", Backup: "本機備份與還原（預設開啟）", BackupContent: "定期備份可保障資料安全。您的備份檔案已進行加密處理。請勿匯入來源不明的備份，以防遭受 XSS 惡意指令碼攻擊。", Preview: "儲存前預覽（預設開啟）", PreviewContent: "修改參數後無需儲存即可即時預覽效果。部分需要重新整理頁面生效的功能，暫不支援在預覽中呈現。", Scaling: "字型等比例縮放（預設關閉）", ScalingContent: "本功能為實驗性功能。由於不同核心瀏覽器對 CSS zoom 屬性的相容性存在差異，建議您根據實際需求開啟。", Viewport: "視口單位縮放修正（預設關閉）", ViewportContent: "若已開啟「字型等比例縮放」，本功能將自動啟用，用於修復因 CSS zoom 導致的視口單位（Viewport Units）偏移問題。您可以在特定網站內單獨控制此功能，或在此處全域關閉。", Updatetip: "新版本更新提示（預設開啟）", UpdatetipContent: "新版本發布後，您將收到指令碼更新提示並可查看更新記錄。若您在彈出式視窗中關閉了此功能，需在此處重新開啟。", Hotkey: "鍵盤快速鍵（預設開啟）", HotkeyContent: "可可快速觸發指令碼功能表功能。部分指令碼管理員若不支援指令碼功能表，則必須使用快速鍵開啟功能表。如遇快速鍵衝突，請在此處關閉本功能。", Personal: "自訂網站轉譯數量上限（預設：200 條）", PersonalContent: "儲存過多的自訂網站資料可能會導致指令碼載入延遲（新版本已大幅最佳化）。雖然預設上限為 200 條，但實際使用時並無強制限制。", Remote: "取得雲端預設轉譯資料", RemoteContent: "為修復常用或知名網站的樣式錯誤，我們維護了一套雲端字型渲染參數，指令碼會在版本更新後自動同步。如遇排版樣式問題，您也可以手動拉取雲端資料嘗試修復。", Pull: "重新拉取", FontCache: "字型列表全域快取（時效：30 天）", FontCacheContent: "由於偵測系統字型會佔用 CPU 和記憶體，指令碼會快取字型列表並每 30 天自動重新整理一次。若您新安裝了系統字型，可在此處手動強制更新快取。", Rebuild: "重建快取", White: "網站白名單模式（全域停用）", WhiteContent: "開啟後將全域停用字型渲染，僅在您指定的特定網站中生效。請注意，此開關開啟後無法手動關閉；如需恢復，請在字型渲染設定面板中重新設定資料並儲存為「全域資料」，屆時本功能將自動關閉。", CacheRebuild: "字型列表快取清理成功", CacheRebuildContent: "舊的字型快取已清除，系統隨後會自動重新產生。", FetchTitle: "取得遠端的網站轉譯資料", SavedTitle: "進階核心設定已儲存", SavedContent: "進階核心設定資料已成功儲存。", Advanced: "進階核心組態設定", confirmDisableTitle: "確認停用全域轉譯", confirmDisableContent: `此操作將關閉預設的全域設定。關閉後，轉譯資料將僅在您指定的網域中生效。若日後需要重新啟用全域轉譯，您必須重新設定並儲存為全域資料。<p class='bold'>確認要停用全域設定嗎？</p>`, confirmScalingTitle: "開啟字型縮放功能", confirmScalingContent: `開啟字型縮放會導致視口單位（Viewport Units）出現偏移，但可以透過「視口單位縮放修正」功能來解決此問題。您可以在此全域關閉該功能，也可以稍後在字型渲染設定中針對特定網站個別關閉。<p class='bold'>確認要開啟字型等比例縮放嗎？</p>`, IncompTitle: "相容性提示", IncompContent: "由於 Firefox（版本低於 126）以及 Greasemonkey、Userscripts、Firemonkey、Orangemonkey 等指令碼管理員存在相容性限制，該功能可能會導致部分網站出現排版錯亂或頁面互動失效等嚴重問題。<p><strong>強烈建議您：</strong><br/>1. 使用瀏覽器的原生縮放功能，或更新瀏覽器版本。<br/>2. 更換為 Tampermonkey 等現代指令碼管理器使用。</p>", Save: "儲存所有設定", Cancel: "取消" },
             }, i18n = new I18n(languagePacks, getLanguage("zh-CN"), "en-US"), incompatible = compareVersion({ GECKO: 126, more: null }) || isRawContent,
               configure = await dataManager.get(CONFIGURE), { isFontsize, isFixViewport, isBackupFunction, isPreview, isCloseTip, isHotkey, globalDisable } = configure,
               html = `<div class="form-group form-inline flex-end"><label class="fs14">${i18n.t("Lang")}</label><span id="language"></span></div><div class="form-scroll"><div class="form-group form-inline"><div class="form-group"><label>①&nbsp;${i18n.t("Backup")}</label><span class="intro">${i18n.t("BackupContent")}</span></div><span class="switch-container"><input type="checkbox" id="panel-backup"${isBackupFunction ? " checked" : ""}/><label for="panel-backup" class="switch-slider"></label></span></div><div class="form-group form-inline"><div class="form-group"><label>②&nbsp;${i18n.t("Preview")}</label><span class="intro">${i18n.t("PreviewContent")}</span></div><span class="switch-container"><input type="checkbox"id="panel-perview"${isPreview ? " checked" : ""}/><label for="panel-perview" class="switch-slider"></label></span></div><div class="form-group form-inline"><div class="form-group"><label>③&nbsp;${i18n.t("Scaling")}</label><span class="intro">${i18n.t("ScalingContent")}</span></div><span class="switch-container"><input type="checkbox" data-action="launch-change" id="panel-scaling"${!incompatible && isFontsize ? " checked" : ""}/><label for="panel-scaling" class="switch-slider"${!incompatible ? "" : " disabled"}></label></span></div><div class="form-group form-inline"><div class="form-group"><label>④&nbsp;${i18n.t("Viewport")}</label><span class="intro">${i18n.t("ViewportContent")}</span></div><span class="switch-container"><input type="checkbox" data-action="launch-change" id="panel-viewport"${!incompatible && isFixViewport ? " checked" : ""}/><label for="panel-viewport" class="switch-slider"${!incompatible ? "" : " disabled"}></label></span></div><div class="form-group form-inline"><div class="form-group"><label>⑤&nbsp;${i18n.t("Updatetip")}</label><span class="intro">${i18n.t("UpdatetipContent")}</span></div><span class="switch-container"><input type="checkbox" id="panel-updatetip"${isCloseTip ? "" : " checked"}/><label for="panel-updatetip" class="switch-slider"></label></span></div><div class="form-group form-inline"><div class="form-group"><label>⑥&nbsp;${i18n.t("Hotkey")}</label><span class="intro">${i18n.t("HotkeyContent")}</span></div><span class="switch-container"><input type="checkbox" id="panel-hotkey"${isHotkey ? " checked" : ""}/><label for="panel-hotkey" class="switch-slider"></label></span></div><div class="form-group form-inline"><div class="form-group"><label>⑦&nbsp;${i18n.t("Personal")}</label><span class="intro">${i18n.t("PersonalContent")}</span></div><input type="text" id="panel-personal" class="input-disable" maxlength="3" disabled value="200"/></div><div class="form-group form-inline"><div class="form-group"><label>⑧&nbsp;${i18n.t("Remote")}</label><span class="intro">${i18n.t("RemoteContent")}</span></div><button class="btn-mirror btn-external" data-action="launch-change" data-action="launch-change" id="panel-prerender">${i18n.t("Pull")}</button></div><div class="form-group form-inline"><div class="form-group"><label>⑨&nbsp;${i18n.t("FontCache")}</label><span class="intro">${i18n.t("FontCacheContent")}</span></div><button class="btn-mirror btn-external" data-action="launch-change" id="panel-fontcache">${i18n.t("Rebuild")}</button></div><div class="form-group form-inline"><div class="form-group"><label>⑩&nbsp;${i18n.t("White")}</label><span class="intro">${i18n.t("WhiteContent")}</span></div><span class="switch-container"><input type="checkbox" data-action="launch-change" id="panel-disable"${globalDisable ? " checked disabled" : ""}/><label for="panel-disable" class="switch-slider"${globalDisable ? " disabled" : ""}></label></span></div></div><div class="btn-box"><button data-action="launch-save" class="btn btn-mirror">${i18n.t("Save")}</button><button data-action="close" class="btn">${i18n.t("Cancel")}</button></div>`,
@@ -2310,13 +2319,12 @@ void (function (ctx, uctx, sctx) {
             addListener(win, "action:launch-save:click", async e => {
               const configure = await dataManager.get(CONFIGURE), values = e.detail.formValues, submitData = {
                 isBackupFunction: values["panel-backup"], isPreview: values["panel-perview"], isFontsize: values["panel-scaling"], isFixViewport: values["panel-viewport"],
-                isCloseTip: !values["panel-updatetip"], isHotkey: values["panel-hotkey"], maxPersonalSites: 200, globalDisable: values["panel-disable"], __proto__: null
+                isCloseTip: !values["panel-updatetip"], isHotkey: values["panel-hotkey"], maxPersonalSites: 200, globalDisable: values["panel-disable"], __proto__: null,
               }; await dataManager.set(CONFIGURE, { ...configure, ...submitData });
               if (disableTag.checked) {
                 const fontSetData = {
-                  fontSelect: rawSavedValue.fontSelect, fontFace: false, fontSmooth: false, fontSize: 1, fixViewport: false, fontStroke: 0,
-                  fixStroke: false, lazyload: false, fontShadow: 0, fixShadow: false, renderCanvas: false, shadowColor: rawSavedValue.shadowColor,
-                  fontCSS: rawSavedValue.fontCSS, fontEx: rawSavedValue.fontEx
+                  fontSelect: rawSavedValue.fontSelect, fontFace: false, fontSmooth: false, fontSize: 1, fixViewport: false, fontStroke: 0, fixStroke: false, lazyload: false,
+                  fontShadow: 0, fixShadow: false, renderCanvas: false, shadowColor: rawSavedValue.shadowColor, fontCSS: rawSavedValue.fontCSS, fontEx: rawSavedValue.fontEx,
                 }; await dataManager.set(FONTSET, fontSetData);
               } win.close(); openSimpleDialog(i18n.t("SavedTitle"), i18n.t("SavedContent"), "dialog", true, true, background);
             });
@@ -2330,7 +2338,7 @@ void (function (ctx, uctx, sctx) {
             const languagePacks = {
               "en-US": { Title: "Custom Font Rewrite Data", Content: `Enter custom font rewrite data in an array format (one item per line wrapped in double quotes <code>""</code>; use curly braces inside the quotes for double-byte characters like Chinese, e.g., <code>"{中文字体}"</code>). <span class="firebrick fs14">(Recommended: See the <a class="fs14" href="${GMsupportURL}/267#discussion-5692372" target="_blank">Author's Guide [CHS]</a>)</span>`, Warn: "Note: Do not add fonts already present in the built-in list. Duplicates will be auto-removed upon saving.", FFinput: "Fix &lt;INPUT&gt; Issue For Current Site", AddTool: "Quick Add Tool", SaveOkTitle: "Save Settings", SaveOkContent: "Custom font rewrite data saved successfully!", Save: "Save Data" },
               "zh-CN": { Title: "自定义字体重写数据", Content: `您可在下方文本域内按格式填写字体重写数据（数组类型，每行一个字体并用半角双引号<code>""</code>包裹；若含中文等双字节文本，须在双引号内部使用半角花括号，如<code>"{中文字体}"</code>）。<span class="firebrick fs14">(建议您参考 <a class="fs14" href="${GMsupportURL}/267#discussion-5692372" target="_blank">作者推荐</a> 填写)</span>`, Warn: "注意：请勿添加内置字体列表中已有的字体。若有重复项，保存时会自动去重。", FFinput: "修复当前站点 &lt;INPUT&gt; 的样式问题", AddTool: "快捷添加工具", SaveOkTitle: "保存字体重写配置", SaveOkContent: "自定义字体重写数据已成功保存！", Save: "保存数据", Cancel: "取消" },
-              "zh-TW": { Title: "自訂字型覆寫資料", Content: `您可在下方文字欄位內按格式填寫字型覆寫資料（陣列類型，每行一個字型並用半形雙引號<code>""</code>包裹；若含中文等雙位元組文字，須在雙引號內部使用半形大括號，如<code>"{中文字型}"</code>）。<span class="firebrick fs14">(建議您參考 <a class="fs14" href="${GMsupportURL}/267#discussion-5692372" target="_blank">作者推薦</a> 填寫)</span>`, Warn: "注意：請勿新增內建字型列表中已有的字型。若有重複項目，儲存時會自動去重。", FFinput: "修復目前網站 &lt;INPUT&gt; 的樣式問題", AddTool: "快捷新增工具", SaveOkTitle: "儲存字型覆寫設定", SaveOkContent: "自訂字型覆寫資料已成功儲存！", Save: "儲存資料", Cancel: "取消" }
+              "zh-TW": { Title: "自訂字型覆寫資料", Content: `您可在下方文字欄位內按格式填寫字型覆寫資料（陣列類型，每行一個字型並用半形雙引號<code>""</code>包裹；若含中文等雙位元組文字，須在雙引號內部使用半形大括號，如<code>"{中文字型}"</code>）。<span class="firebrick fs14">(建議您參考 <a class="fs14" href="${GMsupportURL}/267#discussion-5692372" target="_blank">作者推薦</a> 填寫)</span>`, Warn: "注意：請勿新增內建字型列表中已有的字型。若有重複項目，儲存時會自動去重。", FFinput: "修復目前網站 &lt;INPUT&gt; 的樣式問題", AddTool: "快捷新增工具", SaveOkTitle: "儲存字型覆寫設定", SaveOkContent: "自訂字型覆寫資料已成功儲存！", Save: "儲存資料", Cancel: "取消" },
             }, i18n = new I18n(languagePacks, getLanguage("zh-CN"), "en-US"), fontRewrite = await dataManager.get(FONTOVERRIDE),
               html = `<div class="form-group form-inline porte${IS_REAL_GECKO ? "" : " hidden"}"><label>${i18n.t("FFinput")}</label><span class="switch-container"><input type="checkbox" id="panel-ffinput"${localStorage.getItem(IS_DISCUZ) === "true" ? " checked" : ""} /><label for="panel-ffinput" class="switch-slider"></label></span></div><div class="form-group"><p class="fs14 grey">${i18n.t("Content")}</p><textarea id="font-rewrite-content">${JSON_stringify(fontRewrite, null, 4)}</textarea><p class="warn firebrick fs12">${i18n.t("Warn")}</p></div><div class="btn-box"><button data-action="launch-save" class="btn btn-ok">${i18n.t("Save")}</button><button data-action="close" class="btn">${i18n.t("Cancel")}</button></div>`,
               css = `dialog{min-width:500px;top:150px}.dialog-header{background:#f7836d}.form-group *{text-shadow:0 0 1px #7d7d7d40!important}.form-group p{line-height:150%;margin:0;padding:3px;color: #333}.btn-box{display:flex;gap:8px;justify-content:flex-end;margin:12px 0 0}.form-group code{background:#f0f2f5;border:1px solid #f0f2f5;font-size:14px;line-height:22px;border-radius: 4px;padding-block:0;padding-inline:4px}#font-rewrite-content{margin:0;padding:5px;min-width:100%;min-height:220px;outline:0;border:1px solid #999;border-radius:6px;white-space:pre;overscroll-behavior:contain;scrollbar-color:auto;font:normal 400 15px/150% var(--fr-shared-monospaced)!important;cursor:auto}#font-rewrite-content::-webkit-scrollbar{height:8px;width:8px}.form-group p span a{font-size:14px;line-height:125%;color:#1482ea}p.warn{margin:-4px 0 0 4px}.porte{padding-bottom:6px;border-bottom:1px solid #ccc}@-moz-document url-prefix(){textarea{scrollbar-color:#8e9bb1 #f1f0f012!important;scrollbar-width:thin}}`,
@@ -2353,7 +2361,7 @@ void (function (ctx, uctx, sctx) {
             const languagePacks = {
               "en-US": { Title: "Site Scaling Fix Data", Content: `Enter custom website "font scaling" correction configurations in the text area below following the required format. This is a core setting; do not modify it if you are unfamiliar with the format or data meaning, as it may disrupt normal operation. <span class="firebrick fs14">(Recommended: See the <a class="fs14" href="${GMsupportURL}/267#discussioncomment-7161615" target="_blank">Author's Guide [CHS]</a>)</span>`, Warn: "Warning: Invalid JSON will crash the script and disable font rendering.", SaveOkTitle: "Save Settings", SaveOkContent: "Site scaling fix data saved successfully!", Save: "Save Data" },
               "zh-CN": { Title: "站点缩放修正配置数据", Content: `您可在下方文本域内，按格式填入自定义站点的『字体比例缩放』修正配置。此数据属于核心设置，若不了解格式或数据含义，请勿随意修改，以免影响正常运行。<span class="firebrick fs14">（建议您参考 <a class="fs14" href="${GMsupportURL}/267#discussioncomment-7161615" target="_blank">作者推荐</a> 填写）</span>`, Warn: "警告：若上述 JSON 配置错误，将导致脚本运行异常并使字体渲染失效。", SaveOkTitle: "保存缩放修正配置", SaveOkContent: "站点缩放修正配置数据已成功保存！", Save: "保存数据", Cancel: "取消" },
-              "zh-TW": { Title: "網站縮放修正設定資料", Content: `您可在下方文字區域內，依格式填入自訂網站的「字型比例縮放」修正設定。此數據屬於核心設定，若不瞭解格式或數據含義，請勿隨意修改，以免影響正常運作。<span class="firebrick fs14">（建議您參考 <a class="fs14" href="${GMsupportURL}/267#discussioncomment-7161615" target="_blank">作者推薦</a> 填寫）</span>`, Warn: "警告：若上述 JSON 設定錯誤，將導致指令碼執行異常並使字型渲染失效。", SaveOkTitle: "儲存縮放修正設定", SaveOkContent: "網站縮放修正設定資料已成功保存！", Save: "儲存資料", Cancel: "取消" }
+              "zh-TW": { Title: "網站縮放修正設定資料", Content: `您可在下方文字區域內，依格式填入自訂網站的「字型比例縮放」修正設定。此數據屬於核心設定，若不瞭解格式或數據含義，請勿隨意修改，以免影響正常運作。<span class="firebrick fs14">（建議您參考 <a class="fs14" href="${GMsupportURL}/267#discussioncomment-7161615" target="_blank">作者推薦</a> 填寫）</span>`, Warn: "警告：若上述 JSON 設定錯誤，將導致指令碼執行異常並使字型渲染失效。", SaveOkTitle: "儲存縮放修正設定", SaveOkContent: "網站縮放修正設定資料已成功保存！", Save: "儲存資料", Cancel: "取消" },
             }, i18n = new I18n(languagePacks, getLanguage("zh-CN"), "en-US"), fontScaleOffset = await dataManager.get(FONTSCALEFIX),
               html = `<div class="form-group"><p class="fs14 grey">${i18n.t("Content")}</p><textarea id="font-scaleoffset-content">${JSON_stringify(fontScaleOffset, null, 4)}</textarea><p class="warn firebrick fs12">${i18n.t("Warn")}</p></div><div class="btn-box"><button data-action="launch-save" class="btn btn-ok">${i18n.t("Save")}</button><button data-action="close" class="btn">${i18n.t("Cancel")}</button></div>`,
               css = `dialog{min-width:475px;top:150px}.dialog-header{background:#f7836d}.form-group *{text-shadow:0 0 1px #7d7d7d40!important}.form-group p{line-height:150%;margin:0;padding:3px;color: #333}.btn-box{display:flex;gap:8px;justify-content:flex-end;margin:12px 0 0}.form-group textarea{margin:0;padding:5px;min-width:100%;min-height:220px;outline:0;border:1px solid #999;border-radius:6px;white-space:pre;overscroll-behavior:contain;scrollbar-color:auto;font:normal 400 15px/150% var(--fr-shared-monospaced)!important;cursor:auto}.form-group textarea::-webkit-scrollbar{height:8px;width:8px}.form-group p span a{font-size:14px;line-height:125%;color:#1482ea}p.warn{margin:-4px 0 0 4px}.anchor-add-tool{anchor-name:--add-tool}.porte{padding-bottom:6px;border-bottom:1px solid #ccc}@-moz-document url-prefix(){textarea{scrollbar-color:#8e9bb1 #f1f0f012!important;scrollbar-width:thin}}`,
@@ -2370,7 +2378,7 @@ void (function (ctx, uctx, sctx) {
             const languagePacks = {
               "en-US": { Title: "Get Font Naming Table", CNinput: "Font Chinese Name:", CNintro: "(Required, Or use English/other language)", ENinput: "Font English Name:", ENintro: "(Required, Or customize a unique English name)", PSinput: "PostScript Name:", PSintro: ` (Optional, Required for <a href="${GMsupportURL}/261" target="_blank">font hot-swapping</a>)`, NoEmpty: "Required fields cannot be empty.", Invalid: "Quotes are not allowed in this field.", Invalid2: "Letters, numbers, and standard punctuation only (no quotes).", Submit: "⚡ Send Font Naming Table Data" },
               "zh-CN": { Title: "获取字体命名表信息", CNinput: "字体中文名称：", CNintro: "（必填，若无中文名，可用其他语言名称代替）", ENinput: "字体英文名称：", ENintro: "（必填。若无英文名，请自定义唯一的英文标识）", PSinput: "PostScript 名称：", PSintro: `（选填。建议填写以支持 <a href="${GMsupportURL}/261" target="_blank">全局字体热替换</a>）`, NoEmpty: "必填项不能为空。", Invalid: "输入内容不能包含引号。", Invalid2: "仅支持字母、数字及半角标点（不可包含引号）。", Submit: "⚡ 发送字体命名表信息", Cancel: "取消" },
-              "zh-TW": { Title: "取得字型命名表資訊", CNinput: "字型中文名稱：", CNintro: "（必填，若無中文名，可用其他語言名稱代替）", ENinput: "字型英文名稱：", ENintro: "（必填。若無英文名，請自訂唯一的英文標識）", PSinput: "PostScript 名稱：", PSintro: `（選填。建議填寫以支援 <a href="${GMsupportURL}/261" target="_blank">全域字型熱替換</a>）`, NoEmpty: "必填欄位不能為空。", Invalid: "輸入內容不能包含引號。", Invalid2: "僅支援字母、數字及半角標點（不可包含引號）。", Submit: "⚡ 發送字型命名表資訊", Cancel: "取消" }
+              "zh-TW": { Title: "取得字型命名表資訊", CNinput: "字型中文名稱：", CNintro: "（必填，若無中文名，可用其他語言名稱代替）", ENinput: "字型英文名稱：", ENintro: "（必填。若無英文名，請自訂唯一的英文標識）", PSinput: "PostScript 名稱：", PSintro: `（選填。建議填寫以支援 <a href="${GMsupportURL}/261" target="_blank">全域字型熱替換</a>）`, NoEmpty: "必填欄位不能為空。", Invalid: "輸入內容不能包含引號。", Invalid2: "僅支援字母、數字及半角標點（不可包含引號）。", Submit: "⚡ 發送字型命名表資訊", Cancel: "取消" },
             }, i18n = new I18n(languagePacks, getLanguage("zh-CN"), "en-US"),
               html = `<div class="form-group"><div class="form-group form-inline"><label class="turquoise">${i18n.t("CNinput")}</label><span class="grey fs12">${i18n.t("CNintro")}</span></div><input type="text" id="prompt-chinese" autocomplete="off" placeholder="微软雅黑" class="turquoise"><div class="error-tip hidden"></div></div><div class="form-group"><div class="form-group form-inline"><label class="turquoise">${i18n.t("ENinput")}</label><span class="grey fs12">${i18n.t("ENintro")}</span></div><input type="text"id="prompt-english" autocomplete="off" placeholder="Microsoft YaHei" class="turquoise"><div class="error-tip hidden"></div></div><div class="form-group"><div class="form-group form-inline"><label class="turquoise">${i18n.t("PSinput")}</label><span class="grey fs12">${i18n.t("PSintro")}</span></div><input type="text" id="prompt-postscript" autocomplete="off" placeholder="MicrosoftYaHei" class="turquoise"><div class="error-tip hidden"></div></div><div class="btn-box"><button id="prompt-submit-btn" data-action="submit-data" class="btn btn-ok">${i18n.t("Submit")}</button><button data-action="close" class="btn">${i18n.t("Cancel")}</button></div>`,
               css = `dialog{min-width:500px;top:150px}.dialog-header{background:#13c2c2}.form-group{margin-bottom:15px}.form-group *{text-shadow:0 0 1px #7d7d7d40!important}.form-group p{line-height:150%;margin:0;padding:3px;color: #333}.btn-box{display:flex;gap:8px;justify-content:flex-end;margin:12px 0 0}.form-inline{margin-bottom:2px}.form-group input{border-left:4px solid #13c2c2;font:normal 400 15px/150% var(--fr-shared-monospaced)!important}.form-group input::placeholder{color:#ccc}.form-group span a{color:#13c2c2;font-size:12px;text-decoration:none}`,
@@ -2378,7 +2386,7 @@ void (function (ctx, uctx, sctx) {
               cnTag = qW("#prompt-chinese"), enTag = qW("#prompt-english"), psTag = qW("#prompt-postscript"), PROMPT_RULES = {
                 "prompt-chinese": { exp: /^@?[^"]+$/, emptyMsg: i18n.t("NoEmpty"), invalidMsg: i18n.t("Invalid"), required: true },
                 "prompt-english": { exp: /^@?[^"\uFF00-\uFFEF\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]+$/, emptyMsg: i18n.t("NoEmpty"), invalidMsg: i18n.t("Invalid2"), required: true },
-                "prompt-postscript": { exp: /^[^"]+$/, invalidMsg: i18n.t("Invalid"), required: false }
+                "prompt-postscript": { exp: /^[^"]+$/, invalidMsg: i18n.t("Invalid"), required: false },
               }, updateUIError = (target, errorMsg) => {
                 const eTag = target.nextElementSibling; if (errorMsg) {
                   target.classList.add("input-error"); eTag.classList.remove("hidden"); eTag.textContent = errorMsg;
@@ -2411,7 +2419,7 @@ void (function (ctx, uctx, sctx) {
             const languagePacks = {
               "en-US": { Title: "Manage Excluded Rendering Sites", Add: "Add Network Address", SaveInfo: `<strong class="darkgreen">Kind tips:</strong> Search results will automatically select all matching domains. Changes will not be applied until you click save. Once saved, this action cannot be undone.`, Search: "Search", Empty: "---- No custom excluded sites found ----", Delete: "Delete", Reset: "Reset", SaveSuccess: "Saved Successfully", SaveSuccessContent: "Custom excluded sites saved successfully!", Save: "Save Data" },
               "zh-CN": { Title: "管理排除渲染站点", Add: "添加网络地址", SaveInfo: `<strong class="darkgreen">温馨提示：</strong>搜索结果会自动全选匹配的域名；添加或删除操作需点击保存数据才会生效。数据一旦保存将无法撤回，请谨慎操作。`, Search: "搜索域名", Empty: "---- 暂无自定义排除站点 ----", Delete: "删除", Reset: "重置", SaveSuccess: "保存成功", SaveSuccessContent: "自定义排除站点数据已保存成功！", Save: "保存数据", Cancel: "取消" },
-              "zh-TW": { Title: "管理排除渲染站點", Add: "新增網路位址", SaveInfo: `<strong class="darkgreen">溫馨提示：</strong>搜尋結果會自動全選匹配的網域；新增或刪除操作需點擊儲存資料才會生效。資料一旦儲存將無法復原，請謹慎操作。`, Search: "搜尋網域", Empty: "---- 暫無自訂排除站點 ----", Delete: "刪除", Reset: "重設", SaveSuccess: "儲存成功", SaveSuccessContent: "自訂排除站點資料已儲存成功！", Save: "儲存資料", Cancel: "取消" }
+              "zh-TW": { Title: "管理排除渲染站點", Add: "新增網路位址", SaveInfo: `<strong class="darkgreen">溫馨提示：</strong>搜尋結果會自動全選匹配的網域；新增或刪除操作需點擊儲存資料才會生效。資料一旦儲存將無法復原，請謹慎操作。`, Search: "搜尋網域", Empty: "---- 暫無自訂排除站點 ----", Delete: "刪除", Reset: "重設", SaveSuccess: "儲存成功", SaveSuccessContent: "自訂排除站點資料已儲存成功！", Save: "儲存資料", Cancel: "取消" },
             }, i18n = new I18n(languagePacks, getLanguage("zh-CN"), "en-US"),
               html = `<div class="form-group"><p class="fs14">${i18n.t("SaveInfo")}</p></div><div class="form-group"><div class="form-group form-sub form-inline"><input id="search-data" type="search"><button data-action="launch-search" id="search-data-search">${i18n.t("Search")}</button></div><ul id="search-data-list"></ul></div><div class="btn-box"><button data-action="launch-add" class="btn btn-primary">${i18n.t("Add")}</button><button data-action="launch-save" class="btn btn-ok">${i18n.t("Save")}</button><button data-action="close" class="btn">${i18n.t("Cancel")}</button></div>`,
               css = `dialog{min-width:470px;top:100px}.dialog-header{background:#ca095d}.form-group *{text-shadow:0 0 1px #7d7d7d40!important}.form-group p{line-height:150%;margin:0;padding:3px}.btn-box{display:flex;gap:8px;justify-content:flex-end;margin:12px 0 0}#search-data{margin:0;padding:4px 8px;width:80%;height:32px;border:1px solid #777;border-radius:4px; outline:none;font:normal 400 14px/150% var(--fr-shared-monospaced)!important}#search-data-search{margin:0;padding:4px 10px;width:19%;height:32px;background:#eee;color:#333;border:1px solid #777;border-radius:4px;outline:none;font-size:14px;line-height:150%;cursor:pointer}#search-data-search:hover{background:#f6f6f6;box-shadow:0 0 3px #a7a7a7}#search-data-list{overflow-x:hidden;margin:0;padding:0;list-style:none;max-height:252px;overscroll-behavior:contain;scrollbar-color:auto}#search-data-list li ::selection{background:#ca095d!important;color:#fff!important}#search-data-list::-webkit-scrollbar{height:10px;width:10px}#search-data-list li{display:flex;overflow:hidden;margin:0;padding:5px 10px;color:#555;list-style:none;white-space:nowrap;font:normal 400 14px/150% var(--fr-shared-fontfamily)!important;justify-content:space-between}li span.number{padding:2px}li span.list{margin-right:auto;padding:2px 10px;width:85%;text-align:left;text-overflow:ellipsis;font-size:14px;font-weight:700;-webkit-user-select:all;user-select:all}li span a.action{color:#800000;font-size:14px;cursor:pointer;padding:2px}ul li:nth-child(2n-1){background-color:#fff8fccc}ul li:hover{background-color:#fdf6eccc}.reset{text-decoration:line-through;font-style: italic}ul li#empty{display:list-item;padding:18px 8px;text-align:center;color:#555}@-moz-document url-prefix(){ul{scrollbar-color:#8e9bb1 #f1f0f012!important;scrollbar-width:thin}}`,
@@ -2449,7 +2457,7 @@ void (function (ctx, uctx, sctx) {
             const languagePacks = {
               "en-US": { Title: "Add Network Address", Host: "Domain/Host/IP:", HostInfo: "(Required, Ports & leading wildcard supported)", NoEmpty: "This field is required.", Invalid: "Invalid format. Enter a valid domain, host, or IP (Ports and leading wildcard domain supported)", Redundant: "This address already exists.", Submit: "⚡ Send Network Address", Cancel: "Cancel" },
               "zh-CN": { Title: "添加网络地址", Host: "域名/主机/IP：", HostInfo: "（必填，支持首位通配符泛域名，也可附加端口号）", NoEmpty: "此项为必填项。", Invalid: "格式错误。请输入有效的域名、主机或 IP（支持端口号和首位通配符泛域名）", Redundant: "该网络地址已存在，请勿重复添加。", Submit: "⚡ 发送网络地址", Cancel: "取消" },
-              "zh-TW": { Title: "新增網路位址", Host: "網域/主機/IP：", HostInfo: "（必填，支援首位萬用字元泛網域，也可附加連接埠）", NoEmpty: "此欄位為必填項。", Invalid: "格式錯誤。請輸入有效的網域、主機或 IP（支援埠號和首位萬用字元泛網域）", Redundant: "該網路位址已存在，請勿重複新增。", Submit: "⚡ 發送網路位址", Cancel: "取消" }
+              "zh-TW": { Title: "新增網路位址", Host: "網域/主機/IP：", HostInfo: "（必填，支援首位萬用字元泛網域，也可附加連接埠）", NoEmpty: "此欄位為必填項。", Invalid: "格式錯誤。請輸入有效的網域、主機或 IP（支援埠號和首位萬用字元泛網域）", Redundant: "該網路位址已存在，請勿重複新增。", Submit: "⚡ 發送網路位址", Cancel: "取消" },
             }, i18n = new I18n(languagePacks, getLanguage("zh-CN"), "en-US"),
               html = `<div class="form-group"><div class="form-group form-inline"><label class="turquoise">${i18n.t("Host")}</label><span class="grey fs12">${i18n.t("HostInfo")}</span></div><input type="text" id="prompt-address" autocomplete="off" placeholder="www.test.com/*.test.com/test.com:8080/10.0.0.1" class="turquoise"><div class="error-tip hidden"></div></div><div class="btn-box"><button id="prompt-submit-btn" data-action="submit-data" class="btn btn-ok">${i18n.t("Submit")}</button><button data-action="close" class="btn">${i18n.t("Cancel")}</button></div>`,
               css = `dialog{min-width:500px;top:125px}.dialog-header{background:#13c2c2}.form-group{margin-bottom:15px}.form-group *{text-shadow:0 0 1px #7d7d7d40!important}.form-group p{line-height:150%;margin:0;padding:3px;color: #333}.btn-box{display:flex;gap:8px;justify-content:flex-end;margin:12px 0 0}.form-inline{margin-bottom:2px}.form-group input{border-left:4px solid #13c2c2;font:normal 400 15px/150% var(--fr-shared-monospaced)!important}.form-group input::placeholder{color:#ccc}`,
@@ -2480,7 +2488,7 @@ void (function (ctx, uctx, sctx) {
             const languagePacks = {
               "en-US": { Title: "Re-enable Wildcard Rendering", Content: "The current website is excluded from font rendering by matching the above wildcard rules.", InfoList: "<p>『<strong>OK</strong>』Allow all sites under this wildcard.</p><p>『<strong>Manage</strong>』Manually edit custom excluded sites.</p>", Custom: "Manage" },
               "zh-CN": { Title: "重新启用泛域名渲染", Content: "当前网站已被上述泛域名规则排除渲染。", InfoList: "<p>『<strong>确定</strong>』将自动移出该泛域名下的所有排除项。</p><p>『<strong>管理</strong>』可进入自定义排除站点列表进行手动调整。</p>", Custom: "管理", OK: "确定", Cancel: "取消" },
-              "zh-TW": { Title: "重新啟用泛網域轉譯", Content: "目前網站已被上述泛網域規則排除轉譯。", InfoList: "<p>「<strong>確定</strong>」將自動移出該泛網域下的所有排除項目。</p><p>「<strong>管理</strong>」可進入自訂排除網站列表進行手動調整。</p>", Custom: "管理", OK: "確定", Cancel: "取消" }
+              "zh-TW": { Title: "重新啟用泛網域轉譯", Content: "目前網站已被上述泛網域規則排除轉譯。", InfoList: "<p>「<strong>確定</strong>」將自動移出該泛網域下的所有排除項目。</p><p>「<strong>管理</strong>」可進入自訂排除網站列表進行手動調整。</p>", Custom: "管理", OK: "確定", Cancel: "取消" },
             }, i18n = new I18n(languagePacks, getLanguage("zh-CN"), "en-US"),
               html = `<div class="form-group"><p class="domain">${wildcard}</p><p class="darkgreen">${i18n.t("Content")}</p>${i18n.t("InfoList")}</div><div class="btn-box"><button data-action="launch-action" class="btn btn-ok">${i18n.t("OK")}</button><button data-action="launch-exclusion" class="btn btn-extra">${i18n.t("Custom")}</button><button data-action="close" class="btn">${i18n.t("Cancel")}</button></div>`,
               css = `dialog{min-width:450px;top:250px}.dialog-header{background:#006400}.form-group *{text-shadow:0 0 1px #7d7d7d40!important}.form-group p{line-height:150%;margin:0;padding:3px}.btn-box{display:flex;gap:8px;justify-content:flex-end;margin:12px 0 0}.form-group p.domain{font:italic 700 24px/150% Candara,Times!important;word-break:keep-all}`,
@@ -2506,7 +2514,7 @@ void (function (ctx, uctx, sctx) {
             const languagePacks = {
               "en-US": { ExcludeTitle: "Disable Font Rendering", ResumeTitle: "Re-enable Font Rendering", Custom: "Manage", CustomTitle: "Manage your custom exclusion items" },
               "zh-CN": { ExcludeTitle: "停用字体渲染", ResumeTitle: "重新启用字体渲染", OK: "确定", Custom: "管理", CustomTitle: "管理您的自定义排除项目", Cancel: "取消" },
-              "zh-TW": { ExcludeTitle: "停用字型渲染", ResumeTitle: "重新啟用字型渲染", OK: "確定", Custom: "管理", CustomTitle: "管理您的自訂排除項目", Cancel: "取消" }
+              "zh-TW": { ExcludeTitle: "停用字型渲染", ResumeTitle: "重新啟用字型渲染", OK: "確定", Custom: "管理", CustomTitle: "管理您的自訂排除項目", Cancel: "取消" },
             }, i18n = new I18n(languagePacks, getLanguage("zh-CN"), "en-US"), colorName = isExclude ? "firebrick" : "darkgreen",
               html = `<div class="form-group"><p class="domain">${CUR_HOST}</p><p class="${colorName}">${content}</p><p>${confirm}</p></div><div class="btn-box"><button data-action="launch-action" class="btn btn-ok">${i18n.t("OK")}</button><button data-action="launch-exclusion" class="btn btn-extra anchor-manage-ex tooltip" data-current-anchor="--manage-ex" data-tooltip="${i18n.t("CustomTitle")}">${i18n.t("Custom")}</button><button data-action="close" class="btn">${i18n.t("Cancel")}</button></div>`,
               css = `dialog{min-width:450px;top:250px}.dialog-header{background:${colorName}}.form-group *{text-shadow:0 0 1px #7d7d7d40!important}.form-group p{margin:0;padding:3px;line-height:150%}.btn-box{display:flex;gap:8px;justify-content:flex-end;margin:12px 0 0}.form-group p.domain{font:italic 700 24px/150% Candara,Times!important;word-break:keep-all}.anchor-manage-ex{anchor-name:--manage-ex}`,
@@ -2525,7 +2533,7 @@ void (function (ctx, uctx, sctx) {
             const languagePacks = {
               "en-US": { Loading: "Fetching cloud data, please wait...", FetchDone: "Cloud rules sync and save completed!", FetchFailed: "Failed to fetch cloud rules. Please retry later in 'Advanced Core Settings'.", Reload: "Page will refresh once this dialog is closed." },
               "zh-CN": { Loading: "正在获取云端站点渲染数据，请稍后……", FetchDone: "云端站点渲染规则同步完成，数据已成功保存！", FetchFailed: "云端站点渲染规则获取失败，请稍后在『高级核心配置设置』中重新拉取。", Reload: "关闭当前窗口后，网页将自动刷新以应用更改。", Close: "关闭" },
-              "zh-TW": { Loading: "正在取得雲端網站轉譯資料，請稍後……", FetchDone: "雲端網站轉譯規則同步完成，資料已成功儲存！", FetchFailed: "雲端網站轉譯規則取得失敗，請稍後在「進階核心設定」中重新嘗試拉取。", Reload: "關閉目前視窗後，網頁將會自動重新整理以套用變更。", Close: "關閉" }
+              "zh-TW": { Loading: "正在取得雲端網站轉譯資料，請稍後……", FetchDone: "雲端網站轉譯規則同步完成，資料已成功儲存！", FetchFailed: "雲端網站轉譯規則取得失敗，請稍後在「進階核心設定」中重新嘗試拉取。", Reload: "關閉目前視窗後，網頁將會自動重新整理以套用變更。", Close: "關閉" },
             }, i18n = new I18n(languagePacks, getLanguage("zh-CN"), "en-US"),
               html = `<div class="form-group">${extra_content ?? ""}<p class="indent" id="fetch-result"><span class="grey">${i18n.t("Loading")}<span></p><p>${i18n.t("Reload")}</p></div><div class="btn-box"><button data-action="close" class="btn btn-ok">${i18n.t("Close")}</button></div>`,
               css = `dialog{min-width:450px;top:250px}.dialog-header{background:${bgColor}}.dialog-header .dialog-title{text-shadow:0 0 2px #1c1c1c!important}.form-group *{text-shadow:0 0 1px #7d7d7d40!important}.form-group p{line-height:150%;margin:0;padding:3px}.btn-box{display:flex;gap:8px;justify-content:flex-end;margin:12px 0 0}.form-group p.indent{text-indent:-28px;margin:0 26px}`,
@@ -2555,7 +2563,7 @@ void (function (ctx, uctx, sctx) {
             if (!input || !target || !elementSelector) { return } input.classList.remove("peach-border");
             const keyword = input.value?.trim().replace(/([.*+?^${}()|[\]\\])/g, "\\$&"); if (!keyword) { return }
             const reg = new RegExp(keyword, "i"), textNodes = qA(elementSelector, target); if (textNodes.length === 0) { return }
-            const lastKeyword = input.dataset.lastKeyword || ""; let index = parseInt(input.dataset.searchIndex) || 0;
+            const lastKeyword = input.dataset.lastKeyword || ""; let index = parseInt(input.dataset.searchIndex, 10) || 0;
             if (lastKeyword !== keyword) { index = 0; input.dataset.lastKeyword = keyword } let match = null, textNode = null, foundIndex = -1;
             for (let i = 0, l = textNodes.length; i < l; ++i) {
               const checkIndex = (index + i) % textNodes.length, node = textNodes[checkIndex].firstChild;
@@ -2565,7 +2573,7 @@ void (function (ctx, uctx, sctx) {
               input.dataset.searchIndex = (foundIndex + 1) % textNodes.length; const range = document.createRange(); range.selectNodeContents(textNode);
               const selection = $.getSelection(); if (selection) { selection.removeAllRanges(); selection.addRange(range) }
               const selectedNode = textNode.parentNode.previousElementSibling; if (selectedNode) {
-                const row = parseInt(selectedNode.textContent) || 0, height = Number(selectedNode.clientHeight) || 0; target.scrollTop = (row - 1) * height;
+                const row = parseInt(selectedNode.textContent, 10) || 0, height = Number(selectedNode.clientHeight) || 0; target.scrollTop = (row - 1) * height;
               } input.classList.remove("peach-border");
             } else { input.dataset.searchIndex = 0; input.classList.add("peach-border"); input.blur() }
           }
@@ -2593,8 +2601,7 @@ void (function (ctx, uctx, sctx) {
             if (!text) { return "" } let result = text.replace(/[\uFF01-\uFF5E\u3000，：'"`·“”‘’]/g, char => {
               if (char === "\u3000") { return " " } if (char === "，") { return "," } if (char === "：") { return ":" }
               if (/['"`·“”‘’]/.test(char)) { return isDoubleQuote ? `"` : `'` } return String.fromCharCode(char.charCodeAt(0) - 65248);
-            }); if (filterRegex instanceof RegExp) { result = result.replace(filterRegex, "") }
-            return isConvertHTML ? toSafeString(result.trim()) : result.trim();
+            }); if (filterRegex instanceof RegExp) { result = result.replace(filterRegex, "") } return isConvertHTML ? toSafeString(result.trim()) : result.trim();
           }
           function downloadDataFile(fileName, data) {
             const url = URL.createObjectURL(new Blob([encrypt(toString(data))], { type: "text/plain;charset=utf-8" })),
@@ -2632,16 +2639,15 @@ void (function (ctx, uctx, sctx) {
         }
         async function getBrowserNavigatorInfo(_info) {
           let parsedInfo; try { if (!_info) { throw new Error("Illegal data") } parsedInfo = JSON_parse(_info) } catch {
-            const navigator = new NavigatorInfoFetcher($); parsedInfo = await navigator.getInfo();
-            sessionStorage.setItem(NAVIGATORINFO, JSON_stringify(parsedInfo));
+            const navigator = new NavigatorInfoFetcher($); parsedInfo = await navigator.getInfo(); sessionStorage.setItem(NAVIGATORINFO, JSON_stringify(parsedInfo));
           } return parsedInfo;
         }
         async function automatedInitializationNotice() {
           if (!CUR_WINDOW_TOP) { return } const keys = await GMlistValues(); await Promise.allSettled(Array_map(keys, key => dataManager.delete(key)));
-          if (privateKey) { error(i18n.t("TamperErr")); GMaddMenu(i18n.t("Reinstall"), () => GMopenInTab(GMhomepage, false)) } else {
+          if (privateKey) { error(`\ufff0\ud83d\udea7 ${i18n.t("TamperErr")}`); GMaddMenu(`\ufff0\ud83d\udea7 ${i18n.t("Reinstall")}`, () => GMopenInTab(GMhomepage, false)) } else {
             error(i18n.t("RebuildErr")); await dataManager.init(); const configure = await dataManager.get(CONFIGURE);
-            await dataManager.set(CONFIGURE, { ...configure, curVersion: null }); noticeRebuildError();
-          } function noticeRebuildError() {
+            await dataManager.set(CONFIGURE, { ...configure, curVersion: null }); noticeRebuildInfo();
+          } function noticeRebuildInfo() {
             const languagePacks = {
               "en-US": { Title: "Automatic Data Initialized", Warning: "Notice: Data initialized due to new data structure. Reconfiguration recommended. (Old backups can still be imported, but compatibility is not guaranteed).", Notice: "The page will refresh once this dialog is closed.", Changelog: "Changelog", Update: "The script is now on the latest version. Data initialization will complete once the page is refreshed." },
               "zh-CN": { Title: "数据自动初始化通知", Warning: "注意：因新版本采用全新的数据结构，升级后数据已自动初始化。建议重新配置渲染数据以获得最佳体验（您仍可尝试导入旧备份进行还原，但可能存在兼容性问题）。", Notice: "为使初始化配置生效，关闭此对话框后网页将自动刷新。", Changelog: "更新日志", Update: "当前脚本已是最新，数据初始化将在页面刷新后自动完成。", Close: "关闭" },
@@ -2656,11 +2662,10 @@ void (function (ctx, uctx, sctx) {
         function initRootMarker() {
           let lastId = null, cachedStyle = null; const html = document.documentElement, htmlObserver = new MutationObserver(mutations => {
             let newID = null, newMarker = false; for (let i = 0, l = mutations.length; i < l; ++i) {
-              const { target, attributeName } = mutations[i]; if (attributeName === "id") {
-                if (!target.id) { target.id = MARKERID } else { newID = target.id }
-              } else if (attributeName === LOAD_ONCE && !hasAttribute(target, LOAD_ONCE)) { newMarker = true }
+              const { target, attributeName } = mutations[i]; if (attributeName === "id") { if (!target.id) { target.id = MARKERID } else { newID = target.id } } else
+                if (attributeName === LOAD_ONCE && !hasAttribute(target, LOAD_ONCE)) { newMarker = true }
             } if (newMarker) { setAttribute(html, LOAD_ONCE, currentTheme) } if (newID === null || cachedStyle === null || lastId === newID) { return }
-            styleManager.insert(MAIN_STYLE_NAME, cachedStyle.replace(ID_REGEXP, `:root#${CSS.escape(newID)}`), { type: MAIN_STYLE_TYPE }); lastId = newID;
+            styleManager.insert(MAIN_STYLE_ID, cachedStyle.replace(ID_REGEXP, `:root#${CSS.escape(newID)}`), { type: MAIN_STYLE_TYPE }); lastId = newID;
           }); htmlObserver.observe(html, { attributeFilter: [LOAD_ONCE, "id"] }); SERVICE_BUS.register("hasRootMarker", hasAttribute(html, LOAD_ONCE));
           if (!hasAttribute(html, LOAD_ONCE)) { setAttribute(html, LOAD_ONCE, "") } if (!getAttribute(html, "id")) { setAttribute(html, "id", MARKERID) }
           SERVICE_BUS.get("OutputRenderData").then(output => { cachedStyle = output.data.finalStyle }).catch(e => error("Timeout failed:", e.message));
@@ -2673,15 +2678,13 @@ void (function (ctx, uctx, sctx) {
           });
         }
         function getUniqueFontlist(fontlist) {
-          if (!Array_isArray(fontlist)) { return [] } const result = [], fontMap = new Map();
-          for (let i = 0, l = fontlist.length; i < l; ++i) {
+          if (!Array_isArray(fontlist)) { return [] } const result = [], fontMap = new Map(); for (let i = 0, l = fontlist.length; i < l; ++i) {
             const font = fontlist[i]; if (!font) { continue } const ch = font.ch, en = font.en,
               idx = (ch ? fontMap.get(ch) : void 0) ?? (en ? fontMap.get(en) : void 0); if (idx !== void 0) {
                 if (font.ps && result[idx] && !result[idx].ps) { result[idx] = font }
               } else { const newIdx = Array_push(result, font) - 1; if (ch) { fontMap.set(ch, newIdx) } if (en) { fontMap.set(en, newIdx) } }
           } return result;
         }
-        function safeDeepClone(obj) { if (structuredClone) { return structuredClone(obj) } try { return JSON_parse(JSON_stringify(obj)) } catch { return obj } }
         function updateDomainsIndex(domains, curHost = CUR_HOST) { return Array_findIndex(domains, domain => domain.domain === curHost) }
         function parseCsstextForIframe(cssText) { return cssText.replace(ID_REGEXP, ":root ").replace("var(--fr-font-fontscale)", "initial") }
         function validateUserAgent(uad) { return ($.isSecureContext && !uad) || (uad && Object_toString(uad) !== "[object NavigatorUAData]") }
@@ -2700,89 +2703,74 @@ void (function (ctx, uctx, sctx) {
         if (ctx.TrustedTypePolicyFactory?.prototype) { ctx.TrustedTypePolicyFactory.prototype.createPolicy = exportFn(createPolicyWrapper, ctx.TrustedTypePolicyFactory.prototype) }
         if (!GMcontextMode && uctx.TrustedTypePolicyFactory?.prototype) { uctx.TrustedTypePolicyFactory.prototype.createPolicy = exportFn(createPolicyWrapper, uctx.TrustedTypePolicyFactory.prototype) }
       } catch (e) { warn(i18n.t("TrustedHTML"), e.message) } return defaultPolicy;
-    })(), (function () {
-      if (isRawGreasemonkey || GMcontextMode) { return } let activeRequests = 0, isTracking = false, onCompleteCallback = null; const checkRequests = () => {
-        if (isTracking && activeRequests === 0 && onCompleteCallback) { setTimeout(() => { onCompleteCallback(); isTracking = false }, 0) }
-      }, originalFetch = uctx.fetch; uctx.fetch = function (...args) {
-        if (isTracking) { activeRequests++ } try { return Function_apply(originalFetch, this, args) } catch { void 0 } finally { if (isTracking) { activeRequests--; checkRequests() } }
-      }; const originalXHRSend = uctx.XMLHttpRequest.prototype.send; uctx.XMLHttpRequest.prototype.send = function (...args) {
-        if (isTracking) { activeRequests++ } addListener(this, "loadend", () => { if (isTracking) { activeRequests--; checkRequests() } }, { once: true });
-        try { return Function_apply(originalXHRSend, this, args) } catch { void 0 }
-      }; return { startTracking: callback => { activeRequests = 0; isTracking = true; onCompleteCallback = callback } };
     })());
   })(ctx,
     (function buildSafeMethodsLibrary(window, sandboxWindow) {
-      const createMethodWrapper = function (origFn, reflectApply) { return function (thisArg, ...args) { return reflectApply(origFn, thisArg, args) } },
-        createGetterWrapper = function (getter, reflectApply) { return function (thisArg) { return reflectApply(getter, thisArg, []) } },
-        localConstructors = { Object: Object, Function: Function, Array: Array, String: String, Number: Number, Math: Math, JSON: JSON, Reflect: Reflect },
-        safeWin = sandboxWindow, safeMethods = safeWin.Object.create(null), localReflectApply = Reflect.apply, Char = String.fromCharCode, DECODE = new Uint8Array(256),
-        MAP = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; for (let i = 0; i < 64; ++i) { DECODE[MAP.charCodeAt(i)] = i }
-      safeMethods.btoa = input => {
-        const s = String(input); if (/[^\x00-\xFF]/.test(s)) { throw new Error("'btoa' failed") } // eslint-disable-line no-control-regex
-        const l = s.length, res = []; for (let i = 0; i < l; i += 3) {
-          const v = (s.charCodeAt(i) << 16) | (s.charCodeAt(i + 1) << 8) | s.charCodeAt(i + 2);
-          res.push(MAP[(v >> 18) & 63] + MAP[(v >> 12) & 63] + (i + 1 < l ? MAP[(v >> 6) & 63] : "=") + (i + 2 < l ? MAP[v & 63] : "="));
-        } return res.join("");
-      }; safeMethods.atob = input => {
-        const s = String(input); let l = s.length; while (s[l - 1] === "=") { l-- } if (l % 4 === 1) { throw new Error("'atob' failed") }
-        const res = []; for (let i = 0; i < l; i += 4) {
-          const v = (DECODE[s.charCodeAt(i)] << 18) | (DECODE[s.charCodeAt(i + 1)] << 12) | (DECODE[s.charCodeAt(i + 2)] << 6) | DECODE[s.charCodeAt(i + 3)];
-          res.push(i + 3 < l ? Char((v >> 16) & 255, (v >> 8) & 255, v & 255) : i + 2 < l ? Char((v >> 16) & 255, (v >> 8) & 255) : Char((v >> 16) & 255));
-        } return res.join("");
-      }; const safeConstructors = ["Object", "Function", "Array", "String", "JSON", "Reflect"]; safeConstructors.forEach(name => {
-        let Target = safeWin[name]; if (!Target) { return } if (Target.prototype) {
-          let protoNames = []; try { protoNames = safeWin.Object.getOwnPropertyNames(Target.prototype) } catch { void 0 }
-          if (protoNames.length === 0 && localConstructors[name]) { Target = localConstructors[name]; try { protoNames = Object.getOwnPropertyNames(Target.prototype) } catch { void 0 } }
-          protoNames.forEach(prop => {
-            if (prop === "constructor") { return } try {
-              const currentObj = Target === localConstructors[name] ? Object : safeWin.Object, desc = currentObj.getOwnPropertyDescriptor(Target.prototype, prop); if (!desc) { return }
-              if (typeof desc.value === "function") { safeMethods[`${name}_${prop}`] = createMethodWrapper(desc.value, localReflectApply) } else
-                if (typeof desc.get === "function") { safeMethods[`${name}_get_${prop}`] = createGetterWrapper(desc.get, localReflectApply) }
+      const safeWin = sandboxWindow, safeMethods = safeWin.Object.create(null), call = safeWin.Function.prototype.call, bind = safeWin.Function.prototype.bind,
+        uncurry = bind.bind(call), localConstructors = { Object, Function, Array, String, Number, Math, JSON, Reflect }, Char = String.fromCharCode, DECODE = new Uint8Array(256),
+        MAP = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; for (let i = 0; i < 64; ++i) { DECODE[MAP.charCodeAt(i)] = i } safeMethods.btoa = input => {
+          const s = String(input), l = s.length; if (l === 0) { return "" } if (/[\u0100-\uFFFF]/.test(s)) { throw new Error("'btoa' failed") } let resIdx = 0;
+          const res = new Array(Math.ceil(l / 3)), extra = l % 3, mainLen = l - extra; for (let i = 0; i < mainLen; i += 3) {
+            const v = (s.charCodeAt(i) << 16) | (s.charCodeAt(i + 1) << 8) | s.charCodeAt(i + 2); res[resIdx++] = MAP[(v >> 18) & 63] + MAP[(v >> 12) & 63] + MAP[(v >> 6) & 63] + MAP[v & 63];
+          } if (extra === 1) { const v = s.charCodeAt(mainLen) << 16; res[resIdx] = MAP[(v >> 18) & 63] + MAP[(v >> 12) & 63] + "==" } else if (extra === 2) {
+            const v = (s.charCodeAt(mainLen) << 16) | (s.charCodeAt(mainLen + 1) << 8); res[resIdx] = MAP[(v >> 18) & 63] + MAP[(v >> 12) & 63] + MAP[(v >> 6) & 63] + "=";
+          } return res.join("");
+        }; safeMethods.atob = input => {
+          const s = String(input); let l = s.length; if (l === 0) { return "" } while (l > 0 && s.charCodeAt(l - 1) === 61) { l-- } if (l % 4 === 1) { throw new Error("'atob' failed") }
+          const res = new Array(Math.ceil(l * 3 / 4)); let resIdx = 0; const extra = l % 4, mainLen = l - extra; for (let i = 0; i < mainLen; i += 4) {
+            const v = (DECODE[s.charCodeAt(i)] << 18) | (DECODE[s.charCodeAt(i + 1)] << 12) | (DECODE[s.charCodeAt(i + 2)] << 6) | DECODE[s.charCodeAt(i + 3)];
+            res[resIdx++] = Char((v >> 16) & 255, (v >> 8) & 255, v & 255);
+          } if (extra === 2) { const v = (DECODE[s.charCodeAt(mainLen)] << 18) | (DECODE[s.charCodeAt(mainLen + 1)] << 12); res[resIdx] = Char((v >> 16) & 255) } else if (extra === 3) {
+            const v = (DECODE[s.charCodeAt(mainLen)] << 18) | (DECODE[s.charCodeAt(mainLen + 1)] << 12) | (DECODE[s.charCodeAt(mainLen + 2)] << 6); res[resIdx] = Char((v >> 16) & 255, (v >> 8) & 255);
+          } return res.join("");
+        };["Object", "Function", "Array", "String", "JSON", "Reflect"].forEach(name => {
+          let Target = safeWin[name]; if (!Target) { return } if (Target.prototype) {
+            let protoNames = []; try { protoNames = safeWin.Object.getOwnPropertyNames(Target.prototype) } catch { void 0 }
+            if (protoNames.length === 0 && localConstructors[name]) { Target = localConstructors[name]; try { protoNames = Object.getOwnPropertyNames(Target.prototype) } catch { void 0 } }
+            protoNames.forEach(prop => {
+              if (prop === "constructor") { return } try {
+                const currentObj = Target === localConstructors[name] ? Object : safeWin.Object, desc = currentObj.getOwnPropertyDescriptor(Target.prototype, prop); if (!desc) { return }
+                if (typeof desc.value === "function") { safeMethods[`${name}_${prop}`] = uncurry(desc.value) } else
+                  if (typeof desc.get === "function") { safeMethods[`${name}_get_${prop}`] = uncurry(desc.get) }
+              } catch { void 0 }
+            });
+          } let staticNames = []; try { staticNames = (Target === localConstructors[name] ? Object : safeWin.Object).getOwnPropertyNames(Target) } catch { void 0 }
+          if (staticNames.length === 0 && localConstructors[name]) { Target = localConstructors[name]; try { staticNames = Object.getOwnPropertyNames(Target) } catch { void 0 } }
+          staticNames.forEach(prop => {
+            try {
+              const currentObj = Target === localConstructors[name] ? Object : safeWin.Object, desc = currentObj.getOwnPropertyDescriptor(Target, prop);
+              if (desc && typeof desc.value === "function" && !["caller", "callee", "arguments"].includes(prop)) { safeMethods[`${name}_${prop}`] = desc.value }
             } catch { void 0 }
           });
-        } let staticNames = []; try { staticNames = (Target === localConstructors[name] ? Object : safeWin.Object).getOwnPropertyNames(Target) } catch { void 0 }
-        if (staticNames.length === 0 && localConstructors[name]) { Target = localConstructors[name]; try { staticNames = Object.getOwnPropertyNames(Target) } catch { void 0 } }
-        staticNames.forEach(prop => {
-          try {
-            const currentObj = Target === localConstructors[name] ? Object : safeWin.Object, desc = currentObj.getOwnPropertyDescriptor(Target, prop);
-            if (desc && typeof desc.value === "function" && !["caller", "callee", "arguments"].includes(prop)) { safeMethods[`${name}_${prop}`] = desc.value }
-          } catch { void 0 }
         });
-      }); const winReflectApply = window.Reflect?.apply || localReflectApply,
-        windowMethods = ["setTimeout", "clearTimeout", "structuredClone", "queueMicrotask", "requestIdleCallback", "cancelIdleCallback", "requestAnimationFrame", "cancelAnimationFrame"];
-      windowMethods.forEach(name => { const origFn = window[name]; if (typeof origFn === "function") { safeMethods[name] = (...args) => winReflectApply(origFn, uctx, args) } });
+      const windowMethods = ["setTimeout", "clearTimeout", "structuredClone", "queueMicrotask", "requestIdleCallback", "cancelIdleCallback", "requestAnimationFrame", "cancelAnimationFrame"],
+        targetUctx = uctx || window; windowMethods.forEach(name => { const origFn = window[name]; if (typeof origFn === "function") { safeMethods[name] = origFn.bind(targetUctx) } });
       if (window.console) {
-        const consoleMethods = ["log", "warn", "error"]; consoleMethods.forEach(name => {
-          const origFn = window.console[name]; if (typeof origFn === "function") { safeMethods[`console_${name}`] = (...args) => winReflectApply(origFn, window.console, args) }
-        });
+        ["log", "warn", "error"].forEach(name => { const origFn = window.console[name]; if (typeof origFn === "function") { safeMethods[`console_${name}`] = origFn.bind(window.console) } });
       } if (window.Element && window.Element.prototype) {
-        const elementMethods = ["attachShadow", "setAttribute", "getAttribute", "hasAttribute", "removeAttribute"]; elementMethods.forEach(name => {
-          const origFn = window.Element.prototype[name]; if (typeof origFn === "function") { safeMethods[`Element_${name}`] = (el, ...args) => winReflectApply(origFn, el, args) }
-        });
+        const elementMethods = ["attachShadow", "setAttribute", "getAttribute", "hasAttribute", "removeAttribute"];
+        elementMethods.forEach(name => { const origFn = window.Element.prototype[name]; if (typeof origFn === "function") { safeMethods[`Element_${name}`] = uncurry(origFn) } });
       } if (window.EventTarget && window.EventTarget.prototype) {
-        const targetMethods = ["addEventListener", "removeEventListener", "dispatchEvent"]; targetMethods.forEach(name => {
+        ["addEventListener", "removeEventListener", "dispatchEvent"].forEach(name => {
           const origFn = window.EventTarget.prototype[name], winFn = window[name]; if (typeof origFn !== "function") { return }
-          safeMethods[`EventTarget_${name}`] = function (target, ...args) {
-            if (target === window || target === window.window) { return winReflectApply(winFn, target, args) }
-            try { return winReflectApply(origFn, target, args) } catch (e) {
-              if (e instanceof TypeError && target && typeof target[name] === "function") { return winReflectApply(target[name], target, args) } throw e;
-            }
+          const uncurriedOrig = uncurry(origFn), boundWinFn = winFn ? winFn.bind(window) : null; safeMethods[`EventTarget_${name}`] = function (target, ...args) {
+            if (target === window || target === window.window) { return boundWinFn ? boundWinFn(...args) : void 0 }
+            try { return uncurriedOrig(target, ...args) } catch (e) { if (e instanceof TypeError && target && typeof target[name] === "function") { return target[name](...args) } throw e }
           };
         });
       } if (window.Event && window.Event.prototype) {
-        const eventMethods = ["preventDefault", "stopImmediatePropagation", "stopPropagation", "composedPath"]; eventMethods.forEach(name => {
-          const origFn = window.Event.prototype[name]; if (typeof origFn === "function") { safeMethods[`Event_${name}`] = (event, ...args) => winReflectApply(origFn, event, args) }
-        });
+        const Events = ["preventDefault", "stopImmediatePropagation", "stopPropagation", "composedPath"];
+        Events.forEach(name => { const origFn = window.Event.prototype[name]; if (typeof origFn === "function") { safeMethods[`Event_${name}`] = uncurry(origFn) } });
       } return safeWin.Object.freeze(safeMethods);
-    })(ctx, sctx)
+    })(ctx, sctx),
   );
 })(
-  typeof globalThis !== "undefined" ? globalThis : window,
-  typeof unsafeWindow !== "undefined" ? unsafeWindow : typeof globalThis !== "undefined" ? globalThis : window,
+  typeof this !== "undefined" ? this : window,
+  typeof unsafeWindow !== "undefined" ? unsafeWindow : typeof this !== "undefined" ? this : window,
   (function createSandboxWindow(originalWindow, iframe) {
     if (typeof GM_addElement === "undefined" || document.contentType === "application/pdf") { return originalWindow } try {
       const id = "sandbox:window"; let safeWindow; iframe = GM_addElement("iframe", { id, style: "display:none" }) ?? document.querySelector(`iframe#${CSS.escape(id)}`);
       if (iframe) { safeWindow = iframe.contentWindow; if (safeWindow) { return safeWindow } } return originalWindow;
     } catch { return originalWindow } finally { if (iframe) { iframe.remove() } }
-  })(typeof globalThis !== "undefined" ? globalThis : window, null)
+  })(typeof this !== "undefined" ? this : window, null),
 );
