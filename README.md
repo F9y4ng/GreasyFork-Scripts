@@ -25,15 +25,14 @@
 - 脚本错误、异常请反馈至{[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)}, 字体、渲染样式、乱码问题请反馈至{[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)}。
 - 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-### version 2026.07.11.2 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2026.08.01.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-# 由于代码重构，更新后数据将会自动初始化。推荐您重新配置数据。
-+ 脚本代码完全重构，功能更完善，性能更高效。
-@ 新版代码，如有遇到错误或问题，请及时向作者反馈。
-
-@ 修复粗体样式修正对表单元素的监控。
-@ 修复 Tampermonkey 在 content context 模式下产生的隐藏错误。
+@ 修复数据备份时出现的数据导出错误问题。
+@ 修复字体缩放视口单位修正功能的性能与错误。
+@ 修复粗体样式修正在SPA页面上的元素过滤问题。
+@ 优化部分函数的性能，减少内存泄漏风险。
+@ 修正一些已知问题，优化代码，优化样式。
 ```
 
 ### **字体渲染** 新版本，使用前请注意以下事项：
@@ -126,10 +125,12 @@
 - [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 - 自动更新检测默认开启，如无更新提示需求，可在“**搜索引擎助手高级设置**”中关闭它。
 
-### version 2026.07.11.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2026.08.01.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ 修正在 Greasemonkey 中运行出错的问题。
+@ 修正Yahoo搜索跳转按钮的插入错误。
+@ 修正360搜索跳转按钮的插入错误。
+@ 修正去除链接重定向误处理的错误。
 @ 修正一些已知问题，优化代码，优化样式。
 ```
 
