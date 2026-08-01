@@ -5,10 +5,12 @@
 // @name:zh-TW   優雅的搜尋引擎助手
 // @name:ru      Помощник поисковой системы
 // @name:ja      優雅な検索エンジン助手
-// @version      2026.07.11.1
+// @version      2026.08.01.1
 // @author       F9y4ng
 // @description  "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG and more.
 // @namespace    https://github.com/F9y4ng/GreasyFork-Scripts/
-// @note         {"CN":"修正在 Greasemonkey 中运行出错的问题。","EN":"Fixed a runtime error in Greasemonkey."}
+// @note         {"CN":"修正Yahoo搜索跳转按钮的插入错误。","EN":"Fixed the insertion error of Yahoo search jump button."}
+// @note         {"CN":"修正360搜索跳转按钮的插入错误。","EN":"Fixed the insertion error of 360 search jump button."}
+// @note         {"CN":"修正去除链接重定向误处理的错误。","EN":"Fixed a bug where link redirection was mishandled."}
 // @note         {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // ==/UserScript==
