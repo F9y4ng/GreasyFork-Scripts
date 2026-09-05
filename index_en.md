@@ -28,13 +28,15 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data in a timely manner. Do not use backup files from unknown sources!
 
-### version 2026.08.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2026.09.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ Fixed data export error issue during data backup.
-@ Fixed an error in the font scaling viewport unit correction function.
-@ Fixed bold style correction element filtering issue on SPA pages.
+@ Fixed filter rules for font scaling viewport unit correction function.
+@ Fixed the execution efficiency issue of the bold style correction function.
+@ Fixed data manager performance and asynchronous timing issues.
+@ Fixed an issue with proxy function errors in Greasemonkey.
 @ Optimized the performance of some functions and reduce the risk of memory leaks.
+@ Optimized the execution efficiency of multilingual functions.
 @ Fixed some known issues, optimize code, and optimize styles.
 ```
 
@@ -111,12 +113,14 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-### version 2026.08.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2026.09.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Fixed the insertion error of Yahoo search jump button.
-@ Fixed the insertion error of 360 search jump button.
-@ Fixed a bug where link redirection was mishandled.
+@ Removed You.com, Added info.com.
+@ Optimized Google search result redirection issues.
+@ Optimized duckduckgo for opening new windows.
+@ Fixed sporadic failure issue of the keyword blocking.
+@ Fixed Google the jump button was not inserted issue.
 @ Fixed some known issues, optimized code & style.
 ```
 
