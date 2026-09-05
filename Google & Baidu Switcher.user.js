@@ -5,15 +5,15 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            Помощник поисковой системы
 // @name:ja            優雅な検索エンジン助手
-// @version            2026.08.01.1
+// @version            2026.09.05.1
 // @author             F9y4ng
-// @description        Alias "Search Engine Assistant", le script aide à la navigation entre les moteurs de recherche, à la personnalisation des préférences, à la mise en évidence des mots-clés, à l'élimination des redirections et des publicités et au filtrage des résultats. Compatible avec Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG et bien d'autres moteurs de recherche célèbres.
-// @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG and more.
-// @description:zh-CN  “优雅的搜索引擎助手”方便用户在不同的搜索引擎之间跳转；支持自定义常用搜索引擎、关键词高亮渲染；还提供去除搜索链接重定向、屏蔽搜索结果广告、使用关键词过滤搜索结果、和自动更新检测等高级功能；兼容如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、You、Startpage、Brave、Yahoo、Yep、Mojeek、searXNG等多个搜索引擎。
-// @description:zh-TW  「優雅的搜尋引擎助手」方便使用者在不同的搜尋引擎之間跳轉；支援自定義常用搜尋引擎、關鍵詞高亮渲染；還提供去除搜尋連結重定向、遮蔽搜尋結果廣告、使用關鍵詞過濾搜尋結果、和自動更新檢測等高階功能；相容如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、You、Startpage、Brave、Yahoo、Yep、Mojeek、searXNG等多個搜尋引擎。
-// @description:ru     «Элегантный Помощник поисковой системы» позволяет легко переключаться между поисковыми системами и поддерживает такие дополнительные функции, как настройка, удаление редиректов и рекламы. Совместим с такими поисковыми системами, как Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek и searXNG.
-// @description:ja     「優雅な検索エンジン助手」は、検索エンジン間の切り替えを容易にし、カスタムエンジン、キーワードハイライト、リダイレクト削除、広告ブロック、キーワードフィルタリング、自動更新をサポートし、Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、You、Startpage、Brave、Yahoo、Yep、Mojeek、searXNGなどと互換性があります。
-// @icon               data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAAFC0lEQVR4nO2WbUxTVxjHj8IMWZbt05Yt28y2D3yQRN0++MVsmXFbNjBixbFpkSGvXUt5GRpkgOCgIsgqOANUQCXYOQUKCMqrtDAmiorSwioIytsoIL3ce1olQ+W/3KsFlYov8yUmPsn/w725J//fec7zPPcQ8jJexoscABwsFosLpfRTq9W6CIDTMzFmWfYjSmkux3EWSilsYll2YnBwsNxsNi99auaUUn+O48ZZlkODrgW7lAVIjM9DWuohHD3yF8xmBhzHTXZ2du4B4PhEzVmWDeZ32nq+AxvESfDekIbwHbUIV51F+E4dAuTZEK2IQU3VKSEjBoNBQwiZ80TMx8bGPuY4buLsGSPc3WIQvKcVYVrMUPChAXh4JKC0uEGAKCsri/pfxgCcKKULKKXVfHo9RfGQ5Brtmk9BFJux0jUGl7r7MTAwMLR48eI3H9nYarW+c7vQrtqKTFOgxXrZ3lnNbfJNqEJq8kFhnVKplD+q+SKO40x8ofHn+dvOQuxIUsPPJwUbdttP/b2Sakbh6ZEgAJSUlPxOCJn7UOYMw7xBKb1sMo1AFrgTP/imI0ypw0+7GhG4+Q/Ij12dMgmpnoC02Axp0RUEl1sQVjc5DVE3iS8/3ygA9PT09HV3dwdbLJa3HghAKY3lF23eqIJ/bKn9HdZNIuhAH2S5fyNNewWqE2OIK+6Fb1Yb5Eett+BqJvDVsk3o7zdhdNRsmxPXurq6tswKwLKs0aC/iFWiBITV3bQLEJB3CcmVJuhHgA5mWkc7JhCkaoO8YhySQyYsWxqG1e5xcP0iEnJJOppPtgkger1+/wxjAPMopdH8ECk6rIXXpsP2K7zcgo3qi2g3321uU2HbOPxyO4VvQ6v/vZ2xm5Bnt0K0Mg5VFSeFQaVWq/3vNH+FUlrJ07WcNWJLVA7WRtgHCFL3ocAwbtec1wUzIM1pR2jtjRlrZQVDcHeNBl9fRqPRQAh5zXbuUbz5vpxyrFn9C8JTqhB8eNAugP++LtRcun5fAF7RBZeFY7C33jtcLbQzy7I35s+f/4kAwLfcuZYLELlvhbzi2qztFXigD0Xts2SAAWR8Bmqu213vta0e6cpCoRbEYvFavuff5h/2ZpfDO77igf0tO8Ih8mA3jKP2AUrPU/jsbkXocfsF/H1sJbIyjwgAy5cv/46f8R/wD9lZ5VgXV/1QQyZgfzeUx0fQdg9E7fkxRCY2Iij1DPyyO2bUQejxSazw2I7Tze0YGhoyOzo6fiZcKhiGYfifjJu7YrpyZ1PdTQTm9yBkvxGZjQz2NVMoyv6BX3oLQuL/RFiMDpLkU/DbY5w+irpJeEaWQiLPEnZfWVlZSghxFmqgv78/lX+5XVkC11VJ8EpqgM+ucw+Ut7IZXtsaIFbo4JVyAusSdfCM0EC2ueYWRMpprE9pgjhRCzfPX+ErycDw8ChMJtOos7OzFyFknq0NnXp7e/U8RK1Oj58TixAQkvNYEvumw+2bGIREVQsQPpIcfLtGgYrac3z/86lnRCJROCHkvbsGUX5+/utNTU0FDMOM33nNehztTiuEx8otiIg+BtmPGVBszRPe19fXV7u4uHgTQt6/3ySes2TJkgURERGBCoUi5nGk1+ubeDNVRilErtEI9EmZuhc4ODh8PZX2pxVardbJYDAcuzMjw8PDY1KpNJYQ8i55RjE3MzPTR6PRqFUqVebChQv5tH9InkPMIYS8+jyMyQsT/wHRI0Gp4kJwPQAAAABJRU5ErkJggg==
+// @description        Alias "Search Engine Assistant", le script aide à la navigation entre les moteurs de recherche, à la personnalisation des préférences, à la mise en évidence des mots-clés, à l'élimination des redirections et des publicités et au filtrage des résultats. Compatible avec Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG et bien d'autres moteurs de recherche célèbres.
+// @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG and more.
+// @description:zh-CN  “优雅的搜索引擎助手”方便用户在不同的搜索引擎之间跳转；支持自定义常用搜索引擎、关键词高亮渲染；还提供去除搜索链接重定向、屏蔽搜索结果广告、使用关键词过滤搜索结果、和自动更新检测等高级功能；兼容如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、Startpage、Brave、Yahoo、Yep、Mojeek、searXNG等多个搜索引擎。
+// @description:zh-TW  「優雅的搜尋引擎助手」方便使用者在不同的搜尋引擎之間跳轉；支援自定義常用搜尋引擎、關鍵詞高亮渲染；還提供去除搜尋連結重定向、遮蔽搜尋結果廣告、使用關鍵詞過濾搜尋結果、和自動更新檢測等高階功能；相容如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、Startpage、Brave、Yahoo、Yep、Mojeek、searXNG等多個搜尋引擎。
+// @description:ru     «Элегантный Помощник поисковой системы» позволяет легко переключаться между поисковыми системами и поддерживает такие дополнительные функции, как настройка, удаление редиректов и рекламы. Совместим с такими поисковыми системами, как Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, Startpage, Brave, Yahoo, Yep, Mojeek и searXNG.
+// @description:ja     「優雅な検索エンジン助手」は、検索エンジン間の切り替えを容易にし、カスタムエンジン、キーワードハイライト、リダイレクト削除、広告ブロック、キーワードフィルタリング、自動更新をサポートし、Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、Startpage、Brave、Yahoo、Yep、Mojeek、searXNGなどと互換性があります。
+// @icon               data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAz1BMVEUAAACFhYXw8PHs7Ozf39/z8/MWFhbr6+vu7u7n5+fz8/MAAADBwcHu7u6IiIgqKioQEBDh4eHV1dXy8vLT09Ovr6/W1tZeXl6tra1PT08DAwPw8PDw8PCZmZlwv//y8vLZ7v9kbZxQUYNgktBbg75uu/xttvZqrOrPzthlouBrndZtj8hve75gYY68vM2Qjq1PSnx7rOBjmtewrsGcmbRZdKuGhaat0/bn5+pFP3TU7P+ax/CNvOpdi8hziL5saJK43Pve3eNleq17dpu80O9iKsm6AAAAHnRSTlMAfPrtCC0m4n9uFQiypWZdGdrNubKmnXduWEM8IZf1WLSqAAABZUlEQVQ4y9WQ2XaCMBRFaUCt1nnooDZXIpNMggxCnbX//00NAbR0YV/61P2WdXZO7g33L6lMKsL9dNpCAIBakzt5HYG9DJcegufyHDTL2huG6NgwLHsdaY6OE1TiwevPWKgMEKF5ajinWrcQN5LpPBHnSCG0C+18Mp01vwoqgdH3+7XoYBnGWcFYVlUlMWLo1RtX4REuZ8xY6NuNu1KwHEcIUD0XahrJ8u3HbDY7rhQ1JvFBy75DeAQvYLni0pyyXmEZY53YbFlhANolFRbrWYoup8tG/adkAJ/s1VQ4ZoKrsHPgoSrH8Rqhx7IGLC3hjWuAL+EMxU3z9TwTfCpMc+G2xefeWDGDaPyYPSHfDH2zceemyYxAhGY1GXJJpHnOTpJ2UkCNnUSsiO/QLYQe2KFYwHJMUyQ28C9d9lFNBEVop3kIodmpcinV9kOBPviOdaqNaX85whCA9d+nPXqn/b+S1/+dL1CJQlhxaUFqAAAAAElFTkSuQmCC
 // @namespace          https://github.com/F9y4ng/GreasyFork-Scripts/
 // @homepage           https://f9y4ng.github.io/GreasyFork-Scripts/
 // @homepageURL        https://f9y4ng.github.io/GreasyFork-Scripts/
@@ -37,7 +37,7 @@
 // @match              *://yandex.ru/*search*
 // @match              *://www.ecosia.org/*
 // @match              *://*.search.yahoo.com/search*
-// @match              *://you.com/*
+// @match              *://www.info.com/serp?*
 // @match              *://www.startpage.com/*
 // @match              *://search.brave.com/*
 // @match              *://yep.com/*
@@ -253,9 +253,12 @@
 // @grant              GM.registerMenuCommand
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
-// @note               {"CN":"修正Yahoo搜索跳转按钮的插入错误。","EN":"Fixed the insertion error of Yahoo search jump button."}
-// @note               {"CN":"修正360搜索跳转按钮的插入错误。","EN":"Fixed the insertion error of 360 search jump button."}
-// @note               {"CN":"修正去除链接重定向误处理的错误。","EN":"Fixed a bug where link redirection was mishandled."}
+// @grant              unsafeWindow
+// @note               {"CN":"移除 You.com 搜索，新增 info.com 搜索。","EN":"Removed You.com, Added info.com."}
+// @note               {"CN":"优化 Google 搜索结果连接重定向的问题。","EN":"Optimized Google search result redirection issues."}
+// @note               {"CN":"优化 duckduckgo 默认打开新窗口的设置。","EN":"Optimized duckduckgo for opening new windows."}
+// @note               {"CN":"修复关键词屏蔽功能偶发失效的问题。","EN":"Fixed sporadic failure issue of the keyword blocking."}
+// @note               {"CN":"修复 Google 跳转按钮未插入的问题。","EN":"Fixed Google the jump button was not inserted issue."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         Edge version≥88 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Chrome version≥88 (Compatible Tampermonkey, Violentmonkey)
@@ -294,11 +297,11 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         confirm: ctx.confirm.bind(ctx), setTimeout: ctx.setTimeout.bind(uctx),
         requestAnimationFrame: ctx.requestAnimationFrame.bind(uctx),
         cancelAnimationFrame: ctx.cancelAnimationFrame.bind(uctx),
-        console: sctx.Object.assign(customFns.oC(), ctx.console),
+        console: sctx.Object.assign(customFns.oC(), ctx.console)
       },
       safeArray: customFns.sP(sctx.Object, sctx.Array), safeObject: customFns.sP(sctx.Object, sctx.Object),
       safeJSON: sctx.JSON.parse ? sctx.JSON : ctx.JSON.parse ? ctx.JSON : JSON.parse ? JSON : uctx.JSON,
-      info: typeof GM_info !== "undefined" ? GM_info : typeof GM !== "undefined" && GM.info ? GM.info : { script: {} },
+      info: typeof GM_info !== "undefined" ? GM_info : typeof GM !== "undefined" && GM.info ? GM.info : { script: {} }
     },
     wrappedFrom = toolkit.safeArray.from ?? ctx.Array.from ?? uctx.Array.from,
     orginalFns = { oS: sctx.Object.prototype.toString, aF: (...af) => wrappedFrom(...af), aS: as => arrayProxy(wrappedFrom(as)) };
@@ -308,7 +311,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
   typeof this !== "undefined" ? this : window,
   typeof unsafeWindow !== "undefined" ? unsafeWindow : typeof this !== "undefined" ? this : window,
   ((originalWindow, iframe) => {
-    if (typeof GM_addElement === "undefined" || document.contentType === "application/pdf") return originalWindow;
+    if (typeof GM_addElement === "undefined" || document.contentType === "application/pdf") { return originalWindow }
     try {
       const { contentWindow } = (iframe = GM_addElement("iframe", { id: "𝐬𝐚𝐟e.𝐰𝐢𝐧𝐝𝐨𝐰", style: "display:none", width: 0, height: 0 }));
       !originalWindow.wrappedJSObject && iframe?.remove(); return contentWindow ?? originalWindow;
@@ -362,19 +365,19 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           scrollbars: generateRandomString(8, "char"),
           scrollbarsV2: generateRandomString(8, "mix"),
           attachShadow: Element.prototype.attachShadow,
-          stopImmediatePropagation: Event.prototype.stopImmediatePropagation,
+          stopImmediatePropagation: Event.prototype.stopImmediatePropagation
         },
         static: { once: "gb-init-once", purge: "gd-purge-attribute", anti: "gd-anti-redirect", warn: "data-filter-warn", navinfo: "__Navigation#INFO__" },
         var: {
           curVersion: getMetaValue("version") ?? GMinfo.script.version ?? "2026.06.06.0",
           scriptName: getMetaValue(`name:${getLanguages()}`) ?? decrypt("U2VhcmNoJTIwRW5naW5lJTIwQXNzaXN0YW50"),
-          rIC: global.requestIdleCallback ? global.requestIdleCallback.bind(GMunsafeWindow) : (callback, { timeout }) => sleep(timeout).then(callback),
+          rIC: global.requestIdleCallback ? global.requestIdleCallback.bind(GMunsafeWindow) : (callback, { timeout }) => sleep(timeout).then(callback)
         },
         url: {
           yandexIcon: decrypt("aHR0cHMlM0ElMkYlMkZmYXZpY29uLnlhbmRleC5uZXQlMkZmYXZpY29uJTJGdjI="),
           backupIcon: decrypt("aHR0cHMlM0ElMkYlMkZzMjEuYXgxeC5jb20lMkYyMDI1JTJGMDclMkYyMCUyRnBWOGVMaTYucG5n"),
           feedback: getMetaValue("supportURL") ?? GMinfo.script.supportURL ?? decrypt("aHR0cHMlM0ElMkYlMkZnaXRodWIuY29tJTJGRjl5NG5nJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJGaXNzdWVz"),
-          homepage: getMetaValue("homepageURL") ?? GMinfo.script.homepage ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcuZ2l0aHViLmlvJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJG"),
+          homepage: getMetaValue("homepageURL") ?? GMinfo.script.homepage ?? decrypt("aHR0cHMlM0ElMkYlMkZmOXk0bmcuZ2l0aHViLmlvJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJG")
         },
         notice: {
           rName: generateRandomString(8, "char"),
@@ -402,6 +405,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           legend: generateRandomString(6, "char"),
           settingList: generateRandomString(7, "mix"),
           readonly: generateRandomString(8, "mix"),
+          rf: generateRandomString(6, "mix"),
           hk: generateRandomString(6, "mix"),
           gj: generateRandomString(6, "mix"),
           lw: generateRandomString(6, "mix"),
@@ -410,8 +414,8 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           aa: generateRandomString(6, "mix"),
           au: generateRandomString(6, "mix"),
           grid: generateRandomString(7, "char"),
-          card: generateRandomString(7, "char"),
-        },
+          card: generateRandomString(7, "char")
+        }
       };
 
     if (checkRedundantScript(GMunsafeWindow)) { return }
@@ -430,9 +434,9 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         const timer = ++def.count.RAFTimer,
           step = (currentTime = performance.now()) => {
             const elapsed = currentTime - lastTime;
-            if (elapsed < parsedInterval) return this._setTimerMap(timer, type, step);
+            if (elapsed < parsedInterval) { return this._setTimerMap(timer, type, step) }
             type === "interval" ? (lastTime = currentTime - (elapsed % parsedInterval)) && this._setTimerMap(timer, type, step) : this.clearTimeout(timer);
-            if (typeof fn === "function") fn.apply(this.context, args);
+            if (typeof fn === "function") { fn.apply(this.context, args) }
           };
         this._setTimerMap(timer, type, step);
         return timer;
@@ -441,8 +445,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         this.timerMap[type][timer] = GMunsafeWindow[def.const.raf](step);
       }
       _clearTimerMap(timer, type) {
-        const timerId = this.timerMap[type][timer];
-        if (typeof timerId !== "undefined" && delete this.timerMap[type][timer]) GMunsafeWindow[def.const.caf](timerId);
+        const timerId = this.timerMap[type][timer]; if (typeof timerId !== "undefined") { GMunsafeWindow[def.const.caf](timerId); delete this.timerMap[type][timer] }
       }
       setTimeout(fn, interval, ...args) {
         return this._ticking(fn, "timeout", interval, ...args);
@@ -470,7 +473,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         openInTab: typeof GM_openInTab !== "undefined" ? GM_openInTab : typeof GM !== "undefined" ? GM.openInTab : global.open.bind(global),
         registerMenuCommand: typeof GM_registerMenuCommand !== "undefined" ? GM_registerMenuCommand : typeof GM !== "undefined" ? GM.registerMenuCommand : void 0,
         xmlhttpRequest: typeof GM_xmlhttpRequest !== "undefined" ? GM_xmlhttpRequest : typeof GM !== "undefined" ? GM.xmlHttpRequest : void 0,
-        contextMode: GMinfo.injectInto === "content" || GMinfo.script["inject-into"] === "content" || ["dom", "js"].includes(GMinfo.sandboxMode),
+        contextMode: GMinfo.injectInto === "content" || GMinfo.script["inject-into"] === "content" || ["dom", "js"].includes(GMinfo.sandboxMode)
       };
       return gmSelector._gmFunctions[rec] ?? __console("warn", `Grant 'GM.${rec}' is not available.`) ?? (() => { });
     }
@@ -480,7 +483,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         log: ["log", "%c\ud83d\udd33 %c", "display:inline-block", ""],
         error: ["error", "%c\ud83d\udea9 %c", "display:inline-block", ""],
         warn: ["warn", "%c\ud83d\udea9 %c", "display:inline-block", ""],
-        count: ["count", "\ud83d\udd33 "],
+        count: ["count", "\ud83d\udd33 "]
       };
       const [con, msg, method] = [this ?? console, message ?? "", __console._methods[action]];
       return method ? con[method[0]](method[1] + msg, ...method.slice(2), ...args) : con.log(msg, ...args);
@@ -504,17 +507,15 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     }
 
     function toString(value) {
-      if (typeof value === "symbol") return value.description;
-      return String(value);
+      if (typeof value === "symbol") { return value.description } return String(value);
     }
 
     function cE(nodeName, attributes) {
       const el = document.createElement(nodeName);
-      if (oS.call(attributes) !== "[object Object]") return el;
+      if (oS.call(attributes) !== "[object Object]") { return el }
       for (const [key, value] of safeObject.entries(attributes)) {
-        if (key === "class" || key === "className") safeArray.isArray(value) ? el.classList.add(...value) : el.classList.add(value);
-        else if (key === "innerHTML" || key === "textContent" || key === "id") el[key] = value;
-        else el.setAttribute(key, value);
+        if (key === "class" || key === "className") { safeArray.isArray(value) ? el.classList.add(...value) : el.classList.add(value) } else
+          if (key === "innerHTML" || key === "textContent" || key === "id") { el[key] = value } else { el.setAttribute(key, value) }
       }
       return el;
     }
@@ -534,13 +535,13 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     }
 
     function decrypt(string, decode = true) {
-      if (typeof string !== "string") return "";
+      if (typeof string !== "string") { return "" }
       try { const rst = atob(string.replace(/[^A-Za-z0-9+/=]/g, "")); return decode ? decodeURIComponent(rst) : rst } catch { return "" }
     }
 
     function generateRandomString(l, t, p) {
       if (t === "date") { p = new Date(); return (p.setHours(10, 20, 30, 40) * p.getDate()).toString(16).padEnd(l, p) }
-      if (t === "hex" || t === "number") return ((p = t === "hex" ? 16 : 10) && random({ range: p, length: l, type: "floor" }, v => v.toString(p))).join("");
+      if (t === "hex" || t === "number") { return ((p = t === "hex" ? 16 : 10) && random({ range: p, length: l, type: "floor" }, v => v.toString(p))).join("") }
       return cS[random({ range: cS.length })] + ((p = t === "mix" ? mS : cS) && random({ range: p.length, length: l - 1 }, v => p[v])).join("");
     }
 
@@ -549,14 +550,12 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     }
 
     function escapeHTML(string) {
-      if (typeof string !== "string" || string.trim().length === 0) return "";
-      const element = cE("gb-escape-html", { textContent: string });
-      return element.innerHTML;
+      if (typeof string !== "string" || string.trim().length === 0) { return "" }
+      const element = cE("gb-escape-html", { textContent: string }); return element.innerHTML;
     }
 
     function initTrustedTypesPolicy() {
-      const policyOptions = { createHTML: s => s, createScript: s => s, createScriptURL: u => u };
-      if (!global.trustedTypes?.createPolicy) return policyOptions;
+      const policyOptions = { createHTML: s => s, createScript: s => s, createScriptURL: u => u }; if (!global.trustedTypes?.createPolicy) { return policyOptions }
       const originalCreatePolicy = global.trustedTypes.createPolicy.bind(global.trustedTypes), whitelist = [{ host: "bing.com", policy: "rwflyoutDefault" }],
         policyName = global.trustedTypes.defaultPolicy?.name ?? asArray(whitelist).FindX(entry => CUR_HOST_NAME.endsWith(entry.host))?.policy ?? "default",
         defaultPolicy = global.trustedTypes.defaultPolicy ?? originalCreatePolicy(policyName, policyOptions);
@@ -573,14 +572,14 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         CUR_WINDOW_TOP && (__console("error", errorText), GMregisterMenuCommand(troubleshoot, () => GMopenInTab(`${def.url.feedback}/117`, false))); return true;
       },
         contentText = IS_CHN ? `警告：脚本的注入模式已设置为"content"，部分脚本功能可能受到限制。` : `Warning: The injection mode is set to "content" and some functions may be limited.`;
-      if (GMcontextMode && CUR_WINDOW_TOP) __console("warn", `${def.var.scriptName} ${contentText}`);
-      if (global[def.static.once] === true || document.documentElement?.hasAttribute(def.static.once)) return reportRedundanceError();
+      if (GMcontextMode && CUR_WINDOW_TOP) { __console("warn", `${def.var.scriptName} ${contentText}`) }
+      if (global[def.static.once] === true || document.documentElement?.hasAttribute(def.static.once)) { return reportRedundanceError() }
       global[def.static.once] = true; safeObject.freeze(def.const) && document.documentElement?.setAttribute(def.static.once, "");
     }
 
     async function getNavigatorInfo() {
       const ua = navigator.userAgent, voucher = `${GMscriptHandler} ${GMversion}`, creditEngine = getRealBrowserEngine(global),
-        userAgentData = await getUserAgentDataFromExtension(); if (userAgentData) return getBrowserInfoFromUAD(userAgentData);
+        userAgentData = await getUserAgentDataFromExtension(); if (userAgentData) { return getBrowserInfoFromUAD(userAgentData) }
       const BROWSER_CONFIGS = [
         { key: "OPR", brand: "Opera", engine: "Blink", as: "Chrome" }, { key: "Vivaldi", brand: "Vivaldi", engine: "Blink", as: "Chrome" },
         { key: "YaBrowser", brand: "Yandex", engine: "Blink", as: "Chrome" }, { key: "Edg", brand: "Edge", engine: "Blink", as: "Chrome" },
@@ -589,7 +588,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         { key: "PaleMoon", brand: "PaleMoon", engine: "Gecko", as: "Firefox" }, { key: "Waterfox", brand: "Waterfox", engine: "Gecko", as: "Firefox" },
         { key: "Firefox", brand: "Firefox", engine: "Gecko" }, { key: "Konqueror", brand: "Konqueror", engine: "WebKit" },
         { key: "Kindle", brand: "Kindle", engine: "WebKit", as: "Version" }, { key: "Safari", brand: "Safari", engine: "WebKit", as: "Version", verset: ["Version"] },
-        { key: "Trident", brand: "IE", engine: "Trident", verset: ["MSIE", "rv"] },
+        { key: "Trident", brand: "IE", engine: "Trident", verset: ["MSIE", "rv"] }
       ];
       return getBrowserInfoFromUA();
 
@@ -608,25 +607,20 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             brands = [{ brand: capitalize(browserName), version: browserVersion }];
           if (parseFloat(browserVersion) < 57.0 && (temp = GMinfo.userAgent)) {
             const matches = temp.match(/\s(Chrom(?:e|ium)|Firefox)\/(\d+[.0-9]*)/i);
-            if (matches) brands.unshift({ brand: capitalize(matches[1]), version: matches[2] });
-          }
-          return { bitness, architecture, brands, platform: capitalize(os), source: "ext", voucher };
+            if (matches) { brands.unshift({ brand: capitalize(matches[1]), version: matches[2] }) }
+          } return { bitness, architecture, brands, platform: capitalize(os), source: "ext", voucher };
         } else if ((voucher.startsWith("Tampermonkey") || voucher.startsWith("ScriptCat")) && (temp = GMinfo.userAgentData)) {
           if (creditEngine === "Gecko" && temp.brands?.[0] && parseFloat(temp.brands[0].version) < 78.0) {
-            const matches = ua.match(/\s(Firefox)\/(\d+[.0-9]*)/i);
-            if (matches) temp.brands.unshift({ brand: capitalize(matches[1]), version: matches[2] });
-          }
-          return { ...temp, source: "ext", voucher };
+            const matches = ua.match(/\s(Firefox)\/(\d+[.0-9]*)/i); if (matches) { temp.brands.unshift({ brand: capitalize(matches[1]), version: matches[2] }) }
+          } return { ...temp, source: "ext", voucher };
         } else if ((temp = navigator.userAgentData) && temp.getHighEntropyValues && temp.brands?.[0]) {
-          const data = await temp.getHighEntropyValues(["bitness", "architecture", "fullVersionList"]);
-          return { ...data, brands: data.fullVersionList || data.brands, voucher };
-        } else return null;
+          const data = await temp.getHighEntropyValues(["bitness", "architecture", "fullVersionList"]); return { ...data, brands: data.fullVersionList || data.brands, voucher };
+        } return null;
       }
 
       function getBrowserInfoFromUAD(uad) {
         const mapBrandPath = ({ brand: b, version: v }) => `${/Not[^a-z]*A[^a-z]*Brand/i.test(b) ? 9 : /^(?:Chrom(?:e|ium)|Firefox|Safari)$/i.test(b) ? 5 : 1}${b}\r${v}`,
-          [brand, brandVersion] = uad.brands?.map(mapBrandPath).sort()[0]?.slice(1).split("\r") ?? [],
-          engineMap = { Chrome: "Blink", Chromium: "Blink", Firefox: "Gecko", Safari: "WebKit" },
+          [brand, brandVersion] = uad.brands?.map(mapBrandPath).sort()[0]?.slice(1).split("\r") ?? [], engineMap = { Chrome: "Blink", Chromium: "Blink", Firefox: "Gecko", Safari: "WebKit" },
           mapEnginePath = ({ brand, version }) => /Chrom(?:e|ium)|Firefox|Safari/i.test(brand) && `${brand}\r${version}`,
           [engine, engineVersion] = uad.brands?.map(mapEnginePath).filter(Boolean)[0]?.split("\r") ?? [brand, brandVersion],
           engineInfo = { engine: engineMap[capitalize(engine)] ?? getEngineFromUA(), engineVersion: parseFloat(engineVersion) || 99, creditEngine },
@@ -699,19 +693,18 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
     function throttle({ fn, timer, delay, immed = false }) {
       if (typeof fn !== "function" || !timer) { return () => { } }
       return function (...args) {
-        const [name, context] = [Symbol.for(toString(timer)), this]; if (def.count[name]) { return }
-        if (immed && def.count[name] !== null) fn.apply(context, args); def.count[name] = rAF.setTimeout(() => { def.count[name] = null; fn.apply(context, args) }, Number(delay) || 0);
+        const name = Symbol.for(toString(timer)), context = this; if (def.count[name]) { return } if (immed && def.count[name] !== null) { fn.apply(context, args) }
+        def.count[name] = rAF.setTimeout(() => { def.count[name] = null; fn.apply(context, args) }, Number(delay) || 0);
       };
     }
 
     function deBounce({ fn, timer, delay, immed = false, once = false }) {
       if (typeof fn !== "function" || !timer) { return () => { } }
       return function (...args) {
-        const [name, context] = [Symbol.for(toString(timer)), this];
-        if (immed === true && typeof def.count[name] === "undefined") {
-          fn.apply(context, args); if (once === true) return (def.count[name] = true);
-        } else if (def.count[name]) { if (def.count[name] === true) { return true } rAF.clearTimeout(def.count[name]) }
-        def.count[name] = rAF.setTimeout(() => { fn.apply(context, args); if (once === true) return (def.count[name] = true); delete def.count[name] }, Number(delay) || 0);
+        const name = Symbol.for(toString(timer)), context = this;
+        if (immed === true && typeof def.count[name] === "undefined") { fn.apply(context, args); if (once === true) { return (def.count[name] = true) } } else
+          if (def.count[name]) { if (def.count[name] === true) { return true } rAF.clearTimeout(def.count[name]) }
+        def.count[name] = rAF.setTimeout(() => { fn.apply(context, args); if (once === true) { return (def.count[name] = true) } delete def.count[name] }, Number(delay) || 0);
       };
     }
 
@@ -740,7 +733,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               return data && expired > current ? data : cache.remove(key);
             } catch { return cache.remove(key) }
           },
-          remove: key => GMdeleteValue(key),
+          remove: key => GMdeleteValue(key)
         };
 
       class NoticeX {
@@ -764,15 +757,15 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         }
         _createHeader() {
           if (!this.options.title && !this.options.closeWith.includes("button")) { return null } const header = cE("div", { class: `${def.notice.noticeX}-heading` });
-          if (this.options.title) header.innerHTML += tTP.createHTML(`<span class="${def.notice.noticeX}-heading-title" title="${this.options.title}">${this.options.title}</span>`);
-          if (this.options.closeWith.includes("button")) header.appendChild(cE("div", { class: def.notice.close, innerHTML: tTP.createHTML("&times;") })); return header;
+          if (this.options.title) { header.innerHTML += tTP.createHTML(`<span class="${def.notice.noticeX}-heading-title" title="${this.options.title}">${this.options.title}</span>`) }
+          if (this.options.closeWith.includes("button")) { header.appendChild(cE("div", { class: def.notice.close, innerHTML: tTP.createHTML("&times;") })) } return header;
         }
         _createBody() {
           const body = cE("div", { class: `${def.notice.noticeX}-body` }),
             content = cE("div", { class: `${def.notice.noticeX}-content`, innerHTML: tTP.createHTML(this.options.text) }); body.appendChild(content);
           if (this.options.scroll.maxHeight) {
             body.style.cssText += `overflow-y:auto;max-height:min(calc(92vh - 50px), ${this.options.scroll.maxHeight}px)`;
-            if (this.options.scroll.showOnHover) body.style.visibility = "hidden";
+            if (this.options.scroll.showOnHover) { body.style.visibility = "hidden" }
           } return body;
         }
         _createProgressBar() {
@@ -785,25 +778,21 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         }
         _appendNoticeX(header, body, progressBar) {
           const target = qS(`.${def.notice.noticeX}-${this.options.position}`), noticeItem = cE("div", { class: [def.notice.item, this.options.type] });
-          if (this.options.width && Number.isInteger(this.options.width)) noticeItem.style.width = `${this.options.width}px`;
-          [header, body, progressBar].forEach(el => el && noticeItem.appendChild(el));
-          if (["top", "bottom"].includes(this.options.position)) target.textContent = "";
-          if (this.options.animation.open) noticeItem.className += ` ${this.options.animation.open}`;
+          if (this.options.width && Number.isInteger(this.options.width)) { noticeItem.style.width = `${this.options.width}px` }
+          [header, body, progressBar].forEach(el => el && noticeItem.appendChild(el)); if (["top", "bottom"].includes(this.options.position)) { target.textContent = "" }
+          if (this.options.animation.open) { noticeItem.className += ` ${this.options.animation.open}` }
           this._executeCallbacks("beforeShow"); this._addListeners(noticeItem); this._executeCallbacks("onShow");
           this.options.newestOnTop ? target.insertAdjacentElement("afterbegin", noticeItem) : target.appendChild(noticeItem);
           this._executeCallbacks("afterShow"); return noticeItem;
         }
         _closeWithAnimation(item) {
-          if (this.options.animation?.close) sleep(5e2)((item.className += ` ${this.options.animation.close}`)).then(() => this._closeItem(item));
-          else this._closeItem(item);
+          if (this.options.animation?.close) { sleep(5e2)((item.className += ` ${this.options.animation.close}`)).then(() => this._closeItem(item)) } else { this._closeItem(item) }
         }
         _addListeners(item) {
-          const closeBtn = qS(`.${def.notice.close}`, item);
-          if (this.options.closeWith.includes("button")) closeBtn?.addEventListener("click", () => this._closeItem(item));
+          const closeBtn = qS(`.${def.notice.close}`, item); if (this.options.closeWith.includes("button")) { closeBtn?.addEventListener("click", () => this._closeItem(item)) }
           if (this.options.closeWith.includes("click")) {
-            item.style.cursor = "pointer";
-            item.addEventListener("click", e => e.target.className !== def.notice.close && (this._executeCallbacks("onClick"), this._closeItem(item)));
-          } else item.addEventListener("click", e => e.target.className !== def.notice.close && this._executeCallbacks("onClick"));
+            item.style.cursor = "pointer"; item.addEventListener("click", e => e.target.className !== def.notice.close && (this._executeCallbacks("onClick"), this._closeItem(item)));
+          } else { item.addEventListener("click", e => e.target.className !== def.notice.close && this._executeCallbacks("onClick")) }
           item.addEventListener("mouseenter", () => this._executeCallbacks("onHover"));
         }
         _closeItem(item) {
@@ -823,11 +812,11 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       }
 
       function insertAfter(newNode, target) {
-        if (newNode && target) target.parentNode.insertBefore(newNode, target.nextElementSibling);
+        if (newNode && target) { target.parentNode.insertBefore(newNode, target.nextElementSibling) }
       }
 
       function getSheetMetadata(sheet) {
-        const rootRule = sheet.cssRules[0]; if (!rootRule || rootRule.selectorText !== ":host(sheet-metadata)") return object();
+        const rootRule = sheet.cssRules[0]; if (!rootRule || rootRule.selectorText !== ":host(sheet-metadata)") { return object() }
         const rawValue = rootRule.style.getPropertyValue("--sheet-metadata"); return rawValue ? JSON.parse(rawValue.trim()) : object();
       }
 
@@ -839,19 +828,16 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       function updateAdoptedStyleSheets(target, css, id) {
         const isShadowRoot = target instanceof ShadowRoot;
         try {
-          if (typeof target.adoptedStyleSheets?.push !== "function") throw new Error("use inlineStyle");
+          if (typeof target.adoptedStyleSheets?.push !== "function") { throw new Error("use inlineStyle") }
           if (asArray(target.adoptedStyleSheets).SomeX(sheet => getSheetMetadata(sheet).id === id)) { return true }
           return target.adoptedStyleSheets.push(createStyleSheet(id, css, !isShadowRoot)) && true;
         } catch (error) {
           try {
-            target = isShadowRoot ? target : target.head;
-            if (qS(`style#${id}`, target)) { return true }
+            target = isShadowRoot ? target : target.head; if (qS(`style#${id}`, target)) { return true }
             const option = { id, media: "all", type: "text/css", textContent: css, ...(!isShadowRoot && { [def.const.cssAttrName]: false }) };
-            if (typeof GM_addElement !== "undefined") return GM_addElement(target, "style", option) && true;
+            if (typeof GM_addElement !== "undefined") { return GM_addElement(target, "style", option) && true }
             return target.appendChild(cE("style", option)) && true;
-          } catch (e) {
-            error && ERROR(`${e.name} in UpdateAdoptedStyleSheets:`, e.message, `(${error.message})`);
-          }
+          } catch (e) { error && ERROR(`${e.name} in UpdateAdoptedStyleSheets:`, e.message, `(${error.message})`) }
         }
       }
 
@@ -864,9 +850,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           switch (oS.call(parameter)) {
             case "[object Object]": { const { split, index } = parameter, keyArray = global.location.pathname.split(split); return keyArray[index] ?? "" }
             case "[object Array]": { for (const para of parameter) { const value = getUrlParam(para); if (value) { return value } } return "" }
-            case "[object Number]":
-            case "[object String]":
-              if (!parameter && parameter !== 0) { return "" } return new URLSearchParams(global.location.search).get(parameter) ?? "";
+            case "[object Number]": case "[object String]": if (!parameter && parameter !== 0) { return "" } return new URLSearchParams(global.location.search).get(parameter) ?? "";
             case "[object Function]": return parameter() ?? "";
             default: return "";
           }
@@ -892,7 +876,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           removeItem: function ({ sKey, sPath, sDomain }) {
             if (!sKey || !new RegExp("(?:^|;\\s*)" + sKey.replace(/[-.+*]/g, "\\$&") + "\\s*\\=").test(document.cookie)) { return false }
             document.cookie = `${sKey}=;expires=Thu, 01 Jan 1970 00:00:00 GMT${sDomain ? `;domain=${sDomain}` : ""}${sPath ? `;path=${sPath}` : ""}`; return true;
-          },
+          }
         };
       }
 
@@ -906,16 +890,16 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         function validateOptions(options) {
           return {
             useNewTab: options.useNewTab || false, forceSelf: options.forceSelf || false, forceNewTab: options.forceNewTab || false,
-            cleanAttr: options.cleanAttr || [], removeDataSet: options.removeDataSet || false, advancedAnti: options.advancedAnti || false,
+            cleanAttr: options.cleanAttr || [], removeDataSet: options.removeDataSet || false, advancedAnti: options.advancedAnti || false
           };
         }
 
         function updateNodeAttributes(options, node, result = 0) {
-          if (options.useNewTab && ++result) node.setAttribute("target", "_blank"); if (options.forceSelf && ++result) node.setAttribute("target", "_self");
-          if (safeArray.isArray(options.cleanAttr) && options.cleanAttr.length > 0 && ++result) options.cleanAttr.forEach(item => node.removeAttribute(item));
-          if (options.removeDataSet && ++result) safeObject.keys(node.dataset).forEach(ds => delete node.dataset[ds]);
-          if (options.forceNewTab && ++result) node.addEventListener("click", e => forceNewTabAction(e, node));
-          if (result) node.setAttribute(def.static.purge, "");
+          if (options.useNewTab && ++result) { node.setAttribute("target", "_blank") } if (options.forceSelf && ++result) { node.setAttribute("target", "_self") }
+          if (safeArray.isArray(options.cleanAttr) && options.cleanAttr.length > 0 && ++result) { options.cleanAttr.forEach(item => node.removeAttribute(item)) }
+          if (options.removeDataSet && ++result) { safeObject.keys(node.dataset).forEach(ds => delete node.dataset[ds]) }
+          if (options.forceNewTab && ++result) { node.addEventListener("click", e => forceNewTabAction(e, node)) }
+          if (result) { node.setAttribute(def.static.purge, "") }
         }
 
         function forceNewTabAction(event, node) {
@@ -924,7 +908,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         }
 
         function stopEventPropagation(event, { prevent = true } = {}) {
-          if (prevent) event.preventDefault(); try { def.const.stopImmediatePropagation.call(event) } catch { event.stopImmediatePropagation() }
+          if (prevent) { event.preventDefault() } try { def.const.stopImmediatePropagation.call(event) } catch { event.stopImmediatePropagation() }
         }
 
         function getRealHref(node) {
@@ -934,7 +918,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
         function setAdvancedAntiRedirect(node, tasks, siteName) {
           node.setAttribute(def.static.anti, "pending"); const task = advancedAntiRedirection(siteName, node, () => Promise.resolve(NaN));
-          if (typeof task === "function") tasks.push(task);
+          if (typeof task === "function") { tasks.push(task) }
         }
 
         async function parsingAntiRedirect(siteName, selectors, options) {
@@ -942,21 +926,18 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           const config = validateOptions(options), selectorArray = selectors.split(/,(?![^()]*\))/g),
             query = selectorArray.map(s => `${s.trim()}:not([href^='javascript:' i]):not([href^='#']):not([${def.static.anti}])`).join(","), nodes = qA(query);
           if (nodes.length === 0) { return } const targetNodes = nodes.filter(node => {
-            if (shouldResetPurge(node, config, def.static.purge)) node.removeAttribute(def.static.purge);
-            return !node.hasAttribute(def.static.purge);
+            if (shouldResetPurge(node, config, def.static.purge)) { node.removeAttribute(def.static.purge) } return !node.hasAttribute(def.static.purge);
           });
           if (targetNodes.length === 0) { return } COUNT(`[${siteName}-Anti-Redirect]`); const taskList = [];
-          for (const node of targetNodes) { updateNodeAttributes(config, node); if (config.advancedAnti) setAdvancedAntiRedirect(node, taskList, siteName); }
+          for (const node of targetNodes) { updateNodeAttributes(config, node); if (config.advancedAnti) { setAdvancedAntiRedirect(node, taskList, siteName) } }
           if (taskList.length === 0) { return } const results = await parallelTasks(taskList, 10);
           deBounce({ fn: handlePageCheck, delay: 1e3, timer: "doTask" })(results[results.length - 1]);
         }
 
         function shouldResetPurge(node, options, purgeAttr) {
           if (!node.hasAttribute(purgeAttr)) { return false }
-          const hasNewTabMismatch = options.useNewTab && node.target !== "_blank",
-            hasForceSelfMismatch = options.forceSelf && node.target !== "_self",
-            hasDirtyAttr = Array.isArray(options.cleanAttr) && options.cleanAttr.some(attr => node.hasAttribute(attr)),
-            hasDataSet = options.removeDataSet && Object.keys(node.dataset).length > 0;
+          const hasNewTabMismatch = options.useNewTab && node.target !== "_blank", hasForceSelfMismatch = options.forceSelf && node.target !== "_self",
+            hasDirtyAttr = Array.isArray(options.cleanAttr) && options.cleanAttr.some(attr => node.hasAttribute(attr)), hasDataSet = options.removeDataSet && Object.keys(node.dataset).length > 0;
           return hasNewTabMismatch || hasForceSelfMismatch || hasDirtyAttr || hasDataSet;
         }
 
@@ -971,7 +952,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             const res = await new Promise((resolve, reject) => {
               if (!cachedRequestLinks.has(url)) {
                 cachedRequestLinks.set(url, null); fetchData(url, resolve, reject, onloadFunc, onerrorFunc, ontimeoutFunc);
-              } else reject(new RangeError("DuplicateLinksError"));
+              } else { reject(new RangeError("DuplicateLinksError")) }
             }); return handleSuccess(res, url, node);
           } catch (e) { return handleError(e, url, node, name) }
         }
@@ -983,11 +964,9 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         }
 
         function handleError(e, url, node, name) {
-          if (["URLBrokenError", "TimeoutError", "URLNotExistError", "PermissionDenied", "ResponseError"].includes(e?.message)) cachedRequestLinks.set(url, url);
-          if (e?.message === "DuplicateLinksError") handleDuplicateLinksError(url, node);
-          else {
-            setErrorLink(node); toggleLoadClass(node)?.remove();
-            ERROR(`${e.name} in AntiRedirect_%s: %s %O`, name, e?.message, { Node: node, Text: node.textContent, URL: node.href });
+          if (["URLBrokenError", "TimeoutError", "URLNotExistError", "PermissionDenied", "ResponseError"].includes(e?.message)) { cachedRequestLinks.set(url, url) }
+          if (e?.message === "DuplicateLinksError") { handleDuplicateLinksError(url, node) } else {
+            setErrorLink(node); toggleLoadClass(node)?.remove(); ERROR(`${e.name} in AntiRedirect_%s: %s %O`, name, e?.message, { Node: node, Text: node.textContent, URL: node.href });
           }
         }
 
@@ -1000,12 +979,11 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         }
 
         function toggleLoadClass(node) {
-          if (node && IS_DEBUG) return { remove: () => node.classList.remove(def.const.loading), add: () => node.classList.add(def.const.loading) };
+          if (node && IS_DEBUG) { return { remove: () => node.classList.remove(def.const.loading), add: () => node.classList.add(def.const.loading) } }
         }
 
         function handleBingLink(e) {
-          const node = e.target;
-          node?.nodeName === "A" && node.getAttribute(def.static.anti) === "success" && (stopEventPropagation(e) ?? node.setAttribute("href", getRealHref(node)));
+          const node = e.target; node?.nodeName === "A" && node.getAttribute(def.static.anti) === "success" && (stopEventPropagation(e) ?? node.setAttribute("href", getRealHref(node)));
         }
 
         function setRealLink(node, url) {
@@ -1023,14 +1001,14 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
         function handlePageCheck(count) {
           DEBUG(`(${count ?? cachedRequestLinks.size}) Task Done! (${def.count.duplicate}) Dup.Task!`);
-          if (antiLinkRedirect && cachedRequestLinks.size > 0 && def.count.duplicate === 0) cachedRequestLinks.clear() || DEBUG("Task Clear!");
-          if (antiResultsFilter && usedFilterWords.size > 0) usedFilterWords.clear() || DEBUG("Filter Clear!");
+          if (antiLinkRedirect && cachedRequestLinks.size > 0 && def.count.duplicate === 0) { cachedRequestLinks.clear(); DEBUG("Task Clear!") }
+          if (antiResultsFilter && usedFilterWords.size > 0) { usedFilterWords.clear(); DEBUG("Filter Clear!") }
         }
 
         async function parallelTasks(tasks, maxCount = 3) {
           const results = [], taskLength = tasks.length; if (taskLength === 0) { return results } let currentIndex = 0;
           const executor = async () => { while (currentIndex < taskLength) { const index = currentIndex++, task = tasks[index]; results[index] = await task() } },
-            workers = [], initialCount = Math.min(maxCount, taskLength); for (let i = 0; i < initialCount; i++) workers.push(executor());
+            workers = [], initialCount = Math.min(maxCount, taskLength); for (let i = 0; i < initialCount; i++) { workers.push(executor()) }
           await Promise.all(workers); return results;
         }
 
@@ -1043,9 +1021,8 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
         function rejectResponse(response, resolve, reject, url) {
           const resUrl = response.responseHeaders?.match(/Location:\s*([\S]+)/i)?.[1] || response.finalUrl || response.responseURL || url;
-          if (/^2\d{2}$/.test(response.status)) {
-            if (response.statusText === "Intercepted by the IDM Advanced Integration") reportIDMHijacking(); resolve(resUrl);
-          } else if (response.status !== 0) { resUrl === url ? reject(new Error("ResponseError")) : resolve(resUrl) }
+          if (/^2\d{2}$/.test(response.status)) { if (response.statusText === "Intercepted by the IDM Advanced Integration") { reportIDMHijacking(); resolve(resUrl) } } else
+            if (response.status !== 0) { resUrl === url ? reject(new Error("ResponseError")) : resolve(resUrl) }
         }
 
         function getNodeDecodeURI(siteName, url, node) {
@@ -1060,17 +1037,17 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             }
             case "Toutiao": {
               let temp;
-              while ((temp = decodeURIComponent(new URL(url).searchParams.get("url") ?? ""))) { if (!temp.includes("/search/jump?url=")) break; url = temp }
+              while ((temp = decodeURIComponent(new URL(url).searchParams.get("url") ?? ""))) { if (!temp.includes("/search/jump?url=")) { break } url = temp }
               return temp || node.href;
             }
             case "Yahoo": return decodeURIComponent(url.match(/(\/RU|&rurl|&imgurl)=([^/&]+)(\/|&)/)?.[2] ?? "") || node.href;
-            default: return;
+            default: break;
           }
         }
 
         function getNoneXHRDecodeURI(url, node, siteName, decodeUrl) {
           try {
-            if (cachedRequestLinks.has(url)) throw new RangeError("DuplicateLinksError");
+            if (cachedRequestLinks.has(url)) { throw new RangeError("DuplicateLinksError") }
             cachedRequestLinks.set(url, null); const res = decodeUrl || url; return handleSuccess(res, url, node);
           } catch (e) { return handleError(e, url, node, siteName) }
         }
@@ -1086,37 +1063,26 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                     res = resText.match(/URL\s*=\s*'([^']+)'/) || resText.match(/var\s+u\s*=\s*"([^"]+)"\s*;\s*\r\n/i) || response.responseHeaders?.match(/Location:\s*([\S]+)/i);
                   if (res) { resUrl = res[1] } else { reject(new Error("URLNotExistError")) }
                 } resolve(resUrl);
-              } else rejectResponse(response, resolve, reject, url);
+              } else { rejectResponse(response, resolve, reject, url) }
             },
             onerrorFunc: (reject, resolve) => e => {
               if (e.error?.includes("Request was redirected to a not whitelisted URL") || e.error?.includes("This domain is not a part of the @connect list")) {
                 const realUrl = e.error?.toString().match(/Refused to connect to "([^"]+)"/)?.[1];
-                if (!realUrl || realUrl.includes("/search/error") || realUrl.includes("/static/captcha")) reject(new Error("PermissionDenied"));
-                resolve(realUrl);
-              } else {
-                const res = e.responseHeaders?.match(/Location:\s*([\S]+)/i);
-                if (res?.[1] && res[1] !== e.finalUrl) resolve(res[1]); reject(new Error("URLBrokenError"));
-              }
+                if (!realUrl || realUrl.includes("/search/error") || realUrl.includes("/static/captcha")) { reject(new Error("PermissionDenied")); return } resolve(realUrl);
+              } else { const res = e.responseHeaders?.match(/Location:\s*([\S]+)/i); if (res?.[1] && res[1] !== e.finalUrl) { resolve(res[1]); return } reject(new Error("URLBrokenError")) }
             },
-            ontimeoutFunc: reject => () => reject(new Error("TimeoutError")),
+            ontimeoutFunc: reject => () => reject(new Error("TimeoutError"))
           });
         }
 
         function advancedAntiRedirection(siteName, node, task) {
           if (!node?.href) { return } const url = node.href.replace(httpRegex, "https://"); toggleLoadClass(node)?.add();
           switch (siteName) {
-            case "Baidu":
-              return () => getXHRDecodeURI(url, node, siteName);
-            case "So360":
-              return (data = node.dataset.mdurl) => (data ? getNoneXHRDecodeURI(url, node, siteName, data) : getXHRDecodeURI(url, node, siteName));
-            case "Sogou":
-            case "Bing":
-              return (data = getNodeDecodeURI(siteName, url, node)) => (data ? getNoneXHRDecodeURI(url, node, siteName, data) : getXHRDecodeURI(url, node, siteName));
-            case "Toutiao":
-            case "Yahoo":
-              return () => getNoneXHRDecodeURI(url, node, siteName, getNodeDecodeURI(siteName, url, node));
-            default:
-              return task;
+            case "Baidu": case "Google": return () => getXHRDecodeURI(url, node, siteName);
+            case "So360": return (data = node.dataset.mdurl) => (data ? getNoneXHRDecodeURI(url, node, siteName, data) : getXHRDecodeURI(url, node, siteName));
+            case "Sogou": case "Bing": return (data = getNodeDecodeURI(siteName, url, node)) => (data ? getNoneXHRDecodeURI(url, node, siteName, data) : getXHRDecodeURI(url, node, siteName));
+            case "Toutiao": case "Yahoo": return () => getNoneXHRDecodeURI(url, node, siteName, getNodeDecodeURI(siteName, url, node));
+            default: return task;
           }
         }
 
@@ -1151,7 +1117,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           },
           Ecosia: () => qA(`.campaign-counter--banner button[data-test-id="banner-close"],.onboarding-card--visible button[data-test-id="sidebar-card-dismiss"]`).forEach(b => b?.click()),
           Duckduckgo: () => qS(`button[data-testid="serp-popover-promo-close"]:has(svg)`)?.click(),
-          Qwant: () => qS(`button[class][aria-label="close"]:has(svg)`)?.click(),
+          Qwant: () => qS(`button[class][aria-label="close"]:has(svg)`)?.click()
         };
 
         function parseAntiAdvertising({ selectors, siteName, isRemoveNodes }) {
@@ -1171,14 +1137,11 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
         async function fetchUpdateResponse(url, timeout = 1e4) {
           return await new Promise((resolve, reject) => {
-            const headers = { Accept: "*/*", Referer: url },
-              onload = response => {
-                if (response.readyState !== 4) { return }
-                if (response.status === 200) resolve({ res: response.responseText || response.response, url });
-                else if (response.status !== 0) reject(new Error("NoAccessError"));
-              },
-              onerror = () => reject(new Error("NetworkError")),
-              ontimeout = () => reject(new Error("TimeoutError"));
+            const headers = { Accept: "*/*", Referer: url }, onload = response => {
+              if (response.readyState !== 4) { return }
+              if (response.status === 200) { resolve({ res: response.responseText || response.response, url }) } else if (response.status !== 0) { reject(new Error("NoAccessError")) }
+            },
+              onerror = () => reject(new Error("NetworkError")), ontimeout = () => reject(new Error("TimeoutError"));
             GMxmlhttpRequest({ url, headers, method: "GET", nocache: true, timeout, onload, onerror, ontimeout });
           });
         }
@@ -1188,9 +1151,9 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             const iconBase64Data = await cache.get(REMOTEICONS);
             if (!iconBase64Data || setDebuggerMode()) {
               iconDataURL = DEBUG("%cRequest and initialize remote icon data.", "color:#25f") ?? (await requestRemoteIcon(remoteURL));
-              if (!iconDataURL) DEBUG("%cRemote icon data initialized failed.", "color:#ff0000");
-              else cache.set(REMOTEICONS, iconDataURL, 2592e6) ?? GMsetValue(VERSION, encrypt(def.var.curVersion)) ?? DEBUG("%cRemote icon data initialized successed.", "color:#006400");
-            } else iconDataURL = DEBUG("%cApplied local icon caching data.", "color:#006400") ?? iconBase64Data;
+              if (!iconDataURL) { DEBUG("%cRemote icon data initialized failed.", "color:#ff0000"); return }
+              cache.set(REMOTEICONS, iconDataURL, 2592e6); GMsetValue(VERSION, encrypt(def.var.curVersion)); DEBUG("%cRemote icon data initialized successed.", "color:#006400");
+            } else { DEBUG("%cApplied local icon caching data.", "color:#006400"); iconDataURL = iconBase64Data }
           } catch (e) { ERROR(`FetchAndCacheRemoteIcons: Can't request the icon data.`, e?.message) } return iconDataURL;
         }
 
@@ -1215,9 +1178,9 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "baidu_ar" })("Baidu", selector, { useNewTab: true, removeDataSet: true, advancedAnti: true });
               },
               antiAdsFn: () => {
-                const selectors = `#s-hotsearch-wrapper,#s_wrap,#bottom_layer,.result-op[tpl='sp_hot_sale'],.result-op[tpl='b2b_prod'],.result-op.cr-content[tpl^='recommend_list_'],#content_left>div:not([class]):not([style]),div[data-placeid],[id$='_canvas'],div.result.c-container:not([class~='xpath-log']),.imgpage .imglist>li.newfcImgli,.ec_wise_ad,div[class^='result-op'][tpl='right_tabs'][data-click],div[class^='result-op'][tpl='right_links'][data-click],#searchTag,#content_left>div.c-container[tpl="recommend_list"],#con-ar div:is([tpl='interactive'],[tpl="right_recommends_merge"]),div.result-op.cr-content:has([id='ai-accompanies-container']),div.result-molecule[tpl="app/rs"],.hint_right_top:has([tpl='app/hint-chat-entry']),.hint_right_middle:has([tpl='app/hint-head-top']),div.new-pmd:has(.c-recommend)`;
+                const selectors = `#s-hotsearch-wrapper,#s_wrap,#bottom_layer,.result-op[tpl='sp_hot_sale'],.result-op[tpl='b2b_prod'],.result-op.cr-content[tpl^='recommend_list_'],#content_left>div:not([class]):not([style]),div[data-placeid],[id$='_canvas'],div.result.c-container:not([class~='xpath-log']),.imgpage .imglist>li.newfcImgli,.ec_wise_ad,div[class^='result-op'][tpl='right_tabs'][data-click],div[class^='result-op'][tpl='right_links'][data-click],#searchTag,#content_left>div.c-container[tpl="recommend_list"],#con-ar div:is([tpl='interactive'],[tpl="right_recommends_merge"]),div.result-op.cr-content:has([id='ai-accompanies-container']),div.result-molecule[tpl="app/rs"],.hint_right_top:has([tpl='app/hint-chat-entry']),.hint_right_middle:has([tpl='app/hint-head-top']),div.new-pmd:not(.result):has(.c-recommend)`;
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "baidu_ad", immed: true })({ selectors, siteName: "Baidu", isRemoveNodes: true });
-              },
+              }
             },
             google: {
               siteTypeID: 2,
@@ -1228,20 +1191,21 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageURL: "https://www.google.com/search?newwindow=1&sca_upv=1&source=lnms&udm=2&sa=X&q=",
               imageType: ["2"],
               splitTypeName: "udm",
-              mainSelector: "form button[type='submit']",
+              mainSelector: "form div.RNNXgb",
               overrideCss: `#pnnext>span:nth-child(2){clear:left}`,
               buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:-1px 5px 0 -3px;justify-content:center;align-items:center;flex-wrap:nowrap}.ACRAdd{border-left:1px solid #dadce0;height:65%;padding:0 10px 0 0}#${def.const.leftButton},#${def.const.leftButton}{display:inline-block;margin:0 2px 0 0}input{margin:0;height:40px;min-width:90px;border:0;background:#0b57d0;color:#fff;box-shadow:0 0 2px #00000059;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:24px 0 0 24px}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 24px 24px 0}input:hover{opacity:.88}:host(.${def.const.scrollspan}){min-height:24px!important}.${def.const.scrollbars}{display:inline-block;margin:0;padding-bottom:0!important;height:24px!important;font-size:12px!important}`,
               darkModeCss: `:host(.${def.const.darkmode}) input{background:#c2e7ff;color:#001d35}:host(.${def.const.darkmode}) .ACRAdd{border-left:1px solid #f8f9fa40}:host(.${def.const.darkmode}) input:hover{opacity:.85}}`,
               resultListProp: { qs: `div.MjjYud div.Ww4FFb.vt6azd[data-hveid^="C"][data-hveid$="AA"]:not(:has(div[jscontroller="TvBckd"]))`, delay: 10 },
               keywords: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
               antiRedirectFn: () => {
+                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "google_ar_rd" })("Google", "#rcnt a[href^='/goto?url=']", { useNewTab: true, advancedAnti: true });
                 const selector = `#rcnt div[data-hveid^='C'][data-hveid$='AA'] :not(h3.ob5Hkd,.d0fCJc)>a:not(.ngTNl,.oRJe3d,.k8XOCe,[jsname='ZWuC2'],.fl,#pnprev,#pnnext)`;
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "google_ar" })("Google", selector, { useNewTab: true, cleanAttr: ["ping"], removeDataSet: true });
+                deBounce({ fn: parsingAntiRedirect, delay: 30, timer: "google_ar" })("Google", selector, { useNewTab: true, cleanAttr: ["ping"], removeDataSet: true });
               },
               antiAdsFn: () => {
                 const selectors = `div[aria-label='\u5e7f\u544a'],div[aria-label='Ads' i],#bottomads,#tvcap`;
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "google_ad", immed: true })({ selectors, siteName: "Google" });
-              },
+              }
             },
             bing: {
               siteTypeID: 3,
@@ -1261,7 +1225,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               darkModeCss: `:host(.${def.const.darkmode}) input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}:host(.${def.const.darkmode}) input:hover{background:#a2b7f4;color:#333}`,
               resultListProp: {
                 qs: `#b_results li.b_algo:not(.b_algoBorder,.b_topborder),#b_results li.b_vidAns .mmlist>div[id],#b_results li.b_mop .b_slidebar>div.slide,#b_topw li.b_ans,aside ol#b_context li.b_algo,#b_results li.b_ans.b_top:has(#richdev_ans)`,
-                delay: 10,
+                delay: 10
               },
               keywords:
                 Number(getUrlParam("ensearch")) || Number(gbCookies.getItem("ENSEARCH")?.match(/[=](\d)/)?.[1])
@@ -1283,7 +1247,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               antiAdsFn: () => {
                 const selectors = `li.b_ans>div.wpt_bc_container,li.b_ans>#relatedSearchesLGWContainer,li.b_ans>.b_rs,#b_topw:has(li.b_ad),#b_pole,#b_content .b_underSearchbox,#b_header>div[id^="bnp."][data-vertical],#b_context li.b_ans .b_spa_adblock,.ad_sc,.b_adBottom,.b_adLastChild,.b_adPATitleBlock,.b_spa_adblock,.mapsTextAds,.pa_sb,.productAd,[id$="adsMvCarousel"],a[href*="/aclick?ld="],div.pagereco_anim,#inline_rs,#ev_talkbox_wrapper,#b_content>main[aria-label]>#b_ims_bza_pole,.shop_page .br-poleoffcarousel,#b_content>div#pole>div[class="ra_car_block ra_pole"]>div.ra_car_container,#pole>.productAd[data-ad-carousel],.b_adPATitleBlock+div,a.sb_meta[href^="http://advertise.bingads.microsoft.com"],.promotion-panel-inner,.ins_exp.vsp,li[class="b_algo"]:has(.b_attribution[data-partnertag] + p[class]),.b_ans:has([class^="xm_"][class*="_ansCont"]),.b_inline_ajax_rs,div[id^="bnp.nid"][data-viewname="VerticalHeaderFlyout"]`;
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "bing_ad", immed: true })({ selectors, siteName: "Bing" });
-              },
+              }
             },
             duckduckgo: {
               siteTypeID: 4,
@@ -1295,17 +1259,17 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: "ia",
               mainSelector: "#search_form",
-              buttonCssText: `:host(#${def.const.rndButtonID}){box-sizing:border-box;position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;height:50px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{box-sizing:border-box;margin:0 3px 0 0;padding:2px 0;height:100%}input{box-sizing:border-box;margin:0;height:99%;min-width:100px;border:none;background:var(--theme-col-bg-search, var(--sds-color-background-03));;box-shadow:0 0 0 1px #00000014,0 2px 3px 0 #0000000f;color:var(--theme-col-txt-button-secondary);vertical-align:top;font-weight:500;font-size:18px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 10px 1px 15px;border-radius:13px 0 0 13px}#${def.const.rightButton} input{padding:0 15px 1px 10px;border-radius:0 13px 13px 0}input:hover{background-color:var(--sds-color-background-accent-01-state-01);color:var(--sds-color-text-on-color)}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){box-sizing:border-box;position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;height:42px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{box-sizing:border-box;margin:0 3px 0 0;padding:2px 0;height:40px}input{box-sizing:border-box;margin:0;height:42px;min-width:100px;border:none;background:var(--ds-surface-tertiary);box-shadow:0 10px 20px 0 rgba(0,0,0,.02),0 2px 6px 0 rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.08);color:var(--theme-col-txt-button-secondary);vertical-align:top;font-weight:500;font-size:18px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 10px 1px 15px;border-radius:26px 0 0 26px}#${def.const.rightButton} input{padding:0 15px 1px 10px;border-radius:0 26px 26px 0}input:hover{background-color:var(--ds-accent-primary);color:var(--sds-color-text-on-color)}`,
               resultListProp: {
                 qs: `ol.react-results--main>li[data-layout="organic"],ol.react-results--main>li[data-layout="videos"] div.module--carousel__item,ol.react-results--main>li:has(div[data-react-module-id="about"])`,
-                delay: 10,
+                delay: 10
               },
               keywords: "strong, b",
               antiRedirectFn: null,
               antiAdsFn: () => {
                 const selectors = `.footer,.react-results--main>li[data-layout="related_searches"]>div[class]`;
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "ddg_ad", immed: true })({ selectors, siteName: "Duckduckgo", isRemoveNodes: true });
-              },
+              }
             },
             sogou: {
               siteTypeID: 5,
@@ -1317,7 +1281,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["pics", "d", "v"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: `input#searchBtn,input[type='button'][uigs='search_article'],input[type='submit']:is(.search-btn,.sbtn1)`,
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:var(--position,absolute);top:-2px;right:var(--right,unset);z-index:99999;display:inline-flex;margin:0;padding:0;width:auto;height:40px;cursor:pointer;-webkit-appearance:none;opacity:var(--opacity,0);justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:40px}input{margin:0;padding:0 18px 1px 18px;height:40px;min-width:100px;border:1px solid #222;border-radius:12px;background:#f5f5f5;color:#000;font-weight:500;font-size:15px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}input:hover{background:#e9f2ff;color:#205aef}.${def.notice.random}_images{margin-top:1px;height:34px!important;border:1px solid #ababab!important;border-radius:3px!important;background:##fafafa!important}.${def.notice.random}_weixin{margin-top:2px;height:34px!important;border:1px solid #00a06a!important;border-radius:2px!important;background:#fff!important;color:#00a06a!important;font-size:15px!important}.${def.notice.random}_weixin:hover{background:#f7fffd!important}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:var(--position,absolute);top:0;right:var(--right,unset);z-index:99999;display:inline-flex;margin:0;padding:0;width:auto;height:38px;cursor:pointer;-webkit-appearance:none;opacity:var(--opacity,0);justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:38px}input{margin:0;padding:0 18px 1px 18px;height:38px;min-width:100px;border:1px solid #222;border-radius:12px;background:#f5f5f5;color:#000;font-weight:500;font-size:15px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}input:hover{background:#e9f2ff;color:#205aef}.${def.notice.random}_images{margin-top:1px;height:34px!important;border:1px solid #ababab!important;border-radius:3px!important;background:##fafafa!important}.${def.notice.random}_weixin{margin-top:2px;height:34px!important;border:1px solid #00a06a!important;border-radius:2px!important;background:#fff!important;color:#00a06a!important;font-size:15px!important}.${def.notice.random}_weixin:hover{background:#f7fffd!important}`,
               resultListProp: { qs: `div.results div.vrwrap,div.results div.rb`, delay: 10 },
               keywords: "#wrapper em",
               antiRedirectFn: () =>
@@ -1325,7 +1289,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               antiAdsFn: () => {
                 const selectors = `#biz_tip_box_tuiguang_float,.pz_pc_new_container,.share-wrap,.sponsored,.tgad-box,[class~="ext_query"][id*="sq_ext_"],div.top-better-hintBox,#right>div.rvr-model:not([tpl]),.results .reactResult,.results div.vrwrap.middle-better-hintBox,#right>.reactResult,#searchBtn2[value="\u5168\u7f51\u641c\u7d22"],div.result_list.click-better-sugg`;
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "sogou_ad", immed: true })({ selectors, siteName: "Sogou", isRemoveNodes: true });
-              },
+              }
             },
             qwant: {
               siteTypeID: 6,
@@ -1344,7 +1308,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               antiAdsFn: () => {
                 const selectors = `div[data-testid="containerWeb"] section div[style="display: block;"]:has([data-testid="aserpok"]),.is-sidebar>div>div:has([data-testid="aserpok"]),[data-testid="containerWeb"] section>div>div:last-child`;
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "qwant_ad", immed: true })({ selectors, siteName: "Qwant" });
-              },
+              }
             },
             yandex: {
               siteTypeID: 7,
@@ -1364,7 +1328,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               antiAdsFn: () => {
                 const selectors = `#distr-pcode-container>div,div.HeaderDesktopActions-Distribution.HeaderDesktopActions-Item,div[tabindex][class*='location_right-bottom'],span.distr-nav,div.market-cart,.SerpListFeature :is(.DirectInlineContainer,.Skeleton_type_ad_search),div[id*='-cross-page-']`;
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "yandex_ad", immed: true })({ selectors, siteName: "Yandex", isRemoveNodes: true });
-              },
+              }
             },
             so360: {
               siteTypeID: 8,
@@ -1387,7 +1351,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               antiAdsFn: () => {
                 const selectors = `#so_bd-ad,#e_idea_pp,#righttop_box,[id^='mohe-360pic_ext--'],.res-mediav,.map_business_con,.lianmeng-ad,.res-mediav-right,.atom-adv,.e-buss,.spread,ul[data-so-biz-monitor-so-display],.related_query li.cm,ul>div.inline-recommend,div#so_top,div#so-activity-entry,div.mh-relate-text,.section li[data-id^="related_query_init_"],#mohe-know_side_nlp,#rs-top>dd.rs-top`;
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "so360_ad", immed: true })({ selectors, siteName: "So360", isRemoveNodes: true });
-              },
+              }
             },
             toutiao: {
               siteTypeID: 9,
@@ -1404,7 +1368,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               keywords: "em",
               antiRedirectFn: () =>
                 deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "toutiao_ar" })("Toutiao", ".main a[href*='/search/jump?url=']", { useNewTab: true, advancedAnti: true }),
-              antiAdsFn: null,
+              antiAdsFn: null
             },
             kaifa: {
               siteTypeID: 10,
@@ -1421,7 +1385,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               resultListProp: { qs: `ul.ant-list-items>li.ant-list-item`, delay: 10 },
               keywords: "mark",
               antiRedirectFn: null,
-              antiAdsFn: () => deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "kaifa_ad", immed: true })({ selectors: `#reward-entry`, siteName: "Kaifa", isRemoveNodes: true }),
+              antiAdsFn: () => deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "kaifa_ad", immed: true })({ selectors: `#reward-entry`, siteName: "Kaifa", isRemoveNodes: true })
             },
             ecosia: {
               siteTypeID: 11,
@@ -1441,7 +1405,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               antiAdsFn: () => {
                 const selectors = `div[data-test-id="sidebar-onboarding"][href],div.main-header__install-cta,div.main-footer-visual__cards,div.personal-counter__tooltip,div.cookie-wrapper,div.mainline__footer>a[data-test-id='chat-entry'],[data-test-id="mainline-result-ad"],div.related-queries__bottom[data-test-id="web-related-queries"]`;
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "ecosia_ad", immed: true })({ selectors, siteName: "Ecosia" });
-              },
+              }
             },
             yahoo: {
               siteTypeID: 12,
@@ -1463,24 +1427,23 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               antiAdsFn: () => {
                 const selectors = `#main ol.searchCenterBottomAds,#main ol.searchCenterTopAds`;
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "yahoo_ad", immed: true })({ selectors, siteName: "Yahoo" });
-              },
+              }
             },
-            you: {
+            info: {
               siteTypeID: 13,
-              siteButtonName: "𝐘𝐨𝐮 ®",
-              siteNickName: IS_CHN ? "𝐘𝐨𝐮 搜索" : "𝐘𝐨𝐮.𝐜𝐨𝐦",
-              siteHostName: "you.com",
-              webURL: "https://you.com/search?fromSearchBar=true&q=",
-              imageURL: "https://you.com/search?fromSearchBar=true&tbm=isch&q=",
-              imageType: ["isch"],
-              splitTypeName: "tbm",
-              mainSelector: "#ChatQueryBar>form [class^='_1975xbj']>[aria-label*='sources modal']",
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:0;height:32px;width:190%;max-width:fit-content;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0;height:32px}input{margin:0;padding:0 16px 1px 16px;height:32px;min-width:80px;border:1px solid #596ced;background-color:#596ced;color:#fff;vertical-align:middle;font-weight:500;font-size:15px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{border-radius:8px 0 0 8px}#${def.const.rightButton} input{border-radius:0 8px 8px 0}input:hover{border:1px solid #7a89f0;background-color:#7a89f0;color:#fff}`,
-              darkModeCss: `#${def.const.leftButton} input:hover,#${def.const.rightButton} input:hover{border:1px solid #4d5cc3;background-color:#4d5cc3;}`,
-              resultListProp: null,
-              keywords: null,
+              siteButtonName: "𝐢𝐧𝐟𝐨.𝐜𝐨𝐦",
+              siteNickName: IS_CHN ? "𝐢𝐧𝐟𝐨 搜索" : "𝐢𝐧𝐟𝐨.𝐜𝐨𝐦",
+              siteHostName: "www.info.com",
+              webURL: `https://www.info.com/serp?q=`,
+              imageURL: `https://www.info.com/serp?qc=images&q=`,
+              imageType: ["images"],
+              splitTypeName: "qc",
+              mainSelector: "form#search button.search-form__button",
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:2px 0 0 5px;padding:0;height:40px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:40px}input{margin:0;height:40px;min-width:90px;border:0 solid transparent;background:#f9f9f9;box-shadow:0 0 2px #a4a5bb;color:#136ad5;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 16px 1px 20px;border-radius:30px 0 0 30px}#${def.const.rightButton} input{padding:0 20px 1px 16px;border-radius: 0 30px 30px 0}input:hover{background:#fff;color:#111}`,
+              resultListProp: { qs: `.web-google>div.web-google__result`, delay: 1e2 },
+              keywords: ``,
               antiRedirectFn: null,
-              antiAdsFn: () => deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "you_ad", immed: true })({ selectors: `[id=":rn:"][data-floating-ui-focusable]`, siteName: "You" }),
+              antiAdsFn: null
             },
             startpage: {
               siteTypeID: 14,
@@ -1500,7 +1463,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               antiAdsFn: () => {
                 const selectors = `section.a-gl-tp,div.widget-install-legacy,div.mainline-results>div.block-display,.Firefox-promo`;
                 deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "startpage_ad", immed: true })({ selectors, siteName: "Startpage" });
-              },
+              }
             },
             brave: {
               siteTypeID: 15,
@@ -1516,7 +1479,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               resultListProp: { qs: `#results>div.snippet[data-type],#results>.standalone>.video-item`, delay: 10 },
               keywords: `.snippet-content strong`,
               antiRedirectFn: null,
-              antiAdsFn: null,
+              antiAdsFn: null
             },
             yep: {
               siteTypeID: 16,
@@ -1535,7 +1498,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 const selector = `div[class*='-results']>div>div>div[class*='-card'] a,div[class*='-results']>div>div>div[class*='-block'] a,div[class*='-results']>div>div>div[class*='-incut'] div[class*='-newsIncut'] a,div[class*='-results']>div>div>div[class*='-incut'] div[class*='-container'] a`;
                 deBounce({ fn: parsingAntiRedirect, delay: 30, timer: "yep_ar", immed: true })("Yep", selector, { useNewTab: true, cleanAttr: ["referrerpolicy"] });
               },
-              antiAdsFn: null,
+              antiAdsFn: null
             },
             mojeek: {
               siteTypeID: 17,
@@ -1547,12 +1510,12 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: "fmt",
               mainSelector: "form[name='sf1']",
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:100;display:inline-flex;margin:0;padding:0;height:42px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 2px 0 0;height:42px}input{    box-sizing:content-box;margin:0;padding:4px 0;height:32px;min-width:90px;border:1px solid #c7c7c7;background:#fff;color:#111;box-shadow:0 2px 3px #0000000f;vertical-align:top;font-weight:500;font-size:15px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;letter-spacing:normal;cursor:pointer}#${def.const.leftButton} input{border-radius:4px 0 0 4px}#${def.const.rightButton} input{border-radius:0 4px 4px 0}input:hover{background:#fafafa;box-shadow:0 2px 5px #00000033;transition:box-shadow .1s cubic-bezier(.4,0,.2,1), -webkit-box-shadow .1s cubic-bezier(.4,0,.2,1)}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:-1px;right:var(--right,unset);z-index:100;display:inline-flex;margin:0;padding:0;height:33px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 2px 0 0;height:33px}input{box-sizing:content-box;margin:0;padding:4px 0;height:33px;min-width:90px;border:1px solid #c7c7c7;background:#fff;color:#111;box-shadow:0 2px 3px #0000000f;vertical-align:top;font-weight:500;font-size:15px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;letter-spacing:normal;cursor:pointer}#${def.const.leftButton} input{border-radius:4px 0 0 4px}#${def.const.rightButton} input{border-radius:0 4px 4px 0}input:hover{background:#fafafa;box-shadow:0 2px 5px #00000033;transition:box-shadow .1s cubic-bezier(.4,0,.2,1), -webkit-box-shadow .1s cubic-bezier(.4,0,.2,1)}`,
               darkModeCss: `:host(.${def.const.darkmode}) input{background:#1e1e1e;color:#fff;border:1px solid grey;box-shadow:0 2px 3px #0000000f}:host(.${def.const.darkmode}) input:hover{background:#303030;color:#fafafa}`,
               resultListProp: { qs: `.results>ul.results-standard>li`, delay: 10 },
               keywords: `b, strong`,
               antiRedirectFn: () => deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "mojeek_ar" })("Mojeek", ".results>ul>li :is(:not(.more)>a,>a)", { useNewTab: true }),
-              antiAdsFn: () => deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "mojeek_ad", immed: true })({ selectors: ".sf1>form>button~a", siteName: "mojeek" }),
+              antiAdsFn: () => deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "mojeek_ad", immed: true })({ selectors: ".sf1>form>button~a", siteName: "mojeek" })
             },
             searxng: {
               siteTypeID: 18,
@@ -1568,9 +1531,9 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               resultListProp: { qs: `div#urls article.result`, delay: 10 },
               keywords: ".highlight",
               antiRedirectFn: null,
-              antiAdsFn: null,
+              antiAdsFn: null
             },
-            other: { siteTypeID: 0 },
+            other: { siteTypeID: 0 }
           },
 
             newSiteType = {
@@ -1578,9 +1541,8 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               DUCKDUCKGO: listSite.duckduckgo.siteTypeID, SOGOU: listSite.sogou.siteTypeID, QWANT: listSite.qwant.siteTypeID,
               YANDEX: listSite.yandex.siteTypeID, SO360: listSite.so360.siteTypeID, TOUTIAO: listSite.toutiao.siteTypeID,
               KAIFA: listSite.kaifa.siteTypeID, ECOSIA: listSite.ecosia.siteTypeID, YAHOO: listSite.yahoo.siteTypeID,
-              YOU: listSite.you.siteTypeID, STARTPAGE: listSite.startpage.siteTypeID, BRAVE: listSite.brave.siteTypeID,
-              YEP: listSite.yep.siteTypeID, MOJEEK: listSite.mojeek.siteTypeID, SEARXNG: listSite.searxng.siteTypeID,
-              OTHERS: listSite.other.siteTypeID,
+              INFO: listSite.info.siteTypeID, STARTPAGE: listSite.startpage.siteTypeID, BRAVE: listSite.brave.siteTypeID,
+              YEP: listSite.yep.siteTypeID, MOJEEK: listSite.mojeek.siteTypeID, SEARXNG: listSite.searxng.siteTypeID, OTHERS: listSite.other.siteTypeID
             },
 
             engineMap = {
@@ -1596,12 +1558,12 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               "so\\.toutiao\\.com$": { siteType: newSiteType.TOUTIAO, site: listSite.toutiao },
               "www\\.ecosia\\.org$": { siteType: newSiteType.ECOSIA, site: listSite.ecosia },
               "search\\.yahoo\\.com$": { siteType: newSiteType.YAHOO, site: listSite.yahoo },
-              "you\\.com$": { siteType: newSiteType.YOU, site: listSite.you },
+              "www\\.info\\.com$": { siteType: newSiteType.INFO, site: listSite.info },
               "startpage\\.com$": { siteType: newSiteType.STARTPAGE, site: listSite.startpage },
               "search\\.brave\\.com$": { siteType: newSiteType.BRAVE, site: listSite.brave },
               "yep\\.com$": { siteType: newSiteType.YEP, site: listSite.yep },
               "www\\.mojeek\\.com$": { siteType: newSiteType.MOJEEK, site: listSite.mojeek },
-              "priv\\.au$": { siteType: newSiteType.SEARXNG, site: listSite.searxng },
+              "priv\\.au$": { siteType: newSiteType.SEARXNG, site: listSite.searxng }
             },
 
             searchProperties = {
@@ -1609,9 +1571,9 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 'input#kw[name^="w"]', 'input[name="q"]:not([type="hidden"])', 'input[name="text"][type="text"]',
                 'input#q[name="query"]', 'input[name="query"][class$="query"]:not([id*="bottom"])', 'input.input-search[type="search"]',
                 'input[type="search"][class*="input"]', '#search-box-container input[class~="ant-input"]', 'input#yschsp[name="p"]',
-                'textarea#sb_form_q[name="q"]', 'textarea[jsname][name="q"]', "textarea#search-input-textarea",
+                'textarea#sb_form_q[name="q"]', 'textarea[jsname][name="q"]', "textarea#search-input-textarea"
               ],
-              searchKeys: ["wd", "word", "query", "q", "text", "keyword", "p"],
+              searchKeys: ["wd", "word", "query", "q", "text", "keyword", "p"]
             },
             { currentSite = {}, listCurrentSite = {} } = findCurrentSite(), { currentSiteName, allSiteURIs } = updateSiteInformation(),
             { backgroundColor: bgcolor, foregroundColor: fgcolor } = customColor, updateDetectionAddress = getUpdateAddress(),
@@ -1630,7 +1592,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li{float:none;display:flex;margin:3px 0;padding:2px 8px 2px 12px;height:36px;border:none;background:transparent!important;list-style:none;cursor:default;-webkit-user-select:none;user-select:none;align-content:center;justify-content:space-between}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} li div{font:normal 700 14px/150% Microsoft YaHei UI,system-ui,-apple-system,BlinkMacSystemFont,sans-serif!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button{box-sizing:border-box;margin:0 0 0 8px;padding:4px 8px;height:36px;min-width:65px;border:1px solid #ccc;border-radius:8px;background:#fafafa;box-shadow:1px 1px 1px 0 #ccc;color:#5e5e5e;font-weight:700;font-size:14px!important;letter-spacing:normal;text-transform:none;text-align:center;text-decoration:none}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info{font-weight:400!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_info em{color:#dc143c!important;font-style:normal;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_textarea{padding: 6px 0;margin:0}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter{display:block;margin:0;height:100%}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar{width:8px;height:8px}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb{border-radius:4px;background:#cfcfcf}.${def.notice.random}_filter_textarea textarea::-webkit-scrollbar-thumb:hover{background:#aaa}.${def.notice.random}_filter_textarea textarea::placeholder{color:#555;font:normal 500 16px/150% ui-monospace,monospace,system-ui,-apple-system,BlinkMacSystemFont!important;opacity:0.85;white-space:break-spaces}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{box-sizing:border-box;margin:0;padding:5px;max-height:420px;width:100%;min-height:280px;outline:0!important;border:1px solid #bbb;border-radius:6px;background:#fff;color:#111;white-space:pre;font:normal 400 14px/150% ui-monospace,monospace,sans-serif!important;resize:vertical;overscroll-behavior:contain;word-break:keep-all!important;cursor:auto}` +
             `.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content::placeholder{font:normal 400 14px/150% ui-monospace,monospace!important}.${def.notice.noticeX} .${def.notice.configuration} #${def.notice.random}_customColor{margin:0;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} button:hover{background:#fff;cursor:pointer}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}__content{display:block;margin:0;height:268px}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{overflow-x:hidden;overflow-y:auto;box-sizing:border-box;margin:4px 0 3px;padding:8px;width:266px;max-height:237px;overscroll-behavior:contain}.${def.notice.card} h2{margin:0;padding:0;border:0;vertical-align:baseline;font:inherit;font-size:100%;line-height:135%;}ul.${def.notice.random}_updateinfo{margin:0;padding:0}.${def.notice.random}_updateinfo li{margin:6px 5px 4px 10px;padding:0 0 0 2px;list-style:decimal}#${def.notice.random}_help{position:relative;margin:0;padding:4px 15px!important;border:1px solid transparent;background:#f07f6a;box-shadow:0 0 6px 0 #f5846f;color:#fff;cursor:help}#${def.notice.random}_help:hover{background:#ed6248;box-shadow:0 0 6px 0 #f34525;}#${def.notice.random}_clear{margin:0;color:#666;font-weight:500;cursor:pointer}#${def.notice.random}_clear:hover{color:#ff0000}#${def.notice.random}_clear u{padding:0 2px;text-decoration:none}.${def.notice.linkerror},.${def.notice.linkerror}:hover{color:#a9a9a9!important;text-decoration-line:underline!important;text-decoration-color:#ff0000!important;text-decoration-style:wavy!important;text-decoration-thickness:1px!important;text-underline-offset:2px!important}.${def.notice.linkerror} *,.${def.notice.linkerror} *:hover{color:#a9a9a9!important;text-decoration:none!important}@-moz-document url-prefix() {.${def.notice.noticeX} *,.${def.notice.noticeX} *::after,.${def.notice.noticeX} *::before,.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.random}_filter_content{scrollbar-color:#bbbb #eee1;scrollbar-width:thin}}` +
             `.${def.notice.card}{margin:0;padding:0;--background:#fff;--background-chackbox:#0082ff;--background-image:#fff,#006baf33;--text-color:#666;--text-headline:#000;--card-shadow:#0082ff;--card-height:48px;--card-witght:240px;--card-radius:12px;--header-height:47px;--blend-mode:overlay;--transition:0.15s;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.${def.notice.card}__input{position:absolute;display:none;margin:0;padding:0;outline:none;border:none;background:none;-webkit-appearance:none}.${def.notice.card}__input:checked ~ .${def.notice.card}__body{--shadow:0 0 0 3px var(--card-shadow);}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox{--chack-bg:var(--background-chackbox);--chack-border:#fff;--chack-scale:1;--chack-opacity:1;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover-chackbox--svg{--stroke-color:#fff;--stroke-dashoffset:0;}.${def.notice.card}__input:checked ~ .${def.notice.card}__body .${def.notice.card}__body-cover:after{--opacity-bg:0;}.${def.notice.random}_iconText{color:#333;font-weight:400;letter-spacing:normal;text-transform:none;text-decoration:none}.${def.notice.random}_iconText:hover{color:#dc143c}.${def.notice.random}_iconText>sup{position:absolute;font-size:25px;top:-10px;right:-2px}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body{cursor:not-allowed;opacity:0.5;}.${def.notice.card}__input:disabled ~ .${def.notice.card}__body:active{--scale:1;}.${def.notice.card}__body{position:relative;display:grid;overflow:hidden;width:var(--card-witght);height:var(--card-height);border-radius:var(--card-radius);background:var(--background);box-shadow:var(--shadow,1px 1px 3px 1px #ccc);cursor:pointer;-webkit-transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:box-shadow var(--transition),-webkit-transform var(--transition);transition:transform var(--transition),box-shadow var(--transition);transition:transform var(--transition),box-shadow var(--transition),-webkit-transform var(--transition);-webkit-transform:scale(var(--scale,1)) translateZ(0);transform:scale(var(--scale,1)) translateZ(0);grid-auto-rows:calc(var(--card-height) - var(--header-height)) auto}` +
-            `.${def.notice.card}__body:active{--scale:0.96;}.${def.notice.card}__body-cover-image{position:absolute;top:8px;left:10px;z-index:100;width:32px;height:32px}.${def.notice.card}__body-cover-image span.${def.notice.favicons}{display:block;width:32px;height:32px}.${def.notice.card}__body-cover-chackbox{position:absolute;top:10px;right:10px;z-index:1;width:28px;height:28px;border:2px solid var(--chack-border,#fff);border-radius:50%;background:var(--chack-bg,var(--background-chackbox));opacity:var(--chack-opacity,0);transition:transform var(--transition),opacity calc(var(--transition)*1.2) linear,-webkit-transform var(--transition) ease;-webkit-transform:scale(var(--chack-scale,0));transform:scale(var(--chack-scale,0))}.${def.notice.card}__body-cover-chackbox--svg{display:inline-block;visibility:visible!important;margin:8px 0 0 7px;width:13px;height:11px;vertical-align:top;-webkit-transition:stroke-dashoffset .4s ease var(--transition);transition:stroke-dashoffset .4s ease var(--transition);fill:none;stroke:var(--stroke-color,#fff);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16px;stroke-dashoffset:var(--stroke-dashoffset,16px)}.${def.notice.card}__body-header{padding:4px 10px 6px 50px;height:var(--header-height);background:var(--background)}.${def.notice.card}__body-header-title{margin-bottom:0!important;color:var(--text-headline);font-weight:700!important;font-size:15px!important}.${def.notice.card}__body-header-subtitle{color:var(--text-color);font-weight:500;font-size:13px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{display:grid;grid-template-columns:repeat(1, 1fr);grid-gap:10px;}.${def.notice.gberror}{display:block;margin:0 0 4px -6px;padding:6px;width:max-content;border:1px dashed #ffb78c;border-radius:4px;color:#ffb78c}`,
+            `.${def.notice.card}__body:active{--scale:0.96;}.${def.notice.card}__body-cover-image{position:absolute;top:8px;left:10px;z-index:100;width:32px;height:32px}.${def.notice.card}__body-cover-image span.${def.notice.favicons}{display:block;width:32px;height:32px}.${def.notice.card}__body-cover-chackbox{position:absolute;top:10px;right:10px;z-index:1;width:28px;height:28px;border:2px solid var(--chack-border,#fff);border-radius:50%;background:var(--chack-bg,var(--background-chackbox));opacity:var(--chack-opacity,0);transition:transform var(--transition),opacity calc(var(--transition)*1.2) linear,-webkit-transform var(--transition) ease;-webkit-transform:scale(var(--chack-scale,0));transform:scale(var(--chack-scale,0))}.${def.notice.card}__body-cover-chackbox--svg{display:inline-block;visibility:visible!important;margin:8px 0 0 7px;width:13px;height:11px;vertical-align:top;-webkit-transition:stroke-dashoffset .4s ease var(--transition);transition:stroke-dashoffset .4s ease var(--transition);fill:none;stroke:var(--stroke-color,#fff);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16px;stroke-dashoffset:var(--stroke-dashoffset,16px)}.${def.notice.card}__body-header{padding:4px 10px 6px 50px;height:var(--header-height);background:var(--background)}.${def.notice.card}__body-header-title{margin-bottom:0!important;color:var(--text-headline);font-weight:700!important;font-size:15px!important}.${def.notice.card}__body-header-subtitle{color:var(--text-color);font-weight:500;font-size:13px!important}.${def.notice.noticeX} .${def.notice.configuration} .${def.notice.settingList} .${def.notice.grid}{display:grid;grid-template-columns:repeat(1, 1fr);grid-gap:10px;}.${def.notice.gberror}{display:block;margin:0 0 4px -6px;padding:6px;width:max-content;border:1px dashed #ffb78c;border-radius:4px;color:#ffb78c}`
           );
           def.var.iconbg = iconBase64Data ? `url('${iconBase64Data}')` : `url('${def.url.backupIcon}'),url('${yandexIconsAPIUrl}')`;
           def.var.button = `${currentSite.siteTypeID === newSiteType.GOOGLE ? "<span class='ACRAdd'></span>" : ""}
@@ -1644,10 +1606,6 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           def.var.iconstyle = `.${def.notice.noticeX} .${def.notice.configuration} span.${def.notice.favicon},.${def.notice.card}__body-cover-image span.${def.notice.favicons}{background-color:transparent;background-image:${def.var.iconbg};background-repeat:no-repeat;}`;
 
           function getQueryString() {
-            if (currentSite.siteTypeID === newSiteType.YOU) {
-              const textWord = qS(`textarea#search-input-textarea[name='query']`)?.value.trim(); if (textWord) return encodeURIComponent(textWord);
-              const keyNodes = qA(`[data-testid^="youchat-question-turn"] span[class^='sc-']`); if (keyNodes.length) return keyNodes[keyNodes.length - 1].textContent;
-            }
             const { inputArray, searchKeys } = searchProperties, inputValue = qA(inputArray.join()).FindX(item => item.value)?.value;
             if (inputValue) { DEBUG("QueryString[INPUT]:", { value: inputValue }); return encodeURIComponent(inputValue) }
             for (const key of searchKeys) {
@@ -1657,7 +1615,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           }
 
           function checkIndexPage() {
-            for (const key of searchProperties.searchKeys) if (getUrlParam(key)) { return false } return CUR_PATH_NAME === "/";
+            for (const key of searchProperties.searchKeys) { if (getUrlParam(key)) { return false } } return CUR_PATH_NAME === "/";
           }
 
           function getSecurityPolicy() {
@@ -1680,19 +1638,16 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
           function updateSiteInformation(currentSiteName = "", allSiteURIs = "") {
             for (const site of safeObject.keys(listSite)) {
-              if (listSite[site].siteTypeID !== newSiteType.OTHERS) allSiteURIs += listSite[site].siteHostName + ";";
-              if (listSite[site].siteTypeID === listCurrentSite.siteTypeID) currentSiteName = site;
-              if (listSite[site].siteTypeID !== currentSite.siteTypeID && selectedEngine.includes(Number(listSite[site].siteTypeID))) {
-                selectedSite.length < 2 && selectedSite.push(listSite[site]);
-              }
+              if (listSite[site].siteTypeID !== newSiteType.OTHERS) { allSiteURIs += listSite[site].siteHostName + ";" }
+              if (listSite[site].siteTypeID === listCurrentSite.siteTypeID) { currentSiteName = site }
+              if (listSite[site].siteTypeID !== currentSite.siteTypeID && selectedEngine.includes(Number(listSite[site].siteTypeID))) { selectedSite.length < 2 && selectedSite.push(listSite[site]) }
             } return { currentSiteName, allSiteURIs };
           }
 
           async function updateToRequestIcon() {
             try {
               const iconDataURL = await requestRemoteIcon(yandexIconsAPIUrl);
-              if (iconDataURL) cache.set(REMOTEICONS, iconDataURL, 2592e6) ?? DEBUG("%cRemote icon data parsing successed.", "color:#006400");
-              else DEBUG("%cRemote icon data parsing failed.", "color:#ff0000");
+              if (iconDataURL) { cache.set(REMOTEICONS, iconDataURL, 2592e6); DEBUG("Remote icon data parsing successed.") } else { DEBUG("Remote icon data parsing failed.") }
             } catch (e) { ERROR(`${e.name} in UpdateToRequestIcon:`, e.message) }
           }
 
@@ -1704,7 +1659,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             const node = qS(`#${def.notice.random}_loading`);
             if (updateWindow && typeof updateWindow.close === "function" && (!IS_REAL_BLINK || GMscriptHandler !== "Violentmonkey")) {
               sleep(3e3, { useCachedSetTimeout: true }).then(() => updateWindow.close()); updateWindow.onclose = () => safeRemoveNode(node);
-            } else return node;
+            } else { return node }
           }
 
           function preInstall(url) {
@@ -1724,13 +1679,11 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           }
 
           function generateUpdateList(notes) {
-            if (!safeArray.isArray(notes) || !notes.length) return `<ol>当前更新源没有更新详情，请访问 <a target="_blank" href="${def.url.homepage}">Github</a> 查看。</ol><ol>&nbsp;</ol>`;
+            if (!safeArray.isArray(notes) || !notes.length) { return `<ol>当前更新源没有更新详情，请访问 <a target="_blank" href="${def.url.homepage}">Github</a> 查看。</ol><ol>&nbsp;</ol>` }
             return notes.reduce((updateInfoList, note) => {
               try {
-                const parsedNote = JSON.parse(note), updateinfo = IS_CHN ? parsedNote.CN : parsedNote.EN;
-                updateInfoList += updateinfo ? `<li>${updateinfo}</li>` : ``;
-              } catch { updateInfoList += `<li>${note}</li>` }
-              return updateInfoList;
+                const parsedNote = JSON.parse(note), updateinfo = IS_CHN ? parsedNote.CN : parsedNote.EN; updateInfoList += updateinfo ? `<li>${updateinfo}</li>` : ``;
+              } catch { updateInfoList += `<li>${note}</li>` } return updateInfoList;
             }, "");
           }
 
@@ -1969,7 +1922,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                     textarea.scrollTop = textarea.scrollHeight;
                   });
                 });
-              },
+              }
             };
 
             function changeEventOnTigger(event) {
@@ -1985,12 +1938,12 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               try {
                 const filterString = qS(`.${def.notice.random}_filter_textarea .${def.notice.random}_filter_content`)?.value.trim(),
                   filterTrigger = qS(`#${def.notice.rf}`).checked, parsedFilterString = filterString ? JSON.parse(filterString) : [];
-                if (!safeArray.isArray(parsedFilterString) || asArray(parsedFilterString).SomeX(item => typeof item !== "string")) throw new Error("Format Error");
+                if (!safeArray.isArray(parsedFilterString) || asArray(parsedFilterString).SomeX(item => typeof item !== "string")) { throw new Error("Format Error") }
                 const resultFilterData = { filter: uniq(parsedFilterString.filter(Boolean)), trigger: filterTrigger };
                 GMsetValue(RESULTFILTER, encrypt(JSON.stringify(resultFilterData)));
                 const successTitle = IS_CHN ? "保存成功！" : "Success!",
                   successText = IS_CHN ? "<dd>设置参数已成功保存，页面稍后自动刷新！</dd>" : "<dd>The data is saved successfully, Page will refresh!</dd>";
-                if (await addAction.closeConfig()) GMnotification({ title: successTitle, text: createNoticeHTML(successText), callbacks: { onClose: [reload] } });
+                if (await addAction.closeConfig()) { GMnotification({ title: successTitle, text: createNoticeHTML(successText), callbacks: { onClose: [reload] } }) }
               } catch {
                 const errorMessage = IS_CHN ? "设置数据格式有误，请修正后重新提交。" : "The setting data format is incorrect!",
                   errorText = `<dd><e style="font-size:24px;vertical-align:bottom">\ud83d\ude31\u0020</e>${errorMessage}</dd>`;
@@ -2003,7 +1956,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               try {
                 filterInfo?.removeAttribute("disabled"); const value = target.value.trim();
                 if (value.length === 0) { return target.setAttribute("style", "border: 1px solid #999") } const parsedValue = JSON.parse(value.replace(/,\s+]$/, "]"));
-                if (!safeArray.isArray(parsedValue) || asArray(parsedValue).SomeX(item => typeof item !== "string")) throw new Error("Format Error");
+                if (!safeArray.isArray(parsedValue) || asArray(parsedValue).SomeX(item => typeof item !== "string")) { throw new Error("Format Error") }
                 const previousCursorPosition = target.selectionStart, formattedValue = JSON.stringify(parsedValue, null, 2),
                   newCursorPosition = previousCursorPosition + formattedValue.length - target.value.length, currentScrollTop = target.scrollTop;
                 target.value = formattedValue; target.setAttribute("style", "border: 1px solid #999"); await sleep(10, { instance: true });
@@ -2032,7 +1985,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 if (input_checked < 3) {
                   qA(`input[name='${def.notice.card}_lists']:disabled`).forEach(item => (item.disabled = false));
                   qS(`#${def.notice.random}_clear`).style.display = input_checked === 0 ? "none" : "inline";
-                } else qA(`input[name='${def.notice.card}_lists']:not(:checked)`).forEach(item => (item.disabled = true));
+                } else { qA(`input[name='${def.notice.card}_lists']:not(:checked)`).forEach(item => (item.disabled = true)) }
               });
             }
 
@@ -2052,16 +2005,16 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                   const customColor = { foregroundColor: inputFgColor.trim().toLowerCase(), backgroundColor: inputBgColor.trim().toLowerCase() };
                   _config_date_ = { ..._config_date_, keywordHighlight: true, customColor }; GMsetValue(CONFIGURE, encrypt(JSON.stringify(_config_date_)));
                 };
-              inputFgColor = prompt(foregroundColorText, customColor.foregroundColor); if (inputFgColor === null) { return } else if (colorReg.test(inputFgColor.trim())) {
-                inputBgColor = prompt(backgroundColorText, customColor.backgroundColor); if (inputBgColor === null) { return } else if (colorReg.test(inputBgColor.trim())) {
+              inputFgColor = prompt(foregroundColorText, customColor.foregroundColor); if (inputFgColor === null) { void 0 } else if (colorReg.test(inputFgColor.trim())) {
+                inputBgColor = prompt(backgroundColorText, customColor.backgroundColor); if (inputBgColor === null) { void 0 } else if (colorReg.test(inputBgColor.trim())) {
                   const confirmForegroundColor = inputFgColor.trim().startsWith("#") ? inputFgColor.trim().toUpperCase() : inputFgColor.trim().toLowerCase(),
                     confirmbackgroundColor = inputBgColor.trim().startsWith("#") ? inputBgColor.trim().toUpperCase() : inputBgColor.trim().toLowerCase(),
                     confirmText = `${confirmColorsText}${confirmfgColorText}${confirmForegroundColor}${fonfirmbgColorText}${confirmbackgroundColor}`;
                   if (!confirm(confirmText)) { return }
                   const text = createNoticeHTML(IS_CHN ? "<dd>搜索关键词自定义颜色已保存，当前页面即将刷新！</dd>" : "<dd>Search keywords custom color has been saved!</dd>");
                   addAction.closeConfig() && GMnotification({ title: IS_CHN ? "自定义颜色保存" : "Save Custom Color", text, callbacks: { onShow: [saveData], onClose: [reload] } });
-                } else alert(IS_CHN ? "背景色 格式输入错误！" : "Background-color input-format error!");
-              } else alert(IS_CHN ? "前景色（字体颜色） 格式输入错误！" : "Foreground-color (font-color) input-format error!");
+                } else { alert(IS_CHN ? "背景色 格式输入错误！" : "Background-color input-format error!") }
+              } else { alert(IS_CHN ? "前景色（字体颜色） 格式输入错误！" : "Foreground-color (font-color) input-format error!") }
             }
 
             function cleanSelectedCard() {
@@ -2104,9 +2057,9 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             function insertHotkey() {
               document.addEventListener("keydown", e => {
                 const ekey = (e.altKey || e.key === "Alt" || e.code === "AltRight" || e.code === "AltLeft") && !e.ctrlKey && !e.shiftKey && !e.metaKey;
-                if (e.code === "KeyE" && ekey) handleClickEvent("setConfigure", 1e3, e); else if (e.code === "KeyV" && ekey) handleClickEvent("listEngine", 1e3, e);
-                else if (e.code === "KeyB" && ekey) handleClickEvent("filterResult", 1e3, e);
-              }) || DEBUG("%cInstalling Hotkey_Setting", "color:#808080");
+                if (e.code === "KeyE" && ekey) { handleClickEvent("setConfigure", 1e3, e) } else if (e.code === "KeyV" && ekey) { handleClickEvent("listEngine", 1e3, e) } else
+                  if (e.code === "KeyB" && ekey) { handleClickEvent("filterResult", 1e3, e) }
+              }); DEBUG("%cInstalling Hotkey_Setting", "color:#808080");
             }
 
             function handleClickEvent(name, time, event) {
@@ -2152,7 +2105,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 "font-size:12px;font-weight:700;color:#4682b4",
                 IS_CHN ? "因安全策略被阻止：" : "SecurityPolicy:\u0020",
                 `color:${securityPolicy ? "#006400" : "#0000ff"};${fontStyle}`,
-                securityPolicy,
+                securityPolicy
               );
             }
 
@@ -2164,13 +2117,11 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 clear: () => safeRemoveNode("#con-ar"),
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target); const width = buttonSection.clientWidth || 2e2; buttonSection.style.setProperty("--right", `-${width + 8}px`);
-                },
+                }
               },
               google: {
                 listTypes: { target: "div.MjjYud", listName: "div" },
-                applyButton: ({ buttonSection, target }) => {
-                  insertAfter(buttonSection, target); qS(`meta[name="color-scheme"]`) && buttonSection.classList.add(def.const.darkmode); getGlobalGoogle(googleJump);
-                },
+                applyButton: ({ buttonSection, target }) => { target.appendChild(buttonSection); qS(`meta[name="color-scheme"]`) && buttonSection.classList.add(def.const.darkmode); getGlobalGoogle(googleJump) }
               },
               bing: {
                 listTypes: { target: "#b_results", listName: "li", className: "b_algo" },
@@ -2178,18 +2129,17 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 applyCookie: () => safeObject.assign(GMunsafeWindow, { AwayTimeScrollTopPoleRS: false, AwayTimeThresholdCustomControl: false, AwayTimeThreshold: 864e3 }),
                 applyButton: ({ buttonSection, target, shadow }) => {
                   insertAfter(buttonSection, target);
-                  if (document.body.classList.contains("b_dark")) buttonSection.classList.add(def.const.darkmode);
-                  if (IS_REAL_GECKO && CUR_PATH_NAME.includes("riverview/relatedvideo")) return buttonSection.style.setProperty("--margin", "3px 1px 0 0");
+                  if (document.body.classList.contains("b_dark")) { buttonSection.classList.add(def.const.darkmode) }
+                  if (IS_REAL_GECKO && CUR_PATH_NAME.includes("riverview/relatedvideo")) { return buttonSection.style.setProperty("--margin", "3px 1px 0 0") }
                   const formBox = qS(".b_searchboxForm:has(input.b_searchbox)"); if (!formBox || !/^detail(?:V|v)2$/.test(getUrlParam("view"))) { return }
                   formBox.classList.add(`${def.const.scrollbarsV2}.width`); buttonSection.style.setProperty("--margin", "1px -2px 0 6px");
                   qA(`input`, shadow).forEach(i => i.classList.add(def.const.scrollbarsV2));
-                },
+                }
               },
               duckduckgo: {
                 listTypes: { target: "ol.react-results--main", listName: "li" },
-                applyButton: ({ buttonSection, target }) => {
-                  insertAfter(buttonSection, target); const width = buttonSection.clientWidth || 2e2; buttonSection.style.setProperty("--right", `-${width + 8}px`);
-                },
+                applyCookie: () => { gbCookies.getItem("n") !== "1" && setPreferences({ sKey: "n", sValue: "1", sEnd: 30, sDomain: "duckduckgo.com", sPath: "/", sSomeSite: "Lax" }) },
+                applyButton: ({ buttonSection, target }) => { insertAfter(buttonSection, target); const width = buttonSection.clientWidth || 2e2; buttonSection.style.setProperty("--right", `-${width + 8}px`) }
               },
               sogou: {
                 listTypes: { target: "div.results", listName: "div", className: "vrwrap" },
@@ -2207,21 +2157,21 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                     insertAfter(buttonSection, target); await sleep(0, { instance: true }); const width = buttonSection.clientWidth || 2e2;
                     buttonSection.style.cssText += `--right:-${width + 10}px;--opacity:1`; qS(`#searchBtn2`)?.style.setProperty("right", `-${width + 120}px`);
                   } addSearchButtonEvent(shadow, target);
-                },
+                }
               },
               qwant: {
                 listTypes: { target: "div[data-testid='containerWeb'] div[data-testid='sectionWeb']>div", listName: "div" },
                 applyButton: async ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target); await sleep(0, { instance: true }); const width = buttonSection.clientWidth || 2e2,
                     llmButtonWidth = qS(`div[data-testid="llm-button-force"][class]`)?.clientWidth || 0; buttonSection.style.setProperty("--right", `-${width + llmButtonWidth + 10}px`);
-                },
+                }
               },
               yandex: {
                 listTypes: { target: "#search-result", listName: "li" },
                 clear: () => safeRemoveNode("div.content__right>div"),
                 applyButton: ({ buttonSection, target }) => {
-                  insertAfter(buttonSection, target); if (document.body.classList.contains("i-ua_skin_dark")) buttonSection.classList.add(def.const.darkmode);
-                },
+                  insertAfter(buttonSection, target); if (document.body.classList.contains("i-ua_skin_dark")) { buttonSection.classList.add(def.const.darkmode) }
+                }
               },
               so360: {
                 listTypes: { target: "#main>ul.result", listName: "li", className: "res-list" },
@@ -2231,21 +2181,21 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                   target.insertBefore(buttonSection, target.firstElementChild); await sleep(0, { instance: true }); const formWidth = qS(`#ai-input-wrapper`).clientWidth;
                   buttonSection.style.cssText += `--left:${formWidth + 10}px;--border:none;--background:linear-gradient(279deg,#0fb264 -28.74%,#08e5aa 133.43%);--margin:5px 0px 0px 5px;--opacity:1`;
                 },
-                clear: () => safeRemoveNode("#side_wrap"),
+                clear: () => safeRemoveNode("#side_wrap")
               },
               toutiao: {
                 listTypes: { target: "div.s-result-list", listName: "div", className: "result-content" },
                 clear: () => safeRemoveNode(".main>.s-side-list>.result-content"),
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target); const width = buttonSection.clientWidth || 2e2; buttonSection.style.cssText += `--right:-${width + 10}px;--opacity:1`;
-                },
+                }
               },
               kaifa: {
                 listTypes: { target: "ul.ant-list-items", listName: "li", className: "ant-list-item" },
                 applyButton: ({ buttonSection, target }) => {
                   const input = qS("#search-box-container input[class~='ant-input']"),
                     width = parseInt(computStyle(input).width || 604, 10); target.appendChild(buttonSection); input?.style.setProperty("width", `${width}px`, "important");
-                },
+                }
               },
               ecosia: {
                 listTypes: { target: ".mainline__content>div:not([class])", listName: "div" },
@@ -2258,7 +2208,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 applyButton: ({ buttonSection, target, shadow }) => {
                   const btnFn = () => target && !qS(`#${def.const.rndButtonID}`, target.parentNode) && (insertAfter(buttonSection, target), addSearchButtonEvent(shadow, target));
                   def.var.rIC(btnFn, { timeout: 1e3 });
-                },
+                }
               },
               yahoo: {
                 listTypes: { target: "#web>ol", listName: "li" },
@@ -2267,9 +2217,12 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                   if ([...currentSite.imageType, "video", "news"].includes(getUrlParam(currentSite.splitTypeName))) {
                     target.appendChild(buttonSection); buttonSection.style.setProperty("--height", `44px`);
                   } else { insertAfter(buttonSection, target); const width = buttonSection.clientWidth || 2e2; buttonSection.style.setProperty("--right", `-${10 + width}px`) }
-                },
+                }
               },
-              you: { listTypes: { target: "[data-floating-ui-portal]>[role='dialog'][data-open='true'] div>section", listName: "article" } },
+              info: {
+                listTypes: { target: ".web-google", listName: "div", className: "web-google__result" },
+                applyButton: ({ buttonSection, target }) => { insertAfter(buttonSection, target) }
+              },
               startpage: {
                 listTypes: { target: "#main>div.w-gl", listName: "div", className: "result" },
                 applyCookie: () => {
@@ -2281,7 +2234,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                   insertAfter(buttonSection, target); qS("meta[name='theme-color']")?.getAttribute("content") === "#0c0d0f" && buttonSection.classList.add(def.const.darkmode);
                   const width = buttonSection.clientWidth || 2e2, formSection = qS(`#header-search-form>.search-form-relative-container`),
                     maxWidth = parseInt(computStyle(formSection).maxWidth, 10) + width; formSection?.style.setProperty("max-width", `${maxWidth}px`);
-                },
+                }
               },
               brave: {
                 listTypes: { target: "#results", listName: "div", className: "snippet" },
@@ -2292,14 +2245,14 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target); const width = buttonSection.clientWidth || 2e2; buttonSection.style.setProperty("--right", `-${width + 10}px`);
                 },
-                clear: () => safeRemoveNode("aside>div"),
+                clear: () => safeRemoveNode("aside>div")
               },
               yep: {
                 listTypes: { target: "div[class$='-results']>div>div", listName: "div" },
                 applyButton: async ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target); await sleep(0, { instance: true }); const width = buttonSection.clientWidth || 2e2;
                   buttonSection.style.setProperty("--right", `-${10 + width}px`);
-                },
+                }
               },
               mojeek: {
                 listTypes: { target: "ul.results-standard", listName: "li", className: "r0" },
@@ -2307,7 +2260,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 applyButton: ({ buttonSection, target }) => {
                   insertAfter(buttonSection, target); qS(`link#theme`)?.href.includes("dark") && buttonSection.classList.add(def.const.darkmode);
                   const width = buttonSection.clientWidth || 2e2; buttonSection.style.setProperty("--right", `-${10 + width}px`);
-                },
+                }
               },
               searxng: {
                 listTypes: { target: "div#urls", listName: "article", className: "result" },
@@ -2316,11 +2269,11 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                   (gbCookies.getItem("method") !== "GET" || gbCookies.getItem("results_on_new_tab") !== "1") &&
                     setPreferences(
                       { sKey: "method", sValue: "GET", sEnd: 30, sPath: "/" }, { sKey: "results_on_new_tab", sValue: "1", sEnd: 30, sPath: "/" },
-                      { sKey: "theme", sValue: "simple", sEnd: 30, sPath: "/" }, { sKey: "simple_style", sValue: "auto", sEnd: 30, sPath: "/" },
+                      { sKey: "theme", sValue: "simple", sEnd: 30, sPath: "/" }, { sKey: "simple_style", sValue: "auto", sEnd: 30, sPath: "/" }
                     );
                 },
-                applyButton: ({ buttonSection, target }) => target.appendChild(buttonSection),
-              },
+                applyButton: ({ buttonSection, target }) => target.appendChild(buttonSection)
+              }
             };
 
             function setPreferences(...ops) {
@@ -2380,8 +2333,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 node.setAttribute("event-insert", true); const inputElement = qS("input", node), siteTypeID = Number(node.getAttribute("sn"));
                 inputElement.addEventListener("mousedown", stopEventPropagation); inputElement.addEventListener("click", (_, selectedSiteData) => {
                   const imageSearch = getUrlParam(currentSite.splitTypeName)?.trim();
-                  if (siteTypeID === selectedSite[0].siteTypeID) selectedSiteData = selectedSite[0];
-                  else if (siteTypeID === selectedSite[1].siteTypeID) { selectedSiteData = selectedSite[1] } else { return }
+                  if (siteTypeID === selectedSite[0].siteTypeID) { selectedSiteData = selectedSite[0] } else if (siteTypeID === selectedSite[1].siteTypeID) { selectedSiteData = selectedSite[1] } else { return }
                   const isImageSearch = currentSite.imageType.includes(imageSearch), gotoUrl = isImageSearch ? selectedSiteData.imageURL : selectedSiteData.webURL,
                     finalUrl = decodeURI(gotoUrl + getQueryString()); if (localWindow) { top.location.href = finalUrl } else { GMopenInTab(finalUrl, false) }
                 });
@@ -2402,7 +2354,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               const { target, listName, className } = siteConfig.listTypes, noticeNode = qS(`${target} [${def.static.warn}]`);
               if (noticeNode) { return } const usedFilterWordsStr = escapeHTML([...usedFilterWords].join(", ")),
                 noticeCode = createNotice(listName, className, usedFilterWordsStr), el = qS(target)?.firstElementChild;
-              if (el) el.insertAdjacentHTML(el.classList.contains(def.const.translucent) || el.classList.contains(def.const.disappear) ? "beforebegin" : "afterend", noticeCode);
+              if (el) { el.insertAdjacentHTML(el.classList.contains(def.const.translucent) || el.classList.contains(def.const.disappear) ? "beforebegin" : "afterend", noticeCode) }
               usedFilterWords.clear();
             }
 
@@ -2425,7 +2377,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
             function processMatchedItem(item, content, filter) {
               usedFilterWords.add(filter); item.classList.add(IS_DEBUG ? def.const.translucent : def.const.disappear);
-              if (IS_DEBUG) addDebugNotice(item, filter); qA("a", item).forEach(node => node.setAttribute(def.static.anti, "blocked"));
+              if (IS_DEBUG) { addDebugNotice(item, filter) } qA("a", item).forEach(node => node.setAttribute(def.static.anti, "blocked"));
               return DEBUG("Filter.match:", { filter, item, content });
             }
 
@@ -2436,7 +2388,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             }
 
             function adjustUI(siteName) {
-              const logicFunction = siteConfigMap[siteName]?.clear; if (typeof logicFunction === "function") logicFunction();
+              const logicFunction = siteConfigMap[siteName]?.clear; if (typeof logicFunction === "function") { logicFunction() }
             }
 
             function buildSelectors(querystring) {
@@ -2448,12 +2400,12 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               if (item?.nodeType !== 1) { return }
               const href = qS("a:not(.link--color-null,[role='menuitem'],[data-testid='result-extras-site-search-link'],[title])", item)?.href ?? "",
                 url = [1, 5, 8, 12].includes(listCurrentSite.siteTypeID) ? qS(`.${def.const.filtered}`, item)?.textContent.trim() || "" : href,
-                content = item.innerText?.replace(/[\t\r\n\ue62b]+/g, "").trim() + getDecodeURI(url); if (content) returnContent.set(item, content);
+                content = item.innerText?.replace(/[\t\r\n\ue62b]+/g, "").trim() + getDecodeURI(url); if (content) { returnContent.set(item, content) }
             }
 
             function matchFilters(item, content) {
               if (item?.nodeType !== 1) { return }
-              try { for (const filter of resultFilters) if (new RegExp(filter, "i").test(content)) return processMatchedItem(item, content, filter); } catch (e) {
+              try { for (const filter of resultFilters) { if (new RegExp(filter, "i").test(content)) { return processMatchedItem(item, content, filter) } } } catch (e) {
                 ERROR(`${e.name} in MatchFilters:`, e.message);
               }
             }
@@ -2462,11 +2414,14 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               if (remainingResults > 3) { return } remainingResults === 0 ? showEmptyNotice(currentSiteName) : qS(`[${def.static.warn}]`)?.remove(); adjustUI(currentSiteName);
             }
 
-            function getDecodeURI(href, temp) {
+            function getDecodeURI(href) {
               if (!href || typeof href !== "string" || href.startsWith("javascript:")) { return "" }
-              const invalidPercentRegex = /%(?![0-9A-Fa-f]{2})/g; let result = href.replace(invalidPercentRegex, "%25");
-              while (((temp = result), (result = decodeURIComponent(result.replace(invalidPercentRegex, "%25"))), result !== temp));
-              return `\ue620${result}\ue620`;
+              const invalidPercentRegex = /%(?![0-9A-Fa-f]{2})/g; let result = href;
+              result = result.replace(invalidPercentRegex, "%25"); while (result.includes("%")) {
+                try { const next = decodeURIComponent(result); if (next === result) { break } result = next } catch {
+                  result = result.replace(invalidPercentRegex, "%25"); result = decodeURIComponent(result);
+                }
+              } return `\ue620${result}\ue620`;
             }
 
             function getGlobalGoogle(permission) {
@@ -2479,18 +2434,19 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             function processMainThreadTasks() {
               const indexPage = checkIndexPage(), securePage = getSecurityPolicy(),
                 { siteTypeID, overrideCss, mainSelector, antiAdsFn, resultListProp, antiRedirectFn } = listCurrentSite;
-              if (siteTypeID === newSiteType.OTHERS) { return } if (!findAdoptedStyleSheet(def.const.rndstyleName)) insertStyle();
-              if (securePage) { return } if (antiAds && typeof antiAdsFn === "function") antiAdsFn(); if (indexPage) { return }
+              if (siteTypeID === newSiteType.OTHERS) { return } if (!findAdoptedStyleSheet(def.const.rndstyleName)) { insertStyle() }
+              if (securePage) { return } if (antiAds && typeof antiAdsFn === "function") { antiAdsFn() } if (indexPage) { return }
               const target = qS(mainSelector); target && !qS(`#${def.const.rndButtonID}`, target.parentNode) && insertButtons();
-              if (overrideCss && !findAdoptedStyleSheet(def.const.rndclassName)) insertCSS(listCurrentSite);
-              if (antiResultsFilter) filterSearchResults(resultListProp); if (antiLinkRedirect && typeof antiRedirectFn === "function") antiRedirectFn();
+              if (overrideCss && !findAdoptedStyleSheet(def.const.rndclassName)) { insertCSS(listCurrentSite) }
+              if (antiResultsFilter) { filterSearchResults(resultListProp) } if (antiLinkRedirect && typeof antiRedirectFn === "function") { antiRedirectFn() }
             }
 
             function searchButtonAndStylesObserve() {
               const observer = new MutationObserver(throttle({ fn: processMainThreadTasks, delay: 50, timer: "mainTask" }));
               observer.observe(document, { childList: true, subtree: true }) ?? processMainThreadTasks();
-              if (global.navigation) global.navigation.addEventListener("navigate", processMainThreadTasks);
-              else { ["pushState", "replaceState"].forEach(event => global.addEventListener(event, processMainThreadTasks)) }
+              if (global.navigation) { global.navigation.addEventListener("navigate", processMainThreadTasks) } else {
+                ["pushState", "replaceState"].forEach(event => global.addEventListener(event, processMainThreadTasks));
+              }
             }
 
             function requestIconsForScriptUpdate(requestVersion) {
@@ -2519,13 +2475,13 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 if (!version) { return } const newUpdateHTML = generateUpdateHTML(version, generateUpdateList(notes));
                 if (versionCompare(def.var.curVersion, version)) { showNewUpdateNotify(version, newUpdateHTML, url) } else { showSuccessUpdateNotify() }
               } catch (e) { ERROR(`${e.name} in ParseUpdateInformation: ${e?.message}`) }
-            },
+            }
           );
         })(function () {
           const updateURLArray = [
             "1cGRhdGUuZ3JlYXN5Zm9yay5vcmclMkZzY3JpcHRzJTJGMTI5MDklMkZHb29nbGVfYmFpZHVfU3dpdGNoZXJfKEFMTF9pbl9PbmUpLm1ldGEuanM=",
             "yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tJTJGRjl5NG5nJTJGR3JlYXN5Rm9yay1TY3JpcHRzJTJGbWFzdGVyJTJGR29vZ2xlJTI1MjAlMjUyNiUyNTIwQmFpZHUlMjUyMFN3aXRjaGVyLm1ldGEuanM=",
-            "vcGVudXNlcmpzLm9yZyUyRmluc3RhbGwlMkZmOXk0bmclMkZHb29nbGVfYmFpZHVfU3dpdGNoZXJfKEFMTF9pbl9PbmUpLm1ldGEuanM=",
+            "vcGVudXNlcmpzLm9yZyUyRmluc3RhbGwlMkZmOXk0bmclMkZHb29nbGVfYmFpZHVfU3dpdGNoZXJfKEFMTF9pbl9PbmUpLm1ldGEuanM="
           ]; return updateURLArray.map(url => `${decrypt(`aHR0cHMlM0ElMkYlMkZ${url}`)}?${generateRandomString(32, "hex")}`);
         });
       })(
@@ -2558,20 +2514,20 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 if (response.readyState !== 4) { return }
                 if (response.status === 200) {
                   const reader = new FileReader();
-                  reader.onload = () => resolve(reader.result.replace("data:data:image/png;base64,", "data:"));
-                  reader.onerror = () => reject(new Error("Convert failed"));
+                  reader.onload = () => { resolve(reader.result.replace("data:data:image/png;base64,", "data:")) };
+                  reader.onerror = () => { reject(new Error("Convert failed")) };
                   reader.readAsDataURL(response.response);
-                } else if (response.status !== 0) reject(new Error("NoAccessError"));
+                } else if (response.status !== 0) { reject(new Error("NoAccessError")) }
               },
-              onerror = () => reject(new Error("NetworkError")),
-              ontimeout = () => reject(new Error("TimeoutError"));
+              onerror = () => { reject(new Error("NetworkError")) },
+              ontimeout = () => { reject(new Error("TimeoutError")) };
             GMxmlhttpRequest({ url, headers, method: "GET", timeout: 5e3, responseType: "blob", onload, onerror, ontimeout });
           }).catch(e => Promise.reject(new Error("RequestRemoteIcon: " + e.message)));
         },
         options => new NoticeX({ ...options }).show(),
         (function (emptyStyle) {
           return (node, opt = null) => (node?.nodeType !== 1 ? emptyStyle : (node.ownerDocument?.defaultView || global).getComputedStyle(node, opt));
-        })(new Proxy(object(), { get: () => NaN })),
+        })(new Proxy(object(), { get: () => NaN }))
       );
     })(initTrustedTypesPolicy(), safeJSON, sessionStorage?.getItem(def.static.navinfo));
   },
@@ -2580,14 +2536,12 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       handler = { get(target, prop, receiver) { const method = methodMap.get(prop); return method ? (...args) => method.apply(target, args) : Reflect.get(target, prop, receiver) } };
     return array => (Array.isArray(array) ? new Proxy(array, handler) : array);
   })({
-    SomeX(callback, thisArg = this) { for (let i = 0; i < this.length; i++) if (callback.call(thisArg, this[i], i, this)) { return true } },
-    FindX(callback, thisArg = this) { for (let i = 0; i < this.length; i++) if (callback.call(thisArg, this[i], i, this)) { return this[i] } },
+    SomeX(callback, thisArg = this) { for (let i = 0; i < this.length; i++) { if (callback.call(thisArg, this[i], i, this)) { return true } } },
+    FindX(callback, thisArg = this) { for (let i = 0; i < this.length; i++) { if (callback.call(thisArg, this[i], i, this)) { return this[i] } } }
   }),
   ((ctx, mS = [..."t𝚁TjLWO𝙳ZR𝚖𝚜i𝚗gE𝚎𝚠2H𝚘8YkxC𝙲N0GcBrF5Qda4𝙺XoK𝚆𝚣hIn7uw1e𝚌bpM𝚞PUJlS9szD𝚝Avm3𝚟6qfV𝚡y𝚊"]) => {
     const oC = Object.create.bind(null, null),
-      sP = (O, o) => {
-        const clone = O.create(O.getPrototypeOf(o)); for (const key of Reflect.ownKeys(o)) Reflect.defineProperty(clone, key, O.getOwnPropertyDescriptor(o, key)); return clone;
-      },
+      sP = (O, o) => { const clone = O.create(O.getPrototypeOf(o)); for (const key of Reflect.ownKeys(o)) { Reflect.defineProperty(clone, key, O.getOwnPropertyDescriptor(o, key)) } return clone },
       eH = type => {
         const original = ctx.history[type];
         return function () { ctx.dispatchEvent(new CustomEvent(type, { detail: { state: arguments[0], title: arguments[1], url: arguments[2] } })); original.apply(this, arguments) };
@@ -2599,5 +2553,5 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         } catch { return null }
       };
     return { oC, mS, sP, eH, lS: tS("localStorage"), sS: tS("sessionStorage") };
-  })(typeof this !== "undefined" ? this : window),
+  })(typeof this !== "undefined" ? this : window)
 );
