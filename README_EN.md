@@ -25,13 +25,15 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data promptly and don't use backup files from unknown sources!
 
-### version 2026.08.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2026.09.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ Fixed data export error issue during data backup.
-@ Fixed an error in the font scaling viewport unit correction function.
-@ Fixed bold style correction element filtering issue on SPA pages.
+@ Fixed filter rules for font scaling viewport unit correction function.
+@ Fixed the execution efficiency issue of the bold style correction function.
+@ Fixed data manager performance and asynchronous timing issues.
+@ Fixed an issue with proxy function errors in Greasemonkey.
 @ Optimized the performance of some functions and reduce the risk of memory leaks.
+@ Optimized the execution efficiency of multilingual functions.
 @ Fixed some known issues, optimize code, and optimize styles.
 ```
 
@@ -129,24 +131,26 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 
 ## Search Engine Assistants [`Google & Baidu Switcher.user.js`](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Google%20%26%20Baidu%20Switcher.user.js)
 
-**Introduction:** "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, You, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG and more.
+**Introduction:** "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG and more.
 
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-### version 2026.08.01.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2026.09.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Fixed the insertion error of Yahoo search jump button.
-@ Fixed the insertion error of 360 search jump button.
-@ Fixed a bug where link redirection was mishandled.
+@ Removed You.com, Added info.com.
+@ Optimized Google search result redirection issues.
+@ Optimized duckduckgo for opening new windows.
+@ Fixed sporadic failure issue of the keyword blocking.
+@ Fixed Google the jump button was not inserted issue.
 @ Fixed some known issues, optimized code & style.
 ```
 
 ### The latest feature introduction
 - Added a new high-efficiency keyword filtering function for search results to eliminate content farms and spam. `New`
 - Added the function of removing search results and sidebar ads to optimize ad blocking efficiency of ad blocking.
-- Added custom search engine selection function (including: Baidu, Google, Bing, Duckduckgo, Sogou, Qwant, Yandex, 360 Search, Toutiao Search, Baidu Developer, Ecosia, Yahoo, You, Startpage, Brave, Yep, Mojeek, SearXNG)
+- Added custom search engine selection function (including: Baidu, Google, Bing, Duckduckgo, Sogou, Qwant, Yandex, 360 Search, Toutiao Search, Baidu Developer, Ecosia, Yahoo, Startpage, Brave, Yep, Mojeek, SearXNG)
 - Added the anti-redirection function of search result links and optimized the masking function of privacy parameters.
 - Smarter update detection feature.
 
