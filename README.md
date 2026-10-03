@@ -25,16 +25,15 @@
 - 脚本错误、异常请反馈至{[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)}, 字体、渲染样式、乱码问题请反馈至{[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)}。
 - 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-### version 2026.09.05.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2026.10.03.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ 修复字体缩放视口单位修正功能的过滤规则。
-@ 修复粗体样式修正功能的执行效率问题。
-@ 修复数据管理器的性能和异步时序问题。
-@ 修复在 Greasemonkey 中代理函数出错的问题。
-@ 优化部分函数的性能，减少内存泄漏风险。
-@ 优化多语言函数的执行效率，无刷新变更语言。
-@ 修正一些已知问题，优化代码，优化样式。
++ 新增对未提供地区码的本地语言标识的识别。
+@ 针对低配置电脑，优化粗体描边样式修正函数的性能。
+@ 优化渲染样式写入时同步防篡改的监听机制。
+@ 修复 MV3 下 UBOL 对原生函数劫持造成的报错问题。
+@ 修复某站点劫持 localStorage 方法造成的语法错误。
+@ 修复一些已知问题，优化代码，优化样式。
 ```
 
 ### **字体渲染** 新版本，使用前请注意以下事项：
@@ -122,27 +121,25 @@
 
 ## 优雅的搜索引擎助手 [`Google & Baidu Switcher.user.js`](https://github.com/F9y4ng/GreasyFork-Scripts/blob/master/Google%20%26%20Baidu%20Switcher.user.js)
 
-简介：“优雅的搜索引擎助手”方便用户在不同的搜索引擎之间跳转；支持自定义常用搜索引擎、关键词高亮渲染；还提供去除搜索链接重定向、屏蔽搜索结果广告、使用关键词过滤搜索结果、和自动更新检测等高级功能；兼容如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、Startpage、Brave、Yahoo、Yep、Mojeek、searXNG等多个搜索引擎。
+简介：“优雅的搜索引擎助手”方便用户在不同的搜索引擎之间跳转；支持自定义常用搜索引擎、关键词高亮渲染；还提供去除搜索链接重定向、屏蔽搜索结果广告、使用关键词过滤搜索结果、和自动更新检测等高级功能；兼容如Baidu、Google、Bing、Duckduckgo、Yandex、Sogou、Qwant、Ecosia、Startpage、Brave、Yahoo、Kagi、Yep、Mojeek、searXNG等多个搜索引擎。
 
 - [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 - 自动更新检测默认开启，如无更新提示需求，可在“**搜索引擎助手高级设置**”中关闭它。
 
-### version 2026.09.05.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2026.10.03.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ 移除 You.com 搜索，新增 info.com 搜索。
-@ 优化 Google 搜索结果连接重定向的问题。
-@ 优化 duckduckgo 默认打开新窗口的设置。
-@ 修复关键词屏蔽功能偶发失效的问题。
-@ 修复 Google 跳转按钮未插入的问题。
-@ 修正一些已知问题，优化代码，优化样式。
++ 新增 Kagi.com 搜索引擎。
+@ 修复 Sogou 搜索的各栏目跳转按钮样式问题。
+@ 修复 searxng 搜索的跳转按钮未插入问题。
+@ 修复一些已知问题，优化代码，优化样式。
 ```
 
 ### 最新功能介绍
 
 - 新增搜索结果关键词高效过滤功能，杜绝内容农场与垃圾信息。`New!`
 - 新增去除搜索结果及侧栏广告功能，优化广告屏蔽效率。
-- 新增自定义搜索引擎选取功能（包含：百度、Google、Bing、Duckduckgo、搜狗、Qwant、Yandex、360 搜索、头条搜索、百度开发者、Ecosia、Yahoo、Startpage、Brave、Yep、Mojeek、searXNG 搜索等常见的搜索引擎）
+- 新增自定义搜索引擎选取功能（包含：百度、Google、Bing、Duckduckgo、搜狗、Qwant、Yandex、360 搜索、头条搜索、百度开发者、Ecosia、Yahoo、Startpage、Brave、Kagi、Yep、Mojeek、searXNG 搜索等常见的搜索引擎）
 - 新增搜索结果链接去重定向功能，优化隐私参数屏蔽功能。
 - 更智能的更新检测功能。
 
