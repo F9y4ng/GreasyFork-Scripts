@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            Помощник поисковой системы
 // @name:ja            優雅な検索エンジン助手
-// @version            2026.09.05.1
+// @version            2026.10.03.1
 // @author             F9y4ng
 // @description        Alias "Search Engine Assistant", le script aide à la navigation entre les moteurs de recherche, à la personnalisation des préférences, à la mise en évidence des mots-clés, à l'élimination des redirections et des publicités et au filtrage des résultats. Compatible avec Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG et bien d'autres moteurs de recherche célèbres.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG and more.
@@ -43,6 +43,7 @@
 // @match              *://yep.com/*
 // @match              *://www.mojeek.com/search*
 // @match              *://au.priv.au/search*
+// @match              *://kagi.com/*?*
 // @match              *://*.google.ad/search?*
 // @match              *://*.google.ae/search?*
 // @match              *://*.google.al/search?*
@@ -254,11 +255,9 @@
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
 // @grant              unsafeWindow
-// @note               {"CN":"移除 You.com 搜索，新增 info.com 搜索。","EN":"Removed You.com, Added info.com."}
-// @note               {"CN":"优化 Google 搜索结果连接重定向的问题。","EN":"Optimized Google search result redirection issues."}
-// @note               {"CN":"优化 duckduckgo 默认打开新窗口的设置。","EN":"Optimized duckduckgo for opening new windows."}
-// @note               {"CN":"修复关键词屏蔽功能偶发失效的问题。","EN":"Fixed sporadic failure issue of the keyword blocking."}
-// @note               {"CN":"修复 Google 跳转按钮未插入的问题。","EN":"Fixed Google the jump button was not inserted issue."}
+// @note               {"CN":"新增 Kagi.com 搜索引擎。","EN":"Added Kagi.com search engine."}
+// @note               {"CN":"修复 Sogou 搜索的各栏目跳转按钮样式问题。","EN":"Fixed Sogou search column jump button style issues."}
+// @note               {"CN":"修复 searxng 搜索的跳转按钮未插入问题。","EN":"Fixed searxng search jump button insertion issues."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         Edge version≥88 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Chrome version≥88 (Compatible Tampermonkey, Violentmonkey)
@@ -1150,7 +1149,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           if (!CUR_WINDOW_TOP) { return } let iconDataURL = null; try {
             const iconBase64Data = await cache.get(REMOTEICONS);
             if (!iconBase64Data || setDebuggerMode()) {
-              iconDataURL = DEBUG("%cRequest and initialize remote icon data.", "color:#25f") ?? (await requestRemoteIcon(remoteURL));
+              DEBUG("%cRequest and initialize remote icon data.", "color:#25f"); iconDataURL = await requestRemoteIcon(remoteURL);
               if (!iconDataURL) { DEBUG("%cRemote icon data initialized failed.", "color:#ff0000"); return }
               cache.set(REMOTEICONS, iconDataURL, 2592e6); GMsetValue(VERSION, encrypt(def.var.curVersion)); DEBUG("%cRemote icon data initialized successed.", "color:#006400");
             } else { DEBUG("%cApplied local icon caching data.", "color:#006400"); iconDataURL = iconBase64Data }
@@ -1281,7 +1280,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["pics", "d", "v"],
               splitTypeName: { split: "/", index: 1 },
               mainSelector: `input#searchBtn,input[type='button'][uigs='search_article'],input[type='submit']:is(.search-btn,.sbtn1)`,
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:var(--position,absolute);top:0;right:var(--right,unset);z-index:99999;display:inline-flex;margin:0;padding:0;width:auto;height:38px;cursor:pointer;-webkit-appearance:none;opacity:var(--opacity,0);justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:38px}input{margin:0;padding:0 18px 1px 18px;height:38px;min-width:100px;border:1px solid #222;border-radius:12px;background:#f5f5f5;color:#000;font-weight:500;font-size:15px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}input:hover{background:#e9f2ff;color:#205aef}.${def.notice.random}_images{margin-top:1px;height:34px!important;border:1px solid #ababab!important;border-radius:3px!important;background:##fafafa!important}.${def.notice.random}_weixin{margin-top:2px;height:34px!important;border:1px solid #00a06a!important;border-radius:2px!important;background:#fff!important;color:#00a06a!important;font-size:15px!important}.${def.notice.random}_weixin:hover{background:#f7fffd!important}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:var(--position,absolute);top:0;right:var(--right,unset);z-index:99999;display:inline-flex;margin:0;padding:0;width:auto;height:34px;cursor:pointer;-webkit-appearance:none;opacity:var(--opacity,0);justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:34px}input{margin:0;padding:0 18px 1px 18px;height:38px;min-width:100px;border:1px solid #222;border-radius:12px;background:#f5f5f5;color:#000;font-weight:500;font-size:15px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}input:hover{background:#e9f2ff;color:#205aef}.${def.notice.random}_images{margin-top:-1px;height:34px!important;border:1px solid #ababab!important;border-radius:3px!important;background:##fafafa!important}.${def.notice.random}_weixin{margin-top:0;height:34px!important;border:1px solid #00a06a!important;border-radius:2px!important;background:#fff!important;color:#00a06a!important;font-size:15px!important}.${def.notice.random}_weixin:hover{background:#f7fffd!important}`,
               resultListProp: { qs: `div.results div.vrwrap,div.results div.rb`, delay: 10 },
               keywords: "#wrapper em",
               antiRedirectFn: () =>
@@ -1431,15 +1430,15 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
             },
             info: {
               siteTypeID: 13,
-              siteButtonName: "𝐢𝐧𝐟𝐨.𝐜𝐨𝐦",
-              siteNickName: IS_CHN ? "𝐢𝐧𝐟𝐨 搜索" : "𝐢𝐧𝐟𝐨.𝐜𝐨𝐦",
+              siteButtonName: "𝐈𝐧𝐟𝐨 ®",
+              siteNickName: IS_CHN ? "𝐈𝐧𝐟𝐨 搜索" : "𝐈𝐧𝐟𝐨.𝐜𝐨𝐦",
               siteHostName: "www.info.com",
               webURL: `https://www.info.com/serp?q=`,
               imageURL: `https://www.info.com/serp?qc=images&q=`,
               imageType: ["images"],
               splitTypeName: "qc",
               mainSelector: "form#search button.search-form__button",
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:2px 0 0 5px;padding:0;height:40px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:40px}input{margin:0;height:40px;min-width:90px;border:0 solid transparent;background:#f9f9f9;box-shadow:0 0 2px #a4a5bb;color:#136ad5;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 16px 1px 20px;border-radius:30px 0 0 30px}#${def.const.rightButton} input{padding:0 20px 1px 16px;border-radius: 0 30px 30px 0}input:hover{background:#fff;color:#111}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:2px 0 0 5px;padding:0;height:40px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:40px}input{margin:1px 0;height:38px;min-width:90px;border:0 solid transparent;background:#f9f9f9;box-shadow:0 0 2px #a4a5bb;color:#136ad5;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 16px 1px 20px;border-radius:30px 0 0 30px}#${def.const.rightButton} input{padding:0 20px 1px 16px;border-radius: 0 30px 30px 0}input:hover{background:#fff;color:#111}`,
               resultListProp: { qs: `.web-google>div.web-google__result`, delay: 1e2 },
               keywords: ``,
               antiRedirectFn: null,
@@ -1527,10 +1526,27 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               imageType: ["images"],
               splitTypeName: "categories",
               mainSelector: "#search_view>div.search_box",
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:-10px;width:0;z-index:99999;display:block;height:auto}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 -1px 0 0}input{margin:0;min-width:90px;border:1px solid var(--color-search-border);outline:none;background:var(--color-search-background);box-shadow: var(--color-search-shadow);color:var(--color-search-font);font-weight:500;font-size:1.2rem;line-height:122%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:.8rem 15px .86rem 20px;border-radius:.8rem 0 0 .8rem}#${def.const.rightButton} input{padding:.8rem 20px .86rem 15px;border-radius:0 .8rem .8rem 0}input:hover{background-color:var(--color-search-background-hover);color:var(--color-search-background)}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;top:0;right:-10px;width:0;z-index:99999;display:block;height:auto}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 -2px 0 0}input{margin:0;min-width:90px;border:1px solid var(--color-search-border);outline:none;background:var(--color-search-background);box-shadow:var(--color-search-shadow);color:var(--color-search-font);font-weight:500;font-size:1.2rem;line-height:122%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:.8rem 15px .86rem 20px;border-radius:.8rem 0 0 .8rem}#${def.const.rightButton} input{padding:.8rem 20px .86rem 15px;border-radius:0 .8rem .8rem 0}input:hover{background-color:var(--color-search-background-hover);color:var(--color-search-background)}`,
               resultListProp: { qs: `div#urls article.result`, delay: 10 },
               keywords: ".highlight",
               antiRedirectFn: null,
+              antiAdsFn: null
+            },
+            kagi: {
+              siteTypeID: 19,
+              siteButtonName: "𝐊𝐚𝐠𝐢 ®",
+              siteNickName: IS_CHN ? "𝐊𝐚𝐠𝐢 搜索" : "𝐊𝐚𝐠𝐢.𝐜𝐨𝐦",
+              siteHostName: "kagi.com",
+              webURL: "https://kagi.com/search?q=",
+              imageURL: "https://kagi.com/images?q=",
+              imageType: ["images"],
+              splitTypeName: { split: "/", index: 1 },
+              mainSelector: "#searchForm",
+              overrideCss: `#searchFormSubmit:hover{background-color:var(--primary-hover);color:var(--btn-primary-color)!important;border-radius:20px 40px 40px 20px!important}`,
+              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right, unset);width:auto;z-index:99999;display:block;height:56px}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0}input{margin:0;min-width:120px;height:54px;border: 1px solid var(--color-search-input-border);outline:none;background-color:var(--color-search-input);box-shadow:1px 8px 30px 0 var(--box-shadow);color:inherit;font-weight:500;font-size:18px;line-height:1.5rem;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:10px 15px 10px 20px;border-radius:30px 0 0 30px;margin-right:-3px}#${def.const.rightButton} input{padding:10px 20px 10px 15px;border-radius:0 30px 30px 0}input:hover{background-color:var(--primary-hover);color:var(--btn-primary-color)}`,
+              resultListProp: { qs: `._0_main-search-results div._ext_ub_r`, delay: 10 },
+              keywords: "",
+              antiRedirectFn: () => deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "kagi_ar" })("Kagi", "._0_main-search-results div._ext_ub_r a[data-domain][title]", { useNewTab: true }),
               antiAdsFn: null
             },
             other: { siteTypeID: 0 }
@@ -1542,7 +1558,8 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               YANDEX: listSite.yandex.siteTypeID, SO360: listSite.so360.siteTypeID, TOUTIAO: listSite.toutiao.siteTypeID,
               KAIFA: listSite.kaifa.siteTypeID, ECOSIA: listSite.ecosia.siteTypeID, YAHOO: listSite.yahoo.siteTypeID,
               INFO: listSite.info.siteTypeID, STARTPAGE: listSite.startpage.siteTypeID, BRAVE: listSite.brave.siteTypeID,
-              YEP: listSite.yep.siteTypeID, MOJEEK: listSite.mojeek.siteTypeID, SEARXNG: listSite.searxng.siteTypeID, OTHERS: listSite.other.siteTypeID
+              YEP: listSite.yep.siteTypeID, MOJEEK: listSite.mojeek.siteTypeID, SEARXNG: listSite.searxng.siteTypeID,
+              KAGI: listSite.kagi.siteTypeID, OTHERS: listSite.other.siteTypeID
             },
 
             engineMap = {
@@ -1563,7 +1580,8 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               "search\\.brave\\.com$": { siteType: newSiteType.BRAVE, site: listSite.brave },
               "yep\\.com$": { siteType: newSiteType.YEP, site: listSite.yep },
               "www\\.mojeek\\.com$": { siteType: newSiteType.MOJEEK, site: listSite.mojeek },
-              "priv\\.au$": { siteType: newSiteType.SEARXNG, site: listSite.searxng }
+              "priv\\.au$": { siteType: newSiteType.SEARXNG, site: listSite.searxng },
+              "kagi\\.com$": { siteType: newSiteType.KAGI, site: listSite.kagi }
             },
 
             searchProperties = {
@@ -2273,6 +2291,13 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                     );
                 },
                 applyButton: ({ buttonSection, target }) => target.appendChild(buttonSection)
+              },
+              kagi: {
+                listTypes: { target: "._0_main-search-results", listName: "div", className: "_0_SRI" },
+                applyButton: async ({ buttonSection, target }) => {
+                  target.appendChild(buttonSection); await sleep(0, { instance: true }); const width = buttonSection.clientWidth || 2e2;
+                  buttonSection.style.setProperty("--right", `-${10 + width}px`);
+                }
               }
             };
 
@@ -2451,7 +2476,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
             function requestIconsForScriptUpdate(requestVersion) {
               if (decrypt(requestVersion) === def.var.curVersion) { return } DEBUG("%cRequest Remote icon data for script update.", "color:#25f");
-              GMsetValue(VERSION, encrypt(def.var.curVersion)); updateToRequestIcon();
+              updateToRequestIcon(); GMsetValue(VERSION, encrypt(def.var.curVersion));
             }
 
             /* SEARCH_ENGINE_ASSISTANT_MAIN_PROCESS */
