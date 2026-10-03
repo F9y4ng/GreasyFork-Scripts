@@ -5,7 +5,7 @@
 // @name:en            Font Rendering (Customized)
 // @name:ja            フォントレンダリング (カスタム)
 // @name:ko            폰트 렌더링 (개인용 스크립트)
-// @version            2026.09.05.1
+// @version            2026.10.03.1
 // @author             F9y4ng
 // @description        无需 MacType，享受细腻高质感的网页阅读体验。脚本默认采用“微软雅黑”，支持自定义替换。面向进阶排版需求，集成字体重写、抗锯齿平滑、动态缩放、描边阴影、特殊样式过滤（白名单）及自定义等宽字体等高级功能。完美支持“全局渲染”与“站点个性化”双模式，点击图标或快捷键即可唤出配置面板。全面兼容主流浏览器、脚本管理器及常用扩展。
 // @description:zh-CN  无需 MacType，享受细腻高质感的网页阅读体验。脚本默认采用“微软雅黑”，支持自定义替换。面向进阶排版需求，集成字体重写、抗锯齿平滑、动态缩放、描边阴影、特殊样式过滤（白名单）及自定义等宽字体等高级功能。完美支持“全局渲染”与“站点个性化”双模式，点击图标或快捷键即可唤出配置面板。全面兼容主流浏览器、脚本管理器及常用扩展。
@@ -48,6 +48,8 @@
 // @copyright          2020-2026, F9y4ng
 // @run-at             document-start
 // ==/UserScript==
+
+/* jshint esversion: 11 */
 
 void (function (ctx, uctx, sctx) {
   "use strict";
@@ -93,47 +95,49 @@ void (function (ctx, uctx, sctx) {
     const { host: h, href: hR, hostname: hN, pathname: pN, protocol: pT } = ctx.location, iT = ctx.self === ctx.top, iF = iT ? "" : "[IFRAME]"; let tH = h;
     if (!iT) { try { tH = ctx.top.location.host } catch { const ref = document.referrer; if (ref) { tH = new URL(ref).host } } } return { h, hR, hN, pN, pT, tH, iT, iF };
   }
+  function createStorageProxy(storageInstance) {
+    return new Proxy(storageInstance, {
+      get(target, prop, receiver) { if (typeof prop === "symbol" || prop in target) { const value = Reflect.get(target, prop, receiver); return typeof value === "function" ? value.bind(target) : value } return target.getItem(prop) },
+      set(target, prop, value) { if (prop in target) { return Reflect.set(target, prop, value) } target.setItem(prop, String(value)); return true },
+      deleteProperty(target, prop) { target.removeItem(prop); return true }
+    });
+  }
 
   class LRUCache {
-    constructor(capacity = 100) { this.capacity = capacity > 0 ? capacity : 100; this.cache = new Map() }
+    constructor(capacity = 100) { this.capacity = Number.isInteger(capacity) && capacity > 0 ? capacity : 100; this.cache = new Map() } get size() { return this.cache.size }
     get(key) { if (!this.cache.has(key)) { return void 0 } const value = this.cache.get(key); this.cache.delete(key); this.cache.set(key, value); return value }
-    set(key, value) {
-      if (this.cache.has(key)) { this.cache.delete(key) } else if (this.cache.size >= this.capacity) { const oldKey = this.cache.keys().next().value; this.cache.delete(oldKey) }
-      this.cache.set(key, value); return this;
-    }
-    has(key) { return this.cache.has(key) }
-    clear() { this.cache.clear() }
+    set(key, value) { if (this.cache.has(key)) { this.cache.delete(key) } else if (this.cache.size >= this.capacity) { this.cache.delete(this.cache.keys().next().value) } this.cache.set(key, value); return this.cache }
+    delete(key) { return this.cache.delete(key) } has(key) { return this.cache.has(key) } clear() { this.cache.clear() }
+  }
+
+  class MemoryStorage {
+    constructor(capacity = 1e3) { this._storage = new LRUCache(capacity) } get length() { return this._storage.size } get [Symbol.toStringTag]() { return "Storage" }
+    getItem(key) { const val = this._storage.get(toString(key)); return val === void 0 ? null : val } setItem(key, value) { this._storage.set(toString(key), toString(value)) }
+    removeItem(key) { this._storage.delete(toString(key)) } clear() { this._storage.clear() }
   }
 
   class SecureStorage {
-    constructor() { this.session = this._initStorage("sessionStorage"); this.local = this._initStorage("localStorage") }
-    get getSessionStorage() { return this.session } get getLocalStorage() { return this.local }
-    static createFallback() {
-      const store = new LRUCache(1e3), getItem = key => { return store.has(key) ? store.get(key) : null }, setItem = (key, value) => { store.set(key, String(value)) },
-        removeItem = key => { store.delete(key) }, clear = () => { store.clear() }; return { store, getItem, setItem, removeItem, clear };
-    }
-    _initStorage(type) {
-      const storage = ctx[type]; if (!storage) { return this.constructor.createFallback() }
-      try { const test = "__storage_test__"; storage.setItem(test, test); storage.removeItem(test); return storage } catch { return this.constructor.createFallback() }
-    }
+    constructor() { this.sessionStorage = this._initStorage("sessionStorage"); this.localStorage = this._initStorage("localStorage") }
+    static createFallback(capacity = 1e3) { const memoryStorage = new MemoryStorage(capacity); return createStorageProxy(memoryStorage) }
+    _initStorage(type) { try { const storage = ctx[type], test = "___test__"; storage.setItem(test, test); storage.removeItem(test); return storage } catch { return this.constructor.createFallback() } }
   }
 
   void (function BuiltInSandbox($, $$) {
     const { atob, btoa, console_log, console_warn, console_error, setTimeout, clearTimeout, structuredClone, queueMicrotask, requestAnimationFrame: rAF, cancelAnimationFrame: cAF, requestIdleCallback, JSON_parse, JSON_stringify, Reflect_get, Reflect_set, Reflect_defineProperty, Element_attachShadow: attachShadow, Element_hasAttribute: hasAttribute, Element_getAttribute: getAttribute, Element_setAttribute: setAttribute, Element_removeAttribute: removeAttribute, Reflect_getOwnPropertyDescriptor: Reflect_getOwnDesc, Object_create, Object_keys, Object_entries, Object_is, Object_assign, Object_toString, Object_freeze, Array_isArray, Array_from, Array_push, Array_some, Array_filter, Array_forEach, Array_splice, Array_sort, Array_includes, Array_join, Array_map, Array_find, Array_unshift, Array_findIndex, Array_flatMap, Function_call, Function_apply, String_fromCharCode, Event_preventDefault: preventDefault, Event_stopPropagation: stopPropagation, Event_stopImmediatePropagation: stopImmediatePropagation, Event_composedPath, EventTarget_addEventListener: addListener, EventTarget_removeEventListener: removeListener, EventTarget_dispatchEvent: dispatchEvent } = $$,
-      { h: CUR_HOST, hR: CUR_HREF, hN: CUR_HOST_NAME, tH: TOP_HOST, iT: CUR_WINDOW_TOP, iF: IN_FRAME } = getLocationInfo(), secureStorage = new SecureStorage(),
-      { getSessionStorage: sessionStorage, getLocalStorage: localStorage } = secureStorage, CURRENT_LANGUAGE = "__Language#CURRENT_", PLACEHOLDER_REGEX = /\{([^}]+)\}/g;
+      { h: CUR_HOST, hR: CUR_HREF, hN: CUR_HOST_NAME, tH: TOP_HOST, iT: CUR_WINDOW_TOP, iF: IN_FRAME } = getLocationInfo(), { sessionStorage, localStorage } = new SecureStorage(),
+      CURRENT_LANGUAGE = "__Language#CURRENT_", abbrLangMap = { zh: "zh-CN", en: "en-US" }, PLACEHOLDER_REGEX = /\{([^}]+)\}/g;
 
     /* ---PERFECTLY COMPATIBLE FOR GREASEMONKEY, TAMPERMONKEY, VIOLENTMONKEY, USERSCRIPTS (F9Y4NG)--- */
 
     class I18n {
       constructor(translations, defaultLang, fallbackLang) {
-        this.translations = translations || {}; this.fallbackLang = fallbackLang; const storedLang = sessionStorage.getItem(CURRENT_LANGUAGE);
-        this.currentLang = this.translations[storedLang] ? storedLang : (this.translations[defaultLang] ? defaultLang : fallbackLang);
+        this.translations = translations || {}; const storedLang = sessionStorage.getItem(CURRENT_LANGUAGE);
+        this.currentLang = this.translations[storedLang] ? storedLang : (abbrLangMap[storedLang] || (this.translations[defaultLang] ? defaultLang : (abbrLangMap[defaultLang] || fallbackLang)));
       }
       setLanguage(lang) { if (this.translations[lang]) { this.currentLang = lang; sessionStorage.setItem(CURRENT_LANGUAGE, lang); return true } return false }
       t(key, params) {
-        const dict = this.translations[this.currentLang] || this.translations[this.fallbackLang] || {}, temp = dict[key] || key;
-        if (!params || typeof temp !== "string" || temp.indexOf("{") === -1) { return temp } return temp.replace(PLACEHOLDER_REGEX, (m, p1) => { return p1 in params ? params[p1] : m });
+        const dict = this.translations[this.currentLang] || {}, temp = dict[key] || key; if (!params || typeof temp !== "string" || temp.indexOf("{") === -1) { return temp }
+        return temp.replace(PLACEHOLDER_REGEX, (m, p1) => { return p1 in params ? params[p1] : m });
       }
     }
     const cE = (tagName, opts = {}) => {
@@ -403,9 +407,8 @@ void (function (ctx, uctx, sctx) {
                         }
                       } return typeof value === "function" ? value.bind(target) : value;
                     }, set(target, prop, value, receiver) {
-                      const result = Reflect_set(target, prop, value, receiver); if (!self.__hasChanges && prop !== "length") {
-                        self.__hasChanges = true; self._enforceAdopted(mountPoint, _nativeDesc); self.__hasChanges = false;
-                      } return result;
+                      if (prop === "length") { return value } const result = Reflect_set(target, prop, value, receiver);
+                      if (!self.__hasChanges && prop !== "length") { self.__hasChanges = true; self._enforceAdopted(mountPoint, _nativeDesc); self.__hasChanges = false } return result;
                     }
                   }, proxyArr = new Proxy(nativeArr, proxyHandler); self.proxyCache.set(this, { target: nativeArr, proxy: proxyArr }); return proxyArr;
                 }, set(newSheets) {
@@ -972,26 +975,25 @@ void (function (ctx, uctx, sctx) {
       }
 
       const UltimateBoldProcessor = (function () {
-        const conflictHandler = { flag: Boolean(localStorage.getItem(CONFLICT_NAME)), counter: new LRUCache(50) }, HANDLEINTERVAL = 100, BLANK_REGEXP = /\S/,
-          WGHT_REGEXP = /"wght"\s+(\d+)/, TRIMLEFT = /^\s*(\S.{0,18})/, THREADSHOLD = Math.min(Math.min(navigator.hardwareConcurrency || 4, 16) * 15, 200),
+        const conflictHandler = { flag: Boolean(localStorage.getItem(CONFLICT_NAME)), counter: new LRUCache(50) }, HANDLEINTERVAL = 100, BLANK_REGEXP = /\S/, WGHT_REGEXP = /"wght"\s+(\d+)/,
+          TRIMLEFT = /^\s*(\S.{0,18})/, THREADSHOLD = Math.min(Math.min(navigator.hardwareConcurrency || 4, 16) * 15, 200), FORM_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT", "BUTTON"]),
           hasDirectTextChild = el => { let n = el.firstChild; while (n) { if (n.nodeType === 3 && BLANK_REGEXP.test(n.nodeValue)) { return true } n = n.nextSibling } return false },
           safeTrim = v => { const l = v.length; if (l < 200) { const t = v.trim(); return l < 20 ? t : t.slice(0, 19) } const m = TRIMLEFT.exec(v); return m ? m[1].trimEnd() : "" },
-          isFormsElement = el => /^(INPUT|TEXTAREA|SELECT|BUTTON)$/i.test(el.tagName), isElementBold = el => {
-            const inlineWeight = el.style?.fontWeight; let isBold = inlineWeight === "bold" || inlineWeight === "bolder" || parseInt(inlineWeight, 10) >= 600;
-            if (isBold) { return true } const win = el.ownerDocument?.defaultView || $, style = win.getComputedStyle(el), { fontWeight, fontVariationSetting: fvs } = style;
-            isBold = fontWeight === "bold" || fontWeight === "bolder" || parseInt(fontWeight, 10) >= 600; if (isBold || !fvs || fvs === "normal") { return isBold }
-            const match = fvs.match(WGHT_REGEXP); if (match && (parseInt(match[1], 10)) >= 600) { return true } return false;
+          isElementBold = el => {
+            const style = el.style; if (style) { const inlineWeight = style.fontWeight; if (inlineWeight && (inlineWeight === "bold" || inlineWeight === "bolder" || +inlineWeight >= 600)) { return true } }
+            const win = el.ownerDocument ? (el.ownerDocument.defaultView || $) : $, computed = win.getComputedStyle(el), fontWeight = computed.fontWeight;
+            if (fontWeight === "bold" || fontWeight === "bolder" || +fontWeight >= 600) { return true } const fvs = computed.fontVariationSettings; if (!fvs || fvs === "normal") { return false }
+            if (fvs.includes('"wght"')) { WGHT_REGEXP.lastIndex = 0; const match = WGHT_REGEXP.exec(fvs); if (match && +match[1] >= 600) { return true } } return false;
           }, createSmartNodeHash = ({ maxHits }) => {
             const counter = conflictHandler.counter, getPathTrace = (node, depth, child) => {
               const m = node.nodeName, v = node.nodeValue, l = v?.length ?? node.childElementCount ?? 0, n = v ? safeTrim(v) || "∅" : ""; let i = 0, t = `${m}(${l})[${n}]`;
-              if (depth > 0) { while (child && i < 3) { t += `> ${getPathTrace(child, depth - 1, child.nextSibling)} `; i++ } } return t;
+              if (depth > 0) { while (child && i < 3) { t += `> ${getPathTrace(child, depth - 1, child.firstChild)} `; child = child.nextSibling; i++ } } return t;
             }, handleConflict = observer => {
               if (conflictHandler.flag) {
                 if (observer) { observer.isLocallyBlown = true } conflictHandler.counter.clear(); sessionStorage.setItem(CONFLICT_NAME, 12388);
                 throw new Error("UltimateBold suspended due to a callback conflict found for mutation of childList.");
               } localStorage.setItem(CONFLICT_NAME, 12339); conflictHandler.flag = true;
-            };
-            return function (node, currentTime, localObserver) {
+            }; return function (node, currentTime, localObserver) {
               let cacheEntry, combined = `l::[${node.id || node.className?.baseVal || node.className?.trim() || "∅"}]≯${getPathTrace(node, 2, node.firstChild)}`;
               if (counter.has(combined)) { cacheEntry = counter.get(combined) } else { cacheEntry = { count: 0, hits: 0, lastTime: currentTime }; counter.set(combined, cacheEntry) }
               if (cacheEntry.hits >= maxHits) {
@@ -1059,15 +1061,15 @@ void (function (ctx, uctx, sctx) {
                 for (let i = 0, l = mutations.length; i < l; ++i) {
                   const m = mutations[i]; if (m.type === "childList") {
                     const added = m.addedNodes; for (let j = 0, len = added.length; j < len; ++j) {
-                      const node = added[j]; if (node.nodeType === 1) { if (node.tagName === "STYLE" || node.tagName === "LINK") { requiresGlobalScan = true } else { affectedRoots.add(node) } } else
+                      const node = added[j]; if (node.nodeType === 1) { const tag = node.tagName; if (tag === "STYLE" || tag === "LINK") { requiresGlobalScan = true } else { affectedRoots.add(node) } } else
                         if (node.nodeType === 3 && node.parentNode) { affectedRoots.add(node.parentNode) }
                     } const removed = m.removedNodes; for (let j = 0, len = removed.length; j < len; ++j) {
                       const node = removed[j], isMatchedNode = node.nodeType === 1 && (node.matches(this.boldFixQuery) || qS(this.boldFixQuery, node));
                       if (isMatchedNode) { this.checkConflict(node, $.event, performance.now(), _observer) }
                     }
                   } else if (m.type === "attributes") {
-                    if (m.attributeName === BOLD_FIXER_ATTR) { continue }
-                    if (m.attributeName === "class" && m.target.classList?.contains(BOLD_FIXER_ATTR)) { continue } affectedAttributes.add(m.target);
+                    const attrName = m.attributeName; if (attrName === BOLD_FIXER_ATTR) { continue }
+                    if (attrName === "class" && m.target.classList?.contains(BOLD_FIXER_ATTR)) { continue } affectedAttributes.add(m.target);
                   }
                 }
               } catch (e) { if (e.message.includes("callback conflict")) { _observer.isLocallyBlown = true; _observer.disconnect(); error(e.message); return } }
@@ -1081,35 +1083,40 @@ void (function (ctx, uctx, sctx) {
             this.checkNodeHashForConflict(node, currentTime, localObserver);
           }
           static optimizeRoots(nodes) {
-            const uniqueRoots = new Set(nodes); for (const node of uniqueRoots) {
+            if (nodes.size <= 1) { return nodes } const uniqueRoots = new Set(nodes); for (const node of uniqueRoots) {
               let parent = node.parentElement; while (parent) { if (uniqueRoots.has(parent)) { uniqueRoots.delete(node); break } parent = parent.parentElement }
             } return uniqueRoots;
           }
           processBatch(rootNodesIterable, isReEval = false) {
-            const readQueue = new Set(); for (const root of rootNodesIterable) {
+            const readQueue = new Set(), ignored = this.ignoredTags; for (const root of rootNodesIterable) {
               if (!root || (root.nodeType !== 1 && root.nodeType !== 11) || !root.isConnected) { continue }
-              const walker = document.createTreeWalker(root, 1, { acceptNode: node => (this.ignoredTags.has(node.tagName) ? 2 : 1) });
+              const walker = document.createTreeWalker(root, 1, { acceptNode: node => (ignored.has(node.tagName) ? 2 : 1) });
               let currentNode = walker.currentNode; while (currentNode) {
-                if (currentNode.shadowRoot && !this.observedRoots.has(currentNode.shadowRoot)) {
-                  this.observedRoots.add(currentNode.shadowRoot); const shadowRef = new $.WeakRef(currentNode.shadowRoot);
-                  this.knownShadows.add(shadowRef); this.shadowCleanupRegistry.register(currentNode.shadowRoot, shadowRef);
-                  this.observe(currentNode.shadowRoot); this.injectShadowRootStyle(currentNode.shadowRoot); this.processBatch([currentNode.shadowRoot], isReEval);
-                } if (isFormsElement(currentNode) || hasDirectTextChild(currentNode)) { readQueue.add(currentNode) } currentNode = walker.nextNode();
+                const shadow = currentNode.shadowRoot; if (shadow && !this.observedRoots.has(shadow)) {
+                  this.observedRoots.add(shadow); const shadowRef = new $.WeakRef(shadow); this.knownShadows.add(shadowRef);
+                  this.shadowCleanupRegistry.register(shadow, shadowRef); this.observe(shadow); this.injectShadowRootStyle(shadow); this.processBatch([shadow], isReEval);
+                } if (FORM_TAGS.has(currentNode.tagName) || hasDirectTextChild(currentNode)) { readQueue.add(currentNode) } currentNode = walker.nextNode();
               }
             } this.evaluateNodesExact(readQueue, isReEval);
           }
           evaluateNodesExact(nodesIterable, isReEval) {
-            const previousOverride = this.isProcessOverride; if (!this.enableBoldFix && !this.isProcessOverride) { return }
-            const writeQueue = new Set(), removeQueue = [], strategy = createMarkStrategy(BOLD_FIXER_ATTR, this.lazyload); for (const el of nodesIterable) {
-              if (el && el.nodeType === 1 && el.isConnected) { if (isElementBold(el)) { writeQueue.add(el) } else { Array_push(removeQueue, el) } }
-            } for (let i = 0, l = removeQueue.length; i < l; ++i) { const el = removeQueue[i]; if (strategy.has(el)) { strategy.remove(el) } }
-            for (const el of writeQueue) { if (!strategy.has(el)) { strategy.add(el); const root = el.getRootNode(); if (root) { this.injectBoldFixStyle(root) } } }
-            if (!isReEval && nodesIterable.size > 0) {
-              for (const el of nodesIterable) { this.reEvalNodesQueue.add(el) } clearTimeout(this.reEvalTimer); this.reEvalTimer = setTimeout(() => {
-                const nodesToReEval = new Set(this.reEvalNodesQueue); this.reEvalNodesQueue.clear(); if (nodesToReEval.size === 0) { return }
-                const localPrevOverride = this.isProcessOverride; this.isProcessOverride = true; try { this.processBatch(nodesToReEval, true) } finally { this.isProcessOverride = localPrevOverride }
-              }, 50);
-            } this.isProcessOverride = previousOverride;
+            const previousOverride = this.isProcessOverride; if (!this.enableBoldFix && !this.isProcessOverride) { return } if (!nodesIterable || (nodesIterable.size === 0 && !nodesIterable.length)) { return }
+            const nodes = Array_isArray(nodesIterable) ? nodesIterable : Array_from(nodesIterable), total = nodes.length; if (total === 0) { return }
+            const strategy = createMarkStrategy(BOLD_FIXER_ATTR, this.lazyload), CHUNK_SIZE = 150; let index = 0; const processChunk = () => {
+              const end = Math.min(index + CHUNK_SIZE, total), writeQueue = [], removeQueue = [], rootsToInject = new Set(); for (; index < end; index++) {
+                const el = nodes[index]; if (!el || el.nodeType !== 1 || !el.isConnected) { continue } const bold = isElementBold(el), marked = strategy.has(el);
+                if (bold) { if (!marked) writeQueue.push(el); } else { if (marked) { removeQueue.push(el) } }
+              } for (let i = 0, l = removeQueue.length; i < l; ++i) { strategy.remove(removeQueue[i]) } for (let i = 0, l = writeQueue.length; i < l; ++i) {
+                const el = writeQueue[i]; strategy.add(el); const root = el.getRootNode(); if (root) { rootsToInject.add(root) }
+              } for (const root of rootsToInject) { this.injectBoldFixStyle(root) } if (index < total) {
+                if (typeof requestAnimationFrame === "function") { requestAnimationFrame(processChunk) } else { setTimeout(processChunk, 0) }
+              } else if (!isReEval) {
+                for (let i = 0; i < total; ++i) { this.reEvalNodesQueue.add(nodes[i]) } clearTimeout(this.reEvalTimer); this.reEvalTimer = setTimeout(() => {
+                  const nodesToReEval = new Set(this.reEvalNodesQueue); this.reEvalNodesQueue.clear(); if (nodesToReEval.size === 0) { return }
+                  const localPrevOverride = this.isProcessOverride; this.isProcessOverride = true; try { this.processBatch(nodesToReEval, true) } finally { this.isProcessOverride = localPrevOverride }
+                }, 50);
+              }
+            }; processChunk(); this.isProcessOverride = previousOverride;
           }
         };
       })();
@@ -2212,10 +2219,11 @@ void (function (ctx, uctx, sctx) {
               background = "linear-gradient(135deg,#111 0,#2c251a 25%,#b8975a 45%,#fcf1cd 55%,#a78343 70%,#1f1910 85%,#0a0a0a 100%)",
               css = `dialog{min-width:560px;top:80px}.dialog-header{background:${background}}.dialog-header .dialog-title{text-shadow:0 0 2px #1c1c1c!important}.form-group p{line-height:150%;margin:0;padding:3px}.flex-end{margin:-10px 0px 10px 0px;padding:6px 2px!important;justify-content:flex-end;background:linear-gradient(0.25turn,#fdfdfd,#fbf0cc,#fdfdfd)}#language select{background-color:#a98a53;padding-top:2px;padding-bottom:4px;padding-left:12px;padding-right:12px;border-radius:4px;color:#f3f3f3;border:2px solid #a98a53;font-weight:600;cursor:pointer}#language :is(select:hover,select:focus){background-color:#1c1c1c;border-color:#1c1c1c;outline:none}.btn-box{display:flex;gap:8px;justify-content:flex-end;margin:12px 0 0}.dialog-body .form-scroll{max-height:500px;scrollbar-color:auto;display:flex;overflow:auto;flex-direction:column;overscroll-behavior:contain;scroll-behavior:smooth}.dialog-body .form-scroll::-webkit-scrollbar{height:10px;width:10px}.form-scroll .form-group input + label.switch-slider[disabled]{background:#9e9e9f}button.btn{border-radius:4px}button.btn-mirror,button.btn-mirror:hover{position:relative;color:#fff4d1;background:linear-gradient(135deg,#111 0,#2c2212 10%,#b59453 50%,#111 90%,#000 100%);text-shadow:0 0 2px #1c1c1c!important;border:1px solid #a38245;overflow:hidden;cursor:pointer;box-shadow:inset -2px -2px 8px #ffffff30}button.btn-mirror::after{content:'';position:absolute;top:-50%;left:-60%;width:40%;height:200%;background:linear-gradient(to right,#ffffff00 0,#ffffff99 50%,#ffffff00 100%);transform:rotate(35deg);transition:none}button.btn-mirror:hover{box-shadow:none}button.btn-mirror:hover::after{left:140%;transition:all .6s ease-in-out}.form-group{padding:3px 20px 3px 0}.form-group>label{font-size:18px;font-weight:700;background-image:linear-gradient(135deg,#1b160e 0,#3a301d 30%,#8c7141 55%,#463923 75%,#1b160e 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;-webkit-text-stroke:0.4px #2a21134d;text-shadow:.5px .5px 1px #00000026,0 1px 2px #2a21131a;letter-spacing:.02em}.form-group .intro{font-size:14px;color: #b3b3b3;line-height:150%}.form-scroll .switch-container input+.switch-slider{background:#261e11;box-shadow:inset 0 0 10px #0000001a,0 0 5px #261e1166}.form-scroll .switch-container input:checked+.switch-slider{background:#a98a53;box-shadow:inset 0 0 10px #0000001a,0 0 5px #a98a5366}button.btn-external{min-width:80px;padding:8px 6px;border-radius:4px;font-size:14px}input.input-disable{text-align:center;border-radius:6px;background:linear-gradient(#fbfbfb,#e8e8e8) padding-box,linear-gradient(135deg,#1a1a1a,#a1824a,#faf1c5,#8f6e35,#111) border-box;border:2px solid transparent;width:80px;height:40px;padding:8px 6px;font-family:Anton,Impact,serif!important;font-size:18px;font-weight:700;}@-moz-document url-prefix(){.form-scroll{scrollbar-color:#8e9bb1 #f1f0f012!important;scrollbar-width:thin}}`,
               win = new DialogPanelController({ id: randomString(6, "alpha"), type: "dialog", html, css, styleManager }); win.setTitle(i18n.t("Advanced"));
-            const incompatibleFn = e => { preventDefault(e); openSimpleDialog(i18n.t("IncompTitle"), i18n.t("IncompContent"), "prompt", false, false, background) },
-              qW = s => qS(s, win.dialog), scalingTag = qW("#panel-scaling"), viewportTag = qW("#panel-viewport"), disableTag = qW("#panel-disable"),
-              languageTag = qW("#language"), selectEl = cE("select", { id: "session-languages" }), myLang = sessionStorage.getItem(CURRENT_LANGUAGE) || getLanguage("zh-CN"),
-              langMapFn = lang => { const optEl = cE("option", { value: lang, textContent: lang }); if (lang === myLang) { optEl.selected = true } return optEl },
+            const incompatibleFn = e => { preventDefault(e); openSimpleDialog(i18n.t("IncompTitle"), i18n.t("IncompContent"), "prompt", false, false, background) }, qW = s => qS(s, win.dialog),
+              scalingTag = qW("#panel-scaling"), viewportTag = qW("#panel-viewport"), disableTag = qW("#panel-disable"), languageTag = qW("#language"), selectEl = cE("select", { id: "session-languages" }),
+              browserLang = getLanguage("zh-CN"), storedLang = sessionStorage.getItem(CURRENT_LANGUAGE) || browserLang, rawLang = abbrLangMap[storedLang] || storedLang,
+              currentLang = languagePacks[rawLang] ? rawLang : (languagePacks[browserLang] ? browserLang : (abbrLangMap[rawLang] || abbrLangMap[browserLang] || "en-US")),
+              langMapFn = lang => { const optEl = cE("option", { value: lang, textContent: lang }); if (lang === currentLang) { optEl.selected = true } return optEl },
               optionNodes = Array_map(Object_keys(languagePacks), langMapFn); appendNode(selectEl, ...optionNodes); appendNode(languageTag, selectEl);
             win.trackInternal(languageTag, "change", e => { if (i18n.setLanguage(e.target.value)) { WindowManager.closeAll(); openAdvancedCorePanel() } });
             addListener(win, "action:launch-change:click", async e => {
@@ -2605,13 +2613,13 @@ void (function (ctx, uctx, sctx) {
 
     })((function trustedTypesPolicy() {
       const policyOptions = { createHTML: h => h, createScript: s => s, createScriptURL: u => u };
-      if (typeof ctx.trustedTypes?.createPolicy !== "function") { return typeof cloneInto === "function" ? cloneInto(policyOptions, ctx, { cloneFunctions: true }) : policyOptions }
+      if (typeof ctx.trustedTypes?.createPolicy !== "function") { return typeof ctx.cloneInto === "function" ? ctx.cloneInto(policyOptions, ctx, { cloneFunctions: true }) : policyOptions }
       const trustedTypes = ctx.trustedTypes, originalCreatePolicy = trustedTypes.createPolicy.bind(trustedTypes),
         policyName = trustedTypes.defaultPolicy?.name ?? (CUR_HOST_NAME.endsWith("bing.com") ? "rwflyoutDefault" : "default"),
         defaultPolicy = trustedTypes.defaultPolicy ?? originalCreatePolicy(policyName, policyOptions),
         createPolicyWrapper = (name, options) => { if (name === policyName) { return defaultPolicy } return originalCreatePolicy(name, options) };
       createPolicyWrapper.toString = function () { return "function createPolicy() { [native code] }" }; try {
-        const exportFn = function (fn, context) { return typeof exportFunction === "function" ? exportFunction(fn, context) : fn };
+        const exportFn = function (fn, context) { return typeof ctx.exportFunction === "function" ? ctx.exportFunction(fn, context) : fn };
         if (ctx.trustedTypes) { ctx.trustedTypes.createPolicy = exportFn(createPolicyWrapper, ctx.trustedTypes) }
         if (ctx.TrustedTypePolicyFactory?.prototype) { ctx.TrustedTypePolicyFactory.prototype.createPolicy = exportFn(createPolicyWrapper, ctx.TrustedTypePolicyFactory.prototype) }
         if (!GMcontextMode && uctx.TrustedTypePolicyFactory?.prototype) { uctx.TrustedTypePolicyFactory.prototype.createPolicy = exportFn(createPolicyWrapper, uctx.TrustedTypePolicyFactory.prototype) }
@@ -2619,61 +2627,18 @@ void (function (ctx, uctx, sctx) {
     })());
   })(ctx,
     (function buildSafeMethodsLibrary(window, sandboxWindow) {
-      const safeWin = sandboxWindow, safeMethods = safeWin.Object.create(null), call = safeWin.Function.prototype.call, bind = safeWin.Function.prototype.bind,
-        uncurry = bind.bind(call), localConstructors = { Object, Function, Array, String, Number, Math, JSON, Reflect }, Char = String.fromCharCode, DECODE = new Uint8Array(256),
-        MAP = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; for (let i = 0; i < 64; ++i) { DECODE[MAP.charCodeAt(i)] = i } safeMethods.btoa = input => {
-          const s = String(input), l = s.length; if (l === 0) { return "" } if (/[\u0100-\uFFFF]/.test(s)) { throw new Error("'btoa' failed") } let resIdx = 0;
-          const res = new Array(Math.ceil(l / 3)), extra = l % 3, mainLen = l - extra; for (let i = 0; i < mainLen; i += 3) {
-            const v = (s.charCodeAt(i) << 16) | (s.charCodeAt(i + 1) << 8) | s.charCodeAt(i + 2); res[resIdx++] = MAP[(v >> 18) & 63] + MAP[(v >> 12) & 63] + MAP[(v >> 6) & 63] + MAP[v & 63];
-          } if (extra === 1) { const v = s.charCodeAt(mainLen) << 16; res[resIdx] = MAP[(v >> 18) & 63] + MAP[(v >> 12) & 63] + "==" } else if (extra === 2) {
-            const v = (s.charCodeAt(mainLen) << 16) | (s.charCodeAt(mainLen + 1) << 8); res[resIdx] = MAP[(v >> 18) & 63] + MAP[(v >> 12) & 63] + MAP[(v >> 6) & 63] + "=";
-          } return res.join("");
-        }; safeMethods.atob = input => {
-          const s = String(input); let l = s.length; if (l === 0) { return "" } while (l > 0 && s.charCodeAt(l - 1) === 61) { l-- } if (l % 4 === 1) { throw new Error("'atob' failed") }
-          const res = new Array(Math.ceil(l * 3 / 4)); let resIdx = 0; const extra = l % 4, mainLen = l - extra; for (let i = 0; i < mainLen; i += 4) {
-            const v = (DECODE[s.charCodeAt(i)] << 18) | (DECODE[s.charCodeAt(i + 1)] << 12) | (DECODE[s.charCodeAt(i + 2)] << 6) | DECODE[s.charCodeAt(i + 3)];
-            res[resIdx++] = Char((v >> 16) & 255, (v >> 8) & 255, v & 255);
-          } if (extra === 2) { const v = (DECODE[s.charCodeAt(mainLen)] << 18) | (DECODE[s.charCodeAt(mainLen + 1)] << 12); res[resIdx] = Char((v >> 16) & 255) } else if (extra === 3) {
-            const v = (DECODE[s.charCodeAt(mainLen)] << 18) | (DECODE[s.charCodeAt(mainLen + 1)] << 12) | (DECODE[s.charCodeAt(mainLen + 2)] << 6); res[resIdx] = Char((v >> 16) & 255, (v >> 8) & 255);
-          } return res.join("");
-        };["Object", "Function", "Array", "String", "JSON", "Reflect"].forEach(name => {
-          let Target = safeWin[name]; if (!Target) { return } if (Target.prototype) {
-            let protoNames = []; try { protoNames = safeWin.Object.getOwnPropertyNames(Target.prototype) } catch { void 0 }
-            if (protoNames.length === 0 && localConstructors[name]) { Target = localConstructors[name]; try { protoNames = Object.getOwnPropertyNames(Target.prototype) } catch { void 0 } }
-            protoNames.forEach(prop => {
-              if (prop === "constructor") { return } try {
-                const currentObj = Target === localConstructors[name] ? Object : safeWin.Object, desc = currentObj.getOwnPropertyDescriptor(Target.prototype, prop); if (!desc) { return }
-                if (typeof desc.value === "function") { safeMethods[`${name}_${prop}`] = uncurry(desc.value) } else if (typeof desc.get === "function") { safeMethods[`${name}_get_${prop}`] = uncurry(desc.get) }
-              } catch { void 0 }
-            });
-          } let staticNames = []; try { staticNames = (Target === localConstructors[name] ? Object : safeWin.Object).getOwnPropertyNames(Target) } catch { void 0 }
-          if (staticNames.length === 0 && localConstructors[name]) { Target = localConstructors[name]; try { staticNames = Object.getOwnPropertyNames(Target) } catch { void 0 } }
-          staticNames.forEach(prop => {
-            try {
-              const currentObj = Target === localConstructors[name] ? Object : safeWin.Object, desc = currentObj.getOwnPropertyDescriptor(Target, prop);
-              if (desc && typeof desc.value === "function" && !["caller", "callee", "arguments"].includes(prop)) { safeMethods[`${name}_${prop}`] = desc.value }
-            } catch { void 0 }
-          });
-        });
-      const windowMethods = ["setTimeout", "clearTimeout", "structuredClone", "queueMicrotask", "requestIdleCallback", "cancelIdleCallback", "requestAnimationFrame", "cancelAnimationFrame"];
-      windowMethods.forEach(name => { const origFn = window[name]; if (typeof origFn === "function") { safeMethods[name] = origFn.bind(uctx) } }); if (window.console) {
-        ["log", "warn", "error"].forEach(name => { const origFn = window.console[name]; if (typeof origFn === "function") { safeMethods[`console_${name}`] = origFn.bind(window.console) } });
-      } if (window.Element && window.Element.prototype) {
-        const elementMethods = ["attachShadow", "setAttribute", "getAttribute", "hasAttribute", "removeAttribute"];
-        elementMethods.forEach(name => { const origFn = window.Element.prototype[name]; if (typeof origFn === "function") { safeMethods[`Element_${name}`] = uncurry(origFn) } });
-      } if (window.EventTarget && window.EventTarget.prototype) {
-        ["addEventListener", "removeEventListener", "dispatchEvent"].forEach(name => {
-          const origFn = window.EventTarget.prototype[name], winFn = window[name]; if (typeof origFn !== "function") { return }
-          const uncurriedOrig = uncurry(origFn), boundWinFn = winFn ? winFn.bind(window) : null; safeMethods[`EventTarget_${name}`] = function (target, ...args) {
-            if (!target) { return } if (target === window || target === window.window) { return boundWinFn ? boundWinFn(...args) : void 0 }
-            if (typeof target[name] === "function") { try { return target[name](...args) } catch { void 0 } }
-            try { return uncurriedOrig(target, ...args) } catch (e) { if (e instanceof TypeError) { return } throw e }
-          };
-        });
-      } if (window.Event && window.Event.prototype) {
-        const Events = ["preventDefault", "stopImmediatePropagation", "stopPropagation", "composedPath"];
-        Events.forEach(name => { const origFn = window.Event.prototype[name]; if (typeof origFn === "function") { safeMethods[`Event_${name}`] = uncurry(origFn) } });
-      } return safeWin.Object.freeze(safeMethods);
+      const DECODE = new Uint8Array(256), MAP = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; for (let i = 0; i < 64; ++i) { DECODE[MAP.charCodeAt(i)] = i }
+      const safeWin = sandboxWindow, safeMethods = safeWin.Object.create(null), call = safeWin.Function.prototype.call, bind = safeWin.Function.prototype.bind, uncurry = bind.bind(call), localConstructors = { Object, Function, Array, String, Number, Math, JSON, Reflect }, Char = String.fromCharCode,
+        createPureJSONParser = () => { let text = "", len = 0, i = 0; const parseString = () => { i++; const start = i, nextQuote = text.indexOf('"', i), nextSlash = text.indexOf("\\", i); if (nextSlash === -1 || nextSlash > nextQuote) { const res = text.slice(start, nextQuote); i = nextQuote + 1; return res } let res = ""; i = start; while (i < len) { const c = text[i++]; if (c === '"') { return res } if (c === "\\") { const escapeChar = text[i++]; switch (escapeChar) { case "n": res += "\n"; break; case "r": res += "\r"; break; case "t": res += "\t"; break; case "b": res += "\b"; break; case "f": res += "\f"; break; case '"': res += '"'; break; case "\\": res += "\\"; break; case "u": res += Char(parseInt(text.slice(i, i + 4), 16)); i += 4; break; } } else { res += c } } throw new SyntaxError("Unterminated string") }, parseValue = () => { while (i < len && text.charCodeAt(i) <= 32) { i++ } if (i >= len) { throw new SyntaxError("Unexpected end of input") } const char = text.charCodeAt(i); switch (char) { case 123: { const obj = {}; i++; while (i < len && text.charCodeAt(i) <= 32) i++; if (text.charCodeAt(i) === 125) { i++; return obj } while (true) { if (text.charCodeAt(i) !== 34) { throw new SyntaxError("Expected '\"'") } const key = parseString(); while (i < len && text.charCodeAt(i) <= 32) { i++ } if (text.charCodeAt(i) !== 58) { throw new SyntaxError("Expected ':'") } i++; obj[key] = parseValue(); while (i < len && text.charCodeAt(i) <= 32) { i++ } const nextChar = text.charCodeAt(i); if (nextChar === 125) { i++; return obj } if (nextChar !== 44) { throw new SyntaxError("Expected ','") } i++; while (i < len && text.charCodeAt(i) <= 32) { i++ } } } case 91: { const arr = []; i++; while (i < len && text.charCodeAt(i) <= 32) { i++ } if (text.charCodeAt(i) === 93) { i++; return arr } while (true) { arr.push(parseValue()); while (i < len && text.charCodeAt(i) <= 32) { i++ } const nextChar = text.charCodeAt(i); if (nextChar === 93) { i++; return arr } if (nextChar !== 44) { throw new SyntaxError("Expected ','") } i++ } } case 34: return parseString(); case 116: i += 4; return true; case 102: i += 5; return false; case 110: i += 4; return null; default: if (char === 45 || (char >= 48 && char <= 57)) { const start = i; while (i < len) { const c = text.charCodeAt(i); if ((c >= 48 && c <= 57) || c === 45 || c === 43 || c === 101 || c === 69 || c === 46) { i++ } else { break } } return +text.slice(start, i) } throw new SyntaxError("Unexpected token at position " + i); } }; return input => { text = input; len = input.length; i = 0; const result = parseValue(); while (i < len && text.charCodeAt(i) <= 32) { i++ } if (i < len) { throw new SyntaxError("Unexpected token at end") } text = ""; return result } };
+      safeMethods.btoa = input => { const s = String(input), l = s.length; if (l === 0) { return "" } if (/[\u0100-\uFFFF]/.test(s)) { throw new Error("'btoa' failed") } let resIdx = 0; const res = new Array(Math.ceil(l / 3)), extra = l % 3, mainLen = l - extra; for (let i = 0; i < mainLen; i += 3) { const v = (s.charCodeAt(i) << 16) | (s.charCodeAt(i + 1) << 8) | s.charCodeAt(i + 2); res[resIdx++] = MAP[(v >> 18) & 63] + MAP[(v >> 12) & 63] + MAP[(v >> 6) & 63] + MAP[v & 63] } if (extra === 1) { const v = s.charCodeAt(mainLen) << 16; res[resIdx] = MAP[(v >> 18) & 63] + MAP[(v >> 12) & 63] + "==" } else if (extra === 2) { const v = (s.charCodeAt(mainLen) << 16) | (s.charCodeAt(mainLen + 1) << 8); res[resIdx] = MAP[(v >> 18) & 63] + MAP[(v >> 12) & 63] + MAP[(v >> 6) & 63] + "=" } return res.join("") };
+      safeMethods.atob = input => { const s = String(input); let l = s.length; if (l === 0) { return "" } while (l > 0 && s.charCodeAt(l - 1) === 61) { l-- } if (l % 4 === 1) { throw new Error("'atob' failed") } const res = new Array(Math.ceil(l * 3 / 4)); let resIdx = 0; const extra = l % 4, mainLen = l - extra; for (let i = 0; i < mainLen; i += 4) { const v = (DECODE[s.charCodeAt(i)] << 18) | (DECODE[s.charCodeAt(i + 1)] << 12) | (DECODE[s.charCodeAt(i + 2)] << 6) | DECODE[s.charCodeAt(i + 3)]; res[resIdx++] = Char((v >> 16) & 255, (v >> 8) & 255, v & 255) } if (extra === 2) { const v = (DECODE[s.charCodeAt(mainLen)] << 18) | (DECODE[s.charCodeAt(mainLen + 1)] << 12); res[resIdx] = Char((v >> 16) & 255) } else if (extra === 3) { const v = (DECODE[s.charCodeAt(mainLen)] << 18) | (DECODE[s.charCodeAt(mainLen + 1)] << 12) | (DECODE[s.charCodeAt(mainLen + 2)] << 6); res[resIdx] = Char((v >> 16) & 255, (v >> 8) & 255) } return res.join("") };
+      const nativeObjects = ["Object", "Function", "Array", "String", "JSON", "Reflect"]; nativeObjects.forEach(name => { let Target = safeWin[name]; if (!Target) { return } if (Target.prototype) { let protoNames = []; try { protoNames = safeWin.Object.getOwnPropertyNames(Target.prototype) } catch { void 0 } if (protoNames.length === 0 && localConstructors[name]) { Target = localConstructors[name]; try { protoNames = Object.getOwnPropertyNames(Target.prototype) } catch { void 0 } } protoNames.forEach(prop => { if (prop === "constructor") { return } try { const currentObj = Target === localConstructors[name] ? Object : safeWin.Object, desc = currentObj.getOwnPropertyDescriptor(Target.prototype, prop); if (!desc) { return } if (typeof desc.value === "function") { safeMethods[`${name}_${prop}`] = uncurry(desc.value) } else if (typeof desc.get === "function") { safeMethods[`${name}_get_${prop}`] = uncurry(desc.get) } } catch { void 0 } }) } let staticNames = []; try { staticNames = (Target === localConstructors[name] ? Object : safeWin.Object).getOwnPropertyNames(Target) } catch { void 0 } if (staticNames.length === 0 && localConstructors[name]) { Target = localConstructors[name]; try { staticNames = Object.getOwnPropertyNames(Target) } catch { void 0 } } staticNames.forEach(prop => { if (name === "JSON" && prop === "parse") { try { void Target.parse } catch { safeMethods.JSON_parse = createPureJSONParser(); return } } try { const currentObj = Target === localConstructors[name] ? Object : safeWin.Object, desc = currentObj.getOwnPropertyDescriptor(Target, prop); if (desc && typeof desc.value === "function" && !["caller", "callee", "arguments"].includes(prop)) { safeMethods[`${name}_${prop}`] = desc.value } } catch { void 0 } }) });
+      const windowMethods = ["setTimeout", "clearTimeout", "structuredClone", "queueMicrotask", "requestIdleCallback", "cancelIdleCallback", "requestAnimationFrame", "cancelAnimationFrame"]; windowMethods.forEach(name => { const origFn = window[name]; if (typeof origFn === "function") { safeMethods[name] = origFn.bind(uctx) } });
+      if (window.console) { ["log", "warn", "error"].forEach(name => { const origFn = window.console[name]; if (typeof origFn === "function") { safeMethods[`console_${name}`] = origFn.bind(window.console) } }) }
+      if (window.Element && window.Element.prototype) { ["attachShadow", "setAttribute", "getAttribute", "hasAttribute", "removeAttribute"].forEach(name => { const origFn = window.Element.prototype[name]; if (typeof origFn === "function") { safeMethods[`Element_${name}`] = uncurry(origFn) } }) }
+      if (window.EventTarget && window.EventTarget.prototype) { ["addEventListener", "removeEventListener", "dispatchEvent"].forEach(name => { const origFn = window.EventTarget.prototype[name], winFn = window[name]; if (typeof origFn !== "function") { return } const uncurriedOrig = uncurry(origFn), boundWinFn = winFn ? winFn.bind(window) : null; safeMethods[`EventTarget_${name}`] = function (target, ...args) { if (!target) { return } if (target === window || target === window.window) { return boundWinFn ? boundWinFn(...args) : void 0 } if (typeof target[name] === "function") { try { return target[name](...args) } catch { void 0 } } try { return uncurriedOrig(target, ...args) } catch (e) { if (e instanceof TypeError) { return } throw e } } }) }
+      if (window.Event && window.Event.prototype) { const Events = ["preventDefault", "stopImmediatePropagation", "stopPropagation", "composedPath"]; Events.forEach(name => { const origFn = window.Event.prototype[name]; if (typeof origFn === "function") { safeMethods[`Event_${name}`] = uncurry(origFn) } }) }
+      return safeWin.Object.freeze(safeMethods);
     })(ctx, sctx)
   );
 })(
