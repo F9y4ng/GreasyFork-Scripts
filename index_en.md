@@ -28,15 +28,14 @@
 * Please report script errors to [[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], and report garbled and style issues to [[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)].
 * Back up your local data in a timely manner. Do not use backup files from unknown sources!
 
-### version 2026.09.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2026.10.03.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-@ Fixed filter rules for font scaling viewport unit correction function.
-@ Fixed the execution efficiency issue of the bold style correction function.
-@ Fixed data manager performance and asynchronous timing issues.
-@ Fixed an issue with proxy function errors in Greasemonkey.
-@ Optimized the performance of some functions and reduce the risk of memory leaks.
-@ Optimized the execution efficiency of multilingual functions.
++ Added support for recognizing local language identifiers that do not provide a region code.
+@ Optimized the performance of the bold stroke style correction function for low-spec computers.
+@ Optimized the synchronization and tamper-proof monitoring mechanism when writing rendering styles.
+@ Fixed an error caused by UBOL hijacking native functions in MV3.
+@ Fixed a syntax error caused by a certain site hijacking the `localStorage` method.
 @ Fixed some known issues, optimize code, and optimize styles.
 ```
 
@@ -113,14 +112,12 @@ Font scaling (experimental), **OFF by default**, turn on font scaling in the **A
 * [Read the instructions for using the script and the precautions on the page before use.](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/Search-Engine-Assistant)
 * If you don't need to be prompted for updates, you can turn it off in the "**Advanced Feature Settings**".
 
-### version 2026.09.05.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2026.10.03.1 - Update log: 【🔥[Install this script](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-@ Removed You.com, Added info.com.
-@ Optimized Google search result redirection issues.
-@ Optimized duckduckgo for opening new windows.
-@ Fixed sporadic failure issue of the keyword blocking.
-@ Fixed Google the jump button was not inserted issue.
++ Added Kagi.com search engine.
+@ Fixed Sogou search column jump button style issues.
+@ Fixed searxng search jump button insertion issues.
 @ Fixed some known issues, optimized code & style.
 ```
 
