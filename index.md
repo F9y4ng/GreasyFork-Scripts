@@ -29,14 +29,12 @@
 * 脚本错误、异常请反馈至[[Issues](https://github.com/F9y4ng/GreasyFork-Scripts/issues)], 字体、渲染样式、乱码问题请反馈至[[Discussions](https://github.com/F9y4ng/GreasyFork-Scripts/discussions/categories/%E9%97%AE%E7%AD%94%E4%B8%93%E5%8C%BA-question-answer)]。
 * 为保证您的数据安全，请及时备份您的本地数据！请勿使用来源未知的备份文件。
 
-### version 2026.10.03.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
+### version 2026.11.07.1 - 更新日志： 【🔥[安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Font%20Rendering.user.js)】
 
 ```log
-+ 新增对未提供地区码的本地语言标识的识别。
-@ 针对低配置电脑，优化粗体描边样式修正函数的性能。
-@ 优化渲染样式写入时同步防篡改的监听机制。
-@ 修复 MV3 下 UBOL 对原生函数劫持造成的报错问题。
-@ 修复某站点劫持 localStorage 方法造成的语法错误。
+@ 优化浏览器指纹防护功能的检测机制。
+@ 优化底层函数的性能问题，提升执行效率。
+@ 修复字体比例缩放时视口修正函数的匹配问题。
 @ 修复一些已知问题，优化代码，优化样式。
 ```
 
@@ -105,12 +103,12 @@
 * [新手上路，请使用前仔细阅读脚本使用说明，以及当前页面内相关注意事项。](https://github.com/F9y4ng/GreasyFork-Scripts/wiki/%E4%BC%98%E9%9B%85%E7%9A%84%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E%E5%8A%A9%E6%89%8B)
 * 自动更新检测默认开启，如无更新提示需求，可在“功能设置开关”中关闭它。
 
-### version 2026.10.03.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
+### version 2026.11.07.1 - 更新日志： 【🔥 [安装此脚本](https://github.com/F9y4ng/GreasyFork-Scripts/raw/master/Google%20%26%20Baidu%20Switcher.user.js)】
 
 ```log
-+ 新增 Kagi.com 搜索引擎。
-@ 修复 Sogou 搜索的各栏目跳转按钮样式问题。
-@ 修复 searxng 搜索的跳转按钮未插入问题。
+- 移除 Yep.com 搜索引擎。
+@ 优化 Google 搜索结果链接重定向的解析方式。
+@ 修复代码更新后本地图标的即时生效问题。
 @ 修复一些已知问题，优化代码，优化样式。
 ```
 
