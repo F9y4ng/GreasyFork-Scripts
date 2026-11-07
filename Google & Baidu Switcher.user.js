@@ -5,7 +5,7 @@
 // @name:zh-TW         優雅的搜尋引擎助手
 // @name:ru            Помощник поисковой системы
 // @name:ja            優雅な検索エンジン助手
-// @version            2026.10.03.1
+// @version            2026.11.07.1
 // @author             F9y4ng
 // @description        Alias "Search Engine Assistant", le script aide à la navigation entre les moteurs de recherche, à la personnalisation des préférences, à la mise en évidence des mots-clés, à l'élimination des redirections et des publicités et au filtrage des résultats. Compatible avec Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG et bien d'autres moteurs de recherche célèbres.
 // @description:en     "Elegant search engine assistant" allows switching between engines; supports custom engines, keyword highlighting; offers redirect removal, ad blocking, keyword filtering, and auto-updates; compatible with Baidu, Google, Bing, Duckduckgo, Yandex, Sogou, Qwant, Ecosia, Startpage, Brave, Yahoo, Yep, Mojeek, searXNG and more.
@@ -33,14 +33,17 @@
 // @match              *://www.so.com/s*
 // @match              *://image.so.com/*
 // @match              *://so.toutiao.com/search*
+// @match              *://www.yandex.com/*search*
+// @match              *://www.yandex.ru/*search*
+// @match              *://www.ya.ru/*search*
 // @match              *://yandex.com/*search*
 // @match              *://yandex.ru/*search*
+// @match              *://ya.ru/*search*
 // @match              *://www.ecosia.org/*
 // @match              *://*.search.yahoo.com/search*
 // @match              *://www.info.com/serp?*
 // @match              *://www.startpage.com/*
 // @match              *://search.brave.com/*
-// @match              *://yep.com/*
 // @match              *://www.mojeek.com/search*
 // @match              *://au.priv.au/search*
 // @match              *://kagi.com/*?*
@@ -255,9 +258,9 @@
 // @grant              GM_xmlhttpRequest
 // @grant              GM.xmlHttpRequest
 // @grant              unsafeWindow
-// @note               {"CN":"新增 Kagi.com 搜索引擎。","EN":"Added Kagi.com search engine."}
-// @note               {"CN":"修复 Sogou 搜索的各栏目跳转按钮样式问题。","EN":"Fixed Sogou search column jump button style issues."}
-// @note               {"CN":"修复 searxng 搜索的跳转按钮未插入问题。","EN":"Fixed searxng search jump button insertion issues."}
+// @note               {"CN":"移除 Yep.com 搜索引擎。","EN":"Removed Yep.com search engine."}
+// @note               {"CN":"优化 Google 搜索结果链接重定向的解析方式","EN":"Improved the parsing approach for Google search result link redirects."}
+// @note               {"CN":"修复代码更新后本地图标的即时生效问题。","EN":"Fixed the issue where local icons took effect immediately after code updates."}
 // @note               {"CN":"修正一些已知问题，优化代码，优化样式。","EN":"Fixed some known issues, optimized code & style."}
 // @compatible         Edge version≥88 (Compatible Tampermonkey, Violentmonkey)
 // @compatible         Chrome version≥88 (Compatible Tampermonkey, Violentmonkey)
@@ -312,8 +315,8 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
   ((originalWindow, iframe) => {
     if (typeof GM_addElement === "undefined" || document.contentType === "application/pdf") { return originalWindow }
     try {
-      const { contentWindow } = (iframe = GM_addElement("iframe", { id: "𝐬𝐚𝐟e.𝐰𝐢𝐧𝐝𝐨𝐰", style: "display:none", width: 0, height: 0 }));
-      !originalWindow.wrappedJSObject && iframe?.remove(); return contentWindow ?? originalWindow;
+      iframe = GM_addElement("iframe", { id: "𝐬𝐚𝐟e.𝐰𝐢𝐧𝐝𝐨𝐰", style: "display:none", width: 0, height: 0 });
+      const { contentWindow } = iframe; !originalWindow.wrappedJSObject && iframe?.remove(); return contentWindow ?? originalWindow;
     } catch { iframe?.remove(); return originalWindow }
   })(typeof this !== "undefined" ? this : window, null),
   function (global, GMunsafeWindow, secureVars, customFuntions) {
@@ -564,12 +567,12 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
     function checkRedundantScript(global) {
       const reportRedundanceError = () => {
-        const errorText = IS_CHN
-          ? `\ud83d\udea9【脚本冗余警告】发现冗余安装的脚本: "${def.var.scriptName}"，如刷新后问题依旧，请访问 ${def.url.feedback}/117 排查错误。`
-          : `\ud83d\udea9 [Redundance Warning] Found Redundant Scripts: '${def.var.scriptName}', if persists after reloading, please visit ${def.url.feedback}/117 to troubleshoot.`,
-          troubleshoot = `\ufff8\ud83d\uded1 ${IS_CHN ? "发现冗余安装的脚本，点击排查！" : "Troubleshoot Redundance!"}`;
-        CUR_WINDOW_TOP && (__console("error", errorText), GMregisterMenuCommand(troubleshoot, () => GMopenInTab(`${def.url.feedback}/117`, false))); return true;
-      },
+          const errorText = IS_CHN
+              ? `\ud83d\udea9【脚本冗余警告】发现冗余安装的脚本: "${def.var.scriptName}"，如刷新后问题依旧，请访问 ${def.url.feedback}/117 排查错误。`
+              : `\ud83d\udea9 [Redundance Warning] Found Redundant Scripts: '${def.var.scriptName}', if persists after reloading, please visit ${def.url.feedback}/117 to troubleshoot.`,
+            troubleshoot = `\ufff8\ud83d\uded1 ${IS_CHN ? "发现冗余安装的脚本，点击排查！" : "Troubleshoot Redundance!"}`;
+          CUR_WINDOW_TOP && (__console("error", errorText), GMregisterMenuCommand(troubleshoot, () => GMopenInTab(`${def.url.feedback}/117`, false))); return true;
+        },
         contentText = IS_CHN ? `警告：脚本的注入模式已设置为"content"，部分脚本功能可能受到限制。` : `Warning: The injection mode is set to "content" and some functions may be limited.`;
       if (GMcontextMode && CUR_WINDOW_TOP) { __console("warn", `${def.var.scriptName} ${contentText}`) }
       if (global[def.static.once] === true || document.documentElement?.hasAttribute(def.static.once)) { return reportRedundanceError() }
@@ -721,7 +724,6 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         IS_CHEAT_UA = source !== "ext" && (engine !== creditEngine || checkBlinkCheatingUA(navigator.userAgentData)),
         IS_GREASEMONKEY = ["Greasemonkey", "Userscripts", "FireMonkey", "tamp", "OrangeMonkey"].includes(GMscriptHandler),
         createNoticeHTML = html => `<div class="${def.notice.rName}"><dl>${html}</dl></div>`,
-
         cache = {
           value: (data, eT) => ({ data, expired: Date.now() + (typeof eT === "number" ? eT : 6048e5) }),
           set: (key, ...options) => GMsetValue(key, encrypt(JSON.stringify(cache.value(...options)))),
@@ -785,7 +787,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
           this._executeCallbacks("afterShow"); return noticeItem;
         }
         _closeWithAnimation(item) {
-          if (this.options.animation?.close) { sleep(5e2)((item.className += ` ${this.options.animation.close}`)).then(() => this._closeItem(item)) } else { this._closeItem(item) }
+          if (this.options.animation?.close) { sleep(5e2)(item.className += ` ${this.options.animation.close}`).then(() => this._closeItem(item)) } else { this._closeItem(item) }
         }
         _addListeners(item) {
           const closeBtn = qS(`.${def.notice.close}`, item); if (this.options.closeWith.includes("button")) { closeBtn?.addEventListener("click", () => this._closeItem(item)) }
@@ -820,7 +822,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       }
 
       function createStyleSheet(id, css, primary) {
-        const metadata = `:host(sheet-metadata){--sheet-metadata:${JSON.stringify({ id, ...(primary && { [def.const.cssAttrName]: false }) })}}`,
+        const metadata = `:host(sheet-metadata){--sheet-metadata:${JSON.stringify({ id, ...primary && { [def.const.cssAttrName]: false } })}}`,
           sheet = new CSSStyleSheet(); sheet.media.appendMedium("all"); sheet.replaceSync(tTP.createScript(css)); sheet.insertRule(metadata, 0); return sheet;
       }
 
@@ -833,7 +835,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         } catch (error) {
           try {
             target = isShadowRoot ? target : target.head; if (qS(`style#${id}`, target)) { return true }
-            const option = { id, media: "all", type: "text/css", textContent: css, ...(!isShadowRoot && { [def.const.cssAttrName]: false }) };
+            const option = { id, media: "all", type: "text/css", textContent: css, ...!isShadowRoot && { [def.const.cssAttrName]: false } };
             if (typeof GM_addElement !== "undefined") { return GM_addElement(target, "style", option) && true }
             return target.appendChild(cE("style", option)) && true;
           } catch (e) { error && ERROR(`${e.name} in UpdateAdoptedStyleSheets:`, e.message, `(${error.message})`) }
@@ -882,7 +884,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
       void (async function (getConfigureData, getResultFilterData, requestRemoteIcon, GMnotification, computStyle) {
         let _config_date_ = await getConfigureData(); const { trigger: antiResultsFilter, filter: resultFilters } = await getResultFilterData(),
           { isAutoUpdate, keywordHighlight, isHotkey, selectedEngine, localWindow, googleJump, antiLinkRedirect, antiAds, customColor } = _config_date_,
-          [gbCookies, cachedRequestLinks, usedFilterWords, TIMEOUT, httpRegex, selectedSite] = [manageCookies(), new Map(), new Set(), 2e4, /^http:\/\//i, []];
+          [gbCookies, cachedRequestLinks, usedFilterWords, TIMEOUT, httpRegex, selectedSite] = [manageCookies(), new Map(), new Set(), 1e4, /^http:\/\//i, []];
 
         /* ANTIREDIRECT_FUNCTIONS */
 
@@ -911,8 +913,19 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         }
 
         function getRealHref(node) {
-          const realHref = node?.getAttribute("gb-real-href");
+          const realHref = node?.getAttribute("gd-real-href");
           return (realHref?.startsWith("\u0061\u0030") && new URL(decrypt(realHref.slice(2, -1)), location).href) || node?.href || "about:blank";
+        }
+
+        function parsingAntiRedirectForGoogle(expr, options) {
+          const config = validateOptions(options); if (!config.advancedAnti) { return } const cleanup = new FinalizationRegistry(urlToClean => { if (cachedRequestLinks.has(urlToClean)) { cachedRequestLinks.delete(urlToClean) } });
+          document.addEventListener("mouseover", deBounce({
+            fn: async e => {
+              const link = e.target.closest(expr); if (!link) { return } const status = link.getAttribute(def.static.anti); if (status && status !== "failed") { return }
+              link.setAttribute(def.static.anti, "pending"); const originalURL = link.href; updateNodeAttributes(config, link); if (status === "failed") { cachedRequestLinks.delete(originalURL) }
+              link.style.cursor = "wait"; cleanup?.register(link, originalURL); const resUrl = await getXHRDecodeURI(originalURL, link, "Google"); link.href = resUrl || originalURL; link.style.cursor = null;
+            }, delay: 50, timer: "google_ar_new"
+          }), { passive: true });
         }
 
         function setAdvancedAntiRedirect(node, tasks, siteName) {
@@ -958,22 +971,22 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
         function handleSuccess(res, url, node) {
           antiResultsFilter && asArray(resultFilters).SomeX(filter => new RegExp(filter, "i").test(res)) &&
-            node.insertAdjacentHTML("beforeend", tTP.createHTML(`<div class="${def.const.filtered}">${res}</div>`));
-          cachedRequestLinks.set(url, res); setRealLink(node, res); toggleLoadClass(node)?.remove(); DEBUG("Parsed link:", { node, parsed: res, origin: url });
+            node.insertAdjacentHTML("beforeend", tTP.createHTML(`<div class="${def.const.filtered}">${res}</div>`)); node.removeAttribute("title");
+          cachedRequestLinks.set(url, res); setRealLink(node, res); toggleLoadClass(node)?.remove(); DEBUG("Parsed link:", { node, parsed: res, origin: url }); return url;
         }
 
         function handleError(e, url, node, name) {
           if (["URLBrokenError", "TimeoutError", "URLNotExistError", "PermissionDenied", "ResponseError"].includes(e?.message)) { cachedRequestLinks.set(url, url) }
           if (e?.message === "DuplicateLinksError") { handleDuplicateLinksError(url, node) } else {
             setErrorLink(node); toggleLoadClass(node)?.remove(); ERROR(`${e.name} in AntiRedirect_%s: %s %O`, name, e?.message, { Node: node, Text: node.textContent, URL: node.href });
-          }
+          } return url;
         }
 
         function handleDuplicateLinksError(url, node) {
           def.count.duplicate++; const startTime = Date.now(), attemptToFindCacheLink = rAF.setInterval(() => {
             const cachedRealLinks = cachedRequestLinks.get(url), isTimeout = Date.now() - startTime > TIMEOUT;
-            if (!cachedRealLinks && !isTimeout) { return } rAF.clearInterval(attemptToFindCacheLink); def.count.duplicate--; toggleLoadClass(node)?.remove();
-            if (cachedRealLinks && cachedRealLinks !== url) { DEBUG("Duplicate link:", { node, url: cachedRealLinks }); setRealLink(node, cachedRealLinks); return } setErrorLink(node);
+            if (!cachedRealLinks && !isTimeout) { return url } rAF.clearInterval(attemptToFindCacheLink); def.count.duplicate--; toggleLoadClass(node)?.remove();
+            if (cachedRealLinks && cachedRealLinks !== url) { DEBUG("Duplicate link:", { node, url: cachedRealLinks }); setRealLink(node, cachedRealLinks); return url } setErrorLink(node);
           }, 2e2);
         }
 
@@ -986,11 +999,11 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         }
 
         function setRealLink(node, url) {
-          node.href = url; if (CUR_HOST_NAME.endsWith(".bing.com")) {
+          node.href = url; if (CUR_HOST_NAME.endsWith(".bing.com") || CUR_HOST_NAME.startsWith("www.google.")) {
             const actions = ["mouseenter", "mouseleave", "mouseout", "mousedown", "mouseup", "blur", "keyup"];
-            !global[def.const.bing] && actions.forEach(act => document.addEventListener(act, handleBingLink, (global[def.const.bing] = true)));
-            node.setAttribute("gb-real-href", `\x61\x30${encrypt(url)}\x3d`);
-          } node.setAttribute(def.static.anti, "success");
+            !global[def.const.bing] && actions.forEach(act => document.addEventListener(act, handleBingLink, global[def.const.bing] = true));
+            node.setAttribute("gd-real-href", `\x61\x30${encrypt(url)}\x3d`);
+          } node.setAttribute(def.static.anti, "success"); node.classList.remove(def.notice.linkerror);
         }
 
         function setErrorLink(node) {
@@ -1077,7 +1090,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         function advancedAntiRedirection(siteName, node, task) {
           if (!node?.href) { return } const url = node.href.replace(httpRegex, "https://"); toggleLoadClass(node)?.add();
           switch (siteName) {
-            case "Baidu": case "Google": return () => getXHRDecodeURI(url, node, siteName);
+            case "Baidu": return () => getXHRDecodeURI(url, node, siteName);
             case "So360": return (data = node.dataset.mdurl) => (data ? getNoneXHRDecodeURI(url, node, siteName, data) : getXHRDecodeURI(url, node, siteName));
             case "Sogou": case "Bing": return (data = getNodeDecodeURI(siteName, url, node)) => (data ? getNoneXHRDecodeURI(url, node, siteName, data) : getXHRDecodeURI(url, node, siteName));
             case "Toutiao": case "Yahoo": return () => getNoneXHRDecodeURI(url, node, siteName, getNodeDecodeURI(siteName, url, node));
@@ -1137,9 +1150,9 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
         async function fetchUpdateResponse(url, timeout = 1e4) {
           return await new Promise((resolve, reject) => {
             const headers = { Accept: "*/*", Referer: url }, onload = response => {
-              if (response.readyState !== 4) { return }
-              if (response.status === 200) { resolve({ res: response.responseText || response.response, url }) } else if (response.status !== 0) { reject(new Error("NoAccessError")) }
-            },
+                if (response.readyState !== 4) { return }
+                if (response.status === 200) { resolve({ res: response.responseText || response.response, url }) } else if (response.status !== 0) { reject(new Error("NoAccessError")) }
+              },
               onerror = () => reject(new Error("NetworkError")), ontimeout = () => reject(new Error("TimeoutError"));
             GMxmlhttpRequest({ url, headers, method: "GET", nocache: true, timeout, onload, onerror, ontimeout });
           });
@@ -1158,408 +1171,386 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
         void (async function (getUpdateAddress) {
           const listSite = {
-            baidu: {
-              siteTypeID: 1,
-              siteButtonName: IS_CHN ? "百度一下" : "𝐁𝐚𝐢𝐝𝐮",
-              siteNickName: IS_CHN ? "百度 搜索" : "𝐁𝐚𝐢𝐝𝐮.𝐜𝐨𝐦",
-              siteHostName: "www.baidu.com",
-              webURL: "https://www.baidu.com/s?ie=utf-8&rqlang=cn&wd=",
-              imageURL: "https://image.baidu.com/search/index?tn=baiduimage&ps=1&ie=utf-8&word=",
-              imageType: ["baiduimage", "baiduimagedetail"],
-              splitTypeName: ["tn", "pd"],
-              mainSelector: "#chat-input-main,#ci-main",
-              overrideCss: `a,a em{text-decoration:none!important}:not([class^="page-inner"])>a:not(.${def.notice.linkerror}):hover{text-decoration:underline!important}#form{white-space:nowrap}#u{z-index:1!important}`,
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;z-index:99999;right:var(--right,unset);margin:var(--margin,3px 0)!important;padding:0!important;display:inline-flex;justify-content:center;align-items:flex-start;flex-wrap:nowrap;height:40px}#${def.const.leftButton},#${def.const.rightButton}{margin:0 2px 0 0;height:42px}input{margin:0;height:40px;min-width:95px;border:none;outline:none;color:#fff;font-weight:500;font-size:17px;box-shadow:none;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px!important;border-radius:10px 0 0 10px;background:var(--background,linear-gradient(315deg,#286aff,#4e6ef2,#7274f9,#9f66ff))}#${def.const.rightButton} input{padding:0 18px 1px 12px!important;border-radius:0 10px 10px 0;background:var(--background,linear-gradient(135deg,#286aff,#4e6ef2,#7274f9,#9f66ff))}#${def.const.leftButton} input:hover{background:linear-gradient(#00000017,#00000017), linear-gradient(90deg,#286aff,#4e6ef2,#7274f9,#9f66ff)}#${def.const.rightButton} input:hover{background:linear-gradient(#00000017,#00000017), linear-gradient(270deg,#286aff,#4e6ef2,#7274f9,#9f66ff)}`,
-              resultListProp: { qs: `#content_left div.c-container:not([tpl="recommend_list"]):not([tpl^="rel-"])`, delay: 10 },
-              keywords: "#wrapper_wrapper em,.c-gap-top-small b",
-              antiRedirectFn: () => {
-                const selector = `.c-container a[href*='//www.baidu.com/link?url=']`;
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "baidu_ar" })("Baidu", selector, { useNewTab: true, removeDataSet: true, advancedAnti: true });
+              baidu: {
+                siteTypeID: 1,
+                siteButtonName: IS_CHN ? "百度一下" : "𝐁𝐚𝐢𝐝𝐮",
+                siteNickName: IS_CHN ? "百度 搜索" : "𝐁𝐚𝐢𝐝𝐮.𝐜𝐨𝐦",
+                siteHostName: "www.baidu.com",
+                webURL: "https://www.baidu.com/s?ie=utf-8&rqlang=cn&wd=",
+                imageURL: "https://image.baidu.com/search/index?tn=baiduimage&ps=1&ie=utf-8&word=",
+                imageType: ["baiduimage", "baiduimagedetail"],
+                splitTypeName: ["tn", "pd"],
+                mainSelector: "#chat-input-main,#ci-main",
+                overrideCss: `a,a em{text-decoration:none!important}:not([class^="page-inner"])>a:not(.${def.notice.linkerror}):hover{text-decoration:underline!important}#form{white-space:nowrap}#u{z-index:1!important}`,
+                buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;z-index:99999;right:var(--right,unset);margin:var(--margin,3px 0)!important;padding:0!important;display:inline-flex;justify-content:center;align-items:flex-start;flex-wrap:nowrap;height:40px}#${def.const.leftButton},#${def.const.rightButton}{margin:0 2px 0 0;height:42px}input{margin:0;height:40px;min-width:95px;border:none;outline:none;color:#fff;font-weight:500;font-size:17px;box-shadow:none;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px!important;border-radius:10px 0 0 10px;background:var(--background,linear-gradient(315deg,#286aff,#4e6ef2,#7274f9,#9f66ff))}#${def.const.rightButton} input{padding:0 18px 1px 12px!important;border-radius:0 10px 10px 0;background:var(--background,linear-gradient(135deg,#286aff,#4e6ef2,#7274f9,#9f66ff))}#${def.const.leftButton} input:hover{background:linear-gradient(#00000017,#00000017), linear-gradient(90deg,#286aff,#4e6ef2,#7274f9,#9f66ff)}#${def.const.rightButton} input:hover{background:linear-gradient(#00000017,#00000017), linear-gradient(270deg,#286aff,#4e6ef2,#7274f9,#9f66ff)}`,
+                resultListProp: { qs: `#content_left div.c-container:not([tpl="recommend_list"]):not([tpl^="rel-"])`, delay: 10 },
+                keywords: "#wrapper_wrapper em,.c-gap-top-small b",
+                antiRedirectFn: () => {
+                  const selector = `.c-container a[href*='//www.baidu.com/link?url=']`;
+                  deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "baidu_ar" })("Baidu", selector, { useNewTab: true, removeDataSet: true, advancedAnti: true });
+                },
+                antiAdsFn: () => {
+                  const selectors = `#s-hotsearch-wrapper,#s_wrap,#bottom_layer,.result-op[tpl='sp_hot_sale'],.result-op[tpl='b2b_prod'],.result-op.cr-content[tpl^='recommend_list_'],#content_left>div:not([class]):not([style]),div[data-placeid],[id$='_canvas'],div.result.c-container:not([class~='xpath-log']),.imgpage .imglist>li.newfcImgli,.ec_wise_ad,div[class^='result-op'][tpl='right_tabs'][data-click],div[class^='result-op'][tpl='right_links'][data-click],#searchTag,#content_left>div.c-container[tpl="recommend_list"],#con-ar div:is([tpl='interactive'],[tpl="right_recommends_merge"]),div.result-op.cr-content:has([id='ai-accompanies-container']),div.result-molecule[tpl="app/rs"],.hint_right_top:has([tpl='app/hint-chat-entry']),.hint_right_middle:has([tpl='app/hint-head-top']),div.new-pmd:not(.result):has(.c-recommend)`;
+                  deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "baidu_ad", immed: true })({ selectors, siteName: "Baidu", isRemoveNodes: true });
+                }
               },
-              antiAdsFn: () => {
-                const selectors = `#s-hotsearch-wrapper,#s_wrap,#bottom_layer,.result-op[tpl='sp_hot_sale'],.result-op[tpl='b2b_prod'],.result-op.cr-content[tpl^='recommend_list_'],#content_left>div:not([class]):not([style]),div[data-placeid],[id$='_canvas'],div.result.c-container:not([class~='xpath-log']),.imgpage .imglist>li.newfcImgli,.ec_wise_ad,div[class^='result-op'][tpl='right_tabs'][data-click],div[class^='result-op'][tpl='right_links'][data-click],#searchTag,#content_left>div.c-container[tpl="recommend_list"],#con-ar div:is([tpl='interactive'],[tpl="right_recommends_merge"]),div.result-op.cr-content:has([id='ai-accompanies-container']),div.result-molecule[tpl="app/rs"],.hint_right_top:has([tpl='app/hint-chat-entry']),.hint_right_middle:has([tpl='app/hint-head-top']),div.new-pmd:not(.result):has(.c-recommend)`;
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "baidu_ad", immed: true })({ selectors, siteName: "Baidu", isRemoveNodes: true });
-              }
-            },
-            google: {
-              siteTypeID: 2,
-              siteButtonName: "𝐆𝐨𝐨𝐠𝐥𝐞",
-              siteNickName: IS_CHN ? "𝐆𝐨𝐨𝐠𝐥𝐞 搜索" : "𝐆𝐨𝐨𝐠𝐥𝐞.𝐜𝐨𝐦",
-              siteHostName: "www.google.com",
-              webURL: "https://www.google.com/search?newwindow=1&sca_upv=1&source=hp&q=",
-              imageURL: "https://www.google.com/search?newwindow=1&sca_upv=1&source=lnms&udm=2&sa=X&q=",
-              imageType: ["2"],
-              splitTypeName: "udm",
-              mainSelector: "form div.RNNXgb",
-              overrideCss: `#pnnext>span:nth-child(2){clear:left}`,
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:-1px 5px 0 -3px;justify-content:center;align-items:center;flex-wrap:nowrap}.ACRAdd{border-left:1px solid #dadce0;height:65%;padding:0 10px 0 0}#${def.const.leftButton},#${def.const.leftButton}{display:inline-block;margin:0 2px 0 0}input{margin:0;height:40px;min-width:90px;border:0;background:#0b57d0;color:#fff;box-shadow:0 0 2px #00000059;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:24px 0 0 24px}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 24px 24px 0}input:hover{opacity:.88}:host(.${def.const.scrollspan}){min-height:24px!important}.${def.const.scrollbars}{display:inline-block;margin:0;padding-bottom:0!important;height:24px!important;font-size:12px!important}`,
-              darkModeCss: `:host(.${def.const.darkmode}) input{background:#c2e7ff;color:#001d35}:host(.${def.const.darkmode}) .ACRAdd{border-left:1px solid #f8f9fa40}:host(.${def.const.darkmode}) input:hover{opacity:.85}}`,
-              resultListProp: { qs: `div.MjjYud div.Ww4FFb.vt6azd[data-hveid^="C"][data-hveid$="AA"]:not(:has(div[jscontroller="TvBckd"]))`, delay: 10 },
-              keywords: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
-              antiRedirectFn: () => {
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "google_ar_rd" })("Google", "#rcnt a[href^='/goto?url=']", { useNewTab: true, advancedAnti: true });
-                const selector = `#rcnt div[data-hveid^='C'][data-hveid$='AA'] :not(h3.ob5Hkd,.d0fCJc)>a:not(.ngTNl,.oRJe3d,.k8XOCe,[jsname='ZWuC2'],.fl,#pnprev,#pnnext)`;
-                deBounce({ fn: parsingAntiRedirect, delay: 30, timer: "google_ar" })("Google", selector, { useNewTab: true, cleanAttr: ["ping"], removeDataSet: true });
+              google: {
+                siteTypeID: 2,
+                siteButtonName: "𝐆𝐨𝐨𝐠𝐥𝐞",
+                siteNickName: IS_CHN ? "𝐆𝐨𝐨𝐠𝐥𝐞 搜索" : "𝐆𝐨𝐨𝐠𝐥𝐞.𝐜𝐨𝐦",
+                siteHostName: "www.google.com",
+                webURL: "https://www.google.com/search?newwindow=1&sca_upv=1&source=hp&q=",
+                imageURL: "https://www.google.com/search?newwindow=1&sca_upv=1&source=lnms&udm=2&sa=X&q=",
+                imageType: ["2"],
+                splitTypeName: "udm",
+                mainSelector: "form div.RNNXgb",
+                overrideCss: `#pnnext>span:nth-child(2){clear:left}`,
+                buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:-1px 5px 0 -3px;justify-content:center;align-items:center;flex-wrap:nowrap}.ACRAdd{border-left:1px solid #dadce0;height:65%;padding:0 10px 0 0}#${def.const.leftButton},#${def.const.leftButton}{display:inline-block;margin:0 2px 0 0}input{margin:0;height:40px;min-width:90px;border:0;background:#0b57d0;color:#fff;box-shadow:0 0 2px #00000059;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:24px 0 0 24px}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 24px 24px 0}input:hover{opacity:.88}:host(.${def.const.scrollspan}){min-height:24px!important}.${def.const.scrollbars}{display:inline-block;margin:0;padding-bottom:0!important;height:24px!important;font-size:12px!important}`,
+                darkModeCss: `:host(.${def.const.darkmode}) input{background:#c2e7ff;color:#001d35}:host(.${def.const.darkmode}) .ACRAdd{border-left:1px solid #f8f9fa40}:host(.${def.const.darkmode}) input:hover{opacity:.85}}`,
+                resultListProp: { qs: `div.MjjYud div.Ww4FFb.vt6azd[data-hveid^="C"][data-hveid$="AA"]:not(:has(div[jscontroller="TvBckd"]))`, delay: 10 },
+                keywords: ".aCOpRe em,.aCOpRe a em,.yXK7lf em,.yXK7lf a em,.st em,.st a em,.c2xzTb b,em.qkunPe",
+                antiRedirectFn: () => {
+                  if (!def.var.google) { def.var.google = true; parsingAntiRedirectForGoogle('a[href*="/goto?url="]', { useNewTab: true, forceNewTab: true, advancedAnti: true }) }
+                  const selector = `#rcnt div[data-hveid^='C'][data-hveid$='AA'] :not(h3.ob5Hkd,.d0fCJc)>a:not(.ngTNl,.oRJe3d,.k8XOCe,[jsname='ZWuC2'],.fl,#pnprev,#pnnext)`;
+                  deBounce({ fn: parsingAntiRedirect, delay: 30, timer: "google_ar" })("Google", selector, { useNewTab: true, cleanAttr: ["ping"], removeDataSet: true });
+                },
+                antiAdsFn: () => {
+                  const selectors = `div[aria-label='\u5e7f\u544a'],div[aria-label='Ads' i],#bottomads,#tvcap`;
+                  deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "google_ad", immed: true })({ selectors, siteName: "Google" });
+                }
               },
-              antiAdsFn: () => {
-                const selectors = `div[aria-label='\u5e7f\u544a'],div[aria-label='Ads' i],#bottomads,#tvcap`;
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "google_ad", immed: true })({ selectors, siteName: "Google" });
-              }
-            },
-            bing: {
-              siteTypeID: 3,
-              siteButtonName: "𝐁𝐢𝐧𝐠 ®",
-              siteNickName: IS_CHN ? "𝐁𝐢𝐧𝐠 搜索" : "𝐁𝐢𝐧𝐠.𝐜𝐨𝐦",
-              siteHostName: "www.bing.com",
-              webURL: "https://www.bing.com/search?qs=n&form=QBRE&sp=-1&lq=0&pq=&sc=0-0&hta=off&q=",
-              imageURL: "https://www.bing.com/images/search?qs=n&form=QBILPG&sp=-1&lq=0&sc=0-0&hta=off&first=1&q=",
-              imageType: ["images"],
-              splitTypeName: { split: "/", index: 1 },
-              mainSelector: `.b_searchboxForm>input[type="hidden"][name="form"]`,
-              overrideCss:
+              bing: {
+                siteTypeID: 3,
+                siteButtonName: "𝐁𝐢𝐧𝐠 ®",
+                siteNickName: IS_CHN ? "𝐁𝐢𝐧𝐠 搜索" : "𝐁𝐢𝐧𝐠.𝐜𝐨𝐦",
+                siteHostName: "www.bing.com",
+                webURL: "https://www.bing.com/search?qs=n&form=QBRE&sp=-1&lq=0&pq=&sc=0-0&hta=off&q=",
+                imageURL: "https://www.bing.com/images/search?qs=n&form=QBILPG&sp=-1&lq=0&sc=0-0&hta=off&first=1&q=",
+                imageType: ["images"],
+                splitTypeName: { split: "/", index: 1 },
+                mainSelector: `.b_searchboxForm>input[type="hidden"][name="form"]`,
+                overrideCss:
                 `html{overflow-x:auto}.${def.const.scrollbarsV2}\\.width{width:max-content!important;z-index:999!important}@media (max-width:1363px){body{--searchbox_minwidth:436px}#sa_requery{margin:15px;border-top:0.5px dashed #ccc}.hasmic.hassbi .b_searchbox,.hasmic .b_searchbox{max-width:436px}.sa_as>:is(#sa_ul,#sa_requery){width:100%!important}}.hasmic.hassbi .b_searchboxForm.as_rsform.as_show .b_searchbox,.hasmic .b_searchboxForm.as_rsform .b_searchbox,#b_header .hasmic.hassbi .b_searchboxForm.as_rsform .b_searchbox.b_softkey,#b_header .hasmic .b_searchboxForm.as_rsform .b_searchbox.b_softkey{width:var(--searchbox_minwidth,638px)}` +
                 `#b_content{--smtc-ctrl-link-foreground-brand-rest:#3c3c3c}a,#b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.nslist_card_title,.nscardlite_title,.nscardcal_title,.product-card-info--title,#b_results :is(li a.feedback-binded,li.b_vtl_deeplinks>a,li:not(:has(.b_loccardans)) :not(.b_rc_gb_sub_title,.mmtitle,#mt_tleWrp h2,#ns_mag_ht h2,.b_rcGbMod,.b_paractl)>a:not(.iacf_head,.vsb_tr_t,.b_wikiGbModHero,.wiki_seemore,.gs_mdlink,[role='button'],:has(.b_dynamicMrsSuggestionText),.acf_p_title,#imc_pbtn),.b_no a,.na_t,.l_ecrd_txt_gl>h2,.b_RichCardAnswerV2 .b_paractl>a)){color:#2440b3}#b_content #b_results .product-card-info--title{color:#2440b3!important}a:visited,#b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.nslist_card_title,.nscardlite_title,.nscardcal_title,.product-card-info--title,#b_results :is(li a.feedback-binded,li.b_vtl_deeplinks>a,li:not(:has(.b_loccardans)) :not(.b_rc_gb_sub_title,.mmtitle,#mt_tleWrp h2,#ns_mag_ht h2,.b_rcGbMod,.b_paractl)>a:not(.iacf_head,.vsb_tr_t,.b_wikiGbModHero,.wiki_seemore,.gs_mdlink,[role='button'],:has(.b_dynamicMrsSuggestionText),.acf_p_title,#imc_pbtn),.b_no a,.na_t,.l_ecrd_txt_gl>h2,.b_RichCardAnswerV2 .b_paractl>a)):visited{color:#4007a2}#b_content #b_results li :is(h2>a,h3>a).${def.const.visited}{color:#4007a2!important}` +
                 `.b_dark #b_content{--smtc-ctrl-link-foreground-brand-rest:#d2d0ce;--alinkcol:#a2b7f4}.b_dark a,.b_dark #b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.nslist_card_title,.nscardlite_title,.nscardcal_title,.product-card-info--title,#b_results :is(li a.feedback-binded,li.b_vtl_deeplinks>a,li:not(:has(.b_loccardans)) :not(.b_rc_gb_sub_title,.mmtitle,#mt_tleWrp h2,#ns_mag_ht h2,.b_rcGbMod,.b_paractl)>a:not(.iacf_head,.vsb_tr_t,.b_wikiGbModHero,.wiki_seemore,.gs_mdlink,[role='button'],:has(.b_dynamicMrsSuggestionText),.acf_p_title,#imc_pbtn),.b_no a,.na_t,.l_ecrd_txt_gl>h2,.b_RichCardAnswerV2 .b_paractl>a)){color:#a2b7f4}.b_dark #b_content #b_results .product-card-info--title{color:#a2b7f4!important}.b_dark a:visited,.b_dark #b_content :is(.b_slidebar h2 a,.b_gwaDlTitle,#b_context .mediumCardTitle,main .b_tranthis,.nslist_card_title,.nscardlite_title,.nscardcal_title,.product-card-info--title,#b_results :is(li a.feedback-binded,li.b_vtl_deeplinks>a,li:not(:has(.b_loccardans)) :not(.b_rc_gb_sub_title,.mmtitle,#mt_tleWrp h2,#ns_mag_ht h2,.b_rcGbMod,.b_paractl)>a:not(.iacf_head,.vsb_tr_t,.b_wikiGbModHero,.wiki_seemore,.gs_mdlink,[role='button'],:has(.b_dynamicMrsSuggestionText),.acf_p_title,#imc_pbtn),.b_no a,.na_t,.l_ecrd_txt_gl>h2,.b_RichCardAnswerV2 .b_paractl>a)):visited{color:#7b7fec}.b_dark #b_content #b_results li :is(h2>a,h3>a).${def.const.visited}{color:#7b7fec!important}`,
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:6;display:inline-flex;margin:var(--margin,4px 0 0 0);padding:0 4px 0 6px;width:auto;height:38px;min-width:180px;vertical-align:top;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0}input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 1px 18px;border-radius:24px 0 0 24px}#${def.const.rightButton} input{margin:0;padding:0 18px 1px 12px;border-radius:0 24px 24px 0}:host(.${def.const.scrollspan}){margin:0!important;padding:4px 3px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars}{margin:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}.${def.const.scrollbarsV2}{margin:0 0 0 1px!important;height:34px!important;border-radius:6px!important;padding:0 12px!important}input:hover{background:#f0f3f6;box-shadow:0 0 4px #174ae4;transition:background .1s linear,box-shadow .2s linear}`,
-              darkModeCss: `:host(.${def.const.darkmode}) input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}:host(.${def.const.darkmode}) input:hover{background:#a2b7f4;color:#333}`,
-              resultListProp: {
-                qs: `#b_results li.b_algo:not(.b_algoBorder,.b_topborder),#b_results li.b_vidAns .mmlist>div[id],#b_results li.b_mop .b_slidebar>div.slide,#b_topw li.b_ans,aside ol#b_context li.b_algo,#b_results li.b_ans.b_top:has(#richdev_ans)`,
-                delay: 10
-              },
-              keywords:
+                buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:6;display:inline-flex;margin:var(--margin,4px 0 0 0);padding:0 4px 0 6px;width:auto;height:38px;min-width:180px;vertical-align:top;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0}input{box-sizing:border-box;height:38px;min-width:90px;border:1px solid #174ae4;background-color:#f7faff;color:#174ae4;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{margin:0;padding:0 12px 1px 18px;border-radius:24px 0 0 24px}#${def.const.rightButton} input{margin:0;padding:0 18px 1px 12px;border-radius:0 24px 24px 0}:host(.${def.const.scrollspan}){margin:0!important;padding:4px 3px 0 8px!important;max-height:30px;vertical-align:top!important}.${def.const.scrollbars}{margin:0!important;padding:0 12px!important;max-height:30px;border-radius:4px!important;vertical-align:top!important}.${def.const.scrollbarsV2}{margin:0 0 0 1px!important;height:34px!important;border-radius:6px!important;padding:0 12px!important}input:hover{background:#f0f3f6;box-shadow:0 0 4px #174ae4;transition:background .1s linear,box-shadow .2s linear}`,
+                darkModeCss: `:host(.${def.const.darkmode}) input{border:1px solid #a2b7f4;background:transparent;color:#a2b7f4}:host(.${def.const.darkmode}) input:hover{background:#a2b7f4;color:#333}`,
+                resultListProp: {
+                  qs: `#b_results li.b_algo:not(.b_algoBorder,.b_topborder),#b_results li.b_vidAns .mmlist>div[id],#b_results li.b_mop .b_slidebar>div.slide,#b_topw li.b_ans,aside ol#b_context li.b_algo,#b_results li.b_ans.b_top:has(#richdev_ans)`,
+                  delay: 10
+                },
+                keywords:
                 Number(getUrlParam("ensearch")) || Number(gbCookies.getItem("ENSEARCH")?.match(/[=](\d)/)?.[1])
                   ? "strong,.b_no h4,.b_strong,.b_ad .b_adlabel strong,.cbl"
                   : ".sb_adTA .b_adTopIcon_domain .b_icondomian strong,.sb_adTA .b_adTopIcon_container .b_attribution strong,.sb_adTA .sb_adTextInfo .sb_TextCTA .sb_DispAndDesc strong,#b_context .b_ans strong,.sp_requery strong,.sp_recourse strong,.sb_adTA_title_link_cn strong,.b_ad .ad_esltitle ~ div strong,h2 strong,#b_results .b_algo p strong,.b_caption p strong,.b_caption .b_ad_description strong,.b_snippetBigText strong,.recommendationsTableTitle + .b_slideexp strong,.recommendationsTableTitle + table strong,.recommendationsTableTitle + ul strong,.pageRecoContainer .b_module_expansion_control strong,.pageRecoContainer .b_title > strong,.b_rs strong,#dict_ans strong,.b_listnav > .b_ans_stamp > strong,#b_content #ans_nws .na_cnt strong,.b_vidAns strong,.adltwrnmsg strong,.sb_adTA .b_adTopIcon_domain .b_icondomian strong,.b_ad .ad_esltitle~div strong,.recommendationsTableTitle+.b_slideexp strong,.recommendationsTableTitle+table strong,.recommendationsTableTitle+ul strong,.pageRecoContainer .b_title>strong,.b_listnav>.b_ans_stamp>strong",
-              antiRedirectFn: () => {
-                const checkAllRegionsRedirection = () => {
-                  parsingAntiRedirect("Bing", "#b_content li.b_pag a.b_widePag", { forceSelf: true, cleanAttr: ["h"] });
-                  parsingAntiRedirect("Bing", "#b_results li:not(.b_pag) a:not([role='button'],.b_widePag):not([href*='.bing.com/ck/a?'])", { useNewTab: true });
-                  parsingAntiRedirect("Bing", ".b_scopebar li:is(#b-scopeListItem-conv,#b-scopeListItem-local)>a:not([href*='.bing.com/ck/a?'])", { useNewTab: true });
-                  parsingAntiRedirect("Bing", ".b_scopebar li:not(#b-scopeListItem-local,#b-scopeListItem-conv)>a:not([href*='.bing.com/ck/a?'])", { forceSelf: true });
-                  parsingAntiRedirect("Bing", "#b_content a[href*='.bing.com/ck/a?'][role='button']", { advancedAnti: true, cleanAttr: ["h"] });
-                  parsingAntiRedirect("Bing", "#b_content a[href*='.bing.com/ck/a?']:not([role='button'])", { useNewTab: true, forceNewTab: true, advancedAnti: true });
-                  parsingAntiRedirect("Bing", ".b_scopebar li:is(#b-scopeListItem-conv,#b-scopeListItem-local)>a[href*='.bing.com/ck/a?']", { useNewTab: true, advancedAnti: true });
-                  parsingAntiRedirect("Bing", ".b_scopebar li:not(#b-scopeListItem-conv,#b-scopeListItem-local)>a[href*='.bing.com/ck/a?']", { forceSelf: true, advancedAnti: true });
-                };
-                deBounce({ fn: checkAllRegionsRedirection, delay: 20, timer: "bing_ar" })();
+                antiRedirectFn: () => {
+                  const checkAllRegionsRedirection = () => {
+                    parsingAntiRedirect("Bing", "#b_content li.b_pag a.b_widePag", { forceSelf: true, cleanAttr: ["h"] });
+                    parsingAntiRedirect("Bing", "#b_results li:not(.b_pag) a:not([role='button'],.b_widePag):not([href*='.bing.com/ck/a?'])", { useNewTab: true });
+                    parsingAntiRedirect("Bing", ".b_scopebar li:is(#b-scopeListItem-conv,#b-scopeListItem-local)>a:not([href*='.bing.com/ck/a?'])", { useNewTab: true });
+                    parsingAntiRedirect("Bing", ".b_scopebar li:not(#b-scopeListItem-local,#b-scopeListItem-conv)>a:not([href*='.bing.com/ck/a?'])", { forceSelf: true });
+                    parsingAntiRedirect("Bing", "#b_content a[href*='.bing.com/ck/a?'][role='button']", { advancedAnti: true, cleanAttr: ["h"] });
+                    parsingAntiRedirect("Bing", "#b_content a[href*='.bing.com/ck/a?']:not([role='button'])", { useNewTab: true, forceNewTab: true, advancedAnti: true });
+                    parsingAntiRedirect("Bing", ".b_scopebar li:is(#b-scopeListItem-conv,#b-scopeListItem-local)>a[href*='.bing.com/ck/a?']", { useNewTab: true, advancedAnti: true });
+                    parsingAntiRedirect("Bing", ".b_scopebar li:not(#b-scopeListItem-conv,#b-scopeListItem-local)>a[href*='.bing.com/ck/a?']", { forceSelf: true, advancedAnti: true });
+                  };
+                  deBounce({ fn: checkAllRegionsRedirection, delay: 20, timer: "bing_ar" })();
+                },
+                antiAdsFn: () => {
+                  const selectors = `li.b_ans>div.wpt_bc_container,li.b_ans>#relatedSearchesLGWContainer,li.b_ans>.b_rs,#b_topw:has(li.b_ad),#b_pole,#b_content .b_underSearchbox,#b_header>div[id^="bnp."][data-vertical],#b_context li.b_ans .b_spa_adblock,.ad_sc,.b_adBottom,.b_adLastChild,.b_adPATitleBlock,.b_spa_adblock,.mapsTextAds,.pa_sb,.productAd,[id$="adsMvCarousel"],a[href*="/aclick?ld="],div.pagereco_anim,#inline_rs,#ev_talkbox_wrapper,#b_content>main[aria-label]>#b_ims_bza_pole,.shop_page .br-poleoffcarousel,#b_content>div#pole>div[class="ra_car_block ra_pole"]>div.ra_car_container,#pole>.productAd[data-ad-carousel],.b_adPATitleBlock+div,a.sb_meta[href^="http://advertise.bingads.microsoft.com"],.promotion-panel-inner,.ins_exp.vsp,li[class="b_algo"]:has(.b_attribution[data-partnertag] + p[class]),.b_ans:has([class^="xm_"][class*="_ansCont"]),.b_inline_ajax_rs,div[id^="bnp.nid"][data-viewname="VerticalHeaderFlyout"]`;
+                  deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "bing_ad", immed: true })({ selectors, siteName: "Bing" });
+                }
               },
-              antiAdsFn: () => {
-                const selectors = `li.b_ans>div.wpt_bc_container,li.b_ans>#relatedSearchesLGWContainer,li.b_ans>.b_rs,#b_topw:has(li.b_ad),#b_pole,#b_content .b_underSearchbox,#b_header>div[id^="bnp."][data-vertical],#b_context li.b_ans .b_spa_adblock,.ad_sc,.b_adBottom,.b_adLastChild,.b_adPATitleBlock,.b_spa_adblock,.mapsTextAds,.pa_sb,.productAd,[id$="adsMvCarousel"],a[href*="/aclick?ld="],div.pagereco_anim,#inline_rs,#ev_talkbox_wrapper,#b_content>main[aria-label]>#b_ims_bza_pole,.shop_page .br-poleoffcarousel,#b_content>div#pole>div[class="ra_car_block ra_pole"]>div.ra_car_container,#pole>.productAd[data-ad-carousel],.b_adPATitleBlock+div,a.sb_meta[href^="http://advertise.bingads.microsoft.com"],.promotion-panel-inner,.ins_exp.vsp,li[class="b_algo"]:has(.b_attribution[data-partnertag] + p[class]),.b_ans:has([class^="xm_"][class*="_ansCont"]),.b_inline_ajax_rs,div[id^="bnp.nid"][data-viewname="VerticalHeaderFlyout"]`;
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "bing_ad", immed: true })({ selectors, siteName: "Bing" });
-              }
-            },
-            duckduckgo: {
-              siteTypeID: 4,
-              siteButtonName: "𝐃𝐮𝐜𝐤𝐝𝐮𝐜𝐤𝐠𝐨",
-              siteNickName: IS_CHN ? "𝐃𝐮𝐜𝐤𝐝𝐮𝐜𝐤𝐠𝐨 搜索" : "𝐃𝐮𝐜𝐤𝐝𝐮𝐜𝐤𝐠𝐨",
-              siteHostName: "duckduckgo.com",
-              webURL: "https://duckduckgo.com/?k1=-1&kl=wt-wt&kd=-1&ko=1&kn=1&kp=-2&t=h_&ia=web&q=",
-              imageURL: "https://duckduckgo.com/?k1=-1&kl=wt-wt&kd=-1&ko=s&kn=1&kp=-2&t=h_&iax=images&ia=images&q=",
-              imageType: ["images"],
-              splitTypeName: "ia",
-              mainSelector: "#search_form",
-              buttonCssText: `:host(#${def.const.rndButtonID}){box-sizing:border-box;position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;height:42px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{box-sizing:border-box;margin:0 3px 0 0;padding:2px 0;height:40px}input{box-sizing:border-box;margin:0;height:42px;min-width:100px;border:none;background:var(--ds-surface-tertiary);box-shadow:0 10px 20px 0 rgba(0,0,0,.02),0 2px 6px 0 rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.08);color:var(--theme-col-txt-button-secondary);vertical-align:top;font-weight:500;font-size:18px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 10px 1px 15px;border-radius:26px 0 0 26px}#${def.const.rightButton} input{padding:0 15px 1px 10px;border-radius:0 26px 26px 0}input:hover{background-color:var(--ds-accent-primary);color:var(--sds-color-text-on-color)}`,
-              resultListProp: {
-                qs: `ol.react-results--main>li[data-layout="organic"],ol.react-results--main>li[data-layout="videos"] div.module--carousel__item,ol.react-results--main>li:has(div[data-react-module-id="about"])`,
-                delay: 10
+              duckduckgo: {
+                siteTypeID: 4,
+                siteButtonName: "𝐃𝐮𝐜𝐤𝐝𝐮𝐜𝐤𝐠𝐨",
+                siteNickName: IS_CHN ? "𝐃𝐮𝐜𝐤𝐝𝐮𝐜𝐤𝐠𝐨 搜索" : "𝐃𝐮𝐜𝐤𝐝𝐮𝐜𝐤𝐠𝐨",
+                siteHostName: "duckduckgo.com",
+                webURL: "https://duckduckgo.com/?k1=-1&kl=wt-wt&kd=-1&ko=1&kn=1&kp=-2&t=h_&ia=web&q=",
+                imageURL: "https://duckduckgo.com/?k1=-1&kl=wt-wt&kd=-1&ko=s&kn=1&kp=-2&t=h_&iax=images&ia=images&q=",
+                imageType: ["images"],
+                splitTypeName: "ia",
+                mainSelector: "#search_form",
+                buttonCssText: `:host(#${def.const.rndButtonID}){box-sizing:border-box;position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;height:42px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{box-sizing:border-box;margin:0 3px 0 0;padding:2px 0;height:40px}input{box-sizing:border-box;margin:0;height:42px;min-width:100px;border:none;background:var(--ds-surface-tertiary);box-shadow:0 10px 20px 0 rgba(0,0,0,.02),0 2px 6px 0 rgba(0,0,0,.06),0 0 0 1px rgba(0,0,0,.08);color:var(--theme-col-txt-button-secondary);vertical-align:top;font-weight:500;font-size:18px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 10px 1px 15px;border-radius:26px 0 0 26px}#${def.const.rightButton} input{padding:0 15px 1px 10px;border-radius:0 26px 26px 0}input:hover{background-color:var(--ds-accent-primary);color:var(--sds-color-text-on-color)}`,
+                resultListProp: {
+                  qs: `ol.react-results--main>li[data-layout="organic"],ol.react-results--main>li[data-layout="videos"] div.module--carousel__item,ol.react-results--main>li:has(div[data-react-module-id="about"])`,
+                  delay: 10
+                },
+                keywords: "strong, b",
+                antiRedirectFn: null,
+                antiAdsFn: () => {
+                  const selectors = `.footer,.react-results--main>li[data-layout="related_searches"]>div[class]`;
+                  deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "ddg_ad", immed: true })({ selectors, siteName: "Duckduckgo", isRemoveNodes: true });
+                }
               },
-              keywords: "strong, b",
-              antiRedirectFn: null,
-              antiAdsFn: () => {
-                const selectors = `.footer,.react-results--main>li[data-layout="related_searches"]>div[class]`;
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "ddg_ad", immed: true })({ selectors, siteName: "Duckduckgo", isRemoveNodes: true });
-              }
-            },
-            sogou: {
-              siteTypeID: 5,
-              siteButtonName: IS_CHN ? "搜狗搜索" : "𝐒𝐨𝐠𝐨𝐮",
-              siteNickName: IS_CHN ? "搜狗 搜索" : "𝐒𝐨𝐠𝐨𝐮.𝐜𝐨𝐦",
-              siteHostName: "www.sogou.com",
-              webURL: "https://www.sogou.com/web?query=",
-              imageURL: "https://pic.sogou.com/pics?query=",
-              imageType: ["pics", "d", "v"],
-              splitTypeName: { split: "/", index: 1 },
-              mainSelector: `input#searchBtn,input[type='button'][uigs='search_article'],input[type='submit']:is(.search-btn,.sbtn1)`,
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:var(--position,absolute);top:0;right:var(--right,unset);z-index:99999;display:inline-flex;margin:0;padding:0;width:auto;height:34px;cursor:pointer;-webkit-appearance:none;opacity:var(--opacity,0);justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:34px}input{margin:0;padding:0 18px 1px 18px;height:38px;min-width:100px;border:1px solid #222;border-radius:12px;background:#f5f5f5;color:#000;font-weight:500;font-size:15px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}input:hover{background:#e9f2ff;color:#205aef}.${def.notice.random}_images{margin-top:-1px;height:34px!important;border:1px solid #ababab!important;border-radius:3px!important;background:##fafafa!important}.${def.notice.random}_weixin{margin-top:0;height:34px!important;border:1px solid #00a06a!important;border-radius:2px!important;background:#fff!important;color:#00a06a!important;font-size:15px!important}.${def.notice.random}_weixin:hover{background:#f7fffd!important}`,
-              resultListProp: { qs: `div.results div.vrwrap,div.results div.rb`, delay: 10 },
-              keywords: "#wrapper em",
-              antiRedirectFn: () =>
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "sogou_ar" })("Sogou", "#wrapper a[href^='/link?url=']:not([uigs])", { useNewTab: true, advancedAnti: true }),
-              antiAdsFn: () => {
-                const selectors = `#biz_tip_box_tuiguang_float,.pz_pc_new_container,.share-wrap,.sponsored,.tgad-box,[class~="ext_query"][id*="sq_ext_"],div.top-better-hintBox,#right>div.rvr-model:not([tpl]),.results .reactResult,.results div.vrwrap.middle-better-hintBox,#right>.reactResult,#searchBtn2[value="\u5168\u7f51\u641c\u7d22"],div.result_list.click-better-sugg`;
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "sogou_ad", immed: true })({ selectors, siteName: "Sogou", isRemoveNodes: true });
-              }
-            },
-            qwant: {
-              siteTypeID: 6,
-              siteButtonName: "𝐐𝐰𝐚𝐧𝐭",
-              siteNickName: IS_CHN ? "𝐐𝐰𝐚𝐧𝐭 搜索" : "𝐐𝐰𝐚𝐧𝐭.𝐜𝐨𝐦",
-              siteHostName: "www.qwant.com",
-              webURL: "https://www.qwant.com/?locale=en_AU&t=web&b=1&q=",
-              imageURL: "https://www.qwant.com/?locale=en_AU&t=images&b=1&q=",
-              imageType: ["images"],
-              splitTypeName: "t",
-              mainSelector: "form[data-testid='mainSearchBar']",
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;height:48px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:48px}input{box-sizing:content-box;margin:1px 0;height:48px;min-width:70px;outline:none;border:none;box-shadow:var(--shadow-searchbar-elevation);transition:box-shadow var(--motion-duration-200) var(--motion-ease),color var(--motion-duration-300) var(--motion-ease),background-color var(--motion-duration-300) var(--motion-ease);background-color:var(--color-elevation-surface-elevation);color:var(--color-text-primary);vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px!important;border-radius:var(--border-radius-300) 0 0 var(--border-radius-300)}#${def.const.rightButton} input{padding:0 18px 1px 12px!important;border-radius:0 var(--border-radius-300) var(--border-radius-300) 0}input:hover{background-image:var(--gradient-background-primary);color:#fefefe}`,
-              resultListProp: { qs: `div[data-testid="containerWeb"] div[data-testid="sectionWeb"]>div>div,.is-sidebar>div>div div[style="display: block;"]`, delay: 50 },
-              keywords: "mark",
-              antiRedirectFn: null,
-              antiAdsFn: () => {
-                const selectors = `div[data-testid="containerWeb"] section div[style="display: block;"]:has([data-testid="aserpok"]),.is-sidebar>div>div:has([data-testid="aserpok"]),[data-testid="containerWeb"] section>div>div:last-child`;
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "qwant_ad", immed: true })({ selectors, siteName: "Qwant" });
-              }
-            },
-            yandex: {
-              siteTypeID: 7,
-              siteButtonName: "𝐘𝐚𝐧𝐝𝐞𝐱",
-              siteNickName: IS_CHN ? "𝐘𝐚𝐧𝐝𝐞𝐱 搜索" : "𝐘𝐚𝐧𝐝𝐞𝐱.𝐜𝐨𝐦",
-              siteHostName: "yandex.com",
-              webURL: `https://yandex.${navigator.language === "ru" ? "ru" : "com"}/search/?text=`,
-              imageURL: `https://yandex.${navigator.language === "ru" ? "ru" : "com"}/images/search?from=tabbar&family=no&text=`,
-              imageType: ["images"],
-              splitTypeName: { split: "/", index: 1 },
-              mainSelector: "header form.HeaderForm",
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:0 5px 0 -10px;padding:0;width:auto;height:52px;cursor:pointer;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0;height:52px}input{height:52px;min-width:110px;border:none;box-shadow:0 0 0 2px inset var(--depot-color-header-form-border);background:transparent;color:var(--depot-color-text-primary);font-weight:500;font-size:18px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:28px 0 0 28px;}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 28px 28px 0}input:hover{background:var(--depot-color-control-secondary);color:var(--depot-color-link-hovered)}`,
-              darkModeCss: `:host(.${def.const.darkmode}) input{color:var(--depot-color-text-quaternary);box-shadow:0 0 0 2px inset var(--depot-color-header-form-border)}:host(.${def.const.darkmode}) input:hover{color:var(--depot-color-link-hovered);background:var(--depot-color-control-secondary)}`,
-              resultListProp: { qs: "#search-result>li[data-fast]", delay: 10 },
-              keywords: ".OrganicTitleContentSpan b,.OrganicTextContentSpan b",
-              antiRedirectFn: () => deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yandex_ar" })("Yandex", "#search-result>li.serp-item a", { useNewTab: true, removeDataSet: true }),
-              antiAdsFn: () => {
-                const selectors = `#distr-pcode-container>div,div.HeaderDesktopActions-Distribution.HeaderDesktopActions-Item,div[tabindex][class*='location_right-bottom'],span.distr-nav,div.market-cart,.SerpListFeature :is(.DirectInlineContainer,.Skeleton_type_ad_search),div[id*='-cross-page-']`;
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "yandex_ad", immed: true })({ selectors, siteName: "Yandex", isRemoveNodes: true });
-              }
-            },
-            so360: {
-              siteTypeID: 8,
-              siteButtonName: IS_CHN ? "𝟑𝟔𝟎搜索" : "𝟑𝟔𝟎𝐬𝐨",
-              siteNickName: IS_CHN ? "𝟑𝟔𝟎 搜索" : "𝐰𝐰𝐰.𝐬𝐨.𝐜𝐨𝐦",
-              siteHostName: "www.so.com",
-              webURL: "https://www.so.com/s?ie=utf-8&q=",
-              imageURL: "https://image.so.com/i?q=",
-              imageType: ["i"],
-              splitTypeName: { split: "/", index: 1 },
-              mainSelector: "#ai-textarea-form,button[type='submit'][class~='so-search__button']",
-              overrideCss: `#hd-rtools{z-index:199!important}`,
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;display:inline-flex;z-index:99999;margin:var(--margin,0 0 0 5px);padding:0;width:auto;height:40px;cursor:pointer;justify-content:center;align-items:center;flex-wrap:nowrap;vertical-align:top;left:var(--left,0)}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;padding:0 2px 0 0;height:40px}input{margin:0;padding:0 18px 1px 18px;height:40px;min-width:100px;border:var(--border,1px solid #0fb264);background:var(--background,#0fb264);color:#fff;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;vertical-align:top;cursor:pointer}#${def.const.leftButton} input{border-radius:8px 0 0 8px;}#${def.const.rightButton} input{border-radius:0 8px 8px 0}input:hover{box-shadow: 0 1px 2px #0000001a;background:#2dc471}`,
-              resultListProp: { qs: `ul.result>li.res-list`, delay: 10 },
-              keywords: "em,#mohe-newdict_dict .mh-exsentence b",
-              antiRedirectFn: () => {
-                const selector = ".res-list a[href*='//www.so.com/link?m=']";
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "so360_ar" })("So360", selector, { useNewTab: true, cleanAttr: ["e_href", "data-res"], advancedAnti: true });
+              sogou: {
+                siteTypeID: 5,
+                siteButtonName: IS_CHN ? "搜狗搜索" : "𝐒𝐨𝐠𝐨𝐮",
+                siteNickName: IS_CHN ? "搜狗 搜索" : "𝐒𝐨𝐠𝐨𝐮.𝐜𝐨𝐦",
+                siteHostName: "www.sogou.com",
+                webURL: "https://www.sogou.com/web?query=",
+                imageURL: "https://pic.sogou.com/pics?query=",
+                imageType: ["pics", "d", "v"],
+                splitTypeName: { split: "/", index: 1 },
+                mainSelector: `input#searchBtn,input[type='button'][uigs='search_article'],input[type='submit']:is(.search-btn,.sbtn1)`,
+                buttonCssText: `:host(#${def.const.rndButtonID}){position:var(--position,absolute);top:0;right:var(--right,unset);z-index:99999;display:inline-flex;margin:0;padding:0;width:auto;height:34px;cursor:pointer;-webkit-appearance:none;opacity:var(--opacity,0);justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:34px}input{margin:0;padding:0 18px 1px 18px;height:38px;min-width:100px;border:1px solid #222;border-radius:12px;background:#f5f5f5;color:#000;font-weight:500;font-size:15px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}input:hover{background:#e9f2ff;color:#205aef}.${def.notice.random}_images{margin-top:-1px;height:34px!important;border:1px solid #ababab!important;border-radius:3px!important;background:##fafafa!important}.${def.notice.random}_weixin{margin-top:0;height:34px!important;border:1px solid #00a06a!important;border-radius:2px!important;background:#fff!important;color:#00a06a!important;font-size:15px!important}.${def.notice.random}_weixin:hover{background:#f7fffd!important}`,
+                resultListProp: { qs: `div.results div.vrwrap,div.results div.rb`, delay: 10 },
+                keywords: "#wrapper em",
+                antiRedirectFn: () =>
+                  deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "sogou_ar" })("Sogou", "#wrapper a[href^='/link?url=']:not([uigs])", { useNewTab: true, advancedAnti: true }),
+                antiAdsFn: () => {
+                  const selectors = `#biz_tip_box_tuiguang_float,.pz_pc_new_container,.share-wrap,.sponsored,.tgad-box,[class~="ext_query"][id*="sq_ext_"],div.top-better-hintBox,#right>div.rvr-model:not([tpl]),.results .reactResult,.results div.vrwrap.middle-better-hintBox,#right>.reactResult,#searchBtn2[value="\u5168\u7f51\u641c\u7d22"],div.result_list.click-better-sugg`;
+                  deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "sogou_ad", immed: true })({ selectors, siteName: "Sogou", isRemoveNodes: true });
+                }
               },
-              antiAdsFn: () => {
-                const selectors = `#so_bd-ad,#e_idea_pp,#righttop_box,[id^='mohe-360pic_ext--'],.res-mediav,.map_business_con,.lianmeng-ad,.res-mediav-right,.atom-adv,.e-buss,.spread,ul[data-so-biz-monitor-so-display],.related_query li.cm,ul>div.inline-recommend,div#so_top,div#so-activity-entry,div.mh-relate-text,.section li[data-id^="related_query_init_"],#mohe-know_side_nlp,#rs-top>dd.rs-top`;
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "so360_ad", immed: true })({ selectors, siteName: "So360", isRemoveNodes: true });
-              }
-            },
-            toutiao: {
-              siteTypeID: 9,
-              siteButtonName: IS_CHN ? "搜头条" : "𝐓𝐨𝐮𝐭𝐢𝐚𝐨",
-              siteNickName: IS_CHN ? "头条 搜索" : "𝐬𝐨.𝐭𝐨𝐮𝐭𝐢𝐚𝐨.𝐜𝐨𝐦",
-              siteHostName: "so.toutiao.com",
-              webURL: "https://so.toutiao.com/search?dvpf=pc&keyword=",
-              imageURL: "https://so.toutiao.com/search?dvpf=pc&pd=atlas&from=gallery&keyword=",
-              imageType: ["atlas"],
-              splitTypeName: "pd",
-              mainSelector: "div[class^='search'][data-log-click]",
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;display:inline-flex;top:-1px;right:var(--right,unset);z-index:99999;margin:0;padding:0;width:auto;height:44px;cursor:pointer;justify-content:center;align-items:center;flex-wrap:nowrap;opacity:var(--opacity,0)}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 2px 0 0;height:44px}input{margin:0;height:44px;min-width:100px;border:1px solid transparent;background:#f04142;color:#fff;vertical-align:top;font-weight:500;font-size:17px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 10px 1px 15px;border-radius:8px 0 0 8px}#${def.const.rightButton} input{padding:0 15px 1px 10px;border-radius:0 8px 8px 0}input:hover{background-color:#f04142b3;color:#fff}`,
-              resultListProp: { qs: `div.s-result-list:not(.pd-video)>div.result-content[data-i]`, delay: 10 },
-              keywords: "em",
-              antiRedirectFn: () =>
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "toutiao_ar" })("Toutiao", ".main a[href*='/search/jump?url=']", { useNewTab: true, advancedAnti: true }),
-              antiAdsFn: null
-            },
-            kaifa: {
-              siteTypeID: 10,
-              siteButtonName: IS_CHN ? "百度开发者" : "𝐃𝐞𝐯.𝐁𝐚𝐢𝐝𝐮",
-              siteNickName: IS_CHN ? "百度开发者 搜索" : "𝐃𝐞𝐯.𝐁𝐚𝐢𝐝𝐮",
-              siteHostName: "kaifa.baidu.com",
-              webURL: "https://kaifa.baidu.com/searchPage?module=SEARCH&wd=",
-              imageURL: "https://kaifa.baidu.com/searchPage?module=SUG&wd=",
-              imageType: [null],
-              splitTypeName: "",
-              mainSelector: "div#search-box-container .ant-input-group-addon",
-              overrideCss: `.ant-input-group-addon{background:transparent!important}`,
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;left:5px;z-index:99999;display:inline-flex;margin:0;height:40px;vertical-align:top;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0;height:40px}input{margin:0;height:40px;min-width:90px;border:1px solid var(--ee-brand-6);background:var(--ee-brand-6);color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:10px 0 0 10px}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 10px 10px 0}input:hover{border:1px solid var(--ee-brand-5);background:var(--ee-brand-5)}`,
-              resultListProp: { qs: `ul.ant-list-items>li.ant-list-item`, delay: 10 },
-              keywords: "mark",
-              antiRedirectFn: null,
-              antiAdsFn: () => deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "kaifa_ad", immed: true })({ selectors: `#reward-entry`, siteName: "Kaifa", isRemoveNodes: true })
-            },
-            ecosia: {
-              siteTypeID: 11,
-              siteButtonName: "𝐄𝐜𝐨𝐬𝐢𝐚",
-              siteNickName: IS_CHN ? "𝐄𝐜𝐨𝐬𝐢𝐚 搜索" : "𝐄𝐜𝐨𝐬𝐢𝐚.𝐨𝐫𝐠",
-              siteHostName: "www.ecosia.org",
-              webURL: "https://www.ecosia.org/search?method=index&q=",
-              imageURL: "https://www.ecosia.org/images?q=",
-              imageType: ["images"],
-              splitTypeName: { split: "/", index: 1 },
-              mainSelector: "form[role='search'][class~='search-form'][data-test-id='main-header-search-form']",
-              overrideCss: `.mainline__result-wrapper{visibility:visible!important}`,
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:0;height:40px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0;height:40px}input{margin:0;height:40px;min-width:100px;border:1px solid var(--color-form-border-default);background:var(--color-background-primary);box-shadow:0 1px 2px #1a1a1a2e,0 0 8px #1a1a1a0f;color:var(--color-brand-primary);vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:20px 0 0 20px;}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 20px 20px 0}input:hover{border:1px solid varvar(--color-button-background-featured-hover);background:var(--color-button-background-featured-hover);color:var(--color-button-content-secondary-static)}`,
-              resultListProp: { qs: `.mainline__content>div>div.mainline__result-wrapper,aside>article[position="sidebar"]`, delay: 150 },
-              keywords: null,
-              antiRedirectFn: null,
-              antiAdsFn: () => {
-                const selectors = `div[data-test-id="sidebar-onboarding"][href],div.main-header__install-cta,div.main-footer-visual__cards,div.personal-counter__tooltip,div.cookie-wrapper,div.mainline__footer>a[data-test-id='chat-entry'],[data-test-id="mainline-result-ad"],div.related-queries__bottom[data-test-id="web-related-queries"]`;
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "ecosia_ad", immed: true })({ selectors, siteName: "Ecosia" });
-              }
-            },
-            yahoo: {
-              siteTypeID: 12,
-              siteButtonName: "𝐘𝐚𝐡𝐨𝐨",
-              siteNickName: IS_CHN ? "𝐘𝐚𝐡𝐨𝐨 搜索" : "𝐬𝐞𝐚𝐫𝐜𝐡.𝐘𝐚𝐡𝐨𝐨",
-              siteHostName: "search.yahoo.com",
-              webURL: "https://search.yahoo.com/search?p=",
-              imageURL: "https://images.search.yahoo.com/search/images?p=",
-              imageType: ["images"],
-              splitTypeName: () => CUR_HOST_NAME.split(".").slice(-4, -3)[0],
-              mainSelector: "#hd div.sbx form#search_p,.clr>.sbx>form#sf",
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;margin:0 0 0 10px;width:max-content;height:var(--height,52px);justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0;height:var(--height,52px)}input{box-sizing:content-box;margin:0;height:var(--height,52px);min-width:70px;border:none;background:#7e1fff;color:#fff;vertical-align:top;font-weight:500;font-size:18px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:100px 0 0 100px;}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 100px 100px 0}input:hover{border:none;background:#6001d2;color:#fff}`,
-              resultListProp: { qs: `#web>ol>li`, delay: 10 },
-              keywords: "strong",
-              antiRedirectFn: () => {
-                const selector = `#main a:is([href^='https://r.search.yahoo.com/_ylt='],[href^='https://images.search.yahoo.com/search/images;_ylt='],[href^='https://video.search.yahoo.com/search/video;_ylt='])`;
-                deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yahoo_ar" })("Yahoo", selector, { useNewTab: true, advancedAnti: true });
+              qwant: {
+                siteTypeID: 6,
+                siteButtonName: "𝐐𝐰𝐚𝐧𝐭",
+                siteNickName: IS_CHN ? "𝐐𝐰𝐚𝐧𝐭 搜索" : "𝐐𝐰𝐚𝐧𝐭.𝐜𝐨𝐦",
+                siteHostName: "www.qwant.com",
+                webURL: "https://www.qwant.com/?locale=en_AU&t=web&b=1&q=",
+                imageURL: "https://www.qwant.com/?locale=en_AU&t=images&b=1&q=",
+                imageType: ["images"],
+                splitTypeName: "t",
+                mainSelector: "form[data-testid='mainSearchBar']",
+                buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;height:48px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:48px}input{box-sizing:content-box;margin:1px 0;height:48px;min-width:70px;outline:none;border:none;box-shadow:var(--shadow-searchbar-elevation);transition:box-shadow var(--motion-duration-200) var(--motion-ease),color var(--motion-duration-300) var(--motion-ease),background-color var(--motion-duration-300) var(--motion-ease);background-color:var(--color-elevation-surface-elevation);color:var(--color-text-primary);vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px!important;border-radius:var(--border-radius-300) 0 0 var(--border-radius-300)}#${def.const.rightButton} input{padding:0 18px 1px 12px!important;border-radius:0 var(--border-radius-300) var(--border-radius-300) 0}input:hover{background-image:var(--gradient-background-primary);color:#fefefe}`,
+                resultListProp: { qs: `div[data-testid="containerWeb"] div[data-testid="sectionWeb"]>div>div,.is-sidebar>div>div div[style="display: block;"]`, delay: 50 },
+                keywords: "mark",
+                antiRedirectFn: null,
+                antiAdsFn: () => {
+                  const selectors = `div[data-testid="containerWeb"] section div[style="display: block;"]:has([data-testid="aserpok"]),.is-sidebar>div>div:has([data-testid="aserpok"]),[data-testid="containerWeb"] section>div>div:last-child`;
+                  deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "qwant_ad", immed: true })({ selectors, siteName: "Qwant" });
+                }
               },
-              antiAdsFn: () => {
-                const selectors = `#main ol.searchCenterBottomAds,#main ol.searchCenterTopAds`;
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "yahoo_ad", immed: true })({ selectors, siteName: "Yahoo" });
-              }
-            },
-            info: {
-              siteTypeID: 13,
-              siteButtonName: "𝐈𝐧𝐟𝐨 ®",
-              siteNickName: IS_CHN ? "𝐈𝐧𝐟𝐨 搜索" : "𝐈𝐧𝐟𝐨.𝐜𝐨𝐦",
-              siteHostName: "www.info.com",
-              webURL: `https://www.info.com/serp?q=`,
-              imageURL: `https://www.info.com/serp?qc=images&q=`,
-              imageType: ["images"],
-              splitTypeName: "qc",
-              mainSelector: "form#search button.search-form__button",
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:2px 0 0 5px;padding:0;height:40px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:40px}input{margin:1px 0;height:38px;min-width:90px;border:0 solid transparent;background:#f9f9f9;box-shadow:0 0 2px #a4a5bb;color:#136ad5;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 16px 1px 20px;border-radius:30px 0 0 30px}#${def.const.rightButton} input{padding:0 20px 1px 16px;border-radius: 0 30px 30px 0}input:hover{background:#fff;color:#111}`,
-              resultListProp: { qs: `.web-google>div.web-google__result`, delay: 1e2 },
-              keywords: ``,
-              antiRedirectFn: null,
-              antiAdsFn: null
-            },
-            startpage: {
-              siteTypeID: 14,
-              siteButtonName: "𝐒𝐭𝐚𝐫𝐭𝐩𝐚𝐠𝐞",
-              siteNickName: IS_CHN ? "𝐒𝐭𝐚𝐫𝐭𝐩𝐚𝐠𝐞 搜索" : "𝐒𝐭𝐚𝐫𝐭𝐩𝐚𝐠𝐞.𝐜𝐨𝐦",
-              siteHostName: "www.startpage.com",
-              webURL: `https://www.startpage.com/sp/search?t=device&segment=startpage.${brand.toLowerCase()}&cat=web&query=`,
-              imageURL: `https://www.startpage.com/sp/search?t=device&segment=startpage.${brand.toLowerCase()}&cat=images&query=`,
-              imageType: ["images"],
-              splitTypeName: "cat",
-              mainSelector: "#search[role='search'] button.search-btn",
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:-2px 2px 0 0;padding:0;height:44px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:44px}input{margin:0;height:44px;min-width:90px;border:0 solid transparent;background:#f1f3ff;box-shadow:0 0 2px #a4a5bb;color:#2e39b3;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 16px 1px 20px;border-radius:30px 0 0 30px}#${def.const.rightButton} input{padding:0 20px 1px 16px;border-radius: 0 30px 30px 0}input:hover{background:#6573ff;color:#fff}`,
-              darkModeCss: `:host(.${def.const.darkmode}) input{border:1px solid #252b3b;background:#252b3b;color:#fff}:host(.${def.const.darkmode}) input:hover{border:1px solid #6573ff;background:#6573ff;color:#222}`,
-              resultListProp: { qs: `#main>.w-gl>div.result,.wiki-container>div[role="region"]`, delay: 1e2 },
-              keywords: `.result b`,
-              antiRedirectFn: null,
-              antiAdsFn: () => {
-                const selectors = `section.a-gl-tp,div.widget-install-legacy,div.mainline-results>div.block-display,.Firefox-promo`;
-                deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "startpage_ad", immed: true })({ selectors, siteName: "Startpage" });
-              }
-            },
-            brave: {
-              siteTypeID: 15,
-              siteButtonName: "𝐁𝐫𝐚𝐯𝐞",
-              siteNickName: IS_CHN ? "𝐁𝐫𝐚𝐯𝐞 搜索" : "𝐬𝐞𝐚𝐫𝐜𝐡.𝐁𝐫𝐚𝐯𝐞",
-              siteHostName: "search.brave.com",
-              webURL: "https://search.brave.com/search?source=web&q=",
-              imageURL: "https://search.brave.com/images?source=web&spellcheck=0&q=",
-              imageType: ["images"],
-              splitTypeName: { split: "/", index: 1 },
-              mainSelector: "div#autocomplete",
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;margin:0;padding:0;width:max-content;height:var(--search-form-height);justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.rightButton},#${def.const.leftButton}{display:inline-block;margin:0 3px 0 0;padding:0;height:100%}input{box-sizing:border-box;margin:0;height:calc(var(--search-form-height) - 1px);min-width:100px;border:none;outline:1px solid var(--color-serp-divider-subtle-container);box-shadow:-1px 2px 3px #00000038;background:var(--color-search-background-search-bar);color:var(--color-text-primary);vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 16px 0 24px;border-radius:var(--border-radius-xxl) 0 0 var(--border-radius-xxl)}#${def.const.rightButton} input{padding:0 24px 0 16px;border-radius:0 var(--border-radius-xxl) var(--border-radius-xxl) 0}input:hover{color:var(--color-primitive-white, #fff);background:linear-gradient(314deg,#fa7250 8.49%,#ff1893 43.72%,#a78aff 99.51%)}`,
-              resultListProp: { qs: `#results>div.snippet[data-type],#results>.standalone>.video-item`, delay: 10 },
-              keywords: `.snippet-content strong`,
-              antiRedirectFn: null,
-              antiAdsFn: null
-            },
-            yep: {
-              siteTypeID: 16,
-              siteButtonName: "𝐘𝐞𝐩 ®",
-              siteNickName: IS_CHN ? "𝐘𝐞𝐩 搜索" : "𝐘𝐞𝐩.𝐜𝐨𝐦",
-              siteHostName: "yep.com",
-              webURL: "https://yep.com/web?q=",
-              imageURL: "https://yep.com/images?q=",
-              imageType: ["images"],
-              splitTypeName: { split: "/", index: 1 },
-              mainSelector: `form div[class$="-addon"]`,
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:112;display:inline-flex;margin:0;padding:0;height:50px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 2px 0 0;height:50px}input{margin:0;height:48px;min-width:100px;border:1px solid #f1dc1b;background:var(--background--brand);color:#333;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 15px 1px 25px;border-radius:25px 0 0 25px;}#${def.const.rightButton} input{padding:0 25px 1px 15px;border-radius:0 25px 25px 0}input:hover{background:var(--background--brandHover)}`,
-              resultListProp: { qs: `div[class*='-results']>div>div>div[class*='-card'],div[class*='-sidebar']>div>div>div>div[class*='-stack']`, delay: 20 },
-              keywords: ``,
-              antiRedirectFn: () => {
-                const selector = `div[class*='-results']>div>div>div[class*='-card'] a,div[class*='-results']>div>div>div[class*='-block'] a,div[class*='-results']>div>div>div[class*='-incut'] div[class*='-newsIncut'] a,div[class*='-results']>div>div>div[class*='-incut'] div[class*='-container'] a`;
-                deBounce({ fn: parsingAntiRedirect, delay: 30, timer: "yep_ar", immed: true })("Yep", selector, { useNewTab: true, cleanAttr: ["referrerpolicy"] });
+              yandex: {
+                siteTypeID: 7,
+                siteButtonName: "𝐘𝐚𝐧𝐝𝐞𝐱",
+                siteNickName: IS_CHN ? "𝐘𝐚𝐧𝐝𝐞𝐱 搜索" : "𝐘𝐚𝐧𝐝𝐞𝐱.𝐜𝐨𝐦",
+                siteHostName: "yandex.com",
+                webURL: `https://yandex.${navigator.language === "ru" ? "ru" : "com"}/search/?text=`,
+                imageURL: `https://yandex.${navigator.language === "ru" ? "ru" : "com"}/images/search?from=tabbar&family=no&text=`,
+                imageType: ["images"],
+                splitTypeName: { split: "/", index: 1 },
+                mainSelector: "header form.HeaderForm",
+                buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:0 5px 0 -10px;padding:0;width:auto;height:52px;cursor:pointer;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0;height:52px}input{height:52px;min-width:110px;border:none;box-shadow:0 0 0 2px inset var(--depot-color-header-form-border);background:transparent;color:var(--depot-color-text-primary);font-weight:500;font-size:18px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:28px 0 0 28px;}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 28px 28px 0}input:hover{background:var(--depot-color-control-secondary);color:var(--depot-color-link-hovered)}`,
+                darkModeCss: `:host(.${def.const.darkmode}) input{color:var(--depot-color-text-quaternary);box-shadow:0 0 0 2px inset var(--depot-color-header-form-border)}:host(.${def.const.darkmode}) input:hover{color:var(--depot-color-link-hovered);background:var(--depot-color-control-secondary)}`,
+                resultListProp: { qs: "#search-result>li[data-fast]", delay: 10 },
+                keywords: ".OrganicTitleContentSpan b,.OrganicTextContentSpan b",
+                antiRedirectFn: () => deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yandex_ar" })("Yandex", "#search-result>li.serp-item a", { useNewTab: true, removeDataSet: true }),
+                antiAdsFn: () => {
+                  const selectors = `#distr-pcode-container>div,div.HeaderDesktopActions-Distribution.HeaderDesktopActions-Item,div[tabindex][class*='location_right-bottom'],span.distr-nav,div.market-cart,.SerpListFeature :is(.DirectInlineContainer,.Skeleton_type_ad_search),div[id*='-cross-page-']`;
+                  deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "yandex_ad", immed: true })({ selectors, siteName: "Yandex", isRemoveNodes: true });
+                }
               },
-              antiAdsFn: null
+              so360: {
+                siteTypeID: 8,
+                siteButtonName: IS_CHN ? "𝟑𝟔𝟎搜索" : "𝟑𝟔𝟎𝐬𝐨",
+                siteNickName: IS_CHN ? "𝟑𝟔𝟎 搜索" : "𝐰𝐰𝐰.𝐬𝐨.𝐜𝐨𝐦",
+                siteHostName: "www.so.com",
+                webURL: "https://www.so.com/s?ie=utf-8&q=",
+                imageURL: "https://image.so.com/i?q=",
+                imageType: ["i"],
+                splitTypeName: { split: "/", index: 1 },
+                mainSelector: "#ai-textarea-form,button[type='submit'][class~='so-search__button']",
+                overrideCss: `#hd-rtools{z-index:199!important}`,
+                buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;display:inline-flex;z-index:99999;margin:var(--margin,0 0 0 5px);padding:0;width:auto;height:40px;cursor:pointer;justify-content:center;align-items:center;flex-wrap:nowrap;vertical-align:top;left:var(--left,0)}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;padding:0 2px 0 0;height:40px}input{margin:0;padding:0 18px 1px 18px;height:40px;min-width:100px;border:var(--border,1px solid #0fb264);background:var(--background,#0fb264);color:#fff;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;vertical-align:top;cursor:pointer}#${def.const.leftButton} input{border-radius:8px 0 0 8px;}#${def.const.rightButton} input{border-radius:0 8px 8px 0}input:hover{box-shadow: 0 1px 2px #0000001a;background:#2dc471}`,
+                resultListProp: { qs: `ul.result>li.res-list`, delay: 10 },
+                keywords: "em,#mohe-newdict_dict .mh-exsentence b",
+                antiRedirectFn: () => {
+                  const selector = ".res-list a[href*='//www.so.com/link?m=']";
+                  deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "so360_ar" })("So360", selector, { useNewTab: true, cleanAttr: ["e_href", "data-res"], advancedAnti: true });
+                },
+                antiAdsFn: () => {
+                  const selectors = `#so_bd-ad,#e_idea_pp,#righttop_box,[id^='mohe-360pic_ext--'],.res-mediav,.map_business_con,.lianmeng-ad,.res-mediav-right,.atom-adv,.e-buss,.spread,ul[data-so-biz-monitor-so-display],.related_query li.cm,ul>div.inline-recommend,div#so_top,div#so-activity-entry,div.mh-relate-text,.section li[data-id^="related_query_init_"],#mohe-know_side_nlp,#rs-top>dd.rs-top`;
+                  deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "so360_ad", immed: true })({ selectors, siteName: "So360", isRemoveNodes: true });
+                }
+              },
+              toutiao: {
+                siteTypeID: 9,
+                siteButtonName: IS_CHN ? "搜头条" : "𝐓𝐨𝐮𝐭𝐢𝐚𝐨",
+                siteNickName: IS_CHN ? "头条 搜索" : "𝐬𝐨.𝐭𝐨𝐮𝐭𝐢𝐚𝐨.𝐜𝐨𝐦",
+                siteHostName: "so.toutiao.com",
+                webURL: "https://so.toutiao.com/search?dvpf=pc&keyword=",
+                imageURL: "https://so.toutiao.com/search?dvpf=pc&pd=atlas&from=gallery&keyword=",
+                imageType: ["atlas"],
+                splitTypeName: "pd",
+                mainSelector: "div[class^='search'][data-log-click]",
+                buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;display:inline-flex;top:-1px;right:var(--right,unset);z-index:99999;margin:0;padding:0;width:auto;height:44px;cursor:pointer;justify-content:center;align-items:center;flex-wrap:nowrap;opacity:var(--opacity,0)}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 2px 0 0;height:44px}input{margin:0;height:44px;min-width:100px;border:1px solid transparent;background:#f04142;color:#fff;vertical-align:top;font-weight:500;font-size:17px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 10px 1px 15px;border-radius:8px 0 0 8px}#${def.const.rightButton} input{padding:0 15px 1px 10px;border-radius:0 8px 8px 0}input:hover{background-color:#f04142b3;color:#fff}`,
+                resultListProp: { qs: `div.s-result-list:not(.pd-video)>div.result-content[data-i]`, delay: 10 },
+                keywords: "em",
+                antiRedirectFn: () =>
+                  deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "toutiao_ar" })("Toutiao", ".main a[href*='/search/jump?url=']", { useNewTab: true, advancedAnti: true }),
+                antiAdsFn: null
+              },
+              kaifa: {
+                siteTypeID: 10,
+                siteButtonName: IS_CHN ? "百度开发者" : "𝐃𝐞𝐯.𝐁𝐚𝐢𝐝𝐮",
+                siteNickName: IS_CHN ? "百度开发者 搜索" : "𝐃𝐞𝐯.𝐁𝐚𝐢𝐝𝐮",
+                siteHostName: "kaifa.baidu.com",
+                webURL: "https://kaifa.baidu.com/searchPage?module=SEARCH&wd=",
+                imageURL: "https://kaifa.baidu.com/searchPage?module=SUG&wd=",
+                imageType: [null],
+                splitTypeName: "",
+                mainSelector: "div#search-box-container .ant-input-group-addon",
+                overrideCss: `.ant-input-group-addon{background:transparent!important}`,
+                buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;left:5px;z-index:99999;display:inline-flex;margin:0;height:40px;vertical-align:top;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0;height:40px}input{margin:0;height:40px;min-width:90px;border:1px solid var(--ee-brand-6);background:var(--ee-brand-6);color:#fff;vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:10px 0 0 10px}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 10px 10px 0}input:hover{border:1px solid var(--ee-brand-5);background:var(--ee-brand-5)}`,
+                resultListProp: { qs: `ul.ant-list-items>li.ant-list-item`, delay: 10 },
+                keywords: "mark",
+                antiRedirectFn: null,
+                antiAdsFn: () => deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "kaifa_ad", immed: true })({ selectors: `#reward-entry`, siteName: "Kaifa", isRemoveNodes: true })
+              },
+              ecosia: {
+                siteTypeID: 11,
+                siteButtonName: "𝐄𝐜𝐨𝐬𝐢𝐚",
+                siteNickName: IS_CHN ? "𝐄𝐜𝐨𝐬𝐢𝐚 搜索" : "𝐄𝐜𝐨𝐬𝐢𝐚.𝐨𝐫𝐠",
+                siteHostName: "www.ecosia.org",
+                webURL: "https://www.ecosia.org/search?method=index&q=",
+                imageURL: "https://www.ecosia.org/images?q=",
+                imageType: ["images"],
+                splitTypeName: { split: "/", index: 1 },
+                mainSelector: "form[role='search'][class~='search-form'][data-test-id='main-header-search-form']",
+                overrideCss: `.mainline__result-wrapper{visibility:visible!important}`,
+                buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:0;height:40px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0;height:40px}input{margin:0;height:40px;min-width:100px;border:1px solid var(--color-form-border-default);background:var(--color-background-primary);box-shadow:0 1px 2px #1a1a1a2e,0 0 8px #1a1a1a0f;color:var(--color-brand-primary);vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:20px 0 0 20px;}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 20px 20px 0}input:hover{border:1px solid varvar(--color-button-background-featured-hover);background:var(--color-button-background-featured-hover);color:var(--color-button-content-secondary-static)}`,
+                resultListProp: { qs: `.mainline__content>div>div.mainline__result-wrapper,aside>article[position="sidebar"]`, delay: 150 },
+                keywords: null,
+                antiRedirectFn: null,
+                antiAdsFn: () => {
+                  const selectors = `div[data-test-id="sidebar-onboarding"][href],div.main-header__install-cta,div.main-footer-visual__cards,div.personal-counter__tooltip,div.cookie-wrapper,div.mainline__footer>a[data-test-id='chat-entry'],[data-test-id="mainline-result-ad"],div.related-queries__bottom[data-test-id="web-related-queries"]`;
+                  deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "ecosia_ad", immed: true })({ selectors, siteName: "Ecosia" });
+                }
+              },
+              yahoo: {
+                siteTypeID: 12,
+                siteButtonName: "𝐘𝐚𝐡𝐨𝐨",
+                siteNickName: IS_CHN ? "𝐘𝐚𝐡𝐨𝐨 搜索" : "𝐬𝐞𝐚𝐫𝐜𝐡.𝐘𝐚𝐡𝐨𝐨",
+                siteHostName: "search.yahoo.com",
+                webURL: "https://search.yahoo.com/search?p=",
+                imageURL: "https://images.search.yahoo.com/search/images?p=",
+                imageType: ["images"],
+                splitTypeName: () => CUR_HOST_NAME.split(".").slice(-4, -3)[0],
+                mainSelector: "#hd div.sbx form#search_p,.clr>.sbx>form#sf",
+                buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;margin:0 0 0 10px;width:max-content;height:var(--height,52px);justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 1px 0 0;height:var(--height,52px)}input{box-sizing:content-box;margin:0;height:var(--height,52px);min-width:70px;border:none;background:#7e1fff;color:#fff;vertical-align:top;font-weight:500;font-size:18px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 12px 1px 18px;border-radius:100px 0 0 100px;}#${def.const.rightButton} input{padding:0 18px 1px 12px;border-radius:0 100px 100px 0}input:hover{border:none;background:#6001d2;color:#fff}`,
+                resultListProp: { qs: `#web>ol>li`, delay: 10 },
+                keywords: "strong",
+                antiRedirectFn: () => {
+                  const selector = `#main a:is([href^='https://r.search.yahoo.com/_ylt='],[href^='https://images.search.yahoo.com/search/images;_ylt='],[href^='https://video.search.yahoo.com/search/video;_ylt='])`;
+                  deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "yahoo_ar" })("Yahoo", selector, { useNewTab: true, advancedAnti: true });
+                },
+                antiAdsFn: () => {
+                  const selectors = `#main ol.searchCenterBottomAds,#main ol.searchCenterTopAds`;
+                  deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "yahoo_ad", immed: true })({ selectors, siteName: "Yahoo" });
+                }
+              },
+              info: {
+                siteTypeID: 13,
+                siteButtonName: "𝐈𝐧𝐟𝐨 ®",
+                siteNickName: IS_CHN ? "𝐈𝐧𝐟𝐨 搜索" : "𝐈𝐧𝐟𝐨.𝐜𝐨𝐦",
+                siteHostName: "www.info.com",
+                webURL: `https://www.info.com/serp?q=`,
+                imageURL: `https://www.info.com/serp?qc=images&q=`,
+                imageType: ["images"],
+                splitTypeName: "qc",
+                mainSelector: "form#search button.search-form__button",
+                buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:2px 0 0 5px;padding:0;height:40px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:40px}input{margin:1px 0;height:38px;min-width:90px;border:0 solid transparent;background:#f9f9f9;box-shadow:0 0 2px #a4a5bb;color:#136ad5;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 16px 1px 20px;border-radius:30px 0 0 30px}#${def.const.rightButton} input{padding:0 20px 1px 16px;border-radius: 0 30px 30px 0}input:hover{background:#fff;color:#111}`,
+                resultListProp: { qs: `.web-google>div.web-google__result`, delay: 1e2 },
+                keywords: ``,
+                antiRedirectFn: null,
+                antiAdsFn: null
+              },
+              startpage: {
+                siteTypeID: 14,
+                siteButtonName: "𝐒𝐭𝐚𝐫𝐭𝐩𝐚𝐠𝐞",
+                siteNickName: IS_CHN ? "𝐒𝐭𝐚𝐫𝐭𝐩𝐚𝐠𝐞 搜索" : "𝐒𝐭𝐚𝐫𝐭𝐩𝐚𝐠𝐞.𝐜𝐨𝐦",
+                siteHostName: "www.startpage.com",
+                webURL: `https://www.startpage.com/sp/search?t=device&segment=startpage.${brand.toLowerCase()}&cat=web&query=`,
+                imageURL: `https://www.startpage.com/sp/search?t=device&segment=startpage.${brand.toLowerCase()}&cat=images&query=`,
+                imageType: ["images"],
+                splitTypeName: "cat",
+                mainSelector: "#search[role='search'] button.search-btn",
+                buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;z-index:99999;display:inline-flex;margin:-2px 2px 0 0;padding:0;height:44px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 3px 0 0;height:44px}input{margin:0;height:44px;min-width:90px;border:0 solid transparent;background:#f1f3ff;box-shadow:0 0 2px #a4a5bb;color:#2e39b3;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 16px 1px 20px;border-radius:30px 0 0 30px}#${def.const.rightButton} input{padding:0 20px 1px 16px;border-radius: 0 30px 30px 0}input:hover{background:#6573ff;color:#fff}`,
+                darkModeCss: `:host(.${def.const.darkmode}) input{border:1px solid #252b3b;background:#252b3b;color:#fff}:host(.${def.const.darkmode}) input:hover{border:1px solid #6573ff;background:#6573ff;color:#222}`,
+                resultListProp: { qs: `#main>.w-gl>div.result,.wiki-container>div[role="region"]`, delay: 1e2 },
+                keywords: `.result b`,
+                antiRedirectFn: null,
+                antiAdsFn: () => {
+                  const selectors = `section.a-gl-tp,div.widget-install-legacy,div.mainline-results>div.block-display,.Firefox-promo`;
+                  deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "startpage_ad", immed: true })({ selectors, siteName: "Startpage" });
+                }
+              },
+              brave: {
+                siteTypeID: 15,
+                siteButtonName: "𝐁𝐫𝐚𝐯𝐞",
+                siteNickName: IS_CHN ? "𝐁𝐫𝐚𝐯𝐞 搜索" : "𝐬𝐞𝐚𝐫𝐜𝐡.𝐁𝐫𝐚𝐯𝐞",
+                siteHostName: "search.brave.com",
+                webURL: "https://search.brave.com/search?source=web&q=",
+                imageURL: "https://search.brave.com/images?source=web&spellcheck=0&q=",
+                imageType: ["images"],
+                splitTypeName: { split: "/", index: 1 },
+                mainSelector: "div#autocomplete",
+                buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right,unset);z-index:99999;display:inline-flex;margin:0;padding:0;width:max-content;height:var(--search-form-height);justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.rightButton},#${def.const.leftButton}{display:inline-block;margin:0 3px 0 0;padding:0;height:100%}input{box-sizing:border-box;margin:0;height:calc(var(--search-form-height) - 1px);min-width:100px;border:none;outline:1px solid var(--color-serp-divider-subtle-container);box-shadow:-1px 2px 3px #00000038;background:var(--color-search-background-search-bar);color:var(--color-text-primary);vertical-align:top;font-weight:500;font-size:16px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:0 16px 0 24px;border-radius:var(--border-radius-xxl) 0 0 var(--border-radius-xxl)}#${def.const.rightButton} input{padding:0 24px 0 16px;border-radius:0 var(--border-radius-xxl) var(--border-radius-xxl) 0}input:hover{color:var(--color-primitive-white, #fff);background:linear-gradient(314deg,#fa7250 8.49%,#ff1893 43.72%,#a78aff 99.51%)}`,
+                resultListProp: { qs: `#results>div.snippet[data-type],#results>.standalone>.video-item`, delay: 10 },
+                keywords: `.snippet-content strong`,
+                antiRedirectFn: null,
+                antiAdsFn: null
+              },
+              mojeek: {
+                siteTypeID: 16,
+                siteButtonName: "𝐌𝐨𝐣𝐞𝐞𝐤",
+                siteNickName: IS_CHN ? "𝐌𝐨𝐣𝐞𝐞𝐤 搜索" : "𝐌𝐨𝐣𝐞𝐞𝐤.𝐜𝐨𝐦",
+                siteHostName: "www.mojeek.com",
+                webURL: "https://www.mojeek.com/search?q=",
+                imageURL: "https://www.mojeek.com/search?fmt=images&imgpr=pixabay&q=",
+                imageType: ["images"],
+                splitTypeName: "fmt",
+                mainSelector: "form[name='sf1']",
+                buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:-1px;right:var(--right,unset);z-index:100;display:inline-flex;margin:0;padding:0;height:33px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 2px 0 0;height:33px}input{box-sizing:content-box;margin:0;padding:4px 0;height:33px;min-width:90px;border:1px solid #c7c7c7;background:#fff;color:#111;box-shadow:0 2px 3px #0000000f;vertical-align:top;font-weight:500;font-size:15px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;letter-spacing:normal;cursor:pointer}#${def.const.leftButton} input{border-radius:4px 0 0 4px}#${def.const.rightButton} input{border-radius:0 4px 4px 0}input:hover{background:#fafafa;box-shadow:0 2px 5px #00000033;transition:box-shadow .1s cubic-bezier(.4,0,.2,1), -webkit-box-shadow .1s cubic-bezier(.4,0,.2,1)}`,
+                darkModeCss: `:host(.${def.const.darkmode}) input{background:#1e1e1e;color:#fff;border:1px solid grey;box-shadow:0 2px 3px #0000000f}:host(.${def.const.darkmode}) input:hover{background:#303030;color:#fafafa}`,
+                resultListProp: { qs: `.results>ul.results-standard>li`, delay: 10 },
+                keywords: `b, strong`,
+                antiRedirectFn: () => deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "mojeek_ar" })("Mojeek", ".results>ul>li :is(:not(.more)>a,>a)", { useNewTab: true }),
+                antiAdsFn: () => deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "mojeek_ad", immed: true })({ selectors: ".sf1>form>button~a", siteName: "mojeek" })
+              },
+              searxng: {
+                siteTypeID: 17,
+                siteButtonName: "𝐒𝐞𝐚𝐫𝐗𝐍𝐆",
+                siteNickName: IS_CHN ? "𝐒𝐞𝐚𝐫𝐗𝐍𝐆 搜索" : "𝐒𝐞𝐚𝐫𝐗𝐍𝐆 ©",
+                siteHostName: "searx.space",
+                webURL: "https://au.priv.au/search?category_general=1&language=all&time_range=&safesearch=0&theme=simple&q=",
+                imageURL: "https://au.priv.au/search?categories=images&language=all&time_range=&safesearch=0&theme=simple&q=",
+                imageType: ["images"],
+                splitTypeName: "categories",
+                mainSelector: "#search_view>div.search_box",
+                buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;top:0;right:-10px;width:0;z-index:99999;display:block;height:auto}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 -2px 0 0}input{margin:0;min-width:90px;border:1px solid var(--color-search-border);outline:none;background:var(--color-search-background);box-shadow:var(--color-search-shadow);color:var(--color-search-font);font-weight:500;font-size:1.2rem;line-height:122%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:.8rem 15px .86rem 20px;border-radius:.8rem 0 0 .8rem}#${def.const.rightButton} input{padding:.8rem 20px .86rem 15px;border-radius:0 .8rem .8rem 0}input:hover{background-color:var(--color-search-background-hover);color:var(--color-search-background)}`,
+                resultListProp: { qs: `div#urls article.result`, delay: 10 },
+                keywords: ".highlight",
+                antiRedirectFn: null,
+                antiAdsFn: null
+              },
+              kagi: {
+                siteTypeID: 18,
+                siteButtonName: "𝐊𝐚𝐠𝐢 ®",
+                siteNickName: IS_CHN ? "𝐊𝐚𝐠𝐢 搜索" : "𝐊𝐚𝐠𝐢.𝐜𝐨𝐦",
+                siteHostName: "kagi.com",
+                webURL: "https://kagi.com/search?q=",
+                imageURL: "https://kagi.com/images?q=",
+                imageType: ["images"],
+                splitTypeName: { split: "/", index: 1 },
+                mainSelector: "#searchForm",
+                overrideCss: `#searchFormSubmit:hover{background-color:var(--primary-hover);color:var(--btn-primary-color)!important;border-radius:20px 40px 40px 20px!important}`,
+                buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right, unset);width:auto;z-index:99999;display:block;height:56px}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0}input{margin:0;min-width:120px;height:54px;border: 1px solid var(--color-search-input-border);outline:none;background-color:var(--color-search-input);box-shadow:1px 8px 30px 0 var(--box-shadow);color:inherit;font-weight:500;font-size:18px;line-height:1.5rem;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:10px 15px 10px 20px;border-radius:30px 0 0 30px;margin-right:-3px}#${def.const.rightButton} input{padding:10px 20px 10px 15px;border-radius:0 30px 30px 0}input:hover{background-color:var(--primary-hover);color:var(--btn-primary-color)}`,
+                resultListProp: { qs: `._0_main-search-results div._ext_ub_r`, delay: 10 },
+                keywords: "",
+                antiRedirectFn: () => deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "kagi_ar" })("Kagi", "._0_main-search-results div._ext_ub_r a[data-domain][title]", { useNewTab: true }),
+                antiAdsFn: null
+              },
+              other: { siteTypeID: 0 }
             },
-            mojeek: {
-              siteTypeID: 17,
-              siteButtonName: "𝐌𝐨𝐣𝐞𝐞𝐤",
-              siteNickName: IS_CHN ? "𝐌𝐨𝐣𝐞𝐞𝐤 搜索" : "𝐌𝐨𝐣𝐞𝐞𝐤.𝐜𝐨𝐦",
-              siteHostName: "www.mojeek.com",
-              webURL: "https://www.mojeek.com/search?q=",
-              imageURL: "https://www.mojeek.com/search?fmt=images&imgpr=pixabay&q=",
-              imageType: ["images"],
-              splitTypeName: "fmt",
-              mainSelector: "form[name='sf1']",
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:-1px;right:var(--right,unset);z-index:100;display:inline-flex;margin:0;padding:0;height:33px;justify-content:center;align-items:center;flex-wrap:nowrap}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 2px 0 0;height:33px}input{box-sizing:content-box;margin:0;padding:4px 0;height:33px;min-width:90px;border:1px solid #c7c7c7;background:#fff;color:#111;box-shadow:0 2px 3px #0000000f;vertical-align:top;font-weight:500;font-size:15px;line-height:100%;text-shadow:none;-webkit-text-stroke:0 transparent;letter-spacing:normal;cursor:pointer}#${def.const.leftButton} input{border-radius:4px 0 0 4px}#${def.const.rightButton} input{border-radius:0 4px 4px 0}input:hover{background:#fafafa;box-shadow:0 2px 5px #00000033;transition:box-shadow .1s cubic-bezier(.4,0,.2,1), -webkit-box-shadow .1s cubic-bezier(.4,0,.2,1)}`,
-              darkModeCss: `:host(.${def.const.darkmode}) input{background:#1e1e1e;color:#fff;border:1px solid grey;box-shadow:0 2px 3px #0000000f}:host(.${def.const.darkmode}) input:hover{background:#303030;color:#fafafa}`,
-              resultListProp: { qs: `.results>ul.results-standard>li`, delay: 10 },
-              keywords: `b, strong`,
-              antiRedirectFn: () => deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "mojeek_ar" })("Mojeek", ".results>ul>li :is(:not(.more)>a,>a)", { useNewTab: true }),
-              antiAdsFn: () => deBounce({ fn: parseAntiAdvertising, delay: 20, timer: "mojeek_ad", immed: true })({ selectors: ".sf1>form>button~a", siteName: "mojeek" })
-            },
-            searxng: {
-              siteTypeID: 18,
-              siteButtonName: "𝐒𝐞𝐚𝐫𝐗𝐍𝐆",
-              siteNickName: IS_CHN ? "𝐒𝐞𝐚𝐫𝐗𝐍𝐆 搜索" : "𝐒𝐞𝐚𝐫𝐗𝐍𝐆 ©",
-              siteHostName: "searx.space",
-              webURL: "https://au.priv.au/search?category_general=1&language=all&time_range=&safesearch=0&theme=simple&q=",
-              imageURL: "https://au.priv.au/search?categories=images&language=all&time_range=&safesearch=0&theme=simple&q=",
-              imageType: ["images"],
-              splitTypeName: "categories",
-              mainSelector: "#search_view>div.search_box",
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:relative;top:0;right:-10px;width:0;z-index:99999;display:block;height:auto}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0 -2px 0 0}input{margin:0;min-width:90px;border:1px solid var(--color-search-border);outline:none;background:var(--color-search-background);box-shadow:var(--color-search-shadow);color:var(--color-search-font);font-weight:500;font-size:1.2rem;line-height:122%;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:.8rem 15px .86rem 20px;border-radius:.8rem 0 0 .8rem}#${def.const.rightButton} input{padding:.8rem 20px .86rem 15px;border-radius:0 .8rem .8rem 0}input:hover{background-color:var(--color-search-background-hover);color:var(--color-search-background)}`,
-              resultListProp: { qs: `div#urls article.result`, delay: 10 },
-              keywords: ".highlight",
-              antiRedirectFn: null,
-              antiAdsFn: null
-            },
-            kagi: {
-              siteTypeID: 19,
-              siteButtonName: "𝐊𝐚𝐠𝐢 ®",
-              siteNickName: IS_CHN ? "𝐊𝐚𝐠𝐢 搜索" : "𝐊𝐚𝐠𝐢.𝐜𝐨𝐦",
-              siteHostName: "kagi.com",
-              webURL: "https://kagi.com/search?q=",
-              imageURL: "https://kagi.com/images?q=",
-              imageType: ["images"],
-              splitTypeName: { split: "/", index: 1 },
-              mainSelector: "#searchForm",
-              overrideCss: `#searchFormSubmit:hover{background-color:var(--primary-hover);color:var(--btn-primary-color)!important;border-radius:20px 40px 40px 20px!important}`,
-              buttonCssText: `:host(#${def.const.rndButtonID}){position:absolute;top:0;right:var(--right, unset);width:auto;z-index:99999;display:block;height:56px}#${def.const.leftButton},#${def.const.rightButton}{display:inline-block;margin:0}input{margin:0;min-width:120px;height:54px;border: 1px solid var(--color-search-input-border);outline:none;background-color:var(--color-search-input);box-shadow:1px 8px 30px 0 var(--box-shadow);color:inherit;font-weight:500;font-size:18px;line-height:1.5rem;text-shadow:none;-webkit-text-stroke:0 transparent;cursor:pointer}#${def.const.leftButton} input{padding:10px 15px 10px 20px;border-radius:30px 0 0 30px;margin-right:-3px}#${def.const.rightButton} input{padding:10px 20px 10px 15px;border-radius:0 30px 30px 0}input:hover{background-color:var(--primary-hover);color:var(--btn-primary-color)}`,
-              resultListProp: { qs: `._0_main-search-results div._ext_ub_r`, delay: 10 },
-              keywords: "",
-              antiRedirectFn: () => deBounce({ fn: parsingAntiRedirect, delay: 20, timer: "kagi_ar" })("Kagi", "._0_main-search-results div._ext_ub_r a[data-domain][title]", { useNewTab: true }),
-              antiAdsFn: null
-            },
-            other: { siteTypeID: 0 }
-          },
 
             newSiteType = {
-              BAIDU: listSite.baidu.siteTypeID, GOOGLE: listSite.google.siteTypeID, BING: listSite.bing.siteTypeID,
-              DUCKDUCKGO: listSite.duckduckgo.siteTypeID, SOGOU: listSite.sogou.siteTypeID, QWANT: listSite.qwant.siteTypeID,
-              YANDEX: listSite.yandex.siteTypeID, SO360: listSite.so360.siteTypeID, TOUTIAO: listSite.toutiao.siteTypeID,
-              KAIFA: listSite.kaifa.siteTypeID, ECOSIA: listSite.ecosia.siteTypeID, YAHOO: listSite.yahoo.siteTypeID,
-              INFO: listSite.info.siteTypeID, STARTPAGE: listSite.startpage.siteTypeID, BRAVE: listSite.brave.siteTypeID,
-              YEP: listSite.yep.siteTypeID, MOJEEK: listSite.mojeek.siteTypeID, SEARXNG: listSite.searxng.siteTypeID,
-              KAGI: listSite.kagi.siteTypeID, OTHERS: listSite.other.siteTypeID
+              BAIDU: listSite.baidu.siteTypeID, GOOGLE: listSite.google.siteTypeID, BING: listSite.bing.siteTypeID, DUCKDUCKGO: listSite.duckduckgo.siteTypeID, SOGOU: listSite.sogou.siteTypeID,
+              QWANT: listSite.qwant.siteTypeID, YANDEX: listSite.yandex.siteTypeID, SO360: listSite.so360.siteTypeID, TOUTIAO: listSite.toutiao.siteTypeID, KAIFA: listSite.kaifa.siteTypeID,
+              ECOSIA: listSite.ecosia.siteTypeID, YAHOO: listSite.yahoo.siteTypeID, INFO: listSite.info.siteTypeID, STARTPAGE: listSite.startpage.siteTypeID, BRAVE: listSite.brave.siteTypeID,
+              MOJEEK: listSite.mojeek.siteTypeID, SEARXNG: listSite.searxng.siteTypeID, KAGI: listSite.kagi.siteTypeID, OTHERS: listSite.other.siteTypeID
             },
 
             engineMap = {
@@ -1570,7 +1561,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               "duckduckgo\\.com$": { siteType: newSiteType.DUCKDUCKGO, site: listSite.duckduckgo },
               "\\.sogou\\.com$": { siteType: newSiteType.SOGOU, site: listSite.sogou },
               "www\\.qwant\\.com$": { siteType: newSiteType.QWANT, site: listSite.qwant },
-              "yandex\\.(com|ru|eu)$": { siteType: newSiteType.YANDEX, site: listSite.yandex },
+              "(^www\\.)?(?:yandex\\.(com|ru)$|ya\\.ru$)": { siteType: newSiteType.YANDEX, site: listSite.yandex },
               "\\.so\\.com$": { siteType: newSiteType.SO360, site: listSite.so360 },
               "so\\.toutiao\\.com$": { siteType: newSiteType.TOUTIAO, site: listSite.toutiao },
               "www\\.ecosia\\.org$": { siteType: newSiteType.ECOSIA, site: listSite.ecosia },
@@ -1578,7 +1569,6 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               "www\\.info\\.com$": { siteType: newSiteType.INFO, site: listSite.info },
               "startpage\\.com$": { siteType: newSiteType.STARTPAGE, site: listSite.startpage },
               "search\\.brave\\.com$": { siteType: newSiteType.BRAVE, site: listSite.brave },
-              "yep\\.com$": { siteType: newSiteType.YEP, site: listSite.yep },
               "www\\.mojeek\\.com$": { siteType: newSiteType.MOJEEK, site: listSite.mojeek },
               "priv\\.au$": { siteType: newSiteType.SEARXNG, site: listSite.searxng },
               "kagi\\.com$": { siteType: newSiteType.KAGI, site: listSite.kagi }
@@ -1723,8 +1713,8 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
           function showSuccessUpdateNotify() {
             const successHTML = IS_CHN
-              ? `<dd style="margin: 10px 0"><span>恭喜！</span>当前版本 <i>${def.var.curVersion}</i> 已为最新！</dd>`
-              : `<dd style="margin: 10px 0"><span>Congratulations!</span><br/>The version <i>${def.var.curVersion}</i> is up-to-date!</dd>`,
+                ? `<dd style="margin: 10px 0"><span>恭喜！</span>当前版本 <i>${def.var.curVersion}</i> 已为最新！</dd>`
+                : `<dd style="margin: 10px 0"><span>Congratulations!</span><br/>The version <i>${def.var.curVersion}</i> is up-to-date!</dd>`,
               title = IS_CHN ? "更新成功" : "Update Success";
             GMnotification({ title, text: createNoticeHTML(successHTML), timeout: 3e3, closeWith: ["click"] });
             cache.set(AUTOCHECK, def.var.curVersion); const props = ["font-weight:700;color:#008b8b", "color:0", "color:#dc143c", "color:0"];
@@ -2047,8 +2037,8 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               const selectEngineList = qA(`input[name='${def.notice.card}_lists']:checked`).map(item => Number(item.dataset.sn));
               if (selectEngineList.length < 3) {
                 const noticeText = IS_CHN
-                  ? `\u0020您需要选择「三个」搜索引擎，还少<em>${3 - selectEngineList.length}</em>个呢！`
-                  : `\u0020Please select <b>three</b> search engines, still less<em>${3 - selectEngineList.length}</em>`,
+                    ? `\u0020您需要选择「三个」搜索引擎，还少<em>${3 - selectEngineList.length}</em>个呢！`
+                    : `\u0020Please select <b>three</b> search engines, still less<em>${3 - selectEngineList.length}</em>`,
                   text = createNoticeHTML(`<dd><e style="font-size:24px;vertical-align:bottom">\ud83d\ude31</e>${noticeText}</dd>`);
                 return GMnotification({ text, type: def.notice.error, newestOnTop: true, closeWith: ["click"] });
               }
@@ -2265,13 +2255,6 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
                 },
                 clear: () => safeRemoveNode("aside>div")
               },
-              yep: {
-                listTypes: { target: "div[class$='-results']>div>div", listName: "div" },
-                applyButton: async ({ buttonSection, target }) => {
-                  insertAfter(buttonSection, target); await sleep(0, { instance: true }); const width = buttonSection.clientWidth || 2e2;
-                  buttonSection.style.setProperty("--right", `-${10 + width}px`);
-                }
-              },
               mojeek: {
                 listTypes: { target: "ul.results-standard", listName: "li", className: "r0" },
                 clear: () => safeRemoveNode(".right-col div.infobox.infobox-right"),
@@ -2303,7 +2286,7 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
             function setPreferences(...ops) {
               const loadText = tTP.createHTML(`<center><h2>Loading preset preferences...</h2></center>`);
-              ops.forEach(o => gbCookies.setItem(o)); (document.documentElement.innerHTML = loadText); location.replace(location.href);
+              ops.forEach(o => gbCookies.setItem(o)); document.documentElement.innerHTML = loadText; location.replace(location.href);
             }
 
             function insertCSS(currentSite) {
@@ -2333,9 +2316,9 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
 
             function setupScrollButton(buttonSet) {
               const toggleScrollClass = () => {
-                const result = qS(`#tsf button[type='submit']`)?.getBoundingClientRect().height < 35 || qS(`#miniheader`)?.style.marginTop === "0px";
-                buttonSet.forEach(([element, className]) => element?.classList.toggle(className, Boolean(result))); return result;
-              },
+                  const result = qS(`#tsf button[type='submit']`)?.getBoundingClientRect().height < 35 || qS(`#miniheader`)?.style.marginTop === "0px";
+                  buttonSet.forEach(([element, className]) => element?.classList.toggle(className, Boolean(result))); return result;
+                },
                 throttleToggleScroll = throttle({ fn: toggleScrollClass, timer: "scroll", delay: 50, immed: true });
               document.addEventListener("scroll", throttleToggleScroll) ?? document.addEventListener("scrollend", toggleScrollClass);
               const initInterval = rAF.setInterval(() => toggleScrollClass() && rAF.clearInterval(initInterval), 50),
@@ -2474,17 +2457,17 @@ void (function (ctx, uctx, sctx, searchEngineAssistant, arrayProxy, customFns) {
               }
             }
 
-            function requestIconsForScriptUpdate(requestVersion) {
+            async function requestIconsForScriptUpdate(requestVersion) {
               if (decrypt(requestVersion) === def.var.curVersion) { return } DEBUG("%cRequest Remote icon data for script update.", "color:#25f");
-              updateToRequestIcon(); GMsetValue(VERSION, encrypt(def.var.curVersion));
+              await updateToRequestIcon(); GMsetValue(VERSION, encrypt(def.var.curVersion)); reload();
             }
 
             /* SEARCH_ENGINE_ASSISTANT_MAIN_PROCESS */
 
-            void (function (updateFlag, requestVersion) {
+            void (async function (updateFlag, requestVersion) {
               searchButtonAndStylesObserve(); if (!CUR_WINDOW_TOP) { return }
               parseUpdateInformatio(getUpdateInformation(updateFlag)); showSystemInfo(); insertMenus();
-              requestIconsForScriptUpdate(requestVersion);
+              await requestIconsForScriptUpdate(requestVersion);
             })(await cache.get(AUTOCHECK), await GMgetValue(VERSION));
           })(
             updateFlag => {
